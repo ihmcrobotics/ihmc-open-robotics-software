@@ -3,19 +3,13 @@ package us.ihmc.commonWalkingControlModules.contact.kinematics;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
-import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -26,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -38,16 +33,16 @@ public class MeshBasedContactDetector
    private static final double defaultContactThreshold = 0.03;
    private static final double coefficientOfFriction = 0.7;
 
-   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   protected StatusMessageOutputManager statusOutputManager;
-   protected YoBoolean useAbsoluteGroundLocation = new YoBoolean("useAbsoluteGroundHeight", registry);
-   protected YoDouble groundHeight = new YoDouble("groundHeight", registry);
-   protected YoDouble contactThreshold = new YoDouble("contactThreshold", registry);
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private Consumer<MultiContactBalanceStatus> balanceStatusConsumer;
+   private YoBoolean useAbsoluteGroundLocation = new YoBoolean("useAbsoluteGroundHeight", registry);
+   private YoDouble groundHeight = new YoDouble("groundHeight", registry);
+   private YoDouble contactThreshold = new YoDouble("contactThreshold", registry);
 
-   protected final List<RigidBodyBasics> contactableRigidBodies = new ArrayList<>();
-   protected final List<ContactableShape> allCollidables = new ArrayList<>();
-   protected final Map<RigidBodyBasics, List<ContactableShape>> contactableRigidBodyCollidables = new HashMap<>();
-   protected final Map<RigidBodyBasics, List<DetectedContactPoint>> allContactPoints = new HashMap<>();
+   private final List<RigidBodyBasics> contactableRigidBodies = new ArrayList<>();
+   private final List<ContactableShape> allCollidables = new ArrayList<>();
+   private final Map<RigidBodyBasics, List<ContactableShape>> contactableRigidBodyCollidables = new HashMap<>();
+   private final Map<RigidBodyBasics, List<DetectedContactPoint>> allContactPoints = new HashMap<>();
 
    private List<FrameShape3DReadOnly> environmentShapes = null;
    private final MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
@@ -142,10 +137,11 @@ public class MeshBasedContactDetector
          }
       }
 
-      if (statusOutputManager != null)
+      updateBalanceStatus(multiContactBalanceStatus);
+
+      if (balanceStatusConsumer != null)
       {
-         updateBalanceStatus(multiContactBalanceStatus);
-         statusOutputManager.reportStatusMessage(multiContactBalanceStatus);
+         balanceStatusConsumer.accept(multiContactBalanceStatus);
       }
    }
 
@@ -270,13 +266,18 @@ public class MeshBasedContactDetector
       this.groundHeight.set(groundHeight);
    }
 
-   public void setStatusOutputManager(StatusMessageOutputManager statusOutputManager)
+   public void setBalanceStatusCallback(Consumer<MultiContactBalanceStatus> balanceStatusConsumer)
    {
-      this.statusOutputManager = statusOutputManager;
+      this.balanceStatusConsumer = balanceStatusConsumer;
    }
 
    public void setContactThreshold(double contactThreshold)
    {
       this.contactThreshold.set(contactThreshold);
+   }
+
+   public MultiContactBalanceStatus getMultiContactBalanceStatus()
+   {
+      return multiContactBalanceStatus;
    }
 }

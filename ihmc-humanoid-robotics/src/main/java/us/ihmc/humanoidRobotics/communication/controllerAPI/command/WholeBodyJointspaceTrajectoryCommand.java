@@ -186,16 +186,4 @@ public final class WholeBodyJointspaceTrajectoryCommand extends QueueableCommand
    {
       return sequenceId;
    }
-
-   @Override
-   public boolean isDelayedExecutionSupported()
-   {
-      return true;
-   }
-
-   @Override
-   public double getExecutionDelayTime()
-   {
-
-   }
 }
