@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -32,7 +33,7 @@ public class RDXFootstepChecker
    private final ROS2SyncedRobotModel syncedRobot;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
-   private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepSnapAndWiggler snapper;
    private final FootstepPoseHeuristicChecker stepChecker;
    private BipedalFootstepPlannerNodeRejectionReason reason = null;
@@ -48,9 +49,13 @@ public class RDXFootstepChecker
    private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;
 
-   public RDXFootstepChecker(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersReadOnly footstepPlannerParameters)
+   public RDXFootstepChecker(RDXBaseUI baseUI,
+                             ROS2SyncedRobotModel syncedRobot,
+                             SideDependentList<ConvexPolygon2D> footPolygons,
+                             FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
+      this.footPolygons = footPolygons;
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
       this.footstepPlannerParameters = footstepPlannerParameters;

@@ -9,21 +9,27 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -40,6 +46,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private CommunicationHelper communicationHelper;
    private ROS2SyncedRobotModel syncedRobot;
    private RDXFootstepChecker stepChecker;
+   private RDXSwingPlanningModule swingPlanningModule;
    private RDXTeleoperationParameters teleoperationParameters;
 
    public void create(RDXBaseUI baseUI,
@@ -53,7 +60,13 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       this.teleoperationParameters = teleoperationParameters;
       this.syncedRobot = syncedRobot;
 
-      stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, footstepPlannerParameters);
+      SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
+      stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, footPolygons, footstepPlannerParameters);
+      swingPlanningModule = new RDXSwingPlanningModule(syncedRobot,
+                                                       footstepPlannerParameters,
+                                                       communicationHelper.getRobotModel().getSwingPlannerParameters(),
+                                                       communicationHelper.getRobotModel().getWalkingControllerParameters(),
+                                                       footPolygons);
       clear();
    }
 
@@ -168,6 +181,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          selectedFootstep.update();
 
       stepChecker.update(footsteps);
+      swingPlanningModule.update(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
    }
 
    public void clear()
