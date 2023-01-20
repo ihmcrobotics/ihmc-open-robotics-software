@@ -47,9 +47,9 @@ public class DualBlackflyCamera
    private ROS2Helper ros2Helper;
    private RealtimeROS2Node realtimeROS2Node;
    private IHMCRealtimeROS2Publisher<BigVideoPacket> ros2VideoPublisher;
-   private int numberOfBytesInFrame;
-   private int imageWidth;
-   private int imageHeight;
+   private long numberOfBytesInFrame;
+   private long imageWidth;
+   private long imageHeight;
    private final FrequencyCalculator imagePublishRateCalculator = new FrequencyCalculator();
    private BytedecoImage blackflySourceImage;
    private Mat cameraMatrix;
@@ -113,11 +113,11 @@ public class DualBlackflyCamera
          {
             imageWidth = blackfly.getWidth(spinImage);
             imageHeight = blackfly.getHeight(spinImage);
-            LogTools.info("Blackfly {} resolution detected: {}x{}", serialNumber, imageWidth, imageHeight);
+            LogTools.info("Blackfly {} resolution detected: {} x {}", serialNumber, imageWidth, imageHeight);
             numberOfBytesInFrame = imageWidth * imageHeight * 4;
-            spinImageDataPointer = new BytePointer((long) numberOfBytesInFrame);
+            spinImageDataPointer = new BytePointer(numberOfBytesInFrame);
 
-            blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+            blackflySourceImage = new BytedecoImage((int) imageWidth, (int) imageHeight, opencv_core.CV_8UC3);
 
             // From OpenCV calibrateCamera with Blackfly serial number 17372478 with FE185C086HA-1 fisheye lens
             // Procedure conducted by Bhavyansh Mishra on 12/14/2021
@@ -251,6 +251,7 @@ public class DualBlackflyCamera
 
    public void destroy()
    {
+      blackfly.stopAcquiringImages();
       Spinnaker_C.spinImageRelease(spinImage);
    }
 
