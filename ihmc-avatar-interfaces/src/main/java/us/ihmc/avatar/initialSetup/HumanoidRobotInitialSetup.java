@@ -31,7 +31,7 @@ import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
+public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    protected double initialYaw = 0.0;
    protected double initialGroundHeight = 0.0;
@@ -133,6 +133,10 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
       robot.getRootJoint().getPosition().addZ(initialGroundHeight);
       robot.getRootJoint().setOrientation(rootJointOrientation);
       robot.getRootJoint().getOrientation().prependYawRotation(initialYaw);
+
+      robot.getRootJoint().setVelocity(rootJointLinearVelocityInWorld);
+      robot.getRootJoint().setAngularVelocityInBody(rootJointAngularVelocityInBody);
+
       robot.update();
    }
 
@@ -163,20 +167,31 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
          }
       }
 
+      /* Root joint position */
       if (applyRootJointPose && rootBody.getChildrenJoints().size() == 1)
       {
          JointBasics rootJoint = rootBody.getChildrenJoints().get(0);
 
-         if (rootJoint instanceof FloatingJointBasics)
+         if (rootJoint instanceof FloatingJointBasics floatingJoint)
          {
-            FloatingJointBasics floatingJoint = (FloatingJointBasics) rootJoint;
             Pose3DBasics jointPose = floatingJoint.getJointPose();
-            FixedFrameTwistBasics jointTwist = floatingJoint.getJointTwist();
             jointPose.getPosition().set(rootJointPosition);
             jointPose.getPosition().add(additionalOffset);
             jointPose.getPosition().addZ(initialGroundHeight);
             jointPose.getOrientation().set(rootJointOrientation);
             jointPose.getOrientation().prependYawRotation(initialYaw);
+         }
+      }
+
+      /* Root joint velocity */
+      if (rootBody.getChildrenJoints().size() == 1)
+      {
+         JointBasics rootJoint = rootBody.getChildrenJoints().get(0);
+
+         if (rootJoint instanceof FloatingJointBasics floatingJoint)
+         {
+            Pose3DBasics jointPose = floatingJoint.getJointPose();
+            FixedFrameTwistBasics jointTwist = floatingJoint.getJointTwist();
             jointTwist.getAngularPart().set(rootJointAngularVelocityInBody);
             jointPose.getOrientation().inverseTransform(rootJointLinearVelocityInWorld, jointTwist.getLinearPart());
          }

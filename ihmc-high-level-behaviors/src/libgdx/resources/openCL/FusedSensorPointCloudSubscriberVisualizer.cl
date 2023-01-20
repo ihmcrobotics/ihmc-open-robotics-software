@@ -1,4 +1,3 @@
-
 kernel void unpackPointCloud(global float* parameters,
                              global int* decompressedPointBuffer,
                              global float* pointCloudVertexBuffer)

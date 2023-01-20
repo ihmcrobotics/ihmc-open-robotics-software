@@ -15,10 +15,12 @@ import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
-import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -68,7 +70,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
-   private String messageSizeString;
+   private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
    public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
@@ -152,8 +154,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
                numberOfSegments = (int) fusedMessage.getNumberOfSegments();
                totalNumberOfPoints = pointsPerSegment * numberOfSegments;
                int bytesPerSegment = pointsPerSegment * DiscretizedColoredPointCloud.DISCRETE_BYTES_PER_POINT;
-               String kilobytes = FormattingTools.getFormattedDecimal1D((double) bytesPerSegment / 1000.0);
-               messageSizeString = String.format("Message size: %s KB", kilobytes);
+               messageSizeReadout.update(bytesPerSegment);
                pointCloudRenderer.create(pointsPerSegment, numberOfSegments);
                decompressionInputDirectBuffer = ByteBuffer.allocateDirect(bytesPerSegment);
                decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
@@ -203,19 +204,30 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
                pointCloudRenderer.updateMeshFastestAfterKernel();
             }
          }
+         Point3D tempPoint = new Point3D();
+         Pose3D sensorPose = new Pose3D();
 
          LidarScanMessage latestLidarScanMessage = latestLidarScanMessageReference.getAndSet(null);
          if (latestLidarScanMessage != null)
          {
             int numberOfScanPoints = latestLidarScanMessage.getNumberOfPoints();
+            if (totalNumberOfPoints != latestLidarScanMessage.getNumberOfPoints())
+            {
+               totalNumberOfPoints = latestLidarScanMessage.getNumberOfPoints();
+               pointCloudRenderer.create(totalNumberOfPoints);
+            }
             pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
             {
                float size = pointSize.get();
+
                LidarPointCloudCompression.decompressPointCloud(latestLidarScanMessage.getScan(), numberOfScanPoints, (i, x, y, z) ->
                {
-                  xyzRGBASizeFloatBuffer.put((float) x);
-                  xyzRGBASizeFloatBuffer.put((float) y);
-                  xyzRGBASizeFloatBuffer.put((float) z);
+                  tempPoint.set(x, y, z);
+                  sensorPose.set(latestLidarScanMessage.getLidarPosition(), latestLidarScanMessage.getLidarOrientation());
+                  tempPoint.applyTransform(sensorPose);
+                  xyzRGBASizeFloatBuffer.put((float) tempPoint.getX());
+                  xyzRGBASizeFloatBuffer.put((float) tempPoint.getY());
+                  xyzRGBASizeFloatBuffer.put((float) tempPoint.getZ());
                   xyzRGBASizeFloatBuffer.put(color.r);
                   xyzRGBASizeFloatBuffer.put(color.g);
                   xyzRGBASizeFloatBuffer.put(color.b);
@@ -273,11 +285,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       ImGui.pushItemWidth(30.0f);
       ImGui.dragFloat(labels.get("Size"), pointSize.getData(), 0.001f, 0.0005f, 0.1f);
       ImGui.popItemWidth();
-      if (messageSizeString != null)
-      {
-         ImGui.sameLine();
-         ImGui.text(messageSizeString);
-      }
+      messageSizeReadout.renderImGuiWidgets();
       frequencyPlot.renderImGuiWidgets();
       segmentIndexPlot.renderImGuiWidgets();
    }

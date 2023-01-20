@@ -111,7 +111,6 @@ public class CaptureRegionSafetyHeuristics
       if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion))
          projectVerticesVisibleToStanceAwayFromTheFoot();
 
-      saferCaptureRegion.notifyVerticesChanged();
       saferCaptureRegion.update();
 
       yoSafetyBiasedCaptureRegion.setMatchingFrame(saferCaptureRegion, false);
@@ -176,7 +175,11 @@ public class CaptureRegionSafetyHeuristics
          vertexToProject.scaleAdd(Math.min(maxProjectionDistance, extraDistanceToStepFromStanceFoot.getValue()),
                                   lineOfMinimalAction.getDirection(),
                                   vertexToProject);
+         saferCaptureRegion.notifyVerticesChanged();
       }
+
+      saferCaptureRegion.update();
+      boolean notifyOfUpdate = false;
 
       boolean visibleIndicesAreClockWise = checkIfClockWiseOrdered(verticesVisibleFromStance, saferCaptureRegion);
       int firstVisibleIndex = visibleIndicesAreClockWise ? 0 : verticesVisibleFromStance.size() - 1;
@@ -196,6 +199,7 @@ public class CaptureRegionSafetyHeuristics
                                                                        croppedPoint))
          {
             saferCaptureRegion.getVertexUnsafe(firstVertexIndex).set(croppedPoint);
+            notifyOfUpdate = true;
          }
       }
 
@@ -213,8 +217,12 @@ public class CaptureRegionSafetyHeuristics
                                                                            croppedPoint))
          {
             saferCaptureRegion.getVertexUnsafe(lastVertexIndex).set(croppedPoint);
+            notifyOfUpdate = true;
          }
       }
+
+      if (notifyOfUpdate)
+         saferCaptureRegion.notifyVerticesChanged();
    }
 
    private static boolean checkIfClockWiseOrdered(List<? extends Point2DReadOnly> points, ConvexPolygon2DReadOnly captureRegion)
@@ -240,10 +248,10 @@ public class CaptureRegionSafetyHeuristics
       double A = maxDistanceToProjectedPoint;
       double a = Math.PI - Math.abs(projectionAngle);
       double B = distanceToPointToProject;
-      double b = Math.asin(B * Math.sin(a) / A);
+      double sinA = Math.sin(a);
+      double b = Math.asin(B * sinA / A);
       double c = Math.PI - b - a;
-
-      return Math.sqrt(A * A + B * B - 2.0 * A * B * Math.cos(c));
+      return Math.sin(c) * A / sinA;
    }
 
    /**
@@ -279,9 +287,8 @@ public class CaptureRegionSafetyHeuristics
 
       for (int i = 0; i < saferCaptureRegion.getNumberOfVertices(); i++)
       {
-         lineOfMinimalAction.orthogonalProjection(saferCaptureRegion.getVertex(i), projectedPoint);
-
          FixedFramePoint2DBasics safeVertex = saferCaptureRegion.getVertexUnsafe(i);
+         lineOfMinimalAction.orthogonalProjection(safeVertex, projectedPoint);
 
          // check if the vertex is on the inside. If it is, use the distance for inside points. If it's not, use the distance for all the other points.
          boolean isPointOnInside = lineOfMinimalAction.isPointOnSideOfLine(safeVertex, insideSideOfLine == RobotSide.LEFT);
@@ -292,12 +299,16 @@ public class CaptureRegionSafetyHeuristics
          if (distanceToProjectedPoint < maxProjectionDistance)
             safeVertex.set(projectedPoint);
          else
-            safeVertex.interpolate(saferCaptureRegion.getVertex(i), projectedPoint, maxProjectionDistance / distanceToProjectedPoint);
+            safeVertex.interpolate(safeVertex, projectedPoint, maxProjectionDistance / distanceToProjectedPoint);
+
+         saferCaptureRegion.notifyVerticesChanged();
 
          // make sure that the project points don't end up outside the actual capture region by projecting them back in if they are.
          if (!originalCaptureRegion.isPointInside(safeVertex))
             originalCaptureRegion.orthogonalProjection(safeVertex);
       }
+
+      saferCaptureRegion.update();
    }
 
    public FrameConvexPolygon2DReadOnly getCaptureRegionWithSafetyMargin()

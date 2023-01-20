@@ -95,7 +95,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PolygonizerParametersMessage.class,
                                                     inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, s.takeNextData()));
    }
 
    @Override

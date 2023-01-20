@@ -1,5 +1,0 @@
-<robot xmlns:xacro="http://ros.org/wiki/xacro" name="test_bench_nodes">
-
-	<xacro:property name="testbenchNode" value="/right_arm/j2" />
-    
-</robot>

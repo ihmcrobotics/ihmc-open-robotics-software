@@ -181,9 +181,12 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       if (useHeadingAndVelocityScriptField.get())
       {
+         HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParametersField.hasValue() ?
+               headingAndVelocityEvaluationScriptParametersField.get() :
+               null;
          HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT,
                                                                                             timeProvider,
-                                                                                            headingAndVelocityEvaluationScriptParametersField.get(),
+                                                                                            parameters,
                                                                                             registryField.get());
          continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
          continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
