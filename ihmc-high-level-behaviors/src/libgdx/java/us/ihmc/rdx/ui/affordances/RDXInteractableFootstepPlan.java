@@ -195,7 +195,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          selectedFootstep.update();
 
       stepChecker.update(footsteps);
-      swingPlanningModule.update(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
+      swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
    }
 
    public void clear()

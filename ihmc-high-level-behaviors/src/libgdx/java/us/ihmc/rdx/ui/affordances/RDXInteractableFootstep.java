@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 public class RDXInteractableFootstep
@@ -56,6 +57,7 @@ public class RDXInteractableFootstep
 
    private final List<ModelInstance> trajectoryModel = new ArrayList<>();
 
+   private final AtomicReference<PlannedFootstep> plannedFootstepInput = new AtomicReference<>(null);
    private final PlannedFootstep plannedFootstepInternal;
 
    public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index)
@@ -99,6 +101,7 @@ public class RDXInteractableFootstep
 
    public void updateFromPlannedStep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex )
    {
+      plannedFootstepInput.set(null);
       plannedFootstepInternal.set(plannedFootstep);
 
       if (plannedFootstepInternal.getRobotSide().equals(RobotSide.LEFT))
@@ -129,6 +132,11 @@ public class RDXInteractableFootstep
 
    public void updatePlannedTrajectory(PlannedFootstep other)
    {
+      plannedFootstepInput.set(other);
+   }
+
+   private void updatePlannedTrajectoryInternal(PlannedFootstep other)
+   {
       plannedFootstepInternal.setTrajectoryType(other.getTrajectoryType());
       plannedFootstepInternal.getCustomWaypointProportions().clear();
       for (int i = 0; i < other.getCustomWaypointProportions().size(); i++)
@@ -156,6 +164,10 @@ public class RDXInteractableFootstep
       LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
       footstepIndexText.scale((float) textHeight);
 
+      if (plannedFootstepInput.get() != null)
+      {
+         updatePlannedTrajectoryInternal(plannedFootstepInput.getAndSet(null));
+      }
       updateTrajectoryModel(plannedFootstepInternal);
    }
 

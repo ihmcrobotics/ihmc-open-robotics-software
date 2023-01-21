@@ -62,10 +62,10 @@ public class RDXSwingPlanningModule
 
    public void updateAysnc(List<RDXInteractableFootstep> footstepPlan, SwingPlannerType swingPlannerType)
    {
-      executorService.clearQueueAndExecute(() -> updateAysnc(footstepPlan, swingPlannerType));
+      executorService.clearQueueAndExecute(() -> update(footstepPlan, swingPlannerType));
    }
 
-   public void update(List<RDXInteractableFootstep> footstepPlan, SwingPlannerType swingPlannerType)
+   public synchronized void update(List<RDXInteractableFootstep> footstepPlan, SwingPlannerType swingPlannerType)
    {
       setInitialFeet();
       FootstepPlan tempPlan = createFakeFootstepPlan(footstepPlan);
