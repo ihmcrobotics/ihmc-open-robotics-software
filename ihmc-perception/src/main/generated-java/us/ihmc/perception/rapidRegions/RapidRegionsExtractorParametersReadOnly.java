@@ -75,11 +75,6 @@ public interface RapidRegionsExtractorParametersReadOnly extends StoredPropertyS
       return get(principalOffsetYPixels);
    }
 
-   default boolean getEarlyGaussianBlur()
-   {
-      return get(earlyGaussianBlur);
-   }
-
    default boolean getUseFilteredImage()
    {
       return get(useFilteredImage);
@@ -93,16 +88,6 @@ public interface RapidRegionsExtractorParametersReadOnly extends StoredPropertyS
    default int getSVDReductionFactor()
    {
       return get(svdReductionFactor);
-   }
-
-   default int getGaussianSize()
-   {
-      return get(gaussianSize);
-   }
-
-   default double getGaussianSigma()
-   {
-      return get(gaussianSigma);
    }
 
    default int getInternalSearchDepthLimit()

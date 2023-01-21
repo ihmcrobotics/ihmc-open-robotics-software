@@ -20,6 +20,24 @@
 #define MERGE_DISTANCE_THRESHOLD 19
 #define EXTRACTION_MODE 20
 
+bool check_convergence(float3 va, float3 vb)
+{
+   float alen = length(va);
+   float blen = length(vb);
+   float r = min(alen, blen);
+
+   float theta = acos(dot(va, vb)/(length(va) * length(vb)));
+   float alpha = M_PI / 4;
+   float distThreshold = r * sin(theta) / cos(theta / 2 + alpha);
+
+   float3 diff = va - vb;
+   float dist = length(diff);
+   if(dist < distThreshold)
+       return true;
+   else
+       return false;
+}
+
 float4 back_project_spherical(int2 pos, float depth, global float* params)
 {
 
@@ -215,8 +233,9 @@ bool isConnected(float3 ag, float3 an, float3 bg, float3 bn, global float* param
     float3 vec = ag - bg;
     float dist = length(vec);
     float sim = fabs(dot(an, bn));
+    float minDist = min(length(ag), length(bg));
     float perpDist = fabs(dot(ag-bg, bn)) + fabs(dot(bg-ag, an));
-    if (perpDist < params[MERGE_ORTHOGONAL_THRESHOLD] && (dist < params[MERGE_DISTANCE_THRESHOLD]) && sim > params[MERGE_ANGULAR_THRESHOLD])
+    if (perpDist < params[MERGE_ORTHOGONAL_THRESHOLD] && (dist < params[MERGE_DISTANCE_THRESHOLD]) && sim > params[MERGE_ANGULAR_THRESHOLD] && minDist > 0.3f)
     {
         return true;
     }
@@ -445,7 +464,7 @@ void kernel packKernel(  read_write image2d_t in,
 /* Merge Kernel: Creates the graph-based structure by adding connections between the neighboring
  * patches based on similarity.
  */
-void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, read_only image2d_t out2, /* float3 maps for normal*/
+void kernel mergeKernel(  read_write image2d_t in, read_only image2d_t out0, read_only image2d_t out1, read_only image2d_t out2, /* float3 maps for normal*/
                           read_only image2d_t out3, read_only image2d_t out4, read_only image2d_t out5, /* float3 maps for centroids */
                           write_only image2d_t out6, /* uint8 map for patch metadata*/
                           global float* params /* All parameters */
@@ -518,15 +537,24 @@ void kernel perspectiveBackProjectionKernel(read_write image2d_t in, global floa
           float scaleToMeters = 0.001f;
           float radius = ((float)read_imageui(in, pos).x) * scaleToMeters;
 
-          if(radius > 0.1f)
+          if(radius > 0.3f)
           {
              float4 point = back_project_perspective(pos, radius, params);
 
              int index = ((rIndex * params[INPUT_WIDTH]) + cIndex) * 3;
 
-             cloud[index] = point.x;
-             cloud[index + 1] = point.y;
-             cloud[index + 2] = point.z;
+             if(length(point.xyz) > 1.5f)
+             {
+                 cloud[index] = point.x;
+                 cloud[index + 1] = point.y;
+                 cloud[index + 2] = point.z;
+             }
+             else
+             {
+                cloud[index] = 0;
+                cloud[index + 1] = 0;
+                cloud[index + 2] = 0;
+             }
 
              //printf("[%d] Spherical(%d,%d):\t Radius: %.3lf, Point:(%.4lf, %.4lf, %.4lf)\n", index, rIndex, cIndex, radius, cloud[index], cloud[index+1], cloud[index+2]);
           }

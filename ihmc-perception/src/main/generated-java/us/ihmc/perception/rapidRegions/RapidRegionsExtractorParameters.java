@@ -35,12 +35,9 @@ public class RapidRegionsExtractorParameters extends StoredPropertySet implement
    public static final DoubleStoredPropertyKey focalLengthYPixels = keys.addDoubleKey("Focal length Y pixels");
    public static final DoubleStoredPropertyKey principalOffsetXPixels = keys.addDoubleKey("Principal offset X pixels");
    public static final DoubleStoredPropertyKey principalOffsetYPixels = keys.addDoubleKey("Principal offset Y pixels");
-   public static final BooleanStoredPropertyKey earlyGaussianBlur = keys.addBooleanKey("Early gaussian blur");
    public static final BooleanStoredPropertyKey useFilteredImage = keys.addBooleanKey("Use filtered image");
    public static final BooleanStoredPropertyKey useSVDNormals = keys.addBooleanKey("Use SVD normals");
    public static final IntegerStoredPropertyKey svdReductionFactor = keys.addIntegerKey("SVD reduction factor");
-   public static final IntegerStoredPropertyKey gaussianSize = keys.addIntegerKey("Gaussian size");
-   public static final DoubleStoredPropertyKey gaussianSigma = keys.addDoubleKey("Gaussian sigma");
    public static final IntegerStoredPropertyKey internalSearchDepthLimit = keys.addIntegerKey("Internal search depth limit");
    public static final IntegerStoredPropertyKey boundarySearchDepthLimit = keys.addIntegerKey("Boundary search depth limit");
    public static final IntegerStoredPropertyKey regionMinPatches = keys.addIntegerKey("Region min patches");
