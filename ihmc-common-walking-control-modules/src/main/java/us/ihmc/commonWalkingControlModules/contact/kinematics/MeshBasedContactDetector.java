@@ -104,7 +104,7 @@ public class MeshBasedContactDetector
       return 4;
    }
 
-   public void update()
+   public boolean update()
    {
       clearContacts();
       double flatGroundHeightThreshold = computeFlatGroundHeightThreshold();
@@ -140,12 +140,14 @@ public class MeshBasedContactDetector
 
       updateBalanceStatus(multiContactBalanceStatus);
 
-      if (balanceStatusConsumer != null && !previousMultiContactBalanceStatus.epsilonEquals(multiContactBalanceStatus, 1e-5))
+      boolean balanceStatusChanged = !previousMultiContactBalanceStatus.epsilonEquals(multiContactBalanceStatus, 1e-5);
+      if (balanceStatusConsumer != null && balanceStatusChanged)
       {
          balanceStatusConsumer.accept(multiContactBalanceStatus);
       }
 
       previousMultiContactBalanceStatus.set(multiContactBalanceStatus);
+      return balanceStatusChanged;
    }
 
    public List<RigidBodyBasics> getContactableRigidBodies()
