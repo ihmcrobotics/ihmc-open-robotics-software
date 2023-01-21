@@ -1,17 +1,26 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.tools.MocapTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.visualizers.RDXTrajectoryGraphic;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.thread.Activator;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class RDXPlanarRegionMappingDemo
 {
+   private Activator nativesLoadedActivator;
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
 
@@ -20,6 +29,9 @@ public class RDXPlanarRegionMappingDemo
 
    private PlanarRegionMappingManager mappingManager;
    private PlanarRegionMappingUIPanel planarRegionMappingUI;
+
+   private final RDXTrajectoryGraphic mocapGraphic = new RDXTrajectoryGraphic(0.02f, Color.YELLOW);
+   private final RDXTrajectoryGraphic rootJointGraphic = new RDXTrajectoryGraphic(0.02f, Color.RED);
 
    private final String perceptionLogDirectory = System.getProperty("user.home") + "/.ihmc/logs/perception/";
    private final String logFileName = "20230117_161540_PerceptionLog.hdf5";
@@ -31,6 +43,7 @@ public class RDXPlanarRegionMappingDemo
          @Override
          public void create()
          {
+            nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
             // To Run With Perception Logs (HDF5)
@@ -52,16 +65,31 @@ public class RDXPlanarRegionMappingDemo
          @Override
          public void render()
          {
-            if (planarRegionMappingUI.isCaptured())
+            if(nativesLoadedActivator.poll())
             {
-               LogTools.info("Filtered Map Panel Captured: {}", planarRegionMappingUI.isCaptured());
-               mappingManager.setCaptured(true);
-               planarRegionMappingUI.setCaptured(false);
+               if(nativesLoadedActivator.isNewlyActivated())
+               {
+                  mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
+                  mocapGraphic.update();
+
+                  rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
+                  rootJointGraphic.update();
+
+                  baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
+               }
+
+               if (planarRegionMappingUI.isCaptured())
+               {
+                  LogTools.info("Filtered Map Panel Captured: {}", planarRegionMappingUI.isCaptured());
+                  mappingManager.setCaptured(true);
+                  planarRegionMappingUI.setCaptured(false);
+               }
+
+               //rapidRegionsUIPanel.renderImGuiWidgets();
+
+               planarRegionMappingUI.renderPlanarRegions();
             }
-
-            //rapidRegionsUIPanel.renderImGuiWidgets();
-
-            planarRegionMappingUI.renderPlanarRegions();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

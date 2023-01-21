@@ -26,7 +26,7 @@ public class HDF5Tools
     * @param dimension     The dimension or axis along which the length is requested
     * @return The length of the dataset along the requested dimension or axis
     */
-   private static int extractShape(DataSet dataSet, int dimension)
+   private static synchronized int extractShape(DataSet dataSet, int dimension)
    {
       DataSpace dataSpace = dataSet.getSpace();
       int dimensions = dataSpace.getSimpleExtentNdims();
@@ -47,7 +47,7 @@ public class HDF5Tools
     * @param index           The index of the dataset within the requested group.
     * @param pointListToPack The recycling arraylist to be packed with the 3D points from pointcloud
     */
-   public static void loadPointCloud(Group group, int index, RecyclingArrayList<Point3D32> pointListToPack, int rows, int cols)
+   public static synchronized void loadPointCloud(Group group, int index, RecyclingArrayList<Point3D32> pointListToPack, int rows, int cols)
    {
       DataSet dataset = group.openDataSet(String.valueOf(index));
       float[] pointsBuffer = new float[rows * cols * 3];
@@ -70,7 +70,7 @@ public class HDF5Tools
     * @param index The index of the dataset within the requested group.
     * @return The byte[] array with the data from HDF5 dataset.
     */
-   public static byte[] loadByteArray(Group group, int index)
+   public static synchronized byte[] loadByteArray(Group group, int index)
    {
       int[] loadedIntArray = HDF5Tools.loadIntArray(group, index);
 
@@ -94,7 +94,7 @@ public class HDF5Tools
     * @param index The index of the dataset within the requested group.
     * @return The int[] array with the data from HDF5 dataset.
     */
-   public static int[] loadIntArray(Group group, int index)
+   public static synchronized int[] loadIntArray(Group group, int index)
    {
       DataSet dataset = group.openDataSet(String.valueOf(index));
 
@@ -118,7 +118,7 @@ public class HDF5Tools
     * @param data  The byte[] array to be stored into the HDF5 file.
     * @param size  Size of the relevant part of the data to be stored
     */
-   public static void storeByteArray(Group group, long index, byte[] data, int size)
+   public static synchronized void storeByteArray(Group group, long index, byte[] data, int size)
    {
       ByteBuffer buffer = ByteBuffer.wrap(data, 0, size);
       IntBuffer intBuffer = buffer.asIntBuffer();
@@ -138,7 +138,7 @@ public class HDF5Tools
     * @param data  The int[] array to be stored into the HDF5 file.
     * @param size  Size of the relevant part of the data to be stored
     */
-   public static void storeIntArray(Group group, long index, int[] data, long size)
+   public static synchronized void storeIntArray(Group group, long index, int[] data, long size)
    {
       LogTools.info("Store Int Array: Index: {} Size: {}", index, size);
       long[] dimensions = {size};
@@ -159,7 +159,7 @@ public class HDF5Tools
     * @param index           The index of the dataset within the requested group.
     * @param pointListToPack The final packed 3D point list with pointcloud
     */
-   public static void storePointCloud(Group group, long index, ArrayList<Point3D> pointListToPack)
+   public static synchronized void storePointCloud(Group group, long index, ArrayList<Point3D> pointListToPack)
    {
       long[] dimensions = {pointListToPack.size(), NUMBER_OF_FIELDS_PER_POINT};
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dimensions));
@@ -183,7 +183,7 @@ public class HDF5Tools
     * @param rows  Number of rows in the 2D matrix to be stored
     * @param cols  Number of columns in the 2D matrix to be stored
     */
-   public static void storeLongArray2D(Group group, long index, TLongArrayList data, int rows, int cols)
+   public static synchronized void storeLongArray2D(Group group, long index, TLongArrayList data, int rows, int cols)
    {
       // Log the timestamps buffer as separate dataset with same index
       long[] dimensions = {rows, cols};
@@ -202,7 +202,7 @@ public class HDF5Tools
     * @param rows  Number of rows in the 2D matrix to be stored
     * @param cols  Number of columns in the 2D matrix to be stored
     */
-   public static void storeFloatArray2D(Group group, long index, TFloatArrayList data, int rows, int cols)
+   public static synchronized void storeFloatArray2D(Group group, long index, TFloatArrayList data, int rows, int cols)
    {
       // Log the data buffer as separate dataset with same index
       long[] dimensions = {rows, cols};
@@ -218,7 +218,7 @@ public class HDF5Tools
     * @param group The HDF5 group where the requested float array is stored
     * @param index The index of the dataset within the requested group.
     */
-   public static float[] loadFloatArray(Group group, long index)
+   public static synchronized float[] loadFloatArray(Group group, long index)
    {
       DataSet dataset = group.openDataSet(String.valueOf(index));
 
@@ -242,7 +242,7 @@ public class HDF5Tools
     * @param group The HDF5 group where the requested float array is stored
     * @param index The index of the dataset within the requested group.
     */
-   public static void loadFloatArray(Group group, long index, float[] arrayToPack)
+   public static synchronized void loadFloatArray(Group group, long index, float[] arrayToPack)
    {
       DataSet dataset = group.openDataSet(String.valueOf(index));
 
@@ -259,7 +259,7 @@ public class HDF5Tools
     * @param file The HDF5 file to be explored.
     * @return List of all topic names inside the HDF5 file.
     */
-   public static ArrayList<String> getTopicNames(H5File file)
+   public static synchronized ArrayList<String> getTopicNames(H5File file)
    {
       ArrayList<String> names = new ArrayList<>();
 
@@ -275,7 +275,7 @@ public class HDF5Tools
 
    /* Recursive function to go through the various topic names in the HDF5 hierarchically. Called by
     *  getTopicNames() to create a list of topic names stored within the file. */
-   private static void recursivelyExploreHDF5File(Group group, ArrayList<String> names, String prefix)
+   private static synchronized void recursivelyExploreHDF5File(Group group, ArrayList<String> names, String prefix)
    {
       int numberOfGroups = 0;
       for (int i = 0; i < group.getNumObjs(); i++)
@@ -306,7 +306,7 @@ public class HDF5Tools
    }
 
    // TODO: Complete the method to store a double matrix
-   public static void storeMatrix(Group group, double[] data)
+   public static synchronized void storeMatrix(Group group, double[] data)
    {
       long[] dimensions = {5, 5};
       if (group.nameExists(String.valueOf(0)))
@@ -323,7 +323,7 @@ public class HDF5Tools
    }
 
    // TODO: Does not work yet. Needs to be fixed.
-   public static void storeRawByteArray(Group group, long index, byte[] data, long size)
+   public static synchronized void storeRawByteArray(Group group, long index, byte[] data, long size)
    {
       LogTools.info("Store Byte Array: {} {}", index, size);
       long[] dimensions = {size};

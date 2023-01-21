@@ -215,7 +215,6 @@ public class RapidRegionsDebutOutputGenerator
 
       if(showPointCloud)
       {
-         LogTools.info("Constructing PointCloud: {}x{}, Total: {}", inputDepthImage.rows(), inputDepthImage.cols(), inputDepthImage.rows() * inputDepthImage.cols());
          constructPointCloud(floatBuffer, inputDepthImage.rows() * inputDepthImage.cols());
       }
 //      constructPointCloud(patchFeatureGrid.getCxImage(), patchFeatureGrid.getCyImage(), patchFeatureGrid.getCzImage());

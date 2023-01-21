@@ -38,9 +38,9 @@ public interface RapidRegionsExtractorParametersBasics extends RapidRegionsExtra
       set(RapidRegionsExtractorParameters.mergeAngularThreshold, mergeAngularThreshold);
    }
 
-   default void setFilterDisparityThreshold(double filterDisparityThreshold)
+   default void setConnectionThreshold(int connectionThreshold)
    {
-      set(RapidRegionsExtractorParameters.filterDisparityThreshold, filterDisparityThreshold);
+      set(RapidRegionsExtractorParameters.connectionThreshold, connectionThreshold);
    }
 
    default void setPatchSize(int patchSize)

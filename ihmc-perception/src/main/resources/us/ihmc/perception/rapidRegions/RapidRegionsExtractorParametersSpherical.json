@@ -1,7 +1,7 @@
 {
   "title" : "GPU planar region extraction parameters",
   "Normal pack range" : {
-    "value" : 2,
+    "value" : 1,
     "lowerBound" : 1,
     "upperBound" : 10
   },
@@ -16,21 +16,25 @@
     "upperBound" : 10
   },
   "Merge orthogonal threshold" : {
-    "value" : 0.068729,
+    "value" : 0.573387,
     "lowerBound" : 0.0,
-    "upperBound" : 10.0
+    "upperBound" : 1.5
   },
   "Merge distance threshold" : {
-    "value" : 0.098361,
+    "value" : 2.245902,
     "lowerBound" : 0.0,
-    "upperBound" : 10.0
+    "upperBound" : 5.0
   },
   "Merge angular threshold" : {
-    "value" : 0.880259,
+    "value" : 0.87055,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
-  "Filter disparity threshold" : 2000.0,
+  "Connection threshold" : {
+    "value" : 5,
+    "lowerBound" : 0,
+    "upperBound" : 8
+  },
   "Patch size" : {
     "value" : 2,
     "lowerBound" : 2,
@@ -56,27 +60,27 @@
   "Use filtered image" : true,
   "Use SVD normals" : true,
   "SVD reduction factor" : {
-    "value" : 14,
+    "value" : 16,
     "lowerBound" : 1,
     "upperBound" : 100
   },
   "Internal search depth limit" : {
-    "value" : 5668,
+    "value" : 3834,
     "lowerBound" : 1,
     "upperBound" : 50000
   },
   "Boundary search depth limit" : {
-    "value" : 1199,
+    "value" : 1043,
     "lowerBound" : 1,
     "upperBound" : 15000
   },
   "Region min patches" : {
-    "value" : 45,
+    "value" : 28,
     "lowerBound" : 1,
     "upperBound" : 3000
   },
   "Boundary min patches" : {
-    "value" : 35,
+    "value" : 10,
     "lowerBound" : 1,
     "upperBound" : 1000
   },

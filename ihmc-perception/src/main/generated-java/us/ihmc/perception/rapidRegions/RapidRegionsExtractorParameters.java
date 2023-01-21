@@ -28,7 +28,7 @@ public class RapidRegionsExtractorParameters extends StoredPropertySet implement
    public static final DoubleStoredPropertyKey mergeOrthogonalThreshold = keys.addDoubleKey("Merge orthogonal threshold");
    public static final DoubleStoredPropertyKey mergeDistanceThreshold = keys.addDoubleKey("Merge distance threshold");
    public static final DoubleStoredPropertyKey mergeAngularThreshold = keys.addDoubleKey("Merge angular threshold");
-   public static final DoubleStoredPropertyKey filterDisparityThreshold = keys.addDoubleKey("Filter disparity threshold");
+   public static final IntegerStoredPropertyKey connectionThreshold = keys.addIntegerKey("Connection threshold");
    public static final IntegerStoredPropertyKey patchSize = keys.addIntegerKey("Patch size");
    public static final IntegerStoredPropertyKey deadPixelFilterPatchSize = keys.addIntegerKey("Dead pixel filter patch size");
    public static final DoubleStoredPropertyKey focalLengthXPixels = keys.addDoubleKey("Focal length X pixels");

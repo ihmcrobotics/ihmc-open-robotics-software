@@ -8,7 +8,7 @@
   "Remove all triangles with two border edges" : false,
   "Allow splitting concave hull" : false,
   "Max number of iterations" : {
-    "value" : 5000,
+    "value" : 4898,
     "lowerBound" : 2000,
     "upperBound" : 6000
   },

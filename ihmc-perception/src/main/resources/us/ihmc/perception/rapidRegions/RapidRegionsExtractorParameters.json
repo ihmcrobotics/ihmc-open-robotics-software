@@ -18,19 +18,23 @@
   "Merge orthogonal threshold" : {
     "value" : 0.618557,
     "lowerBound" : 0.0,
-    "upperBound" : 10.0
+    "upperBound" : 1.5
   },
   "Merge distance threshold" : {
     "value" : 0.52459,
     "lowerBound" : 0.0,
-    "upperBound" : 10.0
+    "upperBound" : 1.0
   },
   "Merge angular threshold" : {
     "value" : 0.925566,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
-  "Filter disparity threshold" : 2000.0,
+  "Connection threshold" : {
+    "value" : 4,
+    "lowerBound" : 0,
+    "upperBound" : 8
+  },
   "Patch size" : {
     "value" : 4,
     "lowerBound" : 2,
