@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
@@ -26,6 +27,7 @@ import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.rdx.visualizers.RDXTrajectoryGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
@@ -80,6 +82,9 @@ public class PlanarRegionMappingManager
    private PlanarRegionMap planarRegionMap;
    private PlanarRegionsListLogger planarRegionsListLogger;
 
+   private final ArrayList<Point3D> mocapPositionBuffer = new ArrayList<>();
+   private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
+
    private int planarRegionListIndex = 0;
    private int perceptionLogIndex = 0;
 
@@ -125,18 +130,14 @@ public class PlanarRegionMappingManager
    public PlanarRegionMappingManager(String logFile, boolean smoothing)
    {
       source = DataSource.PERCEPTION_LOG;
+      planarRegionMap = new PlanarRegionMap(smoothing);
 
       /* L515 Parameters
             Color: [fx:901.3026, fy:901.8400, cx:635.2337, cy:350.9427, h:720, w:1280]
             Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
        */
-      openCLManager = new OpenCLManager();
-      openCLManager.create();
-      openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
-
-      rapidRegionsExtractor.create(openCLManager, openCLProgram, 1024, 768, 730.7891, 731.0859, 528.6094, 408.1602);
 
       this.depth16UC1Image = new BytedecoImage(rapidRegionsExtractor.getImageWidth(), rapidRegionsExtractor.getImageHeight(), opencv_core.CV_16UC1);
 
@@ -145,13 +146,32 @@ public class PlanarRegionMappingManager
       //baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
       //baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUIPanel, RDXSceneLevel.VIRTUAL);
 
-      planarRegionMap = new PlanarRegionMap(smoothing);
+      openCLManager = new OpenCLManager();
+      openCLManager.create();
+      openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
+      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
+      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
+   }
+
+   private void createL515(String logFile, int depthHeight, int depthWidth)
+   {
+      rapidRegionsExtractor.create(openCLManager, openCLProgram, 1024, 768, 730.7891, 731.0859, 528.6094, 408.1602);
       perceptionDataLoader = new PerceptionDataLoader();
       perceptionDataLoader.openLogFile(logFile);
 
       perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
+   }
+
+   private void createOuster(String logFile, int depthHeight, int depthWidth)
+   {
+      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight);
+      perceptionDataLoader = new PerceptionDataLoader();
+      perceptionDataLoader.openLogFile(logFile);
+
+      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
+      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
    }
 
    public PlanarRegionMappingManager(File planarRegionLogDirectory, boolean smoothing)
@@ -318,6 +338,26 @@ public class PlanarRegionMappingManager
    public PlanarRegionMappingParameters getParameters()
    {
       return planarRegionMap.getParameters();
+   }
+
+   public ArrayList<Point3D> getMocapPositionBuffer()
+   {
+      return mocapPositionBuffer;
+   }
+
+   public ArrayList<Quaternion> getMocapOrientationBuffer()
+   {
+      return mocapOrientationBuffer;
+   }
+
+   public ArrayList<Point3D> getSensorPositionBuffer()
+   {
+      return sensorPositionBuffer;
+   }
+
+   public ArrayList<Quaternion> getSensorOrientationBuffer()
+   {
+      return sensorOrientationBuffer;
    }
 
    public void setEnableLiveMode(boolean enableLiveMode)

@@ -196,7 +196,7 @@ public class RapidPlanarRegionsExtractor
    {
       calculateDerivativeParameters();
 
-      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) parameters.getFilterDisparityThreshold());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) 0);
       parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) parameters.getMergeAngularThreshold());
       parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) parameters.getMergeOrthogonalThreshold());
       parametersBuffer.getBytedecoFloatBufferPointer().put(3, patchHeight);
@@ -338,7 +338,7 @@ public class RapidPlanarRegionsExtractor
          {
             int boundaryConnectionsEncodedAsOnes = patchGraph.getCharDirect(row, column);
 
-            if (!regionVisitedMatrix.get(row, column) && checkConnectionThreshold(boundaryConnectionsEncodedAsOnes, 200)) // all ones; fully connected
+            if (!regionVisitedMatrix.get(row, column) && checkConnectionThreshold(boundaryConnectionsEncodedAsOnes, parameters.getConnectionThreshold())) // all ones; fully connected
             {
                numberOfRegionPatches = 0; // also number of patches traversed
                GPUPlanarRegion planarRegion = gpuPlanarRegions.add();
@@ -542,7 +542,7 @@ public class RapidPlanarRegionsExtractor
 
    public boolean checkConnectionNonZero(int nodeConnection)
    {
-      return nodeConnection > 0;
+      return Integer.bitCount(nodeConnection) > 0;
    }
 
    public boolean checkConnectionFull(int nodeConnection)
@@ -552,7 +552,7 @@ public class RapidPlanarRegionsExtractor
 
    public boolean checkConnectionThreshold(int nodeConnection, int threshold)
    {
-      return nodeConnection > threshold;
+      return Integer.bitCount(nodeConnection) > threshold;
    }
 
    public boolean checkConnectionDirectional(int nodeConnection, int neighbor)
@@ -609,7 +609,7 @@ public class RapidPlanarRegionsExtractor
             if (row + adjacentY[i] < patchImageHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < patchImageWidth - 1 && column + adjacentX[i] > 1)
             {
                int boundaryConnectionsEncodedAsOnes = patchGraph.getCharDirect((row + adjacentY[i]), (column + adjacentX[i]));
-               if (checkConnectionThreshold(boundaryConnectionsEncodedAsOnes, 200)) // all ones; fully connected
+               if (checkConnectionThreshold(boundaryConnectionsEncodedAsOnes, parameters.getConnectionThreshold())) // all ones; fully connected
                {
                   ++count;
                   depthFirstSearchStack.push(new PatchGraphRecursionBlock(row + adjacentY[i],

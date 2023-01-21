@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
@@ -26,6 +25,7 @@ import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.perception.tools.MocapTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -160,7 +160,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                {
                   baseUI.getPrimaryScene().addRenderableProvider(RDXRapidRegionsExtractionDemo.this, RDXSceneLevel.VIRTUAL);
 
-                  adjustMocapPositionsOffset(mocapPositionBuffer, sensorPositionBuffer.get(0));
+                  MocapTools.adjustMocapPositionsByOffset(mocapPositionBuffer, sensorPositionBuffer.get(0));
 
                   mocapGraphic.generateMeshes(mocapPositionBuffer, 10);
                   mocapGraphic.update();
@@ -282,18 +282,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          rapidRegionsUIPanel.render();
          rapidPlanarRegionsExtractor.setModified(false);
          rapidPlanarRegionsExtractor.setProcessing(false);
-      }
-   }
-
-   public void adjustMocapPositionsOffset(ArrayList<Point3D> mocapPositionBuffer, Point3D origin)
-   {
-      Point3D offset = new Point3D(mocapPositionBuffer.get(0).getX(), -mocapPositionBuffer.get(0).getZ(), mocapPositionBuffer.get(0).getY());
-      offset.sub(origin);
-      LogTools.info("Offset: {}", offset);
-      for (Point3D point : mocapPositionBuffer)
-      {
-         point.set(point.getX(), -point.getZ(), point.getY());
-         point.sub(offset);
       }
    }
 

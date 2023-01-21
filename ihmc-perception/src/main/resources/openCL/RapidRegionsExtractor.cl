@@ -231,11 +231,18 @@ float3 estimate_spherical_centroid(read_write image2d_t in, int rIndex, int cInd
 bool isConnected(float3 ag, float3 an, float3 bg, float3 bn, global float* params)
 {
     float3 vec = ag - bg;
+
+    float distanceToNearerPoint = min(length(ag), length(bg));
     float dist = length(vec);
     float sim = fabs(dot(an, bn));
-    float minDist = min(length(ag), length(bg));
+
     float perpDist = fabs(dot(ag-bg, bn)) + fabs(dot(bg-ag, an));
-    if (perpDist < params[MERGE_ORTHOGONAL_THRESHOLD] && (dist < params[MERGE_DISTANCE_THRESHOLD]) && sim > params[MERGE_ANGULAR_THRESHOLD] && minDist > 0.3f)
+
+    float theta = acos(dot(ag, bg)/(length(ag) * length(bg)));
+    float distThreshold = distanceToNearerPoint * fabs(sin(theta) / sin(M_PI / 2 - theta / 2));
+
+    if (perpDist < params[MERGE_ORTHOGONAL_THRESHOLD] && (dist < distThreshold * params[MERGE_DISTANCE_THRESHOLD])
+            && sim > params[MERGE_ANGULAR_THRESHOLD] && distanceToNearerPoint > 0.5f)
     {
         return true;
     }

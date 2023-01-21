@@ -40,9 +40,9 @@ public interface RapidRegionsExtractorParametersReadOnly extends StoredPropertyS
       return get(mergeAngularThreshold);
    }
 
-   default double getFilterDisparityThreshold()
+   default int getConnectionThreshold()
    {
-      return get(filterDisparityThreshold);
+      return get(connectionThreshold);
    }
 
    default int getPatchSize()
