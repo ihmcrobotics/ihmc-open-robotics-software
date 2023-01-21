@@ -8,6 +8,7 @@ import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -120,13 +121,14 @@ public class HDF5ImageLogging
             logFile = Paths.get(logDirectory.get(), logFileName).toString();
             h5File = new H5File(logFile, hdf5.H5F_ACC_TRUNC);
 
-            CharPointer encodingPointer = new CharPointer(encodingSelection.name().toLowerCase());
+            BytePointer encodingNameBytes = encodingSelection == Encoding.PNG ? new BytePointer("png".getBytes())
+                  : new BytePointer("jpeg".getBytes());
             int rank = 1;
-            long[] dimensions = { encodingPointer.limit() };
+            long[] dimensions = { encodingNameBytes.limit() };
             DataSpace dataSpace = new DataSpace(rank, dimensions);
             DataType dataType = new DataType(PredType.NATIVE_CHAR());
             DataSet dataSet = h5File.createDataSet(ENCODING_NAME, dataType, dataSpace);
-            dataSet.write(encodingPointer, dataType);
+            dataSet.write(encodingNameBytes, dataType); // intentionally writes a string
             dataSet.close();
             dataSpace.close();
 
@@ -168,7 +170,7 @@ public class HDF5ImageLogging
             long[] dimensions = {compressedImageBuffer.limit() };
             DataSpace dataSpace = new DataSpace(rank, dimensions);
             DataSet dataSet = imageGroup.createDataSet(String.valueOf(imageIndex), nativeByteType, dataSpace);
-            dataSet.write(compressedImageBuffer, nativeByteType);
+            dataSet.write((Pointer) compressedImageBuffer, nativeByteType);
             dataSet.close();
             dataSpace.close();
 
