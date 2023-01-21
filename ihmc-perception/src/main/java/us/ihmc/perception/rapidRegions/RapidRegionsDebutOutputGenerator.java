@@ -8,8 +8,10 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -29,6 +31,8 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class RapidRegionsDebutOutputGenerator
 {
+   private boolean showPointCloud = true;
+
    private Mat debugImage;
    private Scalar internalColor = new Scalar(0, 0, 255, 0);
    private Scalar boundaryColor = new Scalar(255, 255, 255, 0);
@@ -205,6 +209,23 @@ public class RapidRegionsDebutOutputGenerator
       debugImage.put(new Scalar(0, 0, 0, 0));
    }
 
+   public void update(Mat inputDepthImage, PatchFeatureGrid patchFeatureGrid, BytedecoImage patchGraph, FloatBuffer floatBuffer)
+   {
+//      printPatchGraph(patchGraph);
+
+      if(showPointCloud)
+      {
+         LogTools.info("Constructing PointCloud: {}x{}, Total: {}", inputDepthImage.rows(), inputDepthImage.cols(), inputDepthImage.rows() * inputDepthImage.cols());
+         constructPointCloud(floatBuffer, inputDepthImage.rows() * inputDepthImage.cols());
+      }
+//      constructPointCloud(patchFeatureGrid.getCxImage(), patchFeatureGrid.getCyImage(), patchFeatureGrid.getCzImage());
+
+      //      constructCentroidSurfelCloud(patchFeatureGrid.getCxImage(), patchFeatureGrid.getCyImage(), patchFeatureGrid.getCzImage(), patchFeatureGrid.getNxImage(),
+//                                   patchFeatureGrid.getNyImage(), patchFeatureGrid.getNzImage());
+//      displayInputDepth(inputDepthImage, 1);
+      showDebugImage(1);
+   }
+
    public void displayInputDepth(Mat depth, int delay)
    {
       Mat depthDisplay = new Mat();
@@ -227,6 +248,14 @@ public class RapidRegionsDebutOutputGenerator
    public Mat getDebugImage()
    {
       return debugImage;
+   }
+
+   public void transformPoints(RigidBodyTransform transform)
+   {
+      for(Point3D32 point : debugPoints)
+      {
+         point.applyTransform(transform);
+      }
    }
 
    public RecyclingArrayList<Point3D32> getDebugPoints()
@@ -326,4 +355,8 @@ public class RapidRegionsDebutOutputGenerator
    //   return modelInstance;
    //}
 
+   public void setShowPointCloud(boolean showPointCloud)
+   {
+      this.showPointCloud = showPointCloud;
+   }
 }

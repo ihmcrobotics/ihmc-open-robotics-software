@@ -16,17 +16,17 @@
     "upperBound" : 10
   },
   "Merge orthogonal threshold" : {
-    "value" : 0.034364,
+    "value" : 0.068729,
     "lowerBound" : 0.0,
     "upperBound" : 10.0
   },
   "Merge distance threshold" : {
-    "value" : 0.196721,
+    "value" : 0.098361,
     "lowerBound" : 0.0,
     "upperBound" : 10.0
   },
   "Merge angular threshold" : {
-    "value" : 0.867314,
+    "value" : 0.880259,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -53,36 +53,30 @@
   },
   "Principal offset X pixels" : 538.984375,
   "Principal offset Y pixels" : 391.03125,
-  "Early gaussian blur" : true,
   "Use filtered image" : true,
   "Use SVD normals" : true,
   "SVD reduction factor" : {
-    "value" : 20,
+    "value" : 14,
     "lowerBound" : 1,
     "upperBound" : 100
   },
-  "Gaussian size" : {
-    "value" : 16,
-    "lowerBound" : 1,
-    "upperBound" : 20
-  },
-  "Gaussian sigma" : {
-    "value" : 6.0,
-    "lowerBound" : 0.23,
-    "upperBound" : 10.0
-  },
-  "Search depth limit" : {
-    "value" : 5000,
+  "Internal search depth limit" : {
+    "value" : 5668,
     "lowerBound" : 1,
     "upperBound" : 50000
   },
+  "Boundary search depth limit" : {
+    "value" : 1199,
+    "lowerBound" : 1,
+    "upperBound" : 15000
+  },
   "Region min patches" : {
-    "value" : 700,
+    "value" : 45,
     "lowerBound" : 1,
     "upperBound" : 3000
   },
   "Boundary min patches" : {
-    "value" : 20,
+    "value" : 35,
     "lowerBound" : 1,
     "upperBound" : 1000
   },

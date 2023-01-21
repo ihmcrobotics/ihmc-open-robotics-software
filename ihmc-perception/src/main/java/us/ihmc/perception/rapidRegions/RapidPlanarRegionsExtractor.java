@@ -170,10 +170,6 @@ public class RapidPlanarRegionsExtractor
          computePatchFeatureGrid(input16UC1DepthImage);
          gpuDurationStopwatch.suspend();
 
-         //debugger.printPatchGraph(patchGraph);
-         //debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
-         //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage, cxImage.getImageHeight(), cxImage.getImageWidth());
-         //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
 
          depthFirstSearchDurationStopwatch.start();
          findRegions();
@@ -187,8 +183,7 @@ public class RapidPlanarRegionsExtractor
 
          wholeAlgorithmDurationStopwatch.suspend();
 
-         //      debugger.displayInputDepth(input16UC1DepthImage.getBytedecoOpenCVMat(), 1);
-         //debugger.showDebugImage(1);
+         debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(), currentFeatureGrid, patchGraph, cloudBuffer.getBackingDirectFloatBuffer());
 
          modified = true;
       }
@@ -271,14 +266,15 @@ public class RapidPlanarRegionsExtractor
       openCLManager.setKernelArgument(packKernel, 7, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(packKernel, patchImageWidth, patchImageHeight);
 
-      openCLManager.setKernelArgument(mergeKernel, 0, currentFeatureGrid.getNxImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 1, currentFeatureGrid.getNyImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 2, currentFeatureGrid.getNzImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 3, currentFeatureGrid.getCxImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 4, currentFeatureGrid.getCyImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 5, currentFeatureGrid.getCzImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 6, patchGraph.getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 7, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(mergeKernel, 0, inputImage);
+      openCLManager.setKernelArgument(mergeKernel, 1, currentFeatureGrid.getNxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 2, currentFeatureGrid.getNyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 3, currentFeatureGrid.getNzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 4, currentFeatureGrid.getCxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 5, currentFeatureGrid.getCyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 6, currentFeatureGrid.getCzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 7, patchGraph.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 8, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(mergeKernel, patchImageWidth, patchImageHeight);
 
       currentFeatureGrid.readOpenCLImages();

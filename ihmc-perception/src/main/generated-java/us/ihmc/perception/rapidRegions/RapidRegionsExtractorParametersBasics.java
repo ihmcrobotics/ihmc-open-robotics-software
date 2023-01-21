@@ -73,11 +73,6 @@ public interface RapidRegionsExtractorParametersBasics extends RapidRegionsExtra
       set(RapidRegionsExtractorParameters.principalOffsetYPixels, principalOffsetYPixels);
    }
 
-   default void setEarlyGaussianBlur(boolean earlyGaussianBlur)
-   {
-      set(RapidRegionsExtractorParameters.earlyGaussianBlur, earlyGaussianBlur);
-   }
-
    default void setUseFilteredImage(boolean useFilteredImage)
    {
       set(RapidRegionsExtractorParameters.useFilteredImage, useFilteredImage);
@@ -91,16 +86,6 @@ public interface RapidRegionsExtractorParametersBasics extends RapidRegionsExtra
    default void setSVDReductionFactor(int svdReductionFactor)
    {
       set(RapidRegionsExtractorParameters.svdReductionFactor, svdReductionFactor);
-   }
-
-   default void setGaussianSize(int gaussianSize)
-   {
-      set(RapidRegionsExtractorParameters.gaussianSize, gaussianSize);
-   }
-
-   default void setGaussianSigma(double gaussianSigma)
-   {
-      set(RapidRegionsExtractorParameters.gaussianSigma, gaussianSigma);
    }
 
    default void setInternalSearchDepthLimit(int internalSearchDepthLimit)

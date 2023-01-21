@@ -175,10 +175,11 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
       anyParameterChanged |= concaveHullParametersTuner.renderImGuiWidgets();
 
       svdDurationPlot.render((float) rapidPlanarRegionsExtractor.getMaxSVDSolveTime());
+
+      ImGui.checkbox(labels.get("Render Point Cloud"), renderPointCloud);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
-      ImGui.checkbox(labels.get("Render Point Cloud"), renderPointCloud);
    }
 
    public void destroy()

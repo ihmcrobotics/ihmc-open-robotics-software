@@ -104,8 +104,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createL515(768, 1024);
-            //createOuster(128, 2048);
+//            createL515(768, 1024);
+            createOuster(128, 2048);
 
             updateRapidRegionsExtractor();
             updatePointCloudRenderer();
@@ -117,8 +117,13 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
+
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
+
             pointCloudRenderer.create(depthHeight * depthWidth);
             rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight);
 
@@ -232,6 +237,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    {
       if (rapidRegionsUIPanel.getPointCloudRenderEnabled())
       {
+         rapidPlanarRegionsExtractor.getDebugger().transformPoints(cameraFrame.getTransformToWorldFrame());
          pointCloudRenderer.setPointsToRender(rapidPlanarRegionsExtractor.getDebugger().getDebugPoints(), Color.GRAY);
          pointCloudRenderer.updateMesh();
       }
@@ -241,6 +247,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    {
       if (!rapidPlanarRegionsExtractor.isProcessing())
       {
+         rapidPlanarRegionsExtractor.getDebugger().setShowPointCloud(rapidRegionsUIPanel.getPointCloudRenderEnabled());
          if((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
          {
             ThreadTools.startAsDaemon(() ->
