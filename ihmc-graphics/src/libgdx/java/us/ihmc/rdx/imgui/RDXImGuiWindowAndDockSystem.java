@@ -202,50 +202,47 @@ public class RDXImGuiWindowAndDockSystem
    {
       boolean success = false;
       imGuiSettingsFile.setMode(configurationLocation.toHybridResourceMode());
-      if (imGuiSettingsFile.isInputStreamAvailable())
+      panelsFile.setMode(configurationLocation.toHybridResourceMode());
+      if (imGuiSettingsFile.isInputStreamAvailable() && panelsFile.isInputStreamAvailable())
       {
          LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getLocationOfResourceForReading());
-         InputStream classpathResourceAsStream = imGuiSettingsFile.getClasspathResourceAsStream();
-         if (classpathResourceAsStream == null)
-         {
-            throw new RuntimeException("Classpath resource stream is null!");
-         }
-         String iniContentsAsString = ResourceTools.readResourceToString(classpathResourceAsStream);
+         String iniContentsAsString = ResourceTools.readResourceToString(imGuiSettingsFile.getInputStream());
          ImGui.loadIniSettingsFromMemory(iniContentsAsString);
-         success = true;
 
-         panelsFile.setMode(configurationLocation.toHybridResourceMode());
          LogTools.info("Loading ImGui panels settings from {}", panelsFile.getLocationOfResourceForReading());
-         JSONFileTools.load(panelsFile.getInputStream(), jsonNode ->
-         {
-            JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
-            if (dockspacePanelsNode != null)
-            {
-               ImGuiDockspacePanel[] priorDockpanelSet = dockPanelSet.toArray(new ImGuiDockspacePanel[0]);
-               dockPanelSet.clear();
-               for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
-               {
-                  Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
-                  ImGuiDockspacePanel dockspacePanel = null;
-                  for (ImGuiDockspacePanel otherDockspacePanel : priorDockpanelSet)
-                  {
-                     if (otherDockspacePanel.getName().equals(dockspacePanelEntry.getKey()))
-                     {
-                        dockspacePanel = otherDockspacePanel;
-                     }
-                  }
-                  if (dockspacePanel == null)
-                  {
-                     dockspacePanel = new ImGuiDockspacePanel(dockspacePanelEntry.getKey());
-                  }
-                  dockPanelSet.add(dockspacePanel);
-                  dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
-               }
-            }
-            panelManager.loadConfiguration(jsonNode);
-         });
+         JSONFileTools.load(panelsFile.getInputStream(), this::loadPanelsJSON);
+         success = true;
       }
       return success;
+   }
+
+   private void loadPanelsJSON(JsonNode jsonNode)
+   {
+      JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
+      if (dockspacePanelsNode != null)
+      {
+         ImGuiDockspacePanel[] priorDockpanelSet = dockPanelSet.toArray(new ImGuiDockspacePanel[0]);
+         dockPanelSet.clear();
+         for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
+         {
+            Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
+            ImGuiDockspacePanel dockspacePanel = null;
+            for (ImGuiDockspacePanel otherDockspacePanel : priorDockpanelSet)
+            {
+               if (otherDockspacePanel.getName().equals(dockspacePanelEntry.getKey()))
+               {
+                  dockspacePanel = otherDockspacePanel;
+               }
+            }
+            if (dockspacePanel == null)
+            {
+               dockspacePanel = new ImGuiDockspacePanel(dockspacePanelEntry.getKey());
+            }
+            dockPanelSet.add(dockspacePanel);
+            dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
+         }
+      }
+      panelManager.loadConfiguration(jsonNode);
    }
 
    public void saveConfiguration(ImGuiConfigurationLocation saveConfigurationLocation)
