@@ -7,6 +7,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.logging.HDF5ImageBrowser;
 import us.ihmc.rdx.logging.HDF5ImageLogging;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
@@ -27,6 +28,7 @@ public class BlackflyCalibrationSuite
    private RDXBlackflyReader blackflyReader;
    private CalibrationPatternDetection calibrationPatternDetection;
    private HDF5ImageLogging hdf5ImageLogging;
+   private HDF5ImageBrowser hdf5ImageBrowser;
    private volatile boolean running = true;
    private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
    private Point3fVectorVector objectPoints;
@@ -59,6 +61,10 @@ public class BlackflyCalibrationSuite
                   calibrationPatternDetection = new CalibrationPatternDetection();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetection.getPanel());
 
+                  hdf5ImageBrowser = new HDF5ImageBrowser();
+                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getControlPanel());
+                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getVideoPanel());
+
                   baseUI.getPerspectiveManager().reloadPerspective();
 
                   ThreadTools.startAsDaemon(() ->
@@ -76,6 +82,7 @@ public class BlackflyCalibrationSuite
 
                calibrationPatternDetection.update();
                blackflyReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+               hdf5ImageBrowser.update();
             }
 
             baseUI.renderBeforeOnScreenUI();

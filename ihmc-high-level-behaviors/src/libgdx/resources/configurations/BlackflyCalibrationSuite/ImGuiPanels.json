@@ -6,6 +6,8 @@
     "Blackfly Reader" : true,
     "Calibration" : true,
     "Calibration Pattern" : true,
+    "HDF5 Browsing" : true,
+    "Image Monitor" : true,
     "Logging" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false
