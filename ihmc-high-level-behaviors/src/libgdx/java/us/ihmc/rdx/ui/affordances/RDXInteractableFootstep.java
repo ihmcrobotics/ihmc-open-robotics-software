@@ -60,6 +60,8 @@ public class RDXInteractableFootstep
    private final AtomicReference<PlannedFootstep> plannedFootstepInput = new AtomicReference<>(null);
    private final PlannedFootstep plannedFootstepInternal;
 
+   private boolean wasPoseUpdated = false;
+
    public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index)
    {
       plannedFootstepInternal = new PlannedFootstep(footstepSide);
@@ -132,6 +134,7 @@ public class RDXInteractableFootstep
 
    public void updatePlannedTrajectory(PlannedFootstep other)
    {
+      wasPoseUpdated = true;
       plannedFootstepInput.set(other);
    }
 
@@ -153,6 +156,8 @@ public class RDXInteractableFootstep
    public void update()
    {
       // Update the internally held planned footstep pose
+      if (!plannedFootstepInternal.getFootstepPose().epsilonEquals(selectablePose3DGizmo.getPoseGizmo().getPose(), 1e-2))
+         wasPoseUpdated = true;
       plannedFootstepInternal.getFootstepPose().set(selectablePose3DGizmo.getPoseGizmo().getPose());
 
       double textHeight = 0.08;
@@ -245,6 +250,7 @@ public class RDXInteractableFootstep
       gizmoTransform.getTranslation().set(x, y, z);
       gizmoTransform.getRotation().set(transform.getRotation());
       plannedFootstepInternal.getFootstepPose().set(gizmoTransform);
+      wasPoseUpdated = true;
 
       boundingSphere.getPosition().set(x, y, z);
    }
@@ -338,6 +344,14 @@ public class RDXInteractableFootstep
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(footstepPose);
       selectablePose3DGizmo.getPoseGizmo().updateTransforms();
       plannedFootstepInternal.getFootstepPose().set(footstepPose);
+      wasPoseUpdated = true;
+   }
+
+   public boolean pollWasPoseUpdated()
+   {
+      boolean value = wasPoseUpdated;
+      wasPoseUpdated = false;
+      return value;
    }
 
    private void updateTrajectoryModel(PlannedFootstep footstep)
