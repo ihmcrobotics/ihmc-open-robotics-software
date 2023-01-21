@@ -13,6 +13,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.PlannedFootstep;
@@ -27,6 +29,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -44,7 +47,7 @@ public class RDXInteractableFootstep
    // Intended to reuse text renderables, as they are relatively expensive to create
    private static final Map<String, RDX3DSituatedText> textRenderablesMap = new HashMap<>();
    private RDX3DSituatedText footstepIndexText;
-   private RDXModelInstance footstepModelInstance;
+   private ModelInstance footstepModelInstance;
    private RDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private boolean isHovered;
@@ -106,6 +109,14 @@ public class RDXInteractableFootstep
       plannedFootstepInput.set(null);
       plannedFootstepInternal.set(plannedFootstep);
 
+      if (plannedFootstepInternal.hasFoothold())
+      {
+         Color regionColor = RDXFootstepPlanGraphic.footstepColors.get(plannedFootstep.getRobotSide());
+         List<Point2DReadOnly> points = new ArrayList<>();
+         for (int i = 0; i < plannedFootstep.getFoothold().getNumberOfVertices(); i++)
+            points.add(plannedFootstep.getFoothold().getVertex(i));
+         footstepModelInstance = RDXModelBuilder.createLinedPolygon(plannedFootstep.getFootstepPose(), points, 0.02, regionColor, true);
+      }
       if (plannedFootstepInternal.getRobotSide().equals(RobotSide.LEFT))
       {
          footstepModelInstance = new RDXModelInstance(RDXModelLoader.load("models/footsteps/footstep_left.g3dj"));
@@ -306,7 +317,7 @@ public class RDXInteractableFootstep
    // sets color of the corresponding footstep in the list
    public void setColor(float r, float g, float b, float a)
    {
-      getFootstepModelInstance().materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, r, g, b, a));
+      footstepModelInstance.materials.get(0).set(new ColorAttribute(ColorAttribute.Diffuse, r, g, b, a));
    }
 
    public void setFootstepModelInstance(RDXModelInstance footstepModelInstance)
@@ -319,7 +330,7 @@ public class RDXInteractableFootstep
       return plannedFootstepInternal.getRobotSide();
    }
 
-   public RDXModelInstance getFootstepModelInstance()
+   public ModelInstance getFootstepModelInstance()
    {
       return footstepModelInstance;
    }
