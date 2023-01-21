@@ -53,6 +53,8 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private RDXSwingPlanningModule swingPlanningModule;
    private RDXTeleoperationParameters teleoperationParameters;
 
+   private boolean wasPlanUpdated = false;
+
    public void create(RDXBaseUI baseUI,
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
@@ -182,6 +184,8 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          RDXInteractableFootstep addedStep = footsteps.add();
          addedStep.updateFromPlannedStep(baseUI, plannedStep, i);
       }
+
+      wasPlanUpdated = true;
    }
 
    public void update()
@@ -195,7 +199,20 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          selectedFootstep.update();
 
       stepChecker.update(footsteps);
-      swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
+      wasPlanUpdated |= pollIfAnyStepWasUpdated();
+      if (wasPlanUpdated)
+      {
+         swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
+         wasPlanUpdated = false;
+      }
+   }
+
+   private boolean pollIfAnyStepWasUpdated()
+   {
+      boolean wasUpdated = false;
+      for (int i = 0; i < footsteps.size(); i++)
+         wasUpdated |= footsteps.get(i).pollWasPoseUpdated();
+      return wasUpdated;
    }
 
    public void clear()
@@ -281,6 +298,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    private RDXInteractableFootstep newPlannedFootstep()
    {
+      wasPlanUpdated = true;
       return new RDXInteractableFootstep(baseUI, RobotSide.LEFT, 0);
    }
 
