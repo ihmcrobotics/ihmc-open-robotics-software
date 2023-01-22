@@ -15,6 +15,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
@@ -49,6 +50,7 @@ public class RDXFootstepPlanning
    private final AtomicReference<PlanarRegionsListMessage> planarRegionsReference = new AtomicReference<>();
    private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerParametersReadOnly> footstepPlannerParametersReference = new AtomicReference<>();
+   private final AtomicReference<AStarBodyPathPlannerParametersReadOnly> bodyPathPlannerParametersReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerOutput> outputReference = new AtomicReference<>();
    private final RDXTeleoperationParameters teleoperationParameters;
 
@@ -113,6 +115,9 @@ public class RDXFootstepPlanning
          footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
       else
          footstepPlannerParameters = footstepPlanner.getFootstepPlannerParameters();
+      AStarBodyPathPlannerParametersReadOnly bodyPathPlannerParameters = bodyPathPlannerParametersReference.getAndSet(null);
+      if (bodyPathPlannerParameters != null)
+         footstepPlanner.getAStarBodyPathPlannerParameters().set(bodyPathPlannerParameters);
 
       setGoalFootPosesFromMidFeetPose(footstepPlannerParameters, goalPose);
       setStanceSideToClosestToGoal(goalPose);
@@ -218,6 +223,11 @@ public class RDXFootstepPlanning
    public void setFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.footstepPlannerParametersReference.set(footstepPlannerParameters);
+   }
+
+   public void setBodyPathPlannerParameters(AStarBodyPathPlannerParametersReadOnly bodyPathPlannerParameters)
+   {
+      this.bodyPathPlannerParametersReference.set(bodyPathPlannerParameters);
    }
 
    public boolean isReadyToWalk()

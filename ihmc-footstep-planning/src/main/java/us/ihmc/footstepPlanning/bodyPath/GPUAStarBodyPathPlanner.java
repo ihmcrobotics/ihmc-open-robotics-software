@@ -124,7 +124,7 @@ public class GPUAStarBodyPathPlanner
 
    private final OpenCLFloatBuffer heightMapBuffer = new OpenCLFloatBuffer(1);
    private final OpenCLFloatBuffer leastSquaresNormalXYZBuffer = new OpenCLFloatBuffer(1);
-   private final OpenCLFloatMem ransacNormalXYZBuffer = new OpenCLFloatMem(1);
+   private final OpenCLFloatMemory ransacNormalXYZBuffer = new OpenCLFloatMemory(1);
    private final OpenCLFloatBuffer sampledHeightBuffer = new OpenCLFloatBuffer(1);
    private final OpenCLFloatBuffer snappedNodeHeightBuffer = new OpenCLFloatBuffer(1);
    private final OpenCLIntBuffer edgeRejectionReasonBuffer = new OpenCLIntBuffer(1);

@@ -19,6 +19,7 @@ import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -78,7 +79,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
+   private final ImGuiStoredPropertySetTuner bodyPathPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Body Path Planner Parameters (Teleoperation)");
    private final RDXFootstepPlanning footstepPlanning;
    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
    private final RDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowPosePlacement();
@@ -129,6 +132,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       setRenderMethod(this::renderImGuiWidgets);
       addChild(teleoperationParametersTuner);
       addChild(footstepPlanningParametersTuner);
+      addChild(bodyPathPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
       ROS2NodeInterface ros2Node = communicationHelper.getROS2Node();
       robotModel = communicationHelper.getRobotModel();
@@ -136,6 +140,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       this.yoVariableClientHelper = yoVariableClientHelper;
 
       this.footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      this.bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
 
       teleoperationParameters = new RDXTeleoperationParameters(robotRepoName, robotSubsequentPathToResourceFolder, robotModel.getSimpleRobotName());
       teleoperationParameters.load();
@@ -185,6 +190,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
       footstepPlanningParametersTuner.create(footstepPlannerParameters, false, () -> footstepPlanning.setFootstepPlannerParameters(footstepPlannerParameters));
+      bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false, () -> footstepPlanning.setBodyPathPlannerParameters(bodyPathPlannerParameters));
       teleoperationParametersTuner.create(teleoperationParameters);
       swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.swingTime, 0.3, 2.5);
       transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.transferTime, 0.3, 2.5);
@@ -483,6 +489,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       trajectoryTimeSlider.render();
 
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
+      ImGui.checkbox(labels.get("Show body path planner parameter tuner"), bodyPathPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
       ImGui.separator();

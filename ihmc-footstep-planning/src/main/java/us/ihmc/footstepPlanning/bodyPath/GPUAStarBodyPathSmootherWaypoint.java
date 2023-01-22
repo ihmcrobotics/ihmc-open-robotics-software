@@ -24,7 +24,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLFloatMem;
+import us.ihmc.perception.OpenCLFloatMemory;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
