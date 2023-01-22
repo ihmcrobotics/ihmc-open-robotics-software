@@ -10,4 +10,14 @@ public enum ImGuiConfigurationLocation
    {
       return this == VERSION_CONTROL ? HybridResourceMode.WORKSPACE : HybridResourceMode.EXTERNAL;
    }
+
+   public boolean isVersionControl()
+   {
+      return this == VERSION_CONTROL;
+
+   }
+   public boolean isUserHome()
+   {
+      return this == USER_HOME;
+   }
 }

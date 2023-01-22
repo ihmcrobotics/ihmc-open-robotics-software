@@ -389,7 +389,7 @@ public class RDXBaseUI
          root.put("windowWidth", Gdx.graphics.getWidth());
          root.put("windowHeight", Gdx.graphics.getHeight());
       };
-      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
+      if (saveConfigurationLocation.isVersionControl())
       {
          LogTools.info("Saving libGDX settings to {}", libGDXSettingsFile.getWorkspaceFile().toString());
          JSONFileTools.save(libGDXSettingsFile.getWorkspaceFile(), rootConsumer);

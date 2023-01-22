@@ -155,8 +155,8 @@ public class RDXImGuiLayoutManager
 
    private void renderLayoutManager(TreeSet<String> layouts, ImGuiConfigurationLocation configurationLocation, ImString layoutNameToSave)
    {
-      boolean enableSaving = configurationLocation == ImGuiConfigurationLocation.USER_HOME
-                         || (configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL && configurationBaseDirectory.isWorkspaceFileAccessAvailable());
+      boolean enableSaving = configurationLocation.isUserHome() ||
+                             (configurationLocation.isVersionControl() && configurationBaseDirectory.isWorkspaceFileAccessAvailable());
       for (String layout : layouts)
       {
          if (ImGui.radioButton(labels.get(layout, configurationLocation.name()),
@@ -229,7 +229,7 @@ public class RDXImGuiLayoutManager
    public void reloadLayout()
    {
       applyLayoutDirectory();
-      Path directory = currentConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
+      Path directory = currentConfigurationLocation.isVersionControl()
             ? layoutDirectory.getWorkspaceDirectory() : layoutDirectory.getExternalDirectory();
       if (Files.exists(directory))
       {

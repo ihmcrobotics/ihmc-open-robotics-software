@@ -163,7 +163,7 @@ public class ImGuiGlfwWindow
          root.put("windowWidth", glfwWindowForImGui.getWindowWidth());
          root.put("windowHeight", glfwWindowForImGui.getWindowHeight());
       };
-      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
+      if (saveConfigurationLocation.isVersionControl())
       {
          LogTools.info("Saving window settings to {}", windowSettingsFile.getWorkspaceFile().toString());
          JSONFileTools.save(windowSettingsFile.getWorkspaceFile(), rootConsumer);
