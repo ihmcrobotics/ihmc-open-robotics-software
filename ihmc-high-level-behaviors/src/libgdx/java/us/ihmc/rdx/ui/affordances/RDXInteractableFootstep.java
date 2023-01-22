@@ -405,5 +405,4 @@ public class RDXInteractableFootstep
       this.textFramePose.setIncludingFrame(manuallyPlacedFootstep.textFramePose);
       this.flashingFootStepsColorHigh = manuallyPlacedFootstep.flashingFootStepsColorHigh;
    }
-
 }
