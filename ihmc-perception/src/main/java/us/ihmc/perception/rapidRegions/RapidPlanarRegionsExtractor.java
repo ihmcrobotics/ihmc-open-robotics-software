@@ -140,6 +140,9 @@ public class RapidPlanarRegionsExtractor
    public void create()
    {
       calculateDerivativeParameters();
+
+      LogTools.info("Creating buffers and kernels for OpenCL program.");
+
       debugger.create(imageHeight, imageWidth);
       parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
       cloudBuffer = new OpenCLFloatBuffer(imageHeight * imageWidth * 3);
@@ -156,6 +159,8 @@ public class RapidPlanarRegionsExtractor
       boundaryVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
       boundaryMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
       regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
+
+      LogTools.info("Finished creating buffers and kernels for OpenCL program.");
    }
 
    public void update(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsWithPose)
@@ -183,7 +188,7 @@ public class RapidPlanarRegionsExtractor
 
          wholeAlgorithmDurationStopwatch.suspend();
 
-         debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(), currentFeatureGrid, patchGraph, cloudBuffer.getBackingDirectFloatBuffer());
+         //debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(), currentFeatureGrid, patchGraph, cloudBuffer.getBackingDirectFloatBuffer());
 
          modified = true;
       }

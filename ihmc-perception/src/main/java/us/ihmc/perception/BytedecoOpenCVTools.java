@@ -313,21 +313,6 @@ public class BytedecoOpenCVTools
       return matString.toString();
    }
 
-   public static void displayVideoPacketDepth(VideoPacket videoPacket)
-   {
-      Mat depthImage = new Mat(720, 1280, opencv_core.CV_16UC1);
-      byte[] compressedByteArray = videoPacket.getData().toArray();
-      BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, depthImage);
-
-      Mat displayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC1);
-      Mat finalDisplayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC3);
-
-      BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
-      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
-
-      display("/l515/depth", finalDisplayDepth, 30);
-   }
-
    public static void displayVideoPacketColor(VideoPacket videoPacket)
    {
       Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
@@ -354,7 +339,7 @@ public class BytedecoOpenCVTools
       BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 255.0);
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
-      display("/l515/depth", finalDisplayDepth, delay);
+      display(tag, finalDisplayDepth, delay);
    }
 
    public static void fillVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)

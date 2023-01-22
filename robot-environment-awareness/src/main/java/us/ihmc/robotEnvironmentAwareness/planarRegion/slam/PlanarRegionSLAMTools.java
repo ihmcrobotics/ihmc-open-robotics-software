@@ -1,5 +1,9 @@
 package us.ihmc.robotEnvironmentAwareness.planarRegion.slam;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,6 +18,7 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
@@ -30,6 +35,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.tools.lists.PairList;
@@ -641,6 +650,17 @@ public class PlanarRegionSLAMTools
       return collisionResult.areShapesColliding();
    }
 
+   public static boolean boxesIn3DIntersect(PlanarRegion a, PlanarRegion b)
+   {
+      Box3D boxA = PlanarRegionTools.getLocalBoundingBox3DInWorldWithMargin(a, 0.1);
+      Box3D boxB = PlanarRegionTools.getLocalBoundingBox3DInWorldWithMargin(b, 0.1);
+
+      GilbertJohnsonKeerthiCollisionDetector gjkCollisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
+      EuclidShape3DCollisionResult collisionResult = gjkCollisionDetector.evaluateCollision(boxA, boxB);
+
+      return collisionResult.areShapesColliding();
+   }
+
    public static boolean boundingBoxesIntersect(PlanarRegion a, PlanarRegion b)
    {
       return a.getBoundingBox3dInWorld().intersectsEpsilon(b.getBoundingBox3dInWorld(), 1e-8);
@@ -724,21 +744,32 @@ public class PlanarRegionSLAMTools
       Vector3D originVec = new Vector3D();
       originVec.sub(newOrigin, mapOrigin);
 
-      double normalDistance = Math.abs(originVec.dot(regionB.getNormal()));
-      double normalSimilarity = Math.abs(regionA.getNormal().dot(regionB.getNormal()));
+      double normalDistance = 0;
+      boolean intersects = false;
+      double closestDistance = 0;
+      double normalSimilarity = regionB.getNormal().dot(regionA.getNormal());
 
-      double originDistance = 0;
-
-      // check to make sure the angles are similar enough
       boolean wasMatched = normalSimilarity > normalThreshold;
-      // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
-      wasMatched &= normalDistance < normalDistanceThreshold;
-      // check that the regions aren't too far from one another
-      if (wasMatched)
+      if(wasMatched)
       {
-         originDistance = planarRegionTools.getDistanceBetweenPlanarRegions(regionB, regionA);
-         wasMatched = originDistance <= distanceThreshold;
+         normalDistance = Math.abs(originVec.dot(regionA.getNormal()));
+         wasMatched &= normalDistance < normalDistanceThreshold;
+
+         //if(wasMatched)
+         //{
+         //   closestDistance = planarRegionTools.getDistanceBetweenPlanarRegions(regionA, regionB);
+         //   wasMatched &= closestDistance <= distanceThreshold;
+         //}
+
+         //if(wasMatched)
+         //{
+         //   intersects = boxesIn3DIntersect(regionA, regionB);
+         //   wasMatched &= intersects;
+         //}
       }
+
+      LogTools.info("Match Metrics for [{}, {}]: {} " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f]", normalSimilarity,
+                        normalThreshold, normalDistance, normalDistanceThreshold), regionA.getRegionId(), regionB.getRegionId(), intersects);
 
       //LogTools.info(String.format("(%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
       //                            regionB.getRegionId(),
@@ -751,29 +782,5 @@ public class PlanarRegionSLAMTools
       //                            distanceThreshold) + ": [{}]", wasMatched);
 
       return wasMatched;
-   }
-
-   public static void printMatches(String tag, PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches)
-   {
-      LogTools.info("------------------------------------------------ Printing Matches ({}) ---------------------------------------------", tag);
-      LogTools.info("Map Region Count: {}", map.getNumberOfPlanarRegions());
-      LogTools.info("Incoming Regionr Count: {}", regions.getNumberOfPlanarRegions());
-
-      for(Integer key : matches.keySet())
-      {
-         int[] values = matches.get(key).toArray();
-         LogTools.info("Match: ({}) -> {}", key, Arrays.toString(values));
-      }
-      LogTools.info("------------------------------------------------ Printing Matches End ---------------------------------------------");
-   }
-
-   public static void printRegionIDs(String tag, PlanarRegionsList regions)
-   {
-      int[] ids = new int[regions.getNumberOfPlanarRegions()];
-      for(int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
-      {
-         ids[i] = regions.getPlanarRegion(i).getRegionId();
-      }
-      LogTools.info("[{}] Region IDs: {}", tag, Arrays.toString(ids));
    }
 }
