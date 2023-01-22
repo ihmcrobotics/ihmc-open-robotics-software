@@ -64,12 +64,17 @@ public class ImGuiGlfwWindow
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          windowSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         JSONFileTools.load(windowSettingsFile.getInputStream(), jsonNode ->
+         InputStream inputStream = windowSettingsFile.getInputStream();
+         if (inputStream != null)
          {
-            int width = jsonNode.get("windowWidth").asInt();
-            int height = jsonNode.get("windowHeight").asInt();
-            glfwWindowForImGui.setWindowSize(width, height);
-         });
+            JSONFileTools.load(inputStream, jsonNode ->
+            {
+               int width = jsonNode.get("windowWidth").asInt();
+               int height = jsonNode.get("windowHeight").asInt();
+               glfwWindowForImGui.setWindowSize(width, height);
+            });
+         }
+         return inputStream != null;
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
       layoutManager.applyLayoutDirectory();

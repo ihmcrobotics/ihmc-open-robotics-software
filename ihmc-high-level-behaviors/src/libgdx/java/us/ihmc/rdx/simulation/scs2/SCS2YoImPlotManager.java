@@ -90,7 +90,7 @@ public class SCS2YoImPlotManager
       configurationFile = new HybridFile(layoutDirectory, getClass().getSimpleName() + ".json");
    }
 
-   private void loadConfiguration(ImGuiConfigurationLocation configurationLocation)
+   private boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
       configurationFile.setMode(configurationLocation.toHybridResourceMode());
       InputStream inputStream = configurationFile.getInputStream();
@@ -121,8 +121,9 @@ public class SCS2YoImPlotManager
       }
       else
       {
-         LogTools.error("Failed to load {}", configurationFile.getLocationOfResourceForReading());
+         LogTools.error("Input stream is null");
       }
+      return inputStream != null;
    }
 
    private void saveConfiguration(ImGuiConfigurationLocation configurationLocation)
