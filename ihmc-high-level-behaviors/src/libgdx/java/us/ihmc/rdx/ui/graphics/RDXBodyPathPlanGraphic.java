@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.graphics;
 
-import boofcv.gui.d3.Orientation3D;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
