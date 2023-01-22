@@ -2,12 +2,12 @@ package us.ihmc.perception;
 
 import org.bytedeco.opencl._cl_mem;
 
-public class OpenCLFloatMem
+public class OpenCLFloatMemory
 {
    private long numberOfFloats;
    private _cl_mem openCLBufferObject;
 
-   public OpenCLFloatMem(int numberOfFloats)
+   public OpenCLFloatMemory(int numberOfFloats)
    {
       resize(numberOfFloats, null);
    }
