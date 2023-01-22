@@ -15,6 +15,7 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
@@ -22,7 +23,7 @@ import java.util.function.Consumer;
 public class ImGuiGlfwWindow
 {
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
-   private String configurationExtraPath;
+   private final String configurationExtraPath;
    private final HybridDirectory configurationBaseDirectory;
    private HybridFile windowSettingsFile;
    private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
@@ -98,7 +99,7 @@ public class ImGuiGlfwWindow
 
       long windowHandle = glfwWindowForImGui.getWindowHandle();
 
-      imGuiWindowAndDockSystem.create(windowHandle);
+      imGuiWindowAndDockSystem.create(windowHandle, layoutManager);
 
       if (create != null)
          create.run();
