@@ -37,8 +37,8 @@ public class RDXImGuiLayoutManager
    private boolean firstIndex = true;
    private boolean firstLoad = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString userHomeLayoutNameToSave = new ImString(256);
-   private final ImString versionControlLayoutNameToSave = new ImString(256);
+   private final ImString userHomeLayoutNameToSave = new ImString(100);
+   private final ImString versionControlLayoutNameToSave = new ImString(100);
    private final TreeSet<String> userHomeLayouts = new TreeSet<>(Comparator.comparing(String::toString));
    private final TreeSet<String> versionControlLayouts = new TreeSet<>(Comparator.comparing(String::toString));
    private String currentLayoutName = "Main";
@@ -186,9 +186,15 @@ public class RDXImGuiLayoutManager
       {
          ImGui.text("Save as:");
          ImGui.sameLine();
-         boolean saveRequested = ImGuiTools.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), layoutNameToSave);
+         // A little fanciness here to make the menu a constant width whether or not
+         // rendering the save button
          String layoutNameToCreateString = layoutNameToSave.get();
-         if (!layoutNameToCreateString.isEmpty())
+         boolean renderSaveButton = layoutNameToCreateString.isEmpty();
+         ImGui.setNextItemWidth(renderSaveButton ? 190.0f :150.0f); // Width of Save button is 30
+         boolean saveRequested = ImGuiTools.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), layoutNameToSave);
+         ImGuiTools.previousWidgetTooltip("A PascalCased name is recommended.\nPress Enter to save.");
+         layoutNameToCreateString = layoutNameToSave.get();
+         if (!renderSaveButton)
          {
             ImGui.sameLine();
             saveRequested |= ImGui.button(labels.get("Save", configurationLocation.name(), 1));
