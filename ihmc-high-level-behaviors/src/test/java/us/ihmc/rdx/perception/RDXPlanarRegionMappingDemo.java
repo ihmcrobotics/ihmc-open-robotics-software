@@ -36,6 +36,8 @@ public class RDXPlanarRegionMappingDemo
    private final String perceptionLogDirectory = System.getProperty("user.home") + "/.ihmc/logs/perception/";
    private final String logFileName = "20230117_161540_PerceptionLog.hdf5";
 
+   private boolean graphicsInitialized = false;
+
    public RDXPlanarRegionMappingDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -46,8 +48,11 @@ public class RDXPlanarRegionMappingDemo
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
+
             // To Run With Perception Logs (HDF5)
-            mappingManager = new PlanarRegionMappingManager(perceptionLogDirectory + logFileName, false);
+            mappingManager = new PlanarRegionMappingManager(perceptionLogDirectory + logFileName, true);
+
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mappingManager::selectRegionToPick);
 
             // To Run with Planar Region Logs (PRLLOG)
             //mappingManager = new PlanarRegionMappingManager(regionLogDirectory , false);
@@ -69,14 +74,22 @@ public class RDXPlanarRegionMappingDemo
             {
                if(nativesLoadedActivator.isNewlyActivated())
                {
+                  baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
+               }
+
+               if(!mappingManager.getSensorPositionBuffer().isEmpty() && !mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
+               {
+                  MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(),
+                                                          mappingManager.getSensorPositionBuffer().get(0));
+
                   mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
                   mocapGraphic.update();
 
                   rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
                   rootJointGraphic.update();
 
-                  baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
-                  baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
+                  graphicsInitialized = true;
                }
 
                if (planarRegionMappingUI.isCaptured())
@@ -99,6 +112,7 @@ public class RDXPlanarRegionMappingDemo
          public void dispose()
          {
             baseUI.dispose();
+            ros2Node.destroy();
             super.dispose();
          }
       });

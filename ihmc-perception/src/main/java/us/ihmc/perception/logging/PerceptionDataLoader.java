@@ -108,7 +108,7 @@ public class PerceptionDataLoader
       });
    }
 
-   public synchronized void loadFloatArray(String namespace, int index, float[] array)
+   public void loadFloatArray(String namespace, int index, float[] array)
    {
       synchronized (hdf5Manager)
       {
@@ -133,10 +133,7 @@ public class PerceptionDataLoader
       synchronized (hdf5Manager)
       {
          Group group = hdf5Manager.getGroup(namespace);
-         synchronized (group)
-         {
-            compressedByteArray = HDF5Tools.loadByteArray(group, index);
-         }
+         compressedByteArray = HDF5Tools.loadByteArray(group, index);
       }
       BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
    }

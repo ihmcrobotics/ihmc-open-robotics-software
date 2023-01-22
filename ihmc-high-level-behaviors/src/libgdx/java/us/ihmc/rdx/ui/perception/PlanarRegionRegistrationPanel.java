@@ -20,11 +20,6 @@ public class PlanarRegionRegistrationPanel extends ImGuiPanel
 
    public void renderImGuiWidgets()
    {
-      if(ImGui.button("Next"))
-      {
-         planarRegionRegistration.incrementIndex();
-         planarRegionRegistration.update();
-      }
    }
 
 }

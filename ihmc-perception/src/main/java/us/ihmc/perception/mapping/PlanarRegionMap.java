@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.slamWrapper.FactorGraph;
+import us.ihmc.perception.tools.PerceptionPrintTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -62,6 +63,11 @@ public class PlanarRegionMap
 
    public PlanarRegionMap(boolean useSmoothingMerger)
    {
+      this(useSmoothingMerger, "");
+   }
+
+   public PlanarRegionMap(boolean useSmoothingMerger, String version)
+   {
       if (useSmoothingMerger)
       {
          this.merger = MergingMode.SMOOTHING;
@@ -74,7 +80,7 @@ public class PlanarRegionMap
          this.merger = MergingMode.FILTERING;
       }
 
-      parameters = new PlanarRegionMappingParameters();
+      parameters = new PlanarRegionMappingParameters(version);
       finalMap = new PlanarRegionsList();
    }
 
@@ -116,19 +122,15 @@ public class PlanarRegionMap
       {
          LogTools.info("Before Cross: {}", finalMap.getNumberOfPlanarRegions());
 
-         PlanarRegionSLAMTools.printRegionIDs("Map", finalMap);
-         PlanarRegionSLAMTools.printRegionIDs("Incoming", regions);
+         PerceptionPrintTools.printRegionIDs("Map", finalMap);
+         PerceptionPrintTools.printRegionIDs("Incoming", regions);
 
          // merge all the new regions in
          finalMap = crossReduceRegionsIteratively(finalMap,
-                                                  regions,
-                                                  (float) parameters.getUpdateAlphaTowardsMatch(),
-                                                  (float) Math.cos(parameters.getAngleThresholdBetweenNormals()),
-                                                  (float) parameters.getOrthogonalDistanceThreshold(),
-                                                  (float) parameters.getMaxInterRegionDistance());
+                                                  regions);
 
          processUniqueRegions(finalMap);
-         PlanarRegionSLAMTools.printMatches("Cross", finalMap, regions, planarRegionMatches);
+         PerceptionPrintTools.printMatches("Cross", finalMap, regions, planarRegionMatches);
 
          if (merger == MergingMode.SMOOTHING)
          {
@@ -240,8 +242,6 @@ public class PlanarRegionMap
 
                double normalDistance = Math.abs(originVec.dot(mapRegion.getNormal()));
                double normalSimilarity = newRegion.getNormal().dot(mapRegion.getNormal());
-
-               double originDistance = originVec.norm();
 
                // check to make sure the angles are similar enough
                boolean wasMatched = normalSimilarity > normalThreshold;
@@ -358,6 +358,7 @@ public class PlanarRegionMap
                      }
                      else
                      {
+                        LogTools.info("++++ Failed to Merge ****" + String.format("(Parent: %d, ChildIndex: %d)", parentIndex, childIndex));
                         childIndex++;
                      }
                   }
@@ -381,11 +382,7 @@ public class PlanarRegionMap
    }
 
    public PlanarRegionsList crossReduceRegionsIteratively(PlanarRegionsList map,
-                                                          PlanarRegionsList regions,
-                                                          float updateTowardsChildAlpha,
-                                                          float normalThreshold,
-                                                          float normalDistanceThreshold,
-                                                          float distanceThreshold)
+                                                          PlanarRegionsList regions)
    {
       map.addPlanarRegionsList(regions);
       map = selfReduceRegionsIteratively(map,
