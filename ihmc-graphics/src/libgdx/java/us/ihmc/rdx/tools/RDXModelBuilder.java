@@ -65,18 +65,9 @@ public class RDXModelBuilder
    public static Model buildModelFromMesh(RDXMultiColorMeshBuilder meshBuilder, String nodeName)
    {
       ModelBuilder modelBuilder = new ModelBuilder();
-      modelBuilder.begin();
       modelBuilder.node().id = nodeName;
-      Mesh mesh = meshBuilder.generateMesh();
 
-      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
-      Material material = new Material();
-      Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-      material.set(TextureAttribute.createDiffuse(paletteTexture));
-      material.set(ColorAttribute.createDiffuse(Color.WHITE));
-      modelBuilder.part(meshPart, material);
-
-      return modelBuilder.end();
+      return buildModelFromMesh(modelBuilder, meshBuilder);
    }
 
    public static Model buildModelFromMesh(ModelBuilder modelBuilder, RDXMultiColorMeshBuilder meshBuilder)
