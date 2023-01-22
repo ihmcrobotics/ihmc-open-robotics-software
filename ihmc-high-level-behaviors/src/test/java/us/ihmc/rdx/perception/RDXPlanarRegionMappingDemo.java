@@ -50,7 +50,7 @@ public class RDXPlanarRegionMappingDemo
 
 
             // To Run With Perception Logs (HDF5)
-            mappingManager = new PlanarRegionMappingManager(perceptionLogDirectory + logFileName, true);
+            mappingManager = new PlanarRegionMappingManager(perceptionLogDirectory + logFileName, false);
 
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mappingManager::selectRegionToPick);
 

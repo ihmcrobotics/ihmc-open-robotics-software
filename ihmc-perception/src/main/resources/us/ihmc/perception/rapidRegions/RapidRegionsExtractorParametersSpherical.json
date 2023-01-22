@@ -16,17 +16,17 @@
     "upperBound" : 10
   },
   "Merge orthogonal threshold" : {
-    "value" : 0.573387,
+    "value" : 0.061856,
     "lowerBound" : 0.0,
     "upperBound" : 1.5
   },
   "Merge distance threshold" : {
-    "value" : 2.245902,
+    "value" : 1.163934,
     "lowerBound" : 0.0,
     "upperBound" : 5.0
   },
   "Merge angular threshold" : {
-    "value" : 0.87055,
+    "value" : 0.828479,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -65,12 +65,12 @@
     "upperBound" : 100
   },
   "Internal search depth limit" : {
-    "value" : 3834,
+    "value" : 6834,
     "lowerBound" : 1,
     "upperBound" : 50000
   },
   "Boundary search depth limit" : {
-    "value" : 1043,
+    "value" : 1303,
     "lowerBound" : 1,
     "upperBound" : 15000
   },
@@ -80,7 +80,7 @@
     "upperBound" : 3000
   },
   "Boundary min patches" : {
-    "value" : 10,
+    "value" : 13,
     "lowerBound" : 1,
     "upperBound" : 1000
   },
