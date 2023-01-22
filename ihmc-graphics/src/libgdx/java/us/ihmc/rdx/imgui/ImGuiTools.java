@@ -48,6 +48,7 @@ public class ImGuiTools
    private static int spaceKey;
    private static int deleteKey;
    private static int escapeKey;
+   private static int enterKey;
    private static int upArrowKey;
    private static int downArrowKey;
    private static int leftArrowKey;
@@ -172,11 +173,17 @@ public class ImGuiTools
       return ImGui.inputDouble(label, imDouble, step, stepFast, format, inputTextFlags);
    }
 
+   /**
+    * Returns true if the user presses Enter, but unlike the EnterReturnsTrue flag,
+    * using this method, the currently input text can be retrieved without the
+    * user hitting the Enter key.
+    *
+    * @return if the user presses Enter
+    */
    public static boolean inputText(String label, ImString text)
    {
-      int flags = ImGuiInputTextFlags.None;
-      flags += ImGuiInputTextFlags.CallbackResize;
-      return ImGui.inputText(label, text, flags);
+      ImGui.inputText(label, text);
+      return ImGui.isItemFocused() && ImGui.isKeyReleased(ImGuiTools.getEnterKey());
    }
 
    public static void textColored(Color color, String text)
@@ -405,6 +412,7 @@ public class ImGuiTools
       spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
       deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
       escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
+      enterKey = ImGui.getKeyIndex(ImGuiKey.Enter);
       upArrowKey = ImGui.getKeyIndex(ImGuiKey.UpArrow);
       downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
       leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
@@ -430,6 +438,13 @@ public class ImGuiTools
       if (!userKeysHaveBeenMapped)
          initializeUserMappedKeys();
       return escapeKey;
+   }
+
+   public static int getEnterKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return enterKey;
    }
 
    public static int getUpArrowKey()

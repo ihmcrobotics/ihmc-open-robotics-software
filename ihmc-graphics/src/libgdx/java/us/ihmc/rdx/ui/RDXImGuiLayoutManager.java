@@ -1,10 +1,10 @@
 package us.ihmc.rdx.ui;
 
-import imgui.flag.ImGuiInputTextFlags;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
@@ -37,8 +37,8 @@ public class RDXImGuiLayoutManager
    private boolean firstIndex = true;
    private boolean firstLoad = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString userHomeLayoutNameToSave = new ImString("", 100);
-   private final ImString versionControlLayoutNameToSave = new ImString("", 100);
+   private final ImString userHomeLayoutNameToSave = new ImString(256);
+   private final ImString versionControlLayoutNameToSave = new ImString(256);
    private final TreeSet<String> userHomeLayouts = new TreeSet<>(Comparator.comparing(String::toString));
    private final TreeSet<String> versionControlLayouts = new TreeSet<>(Comparator.comparing(String::toString));
    private String currentLayoutName = "Main";
@@ -186,10 +186,7 @@ public class RDXImGuiLayoutManager
       {
          ImGui.text("Save as:");
          ImGui.sameLine();
-         boolean saveRequested = ImGui.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()),
-                                                 layoutNameToSave,
-                                                 ImGuiInputTextFlags.CallbackResize | ImGuiInputTextFlags.EnterReturnsTrue);
-
+         boolean saveRequested = ImGuiTools.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), layoutNameToSave);
          String layoutNameToCreateString = layoutNameToSave.get();
          if (!layoutNameToCreateString.isEmpty())
          {
