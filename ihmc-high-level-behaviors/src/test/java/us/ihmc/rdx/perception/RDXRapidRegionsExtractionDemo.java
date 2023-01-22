@@ -41,8 +41,13 @@ import java.util.ArrayList;
 
 public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 {
+   //20230117_161540_PerceptionLog.hdf5 (311 MB)
+   //20230117_162417_PerceptionLog.hdf5 (231 MB)
+   //20230117_162825_PerceptionLog.hdf5 (328 MB)
+
+   String PERCEPTION_LOG_FILE = "20230117_162825_PerceptionLog.hdf5";
    String PERCEPTION_LOG_DIRECTORY = System.getProperty("user.home") + "/.ihmc/logs/perception/";
-   String PERCEPTION_LOG_FILE = "20230117_161540_PerceptionLog.hdf5";
+
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
