@@ -32,13 +32,11 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -152,23 +150,11 @@ public class RDXBaseUI
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         LogTools.info("Loading libGDX settings from {}", libGDXSettingsFile.getLocationOfResourceForReading());
-         InputStream inputStream = libGDXSettingsFile.getInputStream();
-         if (inputStream != null)
-         {
-            JSONFileTools.load(inputStream, jsonNode ->
-            {
-               int width = jsonNode.get("windowWidth").asInt();
-               int height = jsonNode.get("windowHeight").asInt();
-               Gdx.graphics.setWindowedMode(width, height);
-            });
-         }
-         else
-         {
-            LogTools.error("Input stream is null");
-         }
-         return inputStream != null;
+         Gdx.graphics.setWindowedMode(imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth(),
+                                      imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight());
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX(),
+                                                                 imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY());
+         return true;
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
       layoutManager.applyLayoutDirectory();
@@ -188,16 +174,13 @@ public class RDXBaseUI
 
    public void launchRDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
    {
-      AtomicReference<Integer> windowWidth = new AtomicReference<>(800);
-      AtomicReference<Integer> windowHeight = new AtomicReference<>(600);
-      JSONFileTools.loadUserWithClasspathDefaultFallback(libGDXSettingsFile, jsonNode ->
-      {
-         windowWidth.set(jsonNode.get("windowWidth").asInt());
-         windowHeight.set(jsonNode.get("windowHeight").asInt());
-      });
-
       LogTools.info("Launching RDX application");
-      LibGDXApplicationCreator.launchGDXApplication(applicationAdapter, windowTitle, windowWidth.get(), windowHeight.get());
+      // TODO: We could show a splash screen here until the app shows up, since we don't know enough about
+      // the window decorations to make a decision here yet
+      LibGDXApplicationCreator.launchGDXApplication(applicationAdapter,
+                                                    windowTitle,
+                                                    LibGDXApplicationCreator.DEFAULT_WINDOW_WIDTH,
+                                                    LibGDXApplicationCreator.DEFAULT_WINDOW_HEIGHT);
    }
 
    public void create()

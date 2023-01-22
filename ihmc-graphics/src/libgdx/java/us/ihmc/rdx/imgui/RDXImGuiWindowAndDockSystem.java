@@ -7,10 +7,14 @@ import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImString;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.opengl.KHRDebug;
 import org.lwjgl.system.Callback;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
@@ -21,15 +25,13 @@ import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.io.InputStream;
+import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.Consumer;
-
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SEVERITY_HIGH;
 
 public class RDXImGuiWindowAndDockSystem
 {
@@ -48,6 +50,13 @@ public class RDXImGuiWindowAndDockSystem
    private HybridFile imGuiSettingsFile;
    private HybridFile panelsFile;
    private Callback debugMessageCallback;
+   private final IntBuffer frameSizeLeft = BufferUtils.createIntBuffer(1);
+   private final IntBuffer frameSizeTop = BufferUtils.createIntBuffer(1);
+   private final IntBuffer frameSizeRight = BufferUtils.createIntBuffer(1);
+   private final IntBuffer frameSizeBottom = BufferUtils.createIntBuffer(1);
+   private final ImGuiSize calculatedPrimaryWindowSize = new ImGuiSize(LibGDXApplicationCreator.DEFAULT_WINDOW_WIDTH,
+                                                                       LibGDXApplicationCreator.DEFAULT_WINDOW_HEIGHT);
+   private final ImGuiPosition primaryWindowPosition = new ImGuiPosition(0, 0);
 
    public RDXImGuiWindowAndDockSystem()
    {
@@ -66,13 +75,13 @@ public class RDXImGuiWindowAndDockSystem
 
       GLFWErrorCallback.createPrint(System.err).set();
 
-      if (!glfwInit())
+      if (!GLFW.glfwInit())
       {
          throw new IllegalStateException("Unable to initialize GLFW");
       }
 
       if (LibGDXTools.ENABLE_OPENGL_DEBUGGER)
-         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GLFW.GLFW_TRUE);
 
       // TODO: Something needed here for Mac support?
       // glfwDefaultWindowHints();
@@ -93,7 +102,7 @@ public class RDXImGuiWindowAndDockSystem
       ImGuiTools.setCurrentContext(context);
 
       if (LibGDXTools.ENABLE_OPENGL_DEBUGGER)
-         debugMessageCallback = LibGDXTools.setupDebugMessageCallback(GL_DEBUG_SEVERITY_HIGH);
+         debugMessageCallback = LibGDXTools.setupDebugMessageCallback(KHRDebug.GL_DEBUG_SEVERITY_HIGH);
 
       final ImGuiIO io = ImGui.getIO();
       io.setIniFilename(null); // We don't want to save .ini file
@@ -118,6 +127,13 @@ public class RDXImGuiWindowAndDockSystem
 
       imGuiGlfw.init(windowHandle, true);
       imGuiGl3.init(glslVersion);
+
+      GLFW.glfwGetWindowFrameSize(windowHandle, frameSizeLeft, frameSizeTop, frameSizeRight, frameSizeBottom);
+      LogTools.debug(String.format("Window frame sizes left: %d, top: %d, right: %d, bottom: %d",
+                                   frameSizeLeft.get(0),
+                                   frameSizeTop.get(0),
+                                   frameSizeRight.get(0),
+                                   frameSizeBottom.get(0)));
 
       layoutManager.reloadLayout();
    }
@@ -202,8 +218,20 @@ public class RDXImGuiWindowAndDockSystem
       InputStream settingsInputStream = imGuiSettingsFile.getInputStream();
       if (settingsInputStream != null)
       {
-         String iniContentsAsString = ResourceTools.readResourceToString(settingsInputStream);
-         ImGui.loadIniSettingsFromMemory(iniContentsAsString);
+         String settingsINIAsString = ResourceTools.readResourceToString(settingsInputStream);
+         ImGuiTools.parsePrimaryWindowSizeFromSettingsINI(settingsINIAsString, calculatedPrimaryWindowSize);
+         calculatedPrimaryWindowSize.setWidth(calculatedPrimaryWindowSize.getWidth() + getFrameSizeLeft() + getFrameSizeRight());
+         calculatedPrimaryWindowSize.setHeight(calculatedPrimaryWindowSize.getHeight() + getFrameSizeTop() + getFrameSizeBottom()
+                                               + 22); // Menu bar height
+         ImGuiTools.parsePrimaryWindowPositionFromSettingsINI(settingsINIAsString, primaryWindowPosition);
+         primaryWindowPosition.setX(primaryWindowPosition.getX() - getFrameSizeLeft());
+         primaryWindowPosition.setY(primaryWindowPosition.getY() - getFrameSizeTop() - 22);
+         LogTools.debug(String.format("Calculated x: %d y: %d, width: %d, height: %d",
+                                      primaryWindowPosition.getX(),
+                                      primaryWindowPosition.getY(),
+                                      calculatedPrimaryWindowSize.getWidth(),
+                                      calculatedPrimaryWindowSize.getHeight()));
+         ImGui.loadIniSettingsFromMemory(settingsINIAsString);
       }
       else
       {
@@ -287,10 +315,10 @@ public class RDXImGuiWindowAndDockSystem
 
       if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
       {
-         final long backupWindowPtr = glfwGetCurrentContext();
+         final long backupWindowPtr = GLFW.glfwGetCurrentContext();
          ImGui.updatePlatformWindows();
          ImGui.renderPlatformWindowsDefault();
-         glfwMakeContextCurrent(backupWindowPtr);
+         GLFW.glfwMakeContextCurrent(backupWindowPtr);
       }
    }
 
@@ -322,5 +350,35 @@ public class RDXImGuiWindowAndDockSystem
    public ImFont getImFont()
    {
       return imFont;
+   }
+
+   public ImGuiSize getCalculatedPrimaryWindowSize()
+   {
+      return calculatedPrimaryWindowSize;
+   }
+
+   public ImGuiPosition getPrimaryWindowPosition()
+   {
+      return primaryWindowPosition;
+   }
+
+   public int getFrameSizeLeft()
+   {
+      return frameSizeLeft.get(0);
+   }
+
+   public int getFrameSizeRight()
+   {
+      return frameSizeRight.get(0);
+   }
+
+   public int getFrameSizeTop()
+   {
+      return frameSizeTop.get(0);
+   }
+
+   public int getFrameSizeBottom()
+   {
+      return frameSizeBottom.get(0);
    }
 }

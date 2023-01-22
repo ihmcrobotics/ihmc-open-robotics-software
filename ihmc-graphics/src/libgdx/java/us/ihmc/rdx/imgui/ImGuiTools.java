@@ -15,6 +15,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.tools.string.StringTools;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -73,6 +74,42 @@ public class ImGuiTools
       ImGuiContext contextHolder = ImGui.getCurrentContext();
       contextHolder.ptr = context;
       ImGui.setCurrentContext(contextHolder);
+   }
+
+   public static void parsePrimaryWindowSizeFromSettingsINI(String settingsINIAsString, ImGuiSize sizeToPack)
+   {
+      settingsINIAsString = StringTools.filterOutCRLFLineEndings(settingsINIAsString);
+      int indexOfDockingSection = settingsINIAsString.indexOf("[Docking]");
+      int indexOfDockspace = settingsINIAsString.indexOf("DockSpace", indexOfDockingSection); // The first DockSpace entry is the primary one
+      int indexOfSize = settingsINIAsString.indexOf("Size", indexOfDockspace);
+      int indexOfWidth = indexOfSize + 5; // Account for '='
+      int indexOfComma = settingsINIAsString.indexOf(",", indexOfWidth);
+      int width = Integer.parseInt(settingsINIAsString.substring(indexOfWidth, indexOfComma));
+
+      int indexOfHeight = indexOfComma + 1; // Account for ','
+      int indexOfSpace = settingsINIAsString.indexOf(" ", indexOfComma);
+      int height = Integer.parseInt(settingsINIAsString.substring(indexOfHeight, indexOfSpace));
+
+      sizeToPack.setWidth(width);
+      sizeToPack.setHeight(height);
+   }
+
+   public static void parsePrimaryWindowPositionFromSettingsINI(String settingsINIAsString, ImGuiPosition positionToPack)
+   {
+      settingsINIAsString = StringTools.filterOutCRLFLineEndings(settingsINIAsString);
+      int indexOfDockingSection = settingsINIAsString.indexOf("[Docking]");
+      int indexOfDockspace = settingsINIAsString.indexOf("DockSpace", indexOfDockingSection); // The first DockSpace entry is the primary one
+      int indexOfPosition = settingsINIAsString.indexOf("Pos", indexOfDockspace);
+      int indexOfX = indexOfPosition + 4; // Account for '='
+      int indexOfComma = settingsINIAsString.indexOf(",", indexOfX);
+      int x = Integer.parseInt(settingsINIAsString.substring(indexOfX, indexOfComma));
+
+      int indexOfY = indexOfComma + 1; // Account for ','
+      int indexOfSpace = settingsINIAsString.indexOf(" ", indexOfComma);
+      int y = Integer.parseInt(settingsINIAsString.substring(indexOfY, indexOfSpace));
+
+      positionToPack.setX(x);
+      positionToPack.setY(y);
    }
 
    public static void initializeColorStyle()
