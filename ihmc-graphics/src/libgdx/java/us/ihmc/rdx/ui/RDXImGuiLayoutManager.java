@@ -190,7 +190,7 @@ public class RDXImGuiLayoutManager
          // rendering the save button
          String layoutNameToCreateString = layoutNameToSave.get();
          boolean renderSaveButton = layoutNameToCreateString.isEmpty();
-         ImGui.setNextItemWidth(renderSaveButton ? 190.0f :150.0f); // Width of Save button is 30
+         ImGui.setNextItemWidth(renderSaveButton ? 190.0f :150.0f); // Width of Save button is 40
          boolean saveRequested = ImGuiTools.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), layoutNameToSave);
          ImGuiTools.previousWidgetTooltip("A PascalCased name is recommended.\nPress Enter to save.");
          layoutNameToCreateString = layoutNameToSave.get();
