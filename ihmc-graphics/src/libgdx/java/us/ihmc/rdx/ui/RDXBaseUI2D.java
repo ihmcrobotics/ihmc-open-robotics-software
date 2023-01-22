@@ -27,6 +27,7 @@ import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -90,12 +91,17 @@ public class RDXBaseUI2D
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         JSONFileTools.load(libGDXSettingsFile.getInputStream(), jsonNode ->
+         InputStream inputStream = libGDXSettingsFile.getInputStream();
+         if (inputStream != null)
          {
-            int width = jsonNode.get("windowWidth").asInt();
-            int height = jsonNode.get("windowHeight").asInt();
-            Gdx.graphics.setWindowedMode(width, height);
-         });
+            JSONFileTools.load(inputStream, jsonNode ->
+            {
+               int width = jsonNode.get("windowWidth").asInt();
+               int height = jsonNode.get("windowHeight").asInt();
+               Gdx.graphics.setWindowedMode(width, height);
+            });
+         }
+         return inputStream != null;
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
       layoutManager.applyLayoutDirectory();
@@ -130,7 +136,7 @@ public class RDXBaseUI2D
 
 
 
-      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), layoutManager);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
    }

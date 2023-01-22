@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class RDXImGuiLayoutManager
 {
@@ -29,11 +30,12 @@ public class RDXImGuiLayoutManager
    private final String configurationExtraPath;
    private final HybridDirectory configurationBaseDirectory;
    private final ArrayList<Consumer<HybridDirectory>> layoutDirectoryUpdatedListeners = new ArrayList<>();
-   private final ArrayList<Consumer<ImGuiConfigurationLocation>> loadListeners = new ArrayList<>();
+   private final ArrayList<Function<ImGuiConfigurationLocation, Boolean>> loadListeners = new ArrayList<>();
    private final ArrayList<Consumer<ImGuiConfigurationLocation>> saveListeners = new ArrayList<>();
    private HybridDirectory layoutDirectory;
    private boolean needToReindexLayouts = false;
    private boolean firstIndex = true;
+   private boolean firstLoad = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString userHomeLayoutNameToSave = new ImString("", 100);
    private final ImString versionControlLayoutNameToSave = new ImString("", 100);
@@ -91,7 +93,7 @@ public class RDXImGuiLayoutManager
          firstIndex = false;
          if (versionControlLayouts.contains("Main"))
             currentConfigurationLocation = ImGuiConfigurationLocation.VERSION_CONTROL;
-         if (userHomeLayouts.contains("Main"))
+         if (userHomeLayouts.contains("Main")) // This being second makes user home the default if it exists
             currentConfigurationLocation = ImGuiConfigurationLocation.USER_HOME;
       }
    }
@@ -165,10 +167,7 @@ public class RDXImGuiLayoutManager
             currentLayoutName = layout;
             currentConfigurationLocation = configurationLocation;
             applyLayoutDirectory();
-            for (Consumer<ImGuiConfigurationLocation> loadListener : loadListeners)
-            {
-               loadListener.accept(configurationLocation);
-            }
+            loadConfiguration(configurationLocation);
          }
          if (enableSaving && currentLayoutName.equals(layout))
          {
@@ -208,6 +207,20 @@ public class RDXImGuiLayoutManager
       }
    }
 
+   private void loadConfiguration(ImGuiConfigurationLocation configurationLocation)
+   {
+      boolean success = true;
+      for (Function<ImGuiConfigurationLocation, Boolean> loadListener : loadListeners)
+      {
+         success &= loadListener.apply(configurationLocation);
+      }
+      if (!success && configurationLocation.isVersionControl())
+      {
+         LogTools.error("Layout configuration file(s) not found. If you just created this layout, "
+                         + "try building in the IDE to copy the resources to a classpath directory.");
+      }
+   }
+
    public void applyLayoutDirectory()
    {
       layoutDirectory = new HybridDirectory(dotIHMCDirectory,
@@ -228,15 +241,21 @@ public class RDXImGuiLayoutManager
     */
    public void reloadLayout()
    {
+      if (firstLoad)
+      {
+         firstLoad = false;
+         LogTools.info(1, "Loading layout.");
+      }
+      else
+      {
+         LogTools.info(1, "Reloading layout.");
+      }
       applyLayoutDirectory();
-      Path directory = currentConfigurationLocation.isVersionControl()
-            ? layoutDirectory.getWorkspaceDirectory() : layoutDirectory.getExternalDirectory();
+      Path directory = currentConfigurationLocation.isVersionControl() ?
+            layoutDirectory.getWorkspaceDirectory() : layoutDirectory.getExternalDirectory();
       if (Files.exists(directory))
       {
-         for (Consumer<ImGuiConfigurationLocation> loadListener : loadListeners)
-         {
-            loadListener.accept(currentConfigurationLocation);
-         }
+         loadConfiguration(currentConfigurationLocation);
       }
    }
 
@@ -260,7 +279,7 @@ public class RDXImGuiLayoutManager
       return saveListeners;
    }
 
-   public ArrayList<Consumer<ImGuiConfigurationLocation>> getLoadListeners()
+   public ArrayList<Function<ImGuiConfigurationLocation, Boolean>> getLoadListeners()
    {
       return loadListeners;
    }

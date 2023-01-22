@@ -14,6 +14,7 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
@@ -46,7 +47,6 @@ public class RDXImGuiWindowAndDockSystem
    private final ImGuiPanelManager panelManager;
    private HybridFile imGuiSettingsFile;
    private HybridFile panelsFile;
-   private boolean isFirstRenderCall = true;
    private Callback debugMessageCallback;
 
    public RDXImGuiWindowAndDockSystem()
@@ -60,7 +60,7 @@ public class RDXImGuiWindowAndDockSystem
       panelsFile = new HybridFile(configurationDirectory, "ImGuiPanels.json");
    }
 
-   public void create(long windowHandle)
+   public void create(long windowHandle, RDXImGuiLayoutManager layoutManager)
    {
       this.windowHandle = windowHandle;
 
@@ -118,16 +118,13 @@ public class RDXImGuiWindowAndDockSystem
 
       imGuiGlfw.init(windowHandle, true);
       imGuiGl3.init(glslVersion);
+
+      layoutManager.reloadLayout();
    }
 
    public void beforeWindowManagement()
    {
       ImGuiTools.setCurrentContext(context);
-
-      if (isFirstRenderCall)
-      {
-         loadUserConfigurationWithDefaultFallback();
-      }
 
       ImGuiTools.glClearDarkGray();
       imGuiGlfw.newFrame();
@@ -200,20 +197,31 @@ public class RDXImGuiWindowAndDockSystem
 
    public boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
-      boolean success = false;
       imGuiSettingsFile.setMode(configurationLocation.toHybridResourceMode());
-      panelsFile.setMode(configurationLocation.toHybridResourceMode());
-      if (imGuiSettingsFile.isInputStreamAvailable() && panelsFile.isInputStreamAvailable())
+      LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getLocationOfResourceForReading());
+      InputStream settingsInputStream = imGuiSettingsFile.getInputStream();
+      if (settingsInputStream != null)
       {
-         LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getLocationOfResourceForReading());
-         String iniContentsAsString = ResourceTools.readResourceToString(imGuiSettingsFile.getInputStream());
+         String iniContentsAsString = ResourceTools.readResourceToString(settingsInputStream);
          ImGui.loadIniSettingsFromMemory(iniContentsAsString);
-
-         LogTools.info("Loading ImGui panels settings from {}", panelsFile.getLocationOfResourceForReading());
-         JSONFileTools.load(panelsFile.getInputStream(), this::loadPanelsJSON);
-         success = true;
       }
-      return success;
+      else
+      {
+         LogTools.error("Input stream is null");
+      }
+
+      panelsFile.setMode(configurationLocation.toHybridResourceMode());
+      LogTools.info("Loading ImGui panels settings from {}", panelsFile.getLocationOfResourceForReading());
+      InputStream panelSettingsInputStream = panelsFile.getInputStream();
+      if (panelSettingsInputStream != null)
+      {
+         JSONFileTools.load(panelSettingsInputStream, this::loadPanelsJSON);
+      }
+      else
+      {
+         LogTools.error("Input stream is null");
+      }
+      return settingsInputStream != null && panelSettingsInputStream != null;
    }
 
    private void loadPanelsJSON(JsonNode jsonNode)
@@ -272,25 +280,6 @@ public class RDXImGuiWindowAndDockSystem
 
    public void afterWindowManagement()
    {
-      if (isFirstRenderCall)
-      {
-         JSONFileTools.loadUserWithClasspathDefaultFallback(panelsFile, jsonNode ->
-         {
-            JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
-            if (dockspacePanelsNode != null)
-            {
-               for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
-               {
-                  Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
-                  ImGuiDockspacePanel dockspacePanel = new ImGuiDockspacePanel(dockspacePanelEntry.getKey());
-                  dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
-                  dockPanelSet.add(dockspacePanel);
-               }
-            }
-            panelManager.loadConfiguration(jsonNode);
-         });
-      }
-
       ImGui.popFont();
 
       ImGui.render();
@@ -303,8 +292,6 @@ public class RDXImGuiWindowAndDockSystem
          ImGui.renderPlatformWindowsDefault();
          glfwMakeContextCurrent(backupWindowPtr);
       }
-
-      isFirstRenderCall = false;
    }
 
    public void dispose()
