@@ -1,78 +1,128 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCollection;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullPruningFilteringTools;
+import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SteppableRegionsCalculator
 {
-   private final List<SteppableCell> unassignedCells = new ArrayList<>();
-   private SteppableCell[][] steppableCellGrid;
-   private final List<SteppableRegionData> steppableRegions = new ArrayList<>();
-
-   public List<ConvexPolygon2D> calculate(HeightMapData heightMapData, BytedecoImage steppability, BytedecoImage connections)
+   public static SteppableRegionsEnvironmentModel mergeCellsIntoSteppableRegionEnvironment(BytedecoImage steppability, BytedecoImage connections)
    {
-      unassignedCells.clear();
-      steppableRegions.clear();
+      SteppableRegionsEnvironmentModel environmentModel = createUnsortedSteppableRegionEnvironment(steppability);
 
       if (steppability.getImageHeight() != steppability.getImageWidth())
          throw new RuntimeException("Should be square");
 
-      createAllTheCells(steppability);
+      while (environmentModel.hasUnassignedCells())
+         recursivelyAddNeighbors(environmentModel.getNextUnassignedCell(), steppability, connections, environmentModel);
 
-      while (!unassignedCells.isEmpty())
-         recursivelyAddNeighbors(unassignedCells.get(0), steppability, connections);
-
-      return steppableRegions.parallelStream()
-                             .map(region -> SteppableRegionsCalculator.convertToConvexRegion(heightMapData, region))
-                             .collect(Collectors.toList());
+      return environmentModel;
    }
 
-   private void createAllTheCells(BytedecoImage steppability)
+   public static List<SteppableRegion> createSteppableRegions(SteppableRegionsEnvironmentModel environmentModel, HeightMapData heightMapData)
+   {
+      List<SteppableRegion> listToReturn = new ArrayList<>();
+      environmentModel.steppableRegions.parallelStream().map(region -> createSteppableRegions(region, heightMapData)).forEach(listToReturn::addAll);
+
+      return listToReturn;
+   }
+
+   public static List<SteppableRegion> createSteppableRegions(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData)
+   {
+      Collection<Point3D> pointCloudInWorld = regionDataHolder.getCellPointCloud(heightMapData);
+      Point3DReadOnly centroid = regionDataHolder.getCentroidInWorld();
+      Vector3DReadOnly normal = regionDataHolder.getNormalInWorld();
+      AxisAngle orientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normal);
+
+      ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
+      PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+      List<Point2D> pointCloudInRegion = pointCloudInWorld.parallelStream().map(pointInWorld ->
+                                                                                {
+                                                                                   return PolygonizerTools.toPointInPlane(pointInWorld, centroid, orientation);
+                                                                                }).toList();
+
+      ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInRegion, parameters);
+
+      // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
+      double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
+      double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
+      double lengthThreshold = polygonizerParameters.getLengthThreshold();
+
+      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
+      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
+      if (polygonizerParameters.getCutNarrowPassage())
+         concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
+
+      return createSteppableRegions(centroid, orientation, concaveHullCollection);
+   }
+
+   public static List<SteppableRegion> createSteppableRegions(Point3DReadOnly origin,
+                                                              Orientation3DReadOnly orientation,
+                                                              ConcaveHullCollection concaveHullCollection)
+   {
+      
+   }
+
+   private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(BytedecoImage steppability)
    {
       int cellsPerSide = steppability.getImageHeight();
-      steppableCellGrid = new SteppableCell[cellsPerSide][];
+      SteppableRegionsEnvironmentModel steppableRegionsToConvert = new SteppableRegionsEnvironmentModel(cellsPerSide);
+
       for (int x = 0; x < cellsPerSide; x++)
       {
-         steppableCellGrid[x] = new SteppableCell[cellsPerSide];
          for (int y = 0; y < cellsPerSide; y++)
          {
-            // this cell is steppable
+            // this cell is steppable. Also remember the image x-y is switched
             if (steppability.getInt(y, x) == 1)
             {
                SteppableCell cell = new SteppableCell(x, y, cellsPerSide);
-               unassignedCells.add(cell);
-               steppableCellGrid[x][y] = cell;
+               steppableRegionsToConvert.addUnassignedSteppableCell(cell);
             }
          }
       }
+
+      return steppableRegionsToConvert;
    }
 
-   private void recursivelyAddNeighbors(SteppableCell cell, BytedecoImage steppability, BytedecoImage connections)
+   private static void recursivelyAddNeighbors(SteppableCell cellToExpand,
+                                               BytedecoImage steppability,
+                                               BytedecoImage connections,
+                                               SteppableRegionsEnvironmentModel environmentModel)
    {
-      if (!cell.hasRegion())
+      // If we don't already have a region, create a region and add this cell to it
+      if (!cellToExpand.hasRegion())
       {
-         SteppableRegionData region = new SteppableRegionData();
-         region.addCell(cell);
-
-         steppableRegions.add(region);
+         SteppableRegionDataHolder region = environmentModel.createNewSteppableRegion();
+         region.addCell(cellToExpand);
       }
-      unassignedCells.remove(cell);
+      environmentModel.markCellAsAssigned(cellToExpand);
 
-      int boundaryConnectionsEncodedAsOnes = connections.getInt(cell.x, cell.y);
+      int boundaryConnectionsEncodedAsOnes = connections.getInt(cellToExpand.x, cellToExpand.y);
 
       int cellsPerSide = steppability.getImageHeight();
       for (int i = 0; i < 4; i++)
       {
-         int neighborX = cell.x;
-         int neighborY = cell.y;
+         int neighborX = cellToExpand.x;
+         int neighborY = cellToExpand.y;
 
          // These are switched from the open cl code, since the coordinates are different
          if (i == 0)
@@ -89,37 +139,29 @@ public class SteppableRegionsCalculator
 
          if (isConnected(i, boundaryConnectionsEncodedAsOnes))
          {
-            SteppableCell neighbor = steppableCellGrid[neighborX][neighborY];
-            if (unassignedCells.contains(neighbor))
+            SteppableCell neighbor = environmentModel.getCellAt(neighborX, neighborY);
+            if (neighbor.cellHasBeenExpand())
             {
-               cell.getRegion().addCell(neighbor);
-               recursivelyAddNeighbors(neighbor, steppability, connections);
+               cellToExpand.getRegion().mergeRegion(neighbor.getRegion());
             }
             else
             {
-               cell.getRegion().mergeRegion(neighbor.getRegion());
+               // the cell has not been expanded
+               cellToExpand.getRegion().addCell(neighbor);
+               recursivelyAddNeighbors(neighbor, steppability, connections, environmentModel);
             }
          }
       }
    }
 
-   private boolean isConnected(int edgeNumber, int connectionValue)
+   private static boolean isConnected(int edgeNumber, int connectionValue)
    {
       int mask = (1 << edgeNumber);
       int maskedValue = mask & connectionValue;
       return maskedValue > 0;
    }
 
-   private static ConvexPolygon2D convertToConvexRegion(HeightMapData heightMapData, SteppableRegionData steppableRegionData)
-   {
-      ConvexPolygon2D polygon = new ConvexPolygon2D();
-      steppableRegionData.memberCells.forEach(cell -> polygon.addVertex(getAsPoint(heightMapData, cell)));
-      polygon.update();
-
-      return polygon;
-   }
-
-   private static Point2D getAsPoint(HeightMapData heightMapData, SteppableCell steppableCell)
+   private static Point3D getAsPoint(HeightMapData heightMapData, SteppableCell steppableCell)
    {
       double x = HeightMapTools.indexToCoordinate(steppableCell.x,
                                                   heightMapData.getGridCenter().getX(),
@@ -129,22 +171,138 @@ public class SteppableRegionsCalculator
                                                   heightMapData.getGridCenter().getY(),
                                                   heightMapData.getGridResolutionXY(),
                                                   heightMapData.getCenterIndex());
-      return new Point2D(x, y);
+      return new Point3D(x, y, heightMapData.getHeightAt(steppableCell.x, steppableCell.y));
    }
 
-   private static class SteppableRegionData
+   private static class SteppableRegionsEnvironmentModel
    {
+      private final Stack<SteppableCell> unassignedCellsInTheEnvironment = new Stack<>();
+      private final SteppableCell[][] steppableCellsGrid;
+
+      private final List<SteppableRegionDataHolder> steppableRegions = new ArrayList<>();
+
+      public SteppableRegionsEnvironmentModel(int cellsPerSide)
+      {
+         steppableCellsGrid = new SteppableCell[cellsPerSide][];
+         for (int i = 0; i < cellsPerSide; i++)
+            steppableCellsGrid[i] = new SteppableCell[cellsPerSide];
+      }
+
+      public SteppableCell[][] getSteppableCellsGrid()
+      {
+         return steppableCellsGrid;
+      }
+
+      public SteppableCell getCellAt(int x, int y)
+      {
+         return steppableCellsGrid[x][y];
+      }
+
+      public boolean hasUnassignedCells()
+      {
+         return !unassignedCellsInTheEnvironment.isEmpty();
+      }
+
+      public SteppableCell getNextUnassignedCell()
+      {
+         return unassignedCellsInTheEnvironment.remove(0);
+      }
+
+      public void markCellAsAssigned(SteppableCell cell)
+      {
+         unassignedCellsInTheEnvironment.remove(cell);
+      }
+
+      public void addUnassignedSteppableCell(SteppableCell cell)
+      {
+         unassignedCellsInTheEnvironment.add(cell);
+         steppableCellsGrid[cell.x][cell.y] = cell;
+      }
+
+      public SteppableRegionDataHolder createNewSteppableRegion()
+      {
+         SteppableRegionDataHolder steppableRegion = new SteppableRegionDataHolder();
+         steppableRegions.add(steppableRegion);
+
+         return steppableRegion;
+      }
+   }
+
+   private static class SteppableRegionDataHolder
+   {
+      private boolean isCellPointCloudUpToDate = false;
+      private boolean isCentroidUpToDate = false;
+      private boolean isNormalUpToDate = false;
+
       private final HashSet<SteppableCell> memberCells = new HashSet<>();
+
+      private List<Point3D> pointCloud ;
+      private final Point3D regionCentroidTotal = new Point3D();
+      private final Point3D regionCentroid = new Point3D();
+      private final Vector3D regionNormal = new Vector3D();
 
       public void addCell(SteppableCell cell)
       {
+         markChanged();
          memberCells.add(cell);
          cell.setRegion(this);
       }
 
-      public void mergeRegion(SteppableRegionData other)
+      public void mergeRegion(SteppableRegionDataHolder other)
       {
          other.memberCells.forEach(this::addCell);
+      }
+
+      public Collection<Point3D> getCellPointCloud(HeightMapData heightMapData)
+      {
+         if (!isCellPointCloudUpToDate)
+            updatePointCloud(heightMapData);
+         return pointCloud;
+      }
+
+      public Point3DReadOnly getCentroidInWorld()
+      {
+         if (!isCentroidUpToDate)
+            updateCentroid();
+         return regionCentroid;
+      }
+
+      public Vector3DReadOnly getNormalInWorld()
+      {
+         if (!isNormalUpToDate)
+            updateNormal();
+         return regionNormal;
+      }
+
+      public Collection<SteppableCell> getCells()
+      {
+         return memberCells;
+      }
+
+      private void markChanged()
+      {
+         isCellPointCloudUpToDate = false;
+         isCentroidUpToDate = false;
+         isNormalUpToDate = false;
+      }
+
+      private void updatePointCloud(HeightMapData heightMapData)
+      {
+         pointCloud = memberCells.parallelStream().map(cell -> getAsPoint(heightMapData, cell)).collect(Collectors.toList());
+         isCellPointCloudUpToDate = true;
+      }
+
+      private void updateCentroid()
+      {
+         regionCentroid.setAndScale(1.0 / memberCells.size(), regionCentroidTotal);
+         isCentroidUpToDate = true;
+      }
+
+      private void updateNormal()
+      {
+         // TODO run a least squares fit here
+         regionNormal.set(0.0, 0.0, 1.0);
+         isNormalUpToDate = false;
       }
    }
 
@@ -155,7 +313,7 @@ public class SteppableRegionsCalculator
 
       private final int hashCode;
 
-      private SteppableRegionData region;
+      private SteppableRegionDataHolder region;
 
       public SteppableCell(int x, int y, int cellsPerSide)
       {
@@ -170,14 +328,19 @@ public class SteppableRegionsCalculator
          return getRegion() == null;
       }
 
-      public SteppableRegionData getRegion()
+      public SteppableRegionDataHolder getRegion()
       {
          return region;
       }
 
-      public void setRegion(SteppableRegionData region)
+      public void setRegion(SteppableRegionDataHolder region)
       {
          this.region = region;
+      }
+
+      public boolean cellHasBeenExpand()
+      {
+         return region != null;
       }
 
       @Override
