@@ -117,13 +117,16 @@ public class RDXInteractableFootstep
             points.add(plannedFootstep.getFoothold().getVertex(i));
          footstepModelInstance = RDXModelBuilder.createLinedPolygon(plannedFootstep.getFootstepPose(), points, 0.02, regionColor, true);
       }
-      if (plannedFootstepInternal.getRobotSide().equals(RobotSide.LEFT))
+      else
       {
-         footstepModelInstance = new RDXModelInstance(RDXModelLoader.load("models/footsteps/footstep_left.g3dj"));
-      }
-      else if (plannedFootstepInternal.getRobotSide().equals(RobotSide.RIGHT))
-      {
-         footstepModelInstance = new RDXModelInstance(RDXModelLoader.load("models/footsteps/footstep_right.g3dj"));
+         if (plannedFootstepInternal.getRobotSide().equals(RobotSide.LEFT))
+         {
+            footstepModelInstance = new RDXModelInstance(RDXModelLoader.load("models/footsteps/footstep_left.g3dj"));
+         }
+         else if (plannedFootstepInternal.getRobotSide().equals(RobotSide.RIGHT))
+         {
+            footstepModelInstance = new RDXModelInstance(RDXModelLoader.load("models/footsteps/footstep_right.g3dj"));
+         }
       }
 
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo();
