@@ -186,12 +186,16 @@ public class RDXImGuiLayoutManager
       {
          ImGui.text("Save as:");
          ImGui.sameLine();
-         ImGui.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), layoutNameToSave, ImGuiInputTextFlags.CallbackResize);
+         boolean saveRequested = ImGui.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()),
+                                                 layoutNameToSave,
+                                                 ImGuiInputTextFlags.CallbackResize | ImGuiInputTextFlags.EnterReturnsTrue);
+
          String layoutNameToCreateString = layoutNameToSave.get();
          if (!layoutNameToCreateString.isEmpty())
          {
             ImGui.sameLine();
-            if (ImGui.button(labels.get("Save", configurationLocation.name(), 1)))
+            saveRequested |= ImGui.button(labels.get("Save", configurationLocation.name(), 1));
+            if (saveRequested)
             {
                String sanitizedName = layoutNameToCreateString.replaceAll(" ", "");
                layouts.add(sanitizedName);
