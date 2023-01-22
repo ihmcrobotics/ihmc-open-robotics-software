@@ -90,18 +90,11 @@ public class RDXBaseUI2D
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         InputStream inputStream = libGDXSettingsFile.getInputStream();
-         if (inputStream != null)
-         {
-            JSONFileTools.load(inputStream, jsonNode ->
-            {
-               int width = jsonNode.get("windowWidth").asInt();
-               int height = jsonNode.get("windowHeight").asInt();
-               Gdx.graphics.setWindowedMode(width, height);
-            });
-         }
-         return inputStream != null;
+         Gdx.graphics.setWindowedMode(imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth(),
+                                      imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight());
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX(),
+                                                                 imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY());
+         return true;
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
       layoutManager.applyLayoutDirectory();
