@@ -226,6 +226,11 @@ public class BytedecoImage
       return pointerForAccessSpeed.getFloat((getDataKey(column, row)) * Float.BYTES);
    }
 
+   public int getInt(int column, int row)
+   {
+      return pointerForAccessSpeed.getInt((getDataKey(column, row)) * Float.BYTES);
+   }
+
    public void setFloat(int column, int row, float value)
    {
       pointerForAccessSpeed.putFloat((getDataKey(column, row)) * Float.BYTES, value);
