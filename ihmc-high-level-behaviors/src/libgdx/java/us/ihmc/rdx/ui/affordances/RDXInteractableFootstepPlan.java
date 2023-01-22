@@ -227,9 +227,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       for (RDXInteractableFootstep step : footsteps)
       {
          messageList.getFootstepDataList().add().set(step.getPlannedFootstep().getAsMessage());
-         messageList.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-         messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       }
+      // TODO figure out some better logic here. For example, when footstep planning from the current pose, or using the control ring, this is probably pretty
+      // TODO dangerous. However when manually placing footsteps, this is great.
+      messageList.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       messageList.setOffsetFootstepsHeightWithExecutionError(true);
       messageList.setDefaultSwingDuration(teleoperationParameters.getSwingTime());
       messageList.setDefaultTransferDuration(teleoperationParameters.getTransferTime());
