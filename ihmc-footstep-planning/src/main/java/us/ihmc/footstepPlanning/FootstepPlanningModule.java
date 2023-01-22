@@ -179,7 +179,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearLoggedData();
       bodyPathPlanner.clearLoggedData();
 
-      boolean heightMapAvailable = request.getHeightMapMessage() != null;//&& !request.getHeightMapMessage().getHeights().isEmpty();
+      boolean heightMapAvailable = request.getHeightMapMessage() != null;
       boolean planarRegionsAvailable = request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty();
 
       if (heightMapAvailable)
@@ -265,7 +265,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             bodyPathWaypoints.add(new Pose3D(goalMidFootPose));
          }
 
-         // ste the start orientation to be the heading
+         // set the start orientation to be the heading
          double dx = bodyPathWaypoints.get(1).getX() - bodyPathWaypoints.get(0).getX();
          double dy = bodyPathWaypoints.get(1).getY() - bodyPathWaypoints.get(0).getY();
          ((Pose3DBasics) bodyPathWaypoints.get(0)).getOrientation().setToYawOrientation(Math.atan2(dy, dx));
