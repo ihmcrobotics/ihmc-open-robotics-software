@@ -75,15 +75,15 @@ public class GPUAStarBodyPathSmoother
    private final OpenCLFloatBuffer traversibilityOffsetsForNominalBuffer = new OpenCLFloatBuffer(1);
    private final OpenCLIntBuffer offsetsForGroundPlaneGradientBuffer = new OpenCLIntBuffer(1);
 
-   private final OpenCLFloatMem collisionGradientsMapBuffer = new OpenCLFloatMem(1);
-   private final OpenCLIntMem maxCollisionsMapBuffer = new OpenCLIntMem(1);
-   private final OpenCLFloatMem leftTraversibilitiesMapBuffer = new OpenCLFloatMem(1);
-   private final OpenCLFloatMem rightTraversibilitiesMapBuffer = new OpenCLFloatMem(1);
-   private final OpenCLFloatMem leftTraversibilitiesForGradientMapBuffer = new OpenCLFloatMem(1);
-   private final OpenCLFloatMem rightTraversibilitiesForGradientMapBuffer = new OpenCLFloatMem(1);
-   private final OpenCLIntMem leftGroundPlaneCellsMapBuffer = new OpenCLIntMem(1);
-   private final OpenCLIntMem rightGroundPlaneCellsMapBuffer = new OpenCLIntMem(1);
-   private final OpenCLFloatMem groundPlaneGradientMapBuffer = new OpenCLFloatMem(1);
+   private final OpenCLFloatMemory collisionGradientsMapBuffer = new OpenCLFloatMemory(1);
+   private final OpenCLIntMemory maxCollisionsMapBuffer = new OpenCLIntMemory(1);
+   private final OpenCLFloatMemory leftTraversibilitiesMapBuffer = new OpenCLFloatMemory(1);
+   private final OpenCLFloatMemory rightTraversibilitiesMapBuffer = new OpenCLFloatMemory(1);
+   private final OpenCLFloatMemory leftTraversibilitiesForGradientMapBuffer = new OpenCLFloatMemory(1);
+   private final OpenCLFloatMemory rightTraversibilitiesForGradientMapBuffer = new OpenCLFloatMemory(1);
+   private final OpenCLIntMemory leftGroundPlaneCellsMapBuffer = new OpenCLIntMemory(1);
+   private final OpenCLIntMemory rightGroundPlaneCellsMapBuffer = new OpenCLIntMemory(1);
+   private final OpenCLFloatMemory groundPlaneGradientMapBuffer = new OpenCLFloatMemory(1);
 
    private OpenCLFloatBuffer waypointXYZYawBuffer = new OpenCLFloatBuffer(1);
    private OpenCLIntBuffer waypointTurnPointsBuffer = new OpenCLIntBuffer(1);
