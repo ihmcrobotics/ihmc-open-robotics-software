@@ -1,15 +1,16 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
+import org.bytedeco.javacpp.annotation.Convention;
+import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -35,29 +36,36 @@ public class SteppableRegionsCalculator
       return environmentModel;
    }
 
-   public static List<SteppableRegion> createSteppableRegions(SteppableRegionsEnvironmentModel environmentModel, HeightMapData heightMapData)
+   public static List<SteppableRegion> createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
+                                                              PolygonizerParameters polygonizerParameters,
+                                                              SteppableRegionsEnvironmentModel environmentModel,
+                                                              HeightMapData heightMapData)
    {
       List<SteppableRegion> listToReturn = new ArrayList<>();
-      environmentModel.steppableRegions.parallelStream().map(region -> createSteppableRegions(region, heightMapData)).forEach(listToReturn::addAll);
+      environmentModel.steppableRegions.parallelStream().map(region -> createSteppableRegions(concaveHullFactoryParameters, polygonizerParameters, region, heightMapData)).forEach(listToReturn::addAll);
 
       return listToReturn;
    }
 
-   public static List<SteppableRegion> createSteppableRegions(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData)
+   public static List<SteppableRegion> createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
+                                                              PolygonizerParameters polygonizerParameters,
+                                                              SteppableRegionDataHolder regionDataHolder,
+                                                              HeightMapData heightMapData)
    {
       Collection<Point3D> pointCloudInWorld = regionDataHolder.getCellPointCloud(heightMapData);
       Point3DReadOnly centroid = regionDataHolder.getCentroidInWorld();
       Vector3DReadOnly normal = regionDataHolder.getNormalInWorld();
       AxisAngle orientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normal);
 
-      ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
-      PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+
       List<Point2D> pointCloudInRegion = pointCloudInWorld.parallelStream().map(pointInWorld ->
                                                                                 {
                                                                                    return PolygonizerTools.toPointInPlane(pointInWorld, centroid, orientation);
                                                                                 }).toList();
 
-      ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInRegion, parameters);
+      long startTime = System.nanoTime();
+      ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInRegion, concaveHullFactoryParameters);
+      LogTools.info("Concave collection time : " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
 
       // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
       double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
@@ -144,7 +152,7 @@ public class SteppableRegionsCalculator
          if (isConnected(i, boundaryConnectionsEncodedAsOnes))
          {
             SteppableCell neighbor = environmentModel.getCellAt(neighborX, neighborY);
-            if (neighbor.cellHasBeenExpand())
+            if (neighbor.cellHasBeenExpanded())
             {
                cellToExpand.getRegion().mergeRegion(neighbor.getRegion());
             }
@@ -238,7 +246,7 @@ public class SteppableRegionsCalculator
       private boolean isCentroidUpToDate = false;
       private boolean isNormalUpToDate = false;
 
-      private final HashSet<SteppableCell> memberCells = new HashSet<>();
+      private final List<SteppableCell> memberCells = new ArrayList<>();
 
       private List<Point3D> pointCloud ;
       private final Point3D regionCentroidTotal = new Point3D();
@@ -254,7 +262,13 @@ public class SteppableRegionsCalculator
 
       public void mergeRegion(SteppableRegionDataHolder other)
       {
-         other.memberCells.forEach(this::addCell);
+         if (this == other)
+            return;
+
+         for (SteppableCell otherCell : other.memberCells)
+         {
+            addCell(otherCell);
+         }
       }
 
       public Collection<Point3D> getCellPointCloud(HeightMapData heightMapData)
@@ -329,7 +343,7 @@ public class SteppableRegionsCalculator
 
       public boolean hasRegion()
       {
-         return getRegion() == null;
+         return getRegion() != null;
       }
 
       public SteppableRegionDataHolder getRegion()
@@ -342,7 +356,7 @@ public class SteppableRegionsCalculator
          this.region = region;
       }
 
-      public boolean cellHasBeenExpand()
+      public boolean cellHasBeenExpanded()
       {
          return region != null;
       }

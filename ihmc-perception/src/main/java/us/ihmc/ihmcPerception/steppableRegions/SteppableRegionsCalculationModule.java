@@ -4,28 +4,37 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 
 public class SteppableRegionsCalculationModule
 {
    private static final float distanceFromCliffTops = 0.02f;
    private static final float distanceFromCliffBottoms = 0.05f;
    static final int yawDiscretizations = 5;
-   private static final float footWidth = 0.12f;
-   private static final float footLength = 0.22f;
+   static final float footWidth = 0.12f;
+   static final float footLength = 0.22f;
 
    private static final int defaultCells = 50;
    private final OpenCLManager openCLManager;
    private _cl_program steppableRegionsProgram;
    private _cl_kernel computeSteppabilityKernel;
    private _cl_kernel computeSteppabilityConnectionsKernel;
+
+   ConcaveHullFactoryParameters concaveHullParameters = new ConcaveHullFactoryParameters();
+   PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
 
    private final OpenCLFloatParameters steppableParameters = new OpenCLFloatParameters();
    private final OpenCLFloatParameters yaw = new OpenCLFloatParameters();
@@ -83,6 +92,7 @@ public class SteppableRegionsCalculationModule
       computeSteppabilityKernel = openCLManager.createKernel(steppableRegionsProgram, "computeSteppability");
       computeSteppabilityConnectionsKernel = openCLManager.createKernel(steppableRegionsProgram, "computeSteppabilityConnections");
 
+      heightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
       for (int i = 0; i < yawDiscretizations; i++)
       {
          steppabilityImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
@@ -97,14 +107,16 @@ public class SteppableRegionsCalculationModule
       populateSteppabilityParameters(heightMapData);
       populateHeightMapImage(heightMapData);
 
+      Stopwatch timer = new Stopwatch();
+
       regions.clear();
       for (int yawValue = 0; yawValue < yawDiscretizations; yawValue++)
       {
          yaw.setParameter((float) yawValue);
          yaw.writeOpenCLBufferObject(openCLManager);
          openCLManager.setKernelArgument(computeSteppabilityKernel, 0, steppableParameters.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(computeSteppabilityKernel, 1, yaw.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(computeSteppabilityKernel, 2, heightMapImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(computeSteppabilityKernel, 1, heightMapImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(computeSteppabilityKernel, 2, yaw.getOpenCLBufferObject());
          openCLManager.setKernelArgument(computeSteppabilityKernel, 3, steppabilityImages.get(yawValue).getOpenCLImageObject());
 
          openCLManager.execute2D(computeSteppabilityKernel, cellsPerSide, cellsPerSide);
@@ -120,7 +132,10 @@ public class SteppableRegionsCalculationModule
 
          openCLManager.finish();
 
-         regions.add(createSteppableRegions(heightMapData, steppabilityImages.get(yawValue), steppabilityConnections.get(yawValue)));
+         timer.start();
+         regions.add(createSteppableRegions(concaveHullParameters, polygonizerParameters, heightMapData, steppabilityImages.get(yawValue), steppabilityConnections.get(yawValue)));
+         LogTools.info("time = " + timer.lapElapsed());
+         timer.lap();
       }
    }
 
@@ -132,6 +147,11 @@ public class SteppableRegionsCalculationModule
       this.cellsPerSide = cellsPerSide;
 
       heightMapImage.resize(cellsPerSide, cellsPerSide, openCLManager, null);
+      for (int i = 0; i < yawDiscretizations; i++)
+      {
+         steppabilityImages.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
+         steppabilityConnections.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
+      }
    }
 
    private void populateSteppabilityParameters(HeightMapData heightMapData)
@@ -160,12 +180,20 @@ public class SteppableRegionsCalculationModule
       heightMapImage.writeOpenCLImage(openCLManager);
    }
 
-   private static List<SteppableRegion> createSteppableRegions(HeightMapData heightMapData, BytedecoImage steppability, BytedecoImage steppabilityConnections)
+   private static List<SteppableRegion> createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
+                                                               PolygonizerParameters polygonizerParameters,
+                                                               HeightMapData heightMapData, BytedecoImage steppability, BytedecoImage steppabilityConnections)
    {
+      long startTIme = System.nanoTime();
       SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environment0 = SteppableRegionsCalculator.mergeCellsIntoSteppableRegionEnvironment(
             steppability,
             steppabilityConnections);
-      return SteppableRegionsCalculator.createSteppableRegions(environment0, heightMapData);
+      LogTools.info("Merge duration " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTIme));
+      startTIme = System.nanoTime();
+      List<SteppableRegion> regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullFactoryParameters, polygonizerParameters, environment0, heightMapData);
+      LogTools.info("Create duration " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTIme));
+
+      return regions;
    }
 
    public static void main(String[] args)
