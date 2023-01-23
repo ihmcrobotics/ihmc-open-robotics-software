@@ -95,7 +95,7 @@ public class RDXFFMPEGWebcamLoggingDemo
 
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
 
                   readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat)");
                   readFrequencyPlot = new ImPlotFrequencyPlot("read Frequency");
@@ -121,7 +121,7 @@ public class RDXFFMPEGWebcamLoggingDemo
                      });
                   });
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
