@@ -13,9 +13,9 @@ public interface PlanarRegionMappingParametersBasics extends PlanarRegionMapping
       set(PlanarRegionMappingParameters.updateAlphaTowardsMatch, updateAlphaTowardsMatch);
    }
 
-   default void setAngleThresholdBetweenNormals(double angleThresholdBetweenNormals)
+   default void setSimilarityThresholdBetweenNormals(double similarityThresholdBetweenNormals)
    {
-      set(PlanarRegionMappingParameters.angleThresholdBetweenNormals, angleThresholdBetweenNormals);
+      set(PlanarRegionMappingParameters.similarityThresholdBetweenNormals, similarityThresholdBetweenNormals);
    }
 
    default void setOrthogonalDistanceThreshold(double orthogonalDistanceThreshold)
@@ -26,5 +26,10 @@ public interface PlanarRegionMappingParametersBasics extends PlanarRegionMapping
    default void setMaxInterRegionDistance(double maxInterRegionDistance)
    {
       set(PlanarRegionMappingParameters.maxInterRegionDistance, maxInterRegionDistance);
+   }
+
+   default void setMinimumOverlapThreshold(double minimumOverlapThreshold)
+   {
+      set(PlanarRegionMappingParameters.minimumOverlapThreshold, minimumOverlapThreshold);
    }
 }

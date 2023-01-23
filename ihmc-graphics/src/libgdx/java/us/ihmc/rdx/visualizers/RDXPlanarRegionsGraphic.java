@@ -12,8 +12,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,6 +29,7 @@ import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -43,7 +47,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
    // visualization options
    private Function<Integer, Color> colorFunction = new RDXIDMappedColorFunction();
    private boolean drawAreaText = false;
-   private boolean drawBoundingBox = false;
+   private boolean drawBoundingBox = true;
    private boolean drawNormal;
    boolean mouseHovering = false;
 
@@ -144,7 +148,11 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
       if (drawBoundingBox)
       {
-         RDXMeshGraphicTools.drawBoxEdges(meshBuilder, PlanarRegionTools.getLocalBoundingBox3DInWorld(planarRegion, 0.1), 0.005, color);
+//         RDXMeshGraphicTools.drawBoxEdges(meshBuilder, PlanarRegionTools.getLocalBoundingBox3DInWorld(planarRegion, 0.1), 0.005, color);
+
+         BoundingBox3D boundingBox3D = planarRegion.getBoundingBox3dInWorld();
+         Box3D box = GeometryTools.convertBoundingBox3DToBox3D(boundingBox3D);
+         RDXMeshGraphicTools.drawBoxEdges(meshBuilder, box, 0.005, color);
       }
 
       if (drawNormal)
@@ -169,7 +177,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      modelInstance.setOpacity(mouseHovering ? 0.5f : 1.0f);
+//      modelInstance.setOpacity(mouseHovering ? 0.5f : 1.0f);
       if (tooltip != null)
          tooltip.setInput(input);
    }

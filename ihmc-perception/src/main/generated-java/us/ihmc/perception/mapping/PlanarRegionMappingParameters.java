@@ -23,9 +23,10 @@ public class PlanarRegionMappingParameters extends StoredPropertySet implements 
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey updateAlphaTowardsMatch = keys.addDoubleKey("Update Alpha towards match");
-   public static final DoubleStoredPropertyKey angleThresholdBetweenNormals = keys.addDoubleKey("Angle threshold between normals");
+   public static final DoubleStoredPropertyKey similarityThresholdBetweenNormals = keys.addDoubleKey("Similarity threshold between normals");
    public static final DoubleStoredPropertyKey orthogonalDistanceThreshold = keys.addDoubleKey("Orthogonal distance threshold");
    public static final DoubleStoredPropertyKey maxInterRegionDistance = keys.addDoubleKey("Max Inter Region Distance");
+   public static final DoubleStoredPropertyKey minimumOverlapThreshold = keys.addDoubleKey("Minimum overlap threshold");
 
    /**
     * Loads this property set.
