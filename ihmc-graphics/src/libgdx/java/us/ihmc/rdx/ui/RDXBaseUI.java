@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -175,12 +176,15 @@ public class RDXBaseUI
    public void launchRDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
    {
       LogTools.info("Launching RDX application");
-      // TODO: We could show a splash screen here until the app shows up, since we don't know enough about
-      // the window decorations to make a decision here yet
-      LibGDXApplicationCreator.launchGDXApplication(applicationAdapter,
-                                                    windowTitle,
-                                                    LibGDXApplicationCreator.DEFAULT_WINDOW_WIDTH,
-                                                    LibGDXApplicationCreator.DEFAULT_WINDOW_HEIGHT);
+      // TODO: We could show a splash screen here until the app shows up
+      Lwjgl3ApplicationConfiguration applicationConfiguration = LibGDXApplicationCreator.getDefaultConfiguration(windowTitle);
+      // Hide the window at the beginning. If you don't do this, you get a window frame
+      // with the contents behind the window displayed for a few seconds, which is really
+      // consifusing and error-prone.
+      applicationConfiguration.setInitialVisible(false);
+      LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration,
+                                                    applicationAdapter,
+                                                    windowTitle);
    }
 
    public void create()
@@ -263,6 +267,11 @@ public class RDXBaseUI
    {
       imGuiWindowAndDockSystem.afterWindowManagement();
       ++renderIndex;
+
+      if (renderIndex == 1)
+      { // Show the window now that it's been loaded; we started it while it wasn't visible
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setVisible(true);
+      }
    }
 
    private void renderMenuBar()
