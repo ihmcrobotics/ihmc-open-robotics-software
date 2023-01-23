@@ -268,8 +268,11 @@ public class RDXBaseUI
       imGuiWindowAndDockSystem.afterWindowManagement();
       ++renderIndex;
 
-      if (renderIndex == 1)
-      { // Show the window now that it's been loaded; we started it while it wasn't visible
+      // Show the window now that it's been loaded; we started it while it wasn't visible.
+      // Some heavyweight applications still will show an unrendered window after the first
+      // render, so let's show it after the second render.
+      if (renderIndex == 2)
+      {
          ((Lwjgl3Graphics) Gdx.graphics).getWindow().setVisible(true);
       }
    }
