@@ -11,10 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCollection;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullPruningFilteringTools;
-import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory;
+import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -79,7 +76,14 @@ public class SteppableRegionsCalculator
                                                               Orientation3DReadOnly orientation,
                                                               ConcaveHullCollection concaveHullCollection)
    {
-      
+      return concaveHullCollection.getConcaveHulls().parallelStream().map(hull -> createSteppableRegion(origin, orientation, hull)).toList();
+   }
+
+   public static SteppableRegion createSteppableRegion(Point3DReadOnly origin,
+                                                       Orientation3DReadOnly orientation,
+                                                       ConcaveHull concaveHull)
+   {
+      return new SteppableRegion(origin, orientation, concaveHull.getConcaveHullVertices());
    }
 
    private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(BytedecoImage steppability)
@@ -174,7 +178,7 @@ public class SteppableRegionsCalculator
       return new Point3D(x, y, heightMapData.getHeightAt(steppableCell.x, steppableCell.y));
    }
 
-   private static class SteppableRegionsEnvironmentModel
+   public static class SteppableRegionsEnvironmentModel
    {
       private final Stack<SteppableCell> unassignedCellsInTheEnvironment = new Stack<>();
       private final SteppableCell[][] steppableCellsGrid;
