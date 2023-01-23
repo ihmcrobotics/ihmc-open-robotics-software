@@ -92,9 +92,9 @@ public class SCS2YoImPlotManager
    private boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
       configurationFile.setMode(configurationLocation.toHybridResourceMode());
+      LogTools.info("Loading plot panels from {}", configurationFile.getLocationOfResourceForReading());
       return configurationFile.getInputStream(inputStream ->
       {
-         LogTools.info("Loading {}", configurationFile.getLocationOfResourceForReading());
          plotPanels.clear();
          JSONFileTools.load(inputStream, node ->
          {
