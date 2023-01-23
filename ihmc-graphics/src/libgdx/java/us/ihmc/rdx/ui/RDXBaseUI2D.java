@@ -90,11 +90,14 @@ public class RDXBaseUI2D
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         JSONFileTools.load(libGDXSettingsFile.getInputStream(), jsonNode ->
+         return libGDXSettingsFile.getInputStream(inputStream ->
          {
-            int width = jsonNode.get("windowWidth").asInt();
-            int height = jsonNode.get("windowHeight").asInt();
-            Gdx.graphics.setWindowedMode(width, height);
+            JSONFileTools.load(inputStream, jsonNode ->
+            {
+               int width = jsonNode.get("windowWidth").asInt();
+               int height = jsonNode.get("windowHeight").asInt();
+               Gdx.graphics.setWindowedMode(width, height);
+            });
          });
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
@@ -130,7 +133,7 @@ public class RDXBaseUI2D
 
 
 
-      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), layoutManager);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
    }
@@ -250,7 +253,7 @@ public class RDXBaseUI2D
          root.put("windowWidth", Gdx.graphics.getWidth());
          root.put("windowHeight", Gdx.graphics.getHeight());
       };
-      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
+      if (saveConfigurationLocation.isVersionControl())
       {
          LogTools.info("Saving libGDX settings to {}", libGDXSettingsFile.getWorkspaceFile().toString());
          JSONFileTools.save(libGDXSettingsFile.getWorkspaceFile(), rootConsumer);

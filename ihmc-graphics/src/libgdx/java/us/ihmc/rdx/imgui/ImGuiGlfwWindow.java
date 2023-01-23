@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 public class ImGuiGlfwWindow
 {
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
-   private String configurationExtraPath;
+   private final String configurationExtraPath;
    private final HybridDirectory configurationBaseDirectory;
    private HybridFile windowSettingsFile;
    private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
@@ -64,11 +64,14 @@ public class ImGuiGlfwWindow
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          windowSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         JSONFileTools.load(windowSettingsFile.getInputStream(), jsonNode ->
+         return windowSettingsFile.getInputStream(inputStream ->
          {
-            int width = jsonNode.get("windowWidth").asInt();
-            int height = jsonNode.get("windowHeight").asInt();
-            glfwWindowForImGui.setWindowSize(width, height);
+            JSONFileTools.load(inputStream, jsonNode ->
+            {
+               int width = jsonNode.get("windowWidth").asInt();
+               int height = jsonNode.get("windowHeight").asInt();
+               glfwWindowForImGui.setWindowSize(width, height);
+            });
          });
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
@@ -93,7 +96,7 @@ public class ImGuiGlfwWindow
 
       long windowHandle = glfwWindowForImGui.getWindowHandle();
 
-      imGuiWindowAndDockSystem.create(windowHandle);
+      imGuiWindowAndDockSystem.create(windowHandle, layoutManager);
 
       if (create != null)
          create.run();
@@ -163,7 +166,7 @@ public class ImGuiGlfwWindow
          root.put("windowWidth", glfwWindowForImGui.getWindowWidth());
          root.put("windowHeight", glfwWindowForImGui.getWindowHeight());
       };
-      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
+      if (saveConfigurationLocation.isVersionControl())
       {
          LogTools.info("Saving window settings to {}", windowSettingsFile.getWorkspaceFile().toString());
          JSONFileTools.save(windowSettingsFile.getWorkspaceFile(), rootConsumer);

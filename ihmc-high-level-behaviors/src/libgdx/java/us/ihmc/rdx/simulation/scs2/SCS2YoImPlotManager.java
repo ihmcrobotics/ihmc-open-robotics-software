@@ -18,7 +18,6 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -90,13 +89,12 @@ public class SCS2YoImPlotManager
       configurationFile = new HybridFile(layoutDirectory, getClass().getSimpleName() + ".json");
    }
 
-   private void loadConfiguration(ImGuiConfigurationLocation configurationLocation)
+   private boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
       configurationFile.setMode(configurationLocation.toHybridResourceMode());
-      InputStream inputStream = configurationFile.getInputStream();
-      if (inputStream != null)
+      LogTools.info("Loading plot panels from {}", configurationFile.getLocationOfResourceForReading());
+      return configurationFile.getInputStream(inputStream ->
       {
-         LogTools.info("Loading {}", configurationFile.getLocationOfResourceForReading());
          plotPanels.clear();
          JSONFileTools.load(inputStream, node ->
          {
@@ -118,11 +116,7 @@ public class SCS2YoImPlotManager
                }
             }
          });
-      }
-      else
-      {
-         LogTools.error("Failed to load {}", configurationFile.getLocationOfResourceForReading());
-      }
+      });
    }
 
    private void saveConfiguration(ImGuiConfigurationLocation configurationLocation)
