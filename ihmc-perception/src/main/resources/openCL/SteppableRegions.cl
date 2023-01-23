@@ -2,7 +2,7 @@
 #define HEIGHT_MAP_RESOLUTION 1
 #define MIN_DISTANCE_FROM_CLIFF_TOPS 2
 #define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 3
-#define YAW_DISCRETIZATIONS 4
+#define TOTAL_YAW_DISCRETIZATIONS 4
 #define FOOT_WIDTH 5
 #define FOOT_LENGTH 6
 #define CLIFF_START_HEIGHT_TO_AVOID 7
@@ -10,7 +10,7 @@
 
 float get_yaw_from_index(global float* params, int idx_yaw)
 {
-    return M_PI_2_F * ((float) (idx_yaw / params[YAW_DISCRETIZATIONS]));
+    return M_PI_2_F * ((float) (idx_yaw / params[TOTAL_YAW_DISCRETIZATIONS]));
 }
 
 float2 rotate_vector(float2 vector, float yaw)
@@ -28,17 +28,13 @@ float distance_to_foot_polygon(global float* params, int2 foot_key, float yaw, i
 
 void kernel computeSteppability(global float* params,
                                 read_only image2d_t height_map,
-                                write_only image2d_t steppable_map_0,
-                                write_only image2d_t steppable_map_1,
-                                write_only image2d_t steppable_map_2,
-                                write_only image2d_t steppable_map_3,
-                                write_only image2d_t steppable_map_4,
-                                write_only image2d_t steppable_map_5)
+                                global float* idx_yaw_singular_buffer,
+                                write_only image2d_t steppable_map)
 {
     // Remember, these are x and y in image coordinates, not world
     int idx_x = get_global_id(0);
     int idx_y = get_global_id(1);
-    int idx_yaw = get_global_id(2);
+    int idx_yaw = (int) idx_yaw_singular_buffer[0];
 
     int2 key = (int2) (idx_x, idx_y);
     float foot_height = (float) read_imagef(height_map, key).x;
@@ -85,18 +81,7 @@ void kernel computeSteppability(global float* params,
                 if (min_distance_from_this_point > distance_to_foot)
                 {
                     // we're too close to the cliff bottom!
-                    if (idx_yaw == 0)
-                        write_imageui(steppable_map_0, key, (uint4)(0,0,0,0));
-                    else if (idx_yaw == 1)
-                        write_imageui(steppable_map_1, key, (uint4)(0,0,0,0));
-                    else if (idx_yaw == 2)
-                        write_imageui(steppable_map_2, key, (uint4)(0,0,0,0));
-                    else if (idx_yaw == 3)
-                        write_imageui(steppable_map_3, key, (uint4)(0,0,0,0));
-                    else if (idx_yaw == 4)
-                        write_imageui(steppable_map_4, key, (uint4)(0,0,0,0));
-                    else
-                        write_imageui(steppable_map_5, key, (uint4)(0,0,0,0));
+                    write_imageui(steppable_map, key, (uint4)(0,0,0,0));
 
                     return;
                 }
@@ -107,18 +92,7 @@ void kernel computeSteppability(global float* params,
                 if (params[MIN_DISTANCE_FROM_CLIFF_TOPS] > distance_to_foot)
                 {
                     // we're too close to the cliff top!
-                    if (idx_yaw == 0)
-                        write_imageui(steppable_map_0, key, (uint4)(0,0,0,0));
-                    else if (idx_yaw == 1)
-                        write_imageui(steppable_map_1, key, (uint4)(0,0,0,0));
-                    else if (idx_yaw == 2)
-                        write_imageui(steppable_map_2, key, (uint4)(0,0,0,0));
-                    else if (idx_yaw == 3)
-                        write_imageui(steppable_map_3, key, (uint4)(0,0,0,0));
-                    else if (idx_yaw == 4)
-                        write_imageui(steppable_map_4, key, (uint4)(0,0,0,0));
-                    else
-                        write_imageui(steppable_map_5, key, (uint4)(0,0,0,0));
+                    write_imageui(steppable_map, key, (uint4)(0,0,0,0));
 
                     return;
                 }
@@ -127,18 +101,7 @@ void kernel computeSteppability(global float* params,
     }
 
     // we can step here!
-    if (idx_yaw == 0)
-        write_imageui(steppable_map_0, key, (uint4)(1,0,0,0));
-    else if (idx_yaw == 1)
-        write_imageui(steppable_map_1, key, (uint4)(1,0,0,0));
-    else if (idx_yaw == 2)
-        write_imageui(steppable_map_2, key, (uint4)(1,0,0,0));
-    else if (idx_yaw == 3)
-        write_imageui(steppable_map_3, key, (uint4)(1,0,0,0));
-    else if (idx_yaw == 4)
-        write_imageui(steppable_map_4, key, (uint4)(1,0,0,0));
-    else
-        write_imageui(steppable_map_5, key, (uint4)(1,0,0,0));
+    write_imageui(steppable_map, key, (uint4)(1,0,0,0));
 }
 
 void kernel computeSteppabilityConnections(global float* params,
