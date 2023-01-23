@@ -14,8 +14,8 @@ public enum ImGuiConfigurationLocation
    public boolean isVersionControl()
    {
       return this == VERSION_CONTROL;
-
    }
+
    public boolean isUserHome()
    {
       return this == USER_HOME;
