@@ -115,13 +115,12 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             splineGraphics.get(bodyPart).createStart(bodyPartReplayMotionMap.get(bodyPart).get(0).getPosition(), Color.BLUE);
          }
       }
-      else
+      else if (replayPreviewCounter < assistanceStatusList.size() - 1)
       {
          for (String bodyPart : bodyPartReplayMotionMap.keySet())
             splineGraphics.get(bodyPart).createAdditionalPoint(bodyPartReplayMotionMap.get(bodyPart).get(replayPreviewCounter).getPosition(), Color.YELLOW);
       }
-
-      if (replayPreviewCounter == assistanceStatusList.size() - 1)
+      else if (replayPreviewCounter == assistanceStatusList.size() - 1)
          for (String bodyPart : bodyPartReplayMotionMap.keySet())
             splineGraphics.get(bodyPart).createEnd(Color.BLUE);
    }
