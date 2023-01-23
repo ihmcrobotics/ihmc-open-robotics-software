@@ -10,6 +10,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXLineMeshModel;
+import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Activator;
 
@@ -33,6 +34,8 @@ public class RDXPlanarRegionMappingDemo
    private final String perceptionLogDirectory = System.getProperty("user.home") + "/.ihmc/logs/perception/";
    private final String logFileName = "20230117_161540_PerceptionLog.hdf5";
 
+   private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
+
    private boolean graphicsInitialized = false;
 
    public RDXPlanarRegionMappingDemo()
@@ -49,7 +52,6 @@ public class RDXPlanarRegionMappingDemo
             // To Run With Perception Logs (HDF5)
             mappingManager = new PlanarRegionMappingManager(perceptionLogDirectory + logFileName, false);
 
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mappingManager::selectRegionToPick);
 
             // To Run with Planar Region Logs (PRLLOG)
             //mappingManager = new PlanarRegionMappingManager(regionLogDirectory , false);
@@ -57,11 +59,30 @@ public class RDXPlanarRegionMappingDemo
             // To Run in Live Mode (ROS2)
             //mappingManager = new PlanarRegionMappingManager("Nadia", ros2Node, false);
 
+            mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
+            mapPlanarRegionsGraphic.update();
+            mapPlanarRegionsGraphic.setupTooltip(baseUI.getPrimary3DPanel(), "");
+
             planarRegionMappingUI = new PlanarRegionMappingUIPanel("Filtered Map", mappingManager);
             baseUI.getImGuiPanelManager().addPanel(planarRegionMappingUI.getImGuiPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(planarRegionMappingUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(mapPlanarRegionsGraphic::getRenderables, RDXSceneLevel.VIRTUAL);
+
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mapPlanarRegionsGraphic::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(mapPlanarRegionsGraphic::process3DViewInput);
 
             baseUI.getPerspectiveManager().reloadPerspective();
+         }
+
+
+         public void renderPlanarRegions()
+         {
+            if (mappingManager.pollIsModified() && mappingManager.hasPlanarRegionsToRender())
+            {
+               LogTools.info("Calling Update on Graphic ------------------------------------------------------------+++++++++++++++++++++++++++++++++++++++++++++++++++");
+               mapPlanarRegionsGraphic.clear();
+               mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
+               mapPlanarRegionsGraphic.update();
+            }
          }
 
          @Override
@@ -98,7 +119,7 @@ public class RDXPlanarRegionMappingDemo
 
                //rapidRegionsUIPanel.renderImGuiWidgets();
 
-               planarRegionMappingUI.renderPlanarRegions();
+               renderPlanarRegions();
             }
 
             baseUI.renderBeforeOnScreenUI();

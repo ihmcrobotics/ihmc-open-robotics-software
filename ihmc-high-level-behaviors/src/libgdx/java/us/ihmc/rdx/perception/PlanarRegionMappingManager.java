@@ -33,6 +33,8 @@ import us.ihmc.perception.odometry.RapidPatchesBasedICP;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -275,35 +277,34 @@ public class PlanarRegionMappingManager
       {
          LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
 
-         planarRegionsListWithPose = getRegionsFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
+
+         loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
+
+         planarRegionsListWithPose = new PlanarRegionsListWithPose();
+         rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, planarRegionsListWithPose);
+
          LogTools.info("Regions Found: {}", planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions());
 
+         //rapidPatchesBasedICP.update(rapidRegionsExtractor.getPreviousFeatureGrid(), rapidRegionsExtractor.getCurrentFeatureGrid());
+         //rapidRegionsExtractor.copyFeatureGridMapUsingOpenCL();
 
-         //if (planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
-         //{
-         //   modified = true;
-         //   updateMapWithNewRegions(planarRegionsListWithPose);
-         //}
+         if (planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+         {
+            modified = true;
+            updateMapWithNewRegions(planarRegionsListWithPose);
+         }
 
-         perceptionLogIndex++;
+         perceptionLogIndex+=1;
          rapidRegionsExtractor.setProcessing(false);
       }
    }
 
-   private PlanarRegionsListWithPose getRegionsFromPerceptionLog(PerceptionDataLoader loader, int index)
+   private void loadDataFromPerceptionLog(PerceptionDataLoader loader, int index)
    {
-      PlanarRegionsListWithPose regionsToReturn = new PlanarRegionsListWithPose();
-
       loader.loadCompressedDepth(sensorLogChannelName, index, depth16UC1Image.getBytedecoOpenCVMat());
       sensorTransformToWorld.getTranslation().set(sensorPositionBuffer.get(index));
       sensorTransformToWorld.getRotation().set(sensorOrientationBuffer.get(index));
       cameraFrame.update();
-
-      rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, regionsToReturn);
-      rapidPatchesBasedICP.update(rapidRegionsExtractor.getPreviousFeatureGrid(), rapidRegionsExtractor.getCurrentFeatureGrid());
-      rapidRegionsExtractor.copyFeatureGridMapUsingOpenCL();
-
-      return regionsToReturn;
    }
 
    public PlanarRegionsList pollMapRegions()
@@ -353,32 +354,6 @@ public class PlanarRegionMappingManager
       planarRegionMap.setModified(true);
       if (updateMapFuture.isCancelled() || updateMapFuture.isDone())
          launchMapper();
-   }
-
-   public void selectRegionToPick(ImGui3DViewInput input)
-   {
-      if (input.isWindowHovered())
-      {
-         Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-
-         if (pickRayInWorld != null)
-         {
-            PlanarRegionsList planarRegionsList = planarRegionMap.getMapRegions();
-            if (planarRegionsList != null)
-            {
-               ImmutablePair<Point3D, PlanarRegion> regionsWithRay = PlanarRegionTools.intersectRegionsWithRay(planarRegionsList,
-                                                                                                                                 pickRayInWorld.getPoint(),
-                                                                                                               new Vector3D(pickRayInWorld.getDirection()));
-
-               if (regionsWithRay != null)
-               {
-                  Point3D pointOnRegion = regionsWithRay.getLeft();
-                  PlanarRegion planarRegion = regionsWithRay.getRight();
-                  //LogTools.info("Picked Point: {}, Region: {}", pointOnRegion, planarRegion.getRegionId());
-               }
-            }
-         }
-      }
    }
 
    public void hardResetTheMap()
