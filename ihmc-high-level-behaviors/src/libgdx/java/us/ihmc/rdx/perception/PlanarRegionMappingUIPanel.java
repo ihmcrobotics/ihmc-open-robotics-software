@@ -8,7 +8,11 @@ import imgui.type.ImBoolean;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
+import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
 public class PlanarRegionMappingUIPanel
@@ -16,11 +20,13 @@ public class PlanarRegionMappingUIPanel
    private boolean captured = false;
 
    private ImGuiStoredPropertySetTuner mappingParametersTuner;
-   private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private PlanarRegionMappingManager mappingManager;
    private ImGuiPanel imGuiPanel;
    private final ImBoolean liveModeEnabled = new ImBoolean();
    private final ImBoolean renderEnabled = new ImBoolean(true);
+
+
+
 
    public PlanarRegionMappingUIPanel(String name, PlanarRegionMappingManager mappingManager)
    {
@@ -31,8 +37,7 @@ public class PlanarRegionMappingUIPanel
       mappingParametersTuner.create(mappingManager.getParameters());
       imGuiPanel.addChild(mappingParametersTuner);
 
-      mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
-      mapPlanarRegionsGraphic.update();
+
    }
 
    public void renderImGuiWidgets()
@@ -63,23 +68,6 @@ public class PlanarRegionMappingUIPanel
       }
 
       ImGui.checkbox("Show Parameter Tuners", mappingParametersTuner.getIsShowing());
-   }
-
-   public void renderPlanarRegions()
-   {
-      if (mappingManager.pollIsModified() && mappingManager.hasPlanarRegionsToRender())
-      {
-         LogTools.info("Calling Update on Graphic ------------------------------------------------------------+++++++++++++++++++++++++++++++++++++++++++++++++++");
-         mapPlanarRegionsGraphic.clear();
-         mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
-         mapPlanarRegionsGraphic.update();
-      }
-   }
-
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      if (renderEnabled.get())
-         mapPlanarRegionsGraphic.getRenderables(renderables, pool);
    }
 
    public void setCaptured(boolean captured)
