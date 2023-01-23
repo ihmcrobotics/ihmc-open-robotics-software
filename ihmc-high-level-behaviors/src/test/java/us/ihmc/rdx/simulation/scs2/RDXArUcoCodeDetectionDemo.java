@@ -101,7 +101,7 @@ public class RDXArUcoCodeDetectionDemo
                   baseUI.getImGuiPanelManager().addPanel(testUIPanel);
 
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                cameraSensor.render(baseUI.getPrimaryScene());

@@ -117,7 +117,7 @@ public class RDXFFMPEGPlaybackDemo
             {
                videoReload = false;
                baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
-               baseUI.getPerspectiveManager().reloadPerspective();
+               baseUI.getLayoutManager().reloadLayout();
             }
          }
 

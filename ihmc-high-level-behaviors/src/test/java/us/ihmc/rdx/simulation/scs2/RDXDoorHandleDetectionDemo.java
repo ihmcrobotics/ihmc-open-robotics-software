@@ -80,7 +80,7 @@ public class RDXDoorHandleDetectionDemo
                   doorHandleDetectionUI.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
                   baseUI.getImGuiPanelManager().addPanel(doorHandleDetectionUI.getMainPanel());
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                cameraSensor.render(baseUI.getPrimaryScene());

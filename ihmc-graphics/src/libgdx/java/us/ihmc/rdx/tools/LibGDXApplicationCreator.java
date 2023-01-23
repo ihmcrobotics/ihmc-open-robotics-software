@@ -7,14 +7,22 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 
 public class LibGDXApplicationCreator
 {
+   public static final int DEFAULT_WINDOW_WIDTH = 800;
+   public static final int DEFAULT_WINDOW_HEIGHT = 600;
+
    public static void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter, Class<?> clazz)
    {
-      launchGDXApplication(applicationAdapter, clazz.getSimpleName(), 1100, 800);
+      launchGDXApplication(applicationAdapter, clazz.getSimpleName(), DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
    }
 
    public static Lwjgl3ApplicationConfiguration getDefaultConfiguration(Class<?> clazz)
    {
-      return getDefaultConfiguration(clazz.getSimpleName(), 1100, 800);
+      return getDefaultConfiguration(clazz.getSimpleName(), DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+   }
+
+   public static Lwjgl3ApplicationConfiguration getDefaultConfiguration(String title)
+   {
+      return getDefaultConfiguration(title, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
    }
 
    public static Lwjgl3ApplicationConfiguration getDefaultConfiguration(String title, double width, double height)

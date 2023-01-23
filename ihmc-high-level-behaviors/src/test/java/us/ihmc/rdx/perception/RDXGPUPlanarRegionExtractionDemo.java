@@ -89,7 +89,7 @@ public class RDXGPUPlanarRegionExtractionDemo
                   baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
                   baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                l515.render(baseUI.getPrimaryScene());
