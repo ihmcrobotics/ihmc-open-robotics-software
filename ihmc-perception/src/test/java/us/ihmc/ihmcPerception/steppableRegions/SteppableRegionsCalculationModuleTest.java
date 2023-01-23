@@ -8,6 +8,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class SteppableRegionsCalculationModuleTest
 {
@@ -28,6 +29,8 @@ public class SteppableRegionsCalculationModuleTest
          }
       }
 
+      double extremumValue = gridSizeXY / 2.0 - Math.max(SteppableRegionsCalculationModule.footLength, SteppableRegionsCalculationModule.footWidth) / 2.0;
+
       SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
       steppableRegionsCalculationModule.compute(heightMap);
       List<List<SteppableRegion>> regions = steppableRegionsCalculationModule.getSteppableRegions();
@@ -35,6 +38,11 @@ public class SteppableRegionsCalculationModuleTest
       assertEquals(SteppableRegionsCalculationModule.yawDiscretizations, regions.size());
       for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
       {
+         assertTrue(regions.get(i).get(0).getConvexHullInRegionFrame().isPointInside(extremumValue, extremumValue));
+         assertTrue(regions.get(i).get(0).getConvexHullInRegionFrame().isPointInside(extremumValue, -extremumValue));
+         assertTrue(regions.get(i).get(0).getConvexHullInRegionFrame().isPointInside(-extremumValue, -extremumValue));
+         assertTrue(regions.get(i).get(0).getConvexHullInRegionFrame().isPointInside(-extremumValue, extremumValue));
+
          assertEquals(1, regions.get(i).size());
       }
 
