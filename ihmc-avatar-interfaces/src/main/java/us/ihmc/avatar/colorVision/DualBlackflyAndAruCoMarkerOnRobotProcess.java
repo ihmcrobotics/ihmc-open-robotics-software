@@ -113,13 +113,23 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private void destroy()
    {
       running = false;
+      // This sleep is to let the above thread complete.
+      // Typically, frames are captured in 35 ms or so, so we should be giving it
+      // plenty of time here to stop.
+      // Remember, this destroy is getting called on a new thread created by
+      // the user doing a Ctrl+C.
+      ThreadTools.sleep(250);
+
       for (RobotSide side : blackflies.sides())
       {
          blackflies.get(side).destroy();
       }
-      ThreadTools.sleep(300); // Sleeps to try and let the Blackfly shutdown more gracefully
+      // This sleep is because we just asked the Blackflies to stop aquiring images.
+      // I have no idea how long it would normally take.
+      ThreadTools.sleep(100);
+
+      // This releases all the Spinnaker resources
       spinnakerSystemManager.destroy();
-      ThreadTools.sleep(300);
    }
 
    public static void main(String[] args)
