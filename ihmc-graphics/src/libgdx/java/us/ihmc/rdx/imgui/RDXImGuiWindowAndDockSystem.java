@@ -128,11 +128,6 @@ public class RDXImGuiWindowAndDockSystem
       imGuiGl3.init(glslVersion);
 
       GLFW.glfwGetWindowFrameSize(windowHandle, frameSizeLeft, frameSizeTop, frameSizeRight, frameSizeBottom);
-      LogTools.debug(String.format("Window frame sizes left: %d, top: %d, right: %d, bottom: %d",
-                                   frameSizeLeft.get(0),
-                                   frameSizeTop.get(0),
-                                   frameSizeRight.get(0),
-                                   frameSizeBottom.get(0)));
 
       layoutManager.reloadLayout();
    }
