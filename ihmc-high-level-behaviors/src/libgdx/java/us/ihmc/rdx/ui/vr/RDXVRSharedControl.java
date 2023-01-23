@@ -111,18 +111,24 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       {
          for (String bodyPart : bodyPartReplayMotionMap.keySet())
          {
-            splineGraphics.put(bodyPart, new RDXSplineGraphic());
+            if (splineGraphics.containsKey(bodyPart)) // if the spline was previously created, meaning we are at the second replay of full preview
+               splineGraphics.get(bodyPart).clear(); // clear it
+            else
+               splineGraphics.put(bodyPart, new RDXSplineGraphic());
+            // restart creating the spline from beginning
             splineGraphics.get(bodyPart).createStart(bodyPartReplayMotionMap.get(bodyPart).get(0).getPosition(), Color.BLUE);
          }
       }
-      else if (replayPreviewCounter < assistanceStatusList.size() - 1)
+      else
       {
          for (String bodyPart : bodyPartReplayMotionMap.keySet())
-            splineGraphics.get(bodyPart).createAdditionalPoint(bodyPartReplayMotionMap.get(bodyPart).get(replayPreviewCounter).getPosition(), Color.YELLOW);
+         {
+            if (replayPreviewCounter < bodyPartReplayMotionMap.get(bodyPart).size() - 1)
+               splineGraphics.get(bodyPart).createAdditionalPoint(bodyPartReplayMotionMap.get(bodyPart).get(replayPreviewCounter).getPosition(), Color.YELLOW);
+            else if (replayPreviewCounter == bodyPartReplayMotionMap.get(bodyPart).size() - 1)
+               splineGraphics.get(bodyPart).createEnd(Color.BLUE);
+         }
       }
-      else if (replayPreviewCounter == assistanceStatusList.size() - 1)
-         for (String bodyPart : bodyPartReplayMotionMap.keySet())
-            splineGraphics.get(bodyPart).createEnd(Color.BLUE);
    }
 
    @Override
@@ -173,8 +179,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       }
       else // if user did not use the preview or preview has been validated
       {
+         // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
          if (proMPAssistant.isCurrentTaskDone())  // do not want the assistant to keep recomputing trajectories for the same task over and over
-            setEnabled(false); // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
+            setEnabled(false);
       }
    }
 
