@@ -18,7 +18,6 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -93,8 +92,7 @@ public class SCS2YoImPlotManager
    private boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
       configurationFile.setMode(configurationLocation.toHybridResourceMode());
-      InputStream inputStream = configurationFile.getInputStream();
-      if (inputStream != null)
+      return configurationFile.getInputStream(inputStream ->
       {
          LogTools.info("Loading {}", configurationFile.getLocationOfResourceForReading());
          plotPanels.clear();
@@ -118,12 +116,7 @@ public class SCS2YoImPlotManager
                }
             }
          });
-      }
-      else
-      {
-         LogTools.error("Input stream is null");
-      }
-      return inputStream != null;
+      });
    }
 
    private void saveConfiguration(ImGuiConfigurationLocation configurationLocation)
