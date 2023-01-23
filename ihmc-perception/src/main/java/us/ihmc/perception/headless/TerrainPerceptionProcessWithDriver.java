@@ -171,8 +171,8 @@ public class TerrainPerceptionProcessWithDriver
                openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
                rapidRegionsExtractor.create(openCLManager,
                                             openCLProgram,
-                                            depthWidth,
                                             depthHeight,
+                                            depthWidth,
                                             sensor.getDepthFocalLengthPixelsX(),
                                             sensor.getDepthFocalLengthPixelsY(),
                                             sensor.getDepthPrincipalOffsetXPixels(),

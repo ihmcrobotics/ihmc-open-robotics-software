@@ -2,8 +2,13 @@ package us.ihmc.perception.rapidRegions;
 
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
+
+import java.nio.FloatBuffer;
 
 public class PatchFeatureGrid
 {
@@ -76,6 +81,26 @@ public class PatchFeatureGrid
       czImage.destroy(openCLManager);
    }
 
+   public void getNormal(int i, Vector3D vectorToPack)
+   {
+      getNormal(i/columns, i%columns, vectorToPack);
+   }
+
+   public void getCentroid(int i, Point3D pointToPack)
+   {
+      getCentroid(i/columns, i%columns, pointToPack);
+   }
+
+   public void getNormal(int row, int col, Vector3D vectorToPack)
+   {
+      vectorToPack.set(nxImage.getFloatDirect(row, col), nyImage.getFloatDirect(row, col), nzImage.getFloatDirect(row, col));
+   }
+
+   public void getCentroid(int row, int col, Point3D pointToPack)
+   {
+      pointToPack.set(cxImage.getFloatDirect(row, col), cyImage.getFloatDirect(row, col), czImage.getFloatDirect(row, col));
+   }
+
    public int getRows()
    {
       return rows;
@@ -84,6 +109,11 @@ public class PatchFeatureGrid
    public int getColumns()
    {
       return columns;
+   }
+
+   public int getTotal()
+   {
+      return rows * columns;
    }
 
    public BytedecoImage getNxImage()

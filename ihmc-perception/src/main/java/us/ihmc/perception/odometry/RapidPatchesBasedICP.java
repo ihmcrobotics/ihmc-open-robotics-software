@@ -49,10 +49,6 @@ public class RapidPatchesBasedICP
    private final DMatrixRMaj correl = new DMatrixRMaj(3, 3);
 
 
-   private final Point3D centroidOne = new Point3D();
-   private final Point3D centroidTwo = new Point3D();
-
-
    public void create(OpenCLManager openCLManager, _cl_program program, int patchRows, int patchColumns)
    {
       this.openCLManager = openCLManager;
@@ -66,7 +62,7 @@ public class RapidPatchesBasedICP
 
       parametersBuffer = new OpenCLFloatBuffer(10);
       centroidBuffer = new OpenCLFloatBuffer(patchColumns * 6);
-      correlBuffer = new OpenCLFloatBuffer(patchRows * patchColumns * 9);
+      correlBuffer = new OpenCLFloatBuffer(patchColumns * 9);
 
       rowMatchIndexImage = new BytedecoImage(patchColumns, patchRows, opencv_core.CV_16UC1);
       columnMatchIndexImage = new BytedecoImage(patchColumns, patchRows, opencv_core.CV_16UC1);
@@ -108,9 +104,15 @@ public class RapidPatchesBasedICP
          openCLManager.setKernelArgument(centroidReduceKernel, 15, parametersBuffer.getOpenCLBufferObject());
          openCLManager.execute1D(centroidReduceKernel, patchColumns);
          centroidBuffer.readOpenCLBufferObject(openCLManager);
+
+         centroidPrevious.setToZero();
+         centroidCurrent.setToZero();
+
+         LogTools.info("Before -> Centroid One: " + centroidPrevious + ", Centroid Two: " + centroidCurrent);
+
          collectCentroid(centroidBuffer.getBackingDirectFloatBuffer(), centroidPrevious, centroidCurrent);
 
-         LogTools.info("Centroid One: " + centroidOne + ", Centroid Two: " + centroidTwo);
+         LogTools.info("After -> Centroid One: " + centroidPrevious + ", Centroid Two: " + centroidCurrent);
 
          setFeatureGridKernelArguments(correlReduceKernel, previousFeatureGrid, currentFeatureGrid);
          openCLManager.setKernelArgument(correlReduceKernel, 12, rowMatchIndexImage.getOpenCLImageObject());
@@ -119,11 +121,16 @@ public class RapidPatchesBasedICP
          openCLManager.setKernelArgument(correlReduceKernel, 15, parametersBuffer.getOpenCLBufferObject());
          openCLManager.execute1D(correlReduceKernel, patchColumns);
          correlBuffer.readOpenCLBufferObject(openCLManager);
+
+         correl.zero();
          colectCorrel(correlBuffer.getBackingDirectFloatBuffer(), correl);
+
+         LogTools.info("Correlation Matrix: " + correl);
 
          openCLManager.finish();
 
          computeTransform(centroidPrevious, centroidCurrent, correl, transformToPrevious);
+         LogTools.info("Transform: \n" + transformToPrevious);
       }
    }
 
@@ -146,8 +153,8 @@ public class RapidPatchesBasedICP
    {
       int countOne = 0;
       int countTwo = 0;
-      centroidOne.set(0,0,0);
-      centroidTwo.set(0,0,0);
+      Point3D centroidOne = new Point3D();
+      Point3D centroidTwo = new Point3D();
       for (int i = 0; i < patchColumns; i++)
       {
          centroidOne.set(buffer.get(i * 6), buffer.get(i * 6 + 1), buffer.get(i * 6 + 2));
@@ -157,17 +164,15 @@ public class RapidPatchesBasedICP
          {
             countOne++;
             centroidOneToPack.add(centroidOne);
-            System.out.println(centroidOne.getX() + " " + centroidOne.getY());
          }
 
          if (centroidTwo.norm() > 0.3 && centroidTwo.norm() < 100)
          {
             countTwo++;
             centroidTwoToPack.add(centroidTwo);
-            //LogTools.info("Centroid Two: " + centroidTwo + ", Count: " + countTwo);
          }
       }
-
+      LogTools.info("Unscaled -> Centroid One: " + centroidOneToPack + ", Centroid Two: " + centroidTwoToPack);
       centroidOneToPack.scale(1.0 / countOne);
       centroidTwoToPack.scale(1.0 / countTwo);
    }

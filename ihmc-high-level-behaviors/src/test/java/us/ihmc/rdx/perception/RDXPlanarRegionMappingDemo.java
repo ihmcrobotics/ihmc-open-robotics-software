@@ -2,8 +2,6 @@ package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.Color;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.tools.MocapTools;
@@ -11,12 +9,11 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.visualizers.RDXTrajectoryGraphic;
+import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Activator;
 
 import java.io.File;
-import java.util.ArrayList;
 
 public class RDXPlanarRegionMappingDemo
 {
@@ -30,8 +27,8 @@ public class RDXPlanarRegionMappingDemo
    private PlanarRegionMappingManager mappingManager;
    private PlanarRegionMappingUIPanel planarRegionMappingUI;
 
-   private final RDXTrajectoryGraphic mocapGraphic = new RDXTrajectoryGraphic(0.02f, Color.YELLOW);
-   private final RDXTrajectoryGraphic rootJointGraphic = new RDXTrajectoryGraphic(0.02f, Color.RED);
+   private final RDXLineMeshModel mocapGraphic = new RDXLineMeshModel(0.02f, Color.YELLOW);
+   private final RDXLineMeshModel rootJointGraphic = new RDXLineMeshModel(0.02f, Color.RED);
 
    private final String perceptionLogDirectory = System.getProperty("user.home") + "/.ihmc/logs/perception/";
    private final String logFileName = "20230117_161540_PerceptionLog.hdf5";

@@ -19,18 +19,18 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.PlanarRegionRegistrationTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
+import us.ihmc.perception.odometry.RapidPatchesBasedICP;
+import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -43,6 +43,7 @@ import us.ihmc.tools.thread.ExecutorServiceTools;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -104,6 +105,8 @@ public class PlanarRegionMappingManager
                                                                                                               sensorTransformToWorld);
    private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
+
+   private final RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP();
 
    private PerceptionDataLoader perceptionDataLoader;
 
@@ -170,7 +173,8 @@ public class PlanarRegionMappingManager
    {
       planarRegionMap = new PlanarRegionMap(smoothing);
       sensorLogChannelName = PerceptionLoggerConstants.L515_DEPTH_NAME;
-      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight, 730.7891, 731.0859, 528.6094, 408.1602);
+      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 730.7891, 731.0859, 528.6094, 408.1602);
+      rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
       perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depth16UC1Image.getBytedecoOpenCVMat());
@@ -182,16 +186,13 @@ public class PlanarRegionMappingManager
    {
       planarRegionMap = new PlanarRegionMap(smoothing, "Spherical");
       sensorLogChannelName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
-      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight);
+      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
+      rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-
-      LogTools.info("Loading Initial Data");
 
       perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depth16UC1Image.getBytedecoOpenCVMat());
       perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
-
-      LogTools.info("Done Loading Initial Data");
    }
 
    public PlanarRegionMappingManager(File planarRegionLogDirectory, boolean smoothing)
@@ -277,11 +278,13 @@ public class PlanarRegionMappingManager
          planarRegionsListWithPose = getRegionsFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
          LogTools.info("Regions Found: {}", planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions());
 
-         if (planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
-         {
-            modified = true;
-            updateMapWithNewRegions(planarRegionsListWithPose);
-         }
+
+         //if (planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+         //{
+         //   modified = true;
+         //   updateMapWithNewRegions(planarRegionsListWithPose);
+         //}
+
          perceptionLogIndex++;
          rapidRegionsExtractor.setProcessing(false);
       }
@@ -291,12 +294,15 @@ public class PlanarRegionMappingManager
    {
       PlanarRegionsListWithPose regionsToReturn = new PlanarRegionsListWithPose();
 
-      loader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, index, depth16UC1Image.getBytedecoOpenCVMat());
+      loader.loadCompressedDepth(sensorLogChannelName, index, depth16UC1Image.getBytedecoOpenCVMat());
       sensorTransformToWorld.getTranslation().set(sensorPositionBuffer.get(index));
       sensorTransformToWorld.getRotation().set(sensorOrientationBuffer.get(index));
       cameraFrame.update();
 
       rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, regionsToReturn);
+      rapidPatchesBasedICP.update(rapidRegionsExtractor.getPreviousFeatureGrid(), rapidRegionsExtractor.getCurrentFeatureGrid());
+      rapidRegionsExtractor.copyFeatureGridMapUsingOpenCL();
+
       return regionsToReturn;
    }
 

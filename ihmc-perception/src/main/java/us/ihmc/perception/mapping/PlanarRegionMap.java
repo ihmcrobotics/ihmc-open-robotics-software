@@ -358,7 +358,7 @@ public class PlanarRegionMap
                      }
                      else
                      {
-                        LogTools.info("++++ Failed to Merge ****" + String.format("(Parent: %d, ChildIndex: %d)", parentIndex, childIndex));
+                        //LogTools.info("++++ Failed to Merge ****" + String.format("(Parent: %d, ChildIndex: %d)", parentIndex, childIndex));
                         childIndex++;
                      }
                   }

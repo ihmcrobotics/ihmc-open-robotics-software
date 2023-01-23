@@ -12,14 +12,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 
-public class RDXTrajectoryGraphic implements RenderableProvider
+public class RDXLineMeshModel implements RenderableProvider
 {
    private final ModelBuilder modelBuilder = new ModelBuilder();
 
@@ -33,7 +32,7 @@ public class RDXTrajectoryGraphic implements RenderableProvider
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-   public RDXTrajectoryGraphic(float lineWidth, Color color)
+   public RDXLineMeshModel(float lineWidth, Color color)
    {
       this.color = color;
       this.lineWidth = lineWidth;

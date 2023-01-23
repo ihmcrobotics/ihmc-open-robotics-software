@@ -136,7 +136,7 @@ public class StructuralPerceptionProcessWithDriver
             pngImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
             pngImageBytePointer = new BytePointer(pngImageBuffer);
 
-            rapidRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight);
+            rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
             rapidRegionsExtractor.setPatchSizeChanged(false);
 
             ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);

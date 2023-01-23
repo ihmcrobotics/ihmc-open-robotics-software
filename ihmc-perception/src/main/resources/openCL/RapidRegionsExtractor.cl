@@ -682,7 +682,7 @@ void kernel correspondenceKernel(read_only image2d_t one0, read_only image2d_t o
     int columnOne = cIndex;
 
     float radius = length(pointOne.xyz);
-    if(radius < params[2] && radius > params[3])
+    if(radius < 0.3f || radius > 100.0f)
     {
         write_imageui(matchRow, (int2)(cIndex,rIndex), (uint4)(0,0,0,0));
         write_imageui(matchColumn, (int2)(cIndex,rIndex), (uint4)(0,0,0,0));
@@ -710,6 +710,11 @@ void kernel correspondenceKernel(read_only image2d_t one0, read_only image2d_t o
                 pointTwo = (float4)(gx2,gy2,gz2,0);
                 normalTwo = (float4)(nx2,ny2,nz2,0);
 
+                float radiusTwo = length(pointTwo.xyz);
+                if(radiusTwo < 0.3f || radiusTwo > 100.0f)
+                {
+                    continue;
+                }
 
                 //pointTwo = (float4)(cloudTwo[j*3+0], cloudTwo[j*3+1], cloudTwo[j*3+2], 0);
                 //pointTwo = transform(pointTwo, (float4)(transformTwo[0], transformTwo[1], transformTwo[2], 0),
@@ -718,9 +723,11 @@ void kernel correspondenceKernel(read_only image2d_t one0, read_only image2d_t o
                 //(float4)(transformTwo[9], transformTwo[10], transformTwo[11], 0));
 
                 distance = length(pointTwo - pointOne);
-//                printf("Match: (%.2lf, %.2lf, %.2lf) : (%.2lf, %.2lf, %.2lf) -> [%.2lf]\n", pointOne.x, pointOne.y, pointOne.z, pointTwo.x, pointTwo.y, pointTwo.z, distance);
+
                 if(distance < minLength)
                 {
+//                    printf("Match: (%.2lf, %.2lf, %.2lf)[%.2lf] : (%.2lf, %.2lf, %.2lf) -> [%.2lf]\n", pointOne.x, pointOne.y, pointOne.z, radiusTwo,
+//                                                                pointTwo.x, pointTwo.y, pointTwo.z, distance);
                    minRowIndex = (uint)(rowTwo);
                    minColumnIndex = (uint)(columnTwo);
                    minLength = distance;
