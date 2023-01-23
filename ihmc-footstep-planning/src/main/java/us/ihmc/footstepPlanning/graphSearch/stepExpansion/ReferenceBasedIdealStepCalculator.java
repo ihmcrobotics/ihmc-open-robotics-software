@@ -20,7 +20,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
 
    // TODO add to footstep planner parameters
    /* Weight factor for using reference vs nominal ideal steps. Alpha = 0 means use nominal ideal step, alpha = 1 means use reference value */
-   private final double referenceAlpha = 0.5;
+   private double referenceAlpha = 0.5;
 
    public ReferenceBasedIdealStepCalculator(IdealStepCalculator nominalIdealStepCalculator)
    {
@@ -39,7 +39,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
 
       // TODO check that this indexing is correct. The sides should match if setup correctly
       List<FootstepGraphNode> pathFromStart = footstepGraph.getPathFromStart(new FootstepGraphNode(startOfSwing, stanceNode));
-      int stepIndexInPlan = pathFromStart.size();
+      int stepIndexInPlan = pathFromStart.size() - 1;
 
       if (stepIndexInPlan >= referenceFootstepPlan.getNumberOfSteps())
       {
@@ -71,5 +71,16 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    public void setFootstepGraph(DirectedGraph<FootstepGraphNode> footstepGraph)
    {
       this.footstepGraph = footstepGraph;
+   }
+
+   public void setReferenceAlpha(double referenceAlpha)
+   {
+      if (referenceAlpha <= 1.0 && referenceAlpha >= 0.0)
+         this.referenceAlpha = referenceAlpha;
+   }
+
+   public double getReferenceAlpha()
+   {
+      return referenceAlpha;
    }
 }

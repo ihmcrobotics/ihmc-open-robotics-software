@@ -78,6 +78,9 @@ public class AStarFootstepPlanner
    private int iterations = 0;
    private FootstepPlanningResult result = null;
 
+   // TODO: check if this is ok
+   private FootstepPlan referenceFootstepPlan = null;
+
    public AStarFootstepPlanner(FootstepPlannerParametersBasics footstepPlannerParameters,
                                SideDependentList<ConvexPolygon2D> footPolygons,
                                WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
@@ -513,5 +516,10 @@ public class AStarFootstepPlanner
    {
       snapper.setHeightMapData(heightMapData);
       checker.setHeightMapData(heightMapData);
+   }
+
+   public ReferenceBasedIdealStepCalculator getReferenceBasedIdealStepCalculator()
+   {
+      return referenceBasedIdealStepCalculator;
    }
 }

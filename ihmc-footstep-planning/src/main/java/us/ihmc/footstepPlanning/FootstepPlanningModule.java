@@ -604,4 +604,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          ros2Node = null;
       }
    }
+
+   public AStarFootstepPlanner getaStarFootstepPlanner()
+   {
+      return aStarFootstepPlanner;
+   }
 }
