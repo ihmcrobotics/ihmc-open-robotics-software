@@ -103,7 +103,7 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
 
             pointCloudRenderer.create(depthHeight * depthWidth);
 
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight);
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
             rapidPatchesBasedICP.create(openCLManager, openCLProgram, rapidPlanarRegionsExtractor.getPatchImageHeight(), rapidPlanarRegionsExtractor.getPatchImageWidth());
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
@@ -322,18 +322,17 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
       _cl_program program = openCLManager.loadProgram("RapidRegionsExtractor");
 
       PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
-      perceptionDataLoader.openLogFile(System.getProperty("user.home") + "/.ihmc/logs/perception/20230102_152006_PerceptionLog.hdf5");
+      perceptionDataLoader.openLogFile(System.getProperty("user.home") + "/.ihmc/logs/perception/20230117_161540_PerceptionLog.hdf5");
 
       BytedecoImage bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
       RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
       RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP();
 
-      rapidPlanarRegionsExtractor.create(openCLManager, program, depthWidth, depthHeight);
+      rapidPlanarRegionsExtractor.create(openCLManager, program, depthHeight, depthWidth);
       rapidPatchesBasedICP.create(openCLManager, program, rapidPlanarRegionsExtractor.getPatchImageHeight(), rapidPlanarRegionsExtractor.getPatchImageWidth());
 
       LogTools.info("Initialization Update");
       perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, bytedecoDepthImage.getBytedecoOpenCVMat());
-      opencv_core.flip(bytedecoDepthImage.getBytedecoOpenCVMat(), bytedecoDepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
 
       rapidPlanarRegionsExtractor.computePatchFeatureGrid(bytedecoDepthImage);
       rapidPatchesBasedICP.update(rapidPlanarRegionsExtractor.getPreviousFeatureGrid(), rapidPlanarRegionsExtractor.getCurrentFeatureGrid());
@@ -343,7 +342,6 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
 
       LogTools.info("Initialization Update");
       perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 1, bytedecoDepthImage.getBytedecoOpenCVMat());
-      opencv_core.flip(bytedecoDepthImage.getBytedecoOpenCVMat(), bytedecoDepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
 
       LogTools.info("Extracting Patch Graph");
       rapidPlanarRegionsExtractor.computePatchFeatureGrid(bytedecoDepthImage);

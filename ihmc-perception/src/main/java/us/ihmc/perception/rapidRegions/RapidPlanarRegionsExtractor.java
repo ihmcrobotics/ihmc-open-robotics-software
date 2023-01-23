@@ -103,7 +103,7 @@ public class RapidPlanarRegionsExtractor
     * @param imageWidth  width of the input depth image
     * @param imageHeight height of the input depth image
     */
-   public void create(OpenCLManager openCLManager, _cl_program program, int imageWidth, int imageHeight, double fx, double fy, double cx, double cy)
+   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
    {
       this.sensorModel = SensorModel.PERSPECTIVE;
       this.openCLManager = openCLManager;
@@ -122,7 +122,7 @@ public class RapidPlanarRegionsExtractor
       this.create();
    }
 
-   public void create(OpenCLManager openCLManager, _cl_program program, int imageWidth, int imageHeight)
+   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth)
    {
       this.sensorModel = SensorModel.SPHERICAL;
       this.openCLManager = openCLManager;
@@ -181,8 +181,6 @@ public class RapidPlanarRegionsExtractor
          findBoundariesAndHoles();
          growRegionBoundaries();
          depthFirstSearchDurationStopwatch.suspend();
-
-         copyFeatureGridMapUsingOpenCL();
 
          rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(gpuPlanarRegions, cameraFrame, regionsWithPose);
 
@@ -304,6 +302,8 @@ public class RapidPlanarRegionsExtractor
          cloudBuffer.readOpenCLBufferObject(openCLManager);
       }
 
+      openCLManager.finish();
+
    }
 
    public void copyFeatureGridMapUsingOpenCL()
@@ -322,6 +322,7 @@ public class RapidPlanarRegionsExtractor
       openCLManager.setKernelArgument(copyKernel, 11, previousFeatureGrid.getCzImage().getOpenCLImageObject());
       openCLManager.setKernelArgument(copyKernel, 12, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(copyKernel, patchImageWidth, patchImageHeight);
+      openCLManager.finish();
    }
 
    /**

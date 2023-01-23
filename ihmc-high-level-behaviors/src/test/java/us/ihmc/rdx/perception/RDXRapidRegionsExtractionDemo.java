@@ -31,7 +31,7 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.visualizers.RDXTrajectoryGraphic;
+import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -53,8 +53,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
    private ImGuiPanel navigationPanel;
 
-   private final RDXTrajectoryGraphic mocapGraphic = new RDXTrajectoryGraphic(0.02f, Color.YELLOW);
-   private final RDXTrajectoryGraphic rootJointGraphic = new RDXTrajectoryGraphic(0.02f, Color.RED);
+   private final RDXLineMeshModel mocapGraphic = new RDXLineMeshModel(0.02f, Color.YELLOW);
+   private final RDXLineMeshModel rootJointGraphic = new RDXLineMeshModel(0.02f, Color.RED);
 
    private String sensorTopicName;
 
@@ -130,7 +130,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
             pointCloudRenderer.create(depthHeight * depthWidth);
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight);
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth);
 
             rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor);
             baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
@@ -149,7 +149,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight, 730.7891, 731.0859, 528.6094, 408.1602);
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 730.7891, 731.0859, 528.6094, 408.1602);
 
             pointCloudRenderer.create(depthHeight * depthWidth);
             rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor);

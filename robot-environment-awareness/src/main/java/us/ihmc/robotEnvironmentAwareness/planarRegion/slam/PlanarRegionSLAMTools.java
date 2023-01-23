@@ -768,8 +768,8 @@ public class PlanarRegionSLAMTools
          //}
       }
 
-      LogTools.info("Match Metrics for [{}, {}]: {} " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f]", normalSimilarity,
-                        normalThreshold, normalDistance, normalDistanceThreshold), regionA.getRegionId(), regionB.getRegionId(), intersects);
+      //LogTools.info("Match Metrics for [{}, {}]: {} " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f]", normalSimilarity,
+      //                  normalThreshold, normalDistance, normalDistanceThreshold), regionA.getRegionId(), regionB.getRegionId(), intersects);
 
       //LogTools.info(String.format("(%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
       //                            regionB.getRegionId(),
