@@ -20,7 +20,7 @@ import java.util.Comparator;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 
-public class RDXImGuiPerspectiveManager
+public class RDXImGuiLayoutManager
 {
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private final Class<?> classForLoading;
@@ -28,79 +28,79 @@ public class RDXImGuiPerspectiveManager
    private final String subsequentPathToResourceFolder;
    private final String configurationExtraPath;
    private final HybridDirectory configurationBaseDirectory;
-   private final ArrayList<Consumer<HybridDirectory>> perspectiveDirectoryUpdatedListeners = new ArrayList<>();
+   private final ArrayList<Consumer<HybridDirectory>> layoutDirectoryUpdatedListeners = new ArrayList<>();
    private final ArrayList<Consumer<ImGuiConfigurationLocation>> loadListeners = new ArrayList<>();
    private final ArrayList<Consumer<ImGuiConfigurationLocation>> saveListeners = new ArrayList<>();
-   private HybridDirectory perspectiveDirectory;
-   private boolean needToReindexPerspectives = false;
+   private HybridDirectory layoutDirectory;
+   private boolean needToReindexLayouts = false;
    private boolean firstIndex = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString userHomePerspectiveNameToSave = new ImString("", 100);
-   private final ImString versionControlPerspectiveNameToSave = new ImString("", 100);
-   private final TreeSet<String> userHomePerspectives = new TreeSet<>(Comparator.comparing(String::toString));
-   private final TreeSet<String> versionControlPerspectives = new TreeSet<>(Comparator.comparing(String::toString));
-   private String currentPerspectiveName = "Main";
+   private final ImString userHomeLayoutNameToSave = new ImString("", 100);
+   private final ImString versionControlLayoutNameToSave = new ImString("", 100);
+   private final TreeSet<String> userHomeLayouts = new TreeSet<>(Comparator.comparing(String::toString));
+   private final TreeSet<String> versionControlLayouts = new TreeSet<>(Comparator.comparing(String::toString));
+   private String currentLayoutName = "Main";
    private ImGuiConfigurationLocation currentConfigurationLocation;
 
-   public RDXImGuiPerspectiveManager(Class<?> classForLoading,
-                                     String directoryNameToAssumePresent,
-                                     String subsequentPathToResourceFolder,
-                                     String configurationExtraPath,
-                                     HybridDirectory configurationBaseDirectory)
+   public RDXImGuiLayoutManager(Class<?> classForLoading,
+                                String directoryNameToAssumePresent,
+                                String subsequentPathToResourceFolder,
+                                String configurationExtraPath,
+                                HybridDirectory configurationBaseDirectory)
    {
       this.classForLoading = classForLoading;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.configurationExtraPath = configurationExtraPath;
       this.configurationBaseDirectory = configurationBaseDirectory;
-      indexPerspectives();
+      indexLayouts();
    }
 
-   public void renderImGuiPerspectiveMenu()
+   public void renderImGuiLayoutMenu()
    {
-      if (needToReindexPerspectives)
+      if (needToReindexLayouts)
       {
-         needToReindexPerspectives = false;
-         indexPerspectives();
+         needToReindexLayouts = false;
+         indexLayouts();
       }
 
-      if (ImGui.beginMenu(labels.get("Perspective")))
+      if (ImGui.beginMenu(labels.get("Layout")))
       {
          ImGui.text("Version control:");
-         renderPerspectiveManager(versionControlPerspectives, ImGuiConfigurationLocation.VERSION_CONTROL, versionControlPerspectiveNameToSave);
+         renderLayoutManager(versionControlLayouts, ImGuiConfigurationLocation.VERSION_CONTROL, versionControlLayoutNameToSave);
 
          ImGui.separator();
          ImGui.text("User home:");
-         renderPerspectiveManager(userHomePerspectives, ImGuiConfigurationLocation.USER_HOME, userHomePerspectiveNameToSave);
+         renderLayoutManager(userHomeLayouts, ImGuiConfigurationLocation.USER_HOME, userHomeLayoutNameToSave);
 
          ImGui.separator();
          if (ImGui.button(labels.get("Reindex directories")))
          {
-            needToReindexPerspectives = true;
+            needToReindexLayouts = true;
          }
          ImGui.endMenu();
       }
    }
 
-   private void indexPerspectives()
+   private void indexLayouts()
    {
-      indexPerspectives(versionControlPerspectives, HybridResourceMode.WORKSPACE, true);
-      indexPerspectives(userHomePerspectives, HybridResourceMode.EXTERNAL, false);
+      indexLayouts(versionControlLayouts, HybridResourceMode.WORKSPACE, true);
+      indexLayouts(userHomeLayouts, HybridResourceMode.EXTERNAL, false);
       if (firstIndex)
       {
          firstIndex = false;
-         if (versionControlPerspectives.contains("Main"))
+         if (versionControlLayouts.contains("Main"))
             currentConfigurationLocation = ImGuiConfigurationLocation.VERSION_CONTROL;
-         if (userHomePerspectives.contains("Main"))
+         if (userHomeLayouts.contains("Main"))
             currentConfigurationLocation = ImGuiConfigurationLocation.USER_HOME;
       }
    }
 
-   private void indexPerspectives(TreeSet<String> perspectives, HybridResourceMode resourceMode, boolean addMainEvenIfItsNotThere)
+   private void indexLayouts(TreeSet<String> layouts, HybridResourceMode resourceMode, boolean addMainEvenIfItsNotThere)
    {
-      perspectives.clear();
+      layouts.clear();
       if (addMainEvenIfItsNotThere)
-         perspectives.add("Main");
+         layouts.add("Main");
       TreeSet<String> fileNames = new TreeSet<>();
       TreeSet<String> directoryNames = new TreeSet<>();
       if (resourceMode == HybridResourceMode.WORKSPACE)
@@ -138,39 +138,39 @@ public class RDXImGuiPerspectiveManager
       {
          if (fileName.equals(RDXImGuiWindowAndDockSystem.IMGUI_SETTINGS_INI_FILE_NAME))
          {
-            perspectives.add("Main");
+            layouts.add("Main");
          }
       }
       for (String directoryName : directoryNames)
       {
-         String matchString = "Perspective";
+         String matchString = "Layout";
          if (directoryName.endsWith(matchString))
          {
-            String perspectiveName = directoryName.substring(0, directoryName.lastIndexOf(matchString));
-            LogTools.info("Found perspective {}", perspectiveName);
-            perspectives.add(perspectiveName);
+            String layoutName = directoryName.substring(0, directoryName.lastIndexOf(matchString));
+            LogTools.info("Found layout {}", layoutName);
+            layouts.add(layoutName);
          }
       }
    }
 
-   private void renderPerspectiveManager(TreeSet<String> perspectives, ImGuiConfigurationLocation configurationLocation, ImString perspectiveNameToSave)
+   private void renderLayoutManager(TreeSet<String> layouts, ImGuiConfigurationLocation configurationLocation, ImString layoutNameToSave)
    {
       boolean enableSaving = configurationLocation == ImGuiConfigurationLocation.USER_HOME
                          || (configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL && configurationBaseDirectory.isWorkspaceFileAccessAvailable());
-      for (String perspective : perspectives)
+      for (String layout : layouts)
       {
-         if (ImGui.radioButton(labels.get(perspective, configurationLocation.name()),
-                               currentPerspectiveName.equals(perspective) && currentConfigurationLocation == configurationLocation))
+         if (ImGui.radioButton(labels.get(layout, configurationLocation.name()),
+                               currentLayoutName.equals(layout) && currentConfigurationLocation == configurationLocation))
          {
-            currentPerspectiveName = perspective;
+            currentLayoutName = layout;
             currentConfigurationLocation = configurationLocation;
-            applyPerspectiveDirectory();
+            applyLayoutDirectory();
             for (Consumer<ImGuiConfigurationLocation> loadListener : loadListeners)
             {
                loadListener.accept(configurationLocation);
             }
          }
-         if (enableSaving && currentPerspectiveName.equals(perspective))
+         if (enableSaving && currentLayoutName.equals(layout))
          {
             ImGui.sameLine();
             if (ImGui.button(labels.get("Save", configurationLocation.name(), 0)))
@@ -187,18 +187,18 @@ public class RDXImGuiPerspectiveManager
       {
          ImGui.text("Save as:");
          ImGui.sameLine();
-         ImGui.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), perspectiveNameToSave, ImGuiInputTextFlags.CallbackResize);
-         String perpectiveNameToCreateString = perspectiveNameToSave.get();
-         if (!perpectiveNameToCreateString.isEmpty())
+         ImGui.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), layoutNameToSave, ImGuiInputTextFlags.CallbackResize);
+         String layoutNameToCreateString = layoutNameToSave.get();
+         if (!layoutNameToCreateString.isEmpty())
          {
             ImGui.sameLine();
             if (ImGui.button(labels.get("Save", configurationLocation.name(), 1)))
             {
-               String sanitizedName = perpectiveNameToCreateString.replaceAll(" ", "");
-               perspectives.add(sanitizedName);
-               currentPerspectiveName = sanitizedName;
-               applyPerspectiveDirectory();
-               perspectiveNameToSave.clear();
+               String sanitizedName = layoutNameToCreateString.replaceAll(" ", "");
+               layouts.add(sanitizedName);
+               currentLayoutName = sanitizedName;
+               applyLayoutDirectory();
+               layoutNameToSave.clear();
                for (Consumer<ImGuiConfigurationLocation> saveListener : saveListeners)
                {
                   saveListener.accept(configurationLocation);
@@ -208,17 +208,17 @@ public class RDXImGuiPerspectiveManager
       }
    }
 
-   public void applyPerspectiveDirectory()
+   public void applyLayoutDirectory()
    {
-      perspectiveDirectory = new HybridDirectory(dotIHMCDirectory,
-                                                 directoryNameToAssumePresent,
-                                                 subsequentPathToResourceFolder,
-                                                 classForLoading,
-                                                 configurationExtraPath + (currentPerspectiveName.equals("Main") ? "" : "/" + currentPerspectiveName
-                                                                                                                        + "Perspective"));
-      for (Consumer<HybridDirectory> perspectiveDirectoryUpdatedListener : perspectiveDirectoryUpdatedListeners)
+      layoutDirectory = new HybridDirectory(dotIHMCDirectory,
+                                            directoryNameToAssumePresent,
+                                            subsequentPathToResourceFolder,
+                                            classForLoading,
+                                                 configurationExtraPath + (currentLayoutName.equals("Main") ? "" : "/" + currentLayoutName
+                                                                                                                   + "Layout"));
+      for (Consumer<HybridDirectory> layoutDirectoryUpdatedListener : layoutDirectoryUpdatedListeners)
       {
-         perspectiveDirectoryUpdatedListener.accept(perspectiveDirectory);
+         layoutDirectoryUpdatedListener.accept(layoutDirectory);
       }
    }
 
@@ -226,11 +226,11 @@ public class RDXImGuiPerspectiveManager
     * This should be called during the update() phase.
     * It might have undesired behavior if called while in the rendering ImGui widgets phase.
     */
-   public void reloadPerspective()
+   public void reloadLayout()
    {
-      applyPerspectiveDirectory();
+      applyLayoutDirectory();
       Path directory = currentConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
-            ? perspectiveDirectory.getWorkspaceDirectory() : perspectiveDirectory.getExternalDirectory();
+            ? layoutDirectory.getWorkspaceDirectory() : layoutDirectory.getExternalDirectory();
       if (Files.exists(directory))
       {
          for (Consumer<ImGuiConfigurationLocation> loadListener : loadListeners)
@@ -245,14 +245,14 @@ public class RDXImGuiPerspectiveManager
       return currentConfigurationLocation;
    }
 
-   public HybridDirectory getPerspectiveDirectory()
+   public HybridDirectory getLayoutDirectory()
    {
-      return perspectiveDirectory;
+      return layoutDirectory;
    }
 
-   public ArrayList<Consumer<HybridDirectory>> getPerspectiveDirectoryUpdatedListeners()
+   public ArrayList<Consumer<HybridDirectory>> getLayoutDirectoryUpdatedListeners()
    {
-      return perspectiveDirectoryUpdatedListeners;
+      return layoutDirectoryUpdatedListeners;
    }
 
    public ArrayList<Consumer<ImGuiConfigurationLocation>> getSaveListeners()

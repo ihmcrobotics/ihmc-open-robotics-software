@@ -175,7 +175,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
                   baseUI.getPrimaryScene().addRenderableProvider(goalPoseGizmo::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 
                   //                  ros1Node.execute();
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                ouster.render(baseUI.getPrimaryScene());

@@ -103,7 +103,7 @@ public class WebcamROS2SubscriberDemo
                   cvImagePanel = new RDXCVImagePanel("Video1", 1920, 1080);
                   baseUI.getImGuiPanelManager().addPanel(cvImagePanel.getVideoPanel());
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
 
                   messageEncodedBytePointer = new BytePointer(25000000);
                   //                  inputJPEGYUVI420Mat = new Mat(25000000);

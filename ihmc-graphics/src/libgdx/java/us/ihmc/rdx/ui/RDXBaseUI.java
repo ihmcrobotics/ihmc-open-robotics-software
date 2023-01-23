@@ -110,7 +110,7 @@ public class RDXBaseUI
    private final ImFloat backgroundShade = new ImFloat(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
-   private final RDXImGuiPerspectiveManager perspectiveManager;
+   private final RDXImGuiLayoutManager layoutManager;
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
    private enum Theme
@@ -138,18 +138,18 @@ public class RDXBaseUI
                                                        configurationExtraPath);
 
       imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
-      perspectiveManager = new RDXImGuiPerspectiveManager(classForLoading,
-                                                          directoryNameToAssumePresent,
-                                                          subsequentPathToResourceFolder,
-                                                          configurationExtraPath,
-                                                          configurationBaseDirectory);
-      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
-      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(updatedPerspectiveDirectory ->
+      layoutManager = new RDXImGuiLayoutManager(classForLoading,
+                                                directoryNameToAssumePresent,
+                                                subsequentPathToResourceFolder,
+                                                configurationExtraPath,
+                                                configurationBaseDirectory);
+      layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
+      layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
       {
-         libGDXSettingsFile = new HybridFile(updatedPerspectiveDirectory, "GDXSettings.json");
+         libGDXSettingsFile = new HybridFile(updatedLayoutDirectory, "GDXSettings.json");
       });
-      perspectiveManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
-      perspectiveManager.getLoadListeners().add(loadConfigurationLocation ->
+      layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
+      layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
          LogTools.info("Loading libGDX settings from {}", libGDXSettingsFile.getLocationOfResourceForReading());
@@ -160,8 +160,8 @@ public class RDXBaseUI
             Gdx.graphics.setWindowedMode(width, height);
          });
       });
-      perspectiveManager.getSaveListeners().add(this::saveApplicationSettings);
-      perspectiveManager.applyPerspectiveDirectory();
+      layoutManager.getSaveListeners().add(this::saveApplicationSettings);
+      layoutManager.applyLayoutDirectory();
 
 //      guiRecorder = new RDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
 //      onCloseRequestListeners.add(guiRecorder::stop);
@@ -275,7 +275,7 @@ public class RDXBaseUI
    private void renderMenuBar()
    {
       ImGui.beginMainMenuBar();
-      perspectiveManager.renderImGuiPerspectiveMenu();
+      layoutManager.renderImGuiLayoutMenu();
       if (ImGui.beginMenu("Panels"))
       {
          imGuiWindowAndDockSystem.renderMenuDockPanelItems();
@@ -449,9 +449,9 @@ public class RDXBaseUI
       return imGuiWindowAndDockSystem.getPanelManager();
    }
 
-   public RDXImGuiPerspectiveManager getPerspectiveManager()
+   public RDXImGuiLayoutManager getLayoutManager()
    {
-      return perspectiveManager;
+      return layoutManager;
    }
 
    public RDX3DScene getPrimaryScene()
