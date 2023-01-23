@@ -292,7 +292,10 @@ public class FootstepPlannerRequest
 
    public void setReferencePlan(FootstepPlanReadOnly referencePlan)
    {
-      this.referencePlan = new FootstepPlan(referencePlan);
+      if (referencePlan == null)
+         this.referencePlan = null;
+      else
+         this.referencePlan = new FootstepPlan(referencePlan);
    }
 
    public int getRequestId()
@@ -525,6 +528,8 @@ public class FootstepPlannerRequest
       }
 
       this.heightMapMessage = other.heightMapMessage;
-      this.referencePlan = new FootstepPlan(other.referencePlan);
+
+      if (other.referencePlan != null)
+         this.referencePlan = new FootstepPlan(other.referencePlan);
    }
 }
