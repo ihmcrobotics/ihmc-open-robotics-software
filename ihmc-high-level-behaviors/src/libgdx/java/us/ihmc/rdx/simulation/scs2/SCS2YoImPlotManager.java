@@ -9,7 +9,7 @@ import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXImGuiPerspectiveManager;
+import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.rdx.ui.yo.*;
 import us.ihmc.log.LogTools;
@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 public class SCS2YoImPlotManager
 {
-   private RDXImGuiPerspectiveManager perspectiveManager;
+   private RDXImGuiLayoutManager layoutManager;
    private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
    private RDXYoManager yoManager;
    private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
@@ -33,32 +33,32 @@ public class SCS2YoImPlotManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString panelToCreateName = new ImString("", 100);
    private HybridFile configurationFile;
-   private boolean perspectiveReloadQueued = false;
-   private int delayedPerspectiveReloadCounter = 0;
+   private boolean layoutReloadQueued = false;
+   private int delayedLayoutReloadCounter = 0;
 
-   public void create(RDXImGuiPerspectiveManager perspectiveManager, ImGuiPanel parentPanel)
+   public void create(RDXImGuiLayoutManager layoutManager, ImGuiPanel parentPanel)
    {
-      this.perspectiveManager = perspectiveManager;
+      this.layoutManager = layoutManager;
       this.parentPanel = parentPanel;
 
-      updateConfigurationFile(perspectiveManager.getPerspectiveDirectory());
-      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(this::updateConfigurationFile);
-      perspectiveManager.getLoadListeners().add(this::loadConfiguration);
-      perspectiveManager.getSaveListeners().add(this::saveConfiguration);
+      updateConfigurationFile(layoutManager.getLayoutDirectory());
+      layoutManager.getLayoutDirectoryUpdatedListeners().add(this::updateConfigurationFile);
+      layoutManager.getLoadListeners().add(this::loadConfiguration);
+      layoutManager.getSaveListeners().add(this::saveConfiguration);
    }
 
    public void update()
    {
       // This is because the panel changes get queued, so we need to wait a couple frames
       // to make sure we are ready to reload.
-      if (perspectiveReloadQueued)
+      if (layoutReloadQueued)
       {
-         ++delayedPerspectiveReloadCounter;
-         if (delayedPerspectiveReloadCounter == 2)
+         ++delayedLayoutReloadCounter;
+         if (delayedLayoutReloadCounter == 2)
          {
-            delayedPerspectiveReloadCounter = 0;
-            perspectiveReloadQueued = false;
-            perspectiveManager.reloadPerspective();
+            delayedLayoutReloadCounter = 0;
+            layoutReloadQueued = false;
+            layoutManager.reloadLayout();
          }
       }
    }
@@ -78,16 +78,16 @@ public class SCS2YoImPlotManager
          removeAllPlotPanels();
          yoVariableSearchPanel.changeYoRegistry(yoManager.getRootRegistry());
 
-         perspectiveReloadQueued = true;
-         delayedPerspectiveReloadCounter = 0;
+         layoutReloadQueued = true;
+         delayedLayoutReloadCounter = 0;
       }
 
-      loadConfiguration(perspectiveManager.getCurrentConfigurationLocation());
+      loadConfiguration(layoutManager.getCurrentConfigurationLocation());
    }
 
-   private void updateConfigurationFile(HybridDirectory perspectiveDirectory)
+   private void updateConfigurationFile(HybridDirectory layoutDirectory)
    {
-      configurationFile = new HybridFile(perspectiveDirectory, getClass().getSimpleName() + ".json");
+      configurationFile = new HybridFile(layoutDirectory, getClass().getSimpleName() + ".json");
    }
 
    private void loadConfiguration(ImGuiConfigurationLocation configurationLocation)
