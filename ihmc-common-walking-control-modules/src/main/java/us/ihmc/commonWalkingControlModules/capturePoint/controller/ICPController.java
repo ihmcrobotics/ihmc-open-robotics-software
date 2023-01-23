@@ -375,12 +375,14 @@ public class ICPController implements ICPControllerInterface
                                         feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
                                         feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
+      // run a temporary computation here to get what the  unconstrained CMP would be with none of the scaling
+      computeUnconstrainedFeedbackCMP(perfectCoP, perfectCMPOffset);
       computeFeedForwardAndFeedBackAlphas();
 
       referenceFeedForwardCMPOffset.setAndScale(1.0 - feedForwardAlpha.getDoubleValue(), perfectCMPOffset);
       referenceFeedForwardCoP.interpolate(perfectCoP, desiredICP, feedForwardAlpha.getDoubleValue());
 
-      computeUnconstrainedFeedbackCMP();
+      computeUnconstrainedFeedbackCMP(referenceFeedForwardCoP, referenceFeedForwardCMPOffset);
 
       UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 
@@ -420,11 +422,11 @@ public class ICPController implements ICPControllerInterface
       return converged;
    }
 
-   private void computeUnconstrainedFeedbackCMP()
+   private void computeUnconstrainedFeedbackCMP(FramePoint2DReadOnly feedforwardCoP, FrameVector2DReadOnly feedForwardCMPOffset)
    {
       unconstrainedFeedback.setX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
       unconstrainedFeedback.setY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
-      unconstrainedFeedbackCMP.add(referenceFeedForwardCoP, referenceFeedForwardCMPOffset);
+      unconstrainedFeedbackCMP.add(feedforwardCoP, feedForwardCMPOffset);
       unconstrainedFeedbackCMP.add(unconstrainedFeedback);
    }
 

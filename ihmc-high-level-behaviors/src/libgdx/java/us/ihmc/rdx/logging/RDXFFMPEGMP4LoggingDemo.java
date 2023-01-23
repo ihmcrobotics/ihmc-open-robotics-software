@@ -67,7 +67,7 @@ public class RDXFFMPEGMP4LoggingDemo
                   imagePanel = new RDXCVImagePanel("Sample Image", image);
 
                   baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                imagePanel.draw();

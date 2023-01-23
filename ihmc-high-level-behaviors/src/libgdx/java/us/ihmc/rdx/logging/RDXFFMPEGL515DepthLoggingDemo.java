@@ -128,7 +128,7 @@ public class RDXFFMPEGL515DepthLoggingDemo
                      ffmpegLoggerDemoHelper.getLogger().put(rgbaDepthImage);
                   });
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                l515.render(baseUI.getPrimaryScene());
