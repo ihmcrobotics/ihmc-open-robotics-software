@@ -2,6 +2,7 @@ package us.ihmc.ihmcPerception.steppableRegions;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
+import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
@@ -9,13 +10,14 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SteppableRegionsCalculationModule
 {
    private static final float distanceFromCliffTops = 0.02f;
    private static final float distanceFromCliffBottoms = 0.05f;
-   private static final int yawDiscretizations = 5;
+   static final int yawDiscretizations = 5;
    private static final float footWidth = 0.12f;
    private static final float footLength = 0.22f;
 
@@ -26,26 +28,13 @@ public class SteppableRegionsCalculationModule
    private _cl_kernel computeSteppabilityConnectionsKernel;
 
    private final OpenCLFloatParameters steppableParameters = new OpenCLFloatParameters();
+   private final OpenCLFloatParameters yaw = new OpenCLFloatParameters();
    private final BytedecoImage heightMapImage = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityImage0 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityImage1 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityImage2 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityImage3 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityImage4 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityImage5 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityConnections0 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityConnections1 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityConnections2 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityConnections3 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityConnections4 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
-   private final BytedecoImage steppabilityConnections5 = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
 
-   private List<SteppableRegion> regions0;
-   private List<SteppableRegion> regions1;
-   private List<SteppableRegion> regions2;
-   private List<SteppableRegion> regions3;
-   private List<SteppableRegion> regions4;
-   private List<SteppableRegion> regions5;
+   private final List<BytedecoImage> steppabilityImages = new ArrayList<>();
+   private final List<BytedecoImage> steppabilityConnections = new ArrayList<>();
+
+   private final List<List<SteppableRegion>> regions = new ArrayList<>();
 
    private int cellsPerSide;
 
@@ -56,6 +45,12 @@ public class SteppableRegionsCalculationModule
       boolean doneLoading = false;
 
       openCLManager = new OpenCLManager();
+
+      for (int i = 0; i < yawDiscretizations; i++)
+      {
+         steppabilityImages.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
+         steppabilityConnections.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
+      }
 
       while (!doneLoading)
       {
@@ -70,9 +65,9 @@ public class SteppableRegionsCalculationModule
       }
    }
 
-   public List<SteppableRegion> getConvexSteppableRegionsYaw0()
+   public List<List<SteppableRegion>> getSteppableRegions()
    {
-      return regions0;
+      return regions;
    }
 
    /**
@@ -87,6 +82,12 @@ public class SteppableRegionsCalculationModule
       steppableRegionsProgram = openCLManager.loadProgram("SteppableRegions");
       computeSteppabilityKernel = openCLManager.createKernel(steppableRegionsProgram, "computeSteppability");
       computeSteppabilityConnectionsKernel = openCLManager.createKernel(steppableRegionsProgram, "computeSteppabilityConnections");
+
+      for (int i = 0; i < yawDiscretizations; i++)
+      {
+         steppabilityImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         steppabilityConnections.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+      }
    }
 
    public void compute(HeightMapData heightMapData)
@@ -96,39 +97,31 @@ public class SteppableRegionsCalculationModule
       populateSteppabilityParameters(heightMapData);
       populateHeightMapImage(heightMapData);
 
-      openCLManager.setKernelArgument(computeSteppabilityKernel, 0, steppableParameters.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeSteppabilityKernel, 1, heightMapImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSteppabilityKernel, 2, steppabilityImage0.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSteppabilityKernel, 3, steppabilityImage1.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSteppabilityKernel, 4, steppabilityImage2.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSteppabilityKernel, 5, steppabilityImage3.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSteppabilityKernel, 6, steppabilityImage4.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSteppabilityKernel, 7, steppabilityImage5.getOpenCLImageObject());
+      regions.clear();
+      for (int yawValue = 0; yawValue < yawDiscretizations; yawValue++)
+      {
+         yaw.setParameter((float) yawValue);
+         yaw.writeOpenCLBufferObject(openCLManager);
+         openCLManager.setKernelArgument(computeSteppabilityKernel, 0, steppableParameters.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computeSteppabilityKernel, 1, yaw.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computeSteppabilityKernel, 2, heightMapImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(computeSteppabilityKernel, 3, steppabilityImages.get(yawValue).getOpenCLImageObject());
 
-      openCLManager.execute3D(computeSteppabilityKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
+         openCLManager.execute2D(computeSteppabilityKernel, cellsPerSide, cellsPerSide);
 
-      computeConnectionsOnTheGPU(steppabilityImage0, steppabilityConnections0);
-      computeConnectionsOnTheGPU(steppabilityImage1, steppabilityConnections1);
-      computeConnectionsOnTheGPU(steppabilityImage2, steppabilityConnections2);
-      computeConnectionsOnTheGPU(steppabilityImage3, steppabilityConnections3);
-      computeConnectionsOnTheGPU(steppabilityImage4, steppabilityConnections4);
-      computeConnectionsOnTheGPU(steppabilityImage5, steppabilityConnections5);
+         openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 0, steppableParameters.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 1, steppabilityImages.get(yawValue).getOpenCLImageObject());
+         openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 2, steppabilityConnections.get(yawValue).getOpenCLImageObject());
 
-      openCLManager.finish();
+         openCLManager.execute2D(computeSteppabilityConnectionsKernel, cellsPerSide, cellsPerSide);
 
-      createRegionsFromResults(heightMapData);
-   }
+         steppabilityImages.get(yawValue).readOpenCLImage(openCLManager);
+         steppabilityConnections.get(yawValue).readOpenCLImage(openCLManager);
 
-   private void computeConnectionsOnTheGPU(BytedecoImage steppability, BytedecoImage connections)
-   {
-      openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 0, steppableParameters.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 1, steppability.getOpenCLImageObject());
-      openCLManager.setKernelArgument(computeSteppabilityConnectionsKernel, 2, connections.getOpenCLImageObject());
+         openCLManager.finish();
 
-      openCLManager.execute2D(computeSteppabilityConnectionsKernel, cellsPerSide, cellsPerSide);
-
-      steppability.readOpenCLImage(openCLManager);
-      connections.readOpenCLImage(openCLManager);
+         regions.add(createSteppableRegions(heightMapData, steppabilityImages.get(yawValue), steppabilityConnections.get(yawValue)));
+      }
    }
 
    private void resize(int cellsPerSide)
@@ -165,16 +158,6 @@ public class SteppableRegionsCalculationModule
          }
       }
       heightMapImage.writeOpenCLImage(openCLManager);
-   }
-
-   private void createRegionsFromResults(HeightMapData heightMapData)
-   {
-      regions0 = createSteppableRegions(heightMapData, steppabilityImage0, steppabilityConnections0);
-      regions1 = createSteppableRegions(heightMapData, steppabilityImage1, steppabilityConnections1);
-      regions2 = createSteppableRegions(heightMapData, steppabilityImage2, steppabilityConnections2);
-      regions3 = createSteppableRegions(heightMapData, steppabilityImage3, steppabilityConnections3);
-      regions4 = createSteppableRegions(heightMapData, steppabilityImage4, steppabilityConnections4);
-      regions5 = createSteppableRegions(heightMapData, steppabilityImage5, steppabilityConnections5);
    }
 
    private static List<SteppableRegion> createSteppableRegions(HeightMapData heightMapData, BytedecoImage steppability, BytedecoImage steppabilityConnections)
