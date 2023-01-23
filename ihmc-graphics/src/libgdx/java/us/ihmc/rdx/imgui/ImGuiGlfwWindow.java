@@ -15,7 +15,6 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
@@ -65,8 +64,7 @@ public class ImGuiGlfwWindow
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          windowSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         InputStream inputStream = windowSettingsFile.getInputStream();
-         if (inputStream != null)
+         return windowSettingsFile.getInputStream(inputStream ->
          {
             JSONFileTools.load(inputStream, jsonNode ->
             {
@@ -74,8 +72,7 @@ public class ImGuiGlfwWindow
                int height = jsonNode.get("windowHeight").asInt();
                glfwWindowForImGui.setWindowSize(width, height);
             });
-         }
-         return inputStream != null;
+         });
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
       layoutManager.applyLayoutDirectory();
