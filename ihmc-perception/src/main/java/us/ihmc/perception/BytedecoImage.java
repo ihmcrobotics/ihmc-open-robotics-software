@@ -221,19 +221,19 @@ public class BytedecoImage
       return imageHeight;
    }
 
-   public float getFloat(int x, int y)
+   public float getFloat(int column, int row)
    {
-      return pointerForAccessSpeed.getFloat((getDataKey(x, y)) * Float.BYTES);
+      return pointerForAccessSpeed.getFloat((getDataKey(column, row)) * Float.BYTES);
    }
 
-   public void setValue(int x, int y, float value)
+   public void setValue(int column, int row, float value)
    {
-      pointerForAccessSpeed.putFloat((getDataKey(x, y)) * Float.BYTES, value);
+      pointerForAccessSpeed.putFloat((getDataKey(column, row)) * Float.BYTES, value);
    }
 
-   public int getByteAsInteger(int x, int y)
+   public int getByteAsInteger(int column, int row)
    {
-      return Byte.toUnsignedInt(pointerForAccessSpeed.get(getDataKey(x, y)));
+      return Byte.toUnsignedInt(pointerForAccessSpeed.get(getDataKey(column, row)));
    }
 
    public int getByteAsInteger(int byteIndex)
@@ -242,10 +242,10 @@ public class BytedecoImage
    }
 
    /**
-    * Accesses the key for the data entry located at (x, y). This handles whether the image is row major or column major.
+    * Accesses the key for the data entry located at (column, row). This handles whether the image is row major or column major.
      */
-   public long getDataKey(int x, int y)
+   public long getDataKey(int column, int row)
    {
-      return (long) y * imageWidth + x;
+      return (long) row * imageWidth + column;
    }
 }
