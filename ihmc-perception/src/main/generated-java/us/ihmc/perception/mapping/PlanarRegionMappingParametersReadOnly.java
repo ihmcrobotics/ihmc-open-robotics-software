@@ -15,9 +15,9 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
       return get(updateAlphaTowardsMatch);
    }
 
-   default double getAngleThresholdBetweenNormals()
+   default double getSimilarityThresholdBetweenNormals()
    {
-      return get(angleThresholdBetweenNormals);
+      return get(similarityThresholdBetweenNormals);
    }
 
    default double getOrthogonalDistanceThreshold()
@@ -28,5 +28,10 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
    default double getMaxInterRegionDistance()
    {
       return get(maxInterRegionDistance);
+   }
+
+   default double getMinimumOverlapThreshold()
+   {
+      return get(minimumOverlapThreshold);
    }
 }

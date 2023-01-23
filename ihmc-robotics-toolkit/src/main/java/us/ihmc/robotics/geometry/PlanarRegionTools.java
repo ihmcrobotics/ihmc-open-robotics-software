@@ -41,6 +41,8 @@ public class PlanarRegionTools
    public double getDistanceBetweenPlanarRegions(PlanarRegion regionA, PlanarRegion regionB)
    {
       double minDistance = Double.POSITIVE_INFINITY;
+
+      // Check the distance between the two regions' bounding boxes
       for (int indexA = 0; indexA < regionA.getNumberOfConvexPolygons(); indexA++)
       {
          for (int indexB = 0; indexB < regionB.getNumberOfConvexPolygons(); indexB++)

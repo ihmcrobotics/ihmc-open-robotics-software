@@ -41,11 +41,6 @@ public class PlanarRegionMap
    private final RigidBodyTransform worldToPreviousSensorFrameTransform = new RigidBodyTransform();
    private final RigidBodyTransform odoometry = new RigidBodyTransform();
 
-   //   private static final double updateAlphaTowardsMatch = 0.05;
-   //   private static final double angleThresholdBetweenNormalsForMatch = Math.toRadians(15);
-   //   private static final float outOfPlaneDistanceFromOneRegionToAnother = 0.05f;
-   //   private static final float maxDistanceBetweenRegionsForMatch = 0.0f;
-
    private boolean initialized = false;
    private boolean modified = false;
    private int uniqueRegionsFound = 0;
@@ -101,8 +96,6 @@ public class PlanarRegionMap
       // Assign unique IDs to all incoming regions
       for (PlanarRegion region : regions.getPlanarRegionsAsList())
       {
-         LogTools.info("New Region ID: ({})", uniqueIDtracker);
-
          if (!initialized)
             region.setRegionId(uniqueIDtracker++);
          else
@@ -182,7 +175,7 @@ public class PlanarRegionMap
          addIncomingRegionsToGraph(finalMap,
                                    regions,
                                    planarRegionGraph,
-                                   (float) Math.cos(parameters.getAngleThresholdBetweenNormals()),
+                                   (float) parameters.getSimilarityThresholdBetweenNormals(),
                                    (float) parameters.getOrthogonalDistanceThreshold(),
                                    (float) parameters.getMaxInterRegionDistance());
 
@@ -191,7 +184,7 @@ public class PlanarRegionMap
 
          // go back through the existing regions and add them to the graph to check for overlap
          checkMapRegionsForOverlap(planarRegionGraph,
-                                   (float) Math.cos(parameters.getAngleThresholdBetweenNormals()),
+                                   (float) parameters.getSimilarityThresholdBetweenNormals(),
                                    (float) parameters.getOrthogonalDistanceThreshold(),
                                    (float) parameters.getMaxInterRegionDistance());
 
@@ -297,12 +290,7 @@ public class PlanarRegionMap
       }
    }
 
-   public PlanarRegionsList selfReduceRegionsIteratively(PlanarRegionsList map,
-                                                         float updateTowardsChildAlpha,
-                                                         float normalThreshold,
-                                                         float normalDistanceThreshold,
-                                                         float distanceThreshold,
-                                                         HashMap<Integer, TIntArrayList> matches)
+   public PlanarRegionsList selfReduceRegionsIteratively(PlanarRegionsList map, HashMap<Integer, TIntArrayList> matches)
    {
       matches.clear();
       boolean changed = false;
@@ -335,30 +323,37 @@ public class PlanarRegionMap
 
                   //LogTools.info("Checking Match: Parent({}) - Child({})", parentId, childId);
 
-                  if (PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion, childRegion, normalThreshold, normalDistanceThreshold, distanceThreshold))
+                  if (PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion, childRegion, (float) parameters.getSimilarityThresholdBetweenNormals(),
+                                                                   (float) parameters.getOrthogonalDistanceThreshold(),
+                                                                   (float) parameters.getMinimumOverlapThreshold()))
                   {
-                     //LogTools.info("Matched({},{}) -> Merging", parentIndex, childIndex);
-
+                     // Store match index pairs along the way for other purposes
                      if (!matches.containsKey(parentId))
                      {
                         matches.put(parentId, new TIntArrayList());
                      }
+                     else
+                     {
+                        matches.get(parentId).add(childId);
+                     }
 
-                     matches.get(parentId).add(childId);
-
-                     if (PlanarRegionSLAMTools.mergeRegionIntoParent(parentRegion, childRegion, updateTowardsChildAlpha))
+                     // Request a merge for parent and child regions. If they don't merge, pick the parent if it belongs to the map (based on sign of ID)
+                     if (PlanarRegionSLAMTools.mergeRegionIntoParent(parentRegion, childRegion, parameters.getUpdateAlphaTowardsMatch()))
                      {
                         //LogTools.info("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
 
+                        // Generate ID for the merged region
                         int finalId = generatePostMergeId(parentRegion.getRegionId(), childRegion.getRegionId());
                         parentRegion.setRegionId(finalId);
 
                         changed = true;
+
+                        LogTools.info("Merged Parent({}) - Child({}): Final ID: {}", parentId, childId, finalId);
                         map.getPlanarRegionsAsList().remove(childIndex);
                      }
                      else
                      {
-                        //LogTools.info("++++ Failed to Merge ****" + String.format("(Parent: %d, ChildIndex: %d)", parentIndex, childIndex));
+                        LogTools.info("[EMPTY] Could not merge: Parent({}) - Child({})", parentId, childId);
                         childIndex++;
                      }
                   }
@@ -385,12 +380,7 @@ public class PlanarRegionMap
                                                           PlanarRegionsList regions)
    {
       map.addPlanarRegionsList(regions);
-      map = selfReduceRegionsIteratively(map,
-                                         (float) parameters.getUpdateAlphaTowardsMatch(),
-                                         (float) Math.cos(parameters.getAngleThresholdBetweenNormals()),
-                                         (float) parameters.getOrthogonalDistanceThreshold(),
-                                         (float) parameters.getMaxInterRegionDistance(),
-                                         planarRegionMatches);
+      map = selfReduceRegionsIteratively(map, planarRegionMatches);
       return map;
    }
 
@@ -492,16 +482,28 @@ public class PlanarRegionMap
 
    private int generatePostMergeId(int parentIndex, int childIndex)
    {
-      if (parentIndex > 0 && childIndex > 0)
-         return Math.min(parentIndex, childIndex);
-      else if (parentIndex > 0 && childIndex < 0)
-         return parentIndex;
-      else if (parentIndex < 0 && childIndex > 0)
-         return childIndex;
-      else if (parentIndex < 0 && childIndex < 0)
-         return Math.max(parentIndex, childIndex);
-      else
-         return 0;
+      int idToReturn = 0;
+      if (parentIndex > 0 && childIndex > 0) // Both belong to the map
+      {
+         idToReturn = Math.min(parentIndex, childIndex);
+         LogTools.info("Action: Both belong to the map: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+      }
+      else if (parentIndex > 0 && childIndex < 0) // Parent belongs to the map, child belongs to the incoming regions
+      {
+         idToReturn = parentIndex;
+         LogTools.info("Action: Parent in map, child incoming: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+      }
+      else if (parentIndex < 0 && childIndex > 0) // Parent belongs to the incoming regions, child belongs to the map
+      {
+         idToReturn = childIndex;
+         LogTools.info("Action: Parent incoming, child in map: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+      }
+      else if (parentIndex < 0 && childIndex < 0) // Both belong to the incoming regions
+      {
+         idToReturn = Math.max(parentIndex, childIndex);
+         LogTools.info("Action: Both incoming: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+      }
+      return idToReturn;
    }
 
    private void processUniqueRegions(PlanarRegionsList map)

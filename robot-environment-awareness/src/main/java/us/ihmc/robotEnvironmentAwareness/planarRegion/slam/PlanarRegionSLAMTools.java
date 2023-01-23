@@ -16,7 +16,9 @@ import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -650,6 +652,11 @@ public class PlanarRegionSLAMTools
       return collisionResult.areShapesColliding();
    }
 
+   public static double computeBoundingBoxOverlapScore(PlanarRegion a, PlanarRegion b)
+   {
+      return GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(a.getBoundingBox3dInWorld(), b.getBoundingBox3dInWorld());
+   }
+
    public static boolean boxesIn3DIntersect(PlanarRegion a, PlanarRegion b)
    {
       Box3D boxA = PlanarRegionTools.getLocalBoundingBox3DInWorldWithMargin(a, 0.1);
@@ -722,6 +729,10 @@ public class PlanarRegionSLAMTools
             return false;
          }
       }
+      else
+      {
+
+      }
 
 //      throw new RuntimeException("Shoot");
       return false;
@@ -731,10 +742,8 @@ public class PlanarRegionSLAMTools
                                                 PlanarRegion regionB,
                                                 float normalThreshold,
                                                 float normalDistanceThreshold,
-                                                float distanceThreshold)
+                                                float overlapThreshold)
    {
-      PlanarRegionTools planarRegionTools = new PlanarRegionTools();
-
       Point3D newOrigin = new Point3D();
       regionA.getOrigin(newOrigin);
 
@@ -746,7 +755,7 @@ public class PlanarRegionSLAMTools
 
       double normalDistance = 0;
       boolean intersects = false;
-      double closestDistance = 0;
+      double overlapScore = 0;
       double normalSimilarity = regionB.getNormal().dot(regionA.getNormal());
 
       boolean wasMatched = normalSimilarity > normalThreshold;
@@ -755,17 +764,18 @@ public class PlanarRegionSLAMTools
          normalDistance = Math.abs(originVec.dot(regionA.getNormal()));
          wasMatched &= normalDistance < normalDistanceThreshold;
 
-         //if(wasMatched)
-         //{
-         //   closestDistance = planarRegionTools.getDistanceBetweenPlanarRegions(regionA, regionB);
-         //   wasMatched &= closestDistance <= distanceThreshold;
-         //}
+//         if(wasMatched)
+//         {
+//            closestDistance = planarRegionTools.getDistanceBetweenPlanarRegions(regionA, regionB);
+//            wasMatched &= closestDistance <= distanceThreshold;
+//         }
 
-         //if(wasMatched)
-         //{
-         //   intersects = boxesIn3DIntersect(regionA, regionB);
-         //   wasMatched &= intersects;
-         //}
+         if(wasMatched)
+         {
+            overlapScore = computeBoundingBoxOverlapScore(regionA, regionB);
+            intersects =  overlapScore > overlapThreshold;
+            wasMatched &= intersects;
+         }
       }
 
       //LogTools.info("Match Metrics for [{}, {}]: {} " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f]", normalSimilarity,

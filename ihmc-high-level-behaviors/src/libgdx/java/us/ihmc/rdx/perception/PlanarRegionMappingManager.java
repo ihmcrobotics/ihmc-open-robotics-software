@@ -1,7 +1,6 @@
 package us.ihmc.rdx.perception;
 
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -14,29 +13,20 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.PlanarRegionRegistrationTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.odometry.RapidPatchesBasedICP;
-import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
-import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.RDX3DPanelTooltip;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
@@ -45,7 +35,6 @@ import us.ihmc.tools.thread.ExecutorServiceTools;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -150,8 +139,6 @@ public class PlanarRegionMappingManager
        */
 
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
-
-
 
       //rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
       //rapidRegionsUIPanel.create(rapidRegionsExtractor);
@@ -277,7 +264,6 @@ public class PlanarRegionMappingManager
       {
          LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
 
-
          loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
 
          planarRegionsListWithPose = new PlanarRegionsListWithPose();
@@ -294,7 +280,7 @@ public class PlanarRegionMappingManager
             updateMapWithNewRegions(planarRegionsListWithPose);
          }
 
-         perceptionLogIndex+=1;
+         perceptionLogIndex += 1;
          rapidRegionsExtractor.setProcessing(false);
       }
    }
