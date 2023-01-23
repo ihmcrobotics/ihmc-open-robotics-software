@@ -135,7 +135,7 @@ public class RDXHighLevelDepthSensorDemo
                                                            true);
                   baseUI.getImGuiPanelManager().addPanel(mainViewDepthPanel.getVideoPanel());
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                image.resize(aliasedRenderedAreaWidth, aliasedRenderedAreaHeight, null, depthBuffer);
