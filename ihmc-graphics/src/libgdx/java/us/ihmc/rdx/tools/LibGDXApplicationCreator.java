@@ -20,6 +20,11 @@ public class LibGDXApplicationCreator
       return getDefaultConfiguration(clazz.getSimpleName(), DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
    }
 
+   public static Lwjgl3ApplicationConfiguration getDefaultConfiguration(String title)
+   {
+      return getDefaultConfiguration(title, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+   }
+
    public static Lwjgl3ApplicationConfiguration getDefaultConfiguration(String title, double width, double height)
    {
       Lwjgl3ApplicationConfiguration applicationConfiguration = new Lwjgl3ApplicationConfiguration();
