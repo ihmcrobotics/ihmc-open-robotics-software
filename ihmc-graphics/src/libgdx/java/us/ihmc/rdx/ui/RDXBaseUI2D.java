@@ -27,7 +27,6 @@ import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -91,8 +90,7 @@ public class RDXBaseUI2D
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         InputStream inputStream = libGDXSettingsFile.getInputStream();
-         if (inputStream != null)
+         return libGDXSettingsFile.getInputStream(inputStream ->
          {
             JSONFileTools.load(inputStream, jsonNode ->
             {
@@ -100,8 +98,7 @@ public class RDXBaseUI2D
                int height = jsonNode.get("windowHeight").asInt();
                Gdx.graphics.setWindowedMode(width, height);
             });
-         }
-         return inputStream != null;
+         });
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
       layoutManager.applyLayoutDirectory();

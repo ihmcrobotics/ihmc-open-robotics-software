@@ -32,7 +32,6 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -154,8 +153,7 @@ public class RDXBaseUI
       {
          libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
          LogTools.info("Loading libGDX settings from {}", libGDXSettingsFile.getLocationOfResourceForReading());
-         InputStream inputStream = libGDXSettingsFile.getInputStream();
-         if (inputStream != null)
+         return libGDXSettingsFile.getInputStream(inputStream ->
          {
             JSONFileTools.load(inputStream, jsonNode ->
             {
@@ -163,12 +161,7 @@ public class RDXBaseUI
                int height = jsonNode.get("windowHeight").asInt();
                Gdx.graphics.setWindowedMode(width, height);
             });
-         }
-         else
-         {
-            LogTools.error("Input stream is null");
-         }
-         return inputStream != null;
+         });
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
       layoutManager.applyLayoutDirectory();
