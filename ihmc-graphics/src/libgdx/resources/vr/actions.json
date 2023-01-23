@@ -67,6 +67,11 @@
          "type" : "boolean"
       },
       {
+         "name" : "/actions/main/in/right_bbuttondoubleclick",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
          "name" : "/actions/main/in/left_btouched",
          "requirement" : "mandatory",
          "type" : "boolean"
@@ -148,6 +153,7 @@
          "/actions/main/in/right_atouched" : "A Touched Right",
          "/actions/main/in/left_bbutton" : "B Button Left",
          "/actions/main/in/right_bbutton" : "B Button Right",
+         "/actions/main/in/right_bbuttondoubleclick" : "B Button Double Click Right",
          "/actions/main/in/left_btouched" : "B Touched Left",
          "/actions/main/in/right_btouched" : "B Touched Right",
          "/actions/main/in/left_joystickpress" : "Joystick Press Left",
