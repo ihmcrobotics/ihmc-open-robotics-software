@@ -24,7 +24,6 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
-import java.io.InputStream;
 import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -215,10 +214,9 @@ public class RDXImGuiWindowAndDockSystem
    {
       imGuiSettingsFile.setMode(configurationLocation.toHybridResourceMode());
       LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getLocationOfResourceForReading());
-      InputStream settingsInputStream = imGuiSettingsFile.getInputStream();
-      if (settingsInputStream != null)
+      boolean settingsSuccess = imGuiSettingsFile.getInputStream(inputStream ->
       {
-         String settingsINIAsString = ResourceTools.readResourceToString(settingsInputStream);
+         String settingsINIAsString = ResourceTools.readResourceToString(inputStream);
          ImGuiTools.parsePrimaryWindowSizeFromSettingsINI(settingsINIAsString, calculatedPrimaryWindowSize);
          calculatedPrimaryWindowSize.setWidth(calculatedPrimaryWindowSize.getWidth() + getFrameSizeLeft() + getFrameSizeRight());
          calculatedPrimaryWindowSize.setHeight(calculatedPrimaryWindowSize.getHeight() + getFrameSizeTop() + getFrameSizeBottom()
@@ -232,24 +230,15 @@ public class RDXImGuiWindowAndDockSystem
                                       calculatedPrimaryWindowSize.getWidth(),
                                       calculatedPrimaryWindowSize.getHeight()));
          ImGui.loadIniSettingsFromMemory(settingsINIAsString);
-      }
-      else
-      {
-         LogTools.error("Input stream is null");
-      }
+      });
 
       panelsFile.setMode(configurationLocation.toHybridResourceMode());
       LogTools.info("Loading ImGui panels settings from {}", panelsFile.getLocationOfResourceForReading());
-      InputStream panelSettingsInputStream = panelsFile.getInputStream();
-      if (panelSettingsInputStream != null)
+      boolean panelSettingsSuccess = panelsFile.getInputStream(inputStream ->
       {
-         JSONFileTools.load(panelSettingsInputStream, this::loadPanelsJSON);
-      }
-      else
-      {
-         LogTools.error("Input stream is null");
-      }
-      return settingsInputStream != null && panelSettingsInputStream != null;
+         JSONFileTools.load(inputStream, this::loadPanelsJSON);
+      });
+      return settingsSuccess && panelSettingsSuccess;
    }
 
    private void loadPanelsJSON(JsonNode jsonNode)
