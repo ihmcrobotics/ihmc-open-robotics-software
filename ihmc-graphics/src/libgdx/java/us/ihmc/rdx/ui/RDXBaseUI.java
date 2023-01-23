@@ -153,11 +153,14 @@ public class RDXBaseUI
       {
          libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
          LogTools.info("Loading libGDX settings from {}", libGDXSettingsFile.getLocationOfResourceForReading());
-         JSONFileTools.load(libGDXSettingsFile.getInputStream(), jsonNode ->
+         return libGDXSettingsFile.getInputStream(inputStream ->
          {
-            int width = jsonNode.get("windowWidth").asInt();
-            int height = jsonNode.get("windowHeight").asInt();
-            Gdx.graphics.setWindowedMode(width, height);
+            JSONFileTools.load(inputStream, jsonNode ->
+            {
+               int width = jsonNode.get("windowWidth").asInt();
+               int height = jsonNode.get("windowHeight").asInt();
+               Gdx.graphics.setWindowedMode(width, height);
+            });
          });
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
@@ -186,7 +189,7 @@ public class RDXBaseUI
          windowHeight.set(jsonNode.get("windowHeight").asInt());
       });
 
-      LogTools.info("Launching GDX application");
+      LogTools.info("Launching RDX application");
       LibGDXApplicationCreator.launchGDXApplication(applicationAdapter, windowTitle, windowWidth.get(), windowHeight.get());
    }
 
@@ -214,7 +217,7 @@ public class RDXBaseUI
       primary3DPanel.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
       primaryScene.addCoordinateFrame(0.3);
 
-      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), layoutManager);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
@@ -389,7 +392,7 @@ public class RDXBaseUI
          root.put("windowWidth", Gdx.graphics.getWidth());
          root.put("windowHeight", Gdx.graphics.getHeight());
       };
-      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
+      if (saveConfigurationLocation.isVersionControl())
       {
          LogTools.info("Saving libGDX settings to {}", libGDXSettingsFile.getWorkspaceFile().toString());
          JSONFileTools.save(libGDXSettingsFile.getWorkspaceFile(), rootConsumer);
