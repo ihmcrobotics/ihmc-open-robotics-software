@@ -155,7 +155,8 @@ public class PlanarRegionMappingManager
       perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
-      createOuster(128, 2048, smoothing);
+      //createOuster(128, 2048, smoothing);
+      createOuster(768, 1024, smoothing);
    }
 
    private void createL515(int depthHeight, int depthWidth, boolean smoothing)
@@ -338,8 +339,13 @@ public class PlanarRegionMappingManager
       planarRegionMap.reset();
       latestPlanarRegionsForRendering.set(new PlanarRegionsList());
       planarRegionMap.setModified(true);
-      if (updateMapFuture.isCancelled() || updateMapFuture.isDone())
-         launchMapper();
+      perceptionLogIndex = 0;
+
+      if(updateMapFuture != null)
+      {
+         if (updateMapFuture.isCancelled() || updateMapFuture.isDone())
+            launchMapper();
+      }
    }
 
    public void hardResetTheMap()

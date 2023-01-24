@@ -738,6 +738,80 @@ public class PlanarRegionSLAMTools
       return false;
    }
 
+   public static PlanarRegion getMergedPlanarRegion(PlanarRegion firstRegion, PlanarRegion secondRegion, double updateTowardsSecondAlpha)
+   {
+
+      PlanarRegion regionToReturn = new PlanarRegion();
+
+      ArrayList<PlanarRegion> mergedRegion = ConcaveHullMerger.mergePlanarRegions(firstRegion, secondRegion, 1.0f, null);
+
+      boolean merged = (mergedRegion != null);
+      if(merged) merged &= (mergedRegion.size() > 0);
+
+      if (merged) // A brand new merged region was returned
+      {
+         regionToReturn.set(mergedRegion.get(0));
+         regionToReturn.setRegionId(Integer.MIN_VALUE);
+         updateRegionPlaneTowardsReference(regionToReturn, secondRegion, updateTowardsSecondAlpha);
+      }
+      else // Merge unsuccessful
+      {
+         if (firstRegion.getConvexHull().isPointInside(secondRegion.getConvexHull().getVertex(0))) // Second is inside first
+         {
+            regionToReturn.set(firstRegion);
+         }
+         else if (secondRegion.getConvexHull().isPointInside(firstRegion.getConvexHull().getVertex(0))) // First is inside second
+         {
+            regionToReturn.set(secondRegion);
+         }
+         else if(secondRegion.getNumberOfTimesMatched() > firstRegion.getNumberOfTimesMatched()) // Second has more measurements
+         {
+            regionToReturn.set(secondRegion);
+         }
+         else if(secondRegion.getConcaveHullSize() > firstRegion.getConcaveHullSize()) // Second has larger concave hull
+         {
+            regionToReturn.set(secondRegion);
+         }
+         else
+         {
+            regionToReturn.set(firstRegion);
+         }
+      }
+
+      return regionToReturn;
+   }
+
+   private static void updateRegionPlaneTowardsReference(PlanarRegion regionToModify, PlanarRegion regionToRefer, double updateTowardsSecondAlpha)
+   {
+      // Update Map Region Normal and Origin
+      UnitVector3DReadOnly firstNormal = regionToModify.getNormal();
+      Point3DReadOnly firstOrigin = regionToModify.getPoint();
+
+      UnitVector3DReadOnly secondNormal = regionToRefer.getNormal();
+      Point3DReadOnly secondOrigin = regionToRefer.getPoint();
+
+      Vector3D futureNormal = new Vector3D();
+      futureNormal.interpolate(firstNormal, secondNormal, updateTowardsSecondAlpha);
+
+      double futureHeightZ = EuclidCoreTools.interpolate(firstOrigin.getZ(), secondOrigin.getZ(), updateTowardsSecondAlpha);
+
+      Vector3D normalVector = new Vector3D(firstNormal);
+      Vector3D axis = new Vector3D();
+      axis.cross(normalVector, futureNormal);
+      double angle = normalVector.angle(futureNormal);
+
+      Point3D futureOrigin = new Point3D(firstOrigin.getX(), firstOrigin.getY(), futureHeightZ);
+      AxisAngle rotationToFutureRegion = new AxisAngle(axis, angle);
+      Vector3D translationToFutureRegion = new Vector3D();
+      translationToFutureRegion.sub(futureOrigin, firstOrigin);
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.appendOrientation(rotationToFutureRegion);
+      transform.appendTranslation(translationToFutureRegion);
+
+      regionToModify.applyTransform(transform);
+   }
+
    public static boolean checkRegionsForOverlap(PlanarRegion regionA,
                                                 PlanarRegion regionB,
                                                 float normalThreshold,
@@ -778,8 +852,8 @@ public class PlanarRegionSLAMTools
          }
       }
 
-      //LogTools.info("Match Metrics for [{}, {}]: {} " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f]", normalSimilarity,
-      //                  normalThreshold, normalDistance, normalDistanceThreshold), regionA.getRegionId(), regionB.getRegionId(), intersects);
+      //LogTools.info("Match Metrics for [{}, {}]: " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f], Overlap: %.2f [%.2f]", normalSimilarity,
+      //                  normalThreshold, normalDistance, normalDistanceThreshold, overlapScore, overlapThreshold), regionA.getRegionId(), regionB.getRegionId());
 
       //LogTools.info(String.format("(%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
       //                            regionB.getRegionId(),

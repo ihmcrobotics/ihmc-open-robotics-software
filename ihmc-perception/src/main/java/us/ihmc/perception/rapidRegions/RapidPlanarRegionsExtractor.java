@@ -186,7 +186,7 @@ public class RapidPlanarRegionsExtractor
 
          wholeAlgorithmDurationStopwatch.suspend();
 
-         //debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(), currentFeatureGrid, patchGraph, cloudBuffer.getBackingDirectFloatBuffer());
+         debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(), currentFeatureGrid, patchGraph, cloudBuffer.getBackingDirectFloatBuffer());
 
          modified = true;
       }
