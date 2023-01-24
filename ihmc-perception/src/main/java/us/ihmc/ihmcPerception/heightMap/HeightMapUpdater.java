@@ -84,7 +84,7 @@ public class HeightMapUpdater
       heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
    }
 
-   public StoredPropertySet getHeightMapParameters()
+   public HeightMapParametersBasics getHeightMapParameters()
    {
       return parameters;
    }

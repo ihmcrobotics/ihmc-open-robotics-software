@@ -19,6 +19,7 @@ import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParametersBasics;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -113,6 +114,11 @@ public class RemoteHeightMapUpdater
             updateThreadIsRunning.set(false);
          }
       }
+   }
+
+   public HeightMapParametersBasics getParameters()
+   {
+      return heightMapUpdater.getHeightMapParameters();
    }
 
    public HeightMapData getLatestHeightMap()

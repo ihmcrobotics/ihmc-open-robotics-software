@@ -147,7 +147,19 @@ public class RDXSteppableRegionsCalculatorUI
          SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environmentModel = steppableRegionsCalculationModule.getRegionEnvironments().get(i);
          if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
          {
-            int size = panel.getBytedecoImage().getImageHeight();
+            BytedecoImage image = panel.getBytedecoImage();
+            int size = image.getImageHeight();
+            // fill with black
+            for (int x = 0; x < image.getImageWidth(); x++)
+            {
+               for (int y = 0; y < image.getImageHeight(); y++)
+               {
+                  BytePointer pixel = image.getBytedecoOpenCVMat().ptr(x, y);
+                  pixel.put(0, (byte) 0);
+                  pixel.put(1, (byte) 0);
+                  pixel.put(2, (byte) 0);
+               }
+            }
             for (SteppableRegionsCalculator.SteppableRegionDataHolder region : environmentModel.getRegions())
             {
                for (SteppableRegionsCalculator.SteppableCell cell : region.getCells())
@@ -161,7 +173,7 @@ public class RDXSteppableRegionsCalculatorUI
                   int r = (region.regionNumber + 1) * 312 % 255;
                   int g = (region.regionNumber + 1) * 123 % 255;
                   int b = (region.regionNumber + 1) * 231 % 255;
-                  BytePointer pixel = panel.getBytedecoImage().getBytedecoOpenCVMat().ptr(row, column);
+                  BytePointer pixel = image.getBytedecoOpenCVMat().ptr(row, column);
                   pixel.put(0, (byte) r);
                   pixel.put(1, (byte) g);
                   pixel.put(2, (byte) b);
