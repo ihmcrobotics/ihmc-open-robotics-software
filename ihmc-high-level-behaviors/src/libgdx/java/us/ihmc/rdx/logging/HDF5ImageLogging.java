@@ -45,7 +45,7 @@ public class HDF5ImageLogging
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode duration");
    private final ImPlotIntegerPlot compressedBytesPlot = new ImPlotIntegerPlot("Compressed bytes");
    private enum Encoding { PNG, JPEG }
-   private Encoding encodingSelection = Encoding.PNG;
+   private Encoding encodingSelection = Encoding.JPEG;
    private final ImInt jpegQuality = new ImInt(95);
    private final IntPointer pngCompressionParameters;
    private IntPointer jpegCompressionParameters;
