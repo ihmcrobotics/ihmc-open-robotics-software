@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.mapping.PlanarRegionMap;
@@ -139,6 +140,7 @@ public class PlanarRegionMappingManager
        */
 
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
+      rapidRegionsExtractor.getDebugger().setEnabled(false);
 
       //rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
       //rapidRegionsUIPanel.create(rapidRegionsExtractor);
@@ -155,8 +157,8 @@ public class PlanarRegionMappingManager
       perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
-      //createOuster(128, 2048, smoothing);
-      createOuster(768, 1024, smoothing);
+      createOuster(128, 2048, smoothing);
+      //createL515(768, 1024, smoothing);
    }
 
    private void createL515(int depthHeight, int depthWidth, boolean smoothing)
@@ -263,22 +265,25 @@ public class PlanarRegionMappingManager
 
       if (source == DataSource.PERCEPTION_LOG)
       {
-         LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
-
-         loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
-
-         planarRegionsListWithPose = new PlanarRegionsListWithPose();
-         rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, planarRegionsListWithPose);
-
-         LogTools.info("Regions Found: {}", planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions());
-
-         //rapidPatchesBasedICP.update(rapidRegionsExtractor.getPreviousFeatureGrid(), rapidRegionsExtractor.getCurrentFeatureGrid());
-         //rapidRegionsExtractor.copyFeatureGridMapUsingOpenCL();
-
-         if (planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+         if(perceptionLogIndex % HDF5Manager.MAX_BUFFER_SIZE != (HDF5Manager.MAX_BUFFER_SIZE - 1))
          {
-            modified = true;
-            updateMapWithNewRegions(planarRegionsListWithPose);
+            LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
+
+            loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
+
+            planarRegionsListWithPose = new PlanarRegionsListWithPose();
+            rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, planarRegionsListWithPose);
+
+            LogTools.info("Regions Found: {}", planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions());
+
+            //rapidPatchesBasedICP.update(rapidRegionsExtractor.getPreviousFeatureGrid(), rapidRegionsExtractor.getCurrentFeatureGrid());
+            //rapidRegionsExtractor.copyFeatureGridMapUsingOpenCL();
+
+            if (planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+            {
+               modified = true;
+               updateMapWithNewRegions(planarRegionsListWithPose);
+            }
          }
 
          perceptionLogIndex += 1;

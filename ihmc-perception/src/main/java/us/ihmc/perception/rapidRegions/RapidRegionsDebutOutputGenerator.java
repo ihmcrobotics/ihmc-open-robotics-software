@@ -31,6 +31,7 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class RapidRegionsDebutOutputGenerator
 {
+   private boolean enabled = false;
    private boolean showPointCloud = true;
 
    private Mat debugImage;
@@ -46,6 +47,9 @@ public class RapidRegionsDebutOutputGenerator
 
    public void drawRegionInternalPatches(GPUPlanarRegionIsland island, int patchHeight, int patchWidth)
    {
+      if (!enabled)
+         return;
+
       for (Point2D regionIndex : island.planarRegion.getRegionIndices())
       {
          int x = (int) regionIndex.getX();
@@ -62,6 +66,9 @@ public class RapidRegionsDebutOutputGenerator
 
    public void drawRegionRing(GPURegionRing regionRing, int patchHeight, int patchWidth)
    {
+      if (!enabled)
+         return;
+
       for (Vector2D boundaryIndex : regionRing.getBoundaryIndices())
       {
          int x = (int) boundaryIndex.getX();
@@ -78,6 +85,9 @@ public class RapidRegionsDebutOutputGenerator
 
    public void constructPointCloud(FloatBuffer buffer, int numberOfPoints)
    {
+      if (!enabled)
+         return;
+
       debugPoints.clear();
       for (int i = 0; i < numberOfPoints; i++)
       {
@@ -99,6 +109,9 @@ public class RapidRegionsDebutOutputGenerator
 
    public void constructPointCloud(BytedecoImage cxImage, BytedecoImage cyImage, BytedecoImage czImage)
    {
+      if (!enabled)
+         return;
+
       FloatBuffer cxBuffer = cxImage.getBackingDirectByteBuffer().asFloatBuffer();
       FloatBuffer cyBuffer = cyImage.getBackingDirectByteBuffer().asFloatBuffer();
       FloatBuffer czBuffer = czImage.getBackingDirectByteBuffer().asFloatBuffer();
@@ -130,6 +143,9 @@ public class RapidRegionsDebutOutputGenerator
                                             BytedecoImage nyImage,
                                             BytedecoImage nzImage)
    {
+
+      if (!enabled)
+         return;
 
       FloatBuffer cxBuffer = cxImage.getBackingDirectByteBuffer().asFloatBuffer();
       FloatBuffer cyBuffer = cyImage.getBackingDirectByteBuffer().asFloatBuffer();
@@ -165,6 +181,9 @@ public class RapidRegionsDebutOutputGenerator
 
    public void printPatchGraph(BytedecoImage patchGraph)
    {
+      if (!enabled)
+         return;
+
       for (int i = 0; i < patchGraph.getImageHeight(); i++)
       {
          for (int j = 0; j < patchGraph.getImageWidth(); j++)
@@ -183,16 +202,25 @@ public class RapidRegionsDebutOutputGenerator
 
    public void drawInternalNode(int id, int patchRow, int patchCol, int patchHeight, int patchWidth)
    {
+      if (!enabled)
+         return;
+
       drawNode(patchRow, patchCol, patchHeight, patchWidth, getColor(id));
    }
 
    public void drawBoundaryNode(int id, int patchRow, int patchCol, int patchHeight, int patchWidth)
    {
+      if (!enabled)
+         return;
+
       drawNode(patchRow, patchCol, patchHeight, patchWidth, boundaryColor);
    }
 
    private void drawNode(int patchRow, int patchCol, int patchHeight, int patchWidth, Scalar color)
    {
+      if (!enabled)
+         return;
+
       opencv_imgproc.circle(debugImage, new Point(patchRow * patchHeight, patchCol * patchWidth), 2, color, -1, -1, 0);
    }
 
@@ -211,6 +239,9 @@ public class RapidRegionsDebutOutputGenerator
 
    public void update(Mat inputDepthImage, PatchFeatureGrid patchFeatureGrid, BytedecoImage patchGraph, FloatBuffer floatBuffer)
    {
+      if (!enabled)
+         return;
+
 //      printPatchGraph(patchGraph);
 
       if(showPointCloud)
@@ -227,6 +258,9 @@ public class RapidRegionsDebutOutputGenerator
 
    public void displayInputDepth(Mat depth, int delay)
    {
+      if (!enabled)
+         return;
+
       Mat depthDisplay = new Mat();
       BytedecoOpenCVTools.clampTo8BitUnsignedChar(depth, depthDisplay, 0.0, 255.0);
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(depthDisplay, depthDisplay);
@@ -241,6 +275,9 @@ public class RapidRegionsDebutOutputGenerator
 
    public void showDebugImage(int delay)
    {
+      if (!enabled)
+         return;
+
       BytedecoOpenCVTools.display("Debug Output", debugImage, delay);
    }
 
@@ -251,6 +288,9 @@ public class RapidRegionsDebutOutputGenerator
 
    public void transformPoints(RigidBodyTransform transform)
    {
+      if (!enabled)
+         return;
+
       for(Point3D32 point : debugPoints)
       {
          point.applyTransform(transform);
@@ -265,6 +305,16 @@ public class RapidRegionsDebutOutputGenerator
    public RecyclingArrayList<UnitVector3D> getDebugNormals()
    {
       return debugNormals;
+   }
+
+   public boolean isEnabled()
+   {
+      return enabled;
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      this.enabled = enabled;
    }
 
    ///* A one-time method to convert depth map to renderable pointcloud. */
