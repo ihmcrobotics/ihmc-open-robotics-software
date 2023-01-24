@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -37,7 +38,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -151,17 +151,11 @@ public class RDXBaseUI
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         LogTools.info("Loading libGDX settings from {}", libGDXSettingsFile.getLocationOfResourceForReading());
-         return libGDXSettingsFile.getInputStream(inputStream ->
-         {
-            JSONFileTools.load(inputStream, jsonNode ->
-            {
-               int width = jsonNode.get("windowWidth").asInt();
-               int height = jsonNode.get("windowHeight").asInt();
-               Gdx.graphics.setWindowedMode(width, height);
-            });
-         });
+         Gdx.graphics.setWindowedMode(imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth(),
+                                      imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight());
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX(),
+                                                                 imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY());
+         return true;
       });
       layoutManager.getSaveListeners().add(this::saveApplicationSettings);
       layoutManager.applyLayoutDirectory();
@@ -181,16 +175,16 @@ public class RDXBaseUI
 
    public void launchRDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
    {
-      AtomicReference<Integer> windowWidth = new AtomicReference<>(800);
-      AtomicReference<Integer> windowHeight = new AtomicReference<>(600);
-      JSONFileTools.loadUserWithClasspathDefaultFallback(libGDXSettingsFile, jsonNode ->
-      {
-         windowWidth.set(jsonNode.get("windowWidth").asInt());
-         windowHeight.set(jsonNode.get("windowHeight").asInt());
-      });
-
       LogTools.info("Launching RDX application");
-      LibGDXApplicationCreator.launchGDXApplication(applicationAdapter, windowTitle, windowWidth.get(), windowHeight.get());
+      // TODO: We could show a splash screen here until the app shows up
+      Lwjgl3ApplicationConfiguration applicationConfiguration = LibGDXApplicationCreator.getDefaultConfiguration(windowTitle);
+      // Hide the window at the beginning. If you don't do this, you get a window frame
+      // with the contents behind the window displayed for a few seconds, which is really
+      // consifusing and error-prone.
+      applicationConfiguration.setInitialVisible(false);
+      LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration,
+                                                    applicationAdapter,
+                                                    windowTitle);
    }
 
    public void create()
@@ -273,6 +267,14 @@ public class RDXBaseUI
    {
       imGuiWindowAndDockSystem.afterWindowManagement();
       ++renderIndex;
+
+      // Show the window now that it's been loaded; we started it while it wasn't visible.
+      // Some heavyweight applications still will show an unrendered window after the first
+      // render, so let's show it after the second render.
+      if (renderIndex == 2)
+      {
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setVisible(true);
+      }
    }
 
    private void renderMenuBar()

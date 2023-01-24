@@ -1,10 +1,10 @@
 package us.ihmc.rdx.ui;
 
-import imgui.flag.ImGuiInputTextFlags;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
@@ -37,8 +37,8 @@ public class RDXImGuiLayoutManager
    private boolean firstIndex = true;
    private boolean firstLoad = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString userHomeLayoutNameToSave = new ImString("", 100);
-   private final ImString versionControlLayoutNameToSave = new ImString("", 100);
+   private final ImString userHomeLayoutNameToSave = new ImString(100);
+   private final ImString versionControlLayoutNameToSave = new ImString(100);
    private final TreeSet<String> userHomeLayouts = new TreeSet<>(Comparator.comparing(String::toString));
    private final TreeSet<String> versionControlLayouts = new TreeSet<>(Comparator.comparing(String::toString));
    private String currentLayoutName = "Main";
@@ -186,12 +186,19 @@ public class RDXImGuiLayoutManager
       {
          ImGui.text("Save as:");
          ImGui.sameLine();
-         ImGui.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), layoutNameToSave, ImGuiInputTextFlags.CallbackResize);
+         // A little fanciness here to make the menu a constant width whether or not
+         // rendering the save button
          String layoutNameToCreateString = layoutNameToSave.get();
-         if (!layoutNameToCreateString.isEmpty())
+         boolean renderSaveButton = layoutNameToCreateString.isEmpty();
+         ImGui.setNextItemWidth(renderSaveButton ? 190.0f : 150.0f); // Width of Save button is 40
+         boolean saveRequested = ImGuiTools.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), layoutNameToSave);
+         ImGuiTools.previousWidgetTooltip("A PascalCased name is recommended.\nPress Enter to save.");
+         layoutNameToCreateString = layoutNameToSave.get();
+         if (!renderSaveButton)
          {
             ImGui.sameLine();
-            if (ImGui.button(labels.get("Save", configurationLocation.name(), 1)))
+            saveRequested |= ImGui.button(labels.get("Save", configurationLocation.name(), 1));
+            if (saveRequested)
             {
                String sanitizedName = layoutNameToCreateString.replaceAll(" ", "");
                layouts.add(sanitizedName);
