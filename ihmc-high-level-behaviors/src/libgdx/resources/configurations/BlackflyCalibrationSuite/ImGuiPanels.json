@@ -7,7 +7,7 @@
     "Calibration" : true,
     "Calibration Pattern" : true,
     "HDF5 Browsing" : true,
-    "Image Monitor" : true,
+    "HDF5 Image Browser" : true,
     "Logging" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false

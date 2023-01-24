@@ -10,7 +10,7 @@ public class HDF5ImageBrowserDemo
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
+                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
                                                   "HDF5 Image Browser Demo");
    private HDF5ImageBrowser hdf5ImageBrowser;
 

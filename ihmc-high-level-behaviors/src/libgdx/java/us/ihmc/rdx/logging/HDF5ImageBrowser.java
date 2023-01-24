@@ -32,16 +32,17 @@ public class HDF5ImageBrowser
    private Group imageGroup;
    private final ImLong imageIndex = new ImLong();
    private final DataType nativeBytesType;
-   private final BytePointer decompressionInputPointer;
+   private BytePointer decompressionInputPointer;
    private final Mat decompressionInputMat;
    private final Mat bgrImage;
    private final Mat yuv420Image;
+   private final Mat decompressionOutputMat;
    private boolean isPNG;
    private String encoding;
 
    public HDF5ImageBrowser()
    {
-      imagePanel = new RDXCVImagePanel("Image Monitor", 1920, 1080);
+      imagePanel = new RDXCVImagePanel("HDF5 Image Browser", 1, 1);
 
       logDirectory = new ImGuiDirectory(IHMCCommonPaths.LOGS_DIRECTORY.toString(),
                                         fileName -> h5File != null && selectedFileName.equals(fileName),
@@ -49,12 +50,12 @@ public class HDF5ImageBrowser
                                                      && pathEntry.path().getFileName().toString().endsWith(HDF5ImageLogging.FILE_SUFFIX),
                                         this::onHDF5FileSelected);
 
-      decompressionInputPointer = new BytePointer(1920 * 1200 * 3);
       nativeBytesType = new DataType(PredType.NATIVE_B8());
 
       decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
       yuv420Image = new Mat(1, 1, opencv_core.CV_8UC1);
-      bgrImage = new Mat(1080, 1920, opencv_core.CV_8UC3);
+      bgrImage = new Mat(1, 1, opencv_core.CV_8UC3);
+      decompressionOutputMat = new Mat(1, 1, opencv_core.CV_8UC4);
 
       if (h5File != null)
       {
@@ -129,6 +130,11 @@ public class HDF5ImageBrowser
    private void loadDatasetImage()
    {
       DataSet dataSet = imageGroup.openDataSet(String.valueOf(imageIndex.get()));
+      long inMemDataSize = dataSet.getInMemDataSize();
+      if (decompressionInputPointer == null || inMemDataSize > decompressionInputPointer.capacity())
+      {
+         decompressionInputPointer = new BytePointer(2 * inMemDataSize); // Allocate 2x so we aren't always doing this
+      }
       dataSet.read((Pointer) decompressionInputPointer, nativeBytesType);
 
       decompressionInputMat.cols((int) decompressionInputPointer.limit());
@@ -137,13 +143,18 @@ public class HDF5ImageBrowser
       if (isPNG)
       {
          opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, bgrImage);
-         opencv_imgproc.cvtColor(bgrImage, imagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+         opencv_imgproc.cvtColor(bgrImage, decompressionOutputMat, opencv_imgproc.COLOR_BGR2RGBA, 0);
       }
       else
       {
          opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, yuv420Image);
-         opencv_imgproc.cvtColor(yuv420Image, imagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+         opencv_imgproc.cvtColor(yuv420Image, decompressionOutputMat, opencv_imgproc.COLOR_YUV2RGBA_I420);
       }
+
+      // Could potentially be less complex, but would require a lot more code
+      imagePanel.resize(decompressionOutputMat.cols(), decompressionOutputMat.rows(), null);
+      // With some work we could probably remove this copy
+      decompressionOutputMat.copyTo(imagePanel.getBytedecoImage().getBytedecoOpenCVMat());
    }
 
    public RDXCVImagePanel getImagePanel()
