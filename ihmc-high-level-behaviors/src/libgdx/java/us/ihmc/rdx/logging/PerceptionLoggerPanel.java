@@ -27,7 +27,7 @@ public class PerceptionLoggerPanel extends ImGuiPanel
    private ArrayList<Integer> topicObjectCounts = new ArrayList<>();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString perceptionLogPath = new ImString();
+   private final ImString perceptionLogPath = new ImString(256);
    private final ImInt topicIndex = new ImInt(0);
    private final ImInt objectIndex = new ImInt(0);
 
