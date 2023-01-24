@@ -1,8 +1,6 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
-import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -10,7 +8,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -18,7 +15,10 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class SteppableRegionsCalculator
@@ -139,22 +139,25 @@ public class SteppableRegionsCalculator
 
       environmentModel.markCellAsExpanded(cellToExpand);
 
-      int boundaryConnectionsEncodedAsOnes = connections.getInt(cellToExpand.x, cellToExpand.y);
-
       int cellsPerSide = steppability.getImageHeight();
+      int row = cellsPerSide - cellToExpand.x - 1;
+      int col = cellsPerSide - cellToExpand.y - 1;
+
+      int boundaryConnectionsEncodedAsOnes = connections.getInt(row, col);
+
       for (int i = 0; i < 4; i++)
       {
          int neighborX = cellToExpand.x;
          int neighborY = cellToExpand.y;
 
          // These are switched from the open cl code, since the coordinates are different
-         if (i == 0)
+         if (i == 0) // positive x in image frame
             neighborY--;
-         else if (i == 1)
+         else if (i == 1) // positive y in image frame
             neighborX--;
-         else if (i == 2)
+         else if (i == 2) // negative x in image frame
             neighborY++;
-         else
+         else // negative y in image frame
             neighborX++;
 
          if (neighborX < 0 || neighborY < 0 || neighborX >= cellsPerSide || neighborY >= cellsPerSide)
@@ -163,9 +166,12 @@ public class SteppableRegionsCalculator
          SteppableCell neighbor = environmentModel.getCellAt(neighborX, neighborY);
          if (neighbor == null)
             continue;
+//            throw new? RuntimeException("This should have never happened.");
 
          if (isConnected(i, boundaryConnectionsEncodedAsOnes))
          {
+
+
             if (neighbor.cellHasBeenAssigned())
             {
                cellToExpand.getRegion().mergeRegion(neighbor.getRegion());
@@ -245,7 +251,9 @@ public class SteppableRegionsCalculator
 
       public SteppableCell getNextUnexpandedCell()
       {
-         return unexpandedCellsInTheEnvironment.remove(0);
+         SteppableCell cell = unexpandedCellsInTheEnvironment.remove(0);
+         cell.setCellHasBeenExpanded(true);
+         return cell;
       }
 
       public void markCellAsExpanded(SteppableCell cell)
@@ -380,6 +388,11 @@ public class SteppableRegionsCalculator
       public void setCellHasBeenExpanded(boolean cellHasBeenExpanded)
       {
          this.cellHasBeenExpanded = cellHasBeenExpanded;
+      }
+
+      public boolean getCellHasBeenExpanded()
+      {
+         return true;
       }
 
       public int getX()

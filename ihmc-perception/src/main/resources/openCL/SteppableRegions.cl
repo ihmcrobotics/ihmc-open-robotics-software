@@ -147,7 +147,7 @@ void kernel computeSteppabilityConnections(global float* params,
 
     uint boundaryConnectionsEncodedAsOnes = (uint)(0);
 
-    if (read_imageui(steppable_map, key).x == 1)
+    if (read_imageui(steppable_map, key).x == VALID)
     {
         for (int i = 0; i < 4; i++)
         {
