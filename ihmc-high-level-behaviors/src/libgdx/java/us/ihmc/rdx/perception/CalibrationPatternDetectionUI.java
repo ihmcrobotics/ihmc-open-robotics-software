@@ -16,7 +16,7 @@ import us.ihmc.tools.thread.ZeroCopySwapReference;
 
 import java.util.function.Consumer;
 
-public class CalibrationPatternDetection
+public class CalibrationPatternDetectionUI
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiPanel panel = new ImGuiPanel("Calibration Pattern", this::renderImGuiWidgets);
@@ -32,13 +32,12 @@ public class CalibrationPatternDetection
    private final Runnable doPatternDetection = this::doPatternDetection;
    private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue
          = MissingThreadTools.newSingleThreadExecutor("PatternDetection", true, 1);
-   private enum Pattern { CHESSBOARD, CIRCLES }
-   private Pattern pattern = Pattern.CHESSBOARD;
+   private CalibrationPatternType pattern = CalibrationPatternType.CHESSBOARD;
    private final Consumer<Mat> accessOnLowPriorityThread = this::accessOnLowPriorityThread;
    private Mat rgbaMatForDrawing;
    private final Consumer<Mat> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
 
-   public CalibrationPatternDetection()
+   public CalibrationPatternDetectionUI()
    {
       bgrSourceCopy = new Mat();
       grayscaleImage = new Mat();
@@ -83,7 +82,7 @@ public class CalibrationPatternDetection
 
    private void accessOnLowPriorityThread(Mat cornersOrCenters)
    {
-      if (pattern == Pattern.CHESSBOARD)
+      if (pattern == CalibrationPatternType.CHESSBOARD)
       {
          patternFound = opencv_calib3d.findChessboardCorners(grayscaleImage,
                                                              patternSize,
@@ -115,14 +114,14 @@ public class CalibrationPatternDetection
    {
       ImGui.text("Pattern:");
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Chessboard"), pattern == Pattern.CHESSBOARD))
+      if (ImGui.radioButton(labels.get("Chessboard"), pattern == CalibrationPatternType.CHESSBOARD))
       {
-         pattern = Pattern.CHESSBOARD;
+         pattern = CalibrationPatternType.CHESSBOARD;
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Circles"), pattern == Pattern.CIRCLES))
+      if (ImGui.radioButton(labels.get("Circles"), pattern == CalibrationPatternType.CIRCLES))
       {
-         pattern = Pattern.CIRCLES;
+         pattern = CalibrationPatternType.CIRCLES;
       }
       if (ImGuiTools.volatileInputInt(labels.get("Pattern width"), patternWidth))
       {
@@ -138,5 +137,20 @@ public class CalibrationPatternDetection
    public ImGuiPanel getPanel()
    {
       return panel;
+   }
+
+   public CalibrationPatternType getPatternType()
+   {
+      return pattern;
+   }
+
+   public int getPatternWidth()
+   {
+      return patternWidth.get();
+   }
+
+   public int getPatternHeight()
+   {
+      return patternHeight.get();
    }
 }

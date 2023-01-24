@@ -17,7 +17,7 @@ public class WebcamCalibrationPatternDemo
                                                   "ihmc-high-level-behaviors/src/test/resources",
                                                   "Webcam Calibration Pattern Demo");
    private RDXOpenCVWebcamReader webcamReader;
-   private CalibrationPatternDetection calibrationPatternDetection;
+   private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private volatile boolean running = true;
    private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
 
@@ -45,8 +45,8 @@ public class WebcamCalibrationPatternDemo
                   baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
                   baseUI.getPerspectiveManager().reloadPerspective();
 
-                  calibrationPatternDetection = new CalibrationPatternDetection();
-                  baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetection.getPanel());
+                  calibrationPatternDetectionUI = new CalibrationPatternDetectionUI();
+                  baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
                   baseUI.getPerspectiveManager().reloadPerspective();
 
                   ThreadTools.startAsDaemon(() ->
@@ -54,12 +54,12 @@ public class WebcamCalibrationPatternDemo
                      while (running)
                      {
                         webcamReader.readWebcamImage();
-                        calibrationPatternDetection.copyBGRImage(webcamReader.getBGRImage());
+                        calibrationPatternDetectionUI.copyBGRImage(webcamReader.getBGRImage());
                      }
                   }, "CameraRead");
                }
 
-               calibrationPatternDetection.update();
+               calibrationPatternDetectionUI.update();
                webcamReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
             }
 
@@ -81,7 +81,7 @@ public class WebcamCalibrationPatternDemo
    {
       if (webcamReader.getImageWasRead())
       {
-         calibrationPatternDetection.drawCornersOrCenters(data.getRGBA8Mat());
+         calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
       }
 
       webcamReader.accessOnHighPriorityThread(data);
