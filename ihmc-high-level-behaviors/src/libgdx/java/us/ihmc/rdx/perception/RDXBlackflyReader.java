@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -132,7 +133,9 @@ public class RDXBlackflyReader
 
    public void dispose()
    {
+      ThreadTools.sleep(250);
       blackfly.stopAcquiringImages();
+      ThreadTools.sleep(100);
       spinnakerSystemManager.destroy();
    }
 
