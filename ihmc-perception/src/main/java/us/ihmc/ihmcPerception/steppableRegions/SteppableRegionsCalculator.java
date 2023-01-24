@@ -113,8 +113,10 @@ public class SteppableRegionsCalculator
       {
          for (int y = 0; y < cellsPerSide; y++)
          {
+            int row = cellsPerSide - x - 1;
+            int col = cellsPerSide - y - 1;
             // this cell is steppable. Also remember the image x-y is switched
-            if (steppability.getInt(y, x) == 1)
+            if (steppability.getInt(row, col) == 0)
             {
                SteppableCell cell = new SteppableCell(x, y, cellsPerSide);
                steppableRegionsToConvert.addUnexpandedSteppableCell(cell);
@@ -147,13 +149,13 @@ public class SteppableRegionsCalculator
 
          // These are switched from the open cl code, since the coordinates are different
          if (i == 0)
-            neighborY++;
-         else if (i == 1)
-            neighborX++;
-         else if (i == 2)
             neighborY--;
-         else
+         else if (i == 1)
             neighborX--;
+         else if (i == 2)
+            neighborY++;
+         else
+            neighborX++;
 
          if (neighborX < 0 || neighborY < 0 || neighborX >= cellsPerSide || neighborY >= cellsPerSide)
             continue;

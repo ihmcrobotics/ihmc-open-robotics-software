@@ -8,6 +8,10 @@
 #define CLIFF_START_HEIGHT_TO_AVOID 7
 #define CLIFF_END_HEIGHT_TO_AVOID 8
 
+#define VALID 0
+#define CLIFF_TOP 1
+#define CLIFF_BOTTOM 2
+
 float get_yaw_from_index(global float* params, int idx_yaw)
 {
     return M_PI_2_F * ((float) (idx_yaw / params[TOTAL_YAW_DISCRETIZATIONS]));
@@ -54,8 +58,8 @@ void kernel computeSteppability(global float* params,
                                 write_only image2d_t steppable_map)
 {
     // Remember, these are x and y in image coordinates, not world
-    int idx_x = get_global_id(0);
-    int idx_y = get_global_id(1);
+    int idx_x = get_global_id(0); // column
+    int idx_y = get_global_id(1); // row
     int idx_yaw = (int) idx_yaw_singular_buffer[0];
 
     int2 key = (int2) (idx_x, idx_y);
@@ -95,17 +99,16 @@ void kernel computeSteppability(global float* params,
 
             if (relative_height > params[CLIFF_START_HEIGHT_TO_AVOID])
             {
-
                 float distance_to_avoid_by_alpha = (relative_height - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
                 float min_distance_from_this_point = distance_to_avoid_by_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
 
                 float distance_to_foot = signed_distance_to_foot_polygon(params, key, foot_yaw, query_key);
                 if (min_distance_from_this_point > distance_to_foot)
                 {
-                   printf("Cliff height %f bottom to foot %f\n", relative_height, distance_to_foot);
+                   //printf("Cliff height %f bottom to foot %f\n", relative_height, distance_to_foot);
 
                     // we're too close to the cliff bottom!
-                    write_imageui(steppable_map, key, (uint4)(0,0,0,0));
+                    write_imageui(steppable_map, key, (uint4)(CLIFF_BOTTOM,0,0,0));
 
                     return;
                 }
@@ -116,10 +119,10 @@ void kernel computeSteppability(global float* params,
 
                 if (params[MIN_DISTANCE_FROM_CLIFF_TOPS] > distance_to_foot)
                 {
-                    printf("Cliff top height %f to foot %f\n", relative_height, distance_to_foot);
+                   // printf("Cliff top height %f to foot %f\n", relative_height, distance_to_foot);
 
                     // we're too close to the cliff top!
-                    write_imageui(steppable_map, key, (uint4)(0,0,0,0));
+                    write_imageui(steppable_map, key, (uint4)(CLIFF_TOP,0,0,0));
 
                     return;
                 }
@@ -128,7 +131,7 @@ void kernel computeSteppability(global float* params,
     }
 
     // we can step here!
-    write_imageui(steppable_map, key, (uint4)(1,0,0,0));
+    write_imageui(steppable_map, key, (uint4)(VALID,0,0,0));
 }
 
 void kernel computeSteppabilityConnections(global float* params,

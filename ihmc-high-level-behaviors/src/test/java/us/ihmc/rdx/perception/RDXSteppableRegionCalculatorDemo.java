@@ -67,6 +67,7 @@ public class RDXSteppableRegionCalculatorDemo
          {
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
 
+            heightMapUI.create();
             globalVisualizersUI.create();
             baseUI.create();
 
@@ -79,11 +80,15 @@ public class RDXSteppableRegionCalculatorDemo
 //            baseUI.getImGuiPanelManager().addPanel(heightMapVisualizer.getPanel());
             globalVisualizersUI.addVisualizer(heightMapVisualizer);
 
-            new IHMCROS2Callback<>(realtimeRos2Node, ROS2Tools.HEIGHT_MAP_OUTPUT, heightMapVisualizer::acceptHeightMapMessage);
+            new IHMCROS2Callback<>(realtimeRos2Node, ROS2Tools.HEIGHT_MAP_OUTPUT, message ->
+                                   {
+                                      heightMapVisualizer.acceptHeightMapMessage(message);
+                                      heightMapUI.acceptHeightMapMessage(message);
+                                   });
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
-            robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
+            robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 1.25, 1.0);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
             ousterPoseGizmo = new RDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
@@ -128,8 +133,9 @@ public class RDXSteppableRegionCalculatorDemo
 
                ouster.render(baseUI.getPrimaryScene());
 
-               globalVisualizersUI.update();
                heightMap.update();
+               heightMapVisualizer.update();
+               globalVisualizersUI.update();
                steppableRegionsCalculatorModule.extractSteppableRegions();
 
                heightMapUI.update();

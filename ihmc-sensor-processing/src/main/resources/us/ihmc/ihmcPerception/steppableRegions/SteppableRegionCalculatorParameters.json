@@ -1,0 +1,9 @@
+{
+  "title" : "SteppableRegionCalculatorParameters",
+  "Grid resolution XY" : 0.0,
+  "Grid size XY" : 0.0,
+  "Max Z" : 0.0,
+  "Nominal standard deviation" : 0.0,
+  "Max points per cell" : 0,
+  "Mahalanobis scale" : 0.0
+}

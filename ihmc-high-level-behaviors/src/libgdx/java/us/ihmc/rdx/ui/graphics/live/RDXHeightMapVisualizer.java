@@ -1,20 +1,31 @@
 package us.ihmc.rdx.ui.graphics.live;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.HeightMapMessage;
+import us.ihmc.perception.OpenCLManager;
+import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.perception.RDXCVImagePanel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
 import us.ihmc.rdx.visualizers.RDXHeightMapGraphic;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableProvider
+import java.util.concurrent.atomic.AtomicReference;
+
+public class RDXHeightMapVisualizer extends RDXVisualizer
 {
    private final RDXGridMapGraphic gridMapGraphic = new RDXGridMapGraphic();
    private final ResettableExceptionHandlingExecutorService executorService;
@@ -30,6 +41,14 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
       boolean daemon = true;
       int queueSize = 1;
       executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), daemon, queueSize);
+   }
+
+   @Override
+   public void create()
+   {
+      super.create();
+
+      setActive(true);
    }
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
@@ -70,15 +89,14 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
       {
          executorService.interruptAndReset();
       }
-//      ImGui.text(topic.getName());
       frequencyPlot.renderImGuiWidgets();
-//      numberOfRegionsPlot.render(numberOfPlanarRegions);
    }
 
    @Override
    public void update()
    {
       super.update();
+
       if (isActive())
       {
          gridMapGraphic.update();
