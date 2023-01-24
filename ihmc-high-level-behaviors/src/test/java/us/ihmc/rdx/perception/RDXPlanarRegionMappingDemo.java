@@ -70,7 +70,7 @@ public class RDXPlanarRegionMappingDemo
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mapPlanarRegionsGraphic::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(mapPlanarRegionsGraphic::process3DViewInput);
 
-            baseUI.getPerspectiveManager().reloadPerspective();
+            baseUI.getLayoutManager().reloadLayout();
          }
 
 

@@ -4,5 +4,6 @@
   "Similarity threshold between normals" : 0.9,
   "Orthogonal distance threshold" : 0.05,
   "Max Inter Region Distance" : 0.0,
-  "Minimum overlap threshold" : 0.8
+  "Minimum overlap threshold" : 0.8,
+  "Minimum planar region area" : 0.8
 }
