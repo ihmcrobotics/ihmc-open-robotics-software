@@ -176,7 +176,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                   baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
                   baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
                }
 

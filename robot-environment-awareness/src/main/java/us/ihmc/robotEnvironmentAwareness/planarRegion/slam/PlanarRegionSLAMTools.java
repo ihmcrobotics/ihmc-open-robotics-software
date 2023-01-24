@@ -729,56 +729,7 @@ public class PlanarRegionSLAMTools
             return false;
          }
       }
-      else
-      {
-
-      }
-
-//      throw new RuntimeException("Shoot");
       return false;
-   }
-
-   public static PlanarRegion getMergedPlanarRegion(PlanarRegion firstRegion, PlanarRegion secondRegion, double updateTowardsSecondAlpha)
-   {
-
-      PlanarRegion regionToReturn = new PlanarRegion();
-
-      ArrayList<PlanarRegion> mergedRegion = ConcaveHullMerger.mergePlanarRegions(firstRegion, secondRegion, 1.0f, null);
-
-      boolean merged = (mergedRegion != null);
-      if(merged) merged &= (mergedRegion.size() > 0);
-
-      if (merged) // A brand new merged region was returned
-      {
-         regionToReturn.set(mergedRegion.get(0));
-         regionToReturn.setRegionId(Integer.MIN_VALUE);
-         updateRegionPlaneTowardsReference(regionToReturn, secondRegion, updateTowardsSecondAlpha);
-      }
-      else // Merge unsuccessful
-      {
-         if (firstRegion.getConvexHull().isPointInside(secondRegion.getConvexHull().getVertex(0))) // Second is inside first
-         {
-            regionToReturn.set(firstRegion);
-         }
-         else if (secondRegion.getConvexHull().isPointInside(firstRegion.getConvexHull().getVertex(0))) // First is inside second
-         {
-            regionToReturn.set(secondRegion);
-         }
-         else if(secondRegion.getNumberOfTimesMatched() > firstRegion.getNumberOfTimesMatched()) // Second has more measurements
-         {
-            regionToReturn.set(secondRegion);
-         }
-         else if(secondRegion.getConcaveHullSize() > firstRegion.getConcaveHullSize()) // Second has larger concave hull
-         {
-            regionToReturn.set(secondRegion);
-         }
-         else
-         {
-            regionToReturn.set(firstRegion);
-         }
-      }
-
-      return regionToReturn;
    }
 
    private static void updateRegionPlaneTowardsReference(PlanarRegion regionToModify, PlanarRegion regionToRefer, double updateTowardsSecondAlpha)

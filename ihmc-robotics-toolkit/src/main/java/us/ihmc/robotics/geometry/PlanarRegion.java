@@ -37,6 +37,9 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
    private int regionId = NO_REGION_ID;
    private int numberOfTimesMatched = 0;
+   private int tickOfLastMeasurement = 0;
+
+   private double area = 0;
 
    /**
     * This transform also represents the pose of the PlanarRegion.
@@ -1174,6 +1177,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       updateBoundingBox();
       convexHull.set(other.convexHull);
+
+      area = PlanarRegionTools.computePlanarRegionArea(other);
    }
 
    public void setTransformOnly(PlanarRegion other)
@@ -1654,6 +1659,18 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       return buffer.toString();
    }
 
+   public String getTooltipString()
+   {
+      return String.format("Regions ID: %d\nArea: %.2f\nConcave Hull Size: %d\nMatched: %d\nOrigin: %s\nNormal: %s\nTime: %d",
+                    regionId,
+                    getArea(),
+                    getConcaveHullSize(),
+                    getNumberOfTimesMatched(),
+                    String.format("%.2f, %.2f, %.2f", origin.getX(), origin.getY(), origin.getZ()),
+                    String.format("%.2f, %.2f, %.2f", normal.getX(), normal.getY(), normal.getZ()),
+                    getTickOfLastMeasurement());
+   }
+
    public int getNumberOfTimesMatched()
    {
       return numberOfTimesMatched;
@@ -1662,5 +1679,25 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    public void incrementNumberOfTimesMatched()
    {
       numberOfTimesMatched++;
+   }
+
+   public double getArea()
+   {
+      return area;
+   }
+
+   public void setArea(double area)
+   {
+      this.area = area;
+   }
+
+   public int getTickOfLastMeasurement()
+   {
+      return tickOfLastMeasurement;
+   }
+
+   public void setTickOfLastMeasurement(int tickOfLastMeasurement)
+   {
+      this.tickOfLastMeasurement = tickOfLastMeasurement;
    }
 }

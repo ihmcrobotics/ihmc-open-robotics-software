@@ -21,6 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXMeshGraphicTools;
@@ -208,7 +209,8 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
             {
                mouseHovering = true;
                selectedRegionId = regionsWithRay.getRight().getRegionId();
-               tooltipText = "This works really well: -> " + selectedRegionId;
+
+               tooltipText = regionsWithRay.getRight().getTooltipString();
                return;
             }
 
