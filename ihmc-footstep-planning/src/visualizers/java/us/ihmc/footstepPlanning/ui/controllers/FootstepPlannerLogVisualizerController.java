@@ -339,7 +339,7 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, false);
-      messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, true); // hide plan by default
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowBodyPathLogGraphics, true);
 

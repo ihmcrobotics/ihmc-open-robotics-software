@@ -9,9 +9,12 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
@@ -351,9 +354,10 @@ public class FootstepPlanningModuleTest
    public void testReferenceBasedAStarPlanner()
    {
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(planningModule);
 
       double groundHeight = 2.5;
-      double providedGoalNodeHeights = -1.0;
+      double providedGoalNodeHeights = 0.0;
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
@@ -365,10 +369,10 @@ public class FootstepPlanningModuleTest
       request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
-      request.setPlanarRegionsList(planarRegionsListGenerator.getPlanarRegionsList());
-      request.setPlanBodyPath(false);
+//      request.setPlanarRegionsList(planarRegionsListGenerator.getPlanarRegionsList());
+      request.setPlanBodyPath(true);
       request.setTimeout(Double.MAX_VALUE);
-      request.setMaximumIterations(100);
+      request.setMaximumIterations(500);
       request.setPerformAStarSearch(true);
       request.setAssumeFlatGround(true);
 
@@ -381,27 +385,25 @@ public class FootstepPlanningModuleTest
 
       ArrayList<Pose3D> goalMidFootPoseList = new ArrayList<>();
 
-      double y = 10;
-      double x = 5;
-      double yaw = 0;
-      for (int i = 0; i < 5; ++i)
-      {
-         goalMidFootPoseList.add(new Pose3D(x, y, providedGoalNodeHeights, yaw, 0, 0));
-         x += 4;
-         yaw += 5;
-      }
+      Random random = new Random();
+      double y = EuclidCoreRandomTools.nextDouble(random, 2,5);
+      double x = EuclidCoreRandomTools.nextDouble(random, 2,5);
+      double yaw = EuclidCoreRandomTools.nextDouble(random, 0, Math.PI / 4);
+
+      goalMidFootPoseList.add(new Pose3D(x, y, providedGoalNodeHeights, yaw, 0, 0));
 
       ArrayList<String> data = new ArrayList<>();
       String msg;
-      for (int i = 0; i < goalMidFootPoseList.size() - 1; ++i)
+      for (int i = 0; i < goalMidFootPoseList.size(); ++i)
       {
          // case: no referencePlan (nominal)
          request.setReferencePlan(null);
          request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPoseList.get(i));
          FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-         FootstepPlan freshPlan = plannerOutput.getFootstepPlan();
+         footstepPlannerLogger.logSession();
+         FootstepPlan originalPlan = plannerOutput.getFootstepPlan();
 
-         msg = "noreference goal ";
+         msg = "noreference First two are left right goal pose ";
          data.add(msg);
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -410,61 +412,133 @@ public class FootstepPlanningModuleTest
                   + String.format("%.3f", goalPose.getYaw());
             data.add(msg);
          }
-
-         for (int j = 0; j < freshPlan.getNumberOfSteps(); ++j)
+         for (int j = 0; j < originalPlan.getNumberOfSteps(); ++j)
          {
-            PlannedFootstep step = freshPlan.getFootstep(j);
+            PlannedFootstep step = originalPlan.getFootstep(j);
             msg = "side " + step.getRobotSide() + " x " + String.format("%.3f", step.getFootstepPose().getX()) + " y " + String.format("%.3f",
                                                                                                                                          step.getFootstepPose()
                                                                                                                                              .getY()) + " yaw "
                   + String.format("%.3f", step.getFootstepPose().getYaw());
             data.add(msg);
          }
+         // NOTE: Now perturb the original plan and make that as a reference plan to follow with same goal to simulate real world case
+         FootstepPlan perturbedPlan = new FootstepPlan();
+         for (int j = 0; j < originalPlan.getNumberOfSteps(); ++j)
+         {
+            PlannedFootstep step = originalPlan.getFootstep(j);
+            // max 0.1[m] and 30 deg deviation from original step
+            double change_in_x = EuclidCoreRandomTools.nextDouble(random, 0.1);
+            double change_in_y = EuclidCoreRandomTools.nextDouble(random, 0.1);
+            double change_in_yaw = EuclidCoreRandomTools.nextDouble(random, Math.PI/6);
+            double x_new = step.getFootstepPose().getX() + change_in_x;
+            double y_new = step.getFootstepPose().getY() + change_in_y;
+            double yaw_new = step.getFootstepPose().getYaw() + change_in_yaw;
+            Pose3D perturbedStepPose = new Pose3D(x_new, y_new, providedGoalNodeHeights, yaw_new, 0, 0);
+            PlannedFootstep perturbedStep = new PlannedFootstep(step.getRobotSide(), perturbedStepPose);
+            perturbedPlan.addFootstep(perturbedStep);
+         }
 
+         msg = "perturbed First two are left right goal pose ";
+         data.add(msg);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            Pose3D goalPose = request.getGoalFootPoses().get(robotSide);
+            msg = "side " + robotSide.toString() + " x " + String.format("%.3f", goalPose.getX()) + " y " + String.format("%.3f", goalPose.getY()) + " yaw "
+                  + String.format("%.3f", goalPose.getYaw());
+            data.add(msg);
+         }
+         for (int j = 0; j < perturbedPlan.getNumberOfSteps(); ++j)
+         {
+            PlannedFootstep step = perturbedPlan.getFootstep(j);
+            msg = "side " + step.getRobotSide() + " x " + String.format("%.3f", step.getFootstepPose().getX()) + " y " + String.format("%.3f",
+                                                                                                                                       step.getFootstepPose()
+                                                                                                                                           .getY()) + " yaw "
+                  + String.format("%.3f", step.getFootstepPose().getYaw());
+            data.add(msg);
+         }
          // case: yes reference plan
-         // set up reference plan for next plan
-         request.setReferencePlan(freshPlan);
-         request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPoseList.get(i+1));
-         referenceAlpha += 0.2;
-         planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceAlpha(referenceAlpha);
+         // use various reference alphas to see the effects
+         request.setReferencePlan(perturbedPlan);
+         for (referenceAlpha = 0.5; referenceAlpha <= 1.0; referenceAlpha+=1.0)
+         {
+            planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceAlpha(referenceAlpha);
+            plannerOutput = planningModule.handleRequest(request);
+            footstepPlannerLogger.logSession();
+            FootstepPlan referencedPlan = plannerOutput.getFootstepPlan();
+            double currentAlpha = planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().getReferenceAlpha();
+            msg = "yesreference alpha " + currentAlpha +" First two are left right goal pose";
+            data.add(msg);
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               Pose3D goalPose = request.getGoalFootPoses().get(robotSide);
+               msg = "side " + robotSide.toString() + " x " + String.format("%.3f", goalPose.getX()) + " y " + String.format("%.3f", goalPose.getY()) + " yaw "
+                     + String.format("%.3f", goalPose.getYaw());
+               data.add(msg);
+            }
+            for (int j = 0; j < referencedPlan.getNumberOfSteps(); ++j)
+            {
+               PlannedFootstep step = referencedPlan.getFootstep(j);
+               msg = "side " + step.getRobotSide() + " x " + String.format("%.3f", step.getFootstepPose().getX()) + " y " + String.format("%.3f",
+                                                                                                                                          step.getFootstepPose()
+                                                                                                                                              .getY()) + " yaw "
+                     + String.format("%.3f", step.getFootstepPose().getYaw());
+               data.add(msg);
+            }
+         }
+
+         try
+         {
+            FileWriter myWriter = new FileWriter("referencePlanSteps.txt");
+            for (String message : data)
+            {
+               myWriter.write(message + "\n");
+            }
+            myWriter.close();
+            System.out.println("Successfully wrote to the file.");
+         }
+         catch (IOException e)
+         {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+         }
+
+         // for alpha = 0, new plan should be exactly the same as original
+         planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceAlpha(0.0);
+         for (int j = 0; j < 10; ++j)
+         {
+            plannerOutput = planningModule.handleRequest(request);
+            FootstepPlan referencedPlan_alpha_0 = plannerOutput.getFootstepPlan();
+            Assertions.assertTrue(EuclidCoreTools.equals(originalPlan.getNumberOfSteps(), referencedPlan_alpha_0.getNumberOfSteps()));
+            for (int k = 0; k < originalPlan.getNumberOfSteps(); ++k)
+            {
+               Assertions.assertTrue(EuclidCoreTools.equals(originalPlan.getFootstep(k).getFootstepPose(),
+                                                            referencedPlan_alpha_0.getFootstep(k).getFootstepPose()));
+            }
+         }
+
+         // TODO: for alpha = 1.0, new plan should be further away from original but does not mean it will be close to the perturbed(referenced) plan...
+         //  how to test?
+         request.setReferencePlan(perturbedPlan);
+         planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceAlpha(1.0);
          plannerOutput = planningModule.handleRequest(request);
-         FootstepPlan referencedPlan = plannerOutput.getFootstepPlan();
-         double currentAlpha = planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().getReferenceAlpha();
-         msg = "yesreference alpha " + currentAlpha +" goal ";
-         data.add(msg);
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            Pose3D goalPose = request.getGoalFootPoses().get(robotSide);
-            msg = "side " + robotSide.toString() + " x " + String.format("%.3f", goalPose.getX()) + " y " + String.format("%.3f", goalPose.getY()) + " yaw "
-                  + String.format("%.3f", goalPose.getYaw());
-            data.add(msg);
-         }
+         FootstepPlan referencedPlan_alpha_1 = plannerOutput.getFootstepPlan();
 
-         for (int j = 0; j < referencedPlan.getNumberOfSteps(); ++j)
-         {
-            PlannedFootstep step = referencedPlan.getFootstep(j);
-            msg = "side " + step.getRobotSide() + " x " + String.format("%.3f", step.getFootstepPose().getX()) + " y " + String.format("%.3f",
-                                                                                                                                         step.getFootstepPose()
-                                                                                                                                             .getY()) + " yaw "
-                  + String.format("%.3f", step.getFootstepPose().getYaw());
-            data.add(msg);
-         }
       }
 
-      try
-      {
-         FileWriter myWriter = new FileWriter("referencePlanSteps.txt");
-         for (String message : data)
-         {
-            myWriter.write(message + "\n");
-         }
-         myWriter.close();
-         System.out.println("Successfully wrote to the file.");
-      }
-      catch (IOException e)
-      {
-         System.out.println("An error occurred.");
-         e.printStackTrace();
-      }
+//      try
+//      {
+//         FileWriter myWriter = new FileWriter("referencePlanSteps.txt");
+//         for (String message : data)
+//         {
+//            myWriter.write(message + "\n");
+//         }
+//         myWriter.close();
+//         System.out.println("Successfully wrote to the file.");
+//      }
+//      catch (IOException e)
+//      {
+//         System.out.println("An error occurred.");
+//         e.printStackTrace();
+//      }
    }
 }
