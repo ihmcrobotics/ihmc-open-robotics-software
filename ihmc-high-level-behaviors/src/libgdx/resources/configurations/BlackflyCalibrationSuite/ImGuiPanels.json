@@ -6,6 +6,7 @@
     "Blackfly Reader" : true,
     "Calibration" : true,
     "Calibration Pattern" : true,
+    "Calibration Source Image" : true,
     "HDF5 Browsing" : true,
     "HDF5 Image Browser" : true,
     "Logging" : true,
