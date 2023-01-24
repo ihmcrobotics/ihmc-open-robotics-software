@@ -5,7 +5,10 @@ import javafx.stage.Stage;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.pubsub.DomainFactory;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowFootstepPlan;
 
 /**
  * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
