@@ -34,7 +34,7 @@ public class HDF5ImageBrowserDemo
                   hdf5ImageBrowser = new HDF5ImageBrowser();
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getControlPanel());
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getVideoPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                hdf5ImageBrowser.update();

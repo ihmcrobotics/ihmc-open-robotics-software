@@ -40,7 +40,7 @@ public class BlackflyDisplayDemo
                {
                   blackflyReader.create();
                   baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
                   {

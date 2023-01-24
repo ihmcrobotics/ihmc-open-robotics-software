@@ -48,7 +48,7 @@ public class BlackflyCalibrationPatternDemo
 
                   calibrationPatternDetection = new CalibrationPatternDetection();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetection.getPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
                   {
