@@ -18,6 +18,7 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -55,7 +56,8 @@ public class RemoteHeightMapUpdater
          @Override
          public void onNewDataMessage(Subscriber<LidarScanMessage> subscriber)
          {
-            double groundHeight = groundFrameProvider.get().getTransformToRoot().getTranslationZ();
+            ReferenceFrame groundFrame = groundFrameProvider.get();
+            double groundHeight = groundFrame.isRootFrame() ? 0.0 : groundFrame.getTransformToRoot().getTranslationZ();
 
             LidarScanMessage data = subscriber.readNextData();
             //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
@@ -111,6 +113,11 @@ public class RemoteHeightMapUpdater
             updateThreadIsRunning.set(false);
          }
       }
+   }
+
+   public HeightMapData getLatestHeightMap()
+   {
+      return heightMapUpdater.getLatestHeightMap();
    }
 
    public void consumeStateRequestMessage(HeightMapStateRequestMessage message)

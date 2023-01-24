@@ -15,15 +15,37 @@ float get_yaw_from_index(global float* params, int idx_yaw)
 
 float2 rotate_vector(float2 vector, float yaw)
 {
-    // TODO
-    return vector;
+    float cH = cos(yaw);
+    float sH = sin(yaw);
+    float dxLocal = cH * vector.x - sH * vector.y;
+    float dyLocal = sH * vector.x + cH * vector.y;
+
+    return (float2) (dxLocal, dyLocal);
 }
 
-float distance_to_foot_polygon(global float* params, int2 foot_key, float yaw, int2 query)
+float signed_distance_to_foot_polygon(global float* params, int2 foot_key, float foot_yaw, int2 query)
 {
-// TODO
-    float2 vector_to_point = params[HEIGHT_MAP_RESOLUTION];
-    return 0.0;
+    float2 vector_to_point = params[HEIGHT_MAP_RESOLUTION] * (float2) ((float) (query.x - foot_key.x), (float) (query.y - foot_key.y));
+    float2 vector_in_foot_frame = rotate_vector(vector_to_point, -foot_yaw);
+    float x_outside = fabs(vector_in_foot_frame.x) - params[FOOT_WIDTH];
+    float y_outside = fabs(vector_in_foot_frame.y) - params[FOOT_LENGTH];
+
+    if (x_outside > 0.0f && y_outside > 0.0f)
+    {
+        return length((float2) (x_outside, y_outside));
+    }
+    else if (x_outside > 0.0f)
+    {
+        return x_outside;
+    }
+    else if (y_outside > 0.0f)
+    {
+        return y_outside;
+    }
+    else
+    {
+        return max(x_outside, y_outside);
+    }
 }
 
 void kernel computeSteppability(global float* params,
@@ -73,24 +95,29 @@ void kernel computeSteppability(global float* params,
 
             if (relative_height > params[CLIFF_START_HEIGHT_TO_AVOID])
             {
+
                 float distance_to_avoid_by_alpha = (relative_height - params[CLIFF_START_HEIGHT_TO_AVOID]) / (params[CLIFF_END_HEIGHT_TO_AVOID] - params[CLIFF_START_HEIGHT_TO_AVOID]);
                 float min_distance_from_this_point = distance_to_avoid_by_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
 
-                float distance_to_foot = distance_to_foot_polygon(params, key, foot_yaw, query_key);
-
+                float distance_to_foot = signed_distance_to_foot_polygon(params, key, foot_yaw, query_key);
                 if (min_distance_from_this_point > distance_to_foot)
                 {
+                   printf("Cliff height %f bottom to foot %f\n", relative_height, distance_to_foot);
+
                     // we're too close to the cliff bottom!
                     write_imageui(steppable_map, key, (uint4)(0,0,0,0));
 
                     return;
                 }
             }
-            else if (relative_height < params[CLIFF_START_HEIGHT_TO_AVOID])
+            else if (relative_height < -params[CLIFF_START_HEIGHT_TO_AVOID])
             {
-                float distance_to_foot = distance_to_foot_polygon(params, key, foot_yaw, query_key);
+                float distance_to_foot = signed_distance_to_foot_polygon(params, key, foot_yaw, query_key);
+
                 if (params[MIN_DISTANCE_FROM_CLIFF_TOPS] > distance_to_foot)
                 {
+                    printf("Cliff top height %f to foot %f\n", relative_height, distance_to_foot);
+
                     // we're too close to the cliff top!
                     write_imageui(steppable_map, key, (uint4)(0,0,0,0));
 

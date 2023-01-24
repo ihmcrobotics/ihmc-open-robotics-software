@@ -23,9 +23,11 @@ public class SteppableRegionsCalculationModule
 {
    private static final float distanceFromCliffTops = 0.02f;
    private static final float distanceFromCliffBottoms = 0.05f;
-   static final int yawDiscretizations = 5;
-   static final float footWidth = 0.12f;
-   static final float footLength = 0.22f;
+   public static final int yawDiscretizations = 5;
+   public static final float footWidth = 0.12f;
+   public static final float footLength = 0.22f;
+   public static final float cliffStartHeightToAvoid = 0.2f;
+   public static final float cliffEndHeightToAvoid = 0.8f;
 
    private static final int defaultCells = 50;
    private final OpenCLManager openCLManager;
@@ -44,6 +46,7 @@ public class SteppableRegionsCalculationModule
    private final List<BytedecoImage> steppabilityConnections = new ArrayList<>();
 
    private final List<List<SteppableRegion>> regions = new ArrayList<>();
+   private final List<SteppableRegionsCalculator.SteppableRegionsEnvironmentModel> regionEnvironments = new ArrayList<>();
 
    private int cellsPerSide;
 
@@ -79,6 +82,16 @@ public class SteppableRegionsCalculationModule
       return regions;
    }
 
+   public List<SteppableRegionsCalculator.SteppableRegionsEnvironmentModel> getRegionEnvironments()
+   {
+      return regionEnvironments;
+   }
+
+   public OpenCLManager getOpenCLManager()
+   {
+      return openCLManager;
+   }
+
    /**
     * This creates all the open cl managers, programs, and kernels used in the planner
     */
@@ -110,6 +123,7 @@ public class SteppableRegionsCalculationModule
       Stopwatch timer = new Stopwatch();
 
       regions.clear();
+      regionEnvironments.clear();
       for (int yawValue = 0; yawValue < yawDiscretizations; yawValue++)
       {
          yaw.setParameter((float) yawValue);
@@ -133,10 +147,24 @@ public class SteppableRegionsCalculationModule
          openCLManager.finish();
 
          timer.start();
-         regions.add(createSteppableRegions(concaveHullParameters, polygonizerParameters, heightMapData, steppabilityImages.get(yawValue), steppabilityConnections.get(yawValue)));
+
+
+         SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.mergeCellsIntoSteppableRegionEnvironment(
+               steppabilityImages.get(yawValue),
+               steppabilityConnections.get(yawValue));
+         List<SteppableRegion> regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters, polygonizerParameters, environment, heightMapData);
+
+         this.regionEnvironments.add(environment);
+         this.regions.add(regions);
+
          LogTools.info("time = " + timer.lapElapsed());
          timer.lap();
       }
+   }
+
+   public void destroy()
+   {
+      openCLManager.destroy();
    }
 
    private void resize(int cellsPerSide)
@@ -163,6 +191,8 @@ public class SteppableRegionsCalculationModule
       steppableParameters.setParameter(yawDiscretizations);
       steppableParameters.setParameter(footWidth);
       steppableParameters.setParameter(footLength);
+      steppableParameters.setParameter(cliffStartHeightToAvoid);
+      steppableParameters.setParameter(cliffEndHeightToAvoid);
 
       steppableParameters.writeOpenCLBufferObject(openCLManager);
    }
@@ -178,22 +208,6 @@ public class SteppableRegionsCalculationModule
          }
       }
       heightMapImage.writeOpenCLImage(openCLManager);
-   }
-
-   private static List<SteppableRegion> createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
-                                                               PolygonizerParameters polygonizerParameters,
-                                                               HeightMapData heightMapData, BytedecoImage steppability, BytedecoImage steppabilityConnections)
-   {
-      long startTIme = System.nanoTime();
-      SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environment0 = SteppableRegionsCalculator.mergeCellsIntoSteppableRegionEnvironment(
-            steppability,
-            steppabilityConnections);
-      LogTools.info("Merge duration " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTIme));
-      startTIme = System.nanoTime();
-      List<SteppableRegion> regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullFactoryParameters, polygonizerParameters, environment0, heightMapData);
-      LogTools.info("Create duration " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTIme));
-
-      return regions;
    }
 
    public static void main(String[] args)
