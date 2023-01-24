@@ -42,7 +42,7 @@ public class HDF5ImageBrowser
 
    public HDF5ImageBrowser()
    {
-      imagePanel = new RDXCVImagePanel("HDF5 Image Browser", 1, 1);
+      imagePanel = new RDXCVImagePanel("HDF5 Image Browser", 100, 100);
 
       logDirectory = new ImGuiDirectory(IHMCCommonPaths.LOGS_DIRECTORY.toString(),
                                         fileName -> h5File != null && selectedFileName.equals(fileName),
@@ -88,7 +88,7 @@ public class HDF5ImageBrowser
          }
          else
          {
-            long numberOfObjects = imageGroup.getNumObjs();
+            long numberOfObjects = getNumberOfImages();
             ImGui.text(String.format("Number of objects: %d", numberOfObjects));
             ImGui.text(encoding == null ? "null" : encoding);
 
@@ -129,7 +129,17 @@ public class HDF5ImageBrowser
 
    private void loadDatasetImage()
    {
-      DataSet dataSet = imageGroup.openDataSet(String.valueOf(imageIndex.get()));
+      loadDataSetImage((int) imageIndex.get(), decompressionOutputMat);
+
+      // Could potentially be less complex, but would require a lot more code
+      imagePanel.resize(decompressionOutputMat.cols(), decompressionOutputMat.rows(), null);
+      // With some work we could probably remove this copy
+      decompressionOutputMat.copyTo(imagePanel.getBytedecoImage().getBytedecoOpenCVMat());
+   }
+
+   public void loadDataSetImage(int imageIndex, Mat matToPack)
+   {
+      DataSet dataSet = imageGroup.openDataSet(String.valueOf(imageIndex));
       long inMemDataSize = dataSet.getInMemDataSize();
       if (decompressionInputPointer == null || inMemDataSize > decompressionInputPointer.capacity())
       {
@@ -143,18 +153,13 @@ public class HDF5ImageBrowser
       if (isPNG)
       {
          opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, bgrImage);
-         opencv_imgproc.cvtColor(bgrImage, decompressionOutputMat, opencv_imgproc.COLOR_BGR2RGBA, 0);
+         opencv_imgproc.cvtColor(bgrImage, matToPack, opencv_imgproc.COLOR_BGR2RGBA, 0);
       }
       else
       {
          opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, yuv420Image);
-         opencv_imgproc.cvtColor(yuv420Image, decompressionOutputMat, opencv_imgproc.COLOR_YUV2RGBA_I420);
+         opencv_imgproc.cvtColor(yuv420Image, matToPack, opencv_imgproc.COLOR_YUV2RGBA_I420);
       }
-
-      // Could potentially be less complex, but would require a lot more code
-      imagePanel.resize(decompressionOutputMat.cols(), decompressionOutputMat.rows(), null);
-      // With some work we could probably remove this copy
-      decompressionOutputMat.copyTo(imagePanel.getBytedecoImage().getBytedecoOpenCVMat());
    }
 
    public RDXCVImagePanel getImagePanel()
@@ -165,5 +170,15 @@ public class HDF5ImageBrowser
    public ImGuiPanel getControlPanel()
    {
       return panel;
+   }
+
+   public boolean getDataSetIsOpen()
+   {
+      return h5File != null;
+   }
+
+   public int getNumberOfImages()
+   {
+      return (int) imageGroup.getNumObjs();
    }
 }

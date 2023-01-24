@@ -1,8 +1,11 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
+import imgui.type.ImInt;
 import org.bytedeco.opencv.global.opencv_calib3d;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point3fVectorVector;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -29,6 +32,9 @@ public class BlackflyCalibrationSuite
    private CalibrationPatternDetection calibrationPatternDetection;
    private HDF5ImageLogging hdf5ImageLogging;
    private HDF5ImageBrowser hdf5ImageBrowser;
+   private RDXCVImagePanel calibrationSourceImagesPanel;
+   private final RecyclingArrayList<Mat> calibrationSourceImages = new RecyclingArrayList<>(Mat::new);
+   private final ImInt calibrationSourceImageIndex = new ImInt();
    private volatile boolean running = true;
    private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
    private Point3fVectorVector objectPoints;
@@ -65,6 +71,9 @@ public class BlackflyCalibrationSuite
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getControlPanel());
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getVideoPanel());
 
+                  calibrationSourceImagesPanel = new RDXCVImagePanel("Calibration Source Image", 100, 100);
+                  baseUI.getImGuiPanelManager().addPanel(calibrationSourceImagesPanel.getVideoPanel());
+
                   baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
@@ -83,6 +92,7 @@ public class BlackflyCalibrationSuite
                calibrationPatternDetection.update();
                blackflyReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
                hdf5ImageBrowser.update();
+               calibrationSourceImagesPanel.draw();
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -121,6 +131,24 @@ public class BlackflyCalibrationSuite
 
    private void renderImGuiWidgets()
    {
+      if (hdf5ImageBrowser.getDataSetIsOpen() && ImGui.button("Load sources from open data set"))
+      {
+         calibrationSourceImages.clear();
+         calibrationSourceImageIndex.set(0);
+         for (int i = 0; i < hdf5ImageBrowser.getNumberOfImages(); i++)
+         {
+            hdf5ImageBrowser.loadDataSetImage(i, calibrationSourceImages.add());
+         }
+         loadCalibrationSourceImage();
+      }
+      if (!calibrationSourceImages.isEmpty())
+      {
+         if (ImGui.sliderInt(labels.get("Index"), calibrationSourceImageIndex.getData(), 0, calibrationSourceImages.size() - 1))
+         {
+            loadCalibrationSourceImage();
+         }
+      }
+
       if (ImGui.button(labels.get("Start recording data set")))
       {
 
@@ -135,6 +163,13 @@ public class BlackflyCalibrationSuite
       {
          ThreadTools.startAsDaemon(this::calibrate, "Calibration");
       }
+   }
+
+   private void loadCalibrationSourceImage()
+   {
+      Mat selectedImage = calibrationSourceImages.get(calibrationSourceImageIndex.get());
+      calibrationSourceImagesPanel.resize(selectedImage.cols(), selectedImage.rows(), null);
+      selectedImage.copyTo(calibrationSourceImagesPanel.getBytedecoImage().getBytedecoOpenCVMat());
    }
 
    private void calibrate()
