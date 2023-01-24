@@ -105,7 +105,7 @@ public class RDXBlackflyUI
 
                      imageData = new BytePointer((long) imageWidth * imageHeight * 4); // Each pixel has 4 bytes of data, hence * 4
 
-                     baseUI.getPerspectiveManager().reloadPerspective();
+                     baseUI.getLayoutManager().reloadLayout();
                   }
 
                   frameReadFrequency.ping();

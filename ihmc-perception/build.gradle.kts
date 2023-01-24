@@ -62,28 +62,12 @@ val javaCPPVersion = "1.5.8"
 bytedecoDependencies {
    api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:ihmc-commons:0.31.0")
-   apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.21-")
-   apiBytedecoNatives("opencv", "4.6.0-")
-   apiBytedecoNatives("opencl", "3.0-")
-   apiBytedecoNatives("librealsense2", "2.50.0-")
-   apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoNatives("ffmpeg", "5.0-")
-   apiBytedecoNatives("hdf5", "1.12.2-")
-   apiBytedecoNatives("ffmpeg", "5.1.2-")
+   apiCommonBytedecoNatives()
 }
 
 javacvDependencies {
    apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
-   apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.21-")
-   apiBytedecoNatives("opencv", "4.6.0-")
-   apiBytedecoNatives("opencl", "3.0-")
-   apiBytedecoNatives("librealsense2", "2.50.0-")
-   apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoNatives("ffmpeg", "5.0-")
-   apiBytedecoNatives("hdf5", "1.12.2-")
-   apiBytedecoNatives("ffmpeg", "5.1.2-")
+   apiCommonBytedecoNatives()
 }
 
 slamWrapperDependencies {
@@ -91,6 +75,20 @@ slamWrapperDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
 }
 
+fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
+{
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.21-")
+   apiBytedecoNatives("opencv", "4.6.0-")
+   apiBytedecoNatives("opencl", "3.0-")
+   apiBytedecoNatives("librealsense2", "2.50.0-")
+   apiBytedecoNatives("spinnaker", "2.4.0.143-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("hdf5", "1.12.2-")
+   apiBytedecoNatives("ffmpeg", "5.1.2-")
+}
+
+// We are trying to avoid downloading binaries that aren't used by anyone
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
    apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
@@ -105,7 +103,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, ver
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
 {
    api(dependencyNotation) {
-      exclude(group = "org.bytedeco")
+      exclude(group = "org.bytedeco") // This is required in order for the above to work
    }
 }
 
