@@ -345,15 +345,12 @@ public class PlanarRegionMap
                         // Generate ID for the merged region
                         int finalId = generatePostMergeId(parentRegion.getRegionId(), childRegion.getRegionId());
                         parentRegion.setRegionId(finalId);
-
                         changed = true;
 
-                        LogTools.info("Merged Parent({}) - Child({}): Final ID: {}", parentId, childId, finalId);
-                        map.getPlanarRegionsAsList().remove(childIndex);
+                        map.getPlanarRegionsAsList().remove(childRegion);
                      }
                      else
                      {
-                        LogTools.info("[EMPTY] Could not merge: Parent({}) - Child({})", parentId, childId);
                         childIndex++;
                      }
                   }

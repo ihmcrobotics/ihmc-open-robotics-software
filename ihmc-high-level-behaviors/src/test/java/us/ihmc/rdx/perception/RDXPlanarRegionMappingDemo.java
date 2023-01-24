@@ -50,7 +50,7 @@ public class RDXPlanarRegionMappingDemo
 
 
             // To Run With Perception Logs (HDF5)
-            mappingManager = new PlanarRegionMappingManager(perceptionLogDirectory + logFileName, false);
+            mappingManager = new PlanarRegionMappingManager(perceptionLogDirectory + logFileName, true);
 
 
             // To Run with Planar Region Logs (PRLLOG)
