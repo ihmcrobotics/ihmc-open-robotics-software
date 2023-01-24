@@ -44,7 +44,7 @@ public class WebcamHDF5LoggingDemo
 
                   hdf5ImageLogging = new HDF5ImageLogging(nativesLoadedActivator, webcamReader.getImageWidth(), webcamReader.getImageHeight());
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageLogging.getPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
                   {
