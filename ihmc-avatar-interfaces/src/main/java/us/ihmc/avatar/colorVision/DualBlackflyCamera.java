@@ -251,8 +251,8 @@ public class DualBlackflyCamera
 
    public void destroy()
    {
-      blackfly.stopAcquiringImages();
-      Spinnaker_C.spinImageRelease(spinImage);
+      if (blackfly != null)
+         blackfly.stopAcquiringImages();
    }
 
    public String getSerialNumber()
