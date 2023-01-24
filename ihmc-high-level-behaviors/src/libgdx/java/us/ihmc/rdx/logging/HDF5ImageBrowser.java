@@ -70,21 +70,12 @@ public class HDF5ImageBrowser
 
    private void renderImGuiWidgets()
    {
-      if (h5File == null)
-      {
-         logDirectory.renderImGuiWidgets();
-      }
-      else
+      if (h5File != null)
       {
          ImGui.text(openFile);
          if (ImGui.button(labels.get("Close file")))
          {
-            imageGroup.close();
-            imageGroup = null;
-            h5File.close();
-            h5File = null;
-            selectedFileName = "";
-            openFile = "";
+            closeHDF5File();
          }
          else
          {
@@ -101,10 +92,25 @@ public class HDF5ImageBrowser
             }
          }
       }
+
+      logDirectory.renderImGuiWidgets();
+   }
+
+   private void closeHDF5File()
+   {
+      imageGroup.close();
+      imageGroup = null;
+      h5File.close();
+      h5File = null;
+      selectedFileName = "";
+      openFile = "";
    }
 
    private void onHDF5FileSelected(String hdf5FileName)
    {
+      if (h5File != null)
+         closeHDF5File();
+
       selectedFileName = hdf5FileName;
       openFile = Paths.get(logDirectory.getDirectoryName(), hdf5FileName).toString();
       h5File = new H5File(openFile, hdf5.H5F_ACC_RDONLY);

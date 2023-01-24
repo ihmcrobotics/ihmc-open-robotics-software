@@ -19,7 +19,7 @@ public class BlackflyCalibrationPatternDemo
                                                   "ihmc-high-level-behaviors/src/libgdx/resources",
                                                   "Blackfly Calibration Pattern Demo");
    private RDXBlackflyReader blackflyReader;
-   private CalibrationPatternDetection calibrationPatternDetection;
+   private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private volatile boolean running = true;
    private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
 
@@ -46,8 +46,8 @@ public class BlackflyCalibrationPatternDemo
                   blackflyReader.create();
                   baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
 
-                  calibrationPatternDetection = new CalibrationPatternDetection();
-                  baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetection.getPanel());
+                  calibrationPatternDetectionUI = new CalibrationPatternDetectionUI();
+                  baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
@@ -55,13 +55,13 @@ public class BlackflyCalibrationPatternDemo
                      while (running)
                      {
                         blackflyReader.readBlackflyImage();
-                        calibrationPatternDetection.copyRGBImage(blackflyReader.getRGBImage());
+                        calibrationPatternDetectionUI.copyRGBImage(blackflyReader.getRGBImage());
                      }
                   }, "CameraRead");
                }
 
 
-               calibrationPatternDetection.update();
+               calibrationPatternDetectionUI.update();
                blackflyReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
             }
 
@@ -85,7 +85,7 @@ public class BlackflyCalibrationPatternDemo
       {
          if (blackflyReader.getImageWasRead())
          {
-            calibrationPatternDetection.drawCornersOrCenters(data.getRGBA8Mat());
+            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
          }
 
          blackflyReader.accessOnHighPriorityThread(data);
