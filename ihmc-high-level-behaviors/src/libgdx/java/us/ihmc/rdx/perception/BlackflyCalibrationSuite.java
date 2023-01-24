@@ -65,7 +65,7 @@ public class BlackflyCalibrationSuite
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getControlPanel());
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getVideoPanel());
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
                   {
@@ -109,7 +109,7 @@ public class BlackflyCalibrationSuite
             {
                hdf5ImageLogging = new HDF5ImageLogging(nativesLoadedActivator, (int) blackflyReader.getImageWidth(), (int) blackflyReader.getImageHeight());
                baseUI.getImGuiPanelManager().addPanel(hdf5ImageLogging.getPanel());
-               baseUI.getPerspectiveManager().reloadPerspective();
+               baseUI.getLayoutManager().reloadLayout();
             }
 
             calibrationPatternDetection.drawCornersOrCenters(data.getRGBA8Mat());
