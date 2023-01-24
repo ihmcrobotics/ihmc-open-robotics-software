@@ -4,5 +4,5 @@
   "Similarity threshold between normals" : 0.8,
   "Orthogonal distance threshold" : 0.08,
   "Max Inter Region Distance" : 0.08,
-  "Minimum overlap threshold" : 0.8
+  "Minimum overlap threshold" : 0.6
 }

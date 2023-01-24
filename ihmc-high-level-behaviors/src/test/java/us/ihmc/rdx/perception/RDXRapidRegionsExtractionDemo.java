@@ -109,8 +109,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-//            createL515(768, 1024);
-            createOuster(128, 2048);
+            createL515(768, 1024);
+            //createOuster(128, 2048);
 
             updateRapidRegionsExtractor();
             updatePointCloudRenderer();
