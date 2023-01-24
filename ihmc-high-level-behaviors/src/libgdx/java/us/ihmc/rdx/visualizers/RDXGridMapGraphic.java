@@ -356,6 +356,9 @@ public class RDXGridMapGraphic implements RenderableProvider
       double alpha = height % gradientLength;
       if (alpha < 0)
          alpha = 1 + alpha;
+      while (alpha > 5 * gradientSize)
+         alpha -=  5 * gradientSize;
+
       if (alpha <= gradientSize * 1)
       {
          r = InterpolationTools.linearInterpolate(magentaR, blueR, (alpha) / gradientSize);
@@ -386,7 +389,13 @@ public class RDXGridMapGraphic implements RenderableProvider
          g = InterpolationTools.linearInterpolate(orangeG, redG, (alpha - gradientSize * 4) / gradientSize);
          b = InterpolationTools.linearInterpolate(orangeB, redB, (alpha - gradientSize * 4) / gradientSize);
       }
+      else
+      {
+         throw new RuntimeException("no valid color");
+      }
 
+      if (r == 0.0 && g == 0.0 && b == 0.0)
+         throw new RuntimeException("Shouldn't return black.)");
       return new Color((float) r, (float) g, (float) b, 1.0f);
    }
 

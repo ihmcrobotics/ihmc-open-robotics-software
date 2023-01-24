@@ -4,20 +4,20 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
+import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 public class SteppableRegionsCalculationModule
 {
@@ -26,8 +26,8 @@ public class SteppableRegionsCalculationModule
    public static final int yawDiscretizations = 5;
    public static final float footWidth = 0.12f;
    public static final float footLength = 0.22f;
-   public static final float cliffStartHeightToAvoid = 0.2f;
-   public static final float cliffEndHeightToAvoid = 0.8f;
+   public static final float cliffStartHeightToAvoid = 0.1f;
+   public static final float cliffEndHeightToAvoid = 1.2f;
 
    private static final int defaultCells = 50;
    private final OpenCLManager openCLManager;
@@ -38,6 +38,7 @@ public class SteppableRegionsCalculationModule
    ConcaveHullFactoryParameters concaveHullParameters = new ConcaveHullFactoryParameters();
    PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
 
+   private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
    private final OpenCLFloatParameters steppableParameters = new OpenCLFloatParameters();
    private final OpenCLFloatParameters yaw = new OpenCLFloatParameters();
    private final BytedecoImage heightMapImage = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
@@ -82,9 +83,19 @@ public class SteppableRegionsCalculationModule
       return regions;
    }
 
+   public void setSteppableRegionsCalculatorParameters(SteppableRegionCalculatorParametersReadOnly parameters)
+   {
+      this.parameters.set(parameters);
+   }
+
    public List<SteppableRegionsCalculator.SteppableRegionsEnvironmentModel> getRegionEnvironments()
    {
       return regionEnvironments;
+   }
+
+   public List<BytedecoImage> getSteppableImage()
+   {
+      return steppabilityImages;
    }
 
    public OpenCLManager getOpenCLManager()
@@ -186,25 +197,28 @@ public class SteppableRegionsCalculationModule
    {
       steppableParameters.setParameter(heightMapData.getCenterIndex());
       steppableParameters.setParameter((float) heightMapData.getGridResolutionXY());
-      steppableParameters.setParameter(distanceFromCliffTops);
-      steppableParameters.setParameter(distanceFromCliffBottoms);
-      steppableParameters.setParameter(yawDiscretizations);
-      steppableParameters.setParameter(footWidth);
-      steppableParameters.setParameter(footLength);
-      steppableParameters.setParameter(cliffStartHeightToAvoid);
-      steppableParameters.setParameter(cliffEndHeightToAvoid);
+      steppableParameters.setParameter((float) parameters.getDistanceFromCliffTops());
+      steppableParameters.setParameter((float) parameters.getDistanceFromCliffBottoms());
+      steppableParameters.setParameter(parameters.getYawDiscretizations());
+      steppableParameters.setParameter((float) parameters.getFootWidth());
+      steppableParameters.setParameter((float) parameters.getFootLength());
+      steppableParameters.setParameter((float) parameters.getCliffStartHeightToAvoid());
+      steppableParameters.setParameter((float) parameters.getCliffEndHeightToAvoid());
 
       steppableParameters.writeOpenCLBufferObject(openCLManager);
    }
 
    private void populateHeightMapImage(HeightMapData heightMapData)
    {
-      for (int xIndex = 0; xIndex < heightMapData.getCellsPerAxis(); xIndex++)
+      int size = heightMapData.getCellsPerAxis();
+      for (int imageRow = 0; imageRow < size; imageRow++)
       {
-         for (int yIndex = 0; yIndex < heightMapData.getCellsPerAxis(); yIndex++)
+         for (int imageColumn = 0; imageColumn < size; imageColumn++)
          {
+            int x = size - imageRow;
+            int y = size - imageColumn;
             // the x and y values are switched between the world coordinates and the image coordinates
-            heightMapImage.setFloat(yIndex, xIndex, (float) heightMapData.getHeightAt(xIndex, yIndex));
+            heightMapImage.setFloat(imageRow, imageColumn, (float) heightMapData.getHeightAt(x, y));
          }
       }
       heightMapImage.writeOpenCLImage(openCLManager);
