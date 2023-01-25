@@ -176,6 +176,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateBoundingBox();
 
       regionId = newRegionId;
+      area = PlanarRegionTools.computePlanarRegionArea(this);
    }
 
 

@@ -52,6 +52,11 @@ public class PlanarRegionMappingUIPanel
          mappingManager.nextButtonCallback();
       }
 
+      if (ImGui.button("Auto Increment"))
+      {
+         mappingManager.autoIncrementButtonCallback();
+      }
+
       if (ImGui.checkbox("Enable Live Mode", liveModeEnabled))
       {
          mappingManager.setEnableLiveMode(liveModeEnabled.get());

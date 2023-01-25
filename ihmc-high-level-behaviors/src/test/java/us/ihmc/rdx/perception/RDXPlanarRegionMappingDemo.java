@@ -7,6 +7,7 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.tools.MocapTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXLineMeshModel;
@@ -27,6 +28,8 @@ public class RDXPlanarRegionMappingDemo
 
    private PlanarRegionMappingManager mappingManager;
    private PlanarRegionMappingUIPanel planarRegionMappingUI;
+
+   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
    private final RDXLineMeshModel mocapGraphic = new RDXLineMeshModel(0.02f, Color.YELLOW);
    private final RDXLineMeshModel rootJointGraphic = new RDXLineMeshModel(0.02f, Color.RED);
@@ -52,6 +55,10 @@ public class RDXPlanarRegionMappingDemo
             // To Run With Perception Logs (HDF5)
             mappingManager = new PlanarRegionMappingManager(perceptionLogDirectory + logFileName, true);
 
+            pointCloudRenderer.create(mappingManager.getRapidRegionsExtractor().getImageHeight()
+                                          * mappingManager.getRapidRegionsExtractor().getImageWidth());
+
+
 
             // To Run with Planar Region Logs (PRLLOG)
             //mappingManager = new PlanarRegionMappingManager(regionLogDirectory , false);
@@ -66,6 +73,7 @@ public class RDXPlanarRegionMappingDemo
             planarRegionMappingUI = new PlanarRegionMappingUIPanel("Filtered Map", mappingManager);
             baseUI.getImGuiPanelManager().addPanel(planarRegionMappingUI.getImGuiPanel());
             baseUI.getPrimaryScene().addRenderableProvider(mapPlanarRegionsGraphic::getRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer::getRenderables, RDXSceneLevel.VIRTUAL);
 
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(mapPlanarRegionsGraphic::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(mapPlanarRegionsGraphic::process3DViewInput);
@@ -82,6 +90,9 @@ public class RDXPlanarRegionMappingDemo
                mapPlanarRegionsGraphic.clear();
                mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
                mapPlanarRegionsGraphic.update();
+
+               pointCloudRenderer.setPointsToRender(mappingManager.getRapidRegionsExtractor().getDebugger().getDebugPoints(), Color.GRAY);
+               pointCloudRenderer.updateMesh();
             }
          }
 
@@ -131,6 +142,7 @@ public class RDXPlanarRegionMappingDemo
          {
             baseUI.dispose();
             ros2Node.destroy();
+            mappingManager.destroy();
             super.dispose();
          }
       });

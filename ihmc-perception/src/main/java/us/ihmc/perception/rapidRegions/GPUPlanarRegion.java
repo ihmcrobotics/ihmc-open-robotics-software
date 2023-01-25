@@ -8,9 +8,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,16 +16,16 @@ import java.util.TreeSet;
 
 public class GPUPlanarRegion
 {
-   private final Vector3D32 normalAverage = new Vector3D32();
-   private final Vector3D32 normalSVD = new Vector3D32();
-   private final Vector3D32 normal = new Vector3D32();
-   private final Point3D32 centroidAverage = new Point3D32();
+   private final Vector3D normalAverage = new Vector3D();
+   private final Vector3D normalSVD = new Vector3D();
+   private final Vector3D normal = new Vector3D();
+   private final Point3D centroidAverage = new Point3D();
    private final RecyclingArrayList<Point2D> regionIndices = new RecyclingArrayList<>(Point2D::new);
    private final RecyclingArrayList<Point3D> patchCentroids = new RecyclingArrayList<>(Point3D::new);
    private final RecyclingArrayList<Vector3D> patchNormals = new RecyclingArrayList<>(Vector3D::new);
    private final RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
    private final RecyclingArrayList<Point2D> borderIndices = new RecyclingArrayList<>(Point2D::new);
-   private final RecyclingArrayList<Vector3D> boundaryVertices = new RecyclingArrayList<>(Vector3D::new);
+   private final RecyclingArrayList<Point3D> boundaryVertices = new RecyclingArrayList<>(Point3D::new);
    private final RecyclingArrayList<GPURegionRing> regionRings = new RecyclingArrayList<>(GPURegionRing::new);
    // TODO: kd tree
    private int numberOfPatches;
@@ -37,8 +35,7 @@ public class GPUPlanarRegion
    private final DMatrixRMaj svdU = new DMatrixRMaj(3, 3);
    private final Stopwatch svdStopwatch = new Stopwatch();
    private double svdDuration = Double.NaN;
-   private final TreeSet<GPURegionRing> regionsRingsBySize
-         = new TreeSet<>(Comparator.comparing(gpuRegionRing -> -gpuRegionRing.getConvexPolygon().getArea()));
+   private final TreeSet<GPURegionRing> regionsRingsBySize = new TreeSet<>(Comparator.comparing(gpuRegionRing -> -gpuRegionRing.getConvexPolygon().getArea()));
    private final ArrayList<GPURegionRing> holeRingsToRemove = new ArrayList<>();
 
    public void reset(int id)
@@ -69,7 +66,7 @@ public class GPUPlanarRegion
       ++numberOfPatches;
    }
 
-   public RecyclingArrayList<Vector3D> getBoundaryVertices()
+   public RecyclingArrayList<Point3D> getBoundaryVertices()
    {
       return boundaryVertices;
    }
@@ -112,10 +109,10 @@ public class GPUPlanarRegion
          {
             svd.getU(svdU, true);
             normalSVD.set(svdU.get(6), svdU.get(7), svdU.get(8));
-//            normalSVD.normalize();
+            //            normalSVD.normalize();
             if (normalSVD.dot(Axis3D.Z) < 0.0)
                normalSVD.negate();
-//            normalSVD.scale(normalSVD.getZ() / Math.abs(normalSVD.getZ()));
+            //            normalSVD.scale(normalSVD.getZ() / Math.abs(normalSVD.getZ()));
          }
 
          svdDuration = svdStopwatch.totalElapsed();
@@ -123,19 +120,19 @@ public class GPUPlanarRegion
 
       normal.set(useCentroidSVD ? normalSVD : normalAverage);
 
-      if(normal.dot(centroidAverage) > 0.0)
+      if (normal.dot(centroidAverage) > 0.0)
       {
          normal.negate();
       }
       //LogTools.info("Normal: " + normal);
    }
 
-   public Point3D32 getCenter()
+   public Point3D getCenter()
    {
       return centroidAverage;
    }
 
-   public Vector3D32 getNormal()
+   public Vector3D getNormal()
    {
       return normal;
    }
