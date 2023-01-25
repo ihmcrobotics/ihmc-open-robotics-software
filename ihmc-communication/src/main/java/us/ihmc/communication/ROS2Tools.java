@@ -422,10 +422,27 @@ public class ROS2Tools
                                                                              ROS2Topic<?> topicName,
                                                                              NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscription(ros2Node, typeNamedTopic(messageType).withTopic(topicName), newMessageListener);
+      return createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), newMessageListener);
+   }
+
+   public static <T> ROS2Subscription<T> createCallbackSubscriptionTypeNamed(ROS2NodeInterface ros2Node,
+                                                                             Class<T> messageType,
+                                                                             ROS2Topic<?> topicName,
+                                                                             ROS2QosProfile qosProfile,
+                                                                             NewMessageListener<T> newMessageListener)
+   {
+      return createCallbackSubscription(ros2Node, typeNamedTopic(messageType).withTopic(topicName), qosProfile, newMessageListener);
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
+   {
+      return createCallbackSubscription(ros2Node, topic, ROS2QosProfile.DEFAULT(), newMessageListener);
+   }
+
+   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
+                                                                    ROS2Topic<T> topic,
+                                                                    ROS2QosProfile qosProfile,
+                                                                    NewMessageListener<T> newMessageListener)
    {
       return createCallbackSubscription(ros2Node, topic.getType(), topic.getName(), newMessageListener);
    }

@@ -32,6 +32,7 @@ import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -70,17 +71,34 @@ public class LidarScanPublisher
 
    public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node)
    {
-      this(modelFactory, defaultSensorFrameFactory(lidarName), ros2Node);
+      this(lidarName, modelFactory, ros2Node, ROS2QosProfile.DEFAULT());
+   }
+
+   public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node, ROS2QosProfile qosProfile)
+   {
+      this(modelFactory, defaultSensorFrameFactory(lidarName), ros2Node, qosProfile);
    }
 
    public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node)
    {
+      this(modelFactory, sensorFrameFactory, ros2Node, ROS2QosProfile.DEFAULT());
+   }
+
+   public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node, ROS2QosProfile qosProfile)
+   {
       this(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), sensorFrameFactory, ros2Node);
    }
+
+   public LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node)
+   {
+      this(robotName, fullRobotModel, sensorFrameFactory, ros2Node, ROS2QosProfile.DEFAULT());
+   }
+
    public LidarScanPublisher(String robotName,
-                              FullRobotModel fullRobotModel,
-                              SensorFrameFactory sensorFrameFactory,
-                              ROS2NodeInterface ros2Node)
+                             FullRobotModel fullRobotModel,
+                             SensorFrameFactory sensorFrameFactory,
+                             ROS2NodeInterface ros2Node,
+                             ROS2QosProfile qosProfile)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
@@ -89,7 +107,7 @@ public class LidarScanPublisher
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN, qosProfile);
    }
 
    public void setMaximumNumberOfPoints(int maximumNumberOfPoints)
