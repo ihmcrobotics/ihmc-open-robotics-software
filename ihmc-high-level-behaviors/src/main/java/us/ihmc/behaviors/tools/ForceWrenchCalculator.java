@@ -61,23 +61,23 @@ public class ForceWrenchCalculator
    private DMatrixRMaj pseudoInverse(DMatrixRMaj matrix)
    {
       double lambda = 1e-6;
-      int numRow = matrix.getNumRows();
-      int numCol = matrix.getNumCols();
-      DMatrixRMaj matrixTransposed = CommonOps_DDRM.transpose(matrix, null);
 
-      DMatrixRMaj AA_T = new DMatrixRMaj(numRow, numRow);
-      CommonOps_DDRM.mult(matrix, matrixTransposed, AA_T);
+      DMatrixRMaj matrixTransposed = CommonOps_DDRM.transpose(matrix, null);
+      int numRow = matrixTransposed.getNumRows();
+
+      DMatrixRMaj AT_A = new DMatrixRMaj(numRow, numRow);
+      CommonOps_DDRM.mult(matrixTransposed, matrix, AT_A);
 
       DMatrixRMaj identity = CommonOps_DDRM.identity(numRow);
       CommonOps_DDRM.scale(lambda, identity);
 
       DMatrixRMaj result = new DMatrixRMaj(identity.getNumRows(),identity.getNumRows());
-      CommonOps_DDRM.add(AA_T, identity, result);
+      CommonOps_DDRM.add(AT_A, identity, result);
 
       CommonOps_DDRM.invert(result);
 
-      DMatrixRMaj matrixDagger = new DMatrixRMaj(result.getNumRows(),result.getNumRows());
-      CommonOps_DDRM.mult(matrixTransposed, result, matrixDagger);
+      DMatrixRMaj matrixDagger = new DMatrixRMaj(result.getNumRows(),matrixTransposed.getNumCols());
+      CommonOps_DDRM.mult(result, matrixTransposed, matrixDagger);
 
       return matrixDagger;
    }
