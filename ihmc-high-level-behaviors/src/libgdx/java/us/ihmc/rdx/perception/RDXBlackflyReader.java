@@ -5,6 +5,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.commons.thread.ThreadTools;
@@ -31,6 +32,8 @@ public class RDXBlackflyReader
    private spinImage spinImage;
    private BytePointer spinImageDataPointer;
    private Mat blackflySourceMat;
+   private UMat conversionIn;
+   private UMat conversionOut;
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
@@ -85,13 +88,20 @@ public class RDXBlackflyReader
             imageHeight = blackfly.getHeight(spinImage);
             spinImageDataPointer = new BytePointer(imageWidth * imageHeight * 3); // RGB8
             blackflySourceMat = new Mat((int) imageHeight, (int) imageWidth, opencv_core.CV_8UC3);
+            conversionIn = new UMat();
+            conversionOut = new UMat();
             swapCVPanel.getDataSwapReferenceManager().initializeBoth(data2 -> data2.updateOnImageUpdateThread((int) imageWidth, (int) imageHeight));
          }
 
          Spinnaker_C.spinImageGetData(spinImage, spinImageDataPointer);
          blackflySourceMat.data(spinImageDataPointer);
 
+//         blackflySourceMat.copyTo(conversionIn);
+//         opencv_imgproc.cvtColor(conversionIn, conversionOut, opencv_imgproc.COLOR_RGB2RGBA, 0);
+//         conversionOut.copyTo(data.getRGBA8Mat());
+
          opencv_imgproc.cvtColor(blackflySourceMat, data.getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA, 0);
+
          Spinnaker_C.spinImageRelease(spinImage);
       }
    }
