@@ -3,9 +3,11 @@ package us.ihmc.rdx.ui.affordances;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import imgui.ImGui;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.ForceWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -41,6 +43,8 @@ public class RDXArmManager
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
+   private final ForceWrenchCalculator forceWrenchCalculator;
+
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
                         FullHumanoidRobotModel desiredRobot,
@@ -53,6 +57,8 @@ public class RDXArmManager
       this.ros2Helper = ros2Helper;
       this.teleoperationParameters = teleoperationParameters;
       armJointNames = robotModel.getJointMap().getArmJointNames();
+
+      this.forceWrenchCalculator = new ForceWrenchCalculator(syncedRobot);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -134,6 +140,14 @@ public class RDXArmManager
 
       // TODO Update the spine joints
       desiredRobot.getRootJoint().updateFramesRecursively();
+
+      forceWrenchCalculator.update();
+      SideDependentList<DMatrixRMaj> wrench = forceWrenchCalculator.getWrench();
+      // TODO: check if this thing works
+//      for (RobotSide side : RobotSide.values)
+//      {
+//         LogTools.info((wrench.get(side).toString()));
+//      }
    }
 
    public void renderImGuiWidgets()
