@@ -427,7 +427,7 @@ public class RDXCameraCalibrationDemo
       objectPoints = new Point3fVectorVector(1);
 
       calcBoardCornerPositions();
-      objectPoints.get(0).get(boardSize.width() - 1).x(objectPoints.get(0).get(0).x() + gridWidth);
+      objectPoints.get(0).get(boardSize.width() - 1).x(objectPoints.get(0).get(0).x() + gridWidth); // ???
       newObjectPoints = new Mat(objectPoints);
 
       objectPoints.resize(imagePoints.size()); //Docs resized it by (imagePoints.size(), objectPoints[0])
