@@ -1,18 +1,20 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
+import imgui.type.ImDouble;
+import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.opencv.global.opencv_calib3d;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Point3fVectorVector;
-import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_features2d.SimpleBlobDetector;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.logging.HDF5ImageBrowser;
 import us.ihmc.rdx.logging.HDF5ImageLogging;
@@ -43,17 +45,20 @@ public class BlackflyCalibrationSuite
    private final ImInt calibrationSourceImageIndex = new ImInt();
    private volatile boolean running = true;
    private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
-   private Point3fVectorVector objectPoints;
+   private Point2fVectorVector imagePoints;
    private Mat grayscaleImage;
    private Mat calibrationPatternOutput;
    private final Notification calibrationOutputNotification = new Notification();
-   private final Object grayscaleImageInputSync = new Object();
    private final Object calibrationPatternOutputSync = new Object();
-   private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue
-         = MissingThreadTools.newSingleThreadExecutor("PatternDetection", true, 1);
+   private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue = MissingThreadTools.newSingleThreadExecutor("PatternDetection", true);
    private boolean patternFound = false;
-   private Mat cornersOrCenters;
+   private MatVector cornersOrCentersMatVector;
    private SimpleBlobDetector simpleBlobDetector;
+   private final ImFloat patternDistanceBetweenPoints = new ImFloat();
+   private final ImDouble fxGuess = new ImDouble();
+   private final ImDouble fyGuess = new ImDouble();
+   private final ImDouble cxGuess = new ImDouble();
+   private final ImDouble cyGuess = new ImDouble();
 
    public BlackflyCalibrationSuite()
    {
@@ -94,7 +99,8 @@ public class BlackflyCalibrationSuite
 
                   grayscaleImage = new Mat();
                   calibrationPatternOutput = new Mat();
-                  cornersOrCenters = new Mat();
+                  cornersOrCentersMatVector = new MatVector();
+                  imagePoints = new Point2fVectorVector();
                   simpleBlobDetector = SimpleBlobDetector.create();
 
                   ThreadTools.startAsDaemon(() ->
@@ -170,25 +176,22 @@ public class BlackflyCalibrationSuite
          {
             hdf5ImageBrowser.loadDataSetImage(i, calibrationSourceImages.add());
          }
-         loadCalibrationSourceImage();
+         drawPatternOnCurrentImage();
+         findCornersOrCenters();
+      }
+      if (ImGui.button("Find corners or centers again"))
+      {
+         findCornersOrCenters();
       }
       if (!calibrationSourceImages.isEmpty())
       {
          if (ImGui.sliderInt(labels.get("Index"), calibrationSourceImageIndex.getData(), 0, calibrationSourceImages.size() - 1))
          {
-            loadCalibrationSourceImage();
+            drawPatternOnCurrentImage();
          }
       }
 
-      if (ImGui.button(labels.get("Start recording data set")))
-      {
-
-      }
-
-      if (ImGui.button(labels.get("Capture calibration image")))
-      {
-
-      }
+      ImGuiTools.volatileInputFloat(labels.get("Pattern distance between points"), patternDistanceBetweenPoints);
 
       if (ImGui.button(labels.get("Calibrate")))
       {
@@ -196,57 +199,98 @@ public class BlackflyCalibrationSuite
       }
    }
 
-   private void loadCalibrationSourceImage()
+   private void findCornersOrCenters()
    {
-      Mat selectedImage = calibrationSourceImages.get(calibrationSourceImageIndex.get());
-      CalibrationPatternType pattern = calibrationPatternDetectionUI.getPatternType();
+      patternDetectionThreadQueue.execute(() ->
+      {
+         cornersOrCentersMatVector.clear();
+         imagePoints.clear();
+
+         for (int i = 0; i < calibrationSourceImages.size(); i++)
+         {
+            CalibrationPatternType pattern = calibrationPatternDetectionUI.getPatternType();
+            int patternWidth = calibrationPatternDetectionUI.getPatternWidth();
+            int patternHeight = calibrationPatternDetectionUI.getPatternHeight();
+            Size patternSize = new Size(patternWidth, patternHeight);
+
+            opencv_imgproc.cvtColor(calibrationSourceImages.get(i), grayscaleImage, opencv_imgproc.COLOR_BGR2GRAY);
+
+            Mat cornersOrCentersMat = new Mat();
+            if (pattern == CalibrationPatternType.CHESSBOARD)
+            {
+               patternFound = opencv_calib3d.findChessboardCorners(grayscaleImage,
+                                                                   patternSize,
+                                                                   cornersOrCentersMat,
+                                                                   opencv_calib3d.CALIB_CB_ADAPTIVE_THRESH | opencv_calib3d.CALIB_CB_NORMALIZE_IMAGE);
+            }
+            else
+            {
+               patternFound = opencv_calib3d.findCirclesGrid(grayscaleImage,
+                                                             patternSize,
+                                                             cornersOrCentersMat,
+                                                             opencv_calib3d.CALIB_CB_SYMMETRIC_GRID,
+                                                             simpleBlobDetector);
+            }
+            cornersOrCentersMatVector.push_back(cornersOrCentersMat);
+
+            Point2fVector cornersOrCenters = new Point2fVector();
+            for (int x = 0; x < cornersOrCentersMat.cols(); x++)
+            {
+               for (int y = 0; y < cornersOrCentersMat.rows(); y++)
+               {
+                  cornersOrCenters.push_back(new Point2f(cornersOrCentersMat.ptr(y, x)));
+               }
+            }
+            imagePoints.push_back(cornersOrCenters);
+         }
+      });
+   }
+
+   // TODO: Potentially put this on another thread; not sure how long it takes
+   private void drawPatternOnCurrentImage()
+   {
       int patternWidth = calibrationPatternDetectionUI.getPatternWidth();
       int patternHeight = calibrationPatternDetectionUI.getPatternHeight();
-
-      synchronized (grayscaleImageInputSync)
-      {
-         opencv_imgproc.cvtColor(selectedImage, grayscaleImage, opencv_imgproc.COLOR_BGR2GRAY);
-
-         synchronized (calibrationPatternOutputSync)
-         {
-            selectedImage.copyTo(calibrationPatternOutput);
-         }
-      }
-
-      patternDetectionThreadQueue.clearQueueAndExecute(() ->
-      {
-         Size patternSize = new Size(patternWidth, patternHeight);
-         if (pattern == CalibrationPatternType.CHESSBOARD)
-         {
-            patternFound = opencv_calib3d.findChessboardCorners(grayscaleImage,
-                                                                patternSize,
-                                                                cornersOrCenters,
-                                                                opencv_calib3d.CALIB_CB_ADAPTIVE_THRESH | opencv_calib3d.CALIB_CB_NORMALIZE_IMAGE);
-         }
-         else
-         {
-            patternFound = opencv_calib3d.findCirclesGrid(grayscaleImage,
-                                                          patternSize,
-                                                          cornersOrCenters,
-                                                          opencv_calib3d.CALIB_CB_SYMMETRIC_GRID,
-                                                          simpleBlobDetector);
-         }
-
-         synchronized (calibrationPatternOutputSync)
-         {
-            opencv_calib3d.drawChessboardCorners(calibrationPatternOutput, patternSize, cornersOrCenters, patternFound);
-         }
-
-         calibrationOutputNotification.set();
-      });
+      Size patternSize = new Size(patternWidth, patternHeight);
+      int sourceImageIndex = calibrationSourceImageIndex.get();
+      Mat selectedImage = calibrationSourceImages.get(sourceImageIndex);
+      selectedImage.copyTo(calibrationPatternOutput);
+      opencv_calib3d.drawChessboardCorners(calibrationPatternOutput, patternSize, cornersOrCentersMatVector.get(sourceImageIndex), patternFound);
+      calibrationOutputNotification.set();
    }
 
    private void calibrate()
    {
-      objectPoints = new Point3fVectorVector();
+      int patternWidth = calibrationPatternDetectionUI.getPatternWidth();
+      int patternHeight = calibrationPatternDetectionUI.getPatternHeight();
 
+      Point3fVectorVector objectPoints = new Point3fVectorVector();
+      for (int i = 0; i < calibrationSourceImages.size(); i++)
+      {
+         Point3fVector pointsOnPattern = new Point3fVector();
+         for (int y = 0; y < patternHeight; y++)
+         {
+            for (int x = 0; x < patternWidth; x++) // The same pattern is used for all the images, but we still have to make all the copies
+            {
+               pointsOnPattern.push_back(new Point3f(x * patternDistanceBetweenPoints.get(), y * patternDistanceBetweenPoints.get(), 0.0f));
+            }
+         }
+         objectPoints.push_back(pointsOnPattern);
+      }
 
-//      opencv_calib3d.calibrate();
+      Size imageSize = new Size(calibrationSourceImages.get(0).cols(), calibrationSourceImages.get(0).rows());
+
+      Mat cameraMatrix = Mat.eye(3, 3, opencv_core.CV_64F).asMat();
+      // Using fisheye::CALIB_USE_INTRINSIC_GUESS
+      cameraMatrix.ptr(0, 0).putDouble(fxGuess.get());
+      cameraMatrix.ptr(1, 1).putDouble(fxGuess.get());
+      cameraMatrix.ptr(0, 2).putDouble(cxGuess.get());
+      cameraMatrix.ptr(1, 2).putDouble(cyGuess.get());
+
+      int flags = opencv_calib3d.FISHEYE_CALIB_USE_INTRINSIC_GUESS;
+
+      // Here we use the cv::fisheye version
+      opencv_calib3d.calibrate(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rvecs, tvecs, flags, criteria);
    }
 
    public static void main(String[] args)
