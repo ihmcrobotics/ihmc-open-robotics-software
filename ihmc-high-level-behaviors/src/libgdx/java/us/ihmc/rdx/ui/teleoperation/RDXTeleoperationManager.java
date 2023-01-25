@@ -11,10 +11,12 @@ import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.behaviors.tools.ForceWrenchCalculator;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
@@ -106,6 +108,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
    private boolean isPlacingFootstep = false;
 
+   private final ForceWrenchCalculator forceWrenchCalculator;
+
    public RDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
                                   CommunicationHelper communicationHelper)
@@ -171,6 +175,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         ros2Helper,
                                         teleoperationParameters);
       }
+
+      this.forceWrenchCalculator = new ForceWrenchCalculator(syncedRobot);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -389,6 +395,20 @@ public class RDXTeleoperationManager extends ImGuiPanel
          }
       }
       desiredRobot.setActive(!allAreDeleted);
+
+      forceWrenchCalculator.update();
+      SideDependentList<DMatrixRMaj> wrench = forceWrenchCalculator.getWrench();
+      // TODO: check if this thing works
+      //      for (RobotSide side : RobotSide.values)
+      //      {
+      //         LogTools.info((wrench.get(side).toString()));
+      //      }
+
+      for (RobotSide side : RobotSide.values)
+      {
+         DMatrixRMaj wrenchVector = forceWrenchCalculator.getWrench().get(side);
+         interactableHands.get(side).updateForceWrench(wrenchVector);
+      }
    }
 
    private void calculateVRPick(RDXVRContext vrContext)

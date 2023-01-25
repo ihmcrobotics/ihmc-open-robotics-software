@@ -43,8 +43,6 @@ public class RDXArmManager
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
-   private final ForceWrenchCalculator forceWrenchCalculator;
-
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
                         FullHumanoidRobotModel desiredRobot,
@@ -57,8 +55,6 @@ public class RDXArmManager
       this.ros2Helper = ros2Helper;
       this.teleoperationParameters = teleoperationParameters;
       armJointNames = robotModel.getJointMap().getArmJointNames();
-
-      this.forceWrenchCalculator = new ForceWrenchCalculator(syncedRobot);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -141,13 +137,6 @@ public class RDXArmManager
       // TODO Update the spine joints
       desiredRobot.getRootJoint().updateFramesRecursively();
 
-      forceWrenchCalculator.update();
-      SideDependentList<DMatrixRMaj> wrench = forceWrenchCalculator.getWrench();
-      // TODO: check if this thing works
-//      for (RobotSide side : RobotSide.values)
-//      {
-//         LogTools.info((wrench.get(side).toString()));
-//      }
    }
 
    public void renderImGuiWidgets()

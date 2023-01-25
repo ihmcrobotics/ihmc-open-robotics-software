@@ -3,11 +3,13 @@ package us.ihmc.rdx.ui.affordances;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXSpatialVectorArrows;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -23,6 +25,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
    private RDXSpatialVectorArrows wristWrenchArrows;
+   private RDXSpatialVectorArrows forceWrench;
    private String contextMenuName;
 
    public static boolean robotCollidableIsHand(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
@@ -67,7 +70,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
                                                            side.getLowerCaseName() + "WristSensor");
          }
       }
-
+      forceWrench = new RDXSpatialVectorArrows(handFrame);
       contextMenuName = side + " Hand Context Menu";
    }
 
@@ -88,6 +91,20 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       }
    }
 
+   public void updateForceWrench(DMatrixRMaj vector)
+   {
+      // wrench should be 6 x 1
+      if (vector.numRows == 6)
+      {
+         updateForceWrench(vector.get(0),vector.get(1),vector.get(2),vector.get(3),vector.get(4),vector.get(5));
+      }
+   }
+
+   public void updateForceWrench(double fx, double fy, double fz, double tau_x, double tau_y, double tau_z)
+   {
+      forceWrench.updateFromWrench(fx, fy, fz, tau_x, tau_y, tau_z);
+   }
+
    @Override
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
@@ -100,6 +117,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
             wristWrenchArrows.getRenderables(renderables, pool);
          }
       }
+      forceWrench.getRenderables(renderables, pool);
    }
 
    public String getContextMenuName()

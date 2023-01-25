@@ -44,6 +44,11 @@ public class RDXSpatialVectorArrows
       angularZYoVariable = yoVariableClientHelper.subscribeToYoDouble(variablePrefix + "TorqueZ");
    }
 
+   public RDXSpatialVectorArrows(ReferenceFrame originFrame)
+   {
+      this.originFrame = originFrame;
+   }
+
    public RDXSpatialVectorArrows(ReferenceFrame originFrame, int indexOfSensor)
    {
       this.originFrame = originFrame;
@@ -77,6 +82,11 @@ public class RDXSpatialVectorArrows
       }
    }
 
+   public void updateFromWrench(double fx, double fy, double fz, double tau_x, double tau_y,double tau_z)
+   {
+      update(new Vector3D(fx, fy, fz), new Vector3D(tau_x, tau_y, tau_z));
+   }
+
    private void transform(RDXArrowGraphic arrowGraphic, Vector3DReadOnly vector, double scalar)
    {
       double length = vector.length();
@@ -97,5 +107,10 @@ public class RDXSpatialVectorArrows
    public int getIndexOfSensor()
    {
       return indexOfSensor;
+   }
+
+   public ReferenceFrame getOriginFrame()
+   {
+      return originFrame;
    }
 }
