@@ -9,6 +9,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -21,9 +22,9 @@ public class OpenCLTools
    private static ThreadLocal<CharPointer> stringPointer = ThreadLocal.withInitial(() -> new CharPointer(stringSizeByteLimit));
    private static ThreadLocal<SizeTPointer> resultingStringLengthPointer = ThreadLocal.withInitial(() -> new SizeTPointer(1));
 
-   public static String readFile(Path file)
+   public static String readFile(Path path)
    {
-      return ExceptionTools.handle(() -> Resources.toString(ResourceTools.getResourceSystem(file), StandardCharsets.UTF_8),
+      return ExceptionTools.handle(() -> Resources.toString(ResourceTools.getResourceSystem(path), StandardCharsets.UTF_8),
                                    DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 

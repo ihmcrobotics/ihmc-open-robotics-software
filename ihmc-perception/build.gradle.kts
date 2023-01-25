@@ -22,10 +22,10 @@ ihmc {
 
 mainDependencies {
    api(ihmc.sourceSetProject("javacv"))
+   api(ihmc.sourceSetProject("slam-wrapper"))
    // For experimenting with local OpenCV:
    // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
-   api("us.ihmc:ihmc-native-library-loader:2.0.1")
    api("org.georegression:georegression:0.22")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
@@ -38,8 +38,9 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.19.0")
+   api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:simulation-construction-set:0.22.10")
+   api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -48,9 +49,11 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-
    api("us.ihmc:ihmc-perception-mapsense-wrapper:source")
    api("us.ihmc:ihmc-perception-slam-wrapper:source")
+   api("us.ihmc:robot-environment-awareness:source")
+   api("us.ihmc:ihmc-perception-slam-wrapper:source")
+   apiBytedecoNatives("hdf5", "1.12.2-")
 }
 
 openpnpDependencies {
@@ -60,24 +63,14 @@ openpnpDependencies {
 val javaCPPVersion = "1.5.8"
 
 bytedecoDependencies {
-   apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.21-")
-   apiBytedecoNatives("opencv", "4.6.0-")
-   apiBytedecoNatives("opencl", "3.0-")
-   apiBytedecoNatives("librealsense2", "2.50.0-")
-   apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoNatives("ffmpeg", "5.1.2-")
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:ihmc-commons:0.31.0")
+   apiCommonBytedecoNatives()
 }
 
 javacvDependencies {
    apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
-   apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.21-")
-   apiBytedecoNatives("opencv", "4.6.0-")
-   apiBytedecoNatives("opencl", "3.0-")
-   apiBytedecoNatives("librealsense2", "2.50.0-")
-   apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoNatives("ffmpeg", "5.1.2-")
+   apiCommonBytedecoNatives()
 }
 
 slamWrapperDependencies {
@@ -91,6 +84,20 @@ mapsenseWrapperDependencies {
    api("us.ihmc:ihmc-perception:source")
 }
 
+fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
+{
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.21-")
+   apiBytedecoNatives("opencv", "4.6.0-")
+   apiBytedecoNatives("opencl", "3.0-")
+   apiBytedecoNatives("librealsense2", "2.50.0-")
+   apiBytedecoNatives("spinnaker", "2.4.0.143-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("hdf5", "1.12.2-")
+   apiBytedecoNatives("ffmpeg", "5.1.2-")
+}
+
+// We are trying to avoid downloading binaries that aren't used by anyone
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
    apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
@@ -105,7 +112,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, ver
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
 {
    api(dependencyNotation) {
-      exclude(group = "org.bytedeco")
+      exclude(group = "org.bytedeco") // This is required in order for the above to work
    }
 }
 

@@ -5,10 +5,10 @@
 class FactorGraphExternal
 {
     public:
-        // Expects packed Pose3
+        // Expects packed Pose3 as XYZYPR
         void addPriorPoseFactor(int index, float* pose);
 
-        // Expects packed Pose3
+        // Expects packed Pose3 as XYZYPR
         void addOdometryFactor(float* odometry, int poseId);
 
         // Expects 4x4 homogenous transform matrix to insert Pose3 factor

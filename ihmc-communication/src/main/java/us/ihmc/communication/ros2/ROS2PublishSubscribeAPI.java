@@ -22,6 +22,8 @@ public interface ROS2PublishSubscribeAPI
 
    public Notification subscribeViaNotification(ROS2Topic<Empty> topic);
 
+   <T> void createPublisher(ROS2Topic<T> topic);
+
    public <T> void publish(ROS2Topic<T> topic, T message);
 
    public void publish(ROS2Topic<std_msgs.msg.dds.String> topic, String message);

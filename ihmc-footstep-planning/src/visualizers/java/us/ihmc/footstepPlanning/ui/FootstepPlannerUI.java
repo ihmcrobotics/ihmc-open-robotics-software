@@ -1,8 +1,10 @@
 package us.ihmc.footstepPlanning.ui;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
@@ -18,6 +20,7 @@ import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -25,6 +28,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.controllers.*;
 import us.ihmc.footstepPlanning.ui.viewers.*;
@@ -297,13 +301,19 @@ public class FootstepPlannerUI
          mainTabController.setDefaultTiming(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
       }
 
-      if (defaultContactPoints != null)
+      if (defaultContactPoints == null)
       {
-         mainTabController.setContactPointParameters(defaultContactPoints);
-         pathViewer.setDefaultContactPoints(defaultContactPoints);
-         goalOrientationViewer.setDefaultContactPoints(defaultContactPoints);
-         footstepPlannerLogVisualizerController.setContactPointParameters(defaultContactPoints);
+         SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+         defaultContactPoints = new SideDependentList<>();
+         for (RobotSide side : RobotSide.values)
+            defaultContactPoints.put(side, footPolygons.get(side).getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList()));
       }
+
+      mainTabController.setContactPointParameters(defaultContactPoints);
+      pathViewer.setDefaultContactPoints(defaultContactPoints);
+      goalOrientationViewer.setDefaultContactPoints(defaultContactPoints);
+      footstepPlannerLogVisualizerController.setContactPointParameters(defaultContactPoints);
+
 
       messager.registerTopicListener(ShowOcTree, ocTreeViewer::setEnabled);
       messager.registerTopicListener(OcTreeData, ocTreeViewer::submitOcTreeData);

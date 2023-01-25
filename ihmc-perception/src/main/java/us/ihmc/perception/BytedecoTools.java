@@ -9,6 +9,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 import us.ihmc.tools.thread.Activator;
 
 import java.io.IOException;
@@ -56,6 +57,18 @@ public class BytedecoTools
          nativesActivated.activate();
       }, "Bytedeco loader");
       return nativesActivated;
+   }
+
+   public static Activator loadGTSAMNativesOnAThread()
+   {
+      Activator nativesActivated = new Activator();
+      ThreadTools.startAThread(BytedecoTools::loadSlamWrapper, "SlamWrapper loader");
+      return nativesActivated;
+   }
+
+   public static void loadSlamWrapper()
+   {
+      SlamWrapperNativeLibrary.load();
    }
 
    public static Activator loadOpenCVNativesOnAThread()

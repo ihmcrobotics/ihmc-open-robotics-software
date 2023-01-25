@@ -3,6 +3,7 @@ package us.ihmc.avatar.logging;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -34,6 +35,7 @@ public class PlanarRegionsListLogger
 
    public void start()
    {
+      LogTools.info("Storing PlanarRegionLog File at: {}", logDirectory + dateFormat.format(new Date()) + "_" + this.getClass().getSimpleName() + ".prllog");
       File file = new File(logDirectory + dateFormat.format(new Date()) + "_" + this.getClass().getSimpleName() + ".prllog");
       try
       {
@@ -80,6 +82,26 @@ public class PlanarRegionsListLogger
          writer.flush();
 
          PlanarRegionFileTools.exportPlanarRegionDataToStream(out, list);
+      }
+      catch (IOException ex)
+      {
+         LogTools.error("Failed to write to planar regions log");
+         LogTools.error(ex.getMessage());
+      }
+   }
+
+   public void update(long time, PlanarRegionsListWithPose listWithPose)
+   {
+      if (!started)
+         return;
+
+      try
+      {
+         writer.write("##\n");
+         writer.write(time + "\n");
+         writer.flush();
+
+         PlanarRegionFileTools.exportPlanarRegionWithPoseDataToStream(out, listWithPose);
       }
       catch (IOException ex)
       {

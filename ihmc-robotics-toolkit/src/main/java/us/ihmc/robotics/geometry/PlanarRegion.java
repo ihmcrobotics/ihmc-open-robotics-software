@@ -2,10 +2,12 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.interfaces.EuclidGeometry;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -33,6 +36,10 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    public static final double DEFAULT_BOUNDING_BOX_EPSILON = 0.0;
 
    private int regionId = NO_REGION_ID;
+   private int numberOfTimesMatched = 0;
+   private int tickOfLastMeasurement = 0;
+
+   private double area = 0;
 
    /**
     * This transform also represents the pose of the PlanarRegion.
@@ -169,6 +176,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateBoundingBox();
 
       regionId = newRegionId;
+      area = PlanarRegionTools.computePlanarRegionArea(this);
    }
 
 
@@ -1170,6 +1178,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       updateBoundingBox();
       convexHull.set(other.convexHull);
+
+      area = PlanarRegionTools.computePlanarRegionArea(other);
    }
 
    public void setTransformOnly(PlanarRegion other)
@@ -1184,7 +1194,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateBoundingBox();
    }
 
-   private void updateBoundingBox()
+   public void updateBoundingBox()
    {
       boundingBox3dInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
       for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
@@ -1208,7 +1218,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       this.boundingBox3dInWorld.setMax(maxPoint.getX() + boundingBoxEpsilon, maxPoint.getY() + boundingBoxEpsilon, maxPoint.getZ() + boundingBoxEpsilon);
    }
 
-   private void updateConvexHull()
+   public void updateConvexHull()
    {
       convexHull.clear();
       for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
@@ -1648,5 +1658,47 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       }
 
       return buffer.toString();
+   }
+
+   public String getTooltipString()
+   {
+      return String.format("Regions ID: %d\nArea: %.2f\nConcave Hull Size: %d\nMatched: %d\nOrigin: %s\nNormal: %s\nTime: %d",
+                    regionId,
+                    getArea(),
+                    getConcaveHullSize(),
+                    getNumberOfTimesMatched(),
+                    String.format("%.2f, %.2f, %.2f", origin.getX(), origin.getY(), origin.getZ()),
+                    String.format("%.2f, %.2f, %.2f", normal.getX(), normal.getY(), normal.getZ()),
+                    getTickOfLastMeasurement());
+   }
+
+   public int getNumberOfTimesMatched()
+   {
+      return numberOfTimesMatched;
+   }
+
+   public void incrementNumberOfTimesMatched()
+   {
+      numberOfTimesMatched++;
+   }
+
+   public double getArea()
+   {
+      return area;
+   }
+
+   public void setArea(double area)
+   {
+      this.area = area;
+   }
+
+   public int getTickOfLastMeasurement()
+   {
+      return tickOfLastMeasurement;
+   }
+
+   public void setTickOfLastMeasurement(int tickOfLastMeasurement)
+   {
+      this.tickOfLastMeasurement = tickOfLastMeasurement;
    }
 }

@@ -8,6 +8,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
@@ -1193,6 +1194,96 @@ public class GeometryTools
 
       BoundingBox2D intersection = new BoundingBox2D(minX, minY, maxX, maxY);
       return intersection;
+   }
+
+   /**
+    * Finds the intersection of two bounding boxes defined by a bounding box Allocates a new boundingBox3D.
+    *
+    * @param a
+    * @param b
+    * @return the intersection bounding box, or null if no intersection
+    */
+   public static BoundingBox3D getIntersectionOfTwoBoundingBoxes(BoundingBox3DReadOnly a, BoundingBox3DReadOnly b)
+   {
+      double maxX = Math.min(a.getMaxX(), b.getMaxX());
+      double maxY = Math.min(a.getMaxY(), b.getMaxY());
+      double maxZ = Math.min(a.getMaxZ(), b.getMaxZ());
+
+      double minX = Math.max(a.getMinX(), b.getMinX());
+      double minY = Math.max(a.getMinY(), b.getMinY());
+      double minZ = Math.max(a.getMinZ(), b.getMinZ());
+
+      if ((maxX <= minX) || (maxY <= minY) || (maxZ <= minZ))
+         return null;
+
+      BoundingBox3D intersection = new BoundingBox3D(minX, minY, minZ, maxX, maxY, maxZ);
+      return intersection;
+   }
+
+   /**
+    * Finds the union of two bounding boxes defined by a bounding box Allocates a new boundingBox3D.
+    *
+    * @param a
+    * @param b
+    * @return the union bounding box, or null if no intersection
+    */
+   public static BoundingBox3D getUnionOfTwoBoundingBoxes(BoundingBox3DReadOnly a, BoundingBox3DReadOnly b)
+   {
+      double maxX = Math.max(a.getMaxX(), b.getMaxX());
+      double maxY = Math.max(a.getMaxY(), b.getMaxY());
+      double maxZ = Math.max(a.getMaxZ(), b.getMaxZ());
+
+      double minX = Math.min(a.getMinX(), b.getMinX());
+      double minY = Math.min(a.getMinY(), b.getMinY());
+      double minZ = Math.min(a.getMinZ(), b.getMinZ());
+
+      if ((maxX <= minX) || (maxY <= minY) || (maxZ <= minZ))
+         return null;
+
+      BoundingBox3D union = new BoundingBox3D(minX, minY, minZ, maxX, maxY, maxZ);
+      return union;
+   }
+
+   public static double computeBoundingBoxVolume3D(BoundingBox3DReadOnly boundingBox)
+   {
+      return Math.abs(boundingBox.getMaxX() - boundingBox.getMinX()) * Math.abs(boundingBox.getMaxY() - boundingBox.getMinY())
+            * Math.abs(boundingBox.getMaxZ() - boundingBox.getMinZ());
+   }
+
+   /**
+    * Compute Intersection-over-Union (IoU) of two 3D bounding boxes.
+    */
+   public static double computeIntersectionOverUnionOfTwoBoundingBoxes(BoundingBox3DReadOnly a, BoundingBox3DReadOnly b)
+   {
+      BoundingBox3D intersection = getIntersectionOfTwoBoundingBoxes(a, b);
+
+      if(intersection == null)
+         return 0.0;
+
+      double intersectionVolume = GeometryTools.computeBoundingBoxVolume3D(intersection);
+      double volumeA = GeometryTools.computeBoundingBoxVolume3D(a);
+      double volumeB = GeometryTools.computeBoundingBoxVolume3D(b);
+      double unionVolume = volumeA + volumeB - intersectionVolume;
+
+      return intersectionVolume / unionVolume;
+   }
+
+   /**
+    * Compute Intersection-over-Union (IoU) of two 3D bounding boxes.
+    */
+   public static double computeIntersectionOverSmallerOfTwoBoundingBoxes(BoundingBox3DReadOnly a, BoundingBox3DReadOnly b)
+   {
+      BoundingBox3D intersection = getIntersectionOfTwoBoundingBoxes(a, b);
+
+      if(intersection == null)
+         return 0.0;
+
+      double intersectionVolume = GeometryTools.computeBoundingBoxVolume3D(intersection);
+      double volumeA = GeometryTools.computeBoundingBoxVolume3D(a);
+      double volumeB = GeometryTools.computeBoundingBoxVolume3D(b);
+      double smallerVolume = Math.min(volumeA, volumeB);
+
+      return intersectionVolume / smallerVolume;
    }
 
    /**

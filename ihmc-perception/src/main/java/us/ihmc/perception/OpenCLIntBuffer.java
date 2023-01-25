@@ -23,6 +23,13 @@ public class OpenCLIntBuffer
       this(numberOfIntegers, null);
    }
 
+   public OpenCLIntBuffer(ByteBuffer backingDirectByteBuffer)
+   {
+      this.backingDirectByteBuffer = backingDirectByteBuffer;
+      IntBuffer backingDirectIntBuffer = backingDirectByteBuffer.asIntBuffer();
+      resize(backingDirectIntBuffer.capacity(), null, backingDirectIntBuffer);
+   }
+
    public OpenCLIntBuffer(int numberOfIntegers, IntBuffer backingDirectIntBuffer)
    {
       resize(numberOfIntegers, null, backingDirectIntBuffer);
@@ -43,7 +50,7 @@ public class OpenCLIntBuffer
       }
    }
 
-   public void resize(int numberOfIntegers,  OpenCLManager openCLManager, IntBuffer backingDirectIntBuffer)
+   public void resize(int numberOfIntegers, OpenCLManager openCLManager, IntBuffer backingDirectIntBuffer)
    {
       this.numberOfIntegers = numberOfIntegers;
 

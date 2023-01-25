@@ -3,24 +3,21 @@ package us.ihmc.rdx.perception;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import imgui.ImGui;
 import imgui.type.ImFloat;
-import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_program;
-import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.*;
+import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.netty.NettyOuster;
+import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.time.FrequencyCalculator;
 
@@ -35,15 +32,16 @@ public class RDXNettyOusterUI
    private final FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private int numberOfDepthPoints;
-   private OpenCLFloatBuffer parametersBuffer;
    private OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
-   private _cl_kernel createPointCloudKernel;
-   private OpenCLFloatBuffer pointCloudRenderingBuffer;
+   private OusterDepthExtractionKernel depthExtractionKernel;
+   private RDXOusterDepthImageToPointCloudKernel depthImageToPointCloudKernel;
    private RDXPointCloudRenderer pointCloudRenderer;
    private final ImFloat verticalFieldOfView = new ImFloat((float) Math.toRadians(90.0));
    private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
    private RDXInteractableFrameModel ousterInteractable;
+   private int depthWidth;
+   private int depthHeight;
+   private volatile boolean isReady = false;
 
    public RDXNettyOusterUI()
    {
@@ -70,8 +68,28 @@ public class RDXNettyOusterUI
                cylinderIntersection.update(0.0734, 0.04, -0.0372, ousterInteractable.getReferenceFrame().getTransformToWorldFrame());
                return cylinderIntersection.intersect(pickRay);
             });
+
+            ouster = new NettyOuster();
+            ouster.setOnFrameReceived(this::onFrameReceived);
+            ouster.bind();
          }
 
+         private synchronized void onFrameReceived()
+         {
+            if (isReady)
+            {
+               depthExtractionKernel.copyLidarFrameBuffer();
+
+               frameReadFrequency.ping();
+            }
+         }
+
+         /**
+          * The threading here isn't really ideal. The rendered image and point cloud
+          * only need to be rendered after onFrameReceived in a new thread. But I didn't
+          * find it necessary to spend the time on the thread barriers for those yet,
+          * so we just run the kernels everytime and sync over the copy.
+          */
          @Override
          public void render()
          {
@@ -79,71 +97,48 @@ public class RDXNettyOusterUI
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  ouster = new NettyOuster();
-                  ouster.bind();
-
                   openCLManager = new OpenCLManager();
                   openCLManager.create();
                }
 
-               if (ouster.isInitialized())
+               if (openCLManager != null && ouster.isInitialized())
                {
                   if (imagePanel == null)
                   {
-                     imagePanel = new RDXCVImagePanel("Ouster Depth Image", ouster.getImageWidth(), ouster.getImageHeight());
+                     depthWidth = ouster.getImageWidth();
+                     depthHeight = ouster.getImageHeight();
+                     imagePanel = new RDXCVImagePanel("Ouster Depth Image", depthWidth, depthHeight);
 
                      baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
-                     baseUI.getPerspectiveManager().reloadPerspective();
+                     baseUI.getLayoutManager().reloadLayout();
 
                      numberOfDepthPoints = ouster.getImageWidth() * ouster.getImageHeight();
 
-                     pointCloudRenderer = new RDXPointCloudRenderer();
-                     parametersBuffer = new OpenCLFloatBuffer(16);
-                     openCLProgram = openCLManager.loadProgram("OusterPointCloud");
-                     createPointCloudKernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
+                     depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager);
 
+                     pointCloudRenderer = new RDXPointCloudRenderer();
                      pointCloudRenderer.create(numberOfDepthPoints);
                      baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.MODEL);
 
-                     pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfDepthPoints * 8, pointCloudRenderer.getVertexBuffer());
-                     ouster.getDepthImageMeters().createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-                     pointCloudRenderingBuffer.createOpenCLBufferObject(openCLManager);
-                     parametersBuffer.createOpenCLBufferObject(openCLManager);
+                     depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(pointCloudRenderer,
+                                                                                              openCLManager,
+                                                                                              depthExtractionKernel.getExtractedDepthImage());
+                     isReady = true;
                   }
 
-                  frameReadFrequency.ping();
-                  imagePanel.drawFloatImage(ouster.getDepthImageMeters().getBytedecoOpenCVMat());
+                  // Synchronize with copying the Ouster's buffer to the buffer used for this kernel
+                  // All this is included in the block because it's not clear where the actual memory
+                  // operations occur. Probably in the finish method.
+                  synchronized (this)
+                  {
+                     depthExtractionKernel.runKernel(ousterInteractable.getReferenceFrame().getTransformToRoot());
+                  }
 
-                  RigidBodyTransform transformToWorldFrame = ousterInteractable.getReferenceFrame().getTransformToWorldFrame();
+                  imagePanel.drawDepthImage(depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat());
 
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(0, horizontalFieldOfView.get());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(1, verticalFieldOfView.get());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(2, transformToWorldFrame.getTranslation().getX32());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(3, transformToWorldFrame.getTranslation().getY32());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(4, transformToWorldFrame.getTranslation().getZ32());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(5, (float) transformToWorldFrame.getRotation().getM00());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) transformToWorldFrame.getRotation().getM01());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) transformToWorldFrame.getRotation().getM02());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(8, (float) transformToWorldFrame.getRotation().getM10());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(9, (float) transformToWorldFrame.getRotation().getM11());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(10, (float) transformToWorldFrame.getRotation().getM12());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(11, (float) transformToWorldFrame.getRotation().getM20());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(12, (float) transformToWorldFrame.getRotation().getM21());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(13, (float) transformToWorldFrame.getRotation().getM22());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(14, (float) ouster.getImageWidth());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(15, (float) ouster.getImageHeight());
-
-                  ouster.getDepthImageMeters().writeOpenCLImage(openCLManager);
-                  parametersBuffer.writeOpenCLBufferObject(openCLManager);
-
-                  openCLManager.setKernelArgument(createPointCloudKernel, 0, ouster.getDepthImageMeters().getOpenCLImageObject());
-                  openCLManager.setKernelArgument(createPointCloudKernel, 1, pointCloudRenderingBuffer.getOpenCLBufferObject());
-                  openCLManager.setKernelArgument(createPointCloudKernel, 2, parametersBuffer.getOpenCLBufferObject());
-                  openCLManager.execute2D(createPointCloudKernel, ouster.getImageWidth(), ouster.getImageHeight());
-                  pointCloudRenderingBuffer.readOpenCLBufferObject(openCLManager);
-                  openCLManager.finish();
-
-                  pointCloudRenderer.updateMeshFastest(numberOfDepthPoints);
+                  depthImageToPointCloudKernel.updateSensorTransform(ousterInteractable.getReferenceFrame());
+                  float pointSize = 0.01f;
+                  depthImageToPointCloudKernel.runKernel(horizontalFieldOfView.get(), verticalFieldOfView.get(), pointSize);
                }
             }
 
@@ -159,6 +154,9 @@ public class RDXNettyOusterUI
             {
                ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
             }
+
+            ImGuiTools.volatileInputFloat(labels.get("Vertical field of view"), verticalFieldOfView);
+            ImGuiTools.volatileInputFloat(labels.get("Horizontal field of view"), horizontalFieldOfView);
          }
 
          @Override

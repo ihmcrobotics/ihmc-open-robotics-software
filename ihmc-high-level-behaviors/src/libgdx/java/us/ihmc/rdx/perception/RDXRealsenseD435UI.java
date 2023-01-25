@@ -63,7 +63,7 @@ public class RDXRealsenseD435UI
                {
                   realSenseHardwareManager = new RealSenseHardwareManager(yoRegistry, yoGraphicsListRegistry);
 
-                  d435 = realSenseHardwareManager.createD435("049222073352", 1280, 720, 30);
+                  d435 = realSenseHardwareManager.createBytedecoRealsenseDevice("752112070330", 1280, 720, 30);
 //                  d435.enableColor(1920, 1080, 30);
                   d435.initialize();
                }
@@ -81,13 +81,13 @@ public class RDXRealsenseD435UI
                      depthImagePanel = new RDXCVImagePanel("D435 Depth", d435.getDepthWidth(), d435.getDepthHeight());
                      baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getVideoPanel());
 
-                     baseUI.getPerspectiveManager().reloadPerspective();
+                     baseUI.getLayoutManager().reloadLayout();
                   }
 
                   frameReadFrequency.ping();
                   depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, d435.getDepthToMeterConversion(), 0.0);
 
-                  depthImagePanel.drawFloatImage(depth32FC1Image.getBytedecoOpenCVMat());
+                  depthImagePanel.drawDepthImage(depth32FC1Image.getBytedecoOpenCVMat());
                }
             }
 

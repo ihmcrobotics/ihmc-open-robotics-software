@@ -9,20 +9,20 @@ import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.sharedMemory.CropBufferRequest;
 import us.ihmc.tools.UnitConversions;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +62,7 @@ public class RDXSCS2Session
    public void create(RDXBaseUI baseUI, ImGuiPanel plotManagerParentPanel)
    {
       baseUI.getPrimaryScene().addRenderableAdapter(renderables);
-      plotManager.create(baseUI.getPerspectiveManager(), plotManagerParentPanel);
+      plotManager.create(baseUI.getLayoutManager(), plotManagerParentPanel);
    }
 
    /**
@@ -123,10 +123,6 @@ public class RDXSCS2Session
          sessionStartedHandled = true;
          LogTools.info("Session started.");
          plotManager.initializeLinkedVariables();
-         for (Runnable onSessionStartedRunnable : onSessionStartedRunnables)
-         {
-            onSessionStartedRunnable.run();
-         }
       }
 
       for (RDXSimulatedRobot robot : robots)
@@ -189,6 +185,7 @@ public class RDXSCS2Session
          updateDTFromSession();
       }
       ImGui.popItemWidth();
+      ImGui.text("Session Time: " + session.getTime().getValue());
       if (ImGui.radioButton("Run", session.getActiveMode() == SessionMode.RUNNING))
       {
          session.submitBufferIndexRequest(yoManager.getOutPoint());
@@ -322,6 +319,11 @@ public class RDXSCS2Session
 
       showRobotMap.clear();
       showRobotPairs.clear();
+   }
+
+   public ArrayList<RDXSimulatedRobot> getRobots()
+   {
+      return robots;
    }
 
    public Session getSession()

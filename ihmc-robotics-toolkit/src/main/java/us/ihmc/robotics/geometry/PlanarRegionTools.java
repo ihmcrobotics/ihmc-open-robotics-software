@@ -32,8 +32,35 @@ public class PlanarRegionTools
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
    private final ConvexPolygon2D tempPolygon2 = new ConvexPolygon2D();
 
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+   private final ConvexPolygon2D regionBPolygonInRegionA = new ConvexPolygon2D();
+
    public PlanarRegionTools()
    {}
+
+   public double getDistanceBetweenPlanarRegions(PlanarRegion regionA, PlanarRegion regionB)
+   {
+      double minDistance = Double.POSITIVE_INFINITY;
+
+      // Check the distance between the two regions' bounding boxes
+      for (int indexA = 0; indexA < regionA.getNumberOfConvexPolygons(); indexA++)
+      {
+         for (int indexB = 0; indexB < regionB.getNumberOfConvexPolygons(); indexB++)
+         {
+            regionBPolygonInRegionA.set(regionB.getConvexPolygon(indexB));
+            regionBPolygonInRegionA.applyTransform(regionB.getTransformToWorld(), false);
+            regionBPolygonInRegionA.applyTransform(regionA.getTransformToLocal(), false);
+            double distance = convexPolygonTools.distanceBetweenTwoConvexPolygon2Ds(regionA.getConvexPolygon(indexA), regionBPolygonInRegionA);
+
+            minDistance = Math.min(distance, minDistance);
+
+            if (minDistance < 1e-8)
+               return 0.0;
+         }
+      }
+
+      return minDistance;
+   }
 
    /**
     * Returns all the intersections when the convexPolygon is projected vertically onto this
@@ -631,6 +658,16 @@ public class PlanarRegionTools
       BoundingBox3D boundingBox3DInLocal = getLocalBoundingBox3DInLocal(planarRegion);
       boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, height / 2.0);
       boundingBox3DInLocal.updateToIncludePoint(0.0, 0.0, -height / 2.0);
+      Box3D box = GeometryTools.convertBoundingBox3DToBox3D(boundingBox3DInLocal);
+      box.applyTransform(planarRegion.getTransformToWorld());
+      return box;
+   }
+
+   public static Box3D getLocalBoundingBox3DInWorldWithMargin(PlanarRegion planarRegion, double margin)
+   {
+      BoundingBox3D boundingBox3DInLocal = getLocalBoundingBox3DInLocal(planarRegion);
+      boundingBox3DInLocal.getMaxPoint().add(margin, margin, margin);
+      boundingBox3DInLocal.getMinPoint().sub(margin, margin, margin);
       Box3D box = GeometryTools.convertBoundingBox3DToBox3D(boundingBox3DInLocal);
       box.applyTransform(planarRegion.getTransformToWorld());
       return box;

@@ -70,7 +70,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.fromEnvironment();
 
    public static final boolean ENABLE_FINGER_JOINTS = VERSION.hasFingers();
-   public static final boolean HAS_LIGHTER_BACKPACK = true;
    public static final boolean LOG_SECONDARY_HIGH_LEVEL_STATES = false;
 
    private static final String[] torqueControlledJoints;
@@ -196,12 +195,10 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
-      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     feetForceSensorNames,
-                                                                                                    feetContactSensorNames,
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,

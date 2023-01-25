@@ -170,19 +170,31 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public double get(DoubleStoredPropertyKey key)
    {
-      return (Double) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning Double.NaN.", key.getTitleCasedName());
+      return isNull ? Double.NaN : (Double) value;
    }
 
    @Override
    public int get(IntegerStoredPropertyKey key)
    {
-      return (Integer) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning -1.", key.getTitleCasedName());
+      return isNull ? -1 : (Integer) value;
    }
 
    @Override
    public boolean get(BooleanStoredPropertyKey key)
    {
-      return (Boolean) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning false.", key.getTitleCasedName());
+      return isNull ? false : (Boolean) value;
    }
 
    /**
@@ -191,7 +203,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public <T> T get(StoredPropertyKey<T> key)
    {
-      return (T) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning null.", key.getTitleCasedName());
+      return isNull ? null : (T) value;
    }
 
    @Override
@@ -330,6 +346,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       legacyFileNameINI = uncapitalizedClassName + currentVersionSuffix + ".ini";
       workspaceLegacyINIFile = new WorkspaceFile(workspaceDirectory, legacyFileNameINI);
       saveFileNameJSON = basePropertySetClass.getSimpleName() + currentVersionSuffix + ".json";
+      LogTools.info("SPS Loading Version: {}", saveFileNameJSON);
       workspaceJSONFile = new WorkspaceFile(workspaceDirectory, saveFileNameJSON);
    }
 

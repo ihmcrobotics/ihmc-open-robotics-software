@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import us.ihmc.atlas.behaviors.AtlasLookAndStepParameters;
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
@@ -36,6 +37,7 @@ import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -625,6 +627,12 @@ public class AtlasRobotModel implements DRCRobotModel
    public FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
    {
       return new AtlasFootstepPlannerParameters(fileNameSuffix);
+   }
+
+   @Override
+   public LookAndStepBehaviorParameters getLookAndStepParameters()
+   {
+      return new AtlasLookAndStepParameters();
    }
 
    @Override

@@ -27,7 +27,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 {
    private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
    private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
-   public static final double MAX_PERIOD = UnitConversions.hertzToSeconds(30.0);
+   public static final double MAX_PERIOD = UnitConversions.hertzToSeconds(20.0);
 
    private final Activator nativesLoadedActivator;
    private SpinnakerSystemManager spinnakerSystemManager;
@@ -113,10 +113,22 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private void destroy()
    {
       running = false;
+      // This sleep is to let the above thread complete.
+      // Typically, frames are captured in 35 ms or so, so we should be giving it
+      // plenty of time here to stop.
+      // Remember, this destroy is getting called on a new thread created by
+      // the user doing a Ctrl+C.
+      ThreadTools.sleep(250);
+
       for (RobotSide side : blackflies.sides())
       {
          blackflies.get(side).destroy();
       }
+      // This sleep is because we just asked the Blackflies to stop aquiring images.
+      // I have no idea how long it would normally take.
+      ThreadTools.sleep(100);
+
+      // This releases all the Spinnaker resources
       spinnakerSystemManager.destroy();
    }
 

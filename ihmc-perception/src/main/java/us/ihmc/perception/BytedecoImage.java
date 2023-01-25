@@ -5,6 +5,7 @@ import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -105,8 +106,7 @@ public class BytedecoImage
       }
       else
       {
-         this.backingDirectByteBuffer = ByteBuffer.allocateDirect(imageWidth * imageHeight * bytesPerPixel);
-         this.backingDirectByteBuffer.order(ByteOrder.nativeOrder());
+         this.backingDirectByteBuffer = NativeMemoryTools.allocate(imageWidth * imageHeight * bytesPerPixel);
       }
 
       bytedecoByteBufferPointer = new MutableBytePointer(this.backingDirectByteBuffer);
@@ -221,9 +221,19 @@ public class BytedecoImage
       return imageHeight;
    }
 
-   public float getFloat(int x, int y)
+   public float getFloat(int row, int col)
    {
-      return pointerForAccessSpeed.getFloat(((long) y * imageWidth + x) * Float.BYTES);
+      return pointerForAccessSpeed.getFloat(((long) col * imageWidth + row) * Float.BYTES);
+   }
+
+   public float getFloatDirect(int row, int col)
+   {
+      return backingDirectByteBuffer.asFloatBuffer().get(row * imageWidth + col);
+   }
+
+   public int getCharDirect(int row, int col)
+   {
+      return Byte.toUnsignedInt(backingDirectByteBuffer.get(row * imageWidth + col));
    }
 
    public int getByteAsInteger(int x, int y)

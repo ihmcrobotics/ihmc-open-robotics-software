@@ -105,7 +105,7 @@ public class RDXHighLevelDepthSensorDemo
                ImGui.text("Mouse x: " + mousePosX + " y: " + mousePosY);
             });
 
-            RDX3DPanel panel3D = new RDX3DPanel("3D View 2", 2, true);
+            RDX3DPanel panel3D = new RDX3DPanel("3D View 2", true);
             baseUI.add3DPanel(panel3D);
 
             frustumVisualizer = new RDXFrustumVisualizer();
@@ -135,12 +135,12 @@ public class RDXHighLevelDepthSensorDemo
                                                            true);
                   baseUI.getImGuiPanelManager().addPanel(mainViewDepthPanel.getVideoPanel());
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                image.resize(aliasedRenderedAreaWidth, aliasedRenderedAreaHeight, null, depthBuffer);
                mainViewDepthPanel.resize(aliasedRenderedAreaWidth, aliasedRenderedAreaHeight, null);
-               mainViewDepthPanel.drawFloatImage(image.getBytedecoOpenCVMat());
+               mainViewDepthPanel.drawDepthImage(image.getBytedecoOpenCVMat());
             }
 
             frustumVisualizer.generateMeshAsync(baseUI.getPrimary3DPanel().getCamera3D().frustum);
