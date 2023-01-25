@@ -6,8 +6,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.slamWrapper.FactorGraph;
+import us.ihmc.perception.slamWrapper.SlamWrapper;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 import us.ihmc.perception.tools.PerceptionPrintTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -15,7 +15,10 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 public class PlanarRegionMap
 {
@@ -35,7 +38,7 @@ public class PlanarRegionMap
    private MatchingMode matcher;
 
    private PlanarRegionMappingParameters parameters;
-   private FactorGraph factorGraph;
+   private SlamWrapper.FactorGraphExternal factorGraph;
 
    private final RigidBodyTransform previousSensorToWorldFrameTransform = new RigidBodyTransform();
    private final RigidBodyTransform worldToSensorFrameTransform = new RigidBodyTransform();
@@ -68,8 +71,8 @@ public class PlanarRegionMap
       {
          this.merger = MergingMode.SMOOTHING;
 
-         BytedecoTools.loadSlamWrapper();
-         factorGraph = new FactorGraph();
+         SlamWrapperNativeLibrary.load();
+         factorGraph = new SlamWrapper.FactorGraphExternal();
       }
       else
       {
@@ -92,9 +95,9 @@ public class PlanarRegionMap
       regionsRaw.applyTransform(regionsWithPose.getSensorToWorldFrameTransform());
       PlanarRegionsList regions = new PlanarRegionsList();
 
-      for(PlanarRegion region : regionsRaw.getPlanarRegionsAsList())
+      for (PlanarRegion region : regionsRaw.getPlanarRegionsAsList())
       {
-         if(region.getArea() > parameters.getMinimumPlanarRegionArea())
+         if (region.getArea() > parameters.getMinimumPlanarRegionArea())
          {
             regions.addPlanarRegion(region);
          }
@@ -129,8 +132,7 @@ public class PlanarRegionMap
          PerceptionPrintTools.printRegionIDs("Incoming", regions);
 
          // merge all the new regions in
-         finalMap = crossReduceRegionsIteratively(finalMap,
-                                                  regions);
+         finalMap = crossReduceRegionsIteratively(finalMap, regions);
 
          processUniqueRegions(finalMap);
          PerceptionPrintTools.printMatches("Cross Matches", finalMap, regions, planarRegionMatches);
@@ -331,7 +333,9 @@ public class PlanarRegionMap
 
                   //LogTools.info("Checking Match: Parent({}) - Child({})", parentId, childId);
 
-                  if (PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion, childRegion, (float) parameters.getSimilarityThresholdBetweenNormals(),
+                  if (PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion,
+                                                                   childRegion,
+                                                                   (float) parameters.getSimilarityThresholdBetweenNormals(),
                                                                    (float) parameters.getOrthogonalDistanceThreshold(),
                                                                    (float) parameters.getMinimumOverlapThreshold()))
                   {
@@ -381,8 +385,7 @@ public class PlanarRegionMap
       return map;
    }
 
-   public PlanarRegionsList crossReduceRegionsIteratively(PlanarRegionsList map,
-                                                          PlanarRegionsList regions)
+   public PlanarRegionsList crossReduceRegionsIteratively(PlanarRegionsList map, PlanarRegionsList regions)
    {
       LogTools.info("Performing Cross Reduction");
       map.addPlanarRegionsList(regions);
@@ -404,7 +407,7 @@ public class PlanarRegionMap
       odoometry.multiply(transform);
 
       // Convert odometry to float array. Add into factor graph using 16-double method for addOdometryFactor().
-      float[] odometryValue = new float[16];
+      double[] odometryValue = new double[16];
       odoometry.get(odometryValue);
 
       LogTools.info("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
@@ -460,7 +463,7 @@ public class PlanarRegionMap
       }
 
       LogTools.info("Solving factor graph");
-      factorGraph.optimizeISAM2(4);
+      factorGraph.optimizeISAM2((byte) 4);
 
       factorGraph.printResults();
    }
@@ -470,8 +473,12 @@ public class PlanarRegionMap
       Vector3DBasics translation = transform.getTranslation();
       Vector3D eulerAngles = new Vector3D();
       transform.getRotation().getEuler(eulerAngles);
-      float[] initialPose = new float[] {eulerAngles.getZ32(), eulerAngles.getY32(), eulerAngles.getX32(),
-                                         translation.getX32(), translation.getY32(), translation.getZ32()};
+      float[] initialPose = new float[] {eulerAngles.getZ32(),
+                                         eulerAngles.getY32(),
+                                         eulerAngles.getX32(),
+                                         translation.getX32(),
+                                         translation.getY32(),
+                                         translation.getZ32()};
 
       factorGraph.addPriorPoseFactor(0, initialPose);
       factorGraph.setPoseInitialValue(0, initialPose);

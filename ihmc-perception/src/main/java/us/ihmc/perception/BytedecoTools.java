@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.bytedeco.mapsenseWrapper.MapsenseWrapperNativeLibrary;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
@@ -182,6 +183,11 @@ public class BytedecoTools
          System.out.println("Loading: " + filePath);
          System.load(filePath);
       }
+   }
+
+   public static void loadMapsense()
+   {
+      MapsenseWrapperNativeLibrary.load();
    }
 
    public static String stringFromByteBuffer(BytePointer bytePointerWithString)

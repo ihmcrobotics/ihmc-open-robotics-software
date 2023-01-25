@@ -63,7 +63,7 @@ public static class FactorGraphExternal extends Pointer {
         public native void setPoseInitialValue(int index, FloatBuffer value);
         public native void setPoseInitialValue(int index, float[] value);
 
-        // Expects 4x4 homogenous transform as 16-float array
+        // Expects 4x4 homogenous transform matrix as initial value for Pose3
         public native void setPoseInitialValueExtended(int index, FloatPointer value);
         public native void setPoseInitialValueExtended(int index, FloatBuffer value);
         public native void setPoseInitialValueExtended(int index, float[] value);

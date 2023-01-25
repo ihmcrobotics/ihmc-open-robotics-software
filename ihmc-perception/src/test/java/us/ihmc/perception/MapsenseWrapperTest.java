@@ -1,4 +1,4 @@
-package us.ihmc.bytedeco.mapsenseWrapper.test;
+package us.ihmc.perception;
 
 import us.ihmc.bytedeco.mapsenseWrapper.VisualOdometry;
 import us.ihmc.perception.BytedecoTools;
@@ -11,8 +11,7 @@ public class MapsenseWrapperTest
 {
    public static void main(String[] args) throws FileNotFoundException
    {
-      BytedecoTools.loadMapsenseLibraries();
-      BytedecoTools.loadOpenCV();
+      BytedecoTools.loadMapsense();
 
       VisualOdometry.VisualOdometryExternal visualOdometry = new VisualOdometry.VisualOdometryExternal(500, 300);
 

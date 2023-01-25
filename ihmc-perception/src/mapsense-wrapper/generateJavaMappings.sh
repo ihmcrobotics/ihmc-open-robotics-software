@@ -27,7 +27,7 @@ unzip -j javacpp-platform-$JAVACPP_VERSION-bin.zip
 java -jar javacpp.jar us/ihmc/bytedeco/mapsenseWrapper/presets/VisualOdometryInfoMapper.java
 # This will generate the jni shared library and place it into the classpath resources dir
 
-java -jar javacpp.jar us/ihmc/bytedeco/mapsenseWrapper/VisualOdometry.java -d ../../../resources
+java -jar javacpp.jar us/ihmc/bytedeco/mapsenseWrapper/VisualOdometry.java -d ../../../resources/mapsenseWrapper/linux-x86_64
 
 # Clean old generated Java code
 rm -rf ../../../generated-java/*
@@ -37,4 +37,4 @@ mkdir -p ../../../generated-java/us/ihmc/bytedeco/mapsenseWrapper
 cp -r us/ihmc/bytedeco/mapsenseWrapper/VisualOdometry.java ../../../generated-java/us/ihmc/bytedeco/mapsenseWrapper
 
 # Run ldd on <libwrapper-name>.so to find required .so file names.
-cp ../lib/libvisual-odometry.so ../../../resources
+cp ../lib/libvisual-odometry.so ../../../resources/mapsenseWrapper/linux-x86_64

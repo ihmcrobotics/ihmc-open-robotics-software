@@ -2,17 +2,17 @@ package us.ihmc.perception;
 
 import org.apache.commons.lang.ArrayUtils;
 import us.ihmc.bytedeco.mapsenseWrapper.VisualOdometry;
-import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-//import us.ihmc.log.LogTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.elements.CameraModel;
 import us.ihmc.perception.elements.Keyframe;
 import us.ihmc.perception.elements.Landmark;
+import us.ihmc.perception.slamWrapper.SlamWrapper;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 
 import java.util.*;
 
@@ -38,7 +38,7 @@ public class VisualSLAMModule
       BytedecoTools.loadMapsenseLibraries();
       visualOdometryExternal = new VisualOdometry.VisualOdometryExternal(NUMBER_OF_FEATURES, MIN_NUM_FEATURES);
 
-      BytedecoTools.loadGTSAMLibraries();
+      SlamWrapperNativeLibrary.load();
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
       float[] poseInitial = new float[] {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
