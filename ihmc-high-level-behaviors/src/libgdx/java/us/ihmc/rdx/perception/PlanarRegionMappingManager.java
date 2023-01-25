@@ -140,7 +140,7 @@ public class PlanarRegionMappingManager
        */
 
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
-      rapidRegionsExtractor.getDebugger().setEnabled(false);
+      rapidRegionsExtractor.getDebugger().setEnabled(true);
 
       //rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
       //rapidRegionsUIPanel.create(rapidRegionsExtractor);
@@ -250,6 +250,11 @@ public class PlanarRegionMappingManager
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionsToPublish);
          controllerRegionsPublisher.publish(planarRegionsListMessage);
       }
+   }
+
+   public void autoIncrementButtonCallback()
+   {
+      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 100, TimeUnit.MILLISECONDS);
    }
 
    public void nextButtonCallback()
@@ -392,5 +397,17 @@ public class PlanarRegionMappingManager
    public PlanarRegionsListWithPose getPlanarRegionsListWithPose()
    {
       return planarRegionsListWithPose;
+   }
+
+   public RapidPlanarRegionsExtractor getRapidRegionsExtractor()
+   {
+      return rapidRegionsExtractor;
+   }
+
+   public void destroy()
+   {
+      if (updateMapFuture != null)
+         updateMapFuture.cancel(true);
+      executorService.shutdownNow();
    }
 }

@@ -83,7 +83,7 @@ public class RapidRegionsDebutOutputGenerator
       }
    }
 
-   public void constructPointCloud(FloatBuffer buffer, int numberOfPoints)
+   public void constructPointCloud(FloatBuffer buffer, int numberOfPoints, RigidBodyTransform transform)
    {
       if (!enabled)
          return;
@@ -101,7 +101,8 @@ public class RapidRegionsDebutOutputGenerator
 
          if (point.norm() > 0.1f)
          {
-            debugPoints.add().set(cx, cy, cz);
+            point.applyTransform(transform);
+            debugPoints.add().set(point);
             //LogTools.info("Point To Render: {} {} {}", cx, cy, cz);
          }
       }
@@ -237,7 +238,7 @@ public class RapidRegionsDebutOutputGenerator
       debugImage.put(new Scalar(0, 0, 0, 0));
    }
 
-   public void update(Mat inputDepthImage, PatchFeatureGrid patchFeatureGrid, BytedecoImage patchGraph, FloatBuffer floatBuffer)
+   public void update(Mat inputDepthImage, PatchFeatureGrid patchFeatureGrid, BytedecoImage patchGraph, FloatBuffer floatBuffer, RigidBodyTransform transform)
    {
       if (!enabled)
          return;
@@ -246,7 +247,7 @@ public class RapidRegionsDebutOutputGenerator
 
       if(showPointCloud)
       {
-         constructPointCloud(floatBuffer, inputDepthImage.rows() * inputDepthImage.cols());
+         constructPointCloud(floatBuffer, inputDepthImage.rows() * inputDepthImage.cols(), transform);
       }
 //      constructPointCloud(patchFeatureGrid.getCxImage(), patchFeatureGrid.getCyImage(), patchFeatureGrid.getCzImage());
 

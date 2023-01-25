@@ -13,6 +13,8 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -43,81 +45,41 @@ public class RapidPlanarRegionsCustomizer
       polygonizerParameters = new PolygonizerParameters(version);
    }
 
-   public RapidPlanarRegionsCustomizer(ConcaveHullFactoryParameters concaveHullFactoryParameters, PolygonizerParameters polygonizerParameters)
-   {
-      this.concaveHullFactoryParameters = concaveHullFactoryParameters;
-      this.polygonizerParameters = polygonizerParameters;
-   }
-
-   public List<PlanarRegion> convertToPlanarRegion(GPUPlanarRegion rapidPlanarRegion, ReferenceFrame cameraFrame)
+   public List<PlanarRegion> convertToPlanarRegions(GPUPlanarRegion rapidRegion)
    {
       List<PlanarRegion> planarRegions = new ArrayList<>();
-      FrameQuaternion orientation = new FrameQuaternion();
-      try
-      {
-         // Going through LinearTransform3D first prevents NotARotationMatrix exceptions.
-         LinearTransform3D linearTransform3D = new LinearTransform3D(EuclidGeometryTools.axisAngleFromZUpToVector3D(rapidPlanarRegion.getNormal()));
-         linearTransform3D.normalize();
-         orientation.setIncludingFrame(cameraFrame, linearTransform3D.getAsQuaternion());
-         orientation.changeFrame(ReferenceFrame.getWorldFrame());
+      List<LineSegment2D> intersections = new ArrayList<>();
 
-         if (!MathTools.epsilonEquals(rapidPlanarRegion.getNormal().norm(), 1.0, 1e-4))
-            throw new RuntimeException("The planar region norm isn't valid");
+      Quaternion orientation = new Quaternion();
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(rapidRegion.getNormal()).get(orientation);
 
-         FramePoint3D origin = new FramePoint3D(cameraFrame, rapidPlanarRegion.getCenter());
-         origin.changeFrame(ReferenceFrame.getWorldFrame());
+      // Get boundary vertices in the local plane frame
+      List<Point2D> pointCloudInPlane = getPointCloudInPlane(rapidRegion, rapidRegion.getCenter(), orientation);
 
-         List<LineSegment2D> intersections = new ArrayList<>();
-         List<Point2D> pointCloudInPlane = getPointCloudInPlane(rapidPlanarRegion, cameraFrame, origin, orientation);
-         ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInPlane,
-                                                                                                            intersections,
-                                                                                                            concaveHullFactoryParameters);
+      // Get the concave hull(s) of the boundary vertices
+      ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInPlane,
+                                                                                                         intersections,
+                                                                                                         concaveHullFactoryParameters);
 
-         //applyConcaveHullFilters(concaveHullCollection);
-         createAndInsertPlanarRegion(rapidPlanarRegion.getId(), origin, orientation, concaveHullCollection, planarRegions);
+      // Create and insert planar region(s) into the list
+      RigidBodyTransform regionTransformToWorld = new RigidBodyTransform(orientation, rapidRegion.getCenter());
+      createAndInsertPlanarRegions(rapidRegion.getId(), regionTransformToWorld, concaveHullCollection, planarRegions);
 
-      }
-      catch (NotARotationMatrixException notARotationMatrixException)
-      {
-         LogTools.info("Normal = " + rapidPlanarRegion.getNormal().toString(null));
-         LogTools.info("Orientation = " + orientation.toString(null));
-         LogTools.warn("Not a rotation matrix: {}", rapidPlanarRegion.getNormal());
-      }
-      catch (RuntimeException e)
-      {
-         e.printStackTrace();
-      }
       return planarRegions;
    }
 
-   private List<Point2D> getPointCloudInPlane(GPUPlanarRegion rapidRegion, ReferenceFrame cameraFrame, FramePoint3D origin, FrameQuaternion orientation)
+   private List<Point2D> getPointCloudInPlane(GPUPlanarRegion rapidRegion, Point3D origin, Quaternion orientation)
    {
       return rapidRegion.getBoundaryVertices()
-                              .stream()
-                              .map(boundaryVertex ->
-                                   {
-                                      FramePoint3D framePoint3D = new FramePoint3D(cameraFrame,
-                                                                                   boundaryVertex);
-                                      framePoint3D.changeFrame(ReferenceFrame.getWorldFrame());
-                                      return PolygonizerTools.toPointInPlane(framePoint3D,
-                                                                             origin,
-                                                                             orientation);
-                                   })
-                              .filter(point2D -> Double.isFinite(point2D.getX()) && Double.isFinite(point2D.getY()))
-                              .collect(Collectors.toList());
-   }
-
-   public void applyConcaveHullFilters(ConcaveHullCollection concaveHulls)
-   {
-      // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
-      double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
-      double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
-      double lengthThreshold = polygonizerParameters.getLengthThreshold();
-
-      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHulls);
-      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHulls);
-      if (polygonizerParameters.getCutNarrowPassage())
-         concaveHulls = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHulls);
+                        .stream()
+                        .map(boundaryVertex ->
+                             {
+                                return PolygonizerTools.toPointInPlane(new Point3D(boundaryVertex),
+                                                                       origin,
+                                                                       orientation);
+                             })
+                        .filter(point2D -> Double.isFinite(point2D.getX()) && Double.isFinite(point2D.getY()))
+                        .collect(Collectors.toList());
    }
 
    public void createCustomPlanarRegionsList(List<GPUPlanarRegion> gpuPlanarRegions, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsToPack)
@@ -127,9 +89,7 @@ public class RapidPlanarRegionsCustomizer
       AtomicBoolean listCaughtException = new AtomicBoolean(false);
 
       List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
-                                                                      .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size()
-                                                                                                 >= polygonizerParameters.getMinNumberOfNodes())
-                                                                      .map(gpuPlanarRegion -> convertToPlanarRegion(gpuPlanarRegion, cameraFrame))
+                                                                      .map(this::convertToPlanarRegions)
                                                                       .toList();
       regionsToPack.getPlanarRegionsList().clear();
       if (!listCaughtException.get())
@@ -144,8 +104,8 @@ public class RapidPlanarRegionsCustomizer
       stopWatch.suspend();
    }
 
-   public void createAndInsertPlanarRegion(int regionId, FramePoint3D origin, FrameQuaternion orientation, ConcaveHullCollection concaveHullCollection,
-                                           List<PlanarRegion> planarRegions)
+   public void createAndInsertPlanarRegions(int regionId, RigidBodyTransform transformToWorld, ConcaveHullCollection concaveHullCollection,
+                                            List<PlanarRegion> planarRegions)
    {
       int hullCounter = 0;
 
@@ -160,17 +120,26 @@ public class RapidPlanarRegionsCustomizer
          ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
 
          // Pack the data in PlanarRegion
-         FramePose3D regionPose = new FramePose3D();
-         regionPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), origin, orientation);
-         RigidBodyTransform tempTransform = new RigidBodyTransform();
-         regionPose.get(tempTransform);
-         PlanarRegion planarRegion = new PlanarRegion(tempTransform, concaveHull.getConcaveHullVertices(), decomposedPolygons);
+         PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHull.getConcaveHullVertices(), decomposedPolygons);
          planarRegion.setRegionId(regionId);
          planarRegions.add(planarRegion);
 
          hullCounter++;
          regionId = 31 * regionId + hullCounter;
       }
+   }
+
+   public void applyConcaveHullFilters(ConcaveHullCollection concaveHulls)
+   {
+      // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
+      double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
+      double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
+      double lengthThreshold = polygonizerParameters.getLengthThreshold();
+
+      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHulls);
+      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHulls);
+      if (polygonizerParameters.getCutNarrowPassage())
+         concaveHulls = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHulls);
    }
 
    public ConcaveHullFactoryParameters getConcaveHullFactoryParameters()

@@ -34,4 +34,9 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
    {
       return get(minimumOverlapThreshold);
    }
+
+   default double getMinimumPlanarRegionArea()
+   {
+      return get(minimumPlanarRegionArea);
+   }
 }

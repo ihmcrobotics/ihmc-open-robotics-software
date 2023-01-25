@@ -186,7 +186,8 @@ public class RapidPlanarRegionsExtractor
 
          wholeAlgorithmDurationStopwatch.suspend();
 
-         debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(), currentFeatureGrid, patchGraph, cloudBuffer.getBackingDirectFloatBuffer());
+         debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(), currentFeatureGrid, patchGraph,
+                         cloudBuffer.getBackingDirectFloatBuffer(), cameraFrame.getTransformToWorldFrame());
 
          modified = true;
       }
@@ -464,7 +465,7 @@ public class RapidPlanarRegionsExtractor
                                         float vertexY = currentFeatureGrid.getCyImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
                                         float vertexZ = currentFeatureGrid.getCzImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
 
-                                        Vector3D boundaryVertex = planarRegion.getBoundaryVertices().add();
+                                        Point3D boundaryVertex = planarRegion.getBoundaryVertices().add();
                                         boundaryVertex.set(vertexX, vertexY, vertexZ);
                                         boundaryVertex.sub(planarRegion.getCenter());
                                         boundaryVertex.normalize();

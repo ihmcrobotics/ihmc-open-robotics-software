@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.rapidRegions.GPUPlanarRegion;
 import us.ihmc.perception.rapidRegions.GPUPlanarRegionIsland;
@@ -354,7 +355,7 @@ public class RDXGPUPlanarRegionExtractionUI
 
                if (render3DGrownBoundaries.get())
                {
-                  for (Vector3D boundaryVertex : planarRegion.getBoundaryVertices())
+                  for (Point3D boundaryVertex : planarRegion.getBoundaryVertices())
                   {
                      tempFramePoint.setIncludingFrame(cameraFrame, boundaryVertex);
                      tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());

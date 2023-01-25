@@ -4,6 +4,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.slamWrapper.FactorGraph;
@@ -87,7 +88,18 @@ public class PlanarRegionMap
 
    public void submitRegionsUsingIterativeReduction(PlanarRegionsListWithPose regionsWithPose)
    {
-      PlanarRegionsList regions = regionsWithPose.getPlanarRegionsList();
+      PlanarRegionsList regionsRaw = regionsWithPose.getPlanarRegionsList();
+      regionsRaw.applyTransform(regionsWithPose.getSensorToWorldFrameTransform());
+      PlanarRegionsList regions = new PlanarRegionsList();
+
+      for(PlanarRegion region : regionsRaw.getPlanarRegionsAsList())
+      {
+         if(region.getArea() > parameters.getMinimumPlanarRegionArea())
+         {
+            regions.addPlanarRegion(region);
+         }
+      }
+
       LogTools.info("-------------------------------------------------------- New Iteration --------------------------------------------------------------");
       LogTools.info("Incoming: {}", regions.getPlanarRegionsAsList().size());
 
@@ -107,14 +119,12 @@ public class PlanarRegionMap
          finalMap.addPlanarRegionsList(regions);
          if (merger == MergingMode.SMOOTHING)
          {
-            initializeFactorGraphForSmoothing(finalMap);
+            initializeFactorGraphForSmoothing(finalMap, regionsWithPose.getSensorToWorldFrameTransform());
          }
          initialized = true;
       }
       else
       {
-         LogTools.info("Before Cross: {}", finalMap.getNumberOfPlanarRegions());
-
          PerceptionPrintTools.printRegionIDs("Map", finalMap);
          PerceptionPrintTools.printRegionIDs("Incoming", regions);
 
@@ -123,14 +133,12 @@ public class PlanarRegionMap
                                                   regions);
 
          processUniqueRegions(finalMap);
-         PerceptionPrintTools.printMatches("Cross", finalMap, regions, planarRegionMatches);
+         PerceptionPrintTools.printMatches("Cross Matches", finalMap, regions, planarRegionMatches);
 
-         if (merger == MergingMode.SMOOTHING)
-         {
-            applyFactorGraphBasedSmoothing(finalMap, regions, regionsWithPose.getSensorToWorldFrameTransform(), planarRegionMatches, sensorPoseIndex);
-         }
-
-         LogTools.info("After Cross: {}", finalMap.getNumberOfPlanarRegions());
+         //if (merger == MergingMode.SMOOTHING)
+         //{
+         //   applyFactorGraphBasedSmoothing(finalMap, regions, regionsWithPose.getSensorToWorldFrameTransform(), planarRegionMatches, sensorPoseIndex);
+         //}
       }
 
       sensorPoseIndex++;
@@ -376,6 +384,7 @@ public class PlanarRegionMap
    public PlanarRegionsList crossReduceRegionsIteratively(PlanarRegionsList map,
                                                           PlanarRegionsList regions)
    {
+      LogTools.info("Performing Cross Reduction");
       map.addPlanarRegionsList(regions);
       map = selfReduceRegionsIteratively(map, planarRegionMatches);
       return map;
@@ -451,15 +460,21 @@ public class PlanarRegionMap
       }
 
       LogTools.info("Solving factor graph");
-      factorGraph.optimize();
+      factorGraph.optimizeISAM2(4);
 
       factorGraph.printResults();
    }
 
-   public void initializeFactorGraphForSmoothing(PlanarRegionsList map)
+   public void initializeFactorGraphForSmoothing(PlanarRegionsList map, RigidBodyTransform transform)
    {
-      factorGraph.addPriorPoseFactor(0, new float[] {0, 0, 0, 0, 0, 0});
-      factorGraph.setPoseInitialValue(0, new float[] {0, 0, 0, 0, 0, 0});
+      Vector3DBasics translation = transform.getTranslation();
+      Vector3D eulerAngles = new Vector3D();
+      transform.getRotation().getEuler(eulerAngles);
+      float[] initialPose = new float[] {eulerAngles.getZ32(), eulerAngles.getY32(), eulerAngles.getX32(),
+                                         translation.getX32(), translation.getY32(), translation.getZ32()};
+
+      factorGraph.addPriorPoseFactor(0, initialPose);
+      factorGraph.setPoseInitialValue(0, initialPose);
 
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {

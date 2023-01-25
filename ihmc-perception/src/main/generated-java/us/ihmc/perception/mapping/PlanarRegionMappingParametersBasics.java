@@ -32,4 +32,9 @@ public interface PlanarRegionMappingParametersBasics extends PlanarRegionMapping
    {
       set(PlanarRegionMappingParameters.minimumOverlapThreshold, minimumOverlapThreshold);
    }
+
+   default void setMinimumPlanarRegionArea(double minimumPlanarRegionArea)
+   {
+      set(PlanarRegionMappingParameters.minimumPlanarRegionArea, minimumPlanarRegionArea);
+   }
 }

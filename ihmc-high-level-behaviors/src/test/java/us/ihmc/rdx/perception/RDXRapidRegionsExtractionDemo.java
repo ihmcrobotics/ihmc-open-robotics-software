@@ -242,7 +242,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    {
       if (rapidRegionsUIPanel.getPointCloudRenderEnabled())
       {
-         rapidPlanarRegionsExtractor.getDebugger().transformPoints(cameraFrame.getTransformToWorldFrame());
          pointCloudRenderer.setPointsToRender(rapidPlanarRegionsExtractor.getDebugger().getDebugPoints(), Color.GRAY);
          pointCloudRenderer.updateMesh();
       }
@@ -270,6 +269,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
                                          regionsWithPose.getPlanarRegionsList().clear();
                                          rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
+                                         regionsWithPose.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
                                       }, getClass().getSimpleName() + "RapidRegions");
 
          }
