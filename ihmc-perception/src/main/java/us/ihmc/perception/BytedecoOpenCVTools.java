@@ -339,6 +339,8 @@ public class BytedecoOpenCVTools
       BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 255.0);
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
+      opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size(image.cols() * 10, image.rows() * 10));
+
       display(tag, finalDisplayDepth, delay);
    }
 

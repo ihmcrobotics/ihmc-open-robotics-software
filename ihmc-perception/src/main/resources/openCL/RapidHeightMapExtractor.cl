@@ -73,10 +73,12 @@ int2 spherical_projection(float3 cellCenter, global float* params)
     return proj;
 }
 
-void kernel heightMapUpdateKernel(  read_write image2d_t in, write_only image2d_t out, global float* params)
+void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t out, global float* params)
 {
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
+
+    // printf("Height Map Update Kernel\n");
 
     float3 normal;
     float3 centroid;
@@ -104,10 +106,15 @@ void kernel heightMapUpdateKernel(  read_write image2d_t in, write_only image2d_
 
                 float3 point = back_project_spherical(pos, radius, params);
 
+                printf("[%d, %d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf)\n", rIndex, cIndex,
+                                                cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y, point.x, point.y, point.z);
+
                 if ( (int) point.x == rIndex && (int) point.y == cIndex)
                 {
                     count++;
                     averageHeightZ += point.z;
+
+
                 }
             }
         }

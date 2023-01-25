@@ -3,13 +3,16 @@ package us.ihmc.rdx.perception;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import org.bytedeco.opencl._cl_program;
+import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
@@ -48,7 +51,6 @@ public class RDXRapidHeightMapExtractionDemo
 
    private Activator nativesLoadedActivator;
    private BytedecoImage loadedDepthImage;
-   private BytedecoImage outputHeightMapImage;
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
    private PerceptionDataLoader perceptionDataLoader;
@@ -85,16 +87,15 @@ public class RDXRapidHeightMapExtractionDemo
             perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
 
             loadedDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-            outputHeightMapImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
 
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), loadedDepthImage.getBytedecoOpenCVMat());
+            loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
-            rapidHeightMapUpdater.create(openCLManager, openCLProgram, loadedDepthImage, outputHeightMapImage);
-            heightMapRenderer.create(depthHeight * depthWidth);
-
+            rapidHeightMapUpdater.create(openCLManager, openCLProgram, loadedDepthImage);
+            heightMapRenderer.create(rapidHeightMapUpdater.getGridLength() * rapidHeightMapUpdater.getGridWidth());
          }
 
          @Override
@@ -110,7 +111,8 @@ public class RDXRapidHeightMapExtractionDemo
 
                if (initialized)
                {
-                  updateHeightMap();
+                  // For real-time update
+//                  updateHeightMap();
                }
             }
 
@@ -141,6 +143,7 @@ public class RDXRapidHeightMapExtractionDemo
             {
                if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
                {
+                  LogTools.info("Loading sensor data: " + frameIndex.get());
                   perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), loadedDepthImage.getBytedecoOpenCVMat());
                   updateHeightMap();
                }
@@ -157,6 +160,7 @@ public class RDXRapidHeightMapExtractionDemo
          {
             rapidHeightMapUpdater.setProcessing(false);
             perceptionDataLoader.destroy();
+            openCLManager.destroy();
             baseUI.dispose();
          }
       });
@@ -168,6 +172,7 @@ public class RDXRapidHeightMapExtractionDemo
       {
          if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
          {
+            LogTools.info("Update Height Map: " + frameIndex.get());
             ThreadTools.startAsDaemon(() ->
                                       {
                                          Point3D position = sensorPositionBuffer.get(frameIndex.get());
@@ -182,9 +187,12 @@ public class RDXRapidHeightMapExtractionDemo
       }
 
       //heightMapRenderer.update();
-      //rapidHeightMapUpdater.setModified(false);
-      //rapidHeightMapUpdater.setProcessing(false);
+      BytedecoOpenCVTools.displayDepth("Output Height Map", rapidHeightMapUpdater.getOutputHeightMapImage().getBytedecoOpenCVMat(), 1);
+      rapidHeightMapUpdater.setModified(false);
+      rapidHeightMapUpdater.setProcessing(false);
    }
+
+
 
    public static void main(String[] args)
    {

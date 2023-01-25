@@ -2,6 +2,8 @@ package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
+import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
@@ -29,15 +31,17 @@ public class RapidHeightMapExtractor
    private boolean modified = true;
    private boolean processing = false;
 
-   public void create(OpenCLManager openCLManager, _cl_program program, BytedecoImage depthImage, BytedecoImage outputHeightMapImage)
+   public void create(OpenCLManager openCLManager, _cl_program program, BytedecoImage depthImage)
    {
-      this.outputHeightMapImage = outputHeightMapImage;
       this.inputDepthImage = depthImage;
       this.openCLManager = openCLManager;
       this.rapidHeightMapUpdaterProgram = program;
 
       parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
       parametersBuffer.createOpenCLBufferObject(openCLManager);
+
+      outputHeightMapImage = new BytedecoImage(gridWidth, gridLength, opencv_core.CV_16UC1);
+      outputHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
    }
@@ -50,23 +54,23 @@ public class RapidHeightMapExtractor
          inputDepthImage.writeOpenCLImage(openCLManager);
 
          //// Fill parameters buffer
-         //parametersBuffer.getBytedecoFloatBufferPointer().put(0, gridLengthInMeters);
-         //parametersBuffer.getBytedecoFloatBufferPointer().put(1, gridWidthInMeters);
-         //parametersBuffer.getBytedecoFloatBufferPointer().put(2, cellSizeXYInMeters);
-         //parametersBuffer.getBytedecoFloatBufferPointer().put(3, (float) inputDepthImage.getImageHeight());
-         //parametersBuffer.getBytedecoFloatBufferPointer().put(4, (float) inputDepthImage.getImageWidth());
-         //parametersBuffer.writeOpenCLBufferObject(openCLManager);
-         //
-         //// Set kernel arguments for the height map kernel
-         //openCLManager.setKernelArgument(heightMapUpdateKernel, 0, inputDepthImage.getOpenCLImageObject());
-         //openCLManager.setKernelArgument(heightMapUpdateKernel, 1, parametersBuffer.getOpenCLBufferObject());
-         //openCLManager.setKernelArgument(heightMapUpdateKernel, 2, outputHeightMapImage.getOpenCLImageObject());
-         //
-         //// Execute kernel with length and width parameters
-         //openCLManager.execute2D(heightMapUpdateKernel, gridWidth, gridLength);
-         //
-         //// Read height map image into CPU memory
-         //outputHeightMapImage.readOpenCLImage(openCLManager);
+         parametersBuffer.getBytedecoFloatBufferPointer().put(0, gridLengthInMeters);
+         parametersBuffer.getBytedecoFloatBufferPointer().put(1, gridWidthInMeters);
+         parametersBuffer.getBytedecoFloatBufferPointer().put(2, cellSizeXYInMeters);
+         parametersBuffer.getBytedecoFloatBufferPointer().put(3, (float) inputDepthImage.getImageHeight());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(4, (float) inputDepthImage.getImageWidth());
+         parametersBuffer.writeOpenCLBufferObject(openCLManager);
+
+         // Set kernel arguments for the height map kernel
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 0, inputDepthImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 1, outputHeightMapImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 2, parametersBuffer.getOpenCLBufferObject());
+
+         // Execute kernel with length and width parameters
+         openCLManager.execute2D(heightMapUpdateKernel, gridWidth, gridLength);
+
+         // Read height map image into CPU memory
+         outputHeightMapImage.readOpenCLImage(openCLManager);
       }
    }
 
@@ -88,5 +92,30 @@ public class RapidHeightMapExtractor
    public void setModified(boolean modified)
    {
       this.modified = modified;
+   }
+
+   public BytedecoImage getOutputHeightMapImage()
+   {
+      return outputHeightMapImage;
+   }
+
+   public float getGridLengthInMeters()
+   {
+      return gridLengthInMeters;
+   }
+
+   public float getGridWidthInMeters()
+   {
+      return gridWidthInMeters;
+   }
+
+   public int getGridLength()
+   {
+      return gridLength;
+   }
+
+   public int getGridWidth()
+   {
+      return gridWidth;
    }
 }
