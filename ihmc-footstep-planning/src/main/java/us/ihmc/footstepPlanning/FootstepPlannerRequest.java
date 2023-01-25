@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -435,6 +437,7 @@ public class FootstepPlannerRequest
          setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
       setStatusPublishPeriod(requestPacket.getStatusPublishPeriod());
+      setReferencePlan(FootstepDataMessageConverter.convertToFootstepPlan(requestPacket.getReferencePlan()));
 
       SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(requestPacket.getRequestedSwingPlanner());
       if (swingPlannerType != null)
