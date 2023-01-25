@@ -13,7 +13,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -41,10 +40,6 @@ import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -113,6 +108,8 @@ public class FootstepPlannerLogVisualizerController
    @FXML
    private CheckBox showIdealStep;
    @FXML
+   private CheckBox showNominalIdealStep;
+   @FXML
    private CheckBox showBodyBox;
 
    @FXML
@@ -142,6 +139,7 @@ public class FootstepPlannerLogVisualizerController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, showSnappedStep.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, showSnapAndWiggledStep.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, showIdealStep.selectedProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedNominalIdealStep, showNominalIdealStep.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowBodyBox, showBodyBox.selectedProperty(), true);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, show ->
@@ -454,6 +452,7 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.StartOfSwingStepToVisualize, Pair.of(stepProperty.parentNode.getFirstStep(), stepProperty.startStepSnapData));
       messager.submitMessage(FootstepPlannerMessagerAPI.StanceStepToVisualize, Pair.of(stepProperty.parentNode.getSecondStep(), stepProperty.endStepSnapData));
       messager.submitMessage(FootstepPlannerMessagerAPI.LoggedIdealStep, stepProperty.idealStepTransform);
+      messager.submitMessage(FootstepPlannerMessagerAPI.LoggedNominalIdealStep, stepProperty.nominalIdealStepTransform);
 
       childTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());
       childTable.getSelectionModel().select(0);
@@ -619,6 +618,7 @@ public class FootstepPlannerLogVisualizerController
       private final RigidBodyTransform endStepTransform = new RigidBodyTransform();
       private final RigidBodyTransform startStepTransform = new RigidBodyTransform();
       private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
+      private final RigidBodyTransform nominalIdealStepTransform = new RigidBodyTransform();
 
       public ParentStepProperty(FootstepPlannerIterationData iterationData)
       {
@@ -629,7 +629,11 @@ public class FootstepPlannerLogVisualizerController
          startStepTransform.set(startStepSnapData.getSnappedStepTransform(parentNode.getFirstStep()));
 
          DiscreteFootstep idealStep = iterationData.getIdealChildNode().getSecondStep();
+         DiscreteFootstep nominalIdealStep = iterationData.getNominalIdealChildNode().getSecondStep();
+
          FootstepSnapData idealStepSnapData = snapper.snapFootstep(idealStep);
+         FootstepSnapData nominalIdealStepSnapData = snapper.snapFootstep(nominalIdealStep);
+
          if(idealStepSnapData == null || idealStepSnapData.getSnapTransform().containsNaN())
          {
             DiscreteFootstepTools.getStepTransform(idealStep, idealStepTransform);
@@ -638,6 +642,16 @@ public class FootstepPlannerLogVisualizerController
          else
          {
             DiscreteFootstepTools.getSnappedStepTransform(idealStep, idealStepSnapData.getSnapTransform(), idealStepTransform);
+         }
+
+         if(nominalIdealStepSnapData == null || nominalIdealStepSnapData.getSnapTransform().containsNaN())
+         {
+            DiscreteFootstepTools.getStepTransform(nominalIdealStep, nominalIdealStepTransform);
+            nominalIdealStepTransform.getTranslation().setZ(nominalIdealStepTransform.getTranslationZ());
+         }
+         else
+         {
+            DiscreteFootstepTools.getSnappedStepTransform(nominalIdealStep, nominalIdealStepSnapData.getSnapTransform(), nominalIdealStepTransform);
          }
       }
 
