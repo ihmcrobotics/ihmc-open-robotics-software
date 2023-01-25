@@ -43,11 +43,10 @@ public class WebcamCalibrationPatternDemo
                {
                   webcamReader.create();
                   baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
 
                   calibrationPatternDetectionUI = new CalibrationPatternDetectionUI();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
                   {

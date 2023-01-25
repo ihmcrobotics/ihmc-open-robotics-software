@@ -82,7 +82,7 @@ public class WebcamROS2PublisherDemo
                {
                   webcamReader.create();
                   baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
 
                   yuv420Image = new Mat();
                   jpegImageBytePointer = new BytePointer();
