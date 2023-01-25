@@ -262,6 +262,7 @@ public class FootstepPlannerLogger
             fileWriter.write("Iteration " + i + newLine);
             writeNode(1, "parentNode", iterationData.getParentNode());
             writeNode(1, "idealStep", iterationData.getIdealChildNode());
+            writeNode(1, "nominalIdealStep", iterationData.getNominalIdealChildNode());
             writeLine(1, "edges:" + iterationData.getChildNodes().size());
             writeSnapData(1, iterationData.getParentStartSnapData());
             writeSnapData(1, iterationData.getParentEndSnapData());

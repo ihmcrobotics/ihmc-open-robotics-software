@@ -200,6 +200,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StanceStepToVisualize = topic("StanceStepToVisualize");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> TouchdownStepToVisualize = topic("TouchdownStepToVisualize");
    public static final Topic<RigidBodyTransform> LoggedIdealStep = topic("LoggedIdealStep");
+   public static final Topic<RigidBodyTransform> LoggedNominalIdealStep = topic("LoggedNominalIdealStep");
    public static final Topic<List<Box3D>> LoggedCollisionBoxes = topic("LoggedCollisionBoxes");
 
    public static final Topic<Boolean> ShowLoggedStartOfSwingStep = topic("ShowLoggedStartOfSwingStep");
@@ -208,6 +209,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowLoggedSnappedCandidateStep = topic("ShowLoggedSnappedCandidateStep");
    public static final Topic<Boolean> ShowLoggedWiggledCandidateStep = topic("ShowLoggedWiggledCandidateStep");
    public static final Topic<Boolean> ShowLoggedIdealStep = topic("ShowLoggedIdealStep");
+   public static final Topic<Boolean> ShowLoggedNominalIdealStep = topic("ShowLoggedNominalIdealStep");
    public static final Topic<Boolean> ShowBodyBox = topic("ShowBodyBox");
    public static final Topic<Boolean> ShowHeightMap = topic("ShowHeightMap");
 

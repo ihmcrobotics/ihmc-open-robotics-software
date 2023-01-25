@@ -348,7 +348,9 @@ public class AStarFootstepPlanner
          loggedData.setParentNode(iterationData.getParentNode());
          DiscreteFootstep idealFootstep = referenceBasedIdealStepCalculator.computeIdealStep(iterationData.getParentNode().getSecondStep(),
                                                                                              iterationData.getParentNode().getFirstStep());
+         DiscreteFootstep nominalIdealStep = referenceBasedIdealStepCalculator.getNominalIdealStep();
          loggedData.setIdealChildNode(new FootstepGraphNode(iterationData.getParentNode().getSecondStep(), idealFootstep));
+         loggedData.setNominalIdealChildNode(new FootstepGraphNode(iterationData.getParentNode().getSecondStep(), nominalIdealStep));
          loggedData.setParentEndSnapData(snapper.snapFootstep(iterationData.getParentNode().getSecondStep()));
          loggedData.setParentStartSnapData(snapper.snapFootstep(iterationData.getParentNode().getFirstStep()));
          this.iterationData.add(loggedData);

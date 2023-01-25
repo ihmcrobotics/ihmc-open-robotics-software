@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -17,6 +16,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    private final IdealStepCalculator nominalIdealStepCalculator;
    private FootstepPlan referenceFootstepPlan;
    private DirectedGraph<FootstepGraphNode> footstepGraph;
+   private DiscreteFootstep nominalIdealStep;
 
    // TODO add to footstep planner parameters
    /* Weight factor for using reference vs nominal ideal steps. Alpha = 0 means use nominal ideal step, alpha = 1 means use reference value */
@@ -30,7 +30,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    @Override
    public DiscreteFootstep computeIdealStep(DiscreteFootstep stanceNode, DiscreteFootstep startOfSwing)
    {
-      DiscreteFootstep nominalIdealStep = nominalIdealStepCalculator.computeIdealStep(stanceNode, startOfSwing);
+      nominalIdealStep = nominalIdealStepCalculator.computeIdealStep(stanceNode, startOfSwing);
 
       if (referenceFootstepPlan == null || referenceFootstepPlan.isEmpty())
       {
@@ -82,5 +82,10 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    public double getReferenceAlpha()
    {
       return referenceAlpha;
+   }
+
+   public DiscreteFootstep getNominalIdealStep()
+   {
+      return nominalIdealStep;
    }
 }
