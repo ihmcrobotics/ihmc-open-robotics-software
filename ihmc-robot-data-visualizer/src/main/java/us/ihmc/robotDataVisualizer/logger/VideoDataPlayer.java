@@ -335,9 +335,9 @@ public class VideoDataPlayer
       camera.setName("test");
       camera.setInterlaced(false);
       camera.setTimestampFile("ValkyrieTripodNorth_Timestamps.dat");
-      camera.setVideoFile("recordedVideo.mov");
+      camera.setVideoFile("screenRecording.mov");
 
-      File dataDirectory = new File("C:/Users/nkitchel/Documents/security-camera/repository-group/ihmc-video-codecs/src/test/resources/");
+      File dataDirectory = new File("C:/Users/nkitchel/Workspaces/Security-Camera/repository-group/ihmc-video-codecs/src/test/resources");
 //      File dataDirectory = new File("C:/Users/nkitchel/Documents/security-camera/repository-group/ihmc-video-codecs/src/test/resources/");
 
       VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, true);
