@@ -72,6 +72,7 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
 
       KinematicsStreamingToolboxParameters parameters = KinematicsStreamingToolboxParameters.defaultParameters();
+      parameters.setCenterOfMassHoldWeight(0.01);
       KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = parameters.getDefaultConfiguration();
       if (robotModel.getRobotVersion() == ValkyrieRobotVersion.ARM_MASS_SIM)
       {
