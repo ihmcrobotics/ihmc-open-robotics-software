@@ -23,8 +23,8 @@ public class CalibrationPatternDetectionUI
    private final Mat bgrSourceCopy;
    private final Mat grayscaleImage;
    private final SimpleBlobDetector simpleBlobDetector;
-   private final ImInt patternWidth = new ImInt(4);
-   private final ImInt patternHeight = new ImInt(3);
+   private final ImInt patternWidth = new ImInt(11);
+   private final ImInt patternHeight = new ImInt(8);
    private boolean patternFound = false;
    private Size patternSize;
    private final ZeroCopySwapReference<Mat> cornersOrCenters;
@@ -32,7 +32,7 @@ public class CalibrationPatternDetectionUI
    private final Runnable doPatternDetection = this::doPatternDetection;
    private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue
          = MissingThreadTools.newSingleThreadExecutor("PatternDetection", true, 1);
-   private CalibrationPatternType pattern = CalibrationPatternType.CHESSBOARD;
+   private CalibrationPatternType pattern = CalibrationPatternType.CIRCLES;
    private final Consumer<Mat> accessOnLowPriorityThread = this::accessOnLowPriorityThread;
    private Mat rgbaMatForDrawing;
    private final Consumer<Mat> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
