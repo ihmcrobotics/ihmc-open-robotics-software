@@ -47,6 +47,7 @@ public class HDF5ImageBrowserDemo
          @Override
          public void dispose()
          {
+            hdf5ImageBrowser.destroy();
             baseUI.dispose();
          }
       });

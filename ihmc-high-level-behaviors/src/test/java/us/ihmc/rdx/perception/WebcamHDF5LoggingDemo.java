@@ -68,6 +68,7 @@ public class WebcamHDF5LoggingDemo
          {
             running = false;
             webcamReader.dispose();
+            hdf5ImageLogging.destroy();
             baseUI.dispose();
          }
       });

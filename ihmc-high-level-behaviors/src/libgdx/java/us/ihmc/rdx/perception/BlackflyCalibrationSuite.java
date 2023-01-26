@@ -64,11 +64,11 @@ public class BlackflyCalibrationSuite
    private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue
          = MissingThreadTools.newSingleThreadExecutor("PatternDetection", true, 1);
    private boolean patternFound = false;
-   private volatile boolean detectingPatterns = false;
-   private final Notification calibrationImageSourceDrawRequest = new Notification();
+   private final Notification calibrationSourceImagePatternDrawRequest = new Notification();
+   private final Notification calibrationSourceImageDrawRequest = new Notification();
    private MatVector cornersOrCentersMatVector;
    private SimpleBlobDetector simpleBlobDetector;
-   private final ImFloat patternDistanceBetweenPoints = new ImFloat();
+   private final ImFloat patternDistanceBetweenPoints = new ImFloat(0.0189f);
    private final ImDouble fxGuess = new ImDouble(FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS);
    private final ImDouble fyGuess = new ImDouble(FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS);
    private final ImDouble cxGuess = new ImDouble(BFLY_U3_23S6C_WIDTH_PIXELS / 2.0);
@@ -136,12 +136,14 @@ public class BlackflyCalibrationSuite
                blackflyReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
                hdf5ImageBrowser.update();
 
-               if (calibrationImageSourceDrawRequest.poll())
+               if (calibrationSourceImageDrawRequest.poll())
+               {
+                  calibrationSourceImagesPanel.drawResizeAndCopy(calibrationSourceImages.get(calibrationSourceImageIndex.get()));
+               }
+               if (calibrationSourceImagePatternDrawRequest.poll())
                {
                   drawPatternOnCurrentImage();
-                  calibrationSourceImagesPanel.resize(calibrationPatternOutput.cols(), calibrationPatternOutput.rows(), null);
-                  calibrationPatternOutput.copyTo(calibrationSourceImagesPanel.getBytedecoImage().getBytedecoOpenCVMat());
-                  calibrationSourceImagesPanel.draw();
+                  calibrationSourceImagesPanel.drawResizeAndCopy(calibrationPatternOutput);
                }
             }
 
@@ -154,6 +156,8 @@ public class BlackflyCalibrationSuite
          {
             running = false;
             blackflyReader.dispose();
+            hdf5ImageBrowser.destroy();
+            hdf5ImageLogging.destroy();
             baseUI.dispose();
          }
       });
@@ -189,9 +193,9 @@ public class BlackflyCalibrationSuite
          {
             hdf5ImageBrowser.loadDataSetImage(i, calibrationSourceImages.add());
          }
-         findCornersOrCentersAsync();
+         calibrationSourceImageDrawRequest.set();
       }
-      if (ImGui.button("Find corners or centers again"))
+      if (ImGui.button("Find corners or centers"))
       {
          findCornersOrCentersAsync();
       }
@@ -199,11 +203,18 @@ public class BlackflyCalibrationSuite
       {
          if (ImGui.sliderInt(labels.get("Index"), calibrationSourceImageIndex.getData(), 0, calibrationSourceImages.size() - 1))
          {
-            calibrationImageSourceDrawRequest.set();
+            if (cornersOrCentersMatVector.size() > 0)
+            {
+               calibrationSourceImagePatternDrawRequest.set();
+            }
+            else
+            {
+               calibrationSourceImageDrawRequest.set();
+            }
          }
       }
 
-      ImGui.inputFloat(labels.get("Pattern distance between points"), patternDistanceBetweenPoints);
+      ImGui.inputFloat(labels.get("Pattern distance between points"), patternDistanceBetweenPoints, 0.001f, 0.01f, "%.5f");
       ImGui.inputDouble(labels.get("Fx Guess (px)"), fxGuess);
       ImGui.inputDouble(labels.get("Fy Guess (px)"), fyGuess);
       ImGui.inputDouble(labels.get("Cx Guess (px)"), cxGuess);
@@ -226,6 +237,7 @@ public class BlackflyCalibrationSuite
 
          for (int i = 0; i < calibrationSourceImages.size(); i++)
          {
+            LogTools.info("Finding corners for image {}...", i);
             CalibrationPatternType pattern = calibrationPatternDetectionUI.getPatternType();
             int patternWidth = calibrationPatternDetectionUI.getPatternWidth();
             int patternHeight = calibrationPatternDetectionUI.getPatternHeight();
@@ -249,6 +261,7 @@ public class BlackflyCalibrationSuite
                                                              opencv_calib3d.CALIB_CB_SYMMETRIC_GRID,
                                                              simpleBlobDetector);
             }
+            LogTools.info("Found: {}", patternFound);
             cornersOrCentersMatVector.push_back(cornersOrCentersMat);
 
             Point2fVector cornersOrCenters = new Point2fVector();
@@ -262,7 +275,7 @@ public class BlackflyCalibrationSuite
             imagePoints.push_back(cornersOrCenters);
          }
 
-         calibrationImageSourceDrawRequest.set();
+         calibrationSourceImagePatternDrawRequest.set();
       });
    }
 
