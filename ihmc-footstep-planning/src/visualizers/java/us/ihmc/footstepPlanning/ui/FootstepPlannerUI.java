@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.ui;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -312,22 +313,19 @@ public class FootstepPlannerUI
          mainTabController.setDefaultTiming(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
       }
 
-//      if (defaultContactPoints == null)
-//      {
-//         SideDependentList<ConvexPolygon2D> defaultPolygons =  PlannerTools.createDefaultFootPolygons();
-//         defaultContactPoints = new SideDependentList<>();
-//         for (RobotSide robotSide : RobotSide.values)
-//         {
-//            defaultContactPoints.put(robotSide, defaultPolygons.get(robotSide).getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList()));
-//         }
-//      }
-      if (defaultContactPoints != null)
+      if (defaultContactPoints == null)
       {
-         mainTabController.setContactPointParameters(defaultContactPoints);
-         pathViewer.setDefaultContactPoints(defaultContactPoints);
-         goalOrientationViewer.setDefaultContactPoints(defaultContactPoints);
-         footstepPlannerLogVisualizerController.setContactPointParameters(defaultContactPoints);
+         SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+         defaultContactPoints = new SideDependentList<>();
+         for (RobotSide side : RobotSide.values)
+            defaultContactPoints.put(side, footPolygons.get(side).getPolygonVerticesView().stream().map(Point2D::new).collect(Collectors.toList()));
       }
+
+      mainTabController.setContactPointParameters(defaultContactPoints);
+      pathViewer.setDefaultContactPoints(defaultContactPoints);
+      goalOrientationViewer.setDefaultContactPoints(defaultContactPoints);
+      footstepPlannerLogVisualizerController.setContactPointParameters(defaultContactPoints);
+
 
       messager.registerTopicListener(ShowOcTree, ocTreeViewer::setEnabled);
       messager.registerTopicListener(OcTreeData, ocTreeViewer::submitOcTreeData);
