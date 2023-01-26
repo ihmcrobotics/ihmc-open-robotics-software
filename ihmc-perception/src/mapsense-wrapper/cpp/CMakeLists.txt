@@ -4,11 +4,28 @@ project(mapsense)
 add_compile_options(-std=c++17)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+list(INSERT CMAKE_MODULE_PATH 0 "${PROJECT_SOURCE_DIR}/cmake")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+
+set(CMAKE_BUILD_TYPE Debug)
+
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
 set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
+
+message("* Video module available")
+add_definitions(-DVIDEO_MOD_AVAILABLE)
+
+find_package(LIBUSB 1 REQUIRED)
+message(STATUS "libusb: include dir at ${LibUSB_INCLUDE_DIRS}")
+message(STATUS "libusb: libraries at ${LibUSB_LIBRARIES}")
+include_directories(${LibUSB_INCLUDE_DIRS})
+set(SRC_FULL ${SRC_FULL} ${SRC_VIDEO})
+set(HDR_FULL ${HDR_FULL} ${HEADERS_VIDEO})
+set(DEP_LIBS ${DEP_LIBS}
+     ${LibUSB_LIBRARIES}
+)
 
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE)
@@ -76,12 +93,37 @@ install(TARGETS visual-odometry
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
 install(FILES ${MS_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++  SensorDrivers ++++++++++++++++++++++++++++++++++++++++**
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+add_library(zed-driver SHARED drivers/zed_open_driver.cpp)
+
+target_link_libraries(zed-driver
+    ${OpenCV_LIBS}
+    zed_open_capture
+)
+
+target_include_directories(zed-driver PUBLIC
+     /usr/include/
+     ${OpenCV_INCLUDE_DIRS}
+     drivers/
+     launcher/
+     external/
+)
+
+install(TARGETS zed-driver
+        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+install(FILES ${MS_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++  Launchers       ++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
+# Visual Odometry Player
 add_executable(VisualOdometryNativeDemoLauncher launcher/vo_demo_launcher.cpp launcher/vo_demo_launcher.h)
 target_link_libraries(VisualOdometryNativeDemoLauncher
     visual-odometry
@@ -91,6 +133,18 @@ target_include_directories(VisualOdometryNativeDemoLauncher PUBLIC
     feature_detection/
     geometry/
     launcher/
+)
+
+
+# ZED Player
+add_executable(ZEDPlayer launcher/zed_player.cpp)
+target_link_libraries(ZEDPlayer
+    zed-driver
+)
+target_include_directories(ZEDPlayer PUBLIC
+    /usr/include/
+    launcher/
+    drivers/
 )
 
 
