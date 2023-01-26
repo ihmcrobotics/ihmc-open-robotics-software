@@ -91,7 +91,7 @@ public class RDXGPUPlanarRegionExtractionL515HardwareDemo
                      baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
                      baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 
-                     baseUI.getPerspectiveManager().reloadPerspective();
+                     baseUI.getLayoutManager().reloadLayout();
                   }
 
                   depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
