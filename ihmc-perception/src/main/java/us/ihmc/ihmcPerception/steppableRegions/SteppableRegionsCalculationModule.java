@@ -44,6 +44,7 @@ public class SteppableRegionsCalculationModule
    private final BytedecoImage heightMapImage = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
 
    private final List<BytedecoImage> steppabilityImages = new ArrayList<>();
+   private final List<BytedecoImage> snapHeightImages = new ArrayList<>();
    private final List<BytedecoImage> steppabilityConnections = new ArrayList<>();
 
    private final List<List<SteppableRegion>> regions = new ArrayList<>();
@@ -62,6 +63,7 @@ public class SteppableRegionsCalculationModule
       for (int i = 0; i < yawDiscretizations; i++)
       {
          steppabilityImages.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
+         snapHeightImages.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
          steppabilityConnections.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
       }
 
@@ -120,6 +122,7 @@ public class SteppableRegionsCalculationModule
       for (int i = 0; i < yawDiscretizations; i++)
       {
          steppabilityImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         snapHeightImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          steppabilityConnections.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
       }
    }
@@ -143,6 +146,7 @@ public class SteppableRegionsCalculationModule
          openCLManager.setKernelArgument(computeSteppabilityKernel, 1, heightMapImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(computeSteppabilityKernel, 2, yaw.getOpenCLBufferObject());
          openCLManager.setKernelArgument(computeSteppabilityKernel, 3, steppabilityImages.get(yawValue).getOpenCLImageObject());
+         openCLManager.setKernelArgument(computeSteppabilityKernel, 4, snapHeightImages.get(yawValue).getOpenCLImageObject());
 
          openCLManager.execute2D(computeSteppabilityKernel, cellsPerSide, cellsPerSide);
 
@@ -153,6 +157,7 @@ public class SteppableRegionsCalculationModule
          openCLManager.execute2D(computeSteppabilityConnectionsKernel, cellsPerSide, cellsPerSide);
 
          steppabilityImages.get(yawValue).readOpenCLImage(openCLManager);
+         snapHeightImages.get(yawValue).readOpenCLImage(openCLManager);
          steppabilityConnections.get(yawValue).readOpenCLImage(openCLManager);
 
          openCLManager.finish();
@@ -190,6 +195,7 @@ public class SteppableRegionsCalculationModule
       {
          steppabilityImages.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
          steppabilityConnections.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
+         snapHeightImages.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
       }
    }
 
