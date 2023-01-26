@@ -168,6 +168,12 @@ public class HDF5ImageBrowser
       }
    }
 
+   public void destroy()
+   {
+      if (h5File != null)
+         closeHDF5File();
+   }
+
    public RDXCVImagePanel getImagePanel()
    {
       return imagePanel;

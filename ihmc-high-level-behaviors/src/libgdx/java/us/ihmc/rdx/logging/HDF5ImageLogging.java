@@ -141,10 +141,7 @@ public class HDF5ImageLogging
          ImGui.text(logFile);
          if (ImGui.button(labels.get("Close file")))
          {
-            imageGroup.close();
-            imageGroup = null;
-            h5File.close();
-            h5File = null;
+            closeHDF5File();
          }
 
          if (ImGui.button("Capture image"))
@@ -177,6 +174,20 @@ public class HDF5ImageLogging
             ++imageIndex;
          }
       }
+   }
+
+   private void closeHDF5File()
+   {
+      imageGroup.close();
+      imageGroup = null;
+      h5File.close();
+      h5File = null;
+   }
+
+   public void destroy()
+   {
+      if (h5File != null)
+         closeHDF5File();
    }
 
    public ImGuiPanel getPanel()
