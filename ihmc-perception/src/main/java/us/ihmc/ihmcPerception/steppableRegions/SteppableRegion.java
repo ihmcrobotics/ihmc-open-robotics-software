@@ -10,17 +10,22 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.List;
 
 public class SteppableRegion
 {
+   private int regionId = -1;
+
    private final ConcavePolygon2D concaveHullInRegionFrame = new ConcavePolygon2D();
    private final ConvexPolygon2D convexHullInRegionFrame = new ConvexPolygon2D();
 
    private final RigidBodyTransform transformFromWorldToRegion = new RigidBodyTransform();
 
    private final Point2D centroidInWorld = new Point2D();
+
+   private HeightMapData localHeightMap;
 
    public SteppableRegion(Point3DReadOnly origin,
                           Orientation3DReadOnly orientation,
@@ -49,6 +54,26 @@ public class SteppableRegion
    public Point2DReadOnly getConcaveHullCentroidInWorld()
    {
       return centroidInWorld;
+   }
+
+   public void setLocalHeightMap(HeightMapData heightMapData)
+   {
+      this.localHeightMap = heightMapData;
+   }
+
+   public HeightMapData getLocalHeightMap()
+   {
+      return localHeightMap;
+   }
+
+   public void setRegionId(int regionId)
+   {
+      this.regionId = regionId;
+   }
+
+   public int getRegionId()
+   {
+      return regionId;
    }
 }
 

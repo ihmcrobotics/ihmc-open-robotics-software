@@ -24,4 +24,22 @@ public class HeightMapMessageTools
       heightMapData.setEstimatedGroundHeight(heightMapMessage.getEstimatedGroundHeight());
       return heightMapData;
    }
+
+   public static HeightMapMessage toMessage(HeightMapData heightMapData)
+   {
+      HeightMapMessage message = new HeightMapMessage();
+      message.setGridSizeXy(heightMapData.getGridSizeXY());
+      message.setXyResolution(heightMapData.getGridResolutionXY());
+      message.setGridCenterX(heightMapData.getGridCenter().getX());
+      message.setGridCenterY(heightMapData.getGridCenter().getY());
+
+      for (int i = 0; i < heightMapData.getNumberOfOccupiedCells(); i++)
+      {
+         int key = heightMapData.getKey(i);
+         message.getKeys().add(key);
+         message.getHeights().add((float) heightMapData.getHeightAt(i));
+      }
+
+      return message;
+   }
 }
