@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.JavaCV;
 import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
@@ -59,6 +60,7 @@ public class BlackflyCalibrationSuite
    private volatile boolean running = true;
    private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
    private Point2fVectorVector imagePoints;
+   private MatVector imagePointsMatVector;
    private Mat grayscaleImage;
    private Mat calibrationPatternOutput;
    private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue
@@ -117,6 +119,7 @@ public class BlackflyCalibrationSuite
                   calibrationPatternOutput = new Mat();
                   cornersOrCentersMatVector = new MatVector();
                   imagePoints = new Point2fVectorVector();
+                  imagePointsMatVector = new MatVector();
                   simpleBlobDetector = SimpleBlobDetector.create();
 
                   ThreadTools.startAsDaemon(() ->
@@ -234,6 +237,7 @@ public class BlackflyCalibrationSuite
       {
          cornersOrCentersMatVector.clear();
          imagePoints.clear();
+         imagePointsMatVector.clear();
 
          for (int i = 0; i < calibrationSourceImages.size(); i++)
          {
@@ -269,10 +273,15 @@ public class BlackflyCalibrationSuite
             {
                for (int y = 0; y < cornersOrCentersMat.rows(); y++)
                {
-                  cornersOrCenters.push_back(new Point2f(cornersOrCentersMat.ptr(y, x)));
+                  BytePointer ptr = cornersOrCentersMat.ptr(y, x);
+                  float xValue = ptr.getFloat();
+                  float yValue = ptr.getFloat(Float.BYTES);
+                  cornersOrCenters.push_back(new Point2f(xValue, yValue));
+                  LogTools.debug("image point: {}, {}", xValue, yValue);
                }
             }
             imagePoints.push_back(cornersOrCenters);
+            imagePointsMatVector.push_back(cornersOrCentersMat);
          }
 
          calibrationSourceImagePatternDrawRequest.set();
@@ -299,24 +308,32 @@ public class BlackflyCalibrationSuite
 
       Point3fVectorVector objectPoints = new Point3fVectorVector();
       MatVector objectPointsMatVector = new MatVector();
+
       for (int i = 0; i < calibrationSourceImages.size(); i++)
       {
          Point3fVector pointsOnPattern = new Point3fVector();
+         // We have to pack the Mat version for now until this is fixed:
+         // https://github.com/bytedeco/javacpp-presets/issues/1185
+         Mat pointsOnPatternMat = new Mat(patternHeight * patternWidth, 1, opencv_core.CV_32FC3);
+
          for (int y = 0; y < patternHeight; y++)
          {
             for (int x = 0; x < patternWidth; x++) // The same pattern is used for all the images, but we still have to make all the copies
             {
-               pointsOnPattern.push_back(new Point3f(x * patternDistanceBetweenPoints.get(), y * patternDistanceBetweenPoints.get(), 0.0f));
+               float xValue = x * patternDistanceBetweenPoints.get();
+               float yValue = y * patternDistanceBetweenPoints.get();
+               float zValue = 0.0f;
+               pointsOnPattern.push_back(new Point3f(xValue, yValue, 0.0f));
+
+               BytePointer pointOnPatternPointer = pointsOnPatternMat.ptr(y * patternWidth + x, 0);
+               pointOnPatternPointer.putFloat(xValue);
+               pointOnPatternPointer.putFloat(Float.BYTES, yValue);
+               pointOnPatternPointer.putFloat(2 * Float.BYTES, zValue);
+               LogTools.debug("object point: {}, {}, {}", xValue, yValue, zValue);
             }
          }
          objectPoints.push_back(pointsOnPattern);
-         objectPointsMatVector.push_back(new Mat(pointsOnPattern)); // TODO: Does this work?
-      }
-
-      MatVector imagePointsMatVector = new MatVector();
-      for (int i = 0; i < imagePoints.size(); i++)
-      {
-         imagePointsMatVector.push_back(new Mat(imagePoints.get(i))); // TODO: Does this work?
+         objectPointsMatVector.push_back(pointsOnPatternMat);
       }
 
       Size imageSize = new Size(calibrationSourceImages.get(0).cols(), calibrationSourceImages.get(0).rows());
@@ -351,8 +368,8 @@ public class BlackflyCalibrationSuite
                                terminationCriteria);
 
       LogTools.info("Calibration complete!");
-      LogTools.info("# estimated rotation vectors: {}", estimatedRotationVectors.size());
-      LogTools.info("# estimated translation vectors: {}", estimatedTranslationVectors.size());
+      LogTools.info("Number of estimated rotation vectors: {}", estimatedRotationVectors.size());
+      LogTools.info("Number of estimated translation vectors: {}", estimatedTranslationVectors.size());
    }
 
    public static void main(String[] args)
