@@ -10,14 +10,12 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_features2d.SimpleBlobDetector;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.logging.HDF5ImageBrowser;
 import us.ihmc.rdx.logging.HDF5ImageLogging;
@@ -63,10 +61,11 @@ public class BlackflyCalibrationSuite
    private Point2fVectorVector imagePoints;
    private Mat grayscaleImage;
    private Mat calibrationPatternOutput;
-   private final Notification calibrationOutputNotification = new Notification();
-   private final Object calibrationPatternOutputSync = new Object();
-   private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue = MissingThreadTools.newSingleThreadExecutor("PatternDetection", true);
+   private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue
+         = MissingThreadTools.newSingleThreadExecutor("PatternDetection", true, 1);
    private boolean patternFound = false;
+   private volatile boolean detectingPatterns = false;
+   private final Notification calibrationImageSourceDrawRequest = new Notification();
    private MatVector cornersOrCentersMatVector;
    private SimpleBlobDetector simpleBlobDetector;
    private final ImFloat patternDistanceBetweenPoints = new ImFloat();
@@ -137,16 +136,13 @@ public class BlackflyCalibrationSuite
                blackflyReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
                hdf5ImageBrowser.update();
 
-               if (calibrationOutputNotification.poll())
+               if (calibrationImageSourceDrawRequest.poll())
                {
-                  synchronized (calibrationPatternOutputSync)
-                  {
-                     calibrationSourceImagesPanel.resize(calibrationPatternOutput.cols(), calibrationPatternOutput.rows(), null);
-                     calibrationPatternOutput.copyTo(calibrationSourceImagesPanel.getBytedecoImage().getBytedecoOpenCVMat());
-                  }
+                  drawPatternOnCurrentImage();
+                  calibrationSourceImagesPanel.resize(calibrationPatternOutput.cols(), calibrationPatternOutput.rows(), null);
+                  calibrationPatternOutput.copyTo(calibrationSourceImagesPanel.getBytedecoImage().getBytedecoOpenCVMat());
+                  calibrationSourceImagesPanel.draw();
                }
-
-               calibrationSourceImagesPanel.draw();
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -193,18 +189,17 @@ public class BlackflyCalibrationSuite
          {
             hdf5ImageBrowser.loadDataSetImage(i, calibrationSourceImages.add());
          }
-         drawPatternOnCurrentImage();
-         findCornersOrCenters();
+         findCornersOrCentersAsync();
       }
       if (ImGui.button("Find corners or centers again"))
       {
-         findCornersOrCenters();
+         findCornersOrCentersAsync();
       }
       if (!calibrationSourceImages.isEmpty())
       {
          if (ImGui.sliderInt(labels.get("Index"), calibrationSourceImageIndex.getData(), 0, calibrationSourceImages.size() - 1))
          {
-            drawPatternOnCurrentImage();
+            calibrationImageSourceDrawRequest.set();
          }
       }
 
@@ -214,15 +209,17 @@ public class BlackflyCalibrationSuite
       ImGui.inputDouble(labels.get("Cx Guess (px)"), cxGuess);
       ImGui.inputDouble(labels.get("Cy Guess (px)"), cyGuess);
 
+      ImGui.beginDisabled(patternDetectionThreadQueue.isExecuting());
       if (ImGui.button(labels.get("Calibrate")))
       {
          ThreadTools.startAsDaemon(this::calibrate, "Calibration");
       }
+      ImGui.endDisabled();
    }
 
-   private void findCornersOrCenters()
+   private void findCornersOrCentersAsync()
    {
-      patternDetectionThreadQueue.execute(() ->
+      patternDetectionThreadQueue.clearQueueAndExecute(() ->
       {
          cornersOrCentersMatVector.clear();
          imagePoints.clear();
@@ -264,6 +261,8 @@ public class BlackflyCalibrationSuite
             }
             imagePoints.push_back(cornersOrCenters);
          }
+
+         calibrationImageSourceDrawRequest.set();
       });
    }
 
@@ -277,9 +276,9 @@ public class BlackflyCalibrationSuite
       Mat selectedImage = calibrationSourceImages.get(sourceImageIndex);
       selectedImage.copyTo(calibrationPatternOutput);
       opencv_calib3d.drawChessboardCorners(calibrationPatternOutput, patternSize, cornersOrCentersMatVector.get(sourceImageIndex), patternFound);
-      calibrationOutputNotification.set();
    }
 
+   // TODO: Put on thread
    private void calibrate()
    {
       int patternWidth = calibrationPatternDetectionUI.getPatternWidth();
