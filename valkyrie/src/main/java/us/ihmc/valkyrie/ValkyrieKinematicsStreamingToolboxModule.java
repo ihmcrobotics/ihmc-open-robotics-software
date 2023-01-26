@@ -17,6 +17,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.valkyrie.ValkyrieNetworkProcessor.NetworkProcessorVersion;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -72,15 +73,20 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
 
       KinematicsStreamingToolboxParameters parameters = KinematicsStreamingToolboxParameters.defaultParameters();
-      parameters.setCenterOfMassHoldWeight(0.01);
-      KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = parameters.getDefaultConfiguration();
-      if (robotModel.getRobotVersion() == ValkyrieRobotVersion.ARM_MASS_SIM)
+
+      if (NetworkProcessorVersion.fromEnvironment() == NetworkProcessorVersion.IHMC)
       {
-         defaultConfiguration.setEnableLeftHandTaskspace(false);
-         defaultConfiguration.setEnableRightHandTaskspace(false);
-         defaultConfiguration.setEnableLeftArmJointspace(true);
-         defaultConfiguration.setEnableRightArmJointspace(true);
+         parameters.setCenterOfMassSafeMargin(0.05);
+         KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = parameters.getDefaultConfiguration();
+         if (robotModel.getRobotVersion() == ValkyrieRobotVersion.ARM_MASS_SIM)
+         {
+            defaultConfiguration.setEnableLeftHandTaskspace(false);
+            defaultConfiguration.setEnableRightHandTaskspace(false);
+            defaultConfiguration.setEnableLeftArmJointspace(true);
+            defaultConfiguration.setEnableRightArmJointspace(true);
+         }
       }
+
       ValkyrieKinematicsStreamingToolboxModule module = new ValkyrieKinematicsStreamingToolboxModule(robotModel,
                                                                                                      parameters,
                                                                                                      startYoVariableServer,
