@@ -145,52 +145,45 @@ public class SteppableRegionsCalculator
 
       int boundaryConnectionsEncodedAsOnes = connections.getInt(row, col);
 
-      for (int i = 0; i < 4; i++)
+      for (int x_offset = -1; x_offset <= 1; x_offset++)
       {
-         int neighborX = cellToExpand.x;
-         int neighborY = cellToExpand.y;
-
-         // These are switched from the open cl code, since the coordinates are different
-         if (i == 0) // positive x in image frame
-            neighborY--;
-         else if (i == 1) // positive y in image frame
-            neighborX--;
-         else if (i == 2) // negative x in image frame
-            neighborY++;
-         else // negative y in image frame
-            neighborX++;
-
-         if (neighborX < 0 || neighborY < 0 || neighborX >= cellsPerSide || neighborY >= cellsPerSide)
-            continue;
-
-         SteppableCell neighbor = environmentModel.getCellAt(neighborX, neighborY);
-         if (neighbor == null)
-            continue;
-//            throw new? RuntimeException("This should have never happened.");
-
-         if (isConnected(i, boundaryConnectionsEncodedAsOnes))
+         for (int y_offset = -1; y_offset <= 1; y_offset++)
          {
+            // These are switched because of the difference between coordinates in the height map and image frame
+            int neighborX = cellToExpand.x - y_offset;
+            int neighborY = cellToExpand.y - x_offset;
 
+            if (neighborX < 0 || neighborY < 0 || neighborX >= cellsPerSide || neighborY >= cellsPerSide)
+               continue;
 
-            if (neighbor.cellHasBeenAssigned())
+            SteppableCell neighbor = environmentModel.getCellAt(neighborX, neighborY);
+            if (neighbor == null)
+               continue;
+            //            throw new? RuntimeException("This should have never happened.");
+
+            if (isConnected(x_offset, y_offset, boundaryConnectionsEncodedAsOnes))
             {
-               cellToExpand.getRegion().mergeRegion(neighbor.getRegion());
-            }
-            else
-            {
-               // the cell has not been assigned
-               cellToExpand.getRegion().addCell(neighbor);
-            }
 
-            if (!neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
-                recursivelyAddNeighbors(neighbor, steppability, connections, environmentModel, maxDepth, currentDepth + 1);
+               if (neighbor.cellHasBeenAssigned())
+               {
+                  cellToExpand.getRegion().mergeRegion(neighbor.getRegion());
+               }
+               else
+               {
+                  // the cell has not been assigned
+                  cellToExpand.getRegion().addCell(neighbor);
+               }
+
+               if (!neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
+                  recursivelyAddNeighbors(neighbor, steppability, connections, environmentModel, maxDepth, currentDepth + 1);
+            }
          }
       }
    }
 
-   private static boolean isConnected(int edgeNumber, int connectionValue)
+   private static boolean isConnected(int x_offset, int y_offset, int connectionValue)
    {
-      int mask = (1 << edgeNumber);
+      int mask = (1 << (3 * x_offset + y_offset));
       int maskedValue = mask & connectionValue;
       return maskedValue > 0;
    }

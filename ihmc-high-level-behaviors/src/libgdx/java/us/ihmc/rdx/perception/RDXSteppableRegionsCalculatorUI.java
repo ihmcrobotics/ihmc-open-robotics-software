@@ -196,8 +196,11 @@ public class RDXSteppableRegionsCalculatorUI
                      color = Color.WHITE; // valid
                   else if (status == 1)
                      color = Color.BLACK; // cliff top
+                  else if (status == 3)
+                     color = Color.BLUE; // bad snap
                   else
                      color = Color.GRAY; // cliff bottom
+
                   BytePointer pixel = panel.getBytedecoImage().getBytedecoOpenCVMat().ptr(x, y);
                   pixel.put(0, (byte) (color.r * 255));
                   pixel.put(1, (byte) (color.g * 255));
