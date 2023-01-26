@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.Consumer;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -46,8 +47,8 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
-import us.ihmc.valkyrie.behaviors.ValkyrieLookAndStepParameters;
 import us.ihmc.tools.io.WorkspacePathTools;
+import us.ihmc.valkyrie.behaviors.ValkyrieLookAndStepParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerControlThread;
@@ -318,6 +319,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                               getContactPointParameters(),
                                                               getJointMap(),
                                                               true);
+         // For backward compatibility w.r.t. when we were using SDF file.
+         // The URDF to SDF conversion appeared to sort the joints by alphabetical order.
+         // The ordering matters when serializing messages such as RobotConfigurationData.
+         robotDefinition.forEachRigidBodyDefinition(body -> Collections.sort(body.getChildrenJoints(), (j1, j2) -> j1.getName().compareTo(j2.getName())));
+
          if (robotMaterial != null)
             RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
          getRobotDefinitionMutator().accept(robotDefinition);
