@@ -10,7 +10,7 @@ import us.ihmc.perception.OpenCLManager;
 
 public class RapidHeightMapExtractor
 {
-   private final int TOTAL_NUM_PARAMS = 5;
+   private final int TOTAL_NUM_PARAMS = 7;
 
    private float gridLengthInMeters = 8.0f;
    private float gridWidthInMeters = 6.0f;
@@ -59,6 +59,8 @@ public class RapidHeightMapExtractor
          parametersBuffer.getBytedecoFloatBufferPointer().put(2, cellSizeXYInMeters);
          parametersBuffer.getBytedecoFloatBufferPointer().put(3, (float) inputDepthImage.getImageHeight());
          parametersBuffer.getBytedecoFloatBufferPointer().put(4, (float) inputDepthImage.getImageWidth());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(5, (float) gridLength);
+         parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) gridWidth);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
          // Set kernel arguments for the height map kernel

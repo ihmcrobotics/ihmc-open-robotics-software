@@ -3,6 +3,8 @@
 #define CELL_SIZE_XY_METERS 2
 #define INPUT_HEIGHT 3
 #define INPUT_WIDTH 4
+#define GRID_LENGTH 5
+#define GRID_WIDTH 6
 
 float3 back_project_spherical(int2 pos, float depth, global float* params)
 {
@@ -38,9 +40,9 @@ float4 transform4(float4 point, float4 r1, float4 r2, float4 r3, float4 t)
 float3 compute_grid_cell_cell_center(int rIndex, int cIndex, global float* params)
 {
    float3 cellCenter = (float3)(0, 0, 0);
-   cellCenter.y = (cIndex - (params[GRID_WIDTH_METERS] / 2)) * params[CELL_SIZE_XY_METERS];
-   cellCenter.x = (rIndex - (params[GRID_LENGTH_METERS] / 2)) * params[CELL_SIZE_XY_METERS];
-   cellCenter.z = 0;
+   cellCenter.x = ((params[GRID_LENGTH] / 2) - rIndex) * params[CELL_SIZE_XY_METERS];
+   cellCenter.y = ((params[GRID_WIDTH] / 2) - cIndex) * params[CELL_SIZE_XY_METERS];
+   cellCenter.z = -2.0f;
    return cellCenter;
 }
 
@@ -70,6 +72,8 @@ int2 spherical_projection(float3 cellCenter, global float* params)
     proj.x = pitchCount;
     proj.y = yawCount;
 
+//    printf("Projection: [%.2f,%.2f] (Yc:%d,Pc:%d, Z:%.2lf,R:%.2lf)\n", yaw, pitch, yawCount, pitchCount, z, radius);
+
     return proj;
 }
 
@@ -89,31 +93,38 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
 
     int2 pos = (int2)(projectedPoint.x, projectedPoint.y);
 
+    printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
+         cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y);
+
     int WINDOW_LENGTH = 10;
     int WINDOW_WIDTH = 10;
 
     int count = 0;
 
-    for(int i = 0; i<WINDOW_LENGTH; i++)
+    for(int i = -WINDOW_LENGTH / 2; i < WINDOW_LENGTH / 2 + 1; i++)
     {
-        for(int j = 0; j<WINDOW_WIDTH; j++)
+        for(int j = -WINDOW_WIDTH / 2; j < WINDOW_WIDTH / 2 + 1; j++)
         {
             pos = (int2)(projectedPoint.x + i, projectedPoint.y + j);
 
-            if(pos.x >= 0 && pos.x < params[INPUT_WIDTH] && pos.y >= 0 && pos.y < params[INPUT_HEIGHT])
+//            printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
+//                 cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y);
+
+            if(pos.x >= 0 && pos.x < (int) params[INPUT_WIDTH] && pos.y >= 0 && pos.y < (int) params[INPUT_HEIGHT])
             {
                 float radius = ((float)read_imageui(in, pos).x)/(float)1000;
 
                 float3 point = back_project_spherical(pos, radius, params);
 
-                printf("[%d, %d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf)\n", rIndex, cIndex,
-                                                cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y, point.x, point.y, point.z);
+//                printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf)\n", rIndex, (int) params[GRID_LENGTH],
+//                 cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, projectedPoint.x, projectedPoint.y, point.x, point.y, point.z);
 
                 if ( (int) point.x == rIndex && (int) point.y == cIndex)
                 {
                     count++;
                     averageHeightZ += point.z;
 
+                    printf("_________________________________++++++++++++++++++++++++ FOUND +++++++++++++++++++++++++++++++____________________________________\n");
 
                 }
             }
