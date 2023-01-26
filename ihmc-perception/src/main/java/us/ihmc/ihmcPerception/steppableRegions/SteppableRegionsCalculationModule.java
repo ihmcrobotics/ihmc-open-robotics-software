@@ -164,11 +164,14 @@ public class SteppableRegionsCalculationModule
 
          timer.start();
 
-
          SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.mergeCellsIntoSteppableRegionEnvironment(
                steppabilityImages.get(yawValue),
+               snapHeightImages.get(yawValue),
                steppabilityConnections.get(yawValue));
-         List<SteppableRegion> regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters, polygonizerParameters, environment, heightMapData);
+         List<SteppableRegion> regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
+                                                                                           polygonizerParameters,
+                                                                                           environment,
+                                                                                           heightMapData);
 
          this.regionEnvironments.add(environment);
          this.regions.add(regions);

@@ -20,6 +20,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.rdx.visualizers.RDXSteppableRegionGraphic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -48,7 +49,7 @@ public class RDXSteppableRegionsCalculatorUI
    private final List<RDXCVImagePanel> steppableRegionsPanels = new ArrayList<>();
 
    private ImGuiStoredPropertySetTuner parameterTuner;
-   private RDXPlanarRegionsGraphic planarRegionsGraphic;
+   private RDXSteppableRegionGraphic steppableRegionGraphic;
    private int cellsPerSide;
    private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
 
@@ -74,7 +75,7 @@ public class RDXSteppableRegionsCalculatorUI
       numberOfSteppableRegionsPlot = new ImGuiPlot(labels.get("Number of steppable regions"), 1000, 300, 50);
       wholeAlgorithmDurationPlot = new ImGuiPlot(labels.get("Whole algorithm duration"), 1000, 300, 50);
 
-      planarRegionsGraphic = new RDXPlanarRegionsGraphic();
+      steppableRegionGraphic = new RDXSteppableRegionGraphic();
    }
 
    volatile boolean processing = false;
@@ -107,6 +108,7 @@ public class RDXSteppableRegionsCalculatorUI
 
             processing = false;
          }
+         steppableRegionGraphic.update();
       }
    }
 
@@ -115,6 +117,7 @@ public class RDXSteppableRegionsCalculatorUI
       steppableRegionsCalculationModule.setSteppableRegionsCalculatorParameters(parameters);
       steppableRegionsCalculationModule.compute(heightMapData);
       drawRegions();
+      steppableRegionGraphic.generateMeshesAsync(steppableRegionsCalculationModule.getSteppableRegions().get(0));
 
       wholeAlgorithmDurationStopwatch.suspend();
       wholeAlgorithmDuration.set(wholeAlgorithmDurationStopwatch.lapElapsed());
@@ -242,6 +245,7 @@ public class RDXSteppableRegionsCalculatorUI
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       // TODO
+      steppableRegionGraphic.getRenderables(renderables, pool);
 //      if (render3DPlanarRegions.get())
 //         planarRegionsGraphic.getRenderables(renderables, pool);
    }
