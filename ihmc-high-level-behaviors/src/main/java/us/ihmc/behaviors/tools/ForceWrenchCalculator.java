@@ -52,6 +52,9 @@ public class ForceWrenchCalculator
             joints[i] = fullRobotModel.getArmJoint(side, jointName);
          }
 //         jacobianCalculator.setKinematicChain(joints);
+
+
+
          jacobianCalculator.setKinematicChain(fullRobotModel.getChest(), fullRobotModel.getHand(side));
          armJacobianMatrix.set(side, jacobianCalculator.getJacobianMatrix());
          armJoints.set(side, joints);

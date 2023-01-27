@@ -22,6 +22,7 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -398,11 +399,11 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       forceWrenchCalculator.update();
       SideDependentList<DMatrixRMaj> wrench = forceWrenchCalculator.getWrench();
-      // TODO: check if this thing works
-      //      for (RobotSide side : RobotSide.values)
-      //      {
-      //         LogTools.info((wrench.get(side).toString()));
-      //      }
+//       TODO: check if this thing works
+      for (RobotSide side : RobotSide.values)
+      {
+         LogTools.info((wrench.get(side).toString()));
+      }
 
       for (RobotSide side : RobotSide.values)
       {
