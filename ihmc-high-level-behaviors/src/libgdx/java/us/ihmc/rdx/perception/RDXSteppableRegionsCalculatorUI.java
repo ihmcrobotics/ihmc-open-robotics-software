@@ -9,6 +9,7 @@ import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculationModule;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculator;
@@ -118,6 +119,7 @@ public class RDXSteppableRegionsCalculatorUI
       steppableRegionsCalculationModule.compute(heightMapData);
       drawRegions();
       steppableRegionGraphic.generateMeshesAsync(steppableRegionsCalculationModule.getSteppableRegions().get(0));
+      LogTools.info("Found " + steppableRegionsCalculationModule.getSteppableRegions().get(0).size() + " regions");
 
       wholeAlgorithmDurationStopwatch.suspend();
       wholeAlgorithmDuration.set(wholeAlgorithmDurationStopwatch.lapElapsed());

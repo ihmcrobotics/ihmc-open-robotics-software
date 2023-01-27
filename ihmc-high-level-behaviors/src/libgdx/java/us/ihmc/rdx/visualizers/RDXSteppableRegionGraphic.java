@@ -89,6 +89,7 @@ public class RDXSteppableRegionGraphic implements RenderableProvider
       HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(steppableRegion.getLocalHeightMap());
       heightMapMessage.setSequenceId(steppableRegion.getRegionId());
       gridMapGraphic.setInPaintHeight(inPaintHeight);
+      gridMapGraphic.colorFromHeight(false);
       gridMapGraphic.setRenderGroundCells(renderGroundCells);
       gridMapGraphic.setRenderGroundPlane(renderGroundPlane);
       gridMapGraphic.generateMeshes(heightMapMessage);

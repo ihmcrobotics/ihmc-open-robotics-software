@@ -32,8 +32,8 @@ float signed_distance_to_foot_polygon(global float* params, int2 foot_key, float
 {
     float2 vector_to_point = params[HEIGHT_MAP_RESOLUTION] * (float2) ((float) (query.x - foot_key.x), (float) (query.y - foot_key.y));
     float2 vector_in_foot_frame = rotate_vector(vector_to_point, -foot_yaw);
-    float x_outside = fabs(vector_in_foot_frame.x) - params[FOOT_WIDTH];
-    float y_outside = fabs(vector_in_foot_frame.y) - params[FOOT_LENGTH];
+    float x_outside = fabs(vector_in_foot_frame.x) - params[FOOT_LENGTH];
+    float y_outside = fabs(vector_in_foot_frame.y) - params[FOOT_WIDTH];
 
     if (x_outside > 0.0f && y_outside > 0.0f)
     {
