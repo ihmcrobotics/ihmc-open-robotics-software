@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import imgui.type.ImString;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.JavaCV;
 import org.bytedeco.opencv.global.opencv_calib3d;
@@ -17,6 +18,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.logging.HDF5ImageBrowser;
 import us.ihmc.rdx.logging.HDF5ImageLogging;
@@ -29,6 +31,10 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.function.Consumer;
 
+/**
+ * Official OpenCV camera calibration tutorial:
+ * https://docs.opencv.org/4.x/d4/d94/tutorial_camera_calibration.html
+ */
 public class BlackflyCalibrationSuite
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
@@ -77,6 +83,8 @@ public class BlackflyCalibrationSuite
    private final ImDouble cyGuess = new ImDouble(BFLY_U3_23S6C_HEIGHT_PIXELS / 2.0);
    private final MatVector estimatedRotationVectors = new MatVector();
    private final MatVector estimatedTranslationVectors = new MatVector();
+   private double averageReprojectionError = Double.NaN;
+   private final ImString cameraMatrixString = new ImString();
 
    public BlackflyCalibrationSuite()
    {
@@ -229,6 +237,15 @@ public class BlackflyCalibrationSuite
          ThreadTools.startAsDaemon(this::calibrate, "Calibration");
       }
       ImGui.endDisabled();
+
+      if (!Double.isNaN(averageReprojectionError))
+      {
+         ImGui.text("Average reprojection error: %.5f".formatted(averageReprojectionError));
+         ImGuiTools.previousWidgetTooltip("This number (rms) should be as close to zero as possible.");
+      }
+
+      // TODO: Make widgets for adjusting the matrix and coeffs
+      //   These should affect the live undistorted preview
    }
 
    private void findCornersOrCentersAsync()
@@ -241,7 +258,6 @@ public class BlackflyCalibrationSuite
 
          for (int i = 0; i < calibrationSourceImages.size(); i++)
          {
-            LogTools.info("Finding corners for image {}...", i);
             CalibrationPatternType pattern = calibrationPatternDetectionUI.getPatternType();
             int patternWidth = calibrationPatternDetectionUI.getPatternWidth();
             int patternHeight = calibrationPatternDetectionUI.getPatternHeight();
@@ -265,7 +281,7 @@ public class BlackflyCalibrationSuite
                                                              opencv_calib3d.CALIB_CB_SYMMETRIC_GRID,
                                                              simpleBlobDetector);
             }
-            LogTools.info("Found: {}", patternFound);
+            LogTools.info("Found corners for image {}: {}", i, patternFound);
             cornersOrCentersMatVector.push_back(cornersOrCentersMat);
 
             Point2fVector cornersOrCenters = new Point2fVector();
@@ -357,19 +373,36 @@ public class BlackflyCalibrationSuite
 
       // Here we use the cv::fisheye version
       // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#gad626a78de2b1dae7489e152a5a5a89e1
-      opencv_calib3d.calibrate(objectPointsMatVector,
-                               imagePointsMatVector,
-                               imageSize,
-                               cameraMatrix,
-                               distortionCoefficients,
-                               estimatedRotationVectors,
-                               estimatedTranslationVectors,
-                               flags,
-                               terminationCriteria);
+      averageReprojectionError = opencv_calib3d.calibrate(objectPointsMatVector,
+                                                          imagePointsMatVector,
+                                                          imageSize,
+                                                          cameraMatrix,
+                                                          distortionCoefficients,
+                                                          estimatedRotationVectors,
+                                                          estimatedTranslationVectors,
+                                                          flags,
+                                                          terminationCriteria);
 
       LogTools.info("Calibration complete!");
       LogTools.info("Number of estimated rotation vectors: {}", estimatedRotationVectors.size());
       LogTools.info("Number of estimated translation vectors: {}", estimatedTranslationVectors.size());
+
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("Camera matrix:\n");
+      for (int row = 0; row < 3; row++)
+      {
+         for (int col = 0; col < 3; col++)
+         {
+            stringBuilder.append("%.5f".formatted(cameraMatrix.ptr(row, col).getDouble()) + " ");
+         }
+         stringBuilder.append("\n");
+      }
+      LogTools.info(stringBuilder.toString());
+
+      LogTools.info("Distortion coefficients: %.5f %.5f %.5f %.5f".formatted(distortionCoefficients.ptr(0, 0).getDouble(),
+                                                                             distortionCoefficients.ptr(0, 1).getDouble(),
+                                                                             distortionCoefficients.ptr(0, 2).getDouble(),
+                                                                             distortionCoefficients.ptr(0, 3).getDouble()));
    }
 
    public static void main(String[] args)
