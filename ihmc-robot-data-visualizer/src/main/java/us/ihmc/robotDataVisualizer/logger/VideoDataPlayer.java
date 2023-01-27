@@ -337,9 +337,12 @@ public class VideoDataPlayer
       camera.setName("test");
       camera.setInterlaced(false);
       camera.setTimestampFile("Spying-On-Dex_Timestamps.dat");
-      camera.setVideoFile("spying-On-Dex_Video.mov");
+//      camera.setTimestampFile("recordedVideoNoShowVideo.dat");
+//      camera.setVideoFile("recordedVideo.mov");
+      camera.setVideoFile("Spying-On-Dex_Video.mov");
 
-      File dataDirectory = new File("C:/Users/nkitchel/robotLogs/20230127_141043_HeyAtLeastEveryThingIsBeingSavedCorrectly");
+      File dataDirectory = new File("C:/Users/nkitchel/robotLogs/20230127_145414_SlackChannelsAreDumb/");
+//      File dataDirectory = new File("C:/Users/nkitchel/Workspaces/Security-Camera/repository-group/ihmc-robot-data-logger/src/test/resources");
 //      File dataDirectory = new File("C:/Users/nkitchel/Documents/security-camera/repository-group/ihmc-video-codecs/src/test/resources/");
 
       VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, true);
