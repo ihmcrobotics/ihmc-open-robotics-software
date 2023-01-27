@@ -4,7 +4,8 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import us.ihmc.bytedeco.mapsenseWrapper.MapsenseWrapperNativeLibrary;
+import us.ihmc.perception.visualOdometry.VisualOdometryNativeLibrary;
+import us.ihmc.perception.zedDriver.ZEDOpenDriverNativeLibrary;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
@@ -13,7 +14,6 @@ import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 import us.ihmc.tools.thread.Activator;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -158,36 +158,14 @@ public class BytedecoTools
       }
    }
 
-   public static void loadMapsenseLibraries()
+   public static void loadMapsenseNative()
    {
-      // We need to disable javacpp from trying to automatically load libraries.
-      // Otherwise, it will try to load them by name when they aren't in the library path
-      // (LD_LIBRARY_PATH on Linux).
-      //
-      // The approach taken here is to use System.load to load each library by explicit
-      // absolute path on disk.
-      System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
-
-      List<String> libraryFiles = new ArrayList<>();
-
-      // Load these libraries before laoding the wrapper JNI .so. Use ldd to list all necessary libs
-      // and copy them.
-      libraryFiles.add("libvisual-odometry.so");
-      libraryFiles.add("libjniVisualOdometry.so");
-
-      WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-perception/src/mapsense-wrapper/resources");
-      for (String libraryFile : libraryFiles)
-      {
-         WorkspaceFile file = new WorkspaceFile(resourcesDirectory, libraryFile);
-         String filePath = file.getFilePath().toAbsolutePath().normalize().toString();
-         System.out.println("Loading: " + filePath);
-         System.load(filePath);
-      }
+      VisualOdometryNativeLibrary.load();
    }
 
-   public static void loadMapsense()
+   public static void loadZEDDriverNative()
    {
-      MapsenseWrapperNativeLibrary.load();
+      ZEDOpenDriverNativeLibrary.load();
    }
 
    public static String stringFromByteBuffer(BytePointer bytePointerWithString)

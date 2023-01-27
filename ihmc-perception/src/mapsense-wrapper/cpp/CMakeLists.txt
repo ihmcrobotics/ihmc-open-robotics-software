@@ -15,6 +15,7 @@ set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation direc
 set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
 
 message("* Video module available")
+add_definitions(-DSENSORS_MOD_AVAILABLE)
 add_definitions(-DVIDEO_MOD_AVAILABLE)
 
 find_package(LIBUSB 1 REQUIRED)
@@ -27,6 +28,8 @@ set(DEP_LIBS ${DEP_LIBS}
      ${LibUSB_LIBRARIES}
 )
 
+
+find_package(HIDAPI REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE)
 
@@ -64,6 +67,21 @@ set(MS_SOURCES
     tools/opencv_tools.cpp
 )
 
+set(ZOD_SOURCES
+
+    external/zed_open_driver_external.h
+    external/zed_open_driver_external.cpp
+
+    drivers/zed_open_driver.h
+    drivers/zed_open_driver.cpp
+
+    drivers/defines.hpp
+    drivers/sensorcapture_def.hpp
+    drivers/sensorcapture.hpp
+    drivers/videocapture_def.hpp
+    drivers/videocapture.hpp
+)
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++  Visual Odometry ++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -98,16 +116,15 @@ install(FILES ${MS_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-add_library(zed-driver SHARED drivers/zed_open_driver.cpp)
+add_library(zed-driver SHARED ${ZOD_SOURCES})
 
 target_link_libraries(zed-driver
-    ${OpenCV_LIBS}
     zed_open_capture
 )
 
 target_include_directories(zed-driver PUBLIC
      /usr/include/
-     ${OpenCV_INCLUDE_DIRS}
+     /usr/include/hidapi/
      drivers/
      launcher/
      external/
@@ -116,7 +133,9 @@ target_include_directories(zed-driver PUBLIC
 install(TARGETS zed-driver
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-install(FILES ${MS_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
+install(FILES ${ZOD_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
+target_compile_definitions(zed-driver PUBLIC -DVIDEO_MOD_AVAILABLE=1)
+target_compile_definitions(zed-driver PUBLIC -DSENSORS_MOD_AVAILABLE=1)
 
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -139,12 +158,14 @@ target_include_directories(VisualOdometryNativeDemoLauncher PUBLIC
 # ZED Player
 add_executable(ZEDPlayer launcher/zed_player.cpp)
 target_link_libraries(ZEDPlayer
+    ${OpenCV_LIBS}
     zed-driver
 )
 target_include_directories(ZEDPlayer PUBLIC
     /usr/include/
     launcher/
     drivers/
+    ${OpenCV_INCLUDE_DIRS}
 )
 
 

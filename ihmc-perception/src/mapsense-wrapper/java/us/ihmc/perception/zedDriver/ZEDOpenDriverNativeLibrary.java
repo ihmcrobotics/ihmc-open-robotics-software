@@ -1,11 +1,11 @@
-package us.ihmc.bytedeco.mapsenseWrapper;
+package us.ihmc.perception.zedDriver;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryDescription;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 import us.ihmc.tools.nativelibraries.NativeLibraryWithDependencies;
 
-public class MapsenseWrapperNativeLibrary implements NativeLibraryDescription
+public class ZEDOpenDriverNativeLibrary implements NativeLibraryDescription
 {
    @Override
    public String getPackage(OperatingSystem os, Architecture arch)
@@ -21,7 +21,7 @@ public class MapsenseWrapperNativeLibrary implements NativeLibraryDescription
                };
       }
 
-      return "mapsenseWrapper." + archPackage;
+      return "zedDriver." + archPackage;
    }
 
    @Override
@@ -32,8 +32,8 @@ public class MapsenseWrapperNativeLibrary implements NativeLibraryDescription
          // TODO: Windows support
          case LINUX64:
 
-            return NativeLibraryWithDependencies.fromFilename("libvisual-odometry.so",
-                                                              "libjniVisualOdometry.so");
+            return NativeLibraryWithDependencies.fromFilename("libzed-driver.so",
+                                                              "libjniZEDOpenDriver.so");
          default:
             break;
       }
@@ -49,8 +49,8 @@ public class MapsenseWrapperNativeLibrary implements NativeLibraryDescription
    {
       if (!loaded)
       {
-         MapsenseWrapperNativeLibrary mapsenseWrapperNativeLibrary = new MapsenseWrapperNativeLibrary();
-         loaded = NativeLibraryLoader.loadLibrary(mapsenseWrapperNativeLibrary);
+         ZEDOpenDriverNativeLibrary zedWrapperNativeLibrary = new ZEDOpenDriverNativeLibrary();
+         loaded = NativeLibraryLoader.loadLibrary(zedWrapperNativeLibrary);
       }
       return loaded;
    }

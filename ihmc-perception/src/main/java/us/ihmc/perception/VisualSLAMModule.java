@@ -1,7 +1,7 @@
 package us.ihmc.perception;
 
 import org.apache.commons.lang.ArrayUtils;
-import us.ihmc.bytedeco.mapsenseWrapper.VisualOdometry;
+import us.ihmc.perception.visualOdometry.VisualOdometry;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,15 +12,14 @@ import us.ihmc.perception.elements.CameraModel;
 import us.ihmc.perception.elements.Keyframe;
 import us.ihmc.perception.elements.Landmark;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
-import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 
 import java.util.*;
 
 public class VisualSLAMModule
 {
-   public static final int MAX_LANDMARKS = 500;
-   public static final int NUMBER_OF_FEATURES = 800;
-   public static final int MIN_NUM_FEATURES = 600;
+   public static final int MAX_LANDMARKS = 400;
+   public static final int NUMBER_OF_FEATURES = 400;
+   public static final int MIN_NUM_FEATURES = 350;
 
    private final VisualOdometry.VisualOdometryExternal visualOdometryExternal;
    private final SlamWrapper.FactorGraphExternal factorGraphExternal;
@@ -35,10 +34,10 @@ public class VisualSLAMModule
 
    public VisualSLAMModule()
    {
-      BytedecoTools.loadMapsenseLibraries();
+      BytedecoTools.loadMapsenseNative();
       visualOdometryExternal = new VisualOdometry.VisualOdometryExternal(NUMBER_OF_FEATURES, MIN_NUM_FEATURES);
 
-      SlamWrapperNativeLibrary.load();
+      BytedecoTools.loadSlamWrapper();
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
       float[] poseInitial = new float[] {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};

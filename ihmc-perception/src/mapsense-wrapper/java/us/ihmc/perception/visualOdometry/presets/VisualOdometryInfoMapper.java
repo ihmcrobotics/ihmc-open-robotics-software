@@ -1,4 +1,4 @@
-package us.ihmc.bytedeco.mapsenseWrapper.presets;
+package us.ihmc.perception.visualOdometry.presets;
 
 import org.bytedeco.javacpp.annotation.*;
 import org.bytedeco.javacpp.tools.*;
@@ -12,7 +12,7 @@ import org.bytedeco.javacpp.tools.*;
             include = {"include/visual_odometry_external.h"},
             link = {"visual-odometry"}
       ),
-      target = "us.ihmc.bytedeco.mapsenseWrapper.VisualOdometry"
+      target = "us.ihmc.perception.visualOdometry.VisualOdometry"
 )
 public class VisualOdometryInfoMapper implements InfoMapper
 {

@@ -29,6 +29,9 @@
 #include <vector>
 #include <chrono>
 
+#define SENSORS_MOD_AVAILABLE 1
+#define VIDEO_MOD_AVAILABLE 1
+
 #if defined _WIN32
 #if defined(SL_OC_COMPIL)
 #define SL_OC_EXPORT __declspec(dllexport)
