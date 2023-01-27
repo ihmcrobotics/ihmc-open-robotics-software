@@ -43,7 +43,7 @@ public class RDXGridMapGraphic implements RenderableProvider
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    private boolean colorFromHeight = true;
-   private boolean inPaintHeight = false;
+   private boolean inPaintHeight = true;
    private boolean renderGroundCells = false;
    private boolean renderGroundPlane = false;
 

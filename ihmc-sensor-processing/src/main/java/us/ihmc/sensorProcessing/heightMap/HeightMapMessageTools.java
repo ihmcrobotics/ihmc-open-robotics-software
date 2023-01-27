@@ -37,7 +37,7 @@ public class HeightMapMessageTools
       {
          int key = heightMapData.getKey(i);
          message.getKeys().add(key);
-         message.getHeights().add((float) heightMapData.getHeightAt(i));
+         message.getHeights().add((float) heightMapData.getHeightAt(key));
       }
 
       return message;

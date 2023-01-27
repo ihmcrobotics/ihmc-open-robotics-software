@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -89,10 +90,10 @@ public class SteppableRegionsCalculator
       double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
       double lengthThreshold = polygonizerParameters.getLengthThreshold();
 
-//      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
-//      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
-//      if (polygonizerParameters.getCutNarrowPassage())
-//         concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
+      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
+      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
+      if (polygonizerParameters.getCutNarrowPassage())
+         concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
 
       return createSteppableRegions(centroid, orientation, concaveHullCollection, heightMapData, regionDataHolder);
    }
@@ -123,14 +124,16 @@ public class SteppableRegionsCalculator
       double resolution = heightMapData.getGridResolutionXY();
       int xWidth = regionDataHolder.getMaxX() - regionDataHolder.getMinX();
       int yWidth = regionDataHolder.getMaxY() - regionDataHolder.getMinY();
-      double width = Math.max(xWidth, yWidth) * resolution;
 
       HeightMapData regionHeightMap = new HeightMapData(resolution, heightMapData.getGridSizeXY(), heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY());
 
       for (SteppableCell cell : regionDataHolder.getCells())
       {
          int key = HeightMapTools.indicesToKey(cell.x, cell.y, heightMapData.getCenterIndex());
-         regionHeightMap.setHeightAt(key, cell.getZ());
+         double height = heightMapData.getHeightAt(key);
+         if (Double.isNaN(height))
+            LogTools.info("shit");
+         regionHeightMap.setHeightAt(key, height);//cell.getZ());
       }
 
       return regionHeightMap;
