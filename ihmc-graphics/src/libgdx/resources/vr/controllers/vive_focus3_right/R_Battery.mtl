@@ -1,0 +1,22 @@
+newmtl __CM__BatterySG
+illum 4
+Kd 0.80 0.80 0.80
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl __CM__BodySG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd Controller_Focus3_PC_Albedo.png
+Ni 1.00
+Ks 0.00 0.00 0.00
+map_Ks Controller_Focus3_PC_Specular.png
+Ns 8.27
+newmtl __CM__EmitterSG
+illum 4
+Kd 0.64 0.64 0.64
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00

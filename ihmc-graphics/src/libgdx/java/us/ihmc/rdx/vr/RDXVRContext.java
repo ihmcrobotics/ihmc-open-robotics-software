@@ -2,6 +2,8 @@ package us.ihmc.rdx.vr;
 
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.*;
@@ -9,13 +11,11 @@ import java.util.function.Consumer;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.*;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
 
-import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -26,6 +26,7 @@ import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
@@ -87,6 +88,7 @@ public class RDXVRContext
                                                                            teleportFrameIHMCZUp,
                                                                            openVRYUpToIHMCZUpSpace);
 
+   private String controllerModel;
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
@@ -119,6 +121,19 @@ public class RDXVRContext
 
       WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-graphics/src/libgdx/resources", getClass(), "/vr");
       WorkspaceFile actionManifestFile = new WorkspaceFile(directory, "actions.json");
+      JSONFileTools.load(actionManifestFile,
+                                      node ->
+                                      {
+                                         JsonNode modelVR = node.get("default_bindings").get("binding_url");
+                                         if (modelVR != null)
+                                         {
+                                            controllerModel = modelVR.asText();
+                                            int indexTail = controllerModel.lastIndexOf("_");
+                                            controllerModel = controllerModel.substring(0,indexTail-1);
+                                         }
+                                      });
+      LogTools.info(controllerModel);
+
       VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilePath().toString());
 
       VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
@@ -134,7 +149,7 @@ public class RDXVRContext
       activeActionSets.ulRestrictedToDevice(VR.k_ulInvalidInputValueHandle);
    }
 
-   /** Needs to be on libGDX thread. */
+                                      /** Needs to be on libGDX thread. */
    public void setupEyes()
    {
       LogTools.info("VR per eye render size: {} x {}", width, height);

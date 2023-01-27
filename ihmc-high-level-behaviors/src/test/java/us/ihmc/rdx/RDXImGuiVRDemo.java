@@ -6,6 +6,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
+import org.lwjgl.openvr.InputAnalogActionData;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -29,12 +32,33 @@ public class RDXImGuiVRDemo
    private RDXReferenceFrameGraphic leftEyeZBackFrameGraphic;
    private RDXReferenceFrameGraphic rightEyeZUpFrameGraphic;
    private RDXReferenceFrameGraphic rightEyeZBackFrameGraphic;
-   private final ImBoolean showXForwardZUp = new ImBoolean(true);
+   private final ImBoolean showXForwardZUp = new ImBoolean(false);
    private final ImBoolean showXRightZBack = new ImBoolean(true);
-   private final ImBoolean showLeftEyeZUpFrame = new ImBoolean(true);
-   private final ImBoolean showLeftEyeZBackFrame = new ImBoolean(true);
-   private final ImBoolean showRightEyeZUpFrame = new ImBoolean(true);
-   private final ImBoolean showRightEyeZBackFrame = new ImBoolean(true);
+   private final ImBoolean showLeftEyeZUpFrame = new ImBoolean(false);
+   private final ImBoolean showLeftEyeZBackFrame = new ImBoolean(false);
+   private final ImBoolean showRightEyeZUpFrame = new ImBoolean(false);
+   private final ImBoolean showRightEyeZBackFrame = new ImBoolean(false);
+
+   private InputDigitalActionData aButton;
+   private InputDigitalActionData bButton;
+   private InputDigitalActionData xButton;
+   private InputDigitalActionData yButton;
+
+   private InputDigitalActionData leftJoystick;
+   private InputDigitalActionData rightJoystick;
+   private InputDigitalActionData leftTrigger;
+   private InputDigitalActionData rightTrigger;
+
+   private final ImFloat leftForwardJoystickValue = new ImFloat();
+   private final ImFloat leftLateralJoystickValue = new ImFloat();
+   private final ImFloat rightForwardJoystickValue = new ImFloat();
+   private final ImFloat rightLateralJoystickValue = new ImFloat();
+   private final ImFloat leftGripValue = new ImFloat();
+   private final ImFloat rightGripValue = new ImFloat();
+   private final ImFloat leftTriggerValue = new ImFloat();
+   private final ImFloat rightTriggerValue = new ImFloat();
+
+
 
    public RDXImGuiVRDemo()
    {
@@ -76,6 +100,30 @@ public class RDXImGuiVRDemo
             leftEyeZBackFrameGraphic.setToReferenceFrame(vrContext.getEyes().get(RobotSide.LEFT).getEyeXRightZBackFrame());
             rightEyeZUpFrameGraphic.setToReferenceFrame(vrContext.getEyes().get(RobotSide.RIGHT).getEyeXForwardZUpFrame());
             rightEyeZBackFrameGraphic.setToReferenceFrame(vrContext.getEyes().get(RobotSide.RIGHT).getEyeXRightZBackFrame());
+
+            vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
+                                                                   {
+                                                                      xButton = controller.getXButtonActionData();
+                                                                      yButton = controller.getYButtonActionData();
+                                                                      leftJoystick = controller.getJoystickPressActionData();
+                                                                      leftForwardJoystickValue.set(controller.getJoystickActionData().y());
+                                                                      leftLateralJoystickValue.set(-controller.getJoystickActionData().x());
+                                                                      leftGripValue.set(controller.getGripActionData().x());
+                                                                      leftTriggerValue.set(controller.getTriggerActionData().x());
+                                                                      leftTrigger = controller.getClickTriggerActionData();
+                                                                   });
+            vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+                                                                   {
+                                                                      aButton = controller.getAButtonActionData();
+                                                                      bButton = controller.getBButtonActionData();
+                                                                      rightJoystick = controller.getJoystickPressActionData();
+                                                                      rightForwardJoystickValue.set(controller.getJoystickActionData().y());
+                                                                      rightLateralJoystickValue.set(-controller.getJoystickActionData().x());
+                                                                      rightGripValue.set(controller.getGripActionData().x());
+                                                                      rightTriggerValue.set(controller.getTriggerActionData().x());
+                                                                      rightTrigger = controller.getClickTriggerActionData();
+                                                                   });
+
          }
 
          @Override
@@ -93,6 +141,24 @@ public class RDXImGuiVRDemo
             ImGui.checkbox("Show Left Eye ZBack Frame", showLeftEyeZBackFrame);
             ImGui.checkbox("Show Right Eye ZUp Frame", showRightEyeZUpFrame);
             ImGui.checkbox("Show Right Eye ZBack Frame", showRightEyeZBackFrame);
+
+            ImGui.checkbox("X button pressed", xButton.bState());
+            ImGui.checkbox("Y button pressed", yButton.bState());
+            ImGui.checkbox("Left Joystick pressed", leftJoystick.bState());
+            ImGui.inputFloat("Left Joystick forward", leftForwardJoystickValue);
+            ImGui.inputFloat("Left Joystick lateral", leftLateralJoystickValue);
+            ImGui.checkbox("Left Trigger pressed", leftTrigger.bState());
+            ImGui.inputFloat("Left Trigger", leftTriggerValue);
+            ImGui.inputFloat("Left Grip", leftGripValue);
+
+            ImGui.checkbox("A button pressed", aButton.bState());
+            ImGui.checkbox("B button pressed", bButton.bState());
+            ImGui.checkbox("Right Joystick pressed", rightJoystick.bState());
+            ImGui.inputFloat("Right Joystick forward", rightForwardJoystickValue);
+            ImGui.inputFloat("Right Joystick lateral", rightLateralJoystickValue);
+            ImGui.checkbox("Right Trigger pressed", rightTrigger.bState());
+            ImGui.inputFloat("Right Trigger", rightTriggerValue);
+            ImGui.inputFloat("Right Grip", rightGripValue);
          }
 
          private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

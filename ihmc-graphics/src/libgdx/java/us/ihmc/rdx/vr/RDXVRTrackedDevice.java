@@ -10,7 +10,10 @@ import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelLoader;
+import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.nio.IntBuffer;
 
@@ -50,7 +53,18 @@ public abstract class RDXVRTrackedDevice
                String renderModelName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
                                                                                          VR.ETrackedDeviceProperty_Prop_RenderModelName_String,
                                                                                          errorCode);
-               Model model = RDXVRModelLoader.loadRenderModel(renderModelName);
+               Model model = new Model();
+               if (renderModelName.contains("{htc_business_streaming}")) // vive focus 3 controller render models are not supported in open vr
+               {
+                  String configurationFile = "vr\\controllers\\";
+                  if (renderModelName.contains("left"))
+                     configurationFile += "vive_focus3_left\\Focus3_controller_left.g3dj";
+                  else if (renderModelName.contains("right"))
+                     configurationFile += "vive_focus3_right\\Focus3_controller_right.g3dj";
+                  model = RDXModelLoader.load(configurationFile);
+               }
+               else
+                  model = RDXVRModelLoader.loadRenderModel(renderModelName);
                modelInstance = model != null ? new ModelInstance(model) : null;
             }
 
