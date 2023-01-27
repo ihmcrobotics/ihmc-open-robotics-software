@@ -85,8 +85,7 @@ public class RDXVRContext
          = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
                                                                            teleportFrameIHMCZUp,
                                                                            openVRYUpToIHMCZUpSpace);
-
-   private String controllerModel;
+   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
@@ -124,10 +123,12 @@ public class RDXVRContext
          for (Iterator<JsonNode> it = node.withArray("default_bindings").elements(); it.hasNext(); )
          {
             JsonNode objectNode = it.next();
-            controllerModel = objectNode.get("binding_url").asText();
+            String controllerBindings = objectNode.get("binding_url").asText();
+            if (controllerBindings.contains("focus3"))
+               controllerModel = RDXVRControllerModel.FOCUS3;
+            else
+               controllerModel = RDXVRControllerModel.INDEX;
          }
-         int indexTail = controllerModel.lastIndexOf("_");
-         controllerModel = controllerModel.substring(0, indexTail);
       });
       LogTools.info("Using VR controller model: {}", controllerModel);
       VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilePath().toString());
@@ -371,7 +372,7 @@ public class RDXVRContext
       return selectedPick;
    }
 
-   public String getControllerModel()
+   public RDXVRControllerModel getControllerModel()
    {
       return controllerModel;
    }
