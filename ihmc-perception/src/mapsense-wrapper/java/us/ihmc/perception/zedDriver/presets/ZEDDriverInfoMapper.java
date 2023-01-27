@@ -12,7 +12,8 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             resourcepath = "../",
             linkpath = "../",
             include = {"include/zed_open_driver_external.h"},
-            link = {"zed-driver"}
+            link = {"zed-driver"},
+            preload = {"zed-driver", "jniZEDOpenDriver"}
       ),
       target = "us.ihmc.perception.zedDriver.ZEDOpenDriver"
 )

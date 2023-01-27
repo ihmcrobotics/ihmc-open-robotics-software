@@ -5,7 +5,7 @@ import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.perception.visualOdometry.VisualOdometryNativeLibrary;
-import us.ihmc.perception.zedDriver.ZEDOpenDriverNativeLibrary;
+import us.ihmc.perception.zedDriver.ZedDriverNativeLibrary;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
@@ -165,7 +165,7 @@ public class BytedecoTools
 
    public static void loadZEDDriverNative()
    {
-      ZEDOpenDriverNativeLibrary.load();
+      ZedDriverNativeLibrary.load();
    }
 
    public static String stringFromByteBuffer(BytePointer bytePointerWithString)

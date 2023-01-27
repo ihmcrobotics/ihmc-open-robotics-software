@@ -56,6 +56,7 @@ public class SlamWrapperNativeLibrary implements NativeLibraryDescription
       if (!loaded)
       {
          SlamWrapperNativeLibrary slamWrapperNativeLibrary = new SlamWrapperNativeLibrary();
+         LogTools.info("Package Name: {}", slamWrapperNativeLibrary.getPackage(OperatingSystem.LINUX64, Architecture.x64));
          loaded = NativeLibraryLoader.loadLibrary(slamWrapperNativeLibrary);
       }
       return loaded;

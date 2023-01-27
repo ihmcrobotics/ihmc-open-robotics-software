@@ -5,7 +5,7 @@ import us.ihmc.tools.nativelibraries.NativeLibraryDescription;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 import us.ihmc.tools.nativelibraries.NativeLibraryWithDependencies;
 
-public class ZEDOpenDriverNativeLibrary implements NativeLibraryDescription
+public class ZedDriverNativeLibrary implements NativeLibraryDescription
 {
    @Override
    public String getPackage(OperatingSystem os, Architecture arch)
@@ -32,8 +32,7 @@ public class ZEDOpenDriverNativeLibrary implements NativeLibraryDescription
          // TODO: Windows support
          case LINUX64:
 
-            return NativeLibraryWithDependencies.fromFilename("libzed-driver.so",
-                                                              "libjniZEDOpenDriver.so");
+            return NativeLibraryWithDependencies.fromFilename("libjniZEDOpenDriver.so","libzed-driver.so");
          default:
             break;
       }
@@ -49,7 +48,7 @@ public class ZEDOpenDriverNativeLibrary implements NativeLibraryDescription
    {
       if (!loaded)
       {
-         ZEDOpenDriverNativeLibrary zedWrapperNativeLibrary = new ZEDOpenDriverNativeLibrary();
+         ZedDriverNativeLibrary zedWrapperNativeLibrary = new ZedDriverNativeLibrary();
          loaded = NativeLibraryLoader.loadLibrary(zedWrapperNativeLibrary);
       }
       return loaded;

@@ -16,7 +16,7 @@ ihmc {
    configureDependencyResolution()
    javaDirectory("main", "generated-java")
    javaDirectory("slam-wrapper", "generated-java")
-   javaDirectory("visual-odometry", "generated-java")
+   javaDirectory("mapsense-wrapper", "generated-java")
    configurePublications()
 }
 
@@ -49,8 +49,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-perception-visual-odometry:source")
-   api("us.ihmc:ihmc-perception-slam-wrapper:source")
+   api("us.ihmc:ihmc-perception-mapsense-wrapper:source")
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:ihmc-perception-slam-wrapper:source")
    apiBytedecoNatives("hdf5", "1.12.2-")
@@ -78,7 +77,7 @@ slamWrapperDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
 }
 
-visualOdometryDependencies {
+mapsenseWrapperDependencies {
    apiBytedecoNatives("javacpp")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-perception:source")

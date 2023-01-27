@@ -10,7 +10,8 @@ import org.bytedeco.javacpp.tools.*;
             resourcepath = "../",
             linkpath = "../",
             include = {"include/visual_odometry_external.h"},
-            link = {"visual-odometry"}
+            link = {"visual-odometry"},
+            preload = {"visual-odometry", "jniVisualOdometry"}
       ),
       target = "us.ihmc.perception.visualOdometry.VisualOdometry"
 )

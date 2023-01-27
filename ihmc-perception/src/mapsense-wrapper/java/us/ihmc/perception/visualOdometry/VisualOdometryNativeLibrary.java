@@ -32,8 +32,7 @@ public class VisualOdometryNativeLibrary implements NativeLibraryDescription
          // TODO: Windows support
          case LINUX64:
 
-            return NativeLibraryWithDependencies.fromFilename("libvisual-odometry.so",
-                                                              "libjniVisualOdometry.so");
+            return NativeLibraryWithDependencies.fromFilename("libjniVisualOdometry.so","libvisual-odometry.so");
          default:
             break;
       }
@@ -50,6 +49,9 @@ public class VisualOdometryNativeLibrary implements NativeLibraryDescription
       if (!loaded)
       {
          VisualOdometryNativeLibrary visualOdometryNativeLibrary = new VisualOdometryNativeLibrary();
+         LogTools.info("Package Name: {}", visualOdometryNativeLibrary.getPackage(OperatingSystem.LINUX64, Architecture.x64));
+
+
          loaded = NativeLibraryLoader.loadLibrary(visualOdometryNativeLibrary);
       }
       return loaded;
