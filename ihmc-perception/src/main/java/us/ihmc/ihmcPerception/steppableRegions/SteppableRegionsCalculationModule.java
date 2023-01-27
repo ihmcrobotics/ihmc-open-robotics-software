@@ -168,6 +168,7 @@ public class SteppableRegionsCalculationModule
                steppabilityImages.get(yawValue),
                snapHeightImages.get(yawValue),
                steppabilityConnections.get(yawValue));
+         polygonizerParameters.setLengthThreshold(0.4 * heightMapData.getGridResolutionXY()); // this is critical to prevent it from filtering small regions
          List<SteppableRegion> regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
                                                                                            polygonizerParameters,
                                                                                            environment,
