@@ -36,7 +36,7 @@ import java.util.function.Consumer;
  *    by pattern matching what's here
  *
  * It's possible to do this for multiple types of controllers.
- * Currently, we have mappings for Valve Index, Oculus Touch 2 and Vive Cosmos (Focus 3) controllers.
+ * Currently, we have mappings for Valve Index, Oculus Touch 2 and Vive Focus 3 controllers.
  * You can change the default bindings in actions.json to select the right one for the controller you're using.
  */
 public class RDXVRController extends RDXVRTrackedDevice

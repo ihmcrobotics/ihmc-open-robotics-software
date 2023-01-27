@@ -157,7 +157,7 @@ public class RDXVRHandPlacedFootstepMode
    public void renderImGuiWidgets()
    {
       ImGui.text("Footstep placement: Hold and release respective trigger");
-      if (controllerModel.equals("vive_cosmos"))
+      if (controllerModel.equals("vive_focus3"))
       {
          ImGui.text("Clear footsteps: Y button");
          ImGui.text("Walk: A button");

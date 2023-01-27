@@ -56,12 +56,12 @@ public abstract class RDXVRTrackedDevice
                Model model = new Model();
                if (renderModelName.contains("{htc_business_streaming}")) // vive focus 3 controller render models are not supported in open vr
                {
-                  String configurationFile = "vr\\controllers\\";
+                  String modelFile = "vr/controllers/";
                   if (renderModelName.contains("left"))
-                     configurationFile += "vive_focus3_left\\Focus3_controller_left.g3dj";
+                     modelFile += "vive_focus3_left/Focus3_controller_left.g3dj";
                   else if (renderModelName.contains("right"))
-                     configurationFile += "vive_focus3_right\\Focus3_controller_right.g3dj";
-                  model = RDXModelLoader.load(configurationFile);
+                     modelFile += "vive_focus3_right/Focus3_controller_right.g3dj";
+                  model = RDXModelLoader.load(modelFile);
                }
                else
                   model = RDXVRModelLoader.loadRenderModel(renderModelName);
