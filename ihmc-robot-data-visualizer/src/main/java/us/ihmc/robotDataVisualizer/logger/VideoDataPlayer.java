@@ -307,6 +307,8 @@ public class VideoDataPlayer
             @Override
             public void run()
             {
+               if (nextFrame == null)
+                  return;
                img = converter.toBufferedImage(nextFrame, img);
                nextFrame.delete();
                ImageIcon icon = new ImageIcon(img);
@@ -329,15 +331,15 @@ public class VideoDataPlayer
       return name;
    }
 
-   public static void main(String[] args) throws IOException
+   public static void main(String[] args) throws IOException, InterruptedException
    {
       Camera camera = new Camera();
       camera.setName("test");
       camera.setInterlaced(false);
-      camera.setTimestampFile("ValkyrieTripodNorth_Timestamps.dat");
-      camera.setVideoFile("screenRecording.mov");
+      camera.setTimestampFile("Spying-On-Dex_Timestamps.dat");
+      camera.setVideoFile("spying-On-Dex_Video.mov");
 
-      File dataDirectory = new File("C:/Users/nkitchel/Workspaces/Security-Camera/repository-group/ihmc-video-codecs/src/test/resources");
+      File dataDirectory = new File("C:/Users/nkitchel/robotLogs/20230127_141043_HeyAtLeastEveryThingIsBeingSavedCorrectly");
 //      File dataDirectory = new File("C:/Users/nkitchel/Documents/security-camera/repository-group/ihmc-video-codecs/src/test/resources/");
 
       VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, true);
@@ -364,7 +366,9 @@ public class VideoDataPlayer
       {
 
          player.showVideoFrame(player.robotTimestamps[i]);
+         Thread.sleep(10);
       }
+      System.out.println(player.robotTimestamps.length);
 
    }
 }
