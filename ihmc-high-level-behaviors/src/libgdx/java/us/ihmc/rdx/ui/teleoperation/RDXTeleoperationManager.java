@@ -5,8 +5,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
@@ -16,7 +14,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.behaviors.tools.ForceWrenchCalculator;
+import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
@@ -28,7 +26,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
@@ -55,7 +52,6 @@ import us.ihmc.tools.gui.YoAppearanceTools;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
@@ -108,8 +104,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
    private boolean isPlacingFootstep = false;
-
-   private final ForceWrenchCalculator forceWrenchCalculator;
 
    public RDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -176,8 +170,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                         ros2Helper,
                                         teleoperationParameters);
       }
-
-      this.forceWrenchCalculator = new ForceWrenchCalculator(syncedRobot);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -396,20 +388,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
          }
       }
       desiredRobot.setActive(!allAreDeleted);
-
-      forceWrenchCalculator.update();
-      SideDependentList<DMatrixRMaj> wrench = forceWrenchCalculator.getWrench();
-//       TODO: check if this thing works
-      for (RobotSide side : RobotSide.values)
-      {
-         LogTools.info((wrench.get(side).toString()));
-      }
-
-      for (RobotSide side : RobotSide.values)
-      {
-         DMatrixRMaj wrenchVector = forceWrenchCalculator.getWrench().get(side);
-         interactableHands.get(side).updateForceWrench(wrenchVector);
-      }
    }
 
    private void calculateVRPick(RDXVRContext vrContext)

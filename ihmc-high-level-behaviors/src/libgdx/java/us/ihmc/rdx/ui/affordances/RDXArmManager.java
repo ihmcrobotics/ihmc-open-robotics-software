@@ -3,11 +3,10 @@ package us.ihmc.rdx.ui.affordances;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import imgui.ImGui;
-import org.ejml.data.DMatrixRMaj;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.tools.ForceWrenchCalculator;
+import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -43,6 +42,8 @@ public class RDXArmManager
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
+   private final HandWrenchCalculator forceWrenchCalculator;
+
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
                         FullHumanoidRobotModel desiredRobot,
@@ -69,6 +70,8 @@ public class RDXArmManager
       }
       doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.713, -0.935, -0.873, 0.277});
       doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
+
+      forceWrenchCalculator = new HandWrenchCalculator(syncedRobot);
    }
 
    public void create()
@@ -85,9 +88,15 @@ public class RDXArmManager
    public void update(SideDependentList<RDXInteractableHand> interactableHands)
    {
       boolean desiredHandsChanged = false;
+
+      forceWrenchCalculator.update();
       for (RobotSide side : interactableHands.sides())
       {
          armManagers.get(side).update(interactableHands.get(side), desiredRobot);
+
+         // wrench expressed in wrist pitch body fixed-frame
+         interactableHands.get(side).updateForceWrench(forceWrenchCalculator.getWrenchLinear().get(side),
+                                                       forceWrenchCalculator.getWrenchAngular().get(side));
 
          // We only want to evaluate this when we are going to take action on it
          // Otherwise, we will not notice the desired changed while the solver was still solving
@@ -136,7 +145,6 @@ public class RDXArmManager
 
       // TODO Update the spine joints
       desiredRobot.getRootJoint().updateFramesRecursively();
-
    }
 
    public void renderImGuiWidgets()
