@@ -42,7 +42,7 @@ public class RDXArmManager
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
-   private final HandWrenchCalculator forceWrenchCalculator;
+   private final HandWrenchCalculator handWrenchCalculator;
 
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -71,7 +71,7 @@ public class RDXArmManager
       doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.713, -0.935, -0.873, 0.277});
       doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
 
-      forceWrenchCalculator = new HandWrenchCalculator(syncedRobot);
+      handWrenchCalculator = new HandWrenchCalculator(syncedRobot);
    }
 
    public void create()
@@ -89,14 +89,14 @@ public class RDXArmManager
    {
       boolean desiredHandsChanged = false;
 
-      forceWrenchCalculator.update();
+      handWrenchCalculator.update();
       for (RobotSide side : interactableHands.sides())
       {
          armManagers.get(side).update(interactableHands.get(side), desiredRobot);
 
          // wrench expressed in wrist pitch body fixed-frame
-         interactableHands.get(side).updateForceWrench(forceWrenchCalculator.getWrenchLinear().get(side),
-                                                       forceWrenchCalculator.getWrenchAngular().get(side));
+         interactableHands.get(side).updateForceWrench(handWrenchCalculator.getWrenchLinear().get(side),
+                                                       handWrenchCalculator.getWrenchAngular().get(side));
 
          // We only want to evaluate this when we are going to take action on it
          // Otherwise, we will not notice the desired changed while the solver was still solving
