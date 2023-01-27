@@ -227,7 +227,10 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/main/in/left_xbutton"
+                     "output" : "/actions/main/in/left_abutton"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/left_atouched"
                   }
                },
                "mode" : "button",
@@ -236,7 +239,10 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/main/in/left_ybutton"
+                     "output" : "/actions/main/in/left_bbutton"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/left_btouched"
                   }
                },
                "mode" : "button",
