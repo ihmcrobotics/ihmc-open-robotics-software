@@ -118,11 +118,11 @@ public class HandWrenchCalculator
       wrenchLinear.set(side,linearPart);
 
       // ANGULAR PART
-      FrameVector3D angularPart = wrenchLinear.get(side);
+      FrameVector3D angularPart = wrenchAngular.get(side);
       angularPart.setReferenceFrame(getReferenceFrame().get(side));
       angularPart.set(3,0,getWrench().get(side));
       angularPart.changeFrame(ReferenceFrame.getWorldFrame());
-      wrenchLinear.set(side,angularPart);
+      wrenchAngular.set(side,angularPart);
    }
 
    public void update()
