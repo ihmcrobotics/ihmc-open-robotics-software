@@ -1,7 +1,7 @@
 #include "zed_open_driver.h"
 
 
-ZEDOpenDriver::ZEDOpenDriver() : _cap(_params)
+ZEDOpenDriver::ZEDOpenDriver(int resolution, int fps) : _params(resolution, fps), _cap({_params.params})
 {
     if (!_cap.initializeVideo())
     {
@@ -17,10 +17,7 @@ bool ZEDOpenDriver::GetFrameStereoYUV(uint8_t* yuvBytes, int* dims)
    
     if (frame.data != nullptr)
     {
-        dims[0] = frame.height;
-        dims[1] = frame.width;
-
-        std::copy(  frame.data, frame.data + frame.height * frame.width, yuvBytes);
+        std::copy(  frame.data, frame.data + dims[0] * dims[1] * dims[2], yuvBytes);
         
         return true;
     }
@@ -36,6 +33,7 @@ bool ZEDOpenDriver::GetFrameDimensions(int* dims)
     {
         dims[0] = frame.height;
         dims[1] = frame.width;
+        dims[2] = 2;
 
         return true;
     }

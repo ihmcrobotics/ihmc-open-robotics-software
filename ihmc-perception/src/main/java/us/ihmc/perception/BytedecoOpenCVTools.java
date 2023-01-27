@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
+import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.producers.VideoSource;
@@ -18,6 +19,7 @@ import java.awt.image.BufferedImage;
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
+import static org.opencv.videoio.Videoio.*;
 
 public class BytedecoOpenCVTools
 {
@@ -399,5 +401,24 @@ public class BytedecoOpenCVTools
    public static void convertFloatToShort(Mat metricDepth, Mat shortDepthToPack, double scale, double delta)
    {
       metricDepth.convertTo(shortDepthToPack, opencv_core.CV_16UC1, scale, delta);
+   }
+
+   public void setVideoCaptureProperties(VideoCapture capture)
+   {
+      /* Supported Stereo Resolutions: {'1344.0x376.0': 'OK', '2560.0x720.0': 'OK', '3840.0x1080.0': 'OK', '4416.0x1242.0': 'OK'} */
+
+      LogTools.warn("Setting Camera Parameters for ZED2.");
+      capture.set(CAP_PROP_FRAME_WIDTH, 2560);
+      capture.set(CAP_PROP_FRAME_HEIGHT, 720);
+      LogTools.warn("Frame Rate Available: {}", capture.get(CAP_PROP_FPS));
+
+      // TODO: Find more optimal parameters for the following.
+      //capture.set(CAP_PROP_BUFFERSIZE, 3);
+      //capture.set(CAP_PROP_FPS, 30);
+      //capture.set(CAP_PROP_FOURCC, VideoWriter.fourcc((byte)'M', (byte)'J', (byte)'P', (byte)'G'));
+      //capture.set(CAP_PROP_AUTO_EXPOSURE, 0.25);
+      //capture.set(CAP_PROP_AUTO_WB, 0.25);
+      //capture.set(CAP_PROP_AUTOFOCUS, 0.25);
+      //capture.set(CAP_PROP_MODE, CAP_OPENCV_MJPEG);
    }
 }

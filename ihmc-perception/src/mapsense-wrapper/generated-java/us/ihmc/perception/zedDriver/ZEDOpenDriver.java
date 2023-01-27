@@ -13,22 +13,13 @@ public class ZEDOpenDriver extends us.ihmc.perception.zedDriver.presets.ZEDDrive
 
 // #include "zed_open_driver.h"
 
-public static class ZEDOpenDriverExternal extends Pointer {
+@NoOffset public static class ZEDOpenDriverExternal extends Pointer {
     static { Loader.load(); }
-    /** Default native constructor. */
-    public ZEDOpenDriverExternal() { super((Pointer)null); allocate(); }
-    /** Native array allocator. Access with {@link Pointer#position(long)}. */
-    public ZEDOpenDriverExternal(long size) { super((Pointer)null); allocateArray(size); }
     /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
     public ZEDOpenDriverExternal(Pointer p) { super(p); }
-    private native void allocate();
-    private native void allocateArray(long size);
-    @Override public ZEDOpenDriverExternal position(long position) {
-        return (ZEDOpenDriverExternal)super.position(position);
-    }
-    @Override public ZEDOpenDriverExternal getPointer(long i) {
-        return new ZEDOpenDriverExternal((Pointer)this).offsetAddress(i);
-    }
+
+        public ZEDOpenDriverExternal(int resolution, int fps) { super((Pointer)null); allocate(resolution, fps); }
+        private native void allocate(int resolution, int fps);
 
         public native @Cast("bool") boolean getFrameStereoYUVExternal(@Cast("uint8_t*") BytePointer yuvBytes, IntPointer dims);
         public native @Cast("bool") boolean getFrameStereoYUVExternal(@Cast("uint8_t*") ByteBuffer yuvBytes, IntBuffer dims);
