@@ -42,6 +42,8 @@ public class RDXVRHandPlacedFootstepMode
    private ROS2ControllerHelper controllerHelper;
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
    private RDXTeleoperationParameters teleoperationParameters;
+   private String controllerModel = "";
+
 
    public void create(DRCRobotModel robotModel, ROS2ControllerHelper controllerHelper)
    {
@@ -67,6 +69,8 @@ public class RDXVRHandPlacedFootstepMode
 
    public void processVRInput(RDXVRContext vrContext)
    {
+      if (controllerModel.isEmpty())
+         controllerModel = vrContext.getControllerModel();
       boolean noSelectedPick = true;
       for (RobotSide side : RobotSide.values)
          noSelectedPick =  noSelectedPick && vrContext.getSelectedPick().get(side) == null;
@@ -153,8 +157,16 @@ public class RDXVRHandPlacedFootstepMode
    public void renderImGuiWidgets()
    {
       ImGui.text("Footstep placement: Hold and release respective trigger");
-      ImGui.text("Clear footsteps: Left B button");
-      ImGui.text("Walk: Right A button");
+      if (controllerModel.equals("vive_cosmos"))
+      {
+         ImGui.text("Clear footsteps: Y button");
+         ImGui.text("Walk: A button");
+      }
+      else {
+         ImGui.text("Clear footsteps: Left B button");
+         ImGui.text("Walk: Right A button");
+      }
+
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

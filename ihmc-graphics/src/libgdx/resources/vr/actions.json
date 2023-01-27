@@ -37,18 +37,8 @@
          "type" : "vector1"
       },
       {
-         "name" : "/actions/main/in/left_xbutton",
-         "requirement" : "optional",
-         "type" : "boolean"
-      },
-      {
-         "name" : "/actions/main/in/right_xbutton",
-         "requirement" : "optional",
-         "type" : "boolean"
-      },
-      {
          "name" : "/actions/main/in/left_abutton",
-         "requirement" : "optional",
+         "requirement" : "mandatory",
          "type" : "boolean"
       },
       {
@@ -67,18 +57,8 @@
          "type" : "boolean"
       },
       {
-         "name" : "/actions/main/in/left_ybutton",
-         "requirement" : "optional",
-         "type" : "boolean"
-      },
-      {
-         "name" : "/actions/main/in/right_ybutton",
-         "requirement" : "optional",
-         "type" : "boolean"
-      },
-      {
          "name" : "/actions/main/in/left_bbutton",
-         "requirement" : "optional",
+         "requirement" : "mandatory",
          "type" : "boolean"
       },
       {
@@ -154,10 +134,6 @@
    ],
    "default_bindings" : [
       {
-         "binding_url" : "vive_cosmos_bindings.json",
-         "controller_type" : "knuckles"
-      },
-      {
          "binding_url" : "index_bindings.json",
          "controller_type" : "knuckles"
       }
@@ -171,14 +147,10 @@
          "/actions/main/in/right_triggertouched" : "Trigger Touched Right",
          "/actions/main/in/left_trigger" : "Trigger Left",
          "/actions/main/in/right_trigger" : "Trigger Right",
-         "/actions/main/in/left_xbutton" : "X Button Left",
-         "/actions/main/in/right_xbutton" : "X Button Right",
          "/actions/main/in/left_abutton" : "A Button Left",
          "/actions/main/in/right_abutton" : "A Button Right",
          "/actions/main/in/left_atouched" : "A Touched Left",
          "/actions/main/in/right_atouched" : "A Touched Right",
-         "/actions/main/in/left_ybutton" : "Y Button Left",
-         "/actions/main/in/right_ybutton" : "Y Button Right",
          "/actions/main/in/left_bbutton" : "B Button Left",
          "/actions/main/in/right_bbutton" : "B Button Right",
          "/actions/main/in/right_bbuttondoubleclick" : "B Button Double Click Right",

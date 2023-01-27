@@ -124,16 +124,15 @@ public class RDXVRContext
       JSONFileTools.load(actionManifestFile,
                                       node ->
                                       {
-                                         JsonNode modelVR = node.get("default_bindings").get("binding_url");
-                                         if (modelVR != null)
+                                         for (Iterator<JsonNode> it = node.withArray("default_bindings").elements(); it.hasNext();)
                                          {
-                                            controllerModel = modelVR.asText();
-                                            int indexTail = controllerModel.lastIndexOf("_");
-                                            controllerModel = controllerModel.substring(0,indexTail-1);
+                                            JsonNode objectNode = it.next();
+                                            controllerModel = objectNode.get("binding_url").asText();
                                          }
+                                         int indexTail = controllerModel.lastIndexOf("_");
+                                         controllerModel = controllerModel.substring(0,indexTail);
                                       });
       LogTools.info(controllerModel);
-
       VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilePath().toString());
 
       VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
@@ -373,5 +372,10 @@ public class RDXVRContext
    public SideDependentList<RDXVRPickResult> getSelectedPick()
    {
       return selectedPick;
+   }
+
+   public String getControllerModel()
+   {
+      return controllerModel;
    }
 }
