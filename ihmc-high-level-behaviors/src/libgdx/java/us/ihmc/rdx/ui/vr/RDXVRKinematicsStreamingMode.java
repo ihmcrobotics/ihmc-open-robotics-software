@@ -32,6 +32,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -78,7 +79,7 @@ public class RDXVRKinematicsStreamingMode
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
    private int rightIndex = -1;
-   private String controllerModel = "";
+   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
    public RDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -145,7 +146,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      if (controllerModel.isEmpty())
+      if(controllerModel == RDXVRControllerModel.UNKNOWN)
          controllerModel = vrContext.getControllerModel();
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
@@ -303,7 +304,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void renderImGuiWidgets()
    {
-      if (controllerModel.equals("vive_focus3"))
+      if (controllerModel == RDXVRControllerModel.FOCUS3)
       {
          ImGui.text("Toggle IK tracking enabled: A button");
          ImGui.text("Toggle stream to controller: X button");
@@ -341,7 +342,7 @@ public class RDXVRKinematicsStreamingMode
       ImGui.text("Start/Stop replay: Press Left Joystick (cannot stream/record if replay)");
       kinematicsRecorder.renderReplayWidgets(labels);
       // add widget for using shared control assistance in VR
-      if (controllerModel.equals("vive_focus3"))
+      if (controllerModel == RDXVRControllerModel.FOCUS3)
          ImGui.text("Toggle shared control assistance: Y button");
       else
          ImGui.text("Toggle shared control assistance: Left B button");
