@@ -341,7 +341,7 @@ public class VideoDataPlayer
 //      camera.setVideoFile("recordedVideo.mov");
       camera.setVideoFile("Spying-On-Dex_Video.mov");
 
-      File dataDirectory = new File("C:/Users/nkitchel/robotLogs/20230127_145414_SlackChannelsAreDumb/");
+      File dataDirectory = new File("C:/Users/nkitchel/robotLogs/20230127_150549_HelloSlackHowAreYouToday/");
 //      File dataDirectory = new File("C:/Users/nkitchel/Workspaces/Security-Camera/repository-group/ihmc-robot-data-logger/src/test/resources");
 //      File dataDirectory = new File("C:/Users/nkitchel/Documents/security-camera/repository-group/ihmc-video-codecs/src/test/resources/");
 
