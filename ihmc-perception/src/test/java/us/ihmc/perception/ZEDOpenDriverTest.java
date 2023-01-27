@@ -2,7 +2,6 @@ package us.ihmc.perception;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
@@ -45,11 +44,8 @@ public class ZEDOpenDriverTest
 
       LogTools.info("Dimensions: " + dims[0] + ", " + dims[1]);
 
-      opencv_imgproc.cvtColor(mat, mat, opencv_imgproc.COLOR_YUV2BGR_YUYV);
-
-      mat.rows((int) (mat.rows() / 1.5));
-
-      BytedecoOpenCVTools.display("Image", mat, 0);
+      //opencv_imgproc.cvtColor(mat, mat, opencv_imgproc.COLOR_YUV2BGR_YUYV);
+      //BytedecoOpenCVTools.display("Image", mat, 0);
 
       assert (dims[0] == mat.rows());
       assert (dims[1] == mat.cols());
