@@ -2,8 +2,6 @@ package us.ihmc.rdx.vr;
 
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.*;
@@ -121,18 +119,17 @@ public class RDXVRContext
 
       WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-graphics/src/libgdx/resources", getClass(), "/vr");
       WorkspaceFile actionManifestFile = new WorkspaceFile(directory, "actions.json");
-      JSONFileTools.load(actionManifestFile,
-                                      node ->
-                                      {
-                                         for (Iterator<JsonNode> it = node.withArray("default_bindings").elements(); it.hasNext();)
-                                         {
-                                            JsonNode objectNode = it.next();
-                                            controllerModel = objectNode.get("binding_url").asText();
-                                         }
-                                         int indexTail = controllerModel.lastIndexOf("_");
-                                         controllerModel = controllerModel.substring(0,indexTail);
-                                      });
-      LogTools.info(controllerModel);
+      JSONFileTools.load(actionManifestFile, node ->
+      {
+         for (Iterator<JsonNode> it = node.withArray("default_bindings").elements(); it.hasNext(); )
+         {
+            JsonNode objectNode = it.next();
+            controllerModel = objectNode.get("binding_url").asText();
+         }
+         int indexTail = controllerModel.lastIndexOf("_");
+         controllerModel = controllerModel.substring(0, indexTail);
+      });
+      LogTools.info("Using VR controller model: {}", controllerModel);
       VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilePath().toString());
 
       VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
@@ -148,7 +145,7 @@ public class RDXVRContext
       activeActionSets.ulRestrictedToDevice(VR.k_ulInvalidInputValueHandle);
    }
 
-                                      /** Needs to be on libGDX thread. */
+   /** Needs to be on libGDX thread. */
    public void setupEyes()
    {
       LogTools.info("VR per eye render size: {} x {}", width, height);

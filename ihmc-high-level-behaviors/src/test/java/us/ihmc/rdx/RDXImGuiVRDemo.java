@@ -147,7 +147,7 @@ public class RDXImGuiVRDemo
 
             if (!controllerModel.isEmpty())
             {
-               if (controllerModel.equals("vive_cosmos"))
+               if (controllerModel.equals("vive_focus3"))
                {
                   ImGui.checkbox("X button pressed", leftAButton.bState());
                   ImGui.checkbox("Y button pressed", leftBButton.bState());

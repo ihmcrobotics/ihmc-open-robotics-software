@@ -303,7 +303,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void renderImGuiWidgets()
    {
-      if (controllerModel.equals("vive_cosmos"))
+      if (controllerModel.equals("vive_focus3"))
       {
          ImGui.text("Toggle IK tracking enabled: A button");
          ImGui.text("Toggle stream to controller: X button");
@@ -341,7 +341,7 @@ public class RDXVRKinematicsStreamingMode
       ImGui.text("Start/Stop replay: Press Left Joystick (cannot stream/record if replay)");
       kinematicsRecorder.renderReplayWidgets(labels);
       // add widget for using shared control assistance in VR
-      if (controllerModel.equals("vive_cosmos"))
+      if (controllerModel.equals("vive_focus3"))
          ImGui.text("Toggle shared control assistance: Y button");
       else
          ImGui.text("Toggle shared control assistance: Left B button");
