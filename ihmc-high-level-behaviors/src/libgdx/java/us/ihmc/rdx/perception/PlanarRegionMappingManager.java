@@ -409,5 +409,6 @@ public class PlanarRegionMappingManager
       if (updateMapFuture != null)
          updateMapFuture.cancel(true);
       executorService.shutdownNow();
+      planarRegionMap.destroy();
    }
 }

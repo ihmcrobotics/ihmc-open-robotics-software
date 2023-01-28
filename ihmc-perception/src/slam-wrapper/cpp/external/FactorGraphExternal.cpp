@@ -55,7 +55,7 @@ void FactorGraphExternal::setPoseInitialValue(int index, float *value)
 
 void FactorGraphExternal::setPoseInitialValueExtended(int index, float *value)
 {
-    printf("setPoseInitialValueExtended(%d)\n", index);
+    printf("setPoseInitialValueExtended(%d)\n", index); fflush(stdout);
     using namespace gtsam;
     Eigen::Matrix4f M = Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor> >(value);
 
@@ -72,12 +72,34 @@ void FactorGraphExternal::setOrientedPlaneInitialValue(int landmarkId, float *va
     factorGraphHandler.setOrientedPlaneInitialValue(landmarkId, initialValue);
 }
 
-void FactorGraphExternal::createOdometryNoiseModel(float *odomVariance)
+void FactorGraphExternal::createOdometryNoiseModel(float *variance)
 {
+    gtsam::Vector6 odomVariance;
+    odomVariance << variance[0], variance[1], variance[2], variance[3], variance[4], variance[5];
+    factorGraphHandler.createOdometryNoiseModel(odomVariance);
 }
 
-void FactorGraphExternal::createOrientedPlaneNoiseModel(float *lmVariances)
+void FactorGraphExternal::createOrientedPlaneNoiseModel(float *variance)
 {
+    gtsam::Vector3 lmVariance;
+    lmVariance << variance[0], variance[1], variance[2];
+    factorGraphHandler.createOrientedPlaneNoiseModel(lmVariance);
+}
+
+bool FactorGraphExternal::getPoseById(int poseId, double* pose)
+{
+    if(!factorGraphHandler.getResults().exists(gtsam::Symbol('x', poseId)))
+        return false;
+
+    auto matrix = factorGraphHandler.getResults().at<gtsam::Pose3>(gtsam::Symbol('x', poseId)).matrix();
+
+    matrix.transposeInPlace();
+
+    std::copy(  matrix.data(),
+                matrix.data() + 16,
+                pose);
+
+    return true;
 }
 
 void FactorGraphExternal::printResults()
