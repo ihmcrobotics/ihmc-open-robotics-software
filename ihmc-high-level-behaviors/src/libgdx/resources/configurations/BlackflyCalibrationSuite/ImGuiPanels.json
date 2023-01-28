@@ -10,6 +10,7 @@
     "HDF5 Browsing" : true,
     "HDF5 Image Browser" : true,
     "Logging" : true,
+    "Undistorted Fisheye Monitor" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false
   }
