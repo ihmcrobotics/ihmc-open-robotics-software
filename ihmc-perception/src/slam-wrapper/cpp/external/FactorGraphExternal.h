@@ -38,6 +38,8 @@ class FactorGraphExternal
         // Expects packed Vector3
         void createOrientedPlaneNoiseModel(float* lmVariances);
 
+        bool getPoseById(int poseId, double* pose);
+
         void printResults();
 
         void helloWorldTest();

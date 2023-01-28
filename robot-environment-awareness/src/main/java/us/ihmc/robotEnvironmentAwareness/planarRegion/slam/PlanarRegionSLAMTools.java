@@ -304,79 +304,6 @@ public class PlanarRegionSLAMTools
       }
    }
 
-   public static List<IncomingRegionMatchData> findPlanarRegionMatches(PlanarRegionsList map,
-                                                                       PlanarRegionsList incoming,
-                                                                       float normalThreshold,
-                                                                       float normalDistanceThreshold,
-                                                                       float distanceThreshold)
-   {
-      PlanarRegionTools planarRegionTools = new PlanarRegionTools();
-      List<IncomingRegionMatchData> allMatches = new ArrayList<>();
-
-      List<PlanarRegion> incomingRegions = incoming.getPlanarRegionsAsList();
-      List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
-
-      for (int incomingRegionId = 0; incomingRegionId < incomingRegions.size(); incomingRegionId++)
-      {
-         PlanarRegion newRegion = incomingRegions.get(incomingRegionId);
-         IncomingRegionMatchData incomingRegionMatchData = new IncomingRegionMatchData(incomingRegionId);
-         allMatches.add(incomingRegionMatchData);
-
-         for (int mapRegionIndex = 0; mapRegionIndex < mapRegions.size(); mapRegionIndex++)
-         {
-            PlanarRegion mapRegion = mapRegions.get(mapRegionIndex);
-
-            //if (boxesIn3DIntersect(mapRegion, newRegion, mapRegion.getBoundingBox3dInWorld().getMaxZ() - mapRegion.getBoundingBox3dInWorld().getMinZ()))
-            {
-               Point3D newOrigin = new Point3D();
-               newRegion.getOrigin(newOrigin);
-
-               Point3D mapOrigin = new Point3D();
-               mapRegion.getOrigin(mapOrigin);
-
-               Vector3D originVec = new Vector3D();
-               originVec.sub(newOrigin, mapOrigin);
-
-               double normalDistance = Math.abs(originVec.dot(mapRegion.getNormal()));
-               double normalSimilarity = newRegion.getNormal().dot(mapRegion.getNormal());
-
-               double originDistance = originVec.norm();
-
-               // check to make sure the angles are similar enough
-               boolean wasMatched = normalSimilarity > normalThreshold;
-               // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
-               wasMatched &= normalDistance < normalDistanceThreshold;
-               // check that the regions aren't too far from one another
-               if (wasMatched)
-                  wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) <= distanceThreshold;
-
-               //LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
-               //                            mapRegionIndex,
-               //                            mapRegion.getRegionId(),
-               //                            newRegion.getRegionId(),
-               //                            normalSimilarity,
-               //                            normalThreshold,
-               //                            normalDistance,
-               //                            normalDistanceThreshold,
-               //                            originDistance,
-               //                            distanceThreshold) + ": [{}]", wasMatched);
-
-               if (wasMatched)
-               {
-                  MatchData matchData = new MatchData(mapRegionIndex);
-                  // TODO assign score for the match
-                  incomingRegionMatchData.addMatchData(matchData);
-               }
-            }
-         }
-      }
-
-      // remove the regions with no matches
-      allMatches = allMatches.stream().filter(data -> data.getNumberOfMatches() > 0).collect(Collectors.toList());
-
-      return allMatches;
-   }
-
    public static Map<PlanarRegion, List<PlanarRegion>> filterMatchesBasedOnNormalSimilarity(Map<PlanarRegion, List<PlanarRegion>> matchesSoFar,
                                                                                             double threshold)
    {
@@ -613,31 +540,28 @@ public class PlanarRegionSLAMTools
       return newDataCollisions;
    }
 
-   public static HashMap<Integer, Integer> findPlanarRegionMatches(PlanarRegionsList map, PlanarRegionsList newData, float boundingBoxHeight, float normalThreshold)
+   public static void findPlanarRegionMatches(PlanarRegionsList map, PlanarRegionsList incoming, HashMap<Integer, TIntArrayList> matches,
+                                                                         float overlapThreshold, float normalThreshold, float distanceThreshold)
    {
-      HashMap<Integer, Integer> matches = new HashMap<>();
-
-      List<PlanarRegion> newRegions = newData.getPlanarRegionsAsList();
+      List<PlanarRegion> newRegions = incoming.getPlanarRegionsAsList();
       List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
 
-      for (int i = 0; i<mapRegions.size(); i++)
+      for (int i = 0; i<newRegions.size(); i++)
       {
-         PlanarRegion mapRegion = mapRegions.get(i);
-         for (int j = 0; j<newRegions.size(); j++)
-         {
-            PlanarRegion newRegion = newRegions.get(j);
+         matches.put(i, new TIntArrayList());
 
-            if (boxesIn3DIntersect(mapRegion, newRegion, boundingBoxHeight))
+         PlanarRegion newRegion = newRegions.get(i);
+
+         for (int j = 0; j<mapRegions.size(); j++)
+         {
+            PlanarRegion mapRegion = mapRegions.get(i);
+
+            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold))
             {
-               double dot = newRegion.getNormal().dot(mapRegion.getNormal());
-               if (dot > normalThreshold)
-               {
-                  matches.put(i, j);
-               }
+               matches.get(i).add(j);
             }
          }
       }
-      return matches;
    }
 
    public static boolean boxesIn3DIntersect(PlanarRegion a, PlanarRegion b, double boxHeight)
@@ -805,16 +729,6 @@ public class PlanarRegionSLAMTools
 
       //LogTools.info("Match Metrics for [{}, {}]: " + String.format("Angular: %.2f [%.2f], Distance: %.2f [%.2f], Overlap: %.2f [%.2f]", normalSimilarity,
       //                  normalThreshold, normalDistance, normalDistanceThreshold, overlapScore, overlapThreshold), regionA.getRegionId(), regionB.getRegionId());
-
-      //LogTools.info(String.format("(%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
-      //                            regionB.getRegionId(),
-      //                            regionA.getRegionId(),
-      //                            normalSimilarity,
-      //                            normalThreshold,
-      //                            normalDistance,
-      //                            normalDistanceThreshold,
-      //                            originDistance,
-      //                            distanceThreshold) + ": [{}]", wasMatched);
 
       return wasMatched;
    }
