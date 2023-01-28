@@ -10,10 +10,8 @@ import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
-import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.nio.IntBuffer;
 
