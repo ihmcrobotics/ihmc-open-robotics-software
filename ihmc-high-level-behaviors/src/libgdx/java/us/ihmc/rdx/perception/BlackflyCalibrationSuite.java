@@ -1,10 +1,8 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
-import imgui.type.ImDouble;
-import imgui.type.ImFloat;
-import imgui.type.ImInt;
-import imgui.type.ImString;
+import imgui.flag.ImGuiInputTextFlags;
+import imgui.type.*;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacv.JavaCV;
 import org.bytedeco.opencv.global.opencv_calib3d;
@@ -60,6 +58,7 @@ public class BlackflyCalibrationSuite
    private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private HDF5ImageLogging hdf5ImageLogging;
    private HDF5ImageBrowser hdf5ImageBrowser;
+   private RDXCVImagePanel undistortedFisheyePanel;
    private RDXCVImagePanel calibrationSourceImagesPanel;
    private final RecyclingArrayList<Mat> calibrationSourceImages = new RecyclingArrayList<>(Mat::new);
    private final ImInt calibrationSourceImageIndex = new ImInt();
@@ -84,7 +83,33 @@ public class BlackflyCalibrationSuite
    private final MatVector estimatedRotationVectors = new MatVector();
    private final MatVector estimatedTranslationVectors = new MatVector();
    private double averageReprojectionError = Double.NaN;
-   private final ImString cameraMatrixString = new ImString();
+   private final ImBoolean useIntrinsicsGuess = new ImBoolean(true);
+   private final ImBoolean recomputeExtrinsic = new ImBoolean(false);
+   private final ImBoolean checkValidityOfConditionNumber = new ImBoolean(false);
+   private final ImBoolean fixSkew = new ImBoolean(false);
+   private final ImBoolean fixPrincipalPoint = new ImBoolean(false);
+   private final ImBoolean fixFocalLength = new ImBoolean(false);
+   private final ImDouble calibratedFx = new ImDouble(fxGuess.get());
+   private final ImDouble calibratedFy = new ImDouble(fyGuess.get());
+   private final ImDouble calibratedCx = new ImDouble(cxGuess.get());
+   private final ImDouble calibratedCy = new ImDouble(cyGuess.get());
+   private final ImString cameraMatrixAsText = new ImString(512);
+   private final ImDouble distortionCoefficientK1 = new ImDouble(0.01758);
+   private final ImDouble distortionCoefficientK2 = new ImDouble(0.00455);
+   private final ImDouble distortionCoefficientK3 = new ImDouble(-0.00399);
+   private final ImDouble distortionCoefficientK4 = new ImDouble(0.00051);
+   private final ImInt undistortedImageWidth = new ImInt((int) BFLY_U3_23S6C_WIDTH_PIXELS);
+   private final ImInt undistortedImageHeight = new ImInt((int) BFLY_U3_23S6C_HEIGHT_PIXELS);
+   private Mat distortionCoefficients;
+   private Mat distortionCoefficientsCopy;
+   private Mat cameraMatrixForMonitor;
+   private Mat cameraMatrixForMonitorShifting;
+   private Mat bgrImageForUndistortion;
+   private final Notification calibrationFinished = new Notification();
+   private Mat undistortedLiveImage;
+   private Mat cameraMatrix;
+   private Size undistortedImageSize;
+   private Mat identityCameraMatrix;
 
    public BlackflyCalibrationSuite()
    {
@@ -121,6 +146,9 @@ public class BlackflyCalibrationSuite
                   calibrationSourceImagesPanel = new RDXCVImagePanel("Calibration Source Image", 100, 100);
                   baseUI.getImGuiPanelManager().addPanel(calibrationSourceImagesPanel.getVideoPanel());
 
+                  undistortedFisheyePanel = new RDXCVImagePanel("Undistorted Fisheye Monitor", 100, 100);
+                  baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getVideoPanel());
+
                   baseUI.getLayoutManager().reloadLayout();
 
                   grayscaleImage = new Mat();
@@ -129,6 +157,28 @@ public class BlackflyCalibrationSuite
                   imagePoints = new Point2fVectorVector();
                   imagePointsMatVector = new MatVector();
                   simpleBlobDetector = SimpleBlobDetector.create();
+                  distortionCoefficients = new Mat(distortionCoefficientK1.get(),
+                                                   distortionCoefficientK2.get(),
+                                                   distortionCoefficientK3.get(),
+                                                   distortionCoefficientK4.get());
+                  distortionCoefficientsCopy = new Mat();
+                  distortionCoefficients.copyTo(distortionCoefficientsCopy);
+                  MatExpr eyeExpression = Mat.eye(3, 3, opencv_core.CV_64F);
+                  identityCameraMatrix = eyeExpression.asMat();
+                  eyeExpression.close();
+                  cameraMatrix = new Mat();
+                  identityCameraMatrix.copyTo(cameraMatrix);
+                  cameraMatrix.ptr(0, 0).putDouble(calibratedFx.get());
+                  cameraMatrix.ptr(1, 1).putDouble(calibratedFy.get());
+                  cameraMatrix.ptr(0, 2).putDouble(calibratedCx.get());
+                  cameraMatrix.ptr(1, 2).putDouble(calibratedCy.get());
+                  cameraMatrixForMonitor = new Mat();
+                  cameraMatrix.copyTo(cameraMatrixForMonitor);
+//                  cameraMatrixForMonitorShifting = Mat.eye(3, 3, opencv_core.CV_64F).asMat();
+                  cameraMatrixForMonitorShifting = opencv_core.noArray();
+                  undistortedImageSize = new Size(undistortedImageWidth.get(), undistortedImageHeight.get());
+                  undistortedLiveImage = new Mat();
+                  bgrImageForUndistortion = new Mat();
 
                   ThreadTools.startAsDaemon(() ->
                   {
@@ -142,6 +192,36 @@ public class BlackflyCalibrationSuite
                      }
                   }, "CameraRead");
                }
+
+               if (calibrationFinished.poll())
+               {
+                  distortionCoefficients.ptr(0, 0).putDouble(distortionCoefficientK1.get());
+                  distortionCoefficients.ptr(1, 0).putDouble(distortionCoefficientK2.get());
+                  distortionCoefficients.ptr(2, 0).putDouble(distortionCoefficientK3.get());
+                  distortionCoefficients.ptr(3, 0).putDouble(distortionCoefficientK4.get());
+                  distortionCoefficients.copyTo(distortionCoefficientsCopy);
+                  cameraMatrix.copyTo(cameraMatrixForMonitor);
+                  cameraMatrixForMonitor.ptr(0, 0).putDouble(calibratedFx.get());
+                  cameraMatrixForMonitor.ptr(1, 1).putDouble(calibratedFy.get());
+                  cameraMatrixForMonitor.ptr(0, 2).putDouble(calibratedCx.get());
+                  cameraMatrixForMonitor.ptr(1, 2).putDouble(calibratedCy.get());
+
+//                  opencv_calib3d.initUndistortRectifyMap(cameraMatrixForMonitor,
+//                                                         distortionCoefficientsCopy,
+//                                                         );
+               }
+
+               StringBuilder stringBuilder = new StringBuilder();
+               stringBuilder.append("Camera matrix:\n");
+               for (int row = 0; row < 3; row++)
+               {
+                  for (int col = 0; col < 3; col++)
+                  {
+                     stringBuilder.append("%.5f".formatted(cameraMatrixForMonitor.ptr(row, col).getDouble()) + " ");
+                  }
+                  stringBuilder.append("\n");
+               }
+               cameraMatrixAsText.set(stringBuilder.toString());
 
                calibrationPatternDetectionUI.update();
                blackflyReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
@@ -187,6 +267,27 @@ public class BlackflyCalibrationSuite
                baseUI.getLayoutManager().reloadLayout();
             }
 
+            // Access the image before it gets drawn on
+            // Fisheye undistortion
+            // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
+            Mat distortedImage = data.getRGBA8Mat();
+            undistortedImageSize.width(undistortedImageWidth.get());
+            undistortedImageSize.height(undistortedImageHeight.get());
+            opencv_imgproc.cvtColor(distortedImage, bgrImageForUndistortion, opencv_imgproc.COLOR_RGBA2BGR);
+            opencv_calib3d.undistortImage(bgrImageForUndistortion,
+                                          undistortedLiveImage,
+                                          cameraMatrixForMonitor,
+                                          distortionCoefficientsCopy,
+                                          cameraMatrixForMonitorShifting,
+                                          undistortedImageSize);
+//            opencv_calib3d.undistortImage(bgrImageForUndistortion,
+//                                          undistortedLiveImage,
+//                                          cameraMatrixForMonitor,
+//                                          distortionCoefficientsCopy);
+            undistortedFisheyePanel.resize(undistortedLiveImage.cols(), undistortedLiveImage.rows(), null);
+            opencv_imgproc.cvtColor(undistortedLiveImage, undistortedFisheyePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA);
+            undistortedFisheyePanel.draw();
+
             calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
          }
 
@@ -231,6 +332,14 @@ public class BlackflyCalibrationSuite
       ImGui.inputDouble(labels.get("Cx Guess (px)"), cxGuess);
       ImGui.inputDouble(labels.get("Cy Guess (px)"), cyGuess);
 
+      ImGui.checkbox(labels.get("Use intrinsic guess"), useIntrinsicsGuess);
+      ImGui.checkbox(labels.get("Recompute extrinsic"), recomputeExtrinsic);
+      ImGuiTools.previousWidgetTooltip("Extrinsic will be recomputed after each iteration of intrinsic optimization.");
+      ImGui.checkbox(labels.get("Check validity of condition number"), checkValidityOfConditionNumber);
+      ImGui.checkbox(labels.get("Fix skew (alpha) to 0"), fixSkew);
+      ImGui.checkbox(labels.get("Fix principal point to guess"), fixPrincipalPoint);
+      ImGui.checkbox(labels.get("Fix focal length to guess"), fixFocalLength);
+
       ImGui.beginDisabled(patternDetectionThreadQueue.isExecuting());
       if (ImGui.button(labels.get("Calibrate")))
       {
@@ -246,6 +355,26 @@ public class BlackflyCalibrationSuite
 
       // TODO: Make widgets for adjusting the matrix and coeffs
       //   These should affect the live undistorted preview
+
+      boolean userChangedUndistortParameters = false;
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Fx (px)"), calibratedFx, 100.0, 500.0, "%.5f");
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Fy (px)"), calibratedFy, 100.0, 500.0, "%.5f");
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Cx (px)"), calibratedCx, 100.0, 500.0, "%.5f");
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Cy (px)"), calibratedCy, 100.0, 500.0, "%.5f");
+
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Distortion K1"), distortionCoefficientK1, 0.0001, 0.001, "%.7f");
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Distortion K2"), distortionCoefficientK2, 0.0001, 0.001, "%.7f");
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Distortion K3"), distortionCoefficientK3, 0.0001, 0.001, "%.7f");
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Distortion K4"), distortionCoefficientK4, 0.0001, 0.001, "%.7f");
+
+      ImGuiTools.volatileInputInt(labels.get("Undistorted image width"), undistortedImageWidth);
+      ImGuiTools.volatileInputInt(labels.get("Undistorted image height"), undistortedImageHeight);
+
+      ImGui.text("Camera matrix:");
+      ImGui.inputTextMultiline(labels.getHidden("cameraMatrix"), cameraMatrixAsText, 0, 60, ImGuiInputTextFlags.ReadOnly);
+
+      if (userChangedUndistortParameters)
+         calibrationFinished.set();
    }
 
    private void findCornersOrCentersAsync()
@@ -354,20 +483,30 @@ public class BlackflyCalibrationSuite
 
       Size imageSize = new Size(calibrationSourceImages.get(0).cols(), calibrationSourceImages.get(0).rows());
 
-      Mat cameraMatrix = Mat.eye(3, 3, opencv_core.CV_64F).asMat();
+      identityCameraMatrix.copyTo(cameraMatrix);
       // Using fisheye::CALIB_USE_INTRINSIC_GUESS
       cameraMatrix.ptr(0, 0).putDouble(fxGuess.get());
       cameraMatrix.ptr(1, 1).putDouble(fyGuess.get());
       cameraMatrix.ptr(0, 2).putDouble(cxGuess.get());
       cameraMatrix.ptr(1, 2).putDouble(cyGuess.get());
 
-      Mat distortionCoefficients = Mat.zeros(4, 1, opencv_core.CV_64F).asMat();
-
       estimatedRotationVectors.clear();
       estimatedTranslationVectors.clear();
 
       // TODO: We may want to fix the principal point and focal length
-      int flags = opencv_calib3d.FISHEYE_CALIB_USE_INTRINSIC_GUESS;
+      int flags = 0;
+      if (useIntrinsicsGuess.get())
+         flags |= opencv_calib3d.FISHEYE_CALIB_USE_INTRINSIC_GUESS;
+      if (recomputeExtrinsic.get())
+         flags |= opencv_calib3d.FISHEYE_CALIB_RECOMPUTE_EXTRINSIC;
+      if (checkValidityOfConditionNumber.get())
+         flags |= opencv_calib3d.FISHEYE_CALIB_CHECK_COND;
+      if (fixSkew.get())
+         flags |= opencv_calib3d.FISHEYE_CALIB_FIX_SKEW;
+      if (fixPrincipalPoint.get())
+         flags |= opencv_calib3d.FISHEYE_CALIB_FIX_PRINCIPAL_POINT;
+      if (fixFocalLength.get())
+         flags |= opencv_calib3d.FISHEYE_CALIB_FIX_FOCAL_LENGTH;
 
       TermCriteria terminationCriteria = new TermCriteria(TermCriteria.COUNT + TermCriteria.EPS, 100, JavaCV.DBL_EPSILON);
 
@@ -397,12 +536,19 @@ public class BlackflyCalibrationSuite
          }
          stringBuilder.append("\n");
       }
-      LogTools.info(stringBuilder.toString());
+//      cameraMatrixAsText.set(stringBuilder.toString());
 
-      LogTools.info("Distortion coefficients: %.5f %.5f %.5f %.5f".formatted(distortionCoefficients.ptr(0, 0).getDouble(),
-                                                                             distortionCoefficients.ptr(0, 1).getDouble(),
-                                                                             distortionCoefficients.ptr(0, 2).getDouble(),
-                                                                             distortionCoefficients.ptr(0, 3).getDouble()));
+      calibratedFx.set(cameraMatrix.ptr(0, 0).getDouble());
+      calibratedFy.set(cameraMatrix.ptr(1, 1).getDouble());
+      calibratedCx.set(cameraMatrix.ptr(0, 2).getDouble());
+      calibratedCy.set(cameraMatrix.ptr(1, 2).getDouble());
+
+      distortionCoefficientK1.set(distortionCoefficients.ptr(0, 0).getDouble());
+      distortionCoefficientK2.set(distortionCoefficients.ptr(1, 0).getDouble());
+      distortionCoefficientK3.set(distortionCoefficients.ptr(2, 0).getDouble());
+      distortionCoefficientK4.set(distortionCoefficients.ptr(3, 0).getDouble());
+
+      calibrationFinished.set();
    }
 
    public static void main(String[] args)
