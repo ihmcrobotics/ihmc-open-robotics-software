@@ -37,15 +37,12 @@ public static class FactorGraphExternal extends Pointer {
         public native void addPriorPoseFactor(int index, FloatBuffer pose);
         public native void addPriorPoseFactor(int index, float[] pose);
 
+
         // Expects packed Pose3 as XYZYPR
         public native void addOdometryFactor(FloatPointer odometry, int poseId);
         public native void addOdometryFactor(FloatBuffer odometry, int poseId);
         public native void addOdometryFactor(float[] odometry, int poseId);
 
-        // Expects 4x4 homogenous transform matrix as 16-float array
-        public native void addOdometryFactorExtended(FloatPointer odometry, int poseId);
-        public native void addOdometryFactorExtended(FloatBuffer odometry, int poseId);
-        public native void addOdometryFactorExtended(float[] odometry, int poseId);
 
         // Expects packed Vector4
         public native void addOrientedPlaneFactor(FloatPointer lmMean, int lmId, int poseIndex);
@@ -63,11 +60,6 @@ public static class FactorGraphExternal extends Pointer {
         public native void setPoseInitialValue(int index, FloatBuffer value);
         public native void setPoseInitialValue(int index, float[] value);
 
-        // Expects 4x4 homogenous transform as 16-float array
-        public native void setPoseInitialValueExtended(int index, FloatPointer value);
-        public native void setPoseInitialValueExtended(int index, FloatBuffer value);
-        public native void setPoseInitialValueExtended(int index, float[] value);
-
         // Expects packed OrientedPlane3
         public native void setOrientedPlaneInitialValue(int landmarkId, FloatPointer value);
         public native void setOrientedPlaneInitialValue(int landmarkId, FloatBuffer value);
@@ -82,6 +74,21 @@ public static class FactorGraphExternal extends Pointer {
         public native void createOrientedPlaneNoiseModel(FloatPointer lmVariances);
         public native void createOrientedPlaneNoiseModel(FloatBuffer lmVariances);
         public native void createOrientedPlaneNoiseModel(float[] lmVariances);
+
+        // Expects 4x4 homogenous transform matrix as 16-double array
+        public native void addOdometryFactorExtended(DoublePointer odometry, int poseId);
+        public native void addOdometryFactorExtended(DoubleBuffer odometry, int poseId);
+        public native void addOdometryFactorExtended(double[] odometry, int poseId);
+
+        // Expects 4x4 homogenous transform as 16-double array
+        public native void setPoseInitialValueExtended(int index, DoublePointer value);
+        public native void setPoseInitialValueExtended(int index, DoubleBuffer value);
+        public native void setPoseInitialValueExtended(int index, double[] value);
+
+        // Add Prior Pose Factor with full 4x4 homogenous SE3 matrix
+        public native void addPriorPoseFactorExtended(DoublePointer pose, int poseId);
+        public native void addPriorPoseFactorExtended(DoubleBuffer pose, int poseId);
+        public native void addPriorPoseFactorExtended(double[] pose, int poseId);
 
         public native @Cast("bool") boolean getPoseById(int poseId, DoublePointer pose);
         public native @Cast("bool") boolean getPoseById(int poseId, DoubleBuffer pose);

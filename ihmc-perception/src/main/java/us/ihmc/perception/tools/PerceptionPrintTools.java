@@ -13,7 +13,7 @@ public class PerceptionPrintTools
    {
       LogTools.info("------------------------------------------------ Printing Matches ({}) ---------------------------------------------", tag);
       LogTools.info("Map Region Count: {}", map.getNumberOfPlanarRegions());
-      LogTools.info("Incoming Regionr Count: {}", regions.getNumberOfPlanarRegions());
+      LogTools.info("Incoming Regions Count: {}", regions.getNumberOfPlanarRegions());
 
       for(Integer key : matches.keySet())
       {
