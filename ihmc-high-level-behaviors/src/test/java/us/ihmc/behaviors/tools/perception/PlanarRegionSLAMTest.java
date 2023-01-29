@@ -22,15 +22,22 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
+import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.mapping.PlanarRegionMap;
+import us.ihmc.perception.slamWrapper.SlamWrapper;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerTest;
@@ -38,9 +45,11 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
+import us.ihmc.robotics.TestTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.tools.lists.PairList;
 
 class PlanarRegionSLAMTest
@@ -1073,5 +1082,48 @@ class PlanarRegionSLAMTest
       //      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionSLAM.class, PlanarRegionSLAMTest.class);
       MutationTestFacilitator.facilitateMutationTestForClasses(new Class[] {PlanarRegionSLAM.class, ConcaveHullMerger.class},
                                                                new Class[] {PlanarRegionSLAMTest.class, ConcaveHullMergerTest.class});
+   }
+
+   @Test
+   public void testPlanarRegionFactorGraphSLAM()
+   {
+      BytedecoTools.loadSlamWrapper();
+      SlamWrapper.FactorGraphExternal slam = new SlamWrapper.FactorGraphExternal();
+
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.1, 0.0, 0.0), new Vector3D(1.0, 2.0, 3.0));
+      RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
+      worldToSensorTransform.setAndInvert(sensorToWorldTransform);
+
+      PlanarRegionsList listOne = createSomeRightAngledWalls(-3, false, new RigidBodyTransform(), true, true, true);
+      PlanarRegionsList listTwo = createSomeRightAngledWalls(-6, false, worldToSensorTransform, true, true, true);
+
+      PlanarRegionsListWithPose listOneWithPose = new PlanarRegionsListWithPose(listOne, new RigidBodyTransform());
+      PlanarRegionsListWithPose listTwoWithPose = new PlanarRegionsListWithPose(listTwo, sensorToWorldTransform);
+
+      PlanarRegionMap map = new PlanarRegionMap(true);
+
+      map.submitRegionsUsingIterativeReduction(listOneWithPose);
+      map.submitRegionsUsingIterativeReduction(listTwoWithPose);
+
+      RigidBodyTransform optimalTransform = map.getOptimalSensorToWorldTransform();
+
+      Point3D eulerAngles = new Point3D();
+      optimalTransform.getRotation().getEuler(eulerAngles);
+
+      Point3D initialAngles = new Point3D();
+      sensorToWorldTransform.getRotation().getEuler(initialAngles);
+
+      LogTools.info("Optimal Rotation: \n" + eulerAngles + "\tOptimal Translation" + optimalTransform.getTranslation());
+
+      assertEquals(0.0, EuclidGeometryTools.distanceBetweenPoint3Ds(eulerAngles.getX(), eulerAngles.getY(), eulerAngles.getZ(), initialAngles.getX(),
+                                                                    initialAngles.getY(), initialAngles.getZ()), 1e-2);
+
+      assertEquals(0.0,
+                   EuclidGeometryTools.distanceBetweenPoint3Ds(sensorToWorldTransform.getTranslationX(),
+                                                               sensorToWorldTransform.getTranslationY(),
+                                                               sensorToWorldTransform.getTranslationZ(),
+                                                               optimalTransform.getTranslationX(),
+                                                               optimalTransform.getTranslationY(),
+                                                               optimalTransform.getTranslationZ()), 0.1);
    }
 }

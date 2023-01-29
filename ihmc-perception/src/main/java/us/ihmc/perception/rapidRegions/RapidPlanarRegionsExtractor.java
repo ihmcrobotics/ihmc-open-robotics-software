@@ -13,10 +13,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -165,7 +163,7 @@ public class RapidPlanarRegionsExtractor
 
    public void update(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsWithPose)
    {
-      if(!processing)
+      if (!processing)
       {
          processing = true;
          debugger.clearDebugImage();
@@ -174,7 +172,6 @@ public class RapidPlanarRegionsExtractor
          gpuDurationStopwatch.start();
          computePatchFeatureGrid(input16UC1DepthImage);
          gpuDurationStopwatch.suspend();
-
 
          depthFirstSearchDurationStopwatch.start();
          findRegions();
@@ -186,8 +183,11 @@ public class RapidPlanarRegionsExtractor
 
          wholeAlgorithmDurationStopwatch.suspend();
 
-         debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(), currentFeatureGrid, patchGraph,
-                         cloudBuffer.getBackingDirectFloatBuffer(), cameraFrame.getTransformToWorldFrame());
+         debugger.update(input16UC1DepthImage.getBytedecoOpenCVMat(),
+                         currentFeatureGrid,
+                         patchGraph,
+                         cloudBuffer.getBackingDirectFloatBuffer(),
+                         cameraFrame.getTransformToWorldFrame());
 
          modified = true;
       }
@@ -251,12 +251,12 @@ public class RapidPlanarRegionsExtractor
       }
       else
       {
-//         LogTools.info("Writing to OpenCL Image");
+         //         LogTools.info("Writing to OpenCL Image");
          input16UC1DepthImage.writeOpenCLImage(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
       }
 
-//      LogTools.info("Done Writing Input Image");
+      //      LogTools.info("Done Writing Input Image");
 
       _cl_mem inputImage = input16UC1DepthImage.getOpenCLImageObject();
 
@@ -285,7 +285,7 @@ public class RapidPlanarRegionsExtractor
       patchGraph.readOpenCLImage(openCLManager);
 
       // TODO: Remove
-      if(sensorModel == SensorModel.SPHERICAL)
+      if (sensorModel == SensorModel.SPHERICAL)
       {
          openCLManager.setKernelArgument(sphericalBackProjectionKernel, 0, inputImage);
          openCLManager.setKernelArgument(sphericalBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
@@ -294,7 +294,7 @@ public class RapidPlanarRegionsExtractor
          cloudBuffer.readOpenCLBufferObject(openCLManager);
       }
 
-      if(sensorModel == SensorModel.PERSPECTIVE)
+      if (sensorModel == SensorModel.PERSPECTIVE)
       {
          openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 0, inputImage);
          openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
@@ -304,7 +304,6 @@ public class RapidPlanarRegionsExtractor
       }
 
       openCLManager.finish();
-
    }
 
    public void copyFeatureGridMapUsingOpenCL()
@@ -345,7 +344,8 @@ public class RapidPlanarRegionsExtractor
          {
             int boundaryConnectionsEncodedAsOnes = patchGraph.getCharDirect(row, column);
 
-            if (!regionVisitedMatrix.get(row, column) && checkConnectionThreshold(boundaryConnectionsEncodedAsOnes, parameters.getConnectionThreshold())) // all ones; fully connected
+            if (!regionVisitedMatrix.get(row, column) && checkConnectionThreshold(boundaryConnectionsEncodedAsOnes,
+                                                                                  parameters.getConnectionThreshold())) // all ones; fully connected
             {
                numberOfRegionPatches = 0; // also number of patches traversed
                GPUPlanarRegion planarRegion = gpuPlanarRegions.add();
@@ -373,7 +373,7 @@ public class RapidPlanarRegionsExtractor
                else
                {
                   int totalGPURegions = gpuPlanarRegions.size();
-                  if(totalGPURegions > 0)
+                  if (totalGPURegions > 0)
                   {
                      gpuPlanarRegions.remove(gpuPlanarRegions.size() - 1);
                   }
@@ -632,7 +632,7 @@ public class RapidPlanarRegionsExtractor
             boundaryMatrix.set(row, column, true);
             Point2D boundaryPoint = planarRegion.getBorderIndices().add();
 
-            if(boundaryPoint != null)
+            if (boundaryPoint != null)
                boundaryPoint.set(column, row);
             //debugger.drawBoundaryNode(planarRegionIslandIndex, column, row, patchHeight, patchWidth);
          }

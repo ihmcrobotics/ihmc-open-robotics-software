@@ -7,6 +7,15 @@ void FactorGraphExternal::addPriorPoseFactor(int index, float *pose)
     factorGraphHandler.addPriorPoseFactor(index, initPose);
 }
 
+void FactorGraphExternal::addPriorPoseFactorExtended(double *pose, int poseId)
+{
+    using namespace gtsam;
+    Eigen::Matrix4d M = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(pose);
+
+    Pose3 poseValue(M);
+    factorGraphHandler.addPriorPoseFactor(poseId, poseValue);
+}
+
 void FactorGraphExternal::addOdometryFactor(float *odometry, int poseId)
 {
     using namespace gtsam;
@@ -14,12 +23,12 @@ void FactorGraphExternal::addOdometryFactor(float *odometry, int poseId)
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
 }
 
-void FactorGraphExternal::addOdometryFactorExtended(float *odometry, int poseId)
+void FactorGraphExternal::addOdometryFactorExtended(double *odometry, int poseId)
 {
     using namespace gtsam;
-    Eigen::Matrix4f M = Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor> >(odometry);
+    Eigen::Matrix4d M = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(odometry);
 
-    Pose3 odometryValue(M.cast<double>());
+    Pose3 odometryValue(M);
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
 }
 
@@ -53,15 +62,15 @@ void FactorGraphExternal::setPoseInitialValue(int index, float *value)
     factorGraphHandler.setPoseInitialValue(index, initialValue);
 }
 
-void FactorGraphExternal::setPoseInitialValueExtended(int index, float *value)
+void FactorGraphExternal::setPoseInitialValueExtended(int index, double *value)
 {
     printf("setPoseInitialValueExtended(%d)\n", index); fflush(stdout);
     using namespace gtsam;
-    Eigen::Matrix4f M = Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor> >(value);
+    Eigen::Matrix4d M = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(value);
 
     // std::cout << "Set Pose Initial Extended: " << std::endl << M << std::endl;
 
-    Pose3 initialValue(M.cast<double>());
+    Pose3 initialValue(M);
     factorGraphHandler.setPoseInitialValue(index, initialValue);
 }
 

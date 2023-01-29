@@ -554,7 +554,7 @@ public class PlanarRegionSLAMTools
 
          for (int j = 0; j<mapRegions.size(); j++)
          {
-            PlanarRegion mapRegion = mapRegions.get(i);
+            PlanarRegion mapRegion = mapRegions.get(j);
 
             if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold))
             {
@@ -599,33 +599,34 @@ public class PlanarRegionSLAMTools
 
    public static boolean mergeRegionIntoParent(PlanarRegion parentRegion, PlanarRegion childRegion, double updateTowardsChildAlpha)
    {
-      // Update Map Region Normal and Origin
-      UnitVector3DReadOnly mapNormal = parentRegion.getNormal();
-      Point3DReadOnly mapOrigin = parentRegion.getPoint();
+      //// Update Map Region Normal and Origin
+      //UnitVector3DReadOnly mapNormal = parentRegion.getNormal();
+      //Point3DReadOnly mapOrigin = parentRegion.getPoint();
+      //
+      //UnitVector3DReadOnly regionNormal = childRegion.getNormal();
+      //Point3DReadOnly regionOrigin = childRegion.getPoint();
+      //
+      //Vector3D futureNormal = new Vector3D();
+      //futureNormal.interpolate(mapNormal, regionNormal, updateTowardsChildAlpha);
+      //
+      //double futureHeightZ = EuclidCoreTools.interpolate(mapOrigin.getZ(), regionOrigin.getZ(), updateTowardsChildAlpha);
+      //
+      //Vector3D normalVector = new Vector3D(mapNormal);
+      //Vector3D axis = new Vector3D();
+      //axis.cross(normalVector, futureNormal);
+      //double angle = normalVector.angle(futureNormal);
+      //
+      //Point3D futureOrigin = new Point3D(mapOrigin.getX(), mapOrigin.getY(), futureHeightZ);
+      //AxisAngle rotationToFutureRegion = new AxisAngle(axis, angle);
+      //Vector3D translationToFutureRegion = new Vector3D();
+      //translationToFutureRegion.sub(futureOrigin, mapOrigin);
+      //
+      //RigidBodyTransform transform = new RigidBodyTransform(rotationToFutureRegion, translationToFutureRegion);
+      //transform.setUnsafe(transform.getM00(), transform.getM01(), transform.getM02(), transform.getM03(),
+      //                    transform.getM10(), transform.getM11(), transform.getM12(), transform.getM13(),
+      //                    transform.getM20(), transform.getM21(), transform.getM22(), transform.getM23());
 
-      UnitVector3DReadOnly regionNormal = childRegion.getNormal();
-      Point3DReadOnly regionOrigin = childRegion.getPoint();
-
-      Vector3D futureNormal = new Vector3D();
-      futureNormal.interpolate(mapNormal, regionNormal, updateTowardsChildAlpha);
-
-      double futureHeightZ = EuclidCoreTools.interpolate(mapOrigin.getZ(), regionOrigin.getZ(), updateTowardsChildAlpha);
-
-      Vector3D normalVector = new Vector3D(mapNormal);
-      Vector3D axis = new Vector3D();
-      axis.cross(normalVector, futureNormal);
-      double angle = normalVector.angle(futureNormal);
-
-      Point3D futureOrigin = new Point3D(mapOrigin.getX(), mapOrigin.getY(), futureHeightZ);
-      AxisAngle rotationToFutureRegion = new AxisAngle(axis, angle);
-      Vector3D translationToFutureRegion = new Vector3D();
-      translationToFutureRegion.sub(futureOrigin, mapOrigin);
-
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.appendOrientation(rotationToFutureRegion);
-      transform.appendTranslation(translationToFutureRegion);
-
-      parentRegion.applyTransform(transform);
+      //parentRegion.applyTransform(transform);
 
       ArrayList<PlanarRegion> mergedRegion = ConcaveHullMerger.mergePlanarRegions(parentRegion, childRegion, 1.0f, null);
 
