@@ -32,7 +32,7 @@ void ExternalSLAMTest(FactorGraphExternal& factorGraphExternal)
    factorGraphExternal.addPriorPoseFactor(1, initialPoseValue);
 
    float odometryValue[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0};
-   factorGraphExternal.addOdometryFactor(odometryValue, 2);
+   factorGraphExternal.addOdometryFactor(2, odometryValue);
 
    factorGraphExternal.setPoseInitialValue(1, initialPoseValue);
    factorGraphExternal.setPoseInitialValue(2, odometryValue);

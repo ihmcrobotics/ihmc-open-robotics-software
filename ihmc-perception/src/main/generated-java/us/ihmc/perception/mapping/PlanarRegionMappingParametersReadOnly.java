@@ -39,4 +39,9 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
    {
       return get(minimumPlanarRegionArea);
    }
+
+   default double getMinimumBoundingBoxSize()
+   {
+      return get(minimumBoundingBoxSize);
+   }
 }
