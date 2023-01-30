@@ -3,18 +3,13 @@ package us.ihmc.behaviors.tools;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.SpatialVector;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -133,17 +128,5 @@ public class HandWrenchCalculator
    public SideDependentList<ReferenceFrame> getReferenceFrame()
    {
       return referenceFrame;
-   }
-
-   // expressed in world-aligned frame
-   public FrameVector3D getWrenchLinear(RobotSide side)
-   {
-      return new FrameVector3D(wrenches.get(side).getLinearPart().getReferenceFrame(), wrenches.get(side).getLinearPart());
-   }
-
-   // expressed in world-aligned frame
-   public FrameVector3D getWrenchAngular(RobotSide side)
-   {
-      return new FrameVector3D(wrenches.get(side).getAngularPart().getReferenceFrame(), wrenches.get(side).getAngularPart());
    }
 }
