@@ -108,23 +108,26 @@ public class HandWrenchCalculator
 
    private void makeWrench(RobotSide side, DMatrixRMaj wrenchVector)
    {
+      ReferenceFrame wrenchFrame = getReferenceFrame().get(side);
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
       // LINEAR PART
       FrameVector3D linearPart = new FrameVector3D();
-      linearPart.setReferenceFrame(getReferenceFrame().get(side));
+      linearPart.setReferenceFrame(wrenchFrame);
       linearPart.set(0,0, wrenchVector);
-      linearPart.changeFrame(ReferenceFrame.getWorldFrame());
 
       // ANGULAR PART
       FrameVector3D angularPart = new FrameVector3D();
-      angularPart.setReferenceFrame(getReferenceFrame().get(side));
+      angularPart.setReferenceFrame(wrenchFrame);
       angularPart.set(3,0,wrenchVector);
-      angularPart.changeFrame(ReferenceFrame.getWorldFrame());
 
       Wrench wrench = wrenches.get(side);
-      ReferenceFrame wrenchFrame = getReferenceFrame().get(side);
+      wrench.setBodyFrame(wrenchFrame);
+      wrench.setReferenceFrame(wrenchFrame);
+
       wrench.set(wrenchFrame, wrenchFrame, linearPart, angularPart);
       // Express in world frame
-      wrench.changeFrame(ReferenceFrame.getWorldFrame());
+      wrench.changeFrame(worldFrame);
       wrenches.set(side, wrench);
    }
 
@@ -147,12 +150,12 @@ public class HandWrenchCalculator
    // expressed in world-aligned frame
    public FrameVector3D getWrenchLinear(RobotSide side)
    {
-      return (FrameVector3D) wrenches.get(side).getLinearPart();
+      return new FrameVector3D(wrenches.get(side).getLinearPart().getReferenceFrame(), wrenches.get(side).getLinearPart());
    }
 
    // expressed in world-aligned frame
    public FrameVector3D getWrenchAngular(RobotSide side)
    {
-      return (FrameVector3D) wrenches.get(side).getAngularPart();
+      return new FrameVector3D(wrenches.get(side).getAngularPart().getReferenceFrame(), wrenches.get(side).getAngularPart());
    }
 }
