@@ -103,9 +103,4 @@ public class RDXSpatialVectorArrows
    {
       return indexOfSensor;
    }
-
-   public ReferenceFrame getOriginFrame()
-   {
-      return originFrame;
-   }
 }
