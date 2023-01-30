@@ -8,6 +8,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -47,6 +48,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private final ArrayList<KinematicsToolboxOutputStatus> assistanceStatusList = new ArrayList<>();
    private boolean firstPreview = true;
    private int replayPreviewCounter = 0;
+   private int speedSplineAdjustmentFactor = 1;
 
    public RDXVRSharedControl(DRCRobotModel robotModel, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -113,20 +115,28 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          {
             if (splineGraphics.containsKey(bodyPart)) // if the spline was previously created, meaning we are at the second replay of full preview
                splineGraphics.get(bodyPart).clear(); // clear it
-            else
-               splineGraphics.put(bodyPart, new RDXSplineGraphic());
+            splineGraphics.put(bodyPart, new RDXSplineGraphic());
             // restart creating the spline from beginning
             splineGraphics.get(bodyPart).createStart(bodyPartReplayMotionMap.get(bodyPart).get(0).getPosition(), Color.BLUE);
+            speedSplineAdjustmentFactor = (int) Math.floor((1.0 * assistanceStatusList.size()) / (1.0 * bodyPartReplayMotionMap.get(bodyPart).size()));
          }
       }
       else
       {
          for (String bodyPart : bodyPartReplayMotionMap.keySet())
          {
-            if (replayPreviewCounter < bodyPartReplayMotionMap.get(bodyPart).size() - 1)
-               splineGraphics.get(bodyPart).createAdditionalPoint(bodyPartReplayMotionMap.get(bodyPart).get(replayPreviewCounter).getPosition(), Color.YELLOW);
-            else if (replayPreviewCounter == bodyPartReplayMotionMap.get(bodyPart).size() - 1)
+            // since update() method of kinematics streaming can be faster than processVRInput(), the spline size can be shorter than the status list of the ghost robot
+            // we do an approximate speed adjustment consisting in waiting before adding the next point of the spline
+            int speedAdjuster = replayPreviewCounter/speedSplineAdjustmentFactor;
+            if (speedAdjuster < bodyPartReplayMotionMap.get(bodyPart).size() - 1)
+            {
+               splineGraphics.get(bodyPart).createAdditionalPoint(bodyPartReplayMotionMap.get(bodyPart).get(speedAdjuster).getPosition(), Color.YELLOW);
+            }
+            else if (speedAdjuster == bodyPartReplayMotionMap.get(bodyPart).size() - 1)
+            {
                splineGraphics.get(bodyPart).createEnd(Color.BLUE);
+            }
+
          }
       }
    }
@@ -143,7 +153,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          if (!bodyPartReplayMotionMap.containsKey(bodyPart))
             bodyPartReplayMotionMap.put(bodyPart, new ArrayList<>());
          else
-            bodyPartReplayMotionMap.get(bodyPart).add(observedPose);
+            bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(observedPose));
       }
    }
 
@@ -166,6 +176,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
          {
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
+            splineGraphics.clear(); // stop displaying preview splines
             previewValidated = true;
          }
          if (!firstPreview) // if second replay or more, keep promp assistant in pause at beginning
@@ -174,7 +185,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          { // if first preview
             // keep storing current frames for replay preview with splines
             if (bodyPartReplayMotionMap.containsKey(bodyPart))
-               bodyPartReplayMotionMap.get(bodyPart).add(framePose);
+               bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(framePose));
          }
       }
       else // if user did not use the preview or preview has been validated
