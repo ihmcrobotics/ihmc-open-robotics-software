@@ -8,6 +8,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXSpatialVectorArrows;
@@ -90,7 +91,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       }
    }
 
-   public void updateEstimatedWrench(FrameVector3D linear, FrameVector3D angular)
+   public void updateEstimatedWrench(FixedFrameVector3DBasics linear, FixedFrameVector3DBasics angular)
    {
       estimatedHandWrenchArrows.update(linear, angular);
    }

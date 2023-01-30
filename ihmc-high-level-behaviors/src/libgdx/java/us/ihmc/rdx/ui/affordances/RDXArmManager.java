@@ -11,10 +11,10 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -95,8 +95,8 @@ public class RDXArmManager
          armManagers.get(side).update(interactableHands.get(side), desiredRobot);
 
          // wrench expressed in wrist pitch body fixed-frame
-         interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getWrenchLinear(side),
-                                                           handWrenchCalculator.getWrenchAngular(side));
+         interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getWrench().get(side).getLinearPart(),
+                                                           handWrenchCalculator.getWrench().get(side).getAngularPart());
 
          // We only want to evaluate this when we are going to take action on it
          // Otherwise, we will not notice the desired changed while the solver was still solving
