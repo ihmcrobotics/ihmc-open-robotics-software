@@ -20,6 +20,7 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -42,6 +43,8 @@ public class RDXVRHandPlacedFootstepMode
    private ROS2ControllerHelper controllerHelper;
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
    private RDXTeleoperationParameters teleoperationParameters;
+   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
+
 
    public void create(DRCRobotModel robotModel, ROS2ControllerHelper controllerHelper)
    {
@@ -67,6 +70,8 @@ public class RDXVRHandPlacedFootstepMode
 
    public void processVRInput(RDXVRContext vrContext)
    {
+      if (controllerModel == RDXVRControllerModel.UNKNOWN)
+         controllerModel = vrContext.getControllerModel();
       boolean noSelectedPick = true;
       for (RobotSide side : RobotSide.values)
          noSelectedPick =  noSelectedPick && vrContext.getSelectedPick().get(side) == null;
@@ -153,8 +158,16 @@ public class RDXVRHandPlacedFootstepMode
    public void renderImGuiWidgets()
    {
       ImGui.text("Footstep placement: Hold and release respective trigger");
-      ImGui.text("Clear footsteps: Left B button");
-      ImGui.text("Walk: Right A button");
+      if (controllerModel == RDXVRControllerModel.FOCUS3)
+      {
+         ImGui.text("Clear footsteps: Y button");
+         ImGui.text("Walk: A button");
+      }
+      else {
+         ImGui.text("Clear footsteps: Left B button");
+         ImGui.text("Walk: Right A button");
+      }
+
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

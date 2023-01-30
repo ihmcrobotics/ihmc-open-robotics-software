@@ -35,8 +35,9 @@ import java.util.function.Consumer;
  * 8. Add programmatic fields and getters to this class for the new action,
  *    by pattern matching what's here
  *
- * It's possible to do this for multiple types of controllers, but currently
- * we just have mappings for Valve Index controllers.
+ * It's possible to do this for multiple types of controllers.
+ * Currently, we have mappings for Valve Index and Vive Focus 3 controllers.
+ * You can change the default bindings in actions.json to select the right one for the controller you're using.
  */
 public class RDXVRController extends RDXVRTrackedDevice
 {
@@ -71,6 +72,8 @@ public class RDXVRController extends RDXVRTrackedDevice
    private InputAnalogActionData joystickActionData;
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
+
+
 
    private static final RigidBodyTransformReadOnly controllerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(
       new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
