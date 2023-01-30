@@ -37,8 +37,6 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
          int tries = 5;
          while (!isConnected() && tries > 0 && connecting.getValue())
          {
-            System.out.println("is connected " + isConnected());
-
             try
             {
                LogTools.info(caller + ": Connecting to {}:{}", hostname, port);
