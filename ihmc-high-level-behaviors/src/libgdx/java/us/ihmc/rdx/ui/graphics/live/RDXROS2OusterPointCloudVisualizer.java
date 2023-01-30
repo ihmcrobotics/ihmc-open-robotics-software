@@ -200,10 +200,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    public void destroy()
    {
       super.destroy();
-      if (realtimeROS2Node != null)
-      {
-         realtimeROS2Node.destroy();
-      }
+      unsubscribe();
    }
 
    public void setSubscribed(boolean subscribed)

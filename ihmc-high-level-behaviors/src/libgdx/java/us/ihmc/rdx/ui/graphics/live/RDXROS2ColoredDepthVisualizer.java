@@ -399,10 +399,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    public void destroy()
    {
       super.destroy();
-      if (realtimeROS2Node != null)
-      {
-         realtimeROS2Node.destroy();
-      }
+      unsubscribe();
    }
 
    public void setSubscribed(boolean subscribed)
