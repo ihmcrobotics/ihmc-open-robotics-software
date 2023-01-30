@@ -7,7 +7,7 @@ void FactorGraphExternal::addPriorPoseFactor(int index, float *pose)
     factorGraphHandler.addPriorPoseFactor(index, initPose);
 }
 
-void FactorGraphExternal::addPriorPoseFactorExtended(double *pose, int poseId)
+void FactorGraphExternal::addPriorPoseFactorExtended(int poseId, double *pose)
 {
     using namespace gtsam;
     Eigen::Matrix4d M = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(pose);
@@ -16,14 +16,14 @@ void FactorGraphExternal::addPriorPoseFactorExtended(double *pose, int poseId)
     factorGraphHandler.addPriorPoseFactor(poseId, poseValue);
 }
 
-void FactorGraphExternal::addOdometryFactor(float *odometry, int poseId)
+void FactorGraphExternal::addOdometryFactor(int poseId, float *odometry)
 {
     using namespace gtsam;
     Pose3 odometryValue(Rot3::Ypr(odometry[0], odometry[1], odometry[2]), Point3(odometry[3], odometry[4], odometry[5]));
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
 }
 
-void FactorGraphExternal::addOdometryFactorExtended(double *odometry, int poseId)
+void FactorGraphExternal::addOdometryFactorExtended(int poseId, double *odometry)
 {
     using namespace gtsam;
     Eigen::Matrix4d M = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(odometry);
@@ -33,7 +33,7 @@ void FactorGraphExternal::addOdometryFactorExtended(double *odometry, int poseId
 }
 
 
-void FactorGraphExternal::addOrientedPlaneFactor(float *lmMean, int lmId, int poseIndex)
+void FactorGraphExternal::addOrientedPlaneFactor(int lmId, int poseIndex, float *lmMean)
 {
     using namespace gtsam;
     Vector4 planeValue(lmMean[0], lmMean[1], lmMean[2], lmMean[3]);
@@ -107,6 +107,20 @@ bool FactorGraphExternal::getPoseById(int poseId, double* pose)
     std::copy(  matrix.data(),
                 matrix.data() + 16,
                 pose);
+
+    return true;
+}
+
+bool FactorGraphExternal::getPlanarLandmarkById(int landmarkId, double* plane)
+{
+    if(!factorGraphHandler.getResults().exists(gtsam::Symbol('l', landmarkId)))
+        return false;
+
+    auto matrix = factorGraphHandler.getResults().at<gtsam::OrientedPlane3>(gtsam::Symbol('l', landmarkId)).planeCoefficients();
+
+    std::copy(  matrix.data(),
+                matrix.data() + 4,
+                plane);
 
     return true;
 }

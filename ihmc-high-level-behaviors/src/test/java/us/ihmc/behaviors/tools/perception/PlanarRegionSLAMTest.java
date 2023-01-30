@@ -30,6 +30,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
@@ -38,6 +39,7 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
 import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
+import us.ihmc.perception.tools.PerceptionPrintTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerTest;
@@ -1090,7 +1092,7 @@ class PlanarRegionSLAMTest
       BytedecoTools.loadSlamWrapper();
       SlamWrapper.FactorGraphExternal slam = new SlamWrapper.FactorGraphExternal();
 
-      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.1, 0.0, 0.0), new Vector3D(1.0, 2.0, 3.0));
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.03, 0.02, 0.04), new Vector3D(0.05, 0.05, -0.05));
       RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
       worldToSensorTransform.setAndInvert(sensorToWorldTransform);
 
@@ -1125,5 +1127,19 @@ class PlanarRegionSLAMTest
                                                                optimalTransform.getTranslationX(),
                                                                optimalTransform.getTranslationY(),
                                                                optimalTransform.getTranslationZ()), 0.1);
+
+      Vector4D planeOne = map.getOptimalLandmarkById(1);
+      Vector4D planeTwo = map.getOptimalLandmarkById(2);
+      Vector4D planeThree = map.getOptimalLandmarkById(3);
+
+      PerceptionPrintTools.printPlane(listOne.getPlanarRegion(0));
+      LogTools.info("Plane One: " + planeOne);
+
+      PerceptionPrintTools.printPlane(listOne.getPlanarRegion(1));
+      LogTools.info("Plane Two: " + planeTwo);
+
+      PerceptionPrintTools.printPlane(listOne.getPlanarRegion(2));
+      LogTools.info("Plane Three: " + planeThree);
+
    }
 }

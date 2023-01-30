@@ -541,8 +541,9 @@ public class PlanarRegionSLAMTools
    }
 
    public static void findPlanarRegionMatches(PlanarRegionsList map, PlanarRegionsList incoming, HashMap<Integer, TIntArrayList> matches,
-                                                                         float overlapThreshold, float normalThreshold, float distanceThreshold)
+                                              float overlapThreshold, float normalThreshold, float distanceThreshold, float minBoxSize)
    {
+      matches.clear();
       List<PlanarRegion> newRegions = incoming.getPlanarRegionsAsList();
       List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
 
@@ -556,7 +557,7 @@ public class PlanarRegionSLAMTools
          {
             PlanarRegion mapRegion = mapRegions.get(j);
 
-            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold))
+            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold, minBoxSize))
             {
                matches.get(i).add(j);
             }
@@ -576,20 +577,12 @@ public class PlanarRegionSLAMTools
       return collisionResult.areShapesColliding();
    }
 
-   public static double computeBoundingBoxOverlapScore(PlanarRegion a, PlanarRegion b)
+   public static double computeBoundingBoxOverlapScore(PlanarRegion a, PlanarRegion b, double minSize)
    {
-      return GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(a.getBoundingBox3dInWorld(), b.getBoundingBox3dInWorld());
-   }
+      BoundingBox3D boxA = PlanarRegionTools.getWorldBoundingBox3DWithMargin(a, minSize);
+      BoundingBox3D boxB = PlanarRegionTools.getWorldBoundingBox3DWithMargin(b, minSize);
 
-   public static boolean boxesIn3DIntersect(PlanarRegion a, PlanarRegion b)
-   {
-      Box3D boxA = PlanarRegionTools.getLocalBoundingBox3DInWorldWithMargin(a, 0.1);
-      Box3D boxB = PlanarRegionTools.getLocalBoundingBox3DInWorldWithMargin(b, 0.1);
-
-      GilbertJohnsonKeerthiCollisionDetector gjkCollisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
-      EuclidShape3DCollisionResult collisionResult = gjkCollisionDetector.evaluateCollision(boxA, boxB);
-
-      return collisionResult.areShapesColliding();
+      return GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boxA, boxB);
    }
 
    public static boolean boundingBoxesIntersect(PlanarRegion a, PlanarRegion b)
@@ -692,7 +685,8 @@ public class PlanarRegionSLAMTools
                                                 PlanarRegion regionB,
                                                 float normalThreshold,
                                                 float normalDistanceThreshold,
-                                                float overlapThreshold)
+                                                float overlapThreshold,
+                                                float minBoxSize)
    {
       Point3D newOrigin = new Point3D();
       regionA.getOrigin(newOrigin);
@@ -722,7 +716,7 @@ public class PlanarRegionSLAMTools
 
          if(wasMatched)
          {
-            overlapScore = computeBoundingBoxOverlapScore(regionA, regionB);
+            overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, minBoxSize);
             intersects =  overlapScore > overlapThreshold;
             wasMatched &= intersects;
          }
