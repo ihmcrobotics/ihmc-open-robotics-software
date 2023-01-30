@@ -114,7 +114,10 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    public void destroy()
    {
       super.destroy();
-      realtimeROS2Node.destroy();
+      if (realtimeROS2Node != null)
+      {
+         realtimeROS2Node.destroy();
+      }
    }
 
    public void setSubscribed(boolean subscribed)
@@ -132,8 +135,11 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    private void unsubscribe()
    {
       subscribed.set(false);
-      realtimeROS2Node.destroy();
-      realtimeROS2Node = null;
+      if (realtimeROS2Node != null)
+      {
+         realtimeROS2Node.destroy();
+         realtimeROS2Node = null;
+      }
    }
 
    public boolean isSubscribed()
