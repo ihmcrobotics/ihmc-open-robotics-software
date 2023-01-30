@@ -293,10 +293,10 @@ public class RDXJoystickBasedStepping
 
    private void sendPauseWalkingToController()
    {
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-      pauseWalkingMessage.setPause(true);
       if (currentControllerConnected)
       {
+         PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+         pauseWalkingMessage.setPause(true);
          controllerHelper.publishToController(pauseWalkingMessage);
       }
    }
