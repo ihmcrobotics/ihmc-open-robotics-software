@@ -94,7 +94,6 @@ public class RecoveryTransferState extends PushRecoveryState
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
       double finalTransferTime = pushRecoveryParameters.getFinalTransferDurationForRecovery();
-      walkingMessageHandler.requestPlanarRegions();
 
       currentTransferDuration.set(stepTiming.getTransferTime());
       balanceManager.setFinalTransferTime(finalTransferTime);

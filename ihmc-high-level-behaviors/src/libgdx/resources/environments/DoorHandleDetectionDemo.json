@@ -1,7 +1,7 @@
 {
   "ambientLight" : 0.4,
   "objects" : [ {
-    "type" : "GDXLabFloorObject",
+    "type" : "RDXLabFloorObject",
     "x" : -0.1752795106771554,
     "y" : 0.14801377616724573,
     "z" : 0.0,
@@ -10,7 +10,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : -29.34680722753535,
     "y" : -32.372082208212944,
     "z" : 12.617145940835659,
@@ -19,7 +19,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : -2.0237159243106575,
     "y" : 49.55788145603568,
     "z" : 8.894295975020333,
@@ -28,7 +28,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXDoorObject",
+    "type" : "RDXDoorObject",
     "x" : 2.8881995539829184,
     "y" : 0.055582171312443585,
     "z" : 0.0,
@@ -37,7 +37,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXDoorLeverHandleObject",
+    "type" : "RDXDoorLeverHandleObject",
     "x" : 2.831655594017242,
     "y" : -0.18033808204484814,
     "z" : 0.8055852421877492,

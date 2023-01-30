@@ -20,15 +20,16 @@ ihmc {
    openSource = true
    
    configureDependencyResolution()
+   javaDirectory("main", "generated-java")
    configurePublications()
 }
 
-val javaCPPVersion = "1.5.7"
+val javaCPPVersion = "1.5.8"
 
 mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
 
-   api("us.ihmc:euclid-shape:0.19.0")
+   api("us.ihmc:euclid-shape:0.19.1")
    api("us.ihmc:joctomap:1.12.4")
    api("us.ihmc:ihmc-javafx-toolkit:17-0.21.3")
    api("us.ihmc:ihmc-communication:source")
@@ -39,8 +40,8 @@ mainDependencies {
    api("us.ihmc:ihmc-ros-tools:source")
 
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.19-")
-   apiBytedecoNatives("opencv", "4.5.5-")
+   apiBytedecoNatives("openblas", "0.3.21-")
+   apiBytedecoNatives("opencv", "4.6.0-")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")

@@ -1,16 +1,12 @@
 #!/bin/bash
-# Uncomment for debugging this script
+# Immediately exit on any errors.
+set -e
+# Print commands as they are run.
 set -o xtrace
 
-# Make sure it works one way or the other to reduce possible errors
-if (( EUID == 0 )); then
-    echo "Run without sudo." 1>&2
-    exit 1
-fi
+xhost +local:docker
 
-sudo -u $(whoami) xhost +local:docker
-
-sudo -u root docker run \
+docker run \
     --tty \
     --interactive \
     --network host \
@@ -21,4 +17,4 @@ sudo -u root docker run \
     --env DISPLAY \
     --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
     --name perception \
-    ihmcrobotics/nvidia-ros2-ihmc-development:0.1
+    ihmcrobotics/nvidia-ros2-ihmc-development:0.3

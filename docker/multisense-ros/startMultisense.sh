@@ -6,7 +6,7 @@ set -o xtrace
 
 xhost +local:docker
 
-if [ ! "$(docker ps -a | grep multisense)" ]; then
+if [ ! "$(docker ps -a | grep ' multisense$')" ]; then
     echo "multisense not found. Running new container."
     docker run \
     --tty \

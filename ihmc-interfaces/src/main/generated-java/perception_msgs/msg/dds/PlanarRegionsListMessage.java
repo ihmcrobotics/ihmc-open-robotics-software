@@ -19,6 +19,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
             */
    public long sequence_id_;
    /**
+            * Approximate last update time
+            */
+   public ihmc_common_msgs.msg.dds.InstantMessage last_updated_;
+   /**
             * ID number referring to each planar region, it should be unique.
             */
    public us.ihmc.idl.IDLSequence.Integer  region_id_;
@@ -53,6 +57,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
    public PlanarRegionsListMessage()
    {
+      last_updated_ = new ihmc_common_msgs.msg.dds.InstantMessage();
       region_id_ = new us.ihmc.idl.IDLSequence.Integer (3000, "type_2");
 
       region_origin_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (3000, new geometry_msgs.msg.dds.PointPubSubType());
@@ -78,6 +83,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
    {
       sequence_id_ = other.sequence_id_;
 
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.last_updated_, last_updated_);
       region_id_.set(other.region_id_);
       region_origin_.set(other.region_origin_);
       region_orientation_.set(other.region_orientation_);
@@ -101,6 +107,15 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+
+   /**
+            * Approximate last update time
+            */
+   public ihmc_common_msgs.msg.dds.InstantMessage getLastUpdated()
+   {
+      return last_updated_;
    }
 
 
@@ -195,6 +210,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!this.last_updated_.epsilonEquals(other.last_updated_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.region_id_, other.region_id_, epsilon)) return false;
 
       if (this.region_origin_.size() != other.region_origin_.size()) { return false; }
@@ -246,6 +262,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if (!this.last_updated_.equals(otherMyClass.last_updated_)) return false;
       if (!this.region_id_.equals(otherMyClass.region_id_)) return false;
       if (!this.region_origin_.equals(otherMyClass.region_origin_)) return false;
       if (!this.region_orientation_.equals(otherMyClass.region_orientation_)) return false;
@@ -266,6 +283,8 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
       builder.append("PlanarRegionsListMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("last_updated=");
+      builder.append(this.last_updated_);      builder.append(", ");
       builder.append("region_id=");
       builder.append(this.region_id_);      builder.append(", ");
       builder.append("region_origin=");

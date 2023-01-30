@@ -17,4 +17,10 @@ public interface StoredPropertySetReadOnly
    List<Object> getAll();
 
    List<String> getAllAsStrings();
+
+   String getTitle();
+
+   String getCurrentVersionSuffix();
+
+   String getCapitalizedClassName();
 }

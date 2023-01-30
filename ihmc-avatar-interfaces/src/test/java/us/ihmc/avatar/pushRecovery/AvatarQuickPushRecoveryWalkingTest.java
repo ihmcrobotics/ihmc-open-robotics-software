@@ -187,7 +187,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       RobotSide side = RobotSide.LEFT;
 
-      walkForward(16);
+      walkForward(20);
 
       StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
@@ -201,10 +201,12 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       testPush(forceDirection, pushChangeInVelocity, 0.1, condition, swingTime, 4);
 
       // reset and queue a late push
-      footstepsCompletedPerSide.get(side).set(0);
+      for (RobotSide robotSide : RobotSide.values)
+         footstepsCompletedPerSide.get(robotSide).set(0);
+
       condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
-      testPush(forceDirection, 0.7 * pushChangeInVelocity, 0.8, condition, swingTime, 4);
+      testPush(forceDirection, 0.7 * pushChangeInVelocity, 0.8, condition, swingTime, 6);
    }
 
    @Test
@@ -284,7 +286,9 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       ((YoBoolean) simulationTestHelper.findVariable("controllerSwingSpeedUpEnabled")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("leftFootSwingIsSpeedUpEnabled")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("rightFootSwingIsSpeedUpEnabled")).set(true);
-      ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.15);
+      ((YoBoolean) simulationTestHelper.findVariable("controllerAllowCrossOverSteps")).set(true);
+      ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.25);
+      ((YoDouble) simulationTestHelper.findVariable("controllerminimumTimeForStepAdjustment")).set(-3.0);
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(), simulationTestHelper.getRobot(), fullRobotModel);

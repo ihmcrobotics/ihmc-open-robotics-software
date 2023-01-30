@@ -83,7 +83,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                                                            "minimumSlowTransferDuration",
                                                                            registry,
                                                                            walkingControllerParameters.getMinimumSlowTransferDuration());
-      resubmitStepsInTransferEveryTick.set(walkingControllerParameters.resubmitStepsInSwingEveryTick());
+      resubmitStepsInTransferEveryTick.set(walkingControllerParameters.resubmitStepsInTransferEveryTick());
 
       numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
@@ -113,7 +113,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
 
       int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());

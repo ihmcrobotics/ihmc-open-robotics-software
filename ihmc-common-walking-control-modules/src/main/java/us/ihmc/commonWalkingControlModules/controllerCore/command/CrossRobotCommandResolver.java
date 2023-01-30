@@ -219,7 +219,6 @@ public class CrossRobotCommandResolver
       out.setControllerRan(in.getControllerRan());
    }
 
-   
    /**
     * Resolves only the part of the context data that is updated by the perception thread.
     */
@@ -541,8 +540,23 @@ public class CrossRobotCommandResolver
 
    public void resolveInverseDynamicsOptimizationSettingsCommand(InverseDynamicsOptimizationSettingsCommand in, InverseDynamicsOptimizationSettingsCommand out)
    {
-      // There is no robot sensitive information in this command, so the output can directly be set to the input.
-      out.set(in);
+      out.setCommandId(in.getCommandId());
+      out.setRhoMin(in.getRhoMin());
+      out.setJointAccelerationMax(in.getJointAccelerationMax());
+      out.setRhoWeight(in.getRhoWeight());
+      out.setRhoRateWeight(in.getRhoRateWeight());
+      out.setCenterOfPressureWeight(in.getCenterOfPressureWeight());
+      out.setCenterOfPressureRateWeight(in.getCenterOfPressureRateWeight());
+      out.setJointAccelerationWeight(in.getJointAccelerationWeight());
+      out.setJointJerkWeight(in.getJointJerkWeight());
+      out.setJointTorqueWeight(in.getJointTorqueWeight());
+      out.getJointsToActivate().clear();
+      out.getJointsToActivate().clear();
+      for (int i = 0; i < in.getJointsToActivate().size(); i++)
+         out.getJointsToActivate().add(resolveJoint(in.getJointsToActivate().get(i)));
+      out.getJointsToDeactivate().clear();
+      for (int i = 0; i < in.getJointsToDeactivate().size(); i++)
+         out.getJointsToDeactivate().add(resolveJoint(in.getJointsToDeactivate().get(i)));
    }
 
    public void resolveJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand in, JointAccelerationIntegrationCommand out)
@@ -590,6 +604,12 @@ public class CrossRobotCommandResolver
       out.setMomentumRate(in.getMomentumRate());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
+      out.setConsiderAllJoints(in.isConsiderAllJoints());
+
+      for (int jointIndex = 0; jointIndex < in.getJointSelection().size(); jointIndex++)
+      {
+         out.addJointToSelection(resolveJoint(in.getJointSelection().get(jointIndex)));
+      }
    }
 
    public void resolveLinearMomentumRateCostCommand(LinearMomentumRateCostCommand in, LinearMomentumRateCostCommand out)

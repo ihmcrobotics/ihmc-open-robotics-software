@@ -16,10 +16,10 @@ mainDependencies {
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-core:0.39")
 
-   api("us.ihmc:euclid:0.19.0")
-   api("us.ihmc:euclid-geometry:0.19.0")
-   api("us.ihmc:euclid-frame:0.19.0")
-   api("us.ihmc:euclid-shape:0.19.0")
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:euclid-geometry:0.19.1")
+   api("us.ihmc:euclid-frame:0.19.1")
+   api("us.ihmc:euclid-shape:0.19.1")
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-java-toolkit:source")
@@ -35,7 +35,7 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.31.0")
+   api("us.ihmc:ihmc-commons-testing:0.32.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-quadruped-robotics-test:source")
    api("us.ihmc:ihmc-quadruped-planning-test:source")

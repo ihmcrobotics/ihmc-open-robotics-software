@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -16,12 +17,13 @@ public interface FootstepAdjustment
 {
    /**
     * Adjusts the footstep height, pitch, and roll.
-    * 
+    *
+    * @param stanceFootPose     the pose of the stance foot for this step.
     * @param footstepPose       the generated footstep from the {@code ContinuousStepGenerator}.
     *                           Height, pitch, and roll have to be computed.
     * @param footSide           indicates for which foot the footstep is meant to be.
     * @param adjustedPoseToPack the adjusted footstep to pack. Modified.
     * @return whether the adjustment was successful or not.
     */
-   boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPoseToPack);
+   boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPoseToPack);
 }

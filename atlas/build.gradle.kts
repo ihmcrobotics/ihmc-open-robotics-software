@@ -29,14 +29,13 @@ mainDependencies {
    api("org.boofcv:boofcv-recognition:0.36")
    api("com.github.wendykierp:JTransforms:3.1")
 
-   api("us.ihmc:euclid:0.19.0")
-   api("us.ihmc:euclid-geometry:0.19.0")
-   api("us.ihmc:euclid-frame:0.19.0")
-   api("us.ihmc:euclid-shape:0.19.0")
-   api("us.ihmc:euclid-frame-shape:0.19.0")
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:euclid-geometry:0.19.1")
+   api("us.ihmc:euclid-frame:0.19.1")
+   api("us.ihmc:euclid-shape:0.19.1")
+   api("us.ihmc:euclid-frame-shape:0.19.1")
    api("us.ihmc:ihmc-javafx-toolkit:17-0.21.3")
    api("us.ihmc:ihmc-humanoid-behaviors:source")
-   api("us.ihmc:ihmc-mocap:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-simple-whole-body-walking:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
@@ -65,7 +64,7 @@ mainDependencies {
 testDependencies {
    api("com.thoughtworks.xstream:xstream:1.4.19")
 
-   api("us.ihmc:ihmc-commons-testing:0.31.0")
+   api("us.ihmc:ihmc-commons-testing:0.32.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")

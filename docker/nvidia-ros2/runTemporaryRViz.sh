@@ -17,4 +17,4 @@ docker run \
     --device /dev/dri:/dev/dri \
     --env DISPLAY \
     --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
-    ihmcrobotics/nvidia-ros2:0.2 rviz2
+    ihmcrobotics/nvidia-ros2:0.4 rviz2

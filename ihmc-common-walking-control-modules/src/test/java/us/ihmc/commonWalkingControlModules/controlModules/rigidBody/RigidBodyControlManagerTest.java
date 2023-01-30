@@ -505,7 +505,7 @@ public class RigidBodyControlManagerTest
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, controlFrame, baseFrame,
                                                                     taskspaceAngularWeight, taskspaceLinearWeight, taskspaceOrientationGains,
                                                                     taskspacePositionGains, contactableBody, null, yoTime, null, testRegistry);
-      manager.setGains(jointspaceGains);
+      manager.setGains(jointspaceGains, null);
       manager.setWeights(jointspaceWeights, userModeWeights);
 
       new DefaultParameterReader().readParametersInRegistry(testRegistry);

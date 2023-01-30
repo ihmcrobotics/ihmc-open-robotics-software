@@ -23,6 +23,13 @@ public class OpenCLIntBuffer
       this(numberOfIntegers, null);
    }
 
+   public OpenCLIntBuffer(ByteBuffer backingDirectByteBuffer)
+   {
+      this.backingDirectByteBuffer = backingDirectByteBuffer;
+      IntBuffer backingDirectIntBuffer = backingDirectByteBuffer.asIntBuffer();
+      resize(backingDirectIntBuffer.capacity(), null, backingDirectIntBuffer);
+   }
+
    public OpenCLIntBuffer(int numberOfIntegers, IntBuffer backingDirectIntBuffer)
    {
       resize(numberOfIntegers, null, backingDirectIntBuffer);
@@ -39,18 +46,16 @@ public class OpenCLIntBuffer
       {
          openCLManager.releaseBufferObject(openCLBufferObject);
          openCLBufferObject.releaseReference();
+         openCLBufferObject = null;
       }
    }
 
-   public void resize(int numberOfIntegers,  OpenCLManager openCLManager, IntBuffer backingDirectIntBuffer)
+   public void resize(int numberOfIntegers, OpenCLManager openCLManager, IntBuffer backingDirectIntBuffer)
    {
       this.numberOfIntegers = numberOfIntegers;
 
       boolean openCLObjectCreated = openCLBufferObject != null;
-      if (openCLObjectCreated)
-      {
-         openCLManager.releaseBufferObject(openCLBufferObject);
-      }
+      destroy(openCLManager); // TODO: Is this breaking things? Possible bug.
 
       if (backingDirectIntBuffer == null)
       {
