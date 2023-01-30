@@ -120,7 +120,7 @@ public class RDXRealsenseL515UI
                      colorImagePanel = new RDXCVImagePanel("L515 Color", l515.getColorWidth(), l515.getColorHeight());
                      baseUI.getImGuiPanelManager().addPanel(colorImagePanel.getVideoPanel());
 
-                     baseUI.getPerspectiveManager().reloadPerspective();
+                     baseUI.getLayoutManager().reloadLayout();
 
                      numberOfDepthPoints = l515.getDepthWidth() * l515.getDepthHeight();
                      int pointCloudBytesLength = pointCloudRenderer.getFloatsPerVertex();

@@ -47,14 +47,28 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
     */
    public static final DoubleStoredPropertyKey mahalanobisScale = keys.addDoubleKey("Mahalanobis scale");
 
+   /**
+    * Loads this property set.
+    */
    public HeightMapParameters()
    {
       this("");
    }
 
+   /**
+    * Loads an alternate version of this property set in the same folder.
+    */
    public HeightMapParameters(String versionSpecifier)
    {
-      super(keys, HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+   }
+
+   /**
+    * Loads an alternate version of this property set in other folders.
+    */
+   public HeightMapParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   {
+      super(keys, classForLoading, HeightMapParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
       load();
    }
 

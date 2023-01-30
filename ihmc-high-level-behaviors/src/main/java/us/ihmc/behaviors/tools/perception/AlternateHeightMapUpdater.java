@@ -3,7 +3,7 @@ package us.ihmc.behaviors.tools.perception;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -42,7 +42,7 @@ public class AlternateHeightMapUpdater
    public HeightMapMessage update(Point3D[] scanPoints, ReferenceFrame ousterFrame, Point3D center)
    {
       heightMap.setMaxHeight(center.getZ() + 2.0); // Set max to basically just over the robot's head.
-      heightMap.getGridCenterXY().set(center.getX(), center.getY());
+      heightMap.translateToNewGridCenter(center.getX(), center.getY());
 
       PointCloudData pointCloud = new PointCloudData(System.nanoTime(), scanPoints, null);
 

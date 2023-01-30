@@ -110,7 +110,7 @@ public class RDXNettyOusterUI
                      imagePanel = new RDXCVImagePanel("Ouster Depth Image", depthWidth, depthHeight);
 
                      baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
-                     baseUI.getPerspectiveManager().reloadPerspective();
+                     baseUI.getLayoutManager().reloadLayout();
 
                      numberOfDepthPoints = ouster.getImageWidth() * ouster.getImageHeight();
 
@@ -131,7 +131,7 @@ public class RDXNettyOusterUI
                   // operations occur. Probably in the finish method.
                   synchronized (this)
                   {
-                     depthExtractionKernel.runKernel();
+                     depthExtractionKernel.runKernel(ousterInteractable.getReferenceFrame().getTransformToRoot());
                   }
 
                   imagePanel.drawDepthImage(depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat());

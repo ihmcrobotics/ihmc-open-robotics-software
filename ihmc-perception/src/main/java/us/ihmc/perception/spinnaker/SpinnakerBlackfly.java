@@ -119,6 +119,11 @@ public class SpinnakerBlackfly
       Spinnaker_C.spinImageGetData(spinImage, pointer);
    }
 
+   public void stopAcquiringImages()
+   {
+      assertNoError(Spinnaker_C.spinCameraEndAcquisition(spinCamera), "Ending camera acquisition");
+   }
+
    public void destroy()
    {
       Spinnaker_C.spinCameraRelease(spinCamera);

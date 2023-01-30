@@ -47,7 +47,7 @@ public class RDXSCS2EnvironmentBuilder extends ImGuiPanel
    private Path selectedEnvironmentFile = null;
    private final TreeSet<Path> environmentFiles = new TreeSet<>(Comparator.comparing(path -> path.getFileName().toString()));
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString saveString = new ImString("", 100);
+   private final ImString saveString = new ImString(256);
    private final Point3D tempTranslation = new Point3D();
    private final Quaternion tempOrientation = new Quaternion();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();

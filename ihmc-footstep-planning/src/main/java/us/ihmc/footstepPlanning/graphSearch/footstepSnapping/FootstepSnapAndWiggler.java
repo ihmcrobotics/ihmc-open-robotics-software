@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import us.ihmc.commonWalkingControlModules.polygonWiggling.*;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -42,6 +43,8 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private final HashMap<DiscreteFootstep, FootstepSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
+   private final ConvexPolygon2D planarRegionModeledWorld = new ConvexPolygon2D();
+   private final BoundingBox2D planarRegionModeledBoundingBox = new BoundingBox2D();
 
    private HeightMapData heightMapData;
    private final HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
@@ -78,6 +81,21 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    {
       this.planarRegionsList = planarRegionsList;
       snapDataHolder.clear();
+
+      planarRegionModeledWorld.clearAndUpdate();
+      planarRegionModeledBoundingBox.setToNaN();
+      if (planarRegionsList == null)
+         return;
+
+      for (PlanarRegion region : planarRegionsList.getPlanarRegionsAsList())
+      {
+         ConvexPolygon2D convexHull = new ConvexPolygon2D(region.getConvexHull());
+         convexHull.applyTransform(region.getTransformToWorld(), false);
+         planarRegionModeledWorld.addVertices(convexHull);
+         planarRegionModeledBoundingBox.updateToIncludePoint(region.getBoundingBox3dInWorld().getMinX(), region.getBoundingBox3dInWorld().getMinY());
+         planarRegionModeledBoundingBox.updateToIncludePoint(region.getBoundingBox3dInWorld().getMaxX(), region.getBoundingBox3dInWorld().getMaxY());
+      }
+      planarRegionModeledWorld.update();
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -159,7 +177,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
       RigidBodyTransform snapTransform;
 
-      if (heightMapData == null)
+      if (computeIfShouldUsePlanarRegions())
       {
          snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, maximumRegionHeightToConsider, planarRegionToPack);
       }
@@ -190,6 +208,20 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
          return snapData;
       }
+   }
+
+   private boolean computeIfShouldUsePlanarRegions()
+   {
+      if (heightMapData == null)
+         return true;
+
+      if (planarRegionsList == null)
+         return false;
+
+      if (!footPolygon.getPolygonVerticesView().stream().allMatch(planarRegionModeledBoundingBox::isInsideInclusive))
+         return false;
+
+      return footPolygon.getPolygonVerticesView().stream().allMatch(planarRegionModeledWorld::isPointInside);
    }
 
    private static int getIndex(PlanarRegion planarRegion, PlanarRegionsList planarRegionsList)

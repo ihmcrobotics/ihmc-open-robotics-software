@@ -81,7 +81,7 @@ public class RDXRealsenseD435UI
                      depthImagePanel = new RDXCVImagePanel("D435 Depth", d435.getDepthWidth(), d435.getDepthHeight());
                      baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getVideoPanel());
 
-                     baseUI.getPerspectiveManager().reloadPerspective();
+                     baseUI.getLayoutManager().reloadLayout();
                   }
 
                   frameReadFrequency.ping();
