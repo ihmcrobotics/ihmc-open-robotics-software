@@ -157,6 +157,16 @@ public class SCS2AvatarSimulation
       }
    }
 
+   /**
+    * Forces the variables in the controller's registry to update after rewinding the simulation.
+    * <p>
+    * This has no effect when the simulation is running.
+    * </p>
+    * <p>
+    * This can be used to ensure that the controller's variables are up-to-date at a given time while
+    * the simulation is paused. Useful notably to generate dataset from inside the controller.
+    * </p>
+    */
    public void forceMirrorRegistryUpdate()
    {
       if (simulationConstructionSet.isSimulating())
