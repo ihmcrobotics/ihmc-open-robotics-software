@@ -9,13 +9,11 @@ import java.util.function.Consumer;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
+import com.badlogic.gdx.utils.*;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
 
-import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -26,6 +24,7 @@ import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
@@ -86,7 +85,7 @@ public class RDXVRContext
          = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
                                                                            teleportFrameIHMCZUp,
                                                                            openVRYUpToIHMCZUpSpace);
-
+   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
@@ -119,6 +118,19 @@ public class RDXVRContext
 
       WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-graphics/src/libgdx/resources", getClass(), "/vr");
       WorkspaceFile actionManifestFile = new WorkspaceFile(directory, "actions.json");
+      JSONFileTools.load(actionManifestFile, node ->
+      {
+         for (Iterator<JsonNode> it = node.withArray("default_bindings").elements(); it.hasNext(); )
+         {
+            JsonNode objectNode = it.next();
+            String controllerBindings = objectNode.get("binding_url").asText();
+            if (controllerBindings.contains("focus3"))
+               controllerModel = RDXVRControllerModel.FOCUS3;
+            else
+               controllerModel = RDXVRControllerModel.INDEX;
+         }
+      });
+      LogTools.info("Using VR controller model: {}", controllerModel);
       VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilePath().toString());
 
       VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
@@ -358,5 +370,10 @@ public class RDXVRContext
    public SideDependentList<RDXVRPickResult> getSelectedPick()
    {
       return selectedPick;
+   }
+
+   public RDXVRControllerModel getControllerModel()
+   {
+      return controllerModel;
    }
 }
