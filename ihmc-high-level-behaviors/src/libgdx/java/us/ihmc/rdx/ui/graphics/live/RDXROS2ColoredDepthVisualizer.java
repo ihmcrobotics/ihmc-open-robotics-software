@@ -398,8 +398,8 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    @Override
    public void destroy()
    {
-      super.destroy();
       unsubscribe();
+      super.destroy();
    }
 
    public void setSubscribed(boolean subscribed)
