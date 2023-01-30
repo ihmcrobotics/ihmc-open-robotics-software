@@ -113,8 +113,8 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    @Override
    public void destroy()
    {
-      super.destroy();
       unsubscribe();
+      super.destroy();
    }
 
    public void setSubscribed(boolean subscribed)

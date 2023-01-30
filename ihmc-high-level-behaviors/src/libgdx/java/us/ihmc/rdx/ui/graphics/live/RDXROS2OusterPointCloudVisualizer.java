@@ -199,8 +199,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    @Override
    public void destroy()
    {
-      super.destroy();
       unsubscribe();
+      super.destroy();
    }
 
    public void setSubscribed(boolean subscribed)
