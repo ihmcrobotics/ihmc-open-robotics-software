@@ -112,7 +112,7 @@ public class PlanarRegionMap
       PlanarRegionsList priorRegionsInWorld = new PlanarRegionsList();
       PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
 
-      LogTools.info("-------------------------------------------------------- New Iteration --------------------------------------------------------------");
+      LogTools.info("--------------------------------------------- New Iteration [{}] ------------------------------------------", sensorPoseIndex);
       LogTools.info("Incoming: {}", regionsInSensorFrame.getPlanarRegionsAsList().size());
 
       if (regionsInSensorFrame.getNumberOfPlanarRegions() == 0)
@@ -134,7 +134,7 @@ public class PlanarRegionMap
       LogTools.info("Sensor To World [Posterior]: \n{}", sensorToWorldTransformPosterior);
 
       // Generate regions in world frame with prior transform
-      priorRegionsInWorld.addPlanarRegionsList(regionsInSensorFrame);
+      priorRegionsInWorld.addPlanarRegionsList(regionsInSensorFrame.copy());
       priorRegionsInWorld.applyTransform(sensorToWorldFrameTransformPrior);
 
       modified = true;
@@ -176,7 +176,7 @@ public class PlanarRegionMap
          if (merger == MergingMode.SMOOTHING)
          {
             // Find the optimal transform for incoming regions before merge
-            applyFactorGraphBasedSmoothing(finalMap, regionsInSensorFrame, sensorToWorldFrameTransformPrior,
+            applyFactorGraphBasedSmoothing(finalMap, regionsInSensorFrame.copy(), sensorToWorldFrameTransformPrior,
                                            currentToPreviousSensorTransform, incomingToMapMatches, sensorPoseIndex);
 
             // Extract the optimal transform from the factor graph
@@ -186,13 +186,15 @@ public class PlanarRegionMap
             sensorToWorldTransformPosterior.set(transformArray);
 
             // Transform the incoming regions to the map frame with the optimal transform
+            posteriorRegionsInWorld.clear();
             regionsInSensorFrame.copy().getPlanarRegionsAsList().forEach(region -> {
                region.applyTransform(sensorToWorldTransformPosterior);
                posteriorRegionsInWorld.addPlanarRegion(region);
             });
 
             LogTools.info("Estimated Transform: \n{}", regionsWithPose.getSensorToWorldFrameTransform());
-            LogTools.info("Optimized Sensor Transform: \n{}", sensorToWorldTransformPosterior);
+            LogTools.info("Sensor To World [Prior]: \n{}", sensorToWorldFrameTransformPrior);
+            LogTools.info("Sensor To World [Posterior (Optimized)]: \n{}", sensorToWorldTransformPosterior);
          }
 
          // merge all the new regions in
