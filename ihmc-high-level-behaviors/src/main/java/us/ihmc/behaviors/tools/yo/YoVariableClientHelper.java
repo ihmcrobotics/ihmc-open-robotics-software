@@ -35,7 +35,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
       ThreadTools.startAThread(() ->
       {
          int tries = 5;
-         while (!isConnected() && tries > 0)
+         while (!isConnected() && tries > 0 && connecting.getValue())
          {
             try
             {
@@ -67,7 +67,11 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
    public void disconnect()
    {
       if (yoVariableClient != null)
+      {
          yoVariableClient.disconnect();
+         yoVariableClient = null;
+         connecting.setValue(false);
+      }
    }
 
    public String getServerName()
