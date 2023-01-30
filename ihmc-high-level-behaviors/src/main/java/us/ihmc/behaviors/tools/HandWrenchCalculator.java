@@ -6,8 +6,10 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.directionalControlToolboxModule.RobotModelUpdater;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -15,6 +17,7 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public class HandWrenchCalculator
@@ -30,9 +33,7 @@ public class HandWrenchCalculator
    private SideDependentList<ArrayList<Double>> armTorques = new SideDependentList<>();
    private SideDependentList<ReferenceFrame> referenceFrame = new SideDependentList<>();
 
-   private SideDependentList<DMatrixRMaj> wrench = new SideDependentList<>();
-   private SideDependentList<FrameVector3D> wrenchLinear = new SideDependentList<>(new FrameVector3D(), new FrameVector3D());
-   private SideDependentList<FrameVector3D> wrenchAngular = new SideDependentList<>(new FrameVector3D(), new FrameVector3D());
+   private SideDependentList<Wrench> wrenches = new SideDependentList<>(new Wrench(), new Wrench());
 
    public HandWrenchCalculator(ROS2SyncedRobotModel syncedRobot)
    {
@@ -95,34 +96,36 @@ public class HandWrenchCalculator
          {
             torques[i] = armJoints.get(side)[i].getTau();
          }
-
          DMatrixRMaj armJacob = armJacobianMatrix.get(side);
          DMatrixRMaj armJacobTransposed = CommonOps_DDRM.transpose(armJacob, null);
          DMatrixRMaj armJacobTransposedDagger = leftPseudoInverse(armJacobTransposed);
          DMatrixRMaj torqueVector = new DMatrixRMaj(torques);
          DMatrixRMaj forceVector = new DMatrixRMaj(6,1);
-
          CommonOps_DDRM.mult(armJacobTransposedDagger, torqueVector, forceVector);
-         wrench.set(side, forceVector);
-         saveLinearAngularInWorld(side);
+         makeWrench(side, forceVector);
       }
    }
 
-   private void saveLinearAngularInWorld(RobotSide side)
+   private void makeWrench(RobotSide side, DMatrixRMaj wrenchVector)
    {
       // LINEAR PART
-      FrameVector3D linearPart = wrenchLinear.get(side);
+      FrameVector3D linearPart = new FrameVector3D();
       linearPart.setReferenceFrame(getReferenceFrame().get(side));
-      linearPart.set(0,0,getWrench().get(side));
+      linearPart.set(0,0, wrenchVector);
       linearPart.changeFrame(ReferenceFrame.getWorldFrame());
-      wrenchLinear.set(side,linearPart);
 
       // ANGULAR PART
-      FrameVector3D angularPart = wrenchAngular.get(side);
+      FrameVector3D angularPart = new FrameVector3D();
       angularPart.setReferenceFrame(getReferenceFrame().get(side));
-      angularPart.set(3,0,getWrench().get(side));
+      angularPart.set(3,0,wrenchVector);
       angularPart.changeFrame(ReferenceFrame.getWorldFrame());
-      wrenchAngular.set(side,angularPart);
+
+      Wrench wrench = wrenches.get(side);
+      ReferenceFrame wrenchFrame = getReferenceFrame().get(side);
+      wrench.set(wrenchFrame, wrenchFrame, linearPart, angularPart);
+      // Express in world frame
+      wrench.changeFrame(ReferenceFrame.getWorldFrame());
+      wrenches.set(side, wrench);
    }
 
    public void update()
@@ -131,9 +134,9 @@ public class HandWrenchCalculator
       calculateTaskForces();
    }
 
-   public SideDependentList<DMatrixRMaj> getWrench()
+   public SideDependentList<Wrench> getWrench()
    {
-      return wrench;
+      return wrenches;
    }
 
    public SideDependentList<ReferenceFrame> getReferenceFrame()
@@ -141,15 +144,15 @@ public class HandWrenchCalculator
       return referenceFrame;
    }
 
-   // Wrench expressed in world-aligned frame
-   public SideDependentList<FrameVector3D> getWrenchLinear()
+   // expressed in world-aligned frame
+   public FrameVector3D getWrenchLinear(RobotSide side)
    {
-      return wrenchLinear;
+      return (FrameVector3D) wrenches.get(side).getLinearPart();
    }
 
-   // Wrench expressed in world-aligned frame
-   public SideDependentList<FrameVector3D> getWrenchAngular()
+   // expressed in world-aligned frame
+   public FrameVector3D getWrenchAngular(RobotSide side)
    {
-      return wrenchAngular;
+      return (FrameVector3D) wrenches.get(side).getAngularPart();
    }
 }

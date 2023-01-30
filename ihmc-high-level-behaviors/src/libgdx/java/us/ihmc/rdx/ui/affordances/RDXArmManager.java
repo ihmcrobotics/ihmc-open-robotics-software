@@ -95,8 +95,8 @@ public class RDXArmManager
          armManagers.get(side).update(interactableHands.get(side), desiredRobot);
 
          // wrench expressed in wrist pitch body fixed-frame
-         interactableHands.get(side).updateForceWrench(handWrenchCalculator.getWrenchLinear().get(side),
-                                                       handWrenchCalculator.getWrenchAngular().get(side));
+         interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getWrenchLinear(side),
+                                                           handWrenchCalculator.getWrenchAngular(side));
 
          // We only want to evaluate this when we are going to take action on it
          // Otherwise, we will not notice the desired changed while the solver was still solving

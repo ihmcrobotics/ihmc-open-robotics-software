@@ -24,7 +24,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
    private RDXSpatialVectorArrows sensorWristWrenchArrows;
-   private RDXSpatialVectorArrows estimatedWristWrenchArrows;
+   private RDXSpatialVectorArrows estimatedHandWrenchArrows;
    private String contextMenuName;
 
    public static boolean robotCollidableIsHand(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
@@ -69,7 +69,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
                                                            side.getLowerCaseName() + "WristSensor");
          }
       }
-      estimatedWristWrenchArrows = new RDXSpatialVectorArrows(handFrame);
+      estimatedHandWrenchArrows = new RDXSpatialVectorArrows(handFrame);
       contextMenuName = side + " Hand Context Menu";
    }
 
@@ -90,9 +90,9 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
       }
    }
 
-   public void updateForceWrench(FrameVector3D linear, FrameVector3D angular)
+   public void updateEstimatedWrench(FrameVector3D linear, FrameVector3D angular)
    {
-      estimatedWristWrenchArrows.update(linear, angular);
+      estimatedHandWrenchArrows.update(linear, angular);
    }
 
    @Override
@@ -107,7 +107,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
             sensorWristWrenchArrows.getRenderables(renderables, pool);
          }
       }
-      estimatedWristWrenchArrows.getRenderables(renderables, pool);
+      estimatedHandWrenchArrows.getRenderables(renderables, pool);
    }
 
    public String getContextMenuName()
