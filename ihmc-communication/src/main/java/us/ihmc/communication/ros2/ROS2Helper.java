@@ -77,6 +77,12 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    }
 
    @Override
+   public <T> void createPublisher(ROS2Topic<T> topic)
+   {
+      ros2PublisherMap.getOrCreatePublisher(topic);
+   }
+
+   @Override
    public <T> void publish(ROS2Topic<T> topic, T message)
    {
       ros2PublisherMap.publish(topic, message);

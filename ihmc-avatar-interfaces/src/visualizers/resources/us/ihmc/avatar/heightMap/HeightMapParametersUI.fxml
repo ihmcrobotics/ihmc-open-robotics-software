@@ -51,6 +51,10 @@
         </GridPane>
     </left>
     <center>
-        <TableView fx:id="parameterTable"/>
+        <GridPane>
+        <TableView fx:id="parameterTable" GridPane.rowIndex="0"/>
+        <TableView fx:id="filterParameterTable" GridPane.rowIndex="1"/>
+        </GridPane>
     </center>
+
 </BorderPane>

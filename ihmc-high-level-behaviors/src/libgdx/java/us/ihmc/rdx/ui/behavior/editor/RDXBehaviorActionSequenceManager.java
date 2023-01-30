@@ -31,7 +31,7 @@ public class RDXBehaviorActionSequenceManager
    private ROS2Node ros2Node;
    private ROS2SyncedRobotModel syncedRobot;
    private List<ReferenceFrame> referenceFrameLibrary;
-   private final ImString newSequenceName = new ImString("", 100);
+   private final ImString newSequenceName = new ImString(256);
    private final TreeSet<RDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(RDXBehaviorActionSequenceEditor::getName));
 
    public void create(WorkspaceDirectory behaviorSequenceStorageDirectory,

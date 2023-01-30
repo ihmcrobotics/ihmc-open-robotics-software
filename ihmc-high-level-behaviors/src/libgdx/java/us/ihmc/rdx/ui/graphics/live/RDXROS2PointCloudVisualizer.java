@@ -18,6 +18,9 @@ import org.bytedeco.opencl._cl_program;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -201,19 +204,30 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
                pointCloudRenderer.updateMeshFastestAfterKernel();
             }
          }
+         Point3D tempPoint = new Point3D();
+         Pose3D sensorPose = new Pose3D();
 
          LidarScanMessage latestLidarScanMessage = latestLidarScanMessageReference.getAndSet(null);
          if (latestLidarScanMessage != null)
          {
             int numberOfScanPoints = latestLidarScanMessage.getNumberOfPoints();
+            if (totalNumberOfPoints != latestLidarScanMessage.getNumberOfPoints())
+            {
+               totalNumberOfPoints = latestLidarScanMessage.getNumberOfPoints();
+               pointCloudRenderer.create(totalNumberOfPoints);
+            }
             pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
             {
                float size = pointSize.get();
+
                LidarPointCloudCompression.decompressPointCloud(latestLidarScanMessage.getScan(), numberOfScanPoints, (i, x, y, z) ->
                {
-                  xyzRGBASizeFloatBuffer.put((float) x);
-                  xyzRGBASizeFloatBuffer.put((float) y);
-                  xyzRGBASizeFloatBuffer.put((float) z);
+                  tempPoint.set(x, y, z);
+                  sensorPose.set(latestLidarScanMessage.getLidarPosition(), latestLidarScanMessage.getLidarOrientation());
+                  tempPoint.applyTransform(sensorPose);
+                  xyzRGBASizeFloatBuffer.put((float) tempPoint.getX());
+                  xyzRGBASizeFloatBuffer.put((float) tempPoint.getY());
+                  xyzRGBASizeFloatBuffer.put((float) tempPoint.getZ());
                   xyzRGBASizeFloatBuffer.put(color.r);
                   xyzRGBASizeFloatBuffer.put(color.g);
                   xyzRGBASizeFloatBuffer.put(color.b);
