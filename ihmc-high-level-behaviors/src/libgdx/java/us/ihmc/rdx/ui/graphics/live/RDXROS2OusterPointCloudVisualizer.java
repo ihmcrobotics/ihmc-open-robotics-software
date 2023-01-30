@@ -196,6 +196,16 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+      if (realtimeROS2Node != null)
+      {
+         realtimeROS2Node.destroy();
+      }
+   }
+
    public void setSubscribed(boolean subscribed)
    {
       if (subscribed && realtimeROS2Node == null)
@@ -211,8 +221,11 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private void unsubscribe()
    {
       subscribed.set(false);
-      realtimeROS2Node.destroy();
-      realtimeROS2Node = null;
+      if (realtimeROS2Node != null)
+      {
+         realtimeROS2Node.destroy();
+         realtimeROS2Node = null;
+      }
    }
 
    public boolean isSubscribed()
