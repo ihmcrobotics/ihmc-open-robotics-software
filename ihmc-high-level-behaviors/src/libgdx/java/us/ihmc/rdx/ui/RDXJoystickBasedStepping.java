@@ -295,7 +295,10 @@ public class RDXJoystickBasedStepping
    {
       PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
       pauseWalkingMessage.setPause(true);
-      controllerHelper.publishToController(pauseWalkingMessage);
+      if (currentControllerConnected)
+      {
+         controllerHelper.publishToController(pauseWalkingMessage);
+      }
    }
 
    public void renderImGuiWidgets()
