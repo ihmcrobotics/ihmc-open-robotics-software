@@ -6,9 +6,12 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -16,15 +19,17 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.List;
+
 public class HandWrenchCalculator
 {
    private FullHumanoidRobotModel fullRobotModel;
    HumanoidJointNameMap jointNameMap;
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
    private SideDependentList<DMatrixRMaj> armJacobianMatrix = new SideDependentList<>();
-   private SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
+   private SideDependentList<List<OneDoFJointBasics>> armJoints = new SideDependentList<>();
    private SideDependentList<ReferenceFrame> referenceFrame = new SideDependentList<>();
-   private SideDependentList<Wrench> wrenches = new SideDependentList<>(new Wrench(), new Wrench());
+   private SideDependentList<SpatialVector> wrenches = new SideDependentList<>(new SpatialVector(), new SpatialVector());
 
    public HandWrenchCalculator(ROS2SyncedRobotModel syncedRobot)
    {
@@ -34,21 +39,13 @@ public class HandWrenchCalculator
 
    private void updateJacobians()
    {
-      OneDoFJointBasics[] joints = new OneDoFJointBasics[jointNameMap.getArmJointNames().length];
       for (RobotSide side : RobotSide.values)
       {
-         // TODO: use jacobianCalculator.getJointsFromBasedToEndEffector()
-         for (int i = 0; i < jointNameMap.getArmJointNames().length; ++i)
-         {
-            ArmJointName jointName = jointNameMap.getArmJointNames()[i];
-//            LogTools.info(jointName.toString());
-            joints[i] = fullRobotModel.getArmJoint(side, jointName);
-         }
-
          jacobianCalculator.setKinematicChain(fullRobotModel.getChest(), fullRobotModel.getHand(side));
          referenceFrame.set(side, jacobianCalculator.getJacobianFrame());
          armJacobianMatrix.set(side, jacobianCalculator.getJacobianMatrix());
-         armJoints.set(side, joints);
+         List<OneDoFJointBasics> oneDoFJoints = MultiBodySystemTools.filterJoints(jacobianCalculator.getJointsFromBaseToEndEffector(), OneDoFJointBasics.class);
+         armJoints.set(side, oneDoFJoints);
       }
    }
 
@@ -92,10 +89,11 @@ public class HandWrenchCalculator
    {
       for (RobotSide side : RobotSide.values)
       {
-         double[] jointTorques = new double[armJoints.get(side).length];
-         for (int i = 0; i < armJoints.get(side).length; ++i)
+         List<OneDoFJointBasics> oneSideArmJoints = armJoints.get(side);
+         double[] jointTorques = new double[oneSideArmJoints.size()];
+         for (int i = 0; i < oneSideArmJoints.size(); ++i)
          {
-            jointTorques[i] = armJoints.get(side)[i].getTau();
+            jointTorques[i] = oneSideArmJoints.get(i).getTau();
          }
 
          DMatrixRMaj armJacobian = armJacobianMatrix.get(side);
@@ -105,27 +103,20 @@ public class HandWrenchCalculator
          DMatrixRMaj wrenchVector = new DMatrixRMaj(6,1);
          CommonOps_DDRM.mult(armJacobianTransposedDagger, jointTorqueVector, wrenchVector);
 
-         wrenches.set(side, makeWrench(getReferenceFrame().get(side), wrenchVector));
+         wrenches.set(side, makeWrench(wrenchVector));
       }
    }
 
    // Wrench expressed in world-aligned frame
-   private static Wrench makeWrench(ReferenceFrame wrenchFrame, DMatrixRMaj wrenchVector)
+   private static SpatialVector makeWrench(DMatrixRMaj wrenchVector)
    {
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
       // Linear and angular part into spatial vector
       SpatialVector spatialVector = new SpatialVector();
       spatialVector.set(wrenchVector);
       // Express in world-frame
-      spatialVector.changeFrame(worldFrame);
+      spatialVector.changeFrame(ReferenceFrame.getWorldFrame());
 
-      Wrench wrench = new Wrench();
-      wrench.setBodyFrame(wrenchFrame);
-      wrench.setReferenceFrame(worldFrame);
-      wrench.set(spatialVector);
-
-      return wrench;
+      return spatialVector;
    }
 
    public void update()
@@ -134,7 +125,7 @@ public class HandWrenchCalculator
       calculateTaskForces();
    }
 
-   public SideDependentList<Wrench> getWrench()
+   public SideDependentList<SpatialVector> getWrench()
    {
       return wrenches;
    }
