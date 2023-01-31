@@ -12,7 +12,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.tools.thread.ZeroCopySwapReference;
+import us.ihmc.tools.thread.GuidedSwapReference;
 
 public class CalibrationPatternDetectionUI
 {
@@ -25,7 +25,7 @@ public class CalibrationPatternDetectionUI
    private final ImInt patternHeight = new ImInt(8);
    private boolean patternFound = false;
    private Size patternSize;
-   private final ZeroCopySwapReference<Mat> cornersOrCenters;
+   private final GuidedSwapReference<Mat> cornersOrCenters;
    private final Object avoidCopiedImageTearing = new Object();
    private final Runnable doPatternDetection = this::doPatternDetection;
    private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue
@@ -38,7 +38,7 @@ public class CalibrationPatternDetectionUI
       bgrSourceCopy = new Mat();
       grayscaleImage = new Mat();
       patternSize = new Size(patternWidth.get(), patternHeight.get());
-      cornersOrCenters = new ZeroCopySwapReference<>(Mat::new, this::accessOnLowPriorityThread, this::accessOnHighPriorityThread);
+      cornersOrCenters = new GuidedSwapReference<>(Mat::new, this::accessOnLowPriorityThread, this::accessOnHighPriorityThread);
       simpleBlobDetector = SimpleBlobDetector.create();
    }
 

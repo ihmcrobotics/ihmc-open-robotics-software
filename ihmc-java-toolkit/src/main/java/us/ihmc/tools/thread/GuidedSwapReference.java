@@ -29,7 +29,7 @@ import java.util.function.Supplier;
  * Also evaluate IHMC Realtime's ConcurrentCopier for your use case.
  * </p>
  */
-public class ZeroCopySwapReference<T>
+public class GuidedSwapReference<T>
 {
    private final T a;
    private final T b;
@@ -44,7 +44,7 @@ public class ZeroCopySwapReference<T>
     * care about performance and we want to avoid allocating lots of lambdas.
     * This is also usually more convenient and readable in user code anyway.
     */
-   public ZeroCopySwapReference(Supplier<T> supplier, Consumer<T> accessOnLowPriorityThread, Consumer<T> accessOnHighPriorityThread)
+   public GuidedSwapReference(Supplier<T> supplier, Consumer<T> accessOnLowPriorityThread, Consumer<T> accessOnHighPriorityThread)
    {
       this.a = supplier.get();
       this.b = supplier.get();

@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.graphics;
 
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
-import us.ihmc.tools.thread.ZeroCopySwapReference;
+import us.ihmc.tools.thread.GuidedSwapReference;
 
 import java.util.function.Consumer;
 
@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 public class ImGuiOpenCVSwapVideoPanel
 {
    private final ImGuiVideoPanel videoPanel;
-   private final ZeroCopySwapReference<ImGuiOpenCVSwapVideoPanelData> dataSwapReferenceManager;
+   private final GuidedSwapReference<ImGuiOpenCVSwapVideoPanelData> dataSwapReferenceManager;
 
    public ImGuiOpenCVSwapVideoPanel(String panelName,
                                     Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
@@ -32,7 +32,7 @@ public class ImGuiOpenCVSwapVideoPanel
                                     Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnUIThread)
    {
       this.videoPanel = new ImGuiVideoPanel(panelName, flipY);
-      dataSwapReferenceManager = new ZeroCopySwapReference<>(ImGuiOpenCVSwapVideoPanelData::new, updateOnAsynchronousThread, updateOnUIThread);
+      dataSwapReferenceManager = new GuidedSwapReference<>(ImGuiOpenCVSwapVideoPanelData::new, updateOnAsynchronousThread, updateOnUIThread);
    }
 
    /**
