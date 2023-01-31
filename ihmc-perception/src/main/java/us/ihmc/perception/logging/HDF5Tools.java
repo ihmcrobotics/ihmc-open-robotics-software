@@ -3,10 +3,7 @@ package us.ihmc.perception.logging;
 import gnu.trove.list.array.TFloatArrayList;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.*;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -287,9 +284,9 @@ public class HDF5Tools
       long[] dims = {size};
 
       DataSpace ds = new DataSpace(1, dims);
-      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_UCHAR()), ds);
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_B8()), ds);
 
-      dataset.write(bytes, new DataType(PredType.NATIVE_UCHAR()));
+      dataset.write((Pointer) bytes, new DataType(PredType.NATIVE_B8()));
 
       ds.close();
       dataset.close();
