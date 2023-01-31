@@ -7,8 +7,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
 import us.ihmc.tools.thread.Activator;
 
-import java.util.function.Consumer;
-
 public class WebcamCalibrationPatternDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
@@ -19,7 +17,6 @@ public class WebcamCalibrationPatternDemo
    private RDXOpenCVWebcamReader webcamReader;
    private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private volatile boolean running = true;
-   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
 
    public WebcamCalibrationPatternDemo()
    {
@@ -31,6 +28,7 @@ public class WebcamCalibrationPatternDemo
             baseUI.create();
 
             webcamReader = new RDXOpenCVWebcamReader(nativesLoadedActivator);
+            webcamReader.setMonitorPanelUIThreadPreprocessor(this::monitorPanelUpdateOnUIThread);
             baseUI.getImGuiPanelManager().addPanel(webcamReader.getStatisticsPanel());
          }
 
@@ -59,11 +57,16 @@ public class WebcamCalibrationPatternDemo
                }
 
                calibrationPatternDetectionUI.update();
-               webcamReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+               webcamReader.updateOnUIThread();
             }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         private void monitorPanelUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
+         {
+            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
          }
 
          @Override
@@ -74,16 +77,6 @@ public class WebcamCalibrationPatternDemo
             baseUI.dispose();
          }
       });
-   }
-
-   private void accessOnHighPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
-   {
-      if (webcamReader.getImageWasRead())
-      {
-         calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
-      }
-
-      webcamReader.accessOnHighPriorityThread(data);
    }
 
    public static void main(String[] args)

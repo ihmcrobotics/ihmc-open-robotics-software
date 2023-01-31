@@ -56,7 +56,7 @@ public class WebcamHDF5LoggingDemo
                   }, "CameraRead");
                }
 
-               webcamReader.update();
+               webcamReader.updateOnUIThread();
             }
 
             baseUI.renderBeforeOnScreenUI();

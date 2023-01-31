@@ -31,10 +31,9 @@ public class RDXOpenCVWebcamReader
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
-   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnLowPriorityThread = this::accessOnLowPriorityThread;
-   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
    private boolean imageWasRead = false;
    private long numberOfImagesRead = 0;
+   private Consumer<ImGuiOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor = null;
 
    public RDXOpenCVWebcamReader(Activator nativesLoadedActivator)
    {
@@ -76,8 +75,18 @@ public class RDXOpenCVWebcamReader
 
       bgrImage = new Mat();
 
-      swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Webcam Monitor", false);
-      swapCVPanel.getDataSwapReferenceManager().initializeBoth(data -> data.updateOnImageUpdateThread(imageWidth, imageHeight));
+      swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Webcam Monitor", this::monitorPanelUpdateOnAsynchronousThread, this::monitorPanelUpdateOnUIThread);
+      swapCVPanel.allocateInitialTextures(imageWidth, imageHeight);
+   }
+
+   /**
+    * Allows the user to do some processing on the image after it is read
+    * on the UI update thread. It's not ideal to do too much processing here,
+    * just quick and easy stuff.
+    */
+   public void setMonitorPanelUIThreadPreprocessor(Consumer<ImGuiOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor)
+   {
+      this.monitorPanelUIThreadPreprocessor = monitorPanelUIThreadPreprocessor;
    }
 
    /**
@@ -89,12 +98,12 @@ public class RDXOpenCVWebcamReader
    public void readWebcamImage()
    {
       readDurationPlot.start();
-      swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(accessOnLowPriorityThread);
+      swapCVPanel.updateOnAsynchronousThread();
       readDurationPlot.stop();
       readFrequencyPlot.ping();
    }
 
-   private void accessOnLowPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
+   private void monitorPanelUpdateOnAsynchronousThread(ImGuiOpenCVSwapVideoPanelData data)
    {
       imageWasRead = videoCapture.read(bgrImage);
       opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
@@ -104,21 +113,21 @@ public class RDXOpenCVWebcamReader
     * This should be called on the render thread each frame. It will draw the
     * latest webcam image to the framebuffer.
     */
-   public void update()
+   public void updateOnUIThread()
    {
-      swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+      swapCVPanel.updateOnUIThread();
    }
 
-   /**
-    * For advanced use, allow the user to call more stuff on the high priority thread.
-    * You would call this instead of update()
-    */
-   public void accessOnHighPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
+   private void monitorPanelUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
    {
       if (imageWasRead)
       {
          imageWasRead = false;
          ++numberOfImagesRead;
+
+         if (monitorPanelUIThreadPreprocessor != null && data.getRGBA8Image() != null)
+            monitorPanelUIThreadPreprocessor.accept(data);
+
          data.updateOnUIThread(swapCVPanel.getVideoPanel());
       }
    }

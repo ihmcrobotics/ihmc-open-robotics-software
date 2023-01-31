@@ -8,6 +8,11 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
 import us.ihmc.perception.BytedecoImage;
 
+/**
+ * This class will be instantiated twice for each panel. There will be
+ * two sets of pixmaps, textures, and images where each set shares some
+ * native memory, that gets copied to the GPU in the UI update method.
+ */
 public class ImGuiOpenCVSwapVideoPanelData
 {
    private Pixmap pixmap;
@@ -15,7 +20,10 @@ public class ImGuiOpenCVSwapVideoPanelData
    private Texture texture;
    private BytedecoImage bytedecoImage;
 
-   public void updateOnImageUpdateThread(int imageWidth, int imageHeight)
+   /**
+    * Ensure the texture is allocated and is the correct dimensions.
+    */
+   public void ensureTextureDimensions(int imageWidth, int imageHeight)
    {
       if (pixmap == null || pixmap.getWidth() != imageWidth || pixmap.getHeight() != imageHeight)
       {
@@ -30,6 +38,11 @@ public class ImGuiOpenCVSwapVideoPanelData
       }
    }
 
+   /**
+    * Meant to be called from the RDX render thread with an active
+    * OpenGL context. This does what we can't do asynchronously:
+    * creating textures and copying textures to the GPU.
+    */
    public void updateOnUIThread(ImGuiVideoPanel videoPanel)
    {
       if (pixmap != null)
@@ -43,13 +56,15 @@ public class ImGuiOpenCVSwapVideoPanelData
             }
 
             texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-            videoPanel.setTexture(texture);
          }
 
-         texture.draw(pixmap, 0, 0);
+         texture.draw(pixmap, 0, 0); // Copies from RAM to the GPU
+
+         videoPanel.setTexture(texture);
       }
    }
 
+   /** For convenient OpenCV usage. */
    public Mat getRGBA8Mat()
    {
       return bytedecoImage.getBytedecoOpenCVMat();

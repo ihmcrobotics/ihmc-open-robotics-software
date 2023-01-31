@@ -3,20 +3,55 @@ package us.ihmc.rdx.ui.graphics;
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
 import us.ihmc.tools.thread.ZeroCopySwapReference;
 
+import java.util.function.Consumer;
+
+/**
+ * This class is designed to (at most) double the display frame rate of images which
+ * need asynchronous updates because those updates are either computationaly
+ * expensive (i.e. slow) or rely on blocking calls as for reading from a webcam
+ * or sensor.
+ *
+ * It manages two OpenGL textures that get swapped out and provides an easy way to
+ * operate on them with OpenCV.
+ */
 public class ImGuiOpenCVSwapVideoPanel
 {
    private final ImGuiVideoPanel videoPanel;
    private final ZeroCopySwapReference<ImGuiOpenCVSwapVideoPanelData> dataSwapReferenceManager;
 
-   public ImGuiOpenCVSwapVideoPanel(String panelName, boolean flipY)
+   public ImGuiOpenCVSwapVideoPanel(String panelName,
+                                    Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
+                                    Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnUIThread)
    {
-      this.videoPanel = new ImGuiVideoPanel(panelName, flipY);
-      dataSwapReferenceManager = new ZeroCopySwapReference<>(ImGuiOpenCVSwapVideoPanelData::new);
+      this(panelName, false, updateOnAsynchronousThread, updateOnUIThread);
    }
 
-   public ZeroCopySwapReference<ImGuiOpenCVSwapVideoPanelData> getDataSwapReferenceManager()
+   public ImGuiOpenCVSwapVideoPanel(String panelName,
+                                    boolean flipY,
+                                    Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
+                                    Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnUIThread)
    {
-      return dataSwapReferenceManager;
+      this.videoPanel = new ImGuiVideoPanel(panelName, flipY);
+      dataSwapReferenceManager = new ZeroCopySwapReference<>(ImGuiOpenCVSwapVideoPanelData::new, updateOnAsynchronousThread, updateOnUIThread);
+   }
+
+   /**
+    * If you know the dimensions in advance, you can call this once on initialization.
+    * Don't call this after the threads are running, though.
+    */
+   public void allocateInitialTextures(int imageWidth, int imageHeight)
+   {
+      dataSwapReferenceManager.initializeBoth(data -> data.ensureTextureDimensions(imageWidth, imageHeight));
+   }
+
+   public void updateOnAsynchronousThread()
+   {
+      dataSwapReferenceManager.accessOnLowPriorityThread();
+   }
+
+   public void updateOnUIThread()
+   {
+      dataSwapReferenceManager.accessOnHighPriorityThread();
    }
 
    public ImGuiVideoPanel getVideoPanel()

@@ -49,7 +49,7 @@ public class WebcamDisplayDemo
                   }, "CameraRead");
                }
 
-               webcamReader.update();
+               webcamReader.updateOnUIThread();
             }
 
             baseUI.renderBeforeOnScreenUI();

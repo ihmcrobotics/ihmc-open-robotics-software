@@ -7,8 +7,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
 import us.ihmc.tools.thread.Activator;
 
-import java.util.function.Consumer;
-
 public class BlackflyCalibrationPatternDemo
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
@@ -21,7 +19,6 @@ public class BlackflyCalibrationPatternDemo
    private RDXBlackflyReader blackflyReader;
    private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private volatile boolean running = true;
-   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
 
    public BlackflyCalibrationPatternDemo()
    {
@@ -44,6 +41,7 @@ public class BlackflyCalibrationPatternDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   blackflyReader.create();
+                  blackflyReader.setMonitorPanelUIThreadPreprocessor(this::monitorUIThreadPreprocessor);
                   baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
 
                   calibrationPatternDetectionUI = new CalibrationPatternDetectionUI();
@@ -62,11 +60,16 @@ public class BlackflyCalibrationPatternDemo
 
 
                calibrationPatternDetectionUI.update();
-               blackflyReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+               blackflyReader.updateOnUIThread();
             }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         private void monitorUIThreadPreprocessor(ImGuiOpenCVSwapVideoPanelData data)
+         {
+            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
          }
 
          @Override
@@ -77,19 +80,6 @@ public class BlackflyCalibrationPatternDemo
             baseUI.dispose();
          }
       });
-   }
-
-   private void accessOnHighPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
-   {
-      if (data.getRGBA8Image() != null)
-      {
-         if (blackflyReader.getImageWasRead())
-         {
-            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
-         }
-
-         blackflyReader.accessOnHighPriorityThread(data);
-      }
    }
 
    public static void main(String[] args)

@@ -5,7 +5,6 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.UMat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.commons.thread.ThreadTools;
@@ -32,15 +31,12 @@ public class RDXBlackflyReader
    private spinImage spinImage;
    private BytePointer spinImageDataPointer;
    private Mat blackflySourceMat;
-   private UMat conversionIn;
-   private UMat conversionOut;
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
-   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnLowPriorityThread = this::accessOnLowPriorityThread;
-   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
    private boolean imageWasRead = false;
    private long numberOfImagesRead = 0;
+   private Consumer<ImGuiOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor = null;
 
    public RDXBlackflyReader(Activator nativesLoadedActivator, String serialNumber)
    {
@@ -59,7 +55,17 @@ public class RDXBlackflyReader
       blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGB8);
       blackfly.startAcquiringImages();
 
-      swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Blackfly Monitor", false);
+      swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Blackfly Monitor", this::monitorUpdateOnAsynchronousThread, this::monitorPanelUpdateOnUIThread);
+   }
+
+   /**
+    * Allows the user to do some processing on the image after it is read
+    * on the UI update thread. It's not ideal to do too much processing here,
+    * just quick and easy stuff.
+    */
+   public void setMonitorPanelUIThreadPreprocessor(Consumer<ImGuiOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor)
+   {
+      this.monitorPanelUIThreadPreprocessor = monitorPanelUIThreadPreprocessor;
    }
 
    /**
@@ -71,12 +77,12 @@ public class RDXBlackflyReader
    public void readBlackflyImage()
    {
       readDurationPlot.start();
-      swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(accessOnLowPriorityThread);
+      swapCVPanel.updateOnAsynchronousThread();
       readDurationPlot.stop();
       readFrequencyPlot.ping();
    }
 
-   private void accessOnLowPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
+   private void monitorUpdateOnAsynchronousThread(ImGuiOpenCVSwapVideoPanelData data)
    {
       imageWasRead = blackfly.getNextImage(spinImage);
 
@@ -88,17 +94,11 @@ public class RDXBlackflyReader
             imageHeight = blackfly.getHeight(spinImage);
             spinImageDataPointer = new BytePointer(imageWidth * imageHeight * 3); // RGB8
             blackflySourceMat = new Mat((int) imageHeight, (int) imageWidth, opencv_core.CV_8UC3);
-            conversionIn = new UMat();
-            conversionOut = new UMat();
-            swapCVPanel.getDataSwapReferenceManager().initializeBoth(data2 -> data2.updateOnImageUpdateThread((int) imageWidth, (int) imageHeight));
+            swapCVPanel.allocateInitialTextures((int) imageWidth, (int) imageHeight);
          }
 
          Spinnaker_C.spinImageGetData(spinImage, spinImageDataPointer);
          blackflySourceMat.data(spinImageDataPointer);
-
-//         blackflySourceMat.copyTo(conversionIn);
-//         opencv_imgproc.cvtColor(conversionIn, conversionOut, opencv_imgproc.COLOR_RGB2RGBA, 0);
-//         conversionOut.copyTo(data.getRGBA8Mat());
 
          opencv_imgproc.cvtColor(blackflySourceMat, data.getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA, 0);
 
@@ -110,21 +110,21 @@ public class RDXBlackflyReader
     * This should be called on the render thread each frame. It will draw the
     * latest image to the framebuffer.
     */
-   public void update()
+   public void updateOnUIThread()
    {
-      swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+      swapCVPanel.updateOnUIThread();
    }
 
-   /**
-    * For advanced use, allow the user to call more stuff on the high priority thread.
-    * You would call this instead of update()
-    */
-   public void accessOnHighPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
+   private void monitorPanelUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
    {
       if (imageWasRead)
       {
          imageWasRead = false;
          ++numberOfImagesRead;
+
+         if (monitorPanelUIThreadPreprocessor != null && data.getRGBA8Image() != null)
+            monitorPanelUIThreadPreprocessor.accept(data);
+
          data.updateOnUIThread(swapCVPanel.getVideoPanel());
       }
    }
