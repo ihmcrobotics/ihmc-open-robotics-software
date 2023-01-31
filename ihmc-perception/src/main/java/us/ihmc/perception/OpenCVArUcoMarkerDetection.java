@@ -24,7 +24,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.SwapReference;
-import us.ihmc.tools.thread.ZeroCopySwapReference;
+import us.ihmc.tools.thread.GuidedSwapReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +40,7 @@ public class OpenCVArUcoMarkerDetection
    private ReferenceFrame sensorFrame;
    private final FramePose3D markerPose = new FramePose3D();
    private final Object inputImageSync = new Object();
-   private ZeroCopySwapReference<BytedecoImage> rgb888ColorImage;
+   private GuidedSwapReference<BytedecoImage> rgb888ColorImage;
    private final Object detectionDataSync = new Object();
    private SwapReference<MatVector> corners;
    private SwapReference<Mat> ids;
@@ -75,9 +75,9 @@ public class OpenCVArUcoMarkerDetection
       this.sensorFrame = sensorFrame;
       imageWidth = sourceColorImage.getImageWidth();
       imageHeight = sourceColorImage.getImageHeight();
-      rgb888ColorImage = new ZeroCopySwapReference<>(() -> new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3),
-                                                                             this::accessColorImageOnLowPriorityThread,
-                                                                             this::accessColorImageInHighPriorityThread);
+      rgb888ColorImage = new GuidedSwapReference<>(() -> new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3),
+                                                   this::accessColorImageOnLowPriorityThread,
+                                                   this::accessColorImageInHighPriorityThread);
 
       dictionary = opencv_aruco.getPredefinedDictionary(DEFAULT_DICTIONARY);
       corners = new SwapReference<>(MatVector::new);

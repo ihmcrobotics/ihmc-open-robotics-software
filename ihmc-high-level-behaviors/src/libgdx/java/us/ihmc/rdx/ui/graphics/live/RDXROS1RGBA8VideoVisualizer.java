@@ -9,7 +9,7 @@ import us.ihmc.rdx.ui.visualizers.RDXROS1VisualizerInterface;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.tools.thread.ZeroCopySwapReference;
+import us.ihmc.tools.thread.GuidedSwapReference;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -22,10 +22,10 @@ public class RDXROS1RGBA8VideoVisualizer extends RDXVisualizer implements RDXROS
    private final ResettableExceptionHandlingExecutorService threadQueue;
    private final Runnable doReceiveMessageOnThread = this::doReceiveMessageOnThread;
    private final ImGuiVideoPanel videoPanel;
-   private final ZeroCopySwapReference<RDXROS1RGBA8VideoVisualizerData> dataSwapReferenceManager
-                                              = new ZeroCopySwapReference<>(RDXROS1RGBA8VideoVisualizerData::new,
-                                                                            this::processOnLowPriorityThread,
-                                                                            this::updateImagePanelOnUIThread);
+   private final GuidedSwapReference<RDXROS1RGBA8VideoVisualizerData> dataSwapReferenceManager
+                                              = new GuidedSwapReference<>(RDXROS1RGBA8VideoVisualizerData::new,
+                                                                          this::processOnLowPriorityThread,
+                                                                          this::updateImagePanelOnUIThread);
    private volatile Image latestImage;
 
    public RDXROS1RGBA8VideoVisualizer(String title, String topic)

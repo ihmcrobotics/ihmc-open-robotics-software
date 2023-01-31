@@ -36,7 +36,7 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.perception.ProjectionTools;
-import us.ihmc.tools.thread.ZeroCopySwapReference;
+import us.ihmc.tools.thread.GuidedSwapReference;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -99,7 +99,7 @@ public class RDXGPUPlanarRegionExtractionUI
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
    private RDXHeightMapGraphic heightMapGraphic;
-   private ZeroCopySwapReference<RDXPointCloudRenderer> boundaryPointCloudSwap;
+   private GuidedSwapReference<RDXPointCloudRenderer> boundaryPointCloudSwap;
    private Array<Renderable> latestRenderables;
    private Pool<Renderable> latestPool;
    private ReferenceFrame cameraFrame;
@@ -158,7 +158,7 @@ public class RDXGPUPlanarRegionExtractionUI
 
       planarRegionsGraphic = new RDXPlanarRegionsGraphic();
       heightMapGraphic = new RDXHeightMapGraphic();
-      boundaryPointCloudSwap = new ZeroCopySwapReference<>(() ->
+      boundaryPointCloudSwap = new GuidedSwapReference<>(() ->
       {
          RDXPointCloudRenderer boundaryPointCloud = new RDXPointCloudRenderer();
          boundaryPointCloud.create(2000000);
