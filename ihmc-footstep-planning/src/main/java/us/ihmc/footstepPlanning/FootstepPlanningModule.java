@@ -18,6 +18,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner;
 import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
+import us.ihmc.footstepPlanning.bodyPath.GPUAStarBodyPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -60,12 +61,13 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private ROS2NodeInterface ros2Node;
    private boolean manageROS2Node = false;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
+   private final AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final VisibilityGraphPathPlanner visibilityGraphPlanner;
    private final NarrowPassageBodyPathOptimizer narrowPassageBodyPathOptimizer;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
-   private final AStarBodyPathPlanner bodyPathPlanner;
+   private final GPUAStarBodyPathPlanner bodyPathPlanner;
    private final List<VariableDescriptor> bodyPathVariableDescriptors;
 
    private final PlanThenSnapPlanner planThenSnapPlanner;
@@ -91,6 +93,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    {
       this(name,
            new DefaultVisibilityGraphParameters(),
+           new AStarBodyPathPlannerParameters(),
            new DefaultFootstepPlannerParameters(),
            new DefaultSwingPlannerParameters(),
            null,
@@ -100,6 +103,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepPlanningModule(String name,
                                  VisibilityGraphsParametersBasics visibilityGraphParameters,
+                                 AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters,
                                  FootstepPlannerParametersBasics footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
@@ -108,12 +112,13 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    {
       this.name = name;
       this.visibilityGraphParameters = visibilityGraphParameters;
+      this.aStarBodyPathPlannerParameters = aStarBodyPathPlannerParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.visibilityGraphPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor);
       this.narrowPassageBodyPathOptimizer = new NarrowPassageBodyPathOptimizer(footstepPlannerParameters, null);
-      this.bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, footPolygons, stopwatch);
+      this.bodyPathPlanner = new GPUAStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
@@ -174,7 +179,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearLoggedData();
       bodyPathPlanner.clearLoggedData();
 
-      boolean heightMapAvailable = request.getHeightMapMessage() != null && !request.getHeightMapMessage().getHeights().isEmpty();
+      boolean heightMapAvailable = request.getHeightMapMessage() != null;
       boolean planarRegionsAvailable = request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty();
 
       if (heightMapAvailable)
@@ -230,7 +235,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             visibilityGraphPlanner.computeBestEffortPlan(horizonLength);
          }
 
-         bodyPathPlanHolder.setPoseWaypoints(waypoints);
+
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);
          if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
          {
@@ -260,6 +265,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             bodyPathWaypoints.add(new Pose3D(goalMidFootPose));
          }
 
+         // set the start orientation to be the heading
+         double dx = bodyPathWaypoints.get(1).getX() - bodyPathWaypoints.get(0).getX();
+         double dy = bodyPathWaypoints.get(1).getY() - bodyPathWaypoints.get(0).getY();
+         ((Pose3DBasics) bodyPathWaypoints.get(0)).getOrientation().setToYawOrientation(Math.atan2(dy, dx));
+
          bodyPathPlanHolder.setPoseWaypoints(bodyPathWaypoints);
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);
          if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
@@ -267,8 +277,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
-
-         stopwatch.lap();
       }
       else if (visibilityGraphParameters.getOptimizeForNarrowPassage())
       {
@@ -304,11 +312,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
 
-      if (request.getPerformAStarSearch())
+      if (request.getPlanFootsteps() && request.getPerformAStarSearch())
       {
          aStarFootstepPlanner.handleRequest(request, output);
       }
-      else
+      else if (request.getPlanFootsteps())
       {
          RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
@@ -478,6 +486,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlannerParameters;
+   }
+
+   public AStarBodyPathPlannerParametersBasics getAStarBodyPathPlannerParameters()
+   {
+      return aStarBodyPathPlannerParameters;
    }
 
    public VisibilityGraphsParametersBasics getVisibilityGraphParameters()

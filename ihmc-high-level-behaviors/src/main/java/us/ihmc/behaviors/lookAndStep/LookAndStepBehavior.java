@@ -130,6 +130,8 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          footstepPlanning.acceptLidarREARegions(planarRegionsListMessage);
       });
       helper.subscribeViaCallback(GOAL_INPUT, this::acceptGoal);
+      // TODO add height map to footstep planner
+      helper.subscribeViaCallback(ROS2_HEIGHT_MAP, bodyPathPlanning::acceptHeightMap);
 
       bodyPathLocalization.initialize(this);
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, imminentStanceTracker::acceptCapturabilityBasedStatus);
