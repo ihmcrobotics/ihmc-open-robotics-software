@@ -19,6 +19,11 @@ public class ImGuiOpenCVSwapVideoPanel
    private final ImGuiVideoPanel videoPanel;
    private final GuidedSwapReference<ImGuiOpenCVSwapVideoPanelData> dataSwapReferenceManager;
 
+   public ImGuiOpenCVSwapVideoPanel(String panelName, Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnAsynchronousThread)
+   {
+      this(panelName, updateOnAsynchronousThread, null);
+   }
+
    public ImGuiOpenCVSwapVideoPanel(String panelName,
                                     Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
                                     Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnUIThread)
@@ -32,7 +37,9 @@ public class ImGuiOpenCVSwapVideoPanel
                                     Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnUIThread)
    {
       this.videoPanel = new ImGuiVideoPanel(panelName, flipY);
-      dataSwapReferenceManager = new GuidedSwapReference<>(ImGuiOpenCVSwapVideoPanelData::new, updateOnAsynchronousThread, updateOnUIThread);
+      dataSwapReferenceManager = new GuidedSwapReference<>(ImGuiOpenCVSwapVideoPanelData::new,
+                                                           updateOnAsynchronousThread,
+                                                           updateOnUIThread == null ? this::defaultUpdateOnUIThread : updateOnUIThread);
    }
 
    /**
@@ -52,6 +59,14 @@ public class ImGuiOpenCVSwapVideoPanel
    public void updateOnUIThread()
    {
       dataSwapReferenceManager.accessOnHighPriorityThread();
+   }
+
+   private void defaultUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
+   {
+      if (data.getRGBA8Image() != null)
+      {
+         data.updateOnUIThread(videoPanel);
+      }
    }
 
    public ImGuiVideoPanel getVideoPanel()

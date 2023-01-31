@@ -94,7 +94,7 @@ public class RDXFFMPEGWebcamLoggingDemo
 
                   bgrImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
 
-                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
+                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
                   baseUI.getLayoutManager().reloadLayout();
 
@@ -132,11 +132,6 @@ public class RDXFFMPEGWebcamLoggingDemo
 
             data.ensureTextureDimensions(imageWidth, imageHeight);
             opencv_imgproc.cvtColor(bgrImage.getBytedecoOpenCVMat(), data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
-         }
-
-         private void videoUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
-         {
-            data.updateOnUIThread(swapCVPanel.getVideoPanel());
          }
 
          private void renderImGuiWidgets()
