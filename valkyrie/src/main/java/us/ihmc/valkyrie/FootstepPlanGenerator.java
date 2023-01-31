@@ -7,6 +7,7 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class FootstepPlanGenerator
@@ -26,9 +27,7 @@ public class FootstepPlanGenerator
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
 
       // Case: NOMINAL plan
-      FootstepPlannerOutput nominal_output = planningModule.handleRequest(request);
-      planningModule.handleRequest(request);
-      logger.logSession();
+      FootstepPlan nominal_output_plan = planAndLog(0.0, planningModule, request, logger, "nominal");
 
       // Case: REFERENCE plan A
       FootstepPlan reference_A = new FootstepPlan();
@@ -37,13 +36,13 @@ public class FootstepPlanGenerator
       request.setReferencePlan(reference_A);
 
       // ref A alpha 1
-      FootstepPlan ref_A_alpha_full_output = planAndLog(1.0, planningModule, request, logger);
+      FootstepPlan ref_A_alpha_full_output = planAndLog(1.0, planningModule, request, logger, "ref_A_alpha_full");
       referenced_output_plans.add(ref_A_alpha_full_output);
       // ref A alpha 0.5
-      FootstepPlan ref_A_alpha_half_output = planAndLog(0.5, planningModule, request, logger);
+      FootstepPlan ref_A_alpha_half_output = planAndLog(0.5, planningModule, request, logger, "ref_A_alpha_half");
       referenced_output_plans.add(ref_A_alpha_half_output);
       // ref A alpha 0.0
-      FootstepPlan ref_A_alpha_zero_output = planAndLog(0.0, planningModule, request, logger);
+      FootstepPlan ref_A_alpha_zero_output = planAndLog(0.0, planningModule, request, logger, "ref_A_alpha_zero");
       referenced_output_plans.add(ref_A_alpha_zero_output);
 
       // Case: REFERENCE plan B
@@ -53,13 +52,13 @@ public class FootstepPlanGenerator
       request.setReferencePlan(reference_B);
 
       // ref B alpha 1
-      FootstepPlan ref_B_alpha_full_output = planAndLog(1.0, planningModule, request, logger);
+      FootstepPlan ref_B_alpha_full_output = planAndLog(1.0, planningModule, request, logger, "ref_B_alpha_full");
       referenced_output_plans.add(ref_B_alpha_full_output);
       // ref B alpha 0.5
-      FootstepPlan ref_B_alpha_half_output = planAndLog(0.5, planningModule, request, logger);
+      FootstepPlan ref_B_alpha_half_output = planAndLog(0.5, planningModule, request, logger, "ref_B_alpha_half");
       referenced_output_plans.add(ref_B_alpha_half_output);
       // ref B alpha 0.0
-      FootstepPlan ref_B_alpha_zero_output = planAndLog(0.0, planningModule, request, logger);
+      FootstepPlan ref_B_alpha_zero_output = planAndLog(0.0, planningModule, request, logger, "ref_B_alpha_zero");
       referenced_output_plans.add(ref_B_alpha_zero_output);
 
       // Plan without a reference:
@@ -68,7 +67,7 @@ public class FootstepPlanGenerator
       // RIGHT ( 0.600, -0.100,  0.000 )
 
       System.out.println("NOMINAL output");
-      printOutput(nominal_output);
+      printPlan(nominal_output_plan);
       System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
       System.out.println("REF outputs with alphas 1.0, 0.5 ,0.0");
       for (FootstepPlan plan : referenced_output_plans)
@@ -97,13 +96,16 @@ public class FootstepPlanGenerator
       }
    }
 
-   private FootstepPlan planAndLog(double alpha, FootstepPlanningModule planningModule, FootstepPlannerRequest request, FootstepPlannerLogger logger)
+   private FootstepPlan planAndLog(double alpha, FootstepPlanningModule planningModule, FootstepPlannerRequest request, FootstepPlannerLogger logger, String folderName)
    {
       planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceAlpha(alpha);
       FootstepPlannerOutput output = planningModule.handleRequest(request);
       FootstepPlan plan = new FootstepPlan(output.getFootstepPlan());
 
-      logger.logSession();
+      String defaultSaveDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+      String logDirectory = defaultSaveDirectory + folderName + File.separator;
+      logger.logSessionWithExactFolderName(logDirectory);
+
       return plan;
    }
 
