@@ -246,7 +246,7 @@ public class LookAndStepFootstepPlanningTask
          review.reset();
          plannerFailedLastTime.set(false);
          planarRegionsManager.clear();
-         lastPlanStanceSide = null;
+         lastPlanInitialStanceSide = null;
       }
 
       private void evaluateAndRun()
@@ -303,7 +303,7 @@ public class LookAndStepFootstepPlanningTask
    protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected RobotSide stanceSideWhenLastFootstepStarted;
-   protected RobotSide lastPlanStanceSide;
+   protected RobotSide lastPlanInitialStanceSide;
    protected LookAndStepBehavior.State behaviorState;
    protected int numberOfIncompleteFootsteps;
    protected int numberOfCompletedFootsteps;
@@ -377,7 +377,7 @@ public class LookAndStepFootstepPlanningTask
       }
       uiPublisher.publishToUI(ImminentFootPosesForUI, imminentFootPosesForUI);
 
-      RobotSide stanceSide;
+      RobotSide initialStanceSide;
       // if last plan failed
       // if foot is in the air
       // how many steps are left
@@ -385,26 +385,26 @@ public class LookAndStepFootstepPlanningTask
       if (isInMotion && stanceSideWhenLastFootstepStarted != null)
       {
          // If we are in motion (currently walking), make sure to plan w.r.t. the stance side when the last step started
-         stanceSide = stanceSideWhenLastFootstepStarted.getOppositeSide();
+         initialStanceSide = stanceSideWhenLastFootstepStarted.getOppositeSide();
       }
       // If we are stopped, prevent look and step from getting stuck if one side isn't feasible and alternate planning with left and right
-      else if (lastPlanStanceSide != null)
+      else if (lastPlanInitialStanceSide != null)
       {
-         stanceSide = lastPlanStanceSide.getOppositeSide();
+         initialStanceSide = lastPlanInitialStanceSide.getOppositeSide();
       }
       else // if first step, step with furthest foot from the goal
       {
          if (startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld().getPosition().distance(subGoalPoseBetweenFeet.getPosition()) <= startFootPoses.get(
                RobotSide.RIGHT).getSolePoseInWorld().getPosition().distance(subGoalPoseBetweenFeet.getPosition()))
          {
-            stanceSide = RobotSide.LEFT;
+            initialStanceSide = RobotSide.LEFT;
          }
          else
          {
-            stanceSide = RobotSide.RIGHT;
+            initialStanceSide = RobotSide.RIGHT;
          }
       }
-      lastPlanStanceSide = stanceSide;
+      lastPlanInitialStanceSide = initialStanceSide;
       plannerFailedLastTime.set(false);
 
       uiPublisher.publishToUI(SubGoalForUI, new Pose3D(subGoalPoseBetweenFeet));
@@ -412,7 +412,7 @@ public class LookAndStepFootstepPlanningTask
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
       //      footstepPlannerRequest.getBodyPathWaypoints().add(waypoint); // use these to add waypoints between start and goal
-      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
+      footstepPlannerRequest.setRequestedInitialStanceSide(initialStanceSide);
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
 
@@ -449,7 +449,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlanningModule.getChecker().attachCustomFootstepChecker(stepInPlaceChecker);
       int iterations = footstepPlanningModule.getAStarFootstepPlanner().getIterations();
 
-      statusLogger.info("Stance side: {}", stanceSide.name());
+      statusLogger.info("Stance side: {}", initialStanceSide.name());
       statusLogger.info("Planning footsteps with {}...", swingPlannerType.name());
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
       statusLogger.info("Footstep planner completed with {}, {} step(s)",
