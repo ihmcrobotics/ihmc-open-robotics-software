@@ -74,22 +74,6 @@
 #define RANSAC_ACCEPTABLE_CONSENSUS 3
 
 
-
-int key_to_x_index(int key, int center_index)
-{
-    return key % (2 * center_index + 1);
-}
-
-int key_to_y_index(int key, int center_index)
-{
-    return key / (2 * center_index + 1);
-}
-
-int indices_to_key(int x_index, int y_index, int centerIndex)
-{
-    return x_index + y_index * (2 * centerIndex + 1);
-}
-
 float index_to_yaw(int yaw_index, int yaw_total_indices)
 {
     int center_index = yaw_total_indices / 2;
@@ -99,110 +83,6 @@ float index_to_yaw(int yaw_index, int yaw_total_indices)
 int yaw_to_index(float yaw, int yaw_total_indices)
 {
     return ((int) (yaw / yaw_total_indices)) + (yaw_total_indices / 2);
-}
-
-int coordinate_to_index(float coordinate, float center, float resolution, int center_index)
-{
-    return round((coordinate - center) / resolution) + center_index;
-}
-
-int coordinate_to_key(float2 coordinates, float2 center, float resolution, int center_index)
-{
-    int x_index = coordinate_to_index(coordinates.x, center.x, resolution, center_index);
-    int y_index = coordinate_to_index(coordinates.y, center.y, resolution, center_index);
-    return indices_to_key(x_index, y_index, center_index);
-}
-
-float index_to_coordinate(int index, float center, float resolution, int center_index)
-{
-    return (index - center_index) * resolution + center;
-}
-
-float2 indices_to_coordinate(int2 index, float2 center, float resolution, int center_index)
-{
-    return (float2) (index_to_coordinate(index.x, center.x, resolution, center_index),
-                     index_to_coordinate(index.y, center.y, resolution, center_index));
-}
-
-float2 key_to_coordinate(int key, float2 center, float resolution, int center_index)
-{
-    int2 index = (int2) (key_to_x_index(key, center_index), key_to_y_index(key, center_index));
-    return indices_to_coordinate(index, center, resolution, center_index);
-}
-
-uint2 nextRandom(uint seed, uint bits)
-{
-    long multiplier = 0x5DEECE66DL;
-    long addend = 0xBL;
-    long mask = (1L << 48) - 1;
-    seed = (seed * multiplier + addend) & (mask);
-    uint result = seed >> (48 - bits);
-
-    return (uint2) (result, seed);
-}
-
-bool epsilonEquals(float a, float b, float epsilon)
-{
-    return fabs(a - b) < epsilon;
-}
-
-uint2 nextRandomInt(uint seed, uint bound)
-{
-    uint bits = 31;
-    uint2 result = nextRandom(seed, bits);
-    uint r = result.s0;
-    seed = result.s1;
-
-    uint m = bound - 1;
-    if ((bound & m) == 0)
-        r = (uint)((bound * (long) r) >> bits);
-    else
-    {
-        uint u = r;
-        r = u % bound;
-        while (u - r + m < 0)
-        {
-            result = nextRandom(seed, bits);
-            u = result.s0;
-            seed = result.s1;
-            r = u % bound;
-        }
-    }
-
-    return result;
-}
-
-
-float2 rotate_vector(float2 vector, float cH, float sH)
-{
-    float dxLocal = cH * vector.x - sH * vector.y;
-    float dyLocal = sH * vector.x + cH * vector.y;
-
-    return (float2) (dxLocal, dyLocal);
-}
-
-float2 rotate_vector_by_yaw(float2 vector, float yaw)
-{
-    float cY = cos(yaw);
-    float sY = sin(yaw);
-
-    return rotate_vector(vector, cY, sY);
-}
-
-float2 inverse_rotate_vector(float2 vector, float cH, float sH)
-{
-    float dxLocal = cH * vector.x + sH * vector.y;
-    float dyLocal = -sH * vector.x + cH * vector.y;
-
-    return (float2) (dxLocal, dyLocal);
-}
-
-float2 inverse_rotate_vector_by_yaw(float2 vector, float yaw)
-{
-    float cY = cos(yaw);
-    float sY = sin(yaw);
-
-    return inverse_rotate_vector(vector, cY, sY);
 }
 
 float3 normal3DFromThreePoint3Ds(float3 firstPointOnPlane,
@@ -228,47 +108,6 @@ float signedDistanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane,
 float distanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane, float3 planeNormal)
 {
     return fabs(signedDistanceFromPoint3DToPlane3D(pointQuery, pointOnPlane, planeNormal));
-}
-
-
-float determinant3x3Matrix(float* matrix)
-{
-    float pos = matrix[0] * matrix[4] * matrix[8] + matrix[1] * matrix[5] * matrix[6] + matrix[2] * matrix[3] * matrix[7];
-    float neg = matrix[2] * matrix[4] * matrix[6] + matrix[1] * matrix[3] * matrix[8] + matrix[0] * matrix[5] * matrix[7];
-
-    return pos - neg;
-}
-
-float* invert3x3Matrix(float* matrix)
-{
-    float det = determinant3x3Matrix(matrix);
-    float ret[9];
-
-    float detMinor00 = matrix[4] * matrix[8] - matrix[5] * matrix[7];
-    float detMinor01 = matrix[3] * matrix[8] - matrix[5] * matrix[6];
-    float detMinor02 = matrix[3] * matrix[7] - matrix[4] * matrix[6];
-
-    float detMinor10 = matrix[1] * matrix[8] - matrix[2] * matrix[7];
-    float detMinor11 = matrix[0] * matrix[8] - matrix[2] * matrix[6];
-    float detMinor12 = matrix[0] * matrix[7] - matrix[1] * matrix[6];
-
-    float detMinor20 = matrix[1] * matrix[5] - matrix[2] * matrix[4];
-    float detMinor21 = matrix[0] * matrix[5] - matrix[2] * matrix[3];
-    float detMinor22 = matrix[0] * matrix[4] - matrix[1] * matrix[3];
-
-    ret[0] = detMinor00 / det;
-    ret[1] = -detMinor10 / det;
-    ret[2] = detMinor20 / det;
-
-    ret[3] = -detMinor01 / det;
-    ret[4] = detMinor11 / det;
-    ret[5] = -detMinor21 / det;
-
-    ret[6] = detMinor02 / det;
-    ret[7] = -detMinor12 / det;
-    ret[8] = detMinor22 / det;
-
-    return ret;
 }
 
 float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector)
@@ -747,7 +586,7 @@ float computeSidedTraversibility(float* height_map_params,
 
     float yaw = get_yaw(neighbor_idx);
     float2 local_offset = (float2) (0.0f, half_stance_width);
-    float2 translation = inverse_rotate_vector_by_yaw(local_offset, yaw);
+    float2 translation = applyInverseYawRotationToVector2D(local_offset, yaw);
     node += translation;
 
     int center_index = (int) height_map_params[CENTER_INDEX];
@@ -1181,8 +1020,9 @@ float computeSmootherTraversibility(global float* height_map_params,
     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
     float resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
 
-    float cYaw = cos(waypoint_yaw);
-    float sYaw = sin(waypoint_yaw);
+    // we're using the negative value because we want to rotate it back
+    float cYaw = cos(-waypoint_yaw);
+    float sYaw = sin(-waypoint_yaw);
 
     int number_of_offsets = traversibility_offsets[0];
     for (int i = 0; i < number_of_offsets; i++)
@@ -1195,7 +1035,7 @@ float computeSmootherTraversibility(global float* height_map_params,
             offset_y -= planner_params[HALF_STANCE_WIDTH];
 
         float2 local_offset = (float2) (offset_x, offset_y);
-        float2 map_offset = inverse_rotate_vector(local_offset, cYaw, sYaw);
+        float2 map_offset = apply2DRotationToVector2D(local_offset, cYaw, sYaw);
 
         float2 twiddled_position = waypoint_position + map_offset;
         int twiddled_x_index = coordinate_to_index(twiddled_position.x, center.x, resolution, center_index);
@@ -1362,8 +1202,8 @@ void kernel computeCollisionGradientMap(global float* height_map_params,
     int path_key = coordinate_to_key(waypoint_xy, center, planner_params[PATH_RESOLUTION], planner_params[PATH_CENTER_INDEX]);
     float waypointZ = snapped_height_map_data[path_key];
 
-    float sH = sin(heading);
-    float cH = cos(heading);
+    float sH = sin(-heading);
+    float cH = cos(-heading);
 
     float2 gradient = (float2) (0.0f, 0.0f);
     int numCollisions = 0;
@@ -1391,8 +1231,8 @@ void kernel computeCollisionGradientMap(global float* height_map_params,
             float2 delta = position - waypoint_xy;
 
             // rotating this offset to the local frame
-            //float2 delta_local = (float2) (cH * delta.x + sH * delta.y, -sH * delta.x + cH * delta.y);//rotate_vector(delta, cH, sH);
-            float2 delta_local = rotate_vector(delta, cH, sH);
+            //float2 delta_local = (float2) (cH * delta.x + sH * delta.y, -sH * delta.x + cH * delta.y);
+            float2 delta_local = apply2DRotationToVector2D(delta, cH, sH);
 
             float absDyLocal = fabs(delta_local.y);
 
@@ -1408,9 +1248,7 @@ void kernel computeCollisionGradientMap(global float* height_map_params,
             max_collision = max(max_collision, lateral_penetration);
 
             float2 penetration = (float2) (0.0f, sign(delta_local.y) * lateral_penetration);
-            gradient += inverse_rotate_vector(penetration, cH, sH);
-            //gradient.x += sign(delta_local.y) * -lateral_penetration * sH;
-            //gradient.y += sign(delta_local.y) * lateral_penetration * cH;
+            gradient += apply2DRotationToVector2D(penetration, cH, sH);
 
             numCollisions++;
         }
@@ -1525,8 +1363,8 @@ void kernel computeGroundPlaneGradientMap(global float* height_map_params,
     float2 waypoint_position = indices_to_coordinate((int2) (idx_x, idx_y), center, resolution, center_index);
     float waypoint_yaw = index_to_yaw(yaw_key, smoother_params[YAW_DISCRETIZATIONS]);
 
-    float sH = sin(waypoint_yaw);
-    float cH = cos(waypoint_yaw);
+    float sH = sin(-waypoint_yaw);
+    float cH = cos(-waypoint_yaw);
 
     int results_key = smoother_params[YAW_DISCRETIZATIONS] * map_key + yaw_key;
 
@@ -1546,7 +1384,7 @@ void kernel computeGroundPlaneGradientMap(global float* height_map_params,
                 delta.y = -delta.y;
             delta *= height_map_params[HEIGHT_MAP_RESOLUTION];
 
-            float2 delta_map = inverse_rotate_vector(delta, cH, sH);
+            float2 delta_map = apply2DRotationToVector2D(delta, cH, sH);
 
             float2 query_position = waypoint_position + delta_map;
             int query_idx_x = coordinate_to_index(query_position.x, center.x, height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
@@ -1735,7 +1573,7 @@ void kernel computeWaypointMapGradients(global float* height_map_params,
             discount = clamp(discount, 0.0f, 1.0f);
 
             float2 delta_local = (float2) (0.0f, discount * (positive_sample - negative_sample));
-            float2 gradient = inverse_rotate_vector_by_yaw(delta_local, waypoint_xyzYaw[4 * waypoint_key + 3]);;
+            float2 gradient = applyInverseYawRotationToVector2D(delta_local, waypoint_xyzYaw[4 * waypoint_key + 3]);;
 
             waypoint_traversibility_gradients[goal_key] = gradient.x;
             waypoint_traversibility_gradients[goal_key + 1] = gradient.y;
