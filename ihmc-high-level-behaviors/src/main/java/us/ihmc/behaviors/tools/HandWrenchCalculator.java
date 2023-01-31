@@ -37,6 +37,8 @@ public class HandWrenchCalculator
       for (RobotSide side : RobotSide.values)
       {
          jacobianCalculator.setKinematicChain(fullRobotModel.getChest(), fullRobotModel.getHand(side));
+         // Computing the wrench at the handControlFrame and not the hand.getBodyFixedFrame() as is done by default.
+         jacobianCalculator.setJacobianFrame(fullRobotModel.getHandControlFrame(side));
          referenceFrame.set(side, jacobianCalculator.getJacobianFrame());
          armJacobianMatrix.set(side, jacobianCalculator.getJacobianMatrix());
          List<OneDoFJointBasics> oneDoFJoints = MultiBodySystemTools.filterJoints(jacobianCalculator.getJointsFromBaseToEndEffector(), OneDoFJointBasics.class);
@@ -98,15 +100,16 @@ public class HandWrenchCalculator
          DMatrixRMaj wrenchVector = new DMatrixRMaj(6,1);
          CommonOps_DDRM.mult(armJacobianTransposedDagger, jointTorqueVector, wrenchVector);
 
-         wrenches.set(side, makeWrench(wrenchVector));
+         wrenches.set(side, makeWrench(jacobianCalculator.getJacobianFrame(), wrenchVector));
       }
    }
 
    // Wrench expressed in world-aligned frame
-   private static SpatialVector makeWrench(DMatrixRMaj wrenchVector)
+   private static SpatialVector makeWrench(ReferenceFrame jacobianFrame, DMatrixRMaj wrenchVector)
    {
       // Linear and angular part into spatial vector
       SpatialVector spatialVector = new SpatialVector();
+      spatialVector.setReferenceFrame(jacobianFrame);
       spatialVector.set(wrenchVector);
       // Express in world-frame
       spatialVector.changeFrame(ReferenceFrame.getWorldFrame());
