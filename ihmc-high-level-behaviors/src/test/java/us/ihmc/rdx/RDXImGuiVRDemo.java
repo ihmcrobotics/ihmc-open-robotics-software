@@ -155,18 +155,18 @@ public class RDXImGuiVRDemo
                   ImGui.text("Right B button pressed: " + rightBButton.bState());
                }
                ImGui.text("Left Joystick pressed: " + leftJoystick.bState());
-               ImGui.inputFloat("Left Joystick forward", leftForwardJoystickValue);
-               ImGui.inputFloat("Left Joystick lateral", leftLateralJoystickValue);
+               ImGui.text("Left Joystick forward: " + leftForwardJoystickValue);
+               ImGui.text("Left Joystick lateral: " + leftLateralJoystickValue);
                ImGui.text("Left Trigger pressed: " + leftTrigger.bState());
-               ImGui.inputFloat("Left Trigger", leftTriggerValue);
-               ImGui.inputFloat("Left Grip", leftGripValue);
+               ImGui.text("Left Trigger: " + leftTriggerValue);
+               ImGui.text("Left Grip: " + leftGripValue);
 
                ImGui.text("Right Joystick pressed: " + rightJoystick.bState());
-               ImGui.inputFloat("Right Joystick forward", rightForwardJoystickValue);
-               ImGui.inputFloat("Right Joystick lateral", rightLateralJoystickValue);
+               ImGui.text("Right Joystick forward: " + rightForwardJoystickValue);
+               ImGui.text("Right Joystick lateral: " + rightLateralJoystickValue);
                ImGui.text("Right Trigger pressed: " + rightTrigger.bState());
-               ImGui.inputFloat("Right Trigger", rightTriggerValue);
-               ImGui.inputFloat("Right Grip", rightGripValue);
+               ImGui.text("Right Trigger: " + rightTriggerValue);
+               ImGui.text("Right Grip: " + rightGripValue);
             }
          }
 
