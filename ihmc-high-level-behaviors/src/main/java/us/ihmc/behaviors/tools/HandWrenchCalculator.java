@@ -132,4 +132,10 @@ public class HandWrenchCalculator
    {
       return referenceFrame;
    }
+
+   // TODO: remove gravity compensation from the wrench when called? but gravity compensation would change as the arm moves . . .
+   public void calibrate()
+   {
+
+   }
 }
