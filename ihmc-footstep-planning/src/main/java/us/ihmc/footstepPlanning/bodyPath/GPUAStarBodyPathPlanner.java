@@ -251,7 +251,7 @@ public class GPUAStarBodyPathPlanner
 
       openCLManager.create();
 
-      pathPlannerProgram = openCLManager.loadProgram("BodyPathPlanning");
+      pathPlannerProgram = openCLManager.loadProgram("BodyPathPlanning", "HeightMapUtils.cl");
       computeNormalsWithLeastSquaresKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithLeastSquares");
       computeNormalsWithRansacKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithRANSAC");
       snapVerticesKernel = openCLManager.createKernel(pathPlannerProgram, "snapVertices");
