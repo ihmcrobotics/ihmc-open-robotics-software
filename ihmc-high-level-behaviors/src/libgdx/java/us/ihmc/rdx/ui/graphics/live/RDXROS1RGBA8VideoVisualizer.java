@@ -20,9 +20,13 @@ public class RDXROS1RGBA8VideoVisualizer extends RDXVisualizer implements RDXROS
    private boolean currentlySubscribed = false;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ResettableExceptionHandlingExecutorService threadQueue;
+   private final Runnable doReceiveMessageOnThread = this::doReceiveMessageOnThread;
    private final ImGuiVideoPanel videoPanel;
    private final ZeroCopySwapReference<RDXROS1RGBA8VideoVisualizerData> dataSwapReferenceManager
-         = new ZeroCopySwapReference<>(RDXROS1RGBA8VideoVisualizerData::new);
+                                              = new ZeroCopySwapReference<>(RDXROS1RGBA8VideoVisualizerData::new,
+                                                                            this::processOnLowPriorityThread,
+                                                                            this::updateImagePanelOnUIThread);
+   private volatile Image latestImage;
 
    public RDXROS1RGBA8VideoVisualizer(String title, String topic)
    {
@@ -36,32 +40,30 @@ public class RDXROS1RGBA8VideoVisualizer extends RDXVisualizer implements RDXROS
    @Override
    public void subscribe(RosNodeInterface ros1Node)
    {
-      subscriber = new AbstractRosTopicSubscriber<Image>(Image._TYPE)
+      subscriber = new AbstractRosTopicSubscriber<>(Image._TYPE)
       {
          @Override
          public void onNewMessage(Image image)
          {
-            doReceiveMessageOnThread(() -> processIncomingMessageOnThread(image));
+            latestImage = image;
+            frequencyPlot.recordEvent();
+            if (isActive())
+            {
+               threadQueue.clearQueueAndExecute(doReceiveMessageOnThread);
+            }
          }
       };
       ros1Node.attachSubscriber(topic, subscriber);
    }
 
-   protected void doReceiveMessageOnThread(Runnable receiveMessageOnThread)
+   protected void doReceiveMessageOnThread()
    {
-      frequencyPlot.recordEvent();
-      if (isActive())
-      {
-         threadQueue.clearQueueAndExecute(receiveMessageOnThread);
-      }
+      dataSwapReferenceManager.accessOnLowPriorityThread();
    }
 
-   private void processIncomingMessageOnThread(Image image)
+   private void processOnLowPriorityThread(RDXROS1RGBA8VideoVisualizerData data)
    {
-      dataSwapReferenceManager.accessOnLowPriorityThread(data ->
-      {
-         data.updateOnMessageProcessingThread(image);
-      });
+      data.updateOnMessageProcessingThread(latestImage);
    }
 
    @Override
@@ -70,11 +72,13 @@ public class RDXROS1RGBA8VideoVisualizer extends RDXVisualizer implements RDXROS
       super.update();
       if (isActive())
       {
-         dataSwapReferenceManager.accessOnLowPriorityThread(data ->
-         {
-            data.updateOnUIThread(videoPanel);
-         });
+         dataSwapReferenceManager.accessOnLowPriorityThread();
       }
+   }
+
+   private void updateImagePanelOnUIThread(RDXROS1RGBA8VideoVisualizerData data)
+   {
+      data.updateOnUIThread(videoPanel);
    }
 
    @Override
