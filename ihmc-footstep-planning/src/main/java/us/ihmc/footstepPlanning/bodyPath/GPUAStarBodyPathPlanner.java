@@ -675,23 +675,29 @@ public class GPUAStarBodyPathPlanner
       int index = 0;
       IntPointer intPointer = traversibilityOffsetsBuffer.getBytedecoIntBufferPointer();
 
-      intPointer.put(index++, offsets0);
-      intPointer.put(index++, offsets1);
-      intPointer.put(index++, offsets2);
+      intPointer.put(0, offsets0);
+      intPointer.put(1, offsets1);
+      intPointer.put(2, offsets2);
+      int xStart = 3;
+      int yStart = 3 + offsets0;
       for (int i = 0; i < offsets0; i++)
       {
-         intPointer.put(index, zeroDegCollisionOffsetsX.get(i));
-         intPointer.put(offsets0 + index++, zeroDegCollisionOffsetsY.get(i));
+         intPointer.put(xStart + i, zeroDegCollisionOffsetsX.get(i));
+         intPointer.put(yStart + i, zeroDegCollisionOffsetsY.get(i));
       }
+      xStart += 2 * offsets0;
+      yStart += offsets0 + offsets1;
       for (int i = 0; i < offsets1; i++)
       {
-         intPointer.put(index, fourtyFiveDegCollisionOffsetsX.get(i));
-         intPointer.put(offsets1 + index++, fourtyFiveDegCollisionOffsetsY.get(i));
+         intPointer.put(xStart + i, fourtyFiveDegCollisionOffsetsX.get(i));
+         intPointer.put(yStart + i, fourtyFiveDegCollisionOffsetsY.get(i));
       }
+      xStart += 2 * offsets1;
+      yStart += offsets1 + offsets2;
       for (int i = 0; i < offsets2; i++)
       {
-         intPointer.put(index, twentyTwoCollisionOffsetsX.get(i));
-         intPointer.put(offsets2 + index++, twentyTwoCollisionOffsetsY.get(i));
+         intPointer.put(xStart + i, twentyTwoCollisionOffsetsX.get(i));
+         intPointer.put(yStart + i, twentyTwoCollisionOffsetsY.get(i));
       }
 
       traversibilityOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
@@ -718,26 +724,31 @@ public class GPUAStarBodyPathPlanner
       int offsets1 = collisionOffsetsX2.size();
       int offsets2 = collisionOffsetsX3.size();
       collisionOffsetsBuffer.resize(2 * offsets0 + 2 * offsets1 + 2 * offsets2 + 3, openCLManager);
-      int index = 0;
       IntPointer intPointer = collisionOffsetsBuffer.getBytedecoIntBufferPointer();
 
-      intPointer.put(index++, offsets0);
-      intPointer.put(index++, offsets1);
-      intPointer.put(index++, offsets2);
+      intPointer.put(0, offsets0);
+      intPointer.put(1, offsets1);
+      intPointer.put(2, offsets2);
+      int xStart = 3;
+      int yStart = 3 + offsets0;
       for (int i = 0; i < offsets0; i++)
       {
-         intPointer.put(index, collisionOffsetsX1.get(i));
-         intPointer.put(offsets0 + index++, collisionOffsetsY1.get(i));
+         intPointer.put(xStart + i, collisionOffsetsX1.get(i));
+         intPointer.put(yStart + i, collisionOffsetsY1.get(i));
       }
+      xStart += 2 * offsets0;
+      yStart += offsets0 + offsets1;
       for (int i = 0; i < offsets1; i++)
       {
-         intPointer.put(index, collisionOffsetsX2.get(i));
-         intPointer.put(offsets1 + index++, collisionOffsetsY2.get(i));
+         intPointer.put(xStart + i, collisionOffsetsX2.get(i));
+         intPointer.put(yStart + i, collisionOffsetsY2.get(i));
       }
+      xStart += 2 * offsets1;
+      yStart += offsets1 + offsets2;
       for (int i = 0; i < offsets2; i++)
       {
-         intPointer.put(index, collisionOffsetsX3.get(i));
-         intPointer.put(offsets2 + index++, collisionOffsetsY3.get(i));
+         intPointer.put(xStart + i, collisionOffsetsX3.get(i));
+         intPointer.put(yStart + i, collisionOffsetsY3.get(i));
       }
 
       collisionOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
@@ -745,7 +756,7 @@ public class GPUAStarBodyPathPlanner
 
    /**
     * Computes the offset indices for the neighboring nodes when performing the search. These are the grid coordinates of the candidate child nodes when
-    * expanding the cheapest node in the A* planner.
+    * expanding the cheapest node in the A* planner.collisionDetected
     */
    private static void packNeighborOffsets(TIntArrayList xOffsets, TIntArrayList yOffsets)
    {
