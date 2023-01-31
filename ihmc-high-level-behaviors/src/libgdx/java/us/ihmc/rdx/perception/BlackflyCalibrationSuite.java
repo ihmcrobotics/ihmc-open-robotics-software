@@ -24,9 +24,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Activator;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.tools.thread.*;
 
 /**
  * Official OpenCV camera calibration tutorial:
@@ -100,13 +98,13 @@ public class BlackflyCalibrationSuite
    private final ImInt undistortedImageHeight = new ImInt((int) BFLY_U3_23S6C_HEIGHT_PIXELS);
    private Mat distortionCoefficients;
    private Mat distortionCoefficientsCopy;
-   private Mat cameraMatrixForMonitor;
+   private Mat cameraMatrix;
+   private SwapReference<Mat> cameraMatrixForMonitor;
    private Mat cameraMatrixForMonitorShifting;
    private Mat bgrImageForUndistortion;
    private final Notification calibrationFinished = new Notification();
    private Mat distortedImageCopy;
    private Mat undistortedLiveImage;
-   private Mat cameraMatrix;
    private Size undistortedImageSize;
    private Mat identityCameraMatrix;
 
@@ -179,8 +177,8 @@ public class BlackflyCalibrationSuite
                   cameraMatrix.ptr(1, 1).putDouble(calibratedFy.get());
                   cameraMatrix.ptr(0, 2).putDouble(calibratedCx.get());
                   cameraMatrix.ptr(1, 2).putDouble(calibratedCy.get());
-                  cameraMatrixForMonitor = new Mat();
-                  cameraMatrix.copyTo(cameraMatrixForMonitor);
+                  cameraMatrixForMonitor = new SwapReference<>(Mat::new);
+                  cameraMatrixForMonitor.initializeBoth(cameraMatrixForMonitor -> cameraMatrix.copyTo(cameraMatrixForMonitor));
 //                  cameraMatrixForMonitorShifting = Mat.eye(3, 3, opencv_core.CV_64F).asMat();
                   cameraMatrixForMonitorShifting = opencv_core.noArray();
                   undistortedImageSize = new Size(undistortedImageWidth.get(), undistortedImageHeight.get());
@@ -208,28 +206,31 @@ public class BlackflyCalibrationSuite
                   distortionCoefficients.ptr(2, 0).putDouble(distortionCoefficientK3.get());
                   distortionCoefficients.ptr(3, 0).putDouble(distortionCoefficientK4.get());
                   distortionCoefficients.copyTo(distortionCoefficientsCopy);
-                  cameraMatrix.copyTo(cameraMatrixForMonitor);
-                  cameraMatrixForMonitor.ptr(0, 0).putDouble(calibratedFx.get());
-                  cameraMatrixForMonitor.ptr(1, 1).putDouble(calibratedFy.get());
-                  cameraMatrixForMonitor.ptr(0, 2).putDouble(calibratedCx.get());
-                  cameraMatrixForMonitor.ptr(1, 2).putDouble(calibratedCy.get());
+                  synchronized (cameraMatrixForMonitor)
+                  {
+                     cameraMatrix.copyTo(cameraMatrixForMonitor.getForThreadOne());
+                     cameraMatrixForMonitor.getForThreadOne().ptr(0, 0).putDouble(calibratedFx.get());
+                     cameraMatrixForMonitor.getForThreadOne().ptr(1, 1).putDouble(calibratedFy.get());
+                     cameraMatrixForMonitor.getForThreadOne().ptr(0, 2).putDouble(calibratedCx.get());
+                     cameraMatrixForMonitor.getForThreadOne().ptr(1, 2).putDouble(calibratedCy.get());
+
+                     StringBuilder stringBuilder = new StringBuilder();
+                     stringBuilder.append("Camera matrix:\n");
+                     for (int row = 0; row < 3; row++)
+                     {
+                        for (int col = 0; col < 3; col++)
+                        {
+                           stringBuilder.append("%.5f".formatted(cameraMatrixForMonitor.getForThreadOne().ptr(row, col).getDouble()) + " ");
+                        }
+                        stringBuilder.append("\n");
+                     }
+                     cameraMatrixAsText.set(stringBuilder.toString());
+                  }
 
 //                  opencv_calib3d.initUndistortRectifyMap(cameraMatrixForMonitor,
 //                                                         distortionCoefficientsCopy,
 //                                                         );
                }
-
-               StringBuilder stringBuilder = new StringBuilder();
-               stringBuilder.append("Camera matrix:\n");
-               for (int row = 0; row < 3; row++)
-               {
-                  for (int col = 0; col < 3; col++)
-                  {
-                     stringBuilder.append("%.5f".formatted(cameraMatrixForMonitor.ptr(row, col).getDouble()) + " ");
-                  }
-                  stringBuilder.append("\n");
-               }
-               cameraMatrixAsText.set(stringBuilder.toString());
 
                calibrationPatternDetectionUI.update();
                blackflyReader.updateOnUIThread();
@@ -276,7 +277,7 @@ public class BlackflyCalibrationSuite
       //      opencv_imgproc.cvtColor(distortedImageCopy, bgrImageForUndistortion, opencv_imgproc.COLOR_RGBA2BGR);
             opencv_calib3d.undistortImage(distortedImageCopy,
                                           undistortedLiveImage,
-                                          cameraMatrixForMonitor,
+                                          cameraMatrixForMonitor.getForThreadTwo(),
                                           distortionCoefficientsCopy,
                                           cameraMatrixForMonitorShifting,
                                           undistortedImageSize);
@@ -287,6 +288,8 @@ public class BlackflyCalibrationSuite
       //                                          undistortedLiveImage,
       //                                          cameraMatrixForMonitor,
       //                                          distortionCoefficientsCopy);
+
+            cameraMatrixForMonitor.swap();
          }
 
          private void undistoredImageUIThread(ImGuiOpenCVSwapVideoPanelData data)
@@ -459,7 +462,6 @@ public class BlackflyCalibrationSuite
       opencv_calib3d.drawChessboardCorners(calibrationPatternOutput, patternSize, cornersOrCentersMatVector.get(sourceImageIndex), patternFound);
    }
 
-   // TODO: Put on thread
    private void calibrate()
    {
       int patternWidth = calibrationPatternDetectionUI.getPatternWidth();
