@@ -147,6 +147,9 @@ public class PlanarRegionMessageConverter
 
    public static PlanarRegionsList convertToPlanarRegionsList(PlanarRegionsListMessage message)
    {
+      if (message == null)
+         return null;
+
       int vertexIndex = 0;
       Object<Vector3D> normals = message.getRegionNormal();
       Object<Point3D> origins = message.getRegionOrigin();

@@ -6,6 +6,9 @@ public class HeightMapMessageTools
 {
    public static HeightMapData unpackMessage(HeightMapMessage heightMapMessage)
    {
+      if (heightMapMessage == null)
+         return null;
+
       HeightMapData heightMapData = new HeightMapData(heightMapMessage.getXyResolution(),
                                                       heightMapMessage.getGridSizeXy(),
                                                       heightMapMessage.getGridCenterX(),
