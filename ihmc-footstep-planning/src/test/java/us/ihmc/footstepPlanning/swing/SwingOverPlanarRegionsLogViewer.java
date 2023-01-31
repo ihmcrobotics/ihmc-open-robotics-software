@@ -28,6 +28,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphPa
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -106,7 +107,11 @@ public class SwingOverPlanarRegionsLogViewer
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
 
-      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses(), SwingPlannerType.TWO_WAYPOINT_POSITION);
+      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(),
+                                                                    HeightMapMessageTools.unpackMessage(request.getHeightMapMessage()),
+                                                                    footstepPlan,
+                                                                    request.getStartFootPoses(),
+                                                                    SwingPlannerType.TWO_WAYPOINT_POSITION);
 
       scs.startOnAThread();
       scs.cropBuffer();

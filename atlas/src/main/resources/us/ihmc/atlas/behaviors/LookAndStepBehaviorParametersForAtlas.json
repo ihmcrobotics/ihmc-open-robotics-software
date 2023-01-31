@@ -28,6 +28,7 @@
   "Plan horizon" : 0.9,
   "Footstep planner timeout while stopped" : 2.0,
   "Planar regions expiration" : 1.5,
+  "Height map expiration" : 1.5,
   "Wait time after plan failed" : 2.0,
   "Number of steps to try to plan" : 3,
   "Robot configuration data expiration" : 0.5,

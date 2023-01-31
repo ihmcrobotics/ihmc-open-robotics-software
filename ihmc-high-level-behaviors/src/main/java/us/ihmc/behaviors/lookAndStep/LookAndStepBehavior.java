@@ -145,6 +145,11 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          delayFixedPlanarRegionsSubscription.setEnabled(true);
          delayFixedPlanarRegionsSubscription.setPosePublisherEnabled(true);
       }
+      helper.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, heightMapMessage ->
+      {
+         bodyPathPlanning.acceptHeightMap(heightMapMessage);
+         footstepPlanning.acceptHeightMap(heightMapMessage);
+      });
       helper.subscribeViaCallback(ROS2_REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
       helper.subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(helper.getRobotModel().getSimpleRobotName()),
                                   footstepPlanning::acceptRobotConfigurationData);

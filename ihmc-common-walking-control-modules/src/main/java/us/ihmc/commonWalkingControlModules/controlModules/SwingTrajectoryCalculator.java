@@ -112,7 +112,6 @@ public class SwingTrajectoryCalculator
                                                                maxSwingHeightFromStanceFoot,
                                                                defaultSwingHeightFromStanceFoot,
                                                                customWaypointAngleThreshold,
-                                                               2,
                                                                registry,
                                                                controllerToolbox.getYoGraphicsListRegistry());
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
