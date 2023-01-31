@@ -7,13 +7,13 @@ FactorGraphHandler::FactorGraphHandler()
    parameters.relinearizeSkip = 1;
    this->isam = gtsam::ISAM2(parameters);
 
-   gtsam::Vector6 odomVariance;
-   odomVariance << 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3;
-   createOdometryNoiseModel(odomVariance);
+   // gtsam::Vector6 odomVariance;
+   // odomVariance << 1e-2, 1e-2, 1e-2, 1e-2, 1e-2, 1e-2;
+   // createOdometryNoiseModel(odomVariance);
 
-   gtsam::Vector3 lmVariance;
-   lmVariance << 1e-2, 1e-2, 1e-2;
-   createOrientedPlaneNoiseModel(lmVariance);
+   // gtsam::Vector3 lmVariance;
+   // lmVariance << 1e-2, 1e-2, 1e-2;
+   // createOrientedPlaneNoiseModel(lmVariance);
 
    gtsam::Vector6 priorVariance;
    priorVariance << 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4;
