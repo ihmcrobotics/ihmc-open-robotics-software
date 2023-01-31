@@ -141,23 +141,23 @@ public class FFMPEGLoggerDemoHelper
          {
             LogTools.info("Creating logger of class " + loggerClass.getSimpleName() + " using reflection");
             Constructor<? extends FFMPEGLogger> constructor = loggerClass.getConstructor(int.class,
-                                                                               int.class,
-                                                                               boolean.class,
-                                                                               int.class,
-                                                                               int.class,
-                                                                               int.class,
-                                                                               int.class,
-                                                                               String.class,
-                                                                               String.class);
+                                                                                         int.class,
+                                                                                         boolean.class,
+                                                                                         int.class,
+                                                                                         int.class,
+                                                                                         int.class,
+                                                                                         int.class,
+                                                                                         String.class,
+                                                                                         String.class);
             logger = constructor.newInstance(imageWidth,
-                                   imageHeight,
-                                   lossless,
-                                   framerate.get(),
-                                   bitRate,
-                                   sourcePixelFormat,
-                                   encoderPixelFormat,
-                                   fileName,
-                                   preferredVideoEncoder);
+                                             imageHeight,
+                                             lossless,
+                                             framerate.get(),
+                                             bitRate,
+                                             sourcePixelFormat,
+                                             encoderPixelFormat,
+                                             fileName,
+                                             preferredVideoEncoder);
          }
          catch (ReflectiveOperationException ex)
          {
@@ -168,14 +168,14 @@ public class FFMPEGLoggerDemoHelper
 
       if (logger == null)
          logger = new FFMPEGFileLogger(imageWidth,
-                                   imageHeight,
-                                   lossless,
-                                   framerate.get(),
-                                   bitRate,
-                                   sourcePixelFormat,
-                                   encoderPixelFormat,
-                                   fileName,
-                                   preferredVideoEncoder);
+                                       imageHeight,
+                                       lossless,
+                                       framerate.get(),
+                                       bitRate,
+                                       sourcePixelFormat,
+                                       encoderPixelFormat,
+                                       fileName,
+                                       preferredVideoEncoder);
 
       finalizing = true;
 

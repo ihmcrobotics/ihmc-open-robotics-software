@@ -178,7 +178,8 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       HDF5Tools.storeByteArray(ptsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.pts()), Long.BYTES);
       HDF5Tools.storeByteArray(dtsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.dts()), Long.BYTES);
 
-      //TODO this copy operation is necessary for data to be properly logged but there might be a faster way to do this. There doesn't seem to be a major speed impact though
+      // TODO this copy operation is necessary for data to be properly logged but there might be a faster way to do this.
+      //  There doesn't seem to be a major speed impact though
       try (BytePointer data = new BytePointer(avPacket.size())) {
          BytePointer.memcpy(data, avPacket.data(), avPacket.size());
          HDF5Tools.storeBytesFromPointer(dataGroup, presentationTimestamp++, data, avPacket.size());
