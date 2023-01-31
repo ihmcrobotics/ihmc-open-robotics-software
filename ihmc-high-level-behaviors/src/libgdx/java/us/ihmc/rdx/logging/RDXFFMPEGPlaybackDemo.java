@@ -24,6 +24,10 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import java.io.File;
 import java.nio.ByteOrder;
 
+/**
+ * This demo allows to open video files like MP4, WebM, etc, play them back and scrub through them
+ * frame by frame.
+ */
 public class RDXFFMPEGPlaybackDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
