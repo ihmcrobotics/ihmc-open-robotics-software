@@ -439,7 +439,7 @@ public class AStarBodyPathHeightMapDataSetTest
    {
       AStarBodyPathHeightMapDataSetTest test = new AStarBodyPathHeightMapDataSetTest();
 
-      HeightMapDataSetName dataSetName = HeightMapDataSetName.Obstacles_1;
+      HeightMapDataSetName dataSetName = HeightMapDataSetName.Obstacle_Course;
 
 //      VISUALIZE = true;
 //      test.setup();

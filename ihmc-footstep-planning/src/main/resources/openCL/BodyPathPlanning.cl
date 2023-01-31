@@ -781,11 +781,11 @@ float computeSidedTraversibility(float* height_map_params,
     // get the location in the offsets vector to pull from
     int number_of_offsets = offsets[offset_set];
     int x_offset_start = 3;
-    int y_offset_start = x_offset_start + number_of_offsets;
+    int y_offset_start = x_offset_start + offsets[0];
     for (int i = 0; i < offset_set; i++)
     {
-        x_offset_start += offsets[i];
-        y_offset_start += offsets[i];
+        x_offset_start += 2 * offsets[i];
+        y_offset_start += offsets[i] + offsets[i + 1];
     }
 
     for (int i = 0; i < number_of_offsets; i++)
@@ -923,7 +923,7 @@ int get_collision_set_index(int yaw_index)
 {
     if (yaw_index % 4 == 0)
         return 0;
-    else if (yaw_index % 2 == 2)
+    else if (yaw_index % 2 == 0)
         return 2;
     else
         return 1;
@@ -945,13 +945,14 @@ bool collisionDetected(global float* height_map_params,
     float height_threshold = height + planner_params[GROUND_CLEARANCE];
 
     int offset_set = get_collision_set_index(yaw_index);
+
     int number_of_offsets = collision_offsets[offset_set];
     int x_offset_start = 3;
-    int y_offset_start = number_of_offsets;
+    int y_offset_start = x_offset_start + collision_offsets[0];
     for (int i = 0; i < offset_set; i++)
     {
-        x_offset_start += collision_offsets[i];
-        y_offset_start += collision_offsets[i];
+        x_offset_start += 2 * collision_offsets[i];
+        y_offset_start += collision_offsets[i] + collision_offsets[i + 1];
     }
 
     int cells_per_side = 2 * map_center_index + 1;
@@ -960,6 +961,7 @@ bool collisionDetected(global float* height_map_params,
     {
         int x_offset = collision_offsets[x_offset_start + i];
         int y_offset = collision_offsets[y_offset_start + i];
+
         int xQuery = map_idx_x + computeCollisionOffsetX(yaw_index, x_offset, y_offset);
         int yQuery = map_idx_y + computeCollisionOffsetY(yaw_index, x_offset, y_offset);
 
@@ -1023,6 +1025,7 @@ void kernel computeEdgeData(global float* height_map_params,
     int idx_y = get_global_id(1);
     int neighborIdx = get_global_id(2);
 
+
     int path_center_index = (int) planner_params[PATH_CENTER_INDEX];
     int map_center_index = (int) height_map_params[CENTER_INDEX];
     float map_resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
@@ -1045,6 +1048,7 @@ void kernel computeEdgeData(global float* height_map_params,
              int edge_key = number_of_neighbors * path_key + neighborIdx;
              edge_rejection_reason[edge_key] = INVALID_SNAP;
         // }
+
          return;
     }
 
