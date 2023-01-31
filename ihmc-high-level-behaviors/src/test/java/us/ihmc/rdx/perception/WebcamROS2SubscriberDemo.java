@@ -23,7 +23,6 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.Throttler;
-import us.ihmc.tools.thread.ZeroCopySwapReference;
 
 public class WebcamROS2SubscriberDemo
 {
@@ -43,7 +42,6 @@ public class WebcamROS2SubscriberDemo
    private final ImPlotStopwatchPlot copyBytesDurationPlot = new ImPlotStopwatchPlot("Copy bytes duration");
    private final Throttler transferThrottler = new Throttler();
    private RealtimeROS2Node realtimeROS2Node;
-   private final ZeroCopySwapReference<BigVideoSwapData> videoSwapData = new ZeroCopySwapReference<>(BigVideoSwapData::new);
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo sampleInfo = new SampleInfo();
    private boolean readyToReceive = false;

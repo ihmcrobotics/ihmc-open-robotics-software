@@ -14,8 +14,6 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.ZeroCopySwapReference;
 
-import java.util.function.Consumer;
-
 public class CalibrationPatternDetectionUI
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -33,16 +31,14 @@ public class CalibrationPatternDetectionUI
    private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue
          = MissingThreadTools.newSingleThreadExecutor("PatternDetection", true, 1);
    private CalibrationPatternType pattern = CalibrationPatternType.CIRCLES;
-   private final Consumer<Mat> accessOnLowPriorityThread = this::accessOnLowPriorityThread;
    private Mat rgbaMatForDrawing;
-   private final Consumer<Mat> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
 
    public CalibrationPatternDetectionUI()
    {
       bgrSourceCopy = new Mat();
       grayscaleImage = new Mat();
       patternSize = new Size(patternWidth.get(), patternHeight.get());
-      cornersOrCenters = new ZeroCopySwapReference<>(Mat::new);
+      cornersOrCenters = new ZeroCopySwapReference<>(Mat::new, this::accessOnLowPriorityThread, this::accessOnHighPriorityThread);
       simpleBlobDetector = SimpleBlobDetector.create();
    }
 
@@ -77,7 +73,7 @@ public class CalibrationPatternDetectionUI
          opencv_imgproc.cvtColor(bgrSourceCopy, grayscaleImage, opencv_imgproc.COLOR_BGR2GRAY);
       }
 
-      cornersOrCenters.accessOnLowPriorityThread(accessOnLowPriorityThread);
+      cornersOrCenters.accessOnLowPriorityThread();
    }
 
    private void accessOnLowPriorityThread(Mat cornersOrCenters)
@@ -102,7 +98,7 @@ public class CalibrationPatternDetectionUI
    public void drawCornersOrCenters(Mat rgbaMat)
    {
       rgbaMatForDrawing = rgbaMat;
-      cornersOrCenters.accessOnHighPriorityThread(accessOnHighPriorityThread);
+      cornersOrCenters.accessOnHighPriorityThread();
    }
 
    private void accessOnHighPriorityThread(Mat cornersOrCenters)

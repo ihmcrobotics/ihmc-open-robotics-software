@@ -4,18 +4,30 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
+ * <p>
  * Manages two data instances shared by two threads. This often can be used to
  * double performance by doing reading and writing at the same time, if both reading
  * and writing need some time to access the data. Since there's two data instances,
  * the data references can just be exchanged instead of copying anything.
- *
+ * </p><p>
  * It is expected that only two threads be operating on this class throughout its
  * existence. Be careful to only use a single thread executor to call the low
  * priority access method.
- *
+ * </p><p>
+ * The primary consideration for which thread is "low priority" vs. "high priority"
+ * is on which thread is acceptable to block in the event that the other is
+ * currently accessing the other data.
+ * </p><p>
  * This class probably isn't bulletproof, but works under most conditions.
- *
+ * </p><p>
+ * The Java synchronized statement is allocation free. Fun reading:
+ * <ul>
+ *    <li>https://wiki.openjdk.org/display/HotSpot/Synchronization</li>
+ *    <li>https://github.com/openjdk/jdk/blob/master/src/hotspot/share/runtime/synchronizer.cpp</li>
+ * </ul>
+ * </p><p>
  * Also evaluate IHMC Realtime's ConcurrentCopier for your use case.
+ * </p>
  */
 public class ZeroCopySwapReference<T>
 {
@@ -23,32 +35,23 @@ public class ZeroCopySwapReference<T>
    private final T b;
    private T forLowPriorityThread;
    private T forHighPriorityThread;
-   private final StatelessNotification notification = new StatelessNotification();
-   private volatile boolean hightPriorityThreadIsAccessing = false;
+   private final Object swapSynchronizer = new Object();
+   private final Consumer<T> accessOnLowPriorityThread;
+   private final Consumer<T> accessOnHighPriorityThread;
 
-   // Optional fields
-   private Consumer<T> accessOnLowPriorityThread;
-   private Consumer<T> accessOnHighPriorityThread;
-
+   /**
+    * We are preallocating the accessors because if you are using this class, you
+    * care about performance and we want to avoid allocating lots of lambdas.
+    * This is also usually more convenient and readable in user code anyway.
+    */
    public ZeroCopySwapReference(Supplier<T> supplier, Consumer<T> accessOnLowPriorityThread, Consumer<T> accessOnHighPriorityThread)
    {
-      this(supplier);
-      this.accessOnLowPriorityThread = accessOnLowPriorityThread;
-      this.accessOnHighPriorityThread = accessOnHighPriorityThread;
-   }
-
-   /** @deprecated This should really be phased out in favor of predefining good named method references. */
-   public ZeroCopySwapReference(Supplier<T> supplier)
-   {
-      this(supplier.get(), supplier.get());
-   }
-
-   public ZeroCopySwapReference(T a, T b)
-   {
-      this.a = a;
-      this.b = b;
+      this.a = supplier.get();
+      this.b = supplier.get();
       forLowPriorityThread = a;
       forHighPriorityThread = b;
+      this.accessOnLowPriorityThread = accessOnLowPriorityThread;
+      this.accessOnHighPriorityThread = accessOnHighPriorityThread;
    }
 
    /**
@@ -61,54 +64,42 @@ public class ZeroCopySwapReference<T>
    }
 
    /**
-    * Call if you initialized this class with consumers.
+    * This thread performs the following steps in order:
+    * <ol>
+    *    <li>Immediately performs the low priority access on the data.</li>
+    *    <li>If the high priority thread is accessing it's data, we block until that completes.</li>
+    *    <li>Does the swap operation atomically, which exchanges the two data instances
+    *    so the other thread can access it.</li>
+    * </ol>
     */
    public void accessOnLowPriorityThread()
    {
-      accessOnLowPriorityThread(accessOnLowPriorityThread);
+      accessOnLowPriorityThread.accept(forLowPriorityThread);
+
+      // We're done, let's do the swap operation.
+      // This will block and wait for the high priority thread to complete its access
+      // operation if necessary.
+      synchronized (swapSynchronizer)
+      {
+         T wasHighPriorityThread = forHighPriorityThread;
+         forHighPriorityThread = forLowPriorityThread;
+         forLowPriorityThread = wasHighPriorityThread;
+      }
    }
 
    /**
-    * This thread does all the necessary waiting.
-    * It's got access to its data straight away, that it got access to
-    * last time it handed off to thread two.
-    *
-    * If thread two is accessing, we wait for it to be done and give it access to
-    * the new data.
-    */
-   public void accessOnLowPriorityThread(Consumer<T> consumer)
-   {
-      consumer.accept(forLowPriorityThread);
-
-      // waits for two to be done if it's reading
-      if (hightPriorityThreadIsAccessing)
-         notification.blockingWait();
-
-      // we're done, let's swap access now
-      forHighPriorityThread = forLowPriorityThread; // give high priority thread access to the swap right away
-      forLowPriorityThread = a == forHighPriorityThread ? b : a;
-   }
-
-   /**
-    * Call if you initialized this class with consumers.
+    * Call this from the higher priority of the two threads. This
+    * calls the cooresponding Consumer given in the constructor.
+    * This method will not block.
     */
    public void accessOnHighPriorityThread()
    {
-      accessOnHighPriorityThread(accessOnHighPriorityThread);
-   }
-
-   /**
-    * Thread two is high priority reading and shouldn't be getting blocked.
-    * It just says when it's accessing and notifies when it's done.
-    */
-   public void accessOnHighPriorityThread(Consumer<T> consumer)
-   {
-      // high priority get in, get out
-      hightPriorityThreadIsAccessing = true;
-
-      consumer.accept(forHighPriorityThread);
-
-      hightPriorityThreadIsAccessing = false;
-      notification.notifyOtherThread();
+      // High priority. Get in, get out.
+      // Since the other synchronized block is just over the swap operation,
+      // this will effectively not block.
+      synchronized (swapSynchronizer)
+      {
+         accessOnHighPriorityThread.accept(forHighPriorityThread);
+      }
    }
 }

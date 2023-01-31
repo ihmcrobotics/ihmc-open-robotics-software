@@ -75,7 +75,9 @@ public class OpenCVArUcoMarkerDetection
       this.sensorFrame = sensorFrame;
       imageWidth = sourceColorImage.getImageWidth();
       imageHeight = sourceColorImage.getImageHeight();
-      rgb888ColorImage = new ZeroCopySwapReference<>(() -> new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3));
+      rgb888ColorImage = new ZeroCopySwapReference<>(() -> new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3),
+                                                                             this::accessColorImageOnLowPriorityThread,
+                                                                             this::accessColorImageInHighPriorityThread);
 
       dictionary = opencv_aruco.getPredefinedDictionary(DEFAULT_DICTIONARY);
       corners = new SwapReference<>(MatVector::new);
@@ -113,34 +115,14 @@ public class OpenCVArUcoMarkerDetection
    {
       if (enabled)
       {
-         rgb888ColorImage.accessOnHighPriorityThread(rgb888ColorImage ->
-         {
-            if (alphaRemovalMode)
-            {
-               opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(),
-                                       rgb888ColorImage.getBytedecoOpenCVMat(),
-                                       opencv_imgproc.COLOR_RGBA2RGB);
-            }
-            else
-            {
-               sourceColorImage.getBytedecoOpenCVMat().copyTo(rgb888ColorImage.getBytedecoOpenCVMat());
-            }
-         });
+         rgb888ColorImage.accessOnHighPriorityThread();
 
          executorService.clearQueueAndExecute(() ->
          {
             synchronized (inputImageSync)
             {
                stopwatch.getForThreadOne().lap();
-               rgb888ColorImage.accessOnLowPriorityThread(rgb888ColorImage ->
-               {
-                  opencv_aruco.detectMarkers(rgb888ColorImage.getBytedecoOpenCVMat(),
-                                             dictionary,
-                                             corners.getForThreadOne(),
-                                             ids.getForThreadOne(),
-                                             detectorParameters,
-                                             rejectedImagePoints.getForThreadOne());
-               });
+               rgb888ColorImage.accessOnLowPriorityThread();
                stopwatch.getForThreadOne().suspend();
             }
 
@@ -162,6 +144,33 @@ public class OpenCVArUcoMarkerDetection
             }
          });
       }
+   }
+
+   private void accessColorImageInHighPriorityThread(BytedecoImage rgb888ColorImage)
+   {
+      getCopyOfSourceRGBImage(rgb888ColorImage.getBytedecoOpenCVMat());
+   }
+
+   public void getCopyOfSourceRGBImage(Mat imageToPack)
+   {
+      if (alphaRemovalMode)
+      {
+         opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(), imageToPack, opencv_imgproc.COLOR_RGBA2RGB);
+      }
+      else
+      {
+         sourceColorImage.getBytedecoOpenCVMat().copyTo(imageToPack);
+      }
+   }
+
+   private void accessColorImageOnLowPriorityThread(BytedecoImage rgb888ColorImage)
+   {
+      opencv_aruco.detectMarkers(rgb888ColorImage.getBytedecoOpenCVMat(),
+                                 dictionary,
+                                 corners.getForThreadOne(),
+                                 ids.getForThreadOne(),
+                                 detectorParameters,
+                                 rejectedImagePoints.getForThreadOne());
    }
 
    public boolean isDetected(OpenCVArUcoMarker marker)
@@ -285,11 +294,6 @@ public class OpenCVArUcoMarkerDetection
    public long getNumberOfRejectedPoints()
    {
       return rejectedImagePoints.getForThreadTwo().size();
-   }
-
-   public void getImageOfDetection(Mat imageToPack)
-   {
-      rgb888ColorImage.accessOnHighPriorityThread(rgb888ColorImage -> rgb888ColorImage.getBytedecoOpenCVMat().copyTo(imageToPack));
    }
 
    public int getImageWidth()
