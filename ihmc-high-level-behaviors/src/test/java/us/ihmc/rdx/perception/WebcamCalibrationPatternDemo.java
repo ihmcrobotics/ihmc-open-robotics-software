@@ -7,6 +7,9 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
 import us.ihmc.tools.thread.Activator;
 
+/**
+ * Interactive calibration pattern detection with a webcam.
+ */
 public class WebcamCalibrationPatternDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();

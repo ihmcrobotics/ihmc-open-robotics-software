@@ -7,6 +7,10 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
 import us.ihmc.tools.thread.Activator;
 
+/**
+ * This app view the live feed of a locally plugged in Blackfly and visualizes
+ * calibration pattern detection on it.
+ */
 public class BlackflyCalibrationPatternDemo
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");

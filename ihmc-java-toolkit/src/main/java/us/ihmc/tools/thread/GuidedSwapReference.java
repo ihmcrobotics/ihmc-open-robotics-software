@@ -10,6 +10,8 @@ import java.util.function.Supplier;
  * and writing need some time to access the data. Since there's two data instances,
  * the data references can just be exchanged instead of copying anything.
  * </p><p>
+ * "Guided" refers to this class being "on rails" compared to {@link SwapReference}.
+ * </p><p>
  * It is expected that only two threads be operating on this class throughout its
  * existence. Be careful to only use a single thread executor to call the low
  * priority access method.

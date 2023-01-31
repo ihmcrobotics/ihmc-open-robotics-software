@@ -7,9 +7,11 @@ import us.ihmc.rdx.logging.HDF5ImageLogging;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.Activator;
 
+/**
+ * Log webcam images to HDF5.
+ */
 public class WebcamHDF5LoggingDemo
 {
-
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",

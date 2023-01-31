@@ -19,6 +19,10 @@ import us.ihmc.tools.thread.Activator;
 
 import java.util.function.Consumer;
 
+/**
+ * This class handles reading a locally plugged in Blackfly camera and displaying the live
+ * result with good performance.
+ */
 public class RDXBlackflyReader
 {
    private final ImGuiPanel panel = new ImGuiPanel("Blackfly Reader", this::renderImGuiWidgets);

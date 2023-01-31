@@ -17,6 +17,9 @@ import us.ihmc.tools.thread.Activator;
 
 import java.util.function.Consumer;
 
+/**
+ * Reads and displays a webcam feed.
+ */
 public class RDXOpenCVWebcamReader
 {
    private final ImGuiPanel panel = new ImGuiPanel("Webcam Reader", this::renderImGuiWidgets);

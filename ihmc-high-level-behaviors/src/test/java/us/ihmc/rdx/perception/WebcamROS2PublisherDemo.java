@@ -24,6 +24,9 @@ import us.ihmc.tools.thread.Activator;
 import java.io.IOException;
 import java.time.Instant;
 
+/**
+ * Publishes webcam images to ROS 2 with best performance.
+ */
 public class WebcamROS2PublisherDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();

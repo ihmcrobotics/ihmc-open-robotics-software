@@ -28,6 +28,10 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.*;
 
 /**
+ * This application allows to create calibration datasets, load datasets,
+ * calibrate the fisheye camera setup, visualize the undistorted result,
+ * and tune all involved parameters.
+ *
  * Official OpenCV camera calibration tutorial:
  * https://docs.opencv.org/4.x/d4/d94/tutorial_camera_calibration.html
  */
