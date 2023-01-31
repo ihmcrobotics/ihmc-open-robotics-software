@@ -175,6 +175,7 @@ public class WalkingMessageHandler
             clearFootTrajectory();
             break;
          case QUEUE:
+            // TODO review the use of this. 
             boolean checkForInconsistencies = !upcomingFootsteps.isEmpty() || currentNumberOfFootsteps.getIntegerValue() > 0;
             if (checkForInconsistencies)
             {
