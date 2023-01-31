@@ -35,16 +35,18 @@ public class PlanarRegionMap
 
    int sensorPoseIndex = 0;
 
+   float planeNoise = 0.01f;
+   float odomNoise = 0.00001f;
+
    private MergingMode merger;
    private MatchingMode matcher;
 
    private PlanarRegionMappingParameters parameters;
    private SlamWrapper.FactorGraphExternal factorGraph;
 
-   private final RigidBodyTransform previousSensorToWorldFrameTransform = new RigidBodyTransform();
-
    private final RigidBodyTransform currentToPreviousSensorTransform = new RigidBodyTransform();
-   private final RigidBodyTransform worldToSensorFrameTransform = new RigidBodyTransform();
+
+   private final RigidBodyTransform previousSensorToWorldFrameTransform = new RigidBodyTransform();
    private final RigidBodyTransform worldToPreviousSensorFrameTransform = new RigidBodyTransform();
 
    RigidBodyTransform sensorToWorldFrameTransformPrior = new RigidBodyTransform();
@@ -99,16 +101,17 @@ public class PlanarRegionMap
 
    public void submitRegionsUsingIterativeReduction(PlanarRegionsListWithPose regionsWithPose)
    {
-      //// Filters out regions that have area less than threshold
-      //for (PlanarRegion region : regionsInSensorFrame.getPlanarRegionsAsList())
-      //{
-      //   if (region.getArea() > parameters.getMinimumPlanarRegionArea())
-      //   {
-      //      regions.addPlanarRegion(region);
-      //   }
-      //}
+      PlanarRegionsList regionsInSensorFrame = new PlanarRegionsList();
 
-      PlanarRegionsList regionsInSensorFrame = regionsWithPose.getPlanarRegionsList();
+      // Filters out regions that have area less than threshold
+      for (PlanarRegion region : regionsWithPose.getPlanarRegionsList().getPlanarRegionsAsList())
+      {
+         if (region.getArea() > parameters.getMinimumPlanarRegionArea())
+         {
+            regionsInSensorFrame.addPlanarRegion(region);
+         }
+      }
+
       PlanarRegionsList priorRegionsInWorld = new PlanarRegionsList();
       PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
 
@@ -523,6 +526,13 @@ public class PlanarRegionMap
    public void initializeFactorGraphForSmoothing(PlanarRegionsList map, RigidBodyTransform transform)
    {
       LogTools.info("------------------------------- Initializing Factor Graph ---------------------------------");
+
+      // Set up the factor graph noise models
+      odomNoise = (float) parameters.getOdometryNoiseVariance();
+      planeNoise = (float) parameters.getPlaneNoiseVariance();
+
+      factorGraph.createOdometryNoiseModel(new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise});
+      factorGraph.createOrientedPlaneNoiseModel(new float[] {planeNoise, planeNoise, planeNoise});
 
       factorGraph.addPriorPoseFactorExtended(0, PerceptionEuclidTools.toArray(transform));
       factorGraph.setPoseInitialValueExtended(0, PerceptionEuclidTools.toArray(transform));

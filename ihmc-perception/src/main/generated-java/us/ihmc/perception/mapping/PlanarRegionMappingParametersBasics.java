@@ -42,4 +42,14 @@ public interface PlanarRegionMappingParametersBasics extends PlanarRegionMapping
    {
       set(PlanarRegionMappingParameters.minimumBoundingBoxSize, minimumBoundingBoxSize);
    }
+
+   default void setPlaneNoiseVariance(double planeNoiseVariance)
+   {
+      set(PlanarRegionMappingParameters.planeNoiseVariance, planeNoiseVariance);
+   }
+
+   default void setOdometryNoiseVariance(double odometryNoiseVariance)
+   {
+      set(PlanarRegionMappingParameters.odometryNoiseVariance, odometryNoiseVariance);
+   }
 }
