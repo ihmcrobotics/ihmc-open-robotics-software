@@ -85,31 +85,6 @@ int yaw_to_index(float yaw, int yaw_total_indices)
     return ((int) (yaw / yaw_total_indices)) + (yaw_total_indices / 2);
 }
 
-float3 normal3DFromThreePoint3Ds(float3 firstPointOnPlane,
-                                 float3 secondPointOnPlane,
-                                 float3 thirdPointOnPlane)
-{
-
-    float3 v1 = secondPointOnPlane - firstPointOnPlane;
-    float3 v2 = thirdPointOnPlane - firstPointOnPlane;
-
-    float3 normal = cross(v1, v2);
-
-    return normalize(normal);
-}
-
-float signedDistanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane, float3 planeNormal)
-{
-    float3 delta = pointQuery - pointOnPlane;
-
-    return dot(delta, planeNormal);
-}
-
-float distanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane, float3 planeNormal)
-{
-    return fabs(signedDistanceFromPoint3DToPlane3D(pointQuery, pointOnPlane, planeNormal));
-}
-
 float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector)
 {
     float* inverse_covariance_matrix = invert3x3Matrix(covariance_matrix);
@@ -227,7 +202,7 @@ void kernel computeSurfaceNormalsWithRANSAC(global float* params,
         float3 point1 = (float3) (x_coordinate1, y_coordinate1, z_coordinate1);
 
         // compute the normal from the triple of points
-        float3 candidate_normal = normal3DFromThreePoint3Ds(point, point0, point1);
+        float3 candidate_normal = computeNormal3DFromThreePoint3Ds(point, point0, point1);
 
         // if the normal is too vertical, keep looking
         if (fabs(candidate_normal.s2) < ransac_params[RANSAC_MIN_NORMAL_Z])
