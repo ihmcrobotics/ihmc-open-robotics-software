@@ -81,6 +81,7 @@ public class LookAndStepFootstepPlanningTask
    protected LookAndStepReview<FootstepPlan> review = new LookAndStepReview<>();
    protected Consumer<FootstepPlan> autonomousOutput;
    protected Timer planningFailedTimer = new Timer();
+   protected Timer successfulPlanExpirationTimer = new Timer();
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
    protected YoDouble footholdVolume;
    protected YoDouble planarRegionDelay;
@@ -428,14 +429,12 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setSnapGoalSteps(true);
       footstepPlannerRequest.setMaximumIterations(100);
 
-      // TODO check if looks ok
-      if (previousFootstepPlan != null && !previousFootstepPlan.isEmpty())
+      // TODO: maybe it could be swing + stance transition duration + 10% ?
+      double expirationTime = 2.0;
+      // TODO check if looks ok (revised after Duncan review)
+      if (successfulPlanExpirationTimer.isRunning(expirationTime) && previousFootstepPlan.getNumberOfSteps() >= 2)
       {
-         if (previousFootstepPlan.getFootstep(0).getRobotSide() == stanceSide)
-         {
-            previousFootstepPlan.remove(0);
-         }
-         
+         previousFootstepPlan.remove(0);
          footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
       }
 
@@ -545,6 +544,7 @@ public class LookAndStepFootstepPlanningTask
          uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(reducedPlan, "Look and Step Planned"));
 
          updatePlannedFootstepDurations(reducedPlan, startFootPoses);
+         successfulPlanExpirationTimer.reset();
 
          if (operatorReviewEnabledSupplier.get())
          {
