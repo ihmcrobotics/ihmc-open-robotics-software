@@ -6,6 +6,9 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.Activator;
 
+/**
+ * Renders a webcam with good performance.
+ */
 public class WebcamDisplayDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();

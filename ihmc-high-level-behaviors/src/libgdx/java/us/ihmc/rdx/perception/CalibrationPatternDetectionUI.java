@@ -14,6 +14,9 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.GuidedSwapReference;
 
+/**
+ * This can be embedded in applications to support interactive calibration pattern detection.
+ */
 public class CalibrationPatternDetectionUI
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());

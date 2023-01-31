@@ -65,6 +65,9 @@ public class SwapReference<T>
       return forThreadOne == a;
    }
 
+   /**
+    * Performs the swap operation atomically.
+    */
    public synchronized void swap()
    {
       T temp = forThreadOne;

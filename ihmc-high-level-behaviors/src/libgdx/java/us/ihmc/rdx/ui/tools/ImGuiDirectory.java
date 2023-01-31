@@ -16,6 +16,10 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Can be embedded in applications for rendering a filtered directory as ImGui radio buttons for easy
+ * access to known file types in known locations.
+ */
 public class ImGuiDirectory
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());

@@ -24,6 +24,9 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.Throttler;
 
+/**
+ * Subscribes to ROS 2 webcam images with best performance.
+ */
 public class WebcamROS2SubscriberDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();

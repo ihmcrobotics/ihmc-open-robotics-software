@@ -6,6 +6,9 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.Activator;
 
+/**
+ * This application shows the live feed of a locally plugged in Blackfly camera.
+ */
 public class BlackflyDisplayDemo
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
