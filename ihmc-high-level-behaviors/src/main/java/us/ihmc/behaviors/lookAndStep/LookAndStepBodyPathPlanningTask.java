@@ -27,8 +27,6 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -71,9 +69,10 @@ public class LookAndStepBodyPathPlanningTask
    protected YoDouble bodyPathPlanningDuration;
 
    protected PlanarRegionsList mapRegions;
+   protected HeightMapMessage heightMap;
    protected Pose3DReadOnly goal;
    protected ROS2SyncedRobotModel syncedRobot;
-   protected boolean doPlanarRegionsVisibilityGraphsPlan;
+   protected boolean doBodyPathPlan;
    protected RigidBodyTransform goalToWorld = new RigidBodyTransform();
    protected ReferenceFrame goalFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), goalToWorld);
 
@@ -81,7 +80,7 @@ public class LookAndStepBodyPathPlanningTask
    {
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
-      private final TypedInput<HeightMapData> heightMapInput = new TypedInput<>();
+      private final TypedInput<HeightMapMessage> heightMapInput = new TypedInput<>();
       private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
       private final Timer heightMapExpirationTimer = new Timer();
@@ -121,6 +120,7 @@ public class LookAndStepBodyPathPlanningTask
          executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
          mapRegionsInput.addCallback(data -> run());
+         heightMapInput.addCallback(data -> run());
          goalInput.addCallback(data -> run());
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
@@ -164,7 +164,7 @@ public class LookAndStepBodyPathPlanningTask
 
       public void acceptHeightMap(HeightMapMessage heightMapMessage)
       {
-         heightMapInput.set(HeightMapMessageTools.unpackMessage(heightMapMessage));
+         heightMapInput.set(heightMapMessage);
          heightMapExpirationTimer.reset();
       }
 
@@ -202,6 +202,7 @@ public class LookAndStepBodyPathPlanningTask
       {
          ros2LookAndStepParameters.update();
          mapRegions = mapRegionsInput.getLatest();
+         heightMap = heightMapInput.getLatest();
          goal = goalInput.getLatest();
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
@@ -210,7 +211,7 @@ public class LookAndStepBodyPathPlanningTask
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepParameters.getWaitTimeAfterPlanFailed());
          behaviorState = behaviorStateReference.get();
          neckTrajectoryTimerSnapshot = neckTrajectoryTimer.createSnapshot(1.0);
-         doPlanarRegionsVisibilityGraphsPlan = !lookAndStepParameters.getFlatGroundBodyPathPlan() && !lookAndStepParameters.getHeightMapBodyPathPlan();
+         doBodyPathPlan = !lookAndStepParameters.getFlatGroundBodyPathPlan();
 
          // neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
 
@@ -234,10 +235,17 @@ public class LookAndStepBodyPathPlanningTask
       planningStopwatch.reset();
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
       Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> result;
-      if (doPlanarRegionsVisibilityGraphsPlan)
+      if (doBodyPathPlan && (mapRegions != null || heightMap != null))
       {
-         uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
-         result = performTaskWithVisibilityGraphPlanner();
+         if (mapRegions != null)
+         {
+            uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
+            result = performTaskWithVisibilityGraphPlanner();
+         }
+         else
+         {
+            result = performTaskWithHeightMapPlanner();
+         }
       }
       else // flat ground body path
       {
@@ -344,15 +352,14 @@ public class LookAndStepBodyPathPlanningTask
       return new MutablePair<>(BodyPathPlanningResult.FOUND_SOLUTION, waypoints);
    }
 
-   private Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> performTaskWithHeightMapPlanner(HeightMapMessage heightMapMessage)
+   private Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> performTaskWithHeightMapPlanner()
    {
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-      heightMapData.setEstimatedGroundHeight(-1.0);
-
       goalToWorld.set(goal);
       goalFrame.update();
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+      footstepPlannerRequest.setPlanFootsteps(false);
+
       startFramePose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
       startFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       footstepPlannerRequest.getStartFootPoses().put(RobotSide.LEFT, new Pose3D(startFramePose));
@@ -373,9 +380,10 @@ public class LookAndStepBodyPathPlanningTask
       footstepPlannerRequest.getGoalFootPoses().put(RobotSide.RIGHT, new Pose3D(goalFramePose));
       footstepPlannerRequest.setTimeout(10.0);
 
-      heightMapMessage.setEstimatedGroundHeight(-1.0);
-      footstepPlannerRequest.setHeightMapMessage(heightMapMessage);
+//      heightMapMessage.setEstimatedGroundHeight(-1.0);
+      footstepPlannerRequest.setHeightMapMessage(heightMap);
       footstepPlannerRequest.setPlanBodyPath(true);
+      footstepPlannerRequest.setPlanFootsteps(false);
       footstepPlanningModule.handleRequest(footstepPlannerRequest);
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
       footstepPlannerLogger.logSession();
