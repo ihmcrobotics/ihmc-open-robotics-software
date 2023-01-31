@@ -431,6 +431,11 @@ public class LookAndStepFootstepPlanningTask
       // TODO check if looks ok
       if (previousFootstepPlan != null && !previousFootstepPlan.isEmpty())
       {
+         if (previousFootstepPlan.getFootstep(0).getRobotSide() == stanceSide)
+         {
+            previousFootstepPlan.remove(0);
+         }
+         
          footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
       }
 
