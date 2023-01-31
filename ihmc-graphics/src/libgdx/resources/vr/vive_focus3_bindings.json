@@ -337,9 +337,9 @@
    },
    "category" : "steamvr_input",
    "controller_type" : "vive_cosmos_controller",
-   "description" : "Binding values for IHMC apps using the  Vive Cosmos controller",
+   "description" : "Binding values for IHMC apps using the Vive Focus 3 controller",
    "interaction_profile" : "",
-   "name" : "IHMC Vive Cosmos Controller Bindings",
+   "name" : "IHMC Vive Focus 3 Controller Bindings",
    "options" : {},
    "simulated_actions" : []
 }
