@@ -14,7 +14,6 @@
 // SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
 // THIS SOFTWARE OR ITS DERIVATIVES.
 //=============================================================================*/
-
 package us.ihmc.perception;
 
 import java.io.File;
@@ -349,10 +348,10 @@ public class Acquisition_C {
                 IntPointer imageStatus = new IntPointer(1); //_spinImageStatus.IMAGE_NO_ERROR;
                 err = spinImageGetStatus(hResultImage, imageStatus);
                 if (!printOnError(err,
-                        "Unable to retrieve image status. Non-fatal error. " + findImageStatusNameByValue(imageStatus.get()))) {
+                                  "Unable to retrieve image status. Non-fatal error. " + findImageStatusNameByValue(imageStatus.get()))) {
                     System.out.println(
-                            "Image incomplete with image status " + findImageStatusNameByValue(imageStatus.get()) +
-                                    "...");
+                          "Image incomplete with image status " + findImageStatusNameByValue(imageStatus.get()) +
+                          "...");
                 }
                 hasFailed = true;
             }
@@ -416,6 +415,7 @@ public class Acquisition_C {
             if (printOnError(err, "Unable to create image. Non-fatal error.")) {
                 hasFailed = true;
             }
+
             spinImageProcessor hImageProcessor = new spinImageProcessor(); // NULL;
             err = spinImageProcessorCreate(hImageProcessor);
             if (printOnError(err, "Unable to create image processor. Non-fatal error.")) {
@@ -430,8 +430,8 @@ public class Acquisition_C {
             if (!hasFailed) {
                 // Create a unique filename
                 String filename = lenDeviceSerialNumber.get() == 0
-                        ? ("Acquisition-C-" + imageCnt + ".jpg")
-                        : ("Acquisition-C-" + deviceSerialNumber.getString().trim() + "-" + imageCnt + ".jpg");
+                      ? ("Acquisition-C-" + imageCnt + ".jpg")
+                      : ("Acquisition-C-" + deviceSerialNumber.getString().trim() + "-" + imageCnt + ".jpg");
 
                 //
                 // Save image

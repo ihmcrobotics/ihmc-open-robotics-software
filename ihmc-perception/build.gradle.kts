@@ -55,7 +55,7 @@ openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCPPVersion = "1.5.8"
+val javaCPPVersion = "1.5.9-SNAPSHOT"
 
 bytedecoDependencies {
    api("us.ihmc:euclid:0.19.1")
@@ -80,9 +80,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
    apiBytedecoNatives("opencv", "4.6.0-")
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
-//   apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoSelective("us.ihmc:spinnaker:3.0.0.118-1.5.8")
-   apiBytedecoSelective("us.ihmc:spinnaker:3.0.0.118-1.5.8:linux-x86_64")
+   apiBytedecoNatives("spinnaker", "3.0.0.118-")
    apiBytedecoNatives("ffmpeg", "5.0-")
    apiBytedecoNatives("hdf5", "1.12.2-")
    apiBytedecoNatives("ffmpeg", "5.1.2-")
