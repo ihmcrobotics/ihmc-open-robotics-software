@@ -235,3 +235,40 @@ bool epsilonEquals(float a, float b, float epsilon)
 {
     return fabs(a - b) < epsilon;
 }
+
+/**
+* Returns the signed distane of a point 3D to a plane 3D that's defined by the point on the plane and the plane normal.
+* If the distance is positive, the point is "above" the plane, where above is defined as the positive Z of the plane normal.
+* If the distance is negative, the point is below the plane.
+**/
+float signedDistanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane, float3 planeNormal)
+{
+    float3 delta = pointQuery - pointOnPlane;
+
+    return dot(delta, planeNormal);
+}
+
+/**
+* Returns the distane of a point 3D to a plane 3D that's defined by the point on the plane and the plane normal.
+**/
+float distanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane, float3 planeNormal)
+{
+    float3 delta = pointQuery - pointOnPlane;
+
+    return fabs(dot(delta, planeNormal));
+}
+
+/**
+* Computes the 3D normal vector to the plane defined by three points.
+**/
+float3 computeNormal3DFromThreePoint3Ds(float3 firstPointOnPlane,
+                                        float3 secondPointOnPlane,
+                                        float3 thirdPointOnPlane)
+{
+    float3 v1 = secondPointOnPlane - firstPointOnPlane;
+    float3 v2 = thirdPointOnPlane - firstPointOnPlane;
+
+    float3 normal = cross(v1, v2);
+
+    return normalize(normal);
+}
