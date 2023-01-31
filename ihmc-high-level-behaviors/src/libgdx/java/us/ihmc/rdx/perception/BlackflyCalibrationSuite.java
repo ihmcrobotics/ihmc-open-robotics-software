@@ -21,13 +21,12 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.logging.HDF5ImageBrowser;
 import us.ihmc.rdx.logging.HDF5ImageLogging;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-
-import java.util.function.Consumer;
 
 /**
  * Official OpenCV camera calibration tutorial:
@@ -58,12 +57,11 @@ public class BlackflyCalibrationSuite
    private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private HDF5ImageLogging hdf5ImageLogging;
    private HDF5ImageBrowser hdf5ImageBrowser;
-   private RDXCVImagePanel undistortedFisheyePanel;
+   private ImGuiOpenCVSwapVideoPanel undistortedFisheyePanel;
    private RDXCVImagePanel calibrationSourceImagesPanel;
    private final RecyclingArrayList<Mat> calibrationSourceImages = new RecyclingArrayList<>(Mat::new);
    private final ImInt calibrationSourceImageIndex = new ImInt();
    private volatile boolean running = true;
-   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
    private Point2fVectorVector imagePoints;
    private MatVector imagePointsMatVector;
    private Mat grayscaleImage;
@@ -106,6 +104,7 @@ public class BlackflyCalibrationSuite
    private Mat cameraMatrixForMonitorShifting;
    private Mat bgrImageForUndistortion;
    private final Notification calibrationFinished = new Notification();
+   private Mat distortedImageCopy;
    private Mat undistortedLiveImage;
    private Mat cameraMatrix;
    private Size undistortedImageSize;
@@ -134,6 +133,7 @@ public class BlackflyCalibrationSuite
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   blackflyReader.create();
+                  blackflyReader.setMonitorPanelUIThreadPreprocessor(this::blackflyReaderUIThreadPreprocessor);
                   baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
 
                   calibrationPatternDetectionUI = new CalibrationPatternDetectionUI();
@@ -146,7 +146,9 @@ public class BlackflyCalibrationSuite
                   calibrationSourceImagesPanel = new RDXCVImagePanel("Calibration Source Image", 100, 100);
                   baseUI.getImGuiPanelManager().addPanel(calibrationSourceImagesPanel.getVideoPanel());
 
-                  undistortedFisheyePanel = new RDXCVImagePanel("Undistorted Fisheye Monitor", 100, 100);
+                  undistortedFisheyePanel = new ImGuiOpenCVSwapVideoPanel("Undistorted Fisheye Monitor",
+                                                                          this::undistortedImageUpdateOnAsynchronousThread,
+                                                                          this::undistoredImageUIThread);
                   baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getVideoPanel());
 
                   baseUI.getLayoutManager().reloadLayout();
@@ -157,10 +159,15 @@ public class BlackflyCalibrationSuite
                   imagePoints = new Point2fVectorVector();
                   imagePointsMatVector = new MatVector();
                   simpleBlobDetector = SimpleBlobDetector.create();
-                  distortionCoefficients = new Mat(distortionCoefficientK1.get(),
-                                                   distortionCoefficientK2.get(),
-                                                   distortionCoefficientK3.get(),
-                                                   distortionCoefficientK4.get());
+//                  distortionCoefficients = new Mat(distortionCoefficientK1.get(),
+//                                                   distortionCoefficientK2.get(),
+//                                                   distortionCoefficientK3.get(),
+//                                                   distortionCoefficientK4.get());
+                  distortionCoefficients = Mat.zeros(4, 1, opencv_core.CV_64F).asMat();
+                  distortionCoefficients.ptr(0, 0).putDouble(distortionCoefficientK1.get());
+                  distortionCoefficients.ptr(1, 0).putDouble(distortionCoefficientK2.get());
+                  distortionCoefficients.ptr(2, 0).putDouble(distortionCoefficientK3.get());
+                  distortionCoefficients.ptr(3, 0).putDouble(distortionCoefficientK4.get());
                   distortionCoefficientsCopy = new Mat();
                   distortionCoefficients.copyTo(distortionCoefficientsCopy);
                   MatExpr eyeExpression = Mat.eye(3, 3, opencv_core.CV_64F);
@@ -177,6 +184,7 @@ public class BlackflyCalibrationSuite
 //                  cameraMatrixForMonitorShifting = Mat.eye(3, 3, opencv_core.CV_64F).asMat();
                   cameraMatrixForMonitorShifting = opencv_core.noArray();
                   undistortedImageSize = new Size(undistortedImageWidth.get(), undistortedImageHeight.get());
+                  distortedImageCopy = new Mat();
                   undistortedLiveImage = new Mat();
                   bgrImageForUndistortion = new Mat();
 
@@ -224,7 +232,7 @@ public class BlackflyCalibrationSuite
                cameraMatrixAsText.set(stringBuilder.toString());
 
                calibrationPatternDetectionUI.update();
-               blackflyReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+               blackflyReader.updateOnUIThread();
                hdf5ImageBrowser.update();
 
                if (calibrationSourceImageDrawRequest.poll())
@@ -242,6 +250,53 @@ public class BlackflyCalibrationSuite
             baseUI.renderEnd();
          }
 
+         private void blackflyReaderUIThreadPreprocessor(ImGuiOpenCVSwapVideoPanelData data)
+         {
+            if (hdf5ImageLogging == null)
+            {
+               hdf5ImageLogging = new HDF5ImageLogging(nativesLoadedActivator,
+                                                       (int) blackflyReader.getImageWidth(),
+                                                       (int) blackflyReader.getImageHeight());
+               baseUI.getImGuiPanelManager().addPanel(hdf5ImageLogging.getPanel());
+               baseUI.getLayoutManager().reloadLayout();
+            }
+
+            // Access the image before it gets drawn on; copy for the other thread
+            data.getRGBA8Mat().copyTo(distortedImageCopy);
+
+            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
+         }
+
+         private void undistortedImageUpdateOnAsynchronousThread(ImGuiOpenCVSwapVideoPanelData data)
+         {
+            // Fisheye undistortion
+            // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
+            undistortedImageSize.width(undistortedImageWidth.get());
+            undistortedImageSize.height(undistortedImageHeight.get());
+      //      opencv_imgproc.cvtColor(distortedImageCopy, bgrImageForUndistortion, opencv_imgproc.COLOR_RGBA2BGR);
+            opencv_calib3d.undistortImage(distortedImageCopy,
+                                          undistortedLiveImage,
+                                          cameraMatrixForMonitor,
+                                          distortionCoefficientsCopy,
+                                          cameraMatrixForMonitorShifting,
+                                          undistortedImageSize);
+
+      //      data.getRGBA8Image()
+
+      //            opencv_calib3d.undistortImage(bgrImageForUndistortion,
+      //                                          undistortedLiveImage,
+      //                                          cameraMatrixForMonitor,
+      //                                          distortionCoefficientsCopy);
+         }
+
+         private void undistoredImageUIThread(ImGuiOpenCVSwapVideoPanelData data)
+         {
+      //      if
+      //      undistortedFisheyePanel.resize(undistortedLiveImage.cols(), undistortedLiveImage.rows(), null);
+      //      opencv_imgproc.cvtColor(undistortedLiveImage, undistortedFisheyePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA);
+      //      undistortedFisheyePanel.draw();
+         }
+
          @Override
          public void dispose()
          {
@@ -252,47 +307,6 @@ public class BlackflyCalibrationSuite
             baseUI.dispose();
          }
       });
-   }
-
-   private void accessOnHighPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
-   {
-      if (data.getRGBA8Image() != null)
-      {
-         if (blackflyReader.getImageWasRead())
-         {
-            if (hdf5ImageLogging == null)
-            {
-               hdf5ImageLogging = new HDF5ImageLogging(nativesLoadedActivator, (int) blackflyReader.getImageWidth(), (int) blackflyReader.getImageHeight());
-               baseUI.getImGuiPanelManager().addPanel(hdf5ImageLogging.getPanel());
-               baseUI.getLayoutManager().reloadLayout();
-            }
-
-            // Access the image before it gets drawn on
-            // Fisheye undistortion
-            // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
-            Mat distortedImage = data.getRGBA8Mat();
-            undistortedImageSize.width(undistortedImageWidth.get());
-            undistortedImageSize.height(undistortedImageHeight.get());
-            opencv_imgproc.cvtColor(distortedImage, bgrImageForUndistortion, opencv_imgproc.COLOR_RGBA2BGR);
-            opencv_calib3d.undistortImage(bgrImageForUndistortion,
-                                          undistortedLiveImage,
-                                          cameraMatrixForMonitor,
-                                          distortionCoefficientsCopy,
-                                          cameraMatrixForMonitorShifting,
-                                          undistortedImageSize);
-//            opencv_calib3d.undistortImage(bgrImageForUndistortion,
-//                                          undistortedLiveImage,
-//                                          cameraMatrixForMonitor,
-//                                          distortionCoefficientsCopy);
-            undistortedFisheyePanel.resize(undistortedLiveImage.cols(), undistortedLiveImage.rows(), null);
-            opencv_imgproc.cvtColor(undistortedLiveImage, undistortedFisheyePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA);
-            undistortedFisheyePanel.draw();
-
-            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
-         }
-
-         blackflyReader.accessOnHighPriorityThread(data);
-      }
    }
 
    private void renderImGuiWidgets()

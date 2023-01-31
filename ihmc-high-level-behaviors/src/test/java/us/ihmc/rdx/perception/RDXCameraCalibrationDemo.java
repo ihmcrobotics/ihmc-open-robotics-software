@@ -10,6 +10,7 @@ import org.bytedeco.opencv.opencv_text.FloatVector;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import perception_msgs.msg.dds.BigVideoPacket;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
@@ -43,7 +44,7 @@ public class RDXCameraCalibrationDemo
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
-   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
+   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::generateNewCameraMatrixOnUIThread;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read Duration");
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode Duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read Frequency");
@@ -93,6 +94,7 @@ public class RDXCameraCalibrationDemo
    private final Size zeroZone = new Size(-1, -1);
    private final TermCriteria termCriteria = new TermCriteria(TermCriteria.EPS + TermCriteria.COUNT, 30, 0.0001);
    private final Throttler throttler = new Throttler();
+   private final Notification generateCameraMatrixNotification = new Notification();
 
    public RDXCameraCalibrationDemo()
    {
@@ -146,7 +148,7 @@ public class RDXCameraCalibrationDemo
                   yuv420Image = new Mat();
                   jpegImageBytePointer = new BytePointer();
 
-                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
+                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
                   undistortedVideoPanel = new RDXCVImagePanel("Undistorted Video", imageWidth, imageHeight);
                   testImagePanel = new RDXCVImagePanel("Test Image 1", imageWidth, imageHeight);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
@@ -192,11 +194,7 @@ public class RDXCameraCalibrationDemo
 
                         // Convert colors are pretty fast. Encoding is slow, so let's do it in parallel.
 
-                        swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
-                        {
-                           data.updateOnImageUpdateThread(imageWidth, imageHeight);
-                           opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
-                        });
+                        swapCVPanel.updateOnAsynchronousThread();
 
                         opencv_imgproc.cvtColor(bgrImage, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
 
@@ -225,38 +223,50 @@ public class RDXCameraCalibrationDemo
                   currentNumberOfImagesInDirectory = (int) images.size();
                }
 
-               // Calibration Code
-               swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
-               {
-                  if (cameraMatrix != null)
-                  {
-                     newCameraMatrix = opencv_calib3d.getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1.0);
-
-                     data.getRGBA8Image().getBytedecoOpenCVMat().copyTo(tempMat);
-                     opencv_calib3d.undistort(tempMat,
-                                              undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat(),
-                                              cameraMatrix,
-                                              distortionCoefficients,
-                                              newCameraMatrix);
-                  }
-
-                  if (takingPhotosIsActive.get() && throttler.run(0.5))
-                  {
-
-                     opencv_imgproc.cvtColor(data.getRGBA8Image().getBytedecoOpenCVMat(), tempMat, opencv_imgproc.COLOR_BGR2RGB);
-                     opencv_imgcodecs.imwrite(calibrationPhotoDirectory + "CameraCalibrationPhoto" + (currentNumberOfImagesInDirectory /*+1*/) + ".jpg",
-                                              tempMat);
-                     currentNumberOfImagesInDirectory++;
-                  }
-               });
-
-               swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data -> data.updateOnUIThread(swapCVPanel.getVideoPanel()));
+               swapCVPanel.updateOnUIThread();
             }
 
             testImagePanel.draw();
             undistortedVideoPanel.draw();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         private void videoUpdateOnAsynchronousThread(ImGuiOpenCVSwapVideoPanelData data)
+         {
+            data.ensureTextureDimensions(imageWidth, imageHeight);
+            opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+         }
+
+         private void videoUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
+         {
+            if (generateCameraMatrixNotification.poll())
+            {
+               generateNewCameraMatrixOnUIThread(data);
+            }
+
+            if (cameraMatrix != null)
+            {
+               newCameraMatrix = opencv_calib3d.getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1.0);
+
+               data.getRGBA8Image().getBytedecoOpenCVMat().copyTo(tempMat);
+               opencv_calib3d.undistort(tempMat,
+                                        undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat(),
+                                        cameraMatrix,
+                                        distortionCoefficients,
+                                        newCameraMatrix);
+            }
+
+            if (takingPhotosIsActive.get() && throttler.run(0.5))
+            {
+
+               opencv_imgproc.cvtColor(data.getRGBA8Image().getBytedecoOpenCVMat(), tempMat, opencv_imgproc.COLOR_BGR2RGB);
+               opencv_imgcodecs.imwrite(calibrationPhotoDirectory + "CameraCalibrationPhoto" + (currentNumberOfImagesInDirectory /*+1*/) + ".jpg",
+                                        tempMat);
+               currentNumberOfImagesInDirectory++;
+            }
+
+            data.updateOnUIThread(swapCVPanel.getVideoPanel());
          }
       });
    }
@@ -282,11 +292,11 @@ public class RDXCameraCalibrationDemo
       }
       if (ImGui.button("Generate camera matrix"))
       {
-         swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+         generateCameraMatrixNotification.set();
       }
    }
 
-   private void accessOnHighPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
+   private void generateNewCameraMatrixOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
    {
       LogTools.info("PATH {}", dir.getAbsolutePath());
       File[] directoryListing = dir.listFiles();

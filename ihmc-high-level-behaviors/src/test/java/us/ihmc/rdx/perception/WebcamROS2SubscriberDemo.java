@@ -11,7 +11,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
@@ -34,7 +33,6 @@ public class WebcamROS2SubscriberDemo
                                                   "ihmc-high-level-behaviors/src/test/resources",
                                                   "ROS 2 Webcam Subscriber");
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
-   private ImGuiOpenCVSwapVideoPanel swapCVPanel;
 //   private ImGuiVideoPanel videoPanel;
    private RDXCVImagePanel cvImagePanel;
    private final ImPlotFrequencyPlot receiveFrequencyPlot = new ImPlotFrequencyPlot("Receive frequency");
@@ -96,10 +94,6 @@ public class WebcamROS2SubscriberDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
-                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
-
-
                   cvImagePanel = new RDXCVImagePanel("Video1", 1920, 1080);
                   baseUI.getImGuiPanelManager().addPanel(cvImagePanel.getVideoPanel());
 
@@ -123,7 +117,7 @@ public class WebcamROS2SubscriberDemo
 //                              imageWidth = data.getVideoPacket().getImageWidth();
 //                              imageHeight = data.getVideoPacket().getImageHeight();
 //
-//                              panelData.updateOnImageUpdateThread(imageWidth, imageHeight);
+//                              panelData.ensureTextureDimensions(imageWidth, imageHeight);
 //
 //                              copyBytesDurationPlot.start();
 //                              BytePointer bytePointer = panelData.getRGBA8Mat().ptr(0);

@@ -39,7 +39,6 @@ public class RDXFFMPEGL515DepthLoggingDemo
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
-   private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private int imageWidth;
    private int imageHeight;
    private BytedecoImage normalizedDepthImage;
@@ -113,9 +112,6 @@ public class RDXFFMPEGL515DepthLoggingDemo
                   l515.setPublishColorImageROS2(false);
                   CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
                   baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
-
-                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
-                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
 
                   normalizedDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
                   rgbaDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);

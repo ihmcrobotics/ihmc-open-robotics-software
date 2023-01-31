@@ -130,7 +130,7 @@ public class WebcamROS2PublisherDemo
                   }, "CameraRead");
                }
 
-               webcamReader.update();
+               webcamReader.updateOnUIThread();
             }
 
             baseUI.renderBeforeOnScreenUI();

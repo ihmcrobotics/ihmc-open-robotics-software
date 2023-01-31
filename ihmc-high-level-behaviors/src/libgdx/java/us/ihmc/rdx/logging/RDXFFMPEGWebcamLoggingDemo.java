@@ -13,6 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.log.LogTools;
@@ -93,7 +94,7 @@ public class RDXFFMPEGWebcamLoggingDemo
 
                   bgrImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
 
-                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
+                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
                   baseUI.getLayoutManager().reloadLayout();
 
@@ -102,36 +103,40 @@ public class RDXFFMPEGWebcamLoggingDemo
 
                   ffmpegLoggerDemoHelper.create(imageWidth, imageHeight, () ->
                   {
-                     swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
-                     {
-                        readPerformancePlot.start();
-                        boolean imageWasRead = videoCapture.read(bgrImage.getBytedecoOpenCVMat());
-                        readPerformancePlot.stop();
-                        readFrequencyPlot.ping();
-
-                        if (!imageWasRead)
-                        {
-                           LogTools.error("Image was not read!");
-                        }
-
-                        ffmpegLoggerDemoHelper.getLogger().put(bgrImage);
-
-                        data.updateOnImageUpdateThread(imageWidth, imageHeight);
-                        opencv_imgproc.cvtColor(bgrImage.getBytedecoOpenCVMat(), data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
-                     });
+                     swapCVPanel.updateOnAsynchronousThread();
                   });
 
                   baseUI.getLayoutManager().reloadLayout();
                }
 
-               swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
-               {
-                  data.updateOnUIThread(swapCVPanel.getVideoPanel());
-               });
+               swapCVPanel.updateOnUIThread();
             }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         private void videoUpdateOnAsynchronousThread(ImGuiOpenCVSwapVideoPanelData data)
+         {
+            readPerformancePlot.start();
+            boolean imageWasRead = videoCapture.read(bgrImage.getBytedecoOpenCVMat());
+            readPerformancePlot.stop();
+            readFrequencyPlot.ping();
+
+            if (!imageWasRead)
+            {
+               LogTools.error("Image was not read!");
+            }
+
+            ffmpegLoggerDemoHelper.getLogger().put(bgrImage);
+
+            data.ensureTextureDimensions(imageWidth, imageHeight);
+            opencv_imgproc.cvtColor(bgrImage.getBytedecoOpenCVMat(), data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+         }
+
+         private void videoUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
+         {
+            data.updateOnUIThread(swapCVPanel.getVideoPanel());
          }
 
          private void renderImGuiWidgets()

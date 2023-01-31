@@ -9,6 +9,10 @@ import java.util.function.Supplier;
  * and writing need some time to access the data. Since there's two data instances,
  * the data references can just be exchanged instead of copying anything.
  *
+ * It is expected that only two threads be operating on this class throughout its
+ * existence. Be careful to only use a single thread executor to call the low
+ * priority access method.
+ *
  * This class probably isn't bulletproof, but works under most conditions.
  *
  * Also evaluate IHMC Realtime's ConcurrentCopier for your use case.
@@ -22,6 +26,18 @@ public class ZeroCopySwapReference<T>
    private final StatelessNotification notification = new StatelessNotification();
    private volatile boolean hightPriorityThreadIsAccessing = false;
 
+   // Optional fields
+   private Consumer<T> accessOnLowPriorityThread;
+   private Consumer<T> accessOnHighPriorityThread;
+
+   public ZeroCopySwapReference(Supplier<T> supplier, Consumer<T> accessOnLowPriorityThread, Consumer<T> accessOnHighPriorityThread)
+   {
+      this(supplier);
+      this.accessOnLowPriorityThread = accessOnLowPriorityThread;
+      this.accessOnHighPriorityThread = accessOnHighPriorityThread;
+   }
+
+   /** @deprecated This should really be phased out in favor of predefining good named method references. */
    public ZeroCopySwapReference(Supplier<T> supplier)
    {
       this(supplier.get(), supplier.get());
@@ -45,6 +61,14 @@ public class ZeroCopySwapReference<T>
    }
 
    /**
+    * Call if you initialized this class with consumers.
+    */
+   public void accessOnLowPriorityThread()
+   {
+      accessOnLowPriorityThread(accessOnLowPriorityThread);
+   }
+
+   /**
     * This thread does all the necessary waiting.
     * It's got access to its data straight away, that it got access to
     * last time it handed off to thread two.
@@ -63,6 +87,14 @@ public class ZeroCopySwapReference<T>
       // we're done, let's swap access now
       forHighPriorityThread = forLowPriorityThread; // give high priority thread access to the swap right away
       forLowPriorityThread = a == forHighPriorityThread ? b : a;
+   }
+
+   /**
+    * Call if you initialized this class with consumers.
+    */
+   public void accessOnHighPriorityThread()
+   {
+      accessOnHighPriorityThread(accessOnHighPriorityThread);
    }
 
    /**
