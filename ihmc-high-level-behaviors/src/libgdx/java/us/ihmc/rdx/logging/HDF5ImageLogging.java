@@ -27,6 +27,9 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * This can be embedded in applications to record compressed images to HDF5 files.
+ */
 public class HDF5ImageLogging
 {
    public static final String FILE_SUFFIX = "Images" + HDF5Tools.HDF5_FILE_EXTENSION;

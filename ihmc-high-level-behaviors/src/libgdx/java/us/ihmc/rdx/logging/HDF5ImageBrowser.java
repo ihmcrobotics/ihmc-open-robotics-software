@@ -20,6 +20,9 @@ import us.ihmc.tools.IHMCCommonPaths;
 
 import java.nio.file.Paths;
 
+/**
+ * This can be embedded in applications to browse HDF5 files with compressed images in them.
+ */
 public class HDF5ImageBrowser
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
