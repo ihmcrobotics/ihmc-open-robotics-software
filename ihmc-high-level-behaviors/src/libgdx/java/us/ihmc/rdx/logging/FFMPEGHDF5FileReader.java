@@ -45,13 +45,15 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    private HDF5Manager hdf5Manager;
    private Group framesGroup;
 
-   //Due to the current intermediate design of the FFMPEGHDF5Logger, there are two files which the log needs to read from, one of which contains all the metadata required for FFMPEG
-   //There surely is some way to
+   /**
+    * Due to the current intermediate design of the FFMPEGHDF5Logger, there are two files which
+    * the log needs to read from, one of which contains all the metadata required for ffmpeg.
+    */
    public FFMPEGHDF5FileReader(String hdf5File)
    {
       avutil.av_log_set_level(avutil.AV_LOG_WARNING);
 
-      String file = hdf5File.replaceFirst(HDF5Tools.HDF5_FILE_EXTENSION, ""); //BAD
+      String file = hdf5File.replaceFirst(HDF5Tools.HDF5_FILE_EXTENSION, ""); // BAD
 
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = avformat.avformat_alloc_context();
@@ -71,8 +73,8 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       width = decoderContext.width();
       height = decoderContext.height();
 
-      //Extremely strange but working method for determining duration. Webms have weird durations sometimes so we get it from avFormatContext
-      //It just so happens that avFormatContext.duration() is exactly 1000 times too large, so we make it smaller.
+      // Extremely strange but working method for determining duration. Webms have weird durations sometimes so we get it from avFormatContext
+      // It just so happens that avFormatContext.duration() is exactly 1000 times too large, so we make it smaller.
       if ((stream.duration() == 0 || stream.duration() == 0x8000000000000000L))
          duration = avFormatContext.duration() / 1000;
       else
@@ -87,7 +89,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       videoFrame = avutil.av_frame_alloc();
       packet = avcodec.av_packet_alloc();
 
-      //Because vidoeFrame's buffers move around in memory, we build rgbFrame regardless of if the format is already RGBA
+      // Because videoFrame's buffers move around in memory, we build rgbFrame regardless of if the format is already RGBA
       rgbFrame = avutil.av_frame_alloc();
       rgbFrame.width(width);
       rgbFrame.height(height);
@@ -116,7 +118,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       framesGroup = hdf5Manager.getGroup(FFMPEGHDF5Logger.NAMESPACE_ROOT);
    }
 
-   //Adapted from demuxing_decoding.c. Currently assumes video stream, but could be adapted for audio use, too
+   // Adapted from demuxing_decoding.c. Currently assumes video stream, but could be adapted for audio use, too
    private void openCodecContext()
    {
       streamIndex = avformat.av_find_best_stream(avFormatContext, avutil.AVMEDIA_TYPE_VIDEO, -1, -1, (AVCodec) null, 0);
@@ -136,7 +138,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    @Override
    public long seek(long timestamp)
    {
-      return 0; //not yet implemented
+      return 0; // Not yet implemented
    }
 
    private boolean loadNextFrame()
@@ -146,7 +148,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       {
 
          avformat.av_read_frame(avFormatContext, packet);
-         //get packet from HDF5
+         // get packet from HDF5
          byte[] rawData = HDF5Tools.loadRawByteArray(framesGroup, streamIndex);
          BytePointer packetData = new BytePointer(ByteBuffer.wrap(rawData));
          BytePointer.memcpy(packet.data(), packetData, rawData.length);
@@ -155,7 +157,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
 
       FFMPEGTools.checkNonZeroError(avcodec.avcodec_send_packet(decoderContext, packet), "Sending packet for decoding");
 
-      //Note: video packets always contain exactly one frame. For audio, etc. care must be taken to ensure all frames are read
+      // Note: Video packets always contain exactly one frame. For audio, etc. care must be taken to ensure all frames are read
       do
       {
          returnCode = avcodec.avcodec_receive_frame(decoderContext, videoFrame);
@@ -163,12 +165,12 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       while (returnCode == avutil.AVERROR_EAGAIN() || returnCode == avutil.AVERROR_EOF());
       FFMPEGTools.checkNegativeError(returnCode, "Decoding frame from packet");
 
-      avcodec.av_packet_unref(packet); //This is NOT freeing the packet, which is done later
+      avcodec.av_packet_unref(packet); // This is NOT freeing the packet, which is done later
 
       return true;
    }
 
-   /***
+   /**
     * Gets next frame, and stores in native memory (access with {@link #getFrameDataBuffer()})
     * @param load Whether or not to laod the next frame, or to use the existing loaded one
     * @return -1 when end of file reached (AVERROR_EOF), timestamp in time base units otherwise
@@ -176,8 +178,8 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    @Override
    public long getNextFrame(boolean load)
    {
-      if (load && !loadNextFrame()) //do not call loadNextFrame if load is false
-         return -1; //EOF
+      if (load && !loadNextFrame()) // Do not call loadNextFrame if load is false
+         return -1; // EOF
 
       FFMPEGTools.checkNonZeroError(avutil.av_frame_make_writable(rgbFrame), "Ensuring frame data is writable");
 
