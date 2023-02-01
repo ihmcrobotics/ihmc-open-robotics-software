@@ -1,10 +1,14 @@
 package us.ihmc.behaviors.tools;
 
+import org.apache.commons.math3.analysis.function.Inverse;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -25,6 +29,7 @@ public class HandWrenchCalculator
    private SideDependentList<List<OneDoFJointBasics>> armJoints = new SideDependentList<>();
    private SideDependentList<ReferenceFrame> referenceFrame = new SideDependentList<>();
    private SideDependentList<SpatialVector> wrenches = new SideDependentList<>(new SpatialVector(), new SpatialVector());
+   private InverseDynamicsCalculator inverseDynamicsCalculator;
 
    public HandWrenchCalculator(ROS2SyncedRobotModel syncedRobot)
    {
@@ -86,11 +91,15 @@ public class HandWrenchCalculator
    {
       for (RobotSide side : RobotSide.values)
       {
+
+         // TODO: TESTING . . . check size and output
+         double[] jointTorquesForGravity = removeGravityCompensationTorques(side);
+
          List<OneDoFJointBasics> oneSideArmJoints = armJoints.get(side);
          double[] jointTorques = new double[oneSideArmJoints.size()];
          for (int i = 0; i < oneSideArmJoints.size(); ++i)
          {
-            jointTorques[i] = oneSideArmJoints.get(i).getTau();
+            jointTorques[i] = oneSideArmJoints.get(i).getTau() - jointTorquesForGravity[i];
          }
 
          DMatrixRMaj armJacobian = armJacobianMatrix.get(side);
@@ -134,8 +143,26 @@ public class HandWrenchCalculator
    }
 
    // TODO: remove gravity compensation from the wrench when called? but gravity compensation would change as the arm moves . . .
-   public void calibrate()
+   public double[] removeGravityCompensationTorques(RobotSide side)
    {
+      List<OneDoFJointBasics> sideArmJoints = armJoints.get(side);
+      double[] jointTorquesForGravity = new double[sideArmJoints.size()];
+      MultiBodySystemReadOnly system = MultiBodySystemReadOnly.toMultiBodySystemInput(sideArmJoints);
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
 
+//      inverseDynamicsCalculator = new InverseDynamicsCalculator(fullRobotModel.getHand(side));
+      inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+      inverseDynamicsCalculator.compute();
+
+      for (int i = 0; i < sideArmJoints.size(); ++i)
+      {
+         DMatrixRMaj tau = inverseDynamicsCalculator.getComputedJointTau(sideArmJoints.get(i));
+         if (tau != null)
+         {
+            jointTorquesForGravity[i] = tau.get(0,0);
+            LogTools.info("tau matrix shape: {} X {}", tau.getNumRows(), tau.getNumCols());
+         }
+      }
+      return jointTorquesForGravity;
    }
 }
