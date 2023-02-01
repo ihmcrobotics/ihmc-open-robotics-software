@@ -48,12 +48,12 @@
       },
       {
          "name" : "/actions/main/in/left_atouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
          "name" : "/actions/main/in/right_atouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
@@ -68,17 +68,17 @@
       },
       {
          "name" : "/actions/main/in/right_bbuttondoubleclick",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
          "name" : "/actions/main/in/left_btouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
          "name" : "/actions/main/in/right_btouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
@@ -93,22 +93,22 @@
       },
       {
          "name" : "/actions/main/in/left_touchpadtouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
          "name" : "/actions/main/in/right_touchpadtouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
          "name" : "/actions/main/in/left_touchpad",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "vector2"
       },
       {
          "name" : "/actions/main/in/right_touchpad",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "vector2"
       },
       {
