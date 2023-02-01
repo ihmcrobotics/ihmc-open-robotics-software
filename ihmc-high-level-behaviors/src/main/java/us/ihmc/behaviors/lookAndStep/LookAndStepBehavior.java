@@ -130,6 +130,8 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          footstepPlanning.acceptLidarREARegions(planarRegionsListMessage);
       });
       helper.subscribeViaCallback(GOAL_INPUT, this::acceptGoal);
+      // TODO add height map to footstep planner
+      helper.subscribeViaCallback(ROS2_HEIGHT_MAP, bodyPathPlanning::acceptHeightMap);
 
       bodyPathLocalization.initialize(this);
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, imminentStanceTracker::acceptCapturabilityBasedStatus);
@@ -143,6 +145,11 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          delayFixedPlanarRegionsSubscription.setEnabled(true);
          delayFixedPlanarRegionsSubscription.setPosePublisherEnabled(true);
       }
+      helper.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, heightMapMessage ->
+      {
+         bodyPathPlanning.acceptHeightMap(heightMapMessage);
+         footstepPlanning.acceptHeightMap(heightMapMessage);
+      });
       helper.subscribeViaCallback(ROS2_REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
       helper.subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(helper.getRobotModel().getSimpleRobotName()),
                                   footstepPlanning::acceptRobotConfigurationData);

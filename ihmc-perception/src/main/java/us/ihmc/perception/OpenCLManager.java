@@ -282,6 +282,11 @@ public class OpenCLManager
       execute(kernel, 2, workSizeX, workSizeY, 0);
    }
 
+   public void execute3D(_cl_kernel kernel, long workSizeX, long workSizeY, long workSizeZ)
+   {
+      execute(kernel, 3, workSizeX, workSizeY, workSizeZ);
+   }
+
    /**
     * See https://www.khronos.org/registry/OpenCL/sdk/2.2/docs/man/html/clEnqueueNDRangeKernel.html
     */
