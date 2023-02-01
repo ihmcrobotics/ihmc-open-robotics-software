@@ -27,7 +27,6 @@ import us.ihmc.utilities.ros.RosTools;
 
 public class RDXRapidRegionsUIPanel implements RenderableProvider
 {
-
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
    private ModelInstance sensorFrameGraphic;
    private final FramePose3D framePose = new FramePose3D();
