@@ -17,6 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 
 import java.util.List;
@@ -181,6 +182,14 @@ public class RDXModelBuilder
                              new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0),
                              color);
       }, "arrow");
+   }
+
+   public static ModelInstance createLine(Point3DReadOnly start, Point3DReadOnly end, double lineWidth, Color color)
+   {
+      return buildModelInstance(meshBuilder ->
+                                {
+                                   meshBuilder.addLine(start, end, lineWidth, color);
+                                }, "line");
    }
 
    public static ModelInstance createPose(double radius, Color color)
