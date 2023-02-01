@@ -65,7 +65,7 @@ public class RDXModelBuilder
    public static Model buildModelFromMesh(RDXMultiColorMeshBuilder meshBuilder, String nodeName)
    {
       ModelBuilder modelBuilder = new ModelBuilder();
-      modelBuilder.node().id = nodeName;
+//      modelBuilder.node().id = nodeName;
 
       return buildModelFromMesh(modelBuilder, meshBuilder);
    }
