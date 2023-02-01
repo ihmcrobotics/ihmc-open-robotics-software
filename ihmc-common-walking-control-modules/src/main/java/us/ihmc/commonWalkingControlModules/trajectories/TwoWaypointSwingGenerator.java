@@ -245,7 +245,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       }
       else if (trajectoryType == TrajectoryType.CUSTOM && (waypoints.isEmpty() || waypoints.size() > maxNumberOfSwingWaypoints))
       {
-         LogTools.warn("Received unexpected amount of waypoints. Using default trajectory.");
+         LogTools.warn("Received unexpected amount ({}) of waypoints. Using default trajectory.", waypoints.size());
          this.trajectoryType = TrajectoryType.DEFAULT;
       }
       else
