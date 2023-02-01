@@ -25,6 +25,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowBodyPath;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowBodyPathPlanData;
+
 public class BodyPathLogVisualizerController
 {
    private final ObservableList<ParentStepProperty> parentTableItems = FXCollections.observableArrayList();
@@ -50,6 +53,8 @@ public class BodyPathLogVisualizerController
    private boolean additionalColumnsLoaded = false;
 
    @FXML
+   private CheckBox showBodyPathPlanData;
+   @FXML
    private TableView<ParentStepProperty> parentTable;
    @FXML
    private TableView<ChildStepProperty> childTable;
@@ -65,6 +70,7 @@ public class BodyPathLogVisualizerController
 
    public void bindControls()
    {
+      messager.bindBidirectional(ShowBodyPathPlanData, showBodyPathPlanData.selectedProperty(), false);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathGraphData, this::updateGraphData);
    }
 
