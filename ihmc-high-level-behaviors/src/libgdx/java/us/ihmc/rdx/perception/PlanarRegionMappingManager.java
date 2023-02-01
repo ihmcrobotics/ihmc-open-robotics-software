@@ -200,9 +200,9 @@ public class PlanarRegionMappingManager
             {
                planarRegionsListBuffer = new PlanarRegionsReplayBuffer(file, PlanarRegionsListWithPose.class);
             }
-            catch (IOException ex)
+            catch (IOException ioException)
             {
-               LogTools.error(ex.getStackTrace());
+               LogTools.error(ioException.getStackTrace());
             }
             break;
          }
