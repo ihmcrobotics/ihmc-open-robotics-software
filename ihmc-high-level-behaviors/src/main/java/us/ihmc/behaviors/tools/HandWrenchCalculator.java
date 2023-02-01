@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.tools;
 
-import org.apache.commons.math3.analysis.function.Inverse;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -23,63 +22,36 @@ import java.util.List;
 public class HandWrenchCalculator
 {
    private FullHumanoidRobotModel fullRobotModel;
-   HumanoidJointNameMap jointNameMap;
-   private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
-   private SideDependentList<DMatrixRMaj> armJacobianMatrix = new SideDependentList<>();
-   private SideDependentList<List<OneDoFJointBasics>> armJoints = new SideDependentList<>();
-   private SideDependentList<ReferenceFrame> referenceFrame = new SideDependentList<>();
+   private final SideDependentList<GeometricJacobianCalculator> jacobianCalculators = new SideDependentList<>();
+   private final SideDependentList<List<OneDoFJointBasics>> armJoints = new SideDependentList<>();
    private SideDependentList<SpatialVector> wrenches = new SideDependentList<>(new SpatialVector(), new SpatialVector());
-   private InverseDynamicsCalculator inverseDynamicsCalculator;
+   private final SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators = new SideDependentList<>();
+   private final SideDependentList<double[]> jointTorquesForGravity = new SideDependentList<>();
 
    public HandWrenchCalculator(ROS2SyncedRobotModel syncedRobot)
    {
       fullRobotModel = syncedRobot.getFullRobotModel();
-      jointNameMap = syncedRobot.getRobotModel().getJointMap();
-   }
-
-   private void updateJacobians()
-   {
       for (RobotSide side : RobotSide.values)
       {
-         jacobianCalculator.setKinematicChain(fullRobotModel.getChest(), fullRobotModel.getHand(side));
-         // Computing the wrench at the handControlFrame and not the hand.getBodyFixedFrame() as is done by default.
-         jacobianCalculator.setJacobianFrame(fullRobotModel.getHandControlFrame(side));
-         referenceFrame.set(side, jacobianCalculator.getJacobianFrame());
-         armJacobianMatrix.set(side, jacobianCalculator.getJacobianMatrix());
-         List<OneDoFJointBasics> oneDoFJoints = MultiBodySystemTools.filterJoints(jacobianCalculator.getJointsFromBaseToEndEffector(), OneDoFJointBasics.class);
+         // set up for each side . . .
+         GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
+         geometricJacobianCalculator.setKinematicChain(fullRobotModel.getChest(), fullRobotModel.getHand(side));
+         geometricJacobianCalculator.setJacobianFrame(fullRobotModel.getHandControlFrame(side));
+         jacobianCalculators.set(side, geometricJacobianCalculator);
+         List<OneDoFJointBasics> oneDoFJoints = MultiBodySystemTools.filterJoints(geometricJacobianCalculator.getJointsFromBaseToEndEffector(),
+                                                                                  OneDoFJointBasics.class);
          armJoints.set(side, oneDoFJoints);
+         MultiBodySystemReadOnly system = MultiBodySystemReadOnly.toMultiBodySystemInput(armJoints.get(side));
+         InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
+         inverseDynamicsCalculator.setConsiderCoriolisAndCentrifugalForces(false);
+         inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
+         inverseDynamicsCalculators.set(side, inverseDynamicsCalculator);
+         jointTorquesForGravity.set(side, new double [armJoints.get(side).size()]);
       }
    }
 
    private DMatrixRMaj leftPseudoInverse(DMatrixRMaj matrix)
    {
-      // PREVIOUSLY . . . >>>
-      /*
-      double lambda = 1e-6;
-
-      DMatrixRMaj matrixTransposed = CommonOps_DDRM.transpose(matrix, null);
-      int numRow = matrixTransposed.getNumRows();
-
-      DMatrixRMaj AT_A = new DMatrixRMaj(numRow, numRow);
-      CommonOps_DDRM.mult(matrixTransposed, matrix, AT_A);
-
-      DMatrixRMaj identity = CommonOps_DDRM.identity(numRow);
-      CommonOps_DDRM.scale(lambda, identity);
-
-      DMatrixRMaj result = new DMatrixRMaj(identity.getNumRows(),identity.getNumRows());
-      CommonOps_DDRM.add(AT_A, identity, result);
-
-      CommonOps_DDRM.invert(result);
-
-      DMatrixRMaj matrixDagger = new DMatrixRMaj(result.getNumRows(),matrixTransposed.getNumCols());
-      CommonOps_DDRM.mult(result, matrixTransposed, matrixDagger);
-
-      return matrixDagger;
-
-       */
-      // <<< PREVIOUSLY . . .
-
-      // TODO: check this works the same
       DampedLeastSquaresSolver pseudoInverseSolver = new DampedLeastSquaresSolver(matrix.getNumRows(), 1e-6);
       pseudoInverseSolver.setA(matrix);
       DMatrixRMaj leftPseudoInverseOfMatrix = new DMatrixRMaj(matrix);
@@ -87,14 +59,11 @@ public class HandWrenchCalculator
       return leftPseudoInverseOfMatrix;
    }
 
-   private void calculateTaskForces()
+   public void compute()
    {
       for (RobotSide side : RobotSide.values)
       {
-
-         // TODO: TESTING . . . check size and output
-         double[] jointTorquesForGravity = removeGravityCompensationTorques(side);
-
+         double[] jointTorquesForGravity = getGravityCompensationTorques(side);
          List<OneDoFJointBasics> oneSideArmJoints = armJoints.get(side);
          double[] jointTorques = new double[oneSideArmJoints.size()];
          for (int i = 0; i < oneSideArmJoints.size(); ++i)
@@ -102,14 +71,15 @@ public class HandWrenchCalculator
             jointTorques[i] = oneSideArmJoints.get(i).getTau() - jointTorquesForGravity[i];
          }
 
-         DMatrixRMaj armJacobian = armJacobianMatrix.get(side);
+         // getJacobianMatrix updates the matrix and outputs in the form of DMatrixRMaj
+         DMatrixRMaj armJacobian = jacobianCalculators.get(side).getJacobianMatrix();
          DMatrixRMaj armJacobianTransposed = CommonOps_DDRM.transpose(armJacobian, null);
          DMatrixRMaj armJacobianTransposedDagger = leftPseudoInverse(armJacobianTransposed);
          DMatrixRMaj jointTorqueVector = new DMatrixRMaj(jointTorques);
          DMatrixRMaj wrenchVector = new DMatrixRMaj(6,1);
          CommonOps_DDRM.mult(armJacobianTransposedDagger, jointTorqueVector, wrenchVector);
 
-         wrenches.set(side, makeWrench(jacobianCalculator.getJacobianFrame(), wrenchVector));
+         wrenches.set(side, makeWrench(jacobianCalculators.get(side).getJacobianFrame(), wrenchVector));
       }
    }
 
@@ -122,14 +92,10 @@ public class HandWrenchCalculator
       spatialVector.set(wrenchVector);
       // Express in world-frame
       spatialVector.changeFrame(ReferenceFrame.getWorldFrame());
+      // Negate to express the wrench the hand experiences from the external world
+      spatialVector.negate();
 
       return spatialVector;
-   }
-
-   public void update()
-   {
-      updateJacobians();
-      calculateTaskForces();
    }
 
    public SideDependentList<SpatialVector> getWrench()
@@ -137,32 +103,19 @@ public class HandWrenchCalculator
       return wrenches;
    }
 
-   public SideDependentList<ReferenceFrame> getReferenceFrame()
+   // TODO: Check if this looks good.
+   //  remove gravity compensation from the wrench when called? but gravity compensation would change as the arm moves . . .
+   public double[] getGravityCompensationTorques(RobotSide side)
    {
-      return referenceFrame;
-   }
-
-   // TODO: remove gravity compensation from the wrench when called? but gravity compensation would change as the arm moves . . .
-   public double[] removeGravityCompensationTorques(RobotSide side)
-   {
-      List<OneDoFJointBasics> sideArmJoints = armJoints.get(side);
-      double[] jointTorquesForGravity = new double[sideArmJoints.size()];
-      MultiBodySystemReadOnly system = MultiBodySystemReadOnly.toMultiBodySystemInput(sideArmJoints);
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(system);
-
-//      inverseDynamicsCalculator = new InverseDynamicsCalculator(fullRobotModel.getHand(side));
-      inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
-      inverseDynamicsCalculator.compute();
-
-      for (int i = 0; i < sideArmJoints.size(); ++i)
+      inverseDynamicsCalculators.get(side).compute();
+      for (int i = 0; i < armJoints.get(side).size(); ++i)
       {
-         DMatrixRMaj tau = inverseDynamicsCalculator.getComputedJointTau(sideArmJoints.get(i));
+         DMatrixRMaj tau = inverseDynamicsCalculators.get(side).getComputedJointTau(armJoints.get(side).get(i));
          if (tau != null)
          {
-            jointTorquesForGravity[i] = tau.get(0,0);
-            LogTools.info("tau matrix shape: {} X {}", tau.getNumRows(), tau.getNumCols());
+            jointTorquesForGravity.get(side)[i] = tau.get(0,0);
          }
       }
-      return jointTorquesForGravity;
+      return jointTorquesForGravity.get(side);
    }
 }
