@@ -99,8 +99,8 @@ public class RDXInteractableFootstep
 
    public RDXInteractableFootstep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex, SideDependentList<ConvexPolygon2D> defaultPolygons)
    {
-      plannedFootstepInternal = new PlannedFootstep(plannedFootstep);
       this.defaultPolygons = defaultPolygons;
+      plannedFootstepInternal = new PlannedFootstep(plannedFootstep);
       updateFromPlannedStep(baseUI,plannedFootstep,footstepIndex);
    }
 
