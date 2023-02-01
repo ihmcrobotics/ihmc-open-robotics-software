@@ -26,9 +26,8 @@ public class PlanarRegionMappingUIPanel
   
    public PlanarRegionMappingUIPanel(String name, PlanarRegionMappingManager mappingManager)
    {
-      imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
       this.mappingManager = mappingManager;
-
+      imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
       mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getParameters().getTitle());
       mappingParametersTuner.create(mappingManager.getParameters());
       imGuiPanel.addChild(mappingParametersTuner);
