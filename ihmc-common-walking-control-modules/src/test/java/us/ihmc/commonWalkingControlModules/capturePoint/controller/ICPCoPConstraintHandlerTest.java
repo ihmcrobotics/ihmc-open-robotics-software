@@ -1,14 +1,15 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import static org.fest.assertions.Fail.fail;
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.EjmlUnitTests;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -59,11 +60,11 @@ public class ICPCoPConstraintHandlerTest
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(null, useControlPolygons, false, registry);
       ICPControllerQPSolver solver = new ICPControllerQPSolver(5, false, null);
 
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint(bipedSupportPolygons.getSupportPolygonInWorld()));
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -126,12 +127,12 @@ public class ICPCoPConstraintHandlerTest
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(null, useControlPolygons, false, registry);
       ICPControllerQPSolver solver = new ICPControllerQPSolver(5, false, null);
 
       // test left support
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint(bipedSupportPolygons.getSupportPolygonInWorld()));
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -171,15 +172,13 @@ public class ICPCoPConstraintHandlerTest
       EjmlUnitTests.assertEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7);
       EjmlUnitTests.assertEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7);
 
-
       // test right support
       contactStates.get(RobotSide.RIGHT).setFullyConstrained();
       contactStates.get(RobotSide.LEFT).getContactPoints().forEach(point -> point.setInContact(false));
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
-
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint(bipedSupportPolygons.getSupportPolygonInWorld()));
 
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       solver.setCMPFeedbackConditions(10.0, true);
@@ -233,11 +232,11 @@ public class ICPCoPConstraintHandlerTest
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(null, useControlPolygons, false, registry);
       ICPControllerQPSolver solver = new ICPControllerQPSolver(5, false, null);
 
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint(bipedSupportPolygons.getSupportPolygonInWorld()));
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -288,7 +287,7 @@ public class ICPCoPConstraintHandlerTest
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
-      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
+      ICPCoPConstraintHandler constraintHandler = new ICPCoPConstraintHandler(null, useControlPolygons, false, registry);
       ICPControllerQPSolver solver = new ICPControllerQPSolver(5, false, null);
 
       contactStates.get(RobotSide.RIGHT).getContactPoints().forEach(point -> point.setInContact(false));
@@ -296,7 +295,7 @@ public class ICPCoPConstraintHandlerTest
 
       // test left support
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint(bipedSupportPolygons.getSupportPolygonInWorld()));
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -330,14 +329,13 @@ public class ICPCoPConstraintHandlerTest
       assertEquals(CommonOps_DDRM.elementSum(solver.getCMPLocationConstraint().Aineq), 0.0, 1e-7);
       assertEquals(CommonOps_DDRM.elementSum(solver.getCMPLocationConstraint().bineq), 0.0, 1e-7);
 
-
       // test right support
       contactStates.get(RobotSide.RIGHT).setFullyConstrained();
       contactStates.get(RobotSide.LEFT).getContactPoints().forEach(point -> point.setInContact(false));
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint(bipedSupportPolygons.getSupportPolygonInWorld()));
 
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
@@ -405,7 +403,8 @@ public class ICPCoPConstraintHandlerTest
       return contactableFeet;
    }
 
-   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoRegistry registry,
+   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet,
+                                                          YoRegistry registry,
                                                           SideDependentList<YoPlaneContactState> contactStatesToPack)
    {
       SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
@@ -424,12 +423,16 @@ public class ICPCoPConstraintHandlerTest
          soleFrames.put(robotSide, soleFrame);
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
-         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
+         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix
+               + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
          contactStatesToPack.put(robotSide, yoPlaneContactState);
       }
 
-      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
+      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame",
+                                                            worldFrame,
+                                                            ankleZUpFrames.get(RobotSide.LEFT),
+                                                            ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, soleFrames, registry, null);

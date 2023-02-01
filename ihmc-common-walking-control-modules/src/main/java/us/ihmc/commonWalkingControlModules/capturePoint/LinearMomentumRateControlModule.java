@@ -234,24 +234,15 @@ public class LinearMomentumRateControlModule
       bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
 
       ICPControllerParameters icpControllerParameters = walkingControllerParameters.getICPControllerParameters();
-      
+
       if (icpControllerParameters.getUseHeuristicICPController())
       {
-         icpController = new HeuristicICPController(icpControllerParameters,
-                                                    controlDT,
-                                                    registry,
-                                                    yoGraphicsListRegistry);
+         icpController = new HeuristicICPController(icpControllerParameters, controlDT, registry, yoGraphicsListRegistry);
       }
 
       else
-      {     
-         icpController = new ICPController(walkingControllerParameters,
-                                           bipedSupportPolygons,
-                                           icpControlPolygons,
-                                           contactableFeet,
-                                           controlDT,
-                                           registry,
-                                           yoGraphicsListRegistry);
+      {
+         icpController = new ICPController(walkingControllerParameters, icpControlPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       }
 
       parentRegistry.addChild(registry);
@@ -474,17 +465,32 @@ public class LinearMomentumRateControlModule
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
-         icpController.compute(supportPolygonInWorld, desiredCapturePoint, desiredCapturePointVelocity, desiredCapturePointAtEndOfState, perfectCMP, capturePoint, centerOfMass2d, omega0);
+         icpController.compute(supportPolygonInWorld,
+                               desiredCapturePoint,
+                               desiredCapturePointVelocity,
+                               desiredCapturePointAtEndOfState,
+                               perfectCMP,
+                               capturePoint,
+                               centerOfMass2d,
+                               omega0);
       }
       else
       {
          perfectCMPDelta.sub(perfectCMP, perfectCoP);
-         icpController.compute(supportPolygonInWorld, desiredCapturePoint, desiredCapturePointVelocity, desiredCapturePointAtEndOfState, perfectCoP, perfectCMPDelta, capturePoint, centerOfMass2d, omega0);
+         icpController.compute(supportPolygonInWorld,
+                               desiredCapturePoint,
+                               desiredCapturePointVelocity,
+                               desiredCapturePointAtEndOfState,
+                               perfectCoP,
+                               perfectCMPDelta,
+                               capturePoint,
+                               centerOfMass2d,
+                               omega0);
       }
 
       icpController.getDesiredCMP(desiredCMP);
       icpController.getDesiredCoP(desiredCoP);
-      
+
    }
 
    private void checkAndPackOutputs()
