@@ -39,14 +39,15 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
-   public RDXROS2BigVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
+   public RDXROS2BigVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic, boolean subscribe)
    {
       super(title + " (ROS 2)", topic.getName(), false);
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
 
-      setSubscribed(subscribed.get());
+      if (subscribe)
+         subscribe();
    }
 
    private void subscribe()

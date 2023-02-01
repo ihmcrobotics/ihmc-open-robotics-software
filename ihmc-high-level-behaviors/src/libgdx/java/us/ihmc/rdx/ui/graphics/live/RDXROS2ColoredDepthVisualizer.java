@@ -59,7 +59,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private final SampleInfo depthSampleInfo = new SampleInfo();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(true);
+   private final ImBoolean subscribed = new ImBoolean(false);
    private final String titleBeforeAdditions;
    private final PubSubImplementation pubSubImplementation;
    private RealtimeROS2Node realtimeROS2Node;
@@ -112,7 +112,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private int colorHeight;
    private int totalColorPixels;
 
-   public RDXROS2ColoredDepthVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic)
+   public RDXROS2ColoredDepthVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic, boolean subscribe)
    {
       super(title + " (ROS 2)");
       titleBeforeAdditions = title;
@@ -120,7 +120,8 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
       this.depthTopic = depthTopic;
       this.colorTopic = colorTopic;
 
-      setSubscribed(subscribed.get());
+      if (subscribe)
+         subscribe();
    }
 
    private void subscribe()

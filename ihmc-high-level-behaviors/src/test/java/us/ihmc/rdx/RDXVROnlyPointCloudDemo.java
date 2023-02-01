@@ -33,7 +33,10 @@ public class RDXVROnlyPointCloudDemo
             vrApplication.getVRContext().addVRInputProcessor(this::processVRInput);
 
             ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "vr_viewer");
-            fusedPointCloud = new RDXROS2PointCloudVisualizer("Fused Point Cloud", ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
+            fusedPointCloud = new RDXROS2PointCloudVisualizer("Fused Point Cloud",
+                                                              ros2Node,
+                                                              ROS2Tools.MULTISENSE_LIDAR_SCAN,
+                                                              true);
             fusedPointCloud.create();
             fusedPointCloud.setActive(true);
          }

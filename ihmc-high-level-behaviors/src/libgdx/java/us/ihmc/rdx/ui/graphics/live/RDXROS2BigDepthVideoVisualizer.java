@@ -27,7 +27,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    private final ROS2Topic<BigVideoPacket> topic;
    private RealtimeROS2Node realtimeROS2Node = null;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(true);
+   private final ImBoolean subscribed = new ImBoolean(false);
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
@@ -38,14 +38,15 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
-   public RDXROS2BigDepthVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
+   public RDXROS2BigDepthVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic, boolean subscribe)
    {
       super(title + " (ROS 2)", topic.getName(), false);
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
 
-      setSubscribed(subscribed.get());
+      if (subscribe)
+         subscribe();
    }
 
    private void subscribe()

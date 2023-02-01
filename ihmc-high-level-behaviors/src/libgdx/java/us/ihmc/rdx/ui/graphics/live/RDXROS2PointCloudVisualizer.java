@@ -52,7 +52,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private final ImPlotIntegerPlot segmentIndexPlot = new ImPlotIntegerPlot("Segment", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(true);
+   private final ImBoolean subscribed = new ImBoolean(false);
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private int pointsPerSegment;
    private int numberOfSegments;
@@ -72,14 +72,15 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
-   public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
+   public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic, boolean subscribe)
    {
       super(title + " (ROS 2)");
       this.ros2Node = ros2Node;
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-      setSubscribed(subscribed.get());
+      if (subscribe)
+         subscribe();
    }
 
    private void subscribe()
