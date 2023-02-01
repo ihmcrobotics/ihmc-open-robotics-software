@@ -265,8 +265,8 @@ public class BlackflyCalibrationSuite
             if (hdf5ImageLogging == null)
             {
                hdf5ImageLogging = new HDF5ImageLogging(nativesLoadedActivator,
-                                                       (int) blackflyReader.getImageWidth(),
-                                                       (int) blackflyReader.getImageHeight());
+                                                       blackflyReader.getImageWidth(),
+                                                       blackflyReader.getImageHeight());
                baseUI.getImGuiPanelManager().addPanel(hdf5ImageLogging.getPanel());
                baseUI.getLayoutManager().reloadLayout();
             }
