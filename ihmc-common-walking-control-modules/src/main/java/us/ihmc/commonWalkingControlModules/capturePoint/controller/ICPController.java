@@ -14,8 +14,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
@@ -243,27 +241,29 @@ public class ICPController implements ICPControllerInterface
     * {@inheritDoc}
     */
    @Override
-   public void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack)
+   public FramePoint2DReadOnly getDesiredCMP()
    {
-      desiredCMPToPack.set(feedbackCMP);
+      return feedbackCMP;
+   }
+
+   /**
+    * {@inheritDoc}
+    * 
+    * @return
+    */
+   @Override
+   public FramePoint2DReadOnly getDesiredCoP()
+   {
+      return feedbackCoP;
    }
 
    /**
     * {@inheritDoc}
     */
    @Override
-   public void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack)
+   public FrameVector2DReadOnly getExpectedControlICPVelocity()
    {
-      desiredCoPToPack.set(feedbackCoP);
-   }
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public void getExpectedControlICPVelocity(FixedFrameVector2DBasics expectedControlICPVelocityToPack)
-   {
-      expectedControlICPVelocityToPack.set(expectedControlICPVelocity);
+      return expectedControlICPVelocity;
    }
 
    /**
@@ -273,25 +273,6 @@ public class ICPController implements ICPControllerInterface
    public boolean useAngularMomentum()
    {
       return useAngularMomentum.getValue();
-   }
-
-   private final FrameVector2D desiredCMPOffsetToThrowAway = new FrameVector2D();
-
-   /**
-    * {@inheritDoc}
-    */
-   @Override
-   public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
-                       FramePoint2DReadOnly desiredICP,
-                       FrameVector2DReadOnly desiredICPVelocity,
-                       FramePoint2DReadOnly finalICP,
-                       FramePoint2DReadOnly perfectCoP,
-                       FramePoint2DReadOnly currentICP,
-                       FramePoint2DReadOnly currentCoMPosition,
-                       double omega0)
-   {
-      desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
    }
 
    /**
@@ -313,14 +294,25 @@ public class ICPController implements ICPControllerInterface
       this.desiredICP.setMatchingFrame(desiredICP);
       this.finalICP.setMatchingFrame(finalICP);
       this.desiredICPVelocity.setMatchingFrame(desiredICPVelocity);
-      this.perfectCMPOffset.setMatchingFrame(perfectCMPOffset);
+      if (perfectCMPOffset == null)
+         this.perfectCMPOffset.setToZero();
+      else
+         this.perfectCMPOffset.setMatchingFrame(perfectCMPOffset);
       this.currentICP.setMatchingFrame(currentICP);
       this.currentCoMPosition.setMatchingFrame(currentCoMPosition);
 
       CapturePointTools.computeCenterOfMassVelocity(currentCoMPosition, currentICP, omega0, currentCoMVelocity);
 
-      this.perfectCoP.setMatchingFrame(perfectCoP);
-      this.perfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
+      if (perfectCoP == null)
+      { // Then compute the perfect CMP using: x_{CMP} = x_{ICP} - xDot_{ICP} / omega0, and perfect CoP using the perfect CMP offset.
+         this.perfectCMP.scaleAdd(-1.0 / omega0, desiredICPVelocity, desiredICP);
+         this.perfectCoP.sub(this.perfectCMP, this.perfectCMPOffset);
+      }
+      else
+      {
+         this.perfectCoP.setMatchingFrame(perfectCoP);
+         this.perfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
+      }
 
       this.icpError.sub(currentICP, desiredICP);
 

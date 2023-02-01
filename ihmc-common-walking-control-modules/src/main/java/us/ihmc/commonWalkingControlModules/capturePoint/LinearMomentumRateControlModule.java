@@ -488,8 +488,8 @@ public class LinearMomentumRateControlModule
                                omega0);
       }
 
-      icpController.getDesiredCMP(desiredCMP);
-      icpController.getDesiredCoP(desiredCoP);
+      desiredCMP.set(icpController.getDesiredCMP());
+      desiredCoP.set(icpController.getDesiredCoP());
 
    }
 
