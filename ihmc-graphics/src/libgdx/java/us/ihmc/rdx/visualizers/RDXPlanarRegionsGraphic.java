@@ -42,7 +42,7 @@ import java.util.function.Function;
 
 public class RDXPlanarRegionsGraphic implements RenderableProvider
 {
-   private PlanarRegionsList planarRegionsList;;
+   private PlanarRegionsList planarRegionsList;
    private final ModelBuilder modelBuilder = new ModelBuilder();
 
    // visualization options
