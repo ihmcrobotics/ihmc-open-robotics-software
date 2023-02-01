@@ -66,8 +66,6 @@ public class PerceptionDataLoader
    {
       executorService.submit(() ->
       {
-         synchronized (hdf5Manager)
-         {
             int count = (int) hdf5Manager.getCount(namespace);
             for(int index = 0; index < count; index++)
             {
@@ -81,7 +79,6 @@ public class PerceptionDataLoader
             }
 
             LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
-         }
       });
    }
 
@@ -89,8 +86,6 @@ public class PerceptionDataLoader
    {
       executorService.submit(() ->
       {
-         synchronized (hdf5Manager)
-         {
             int count = (int) hdf5Manager.getCount(namespace);
             for(int index = 0; index < count; index++)
             {
@@ -104,37 +99,27 @@ public class PerceptionDataLoader
             }
 
             LogTools.info("[{}] Total Quaternions Loaded: {}", namespace, quaternions.size());
-         }
       });
    }
 
    public void loadFloatArray(String namespace, int index, float[] array)
    {
-      synchronized (hdf5Manager)
-      {
          Group group = hdf5Manager.getGroup(namespace);
          HDF5Tools.loadFloatArray(group, index, array);
-      }
    }
 
    public synchronized void loadCompressedImage(String namespace, int index, Mat mat)
    {
-      synchronized (hdf5Manager)
-      {
          Group group = hdf5Manager.getGroup(namespace);
          byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
          mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(compressedByteArray));
-      }
    }
 
    public synchronized void loadCompressedDepth(String namespace, int index, Mat mat)
    {
       byte[] compressedByteArray;
-      synchronized (hdf5Manager)
-      {
-         Group group = hdf5Manager.getGroup(namespace);
-         compressedByteArray = HDF5Tools.loadByteArray(group, index);
-      }
+      Group group = hdf5Manager.getGroup(namespace);
+      compressedByteArray = HDF5Tools.loadByteArray(group, index);
       BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
    }
 
