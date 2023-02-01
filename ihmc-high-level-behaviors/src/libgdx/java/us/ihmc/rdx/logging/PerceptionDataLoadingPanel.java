@@ -21,7 +21,6 @@ import static org.bytedeco.opencv.global.opencv_highgui.destroyAllWindows;
 
 public class PerceptionDataLoadingPanel extends ImGuiPanel
 {
-
    private PerceptionDataLoader loader;
    private Mat cvImage;
 
