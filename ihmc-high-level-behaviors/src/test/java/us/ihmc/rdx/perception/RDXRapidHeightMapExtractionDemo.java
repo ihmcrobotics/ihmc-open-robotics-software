@@ -5,9 +5,11 @@ import imgui.type.ImInt;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
@@ -79,6 +81,8 @@ public class RDXRapidHeightMapExtractionDemo
             createForOuster(128, 2048);
 
             updateHeightMap();
+
+            testProjection(loadedDepthImage.getBytedecoOpenCVMat());
          }
 
          private void createForOuster(int depthHeight, int depthWidth)
@@ -145,7 +149,7 @@ public class RDXRapidHeightMapExtractionDemo
                {
                   LogTools.info("Loading sensor data: " + frameIndex.get());
                   perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), loadedDepthImage.getBytedecoOpenCVMat());
-                  updateHeightMap();
+                  //updateHeightMap();
                }
 
                if (!initialized)
@@ -190,6 +194,56 @@ public class RDXRapidHeightMapExtractionDemo
       BytedecoOpenCVTools.displayDepth("Output Height Map", rapidHeightMapUpdater.getOutputHeightMapImage().getBytedecoOpenCVMat(), 1);
       rapidHeightMapUpdater.setModified(false);
       rapidHeightMapUpdater.setProcessing(false);
+   }
+
+   public Point2D sphericalProject(Point3D cellCenter, int INPUT_HEIGHT, int INPUT_WIDTH)
+   {
+      Point2D proj = new Point2D();
+
+      int count = 0;
+      double pitchUnit = Math.PI / (2 * INPUT_HEIGHT);
+      double yawUnit = 2 * Math.PI / (INPUT_WIDTH);
+
+      int pitchOffset = INPUT_HEIGHT/2;
+      int yawOffset = INPUT_WIDTH/2;
+
+      double x = cellCenter.getX();
+      double y = cellCenter.getY();
+      double z = cellCenter.getZ();
+
+      double radius = Math.sqrt(x * x + y * y);
+
+      double pitch = Math.atan2(z, radius);
+      int pitchCount = (pitchOffset) - (int) (pitch / pitchUnit);
+
+      double yaw = Math.atan2(-y, x);
+      int yawCount = (yawOffset) + (int) (yaw / yawUnit);
+
+      proj.setX(pitchCount);
+      proj.setY(yawCount);
+
+      //    printf("Projection: [%.2f,%.2f] (Yc:%d,Pc:%d, Z:%.2lf,R:%.2lf)\n", yaw, pitch, yawCount, pitchCount, z, radius);
+
+      return proj;
+   }
+
+   public void testProjection(Mat depth)
+   {
+      double radius = 4.0f;
+      double height = 2.0f;
+      double yawUnit = 2 * Math.PI / depth.cols();
+      double pitchUnit = Math.PI / (2 * depth.rows());
+
+      for(int i = 0; i<depth.cols(); i++)
+      {
+         Point3D point = new Point3D(radius * Math.cos(i*yawUnit), radius * Math.sin(i*yawUnit), -height);
+
+         Point2D projection = sphericalProject(point, depth.rows(), depth.cols());
+
+         LogTools.info("[" + i + "] Point : " + String.format("%.2f, %.2f, %.2f", point.getX(), point.getY(), point.getZ()) + " Projection : " + String.format("%d, %d", (int)projection.getX(), (int)projection.getY()));
+      }
+
+
    }
 
 

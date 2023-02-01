@@ -37,7 +37,7 @@ float4 transform4(float4 point, float4 r1, float4 r2, float4 r3, float4 t)
    return (float4)(dot(r1, point) + t.x, dot(r2, point) + t.y, dot(r3, point) + t.z, 0);
 }
 
-float3 compute_grid_cell_cell_center(int rIndex, int cIndex, global float* params)
+float3 compute_grid_cell_center(int rIndex, int cIndex, global float* params)
 {
    float3 cellCenter = (float3)(0, 0, 0);
    cellCenter.x = ((params[GRID_LENGTH] / 2) - rIndex) * params[CELL_SIZE_XY_METERS];
@@ -64,7 +64,7 @@ int2 spherical_projection(float3 cellCenter, global float* params)
     float radius = length(cellCenter.xy);
 
     float pitch = atan2(z, radius);
-    int pitchCount = (pitchOffset) + (int) (pitch / pitchUnit);
+    int pitchCount = (pitchOffset) - (int) (pitch / pitchUnit);
 
     float yaw = atan2(-y, x);
     int yawCount = (yawOffset) + (int) (yaw / yawUnit);
@@ -88,7 +88,7 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
     float3 centroid;
 
     float averageHeightZ = 0;
-    float3 cellCenter = compute_grid_cell_cell_center(rIndex, cIndex, params);
+    float3 cellCenter = compute_grid_cell_center(rIndex, cIndex, params);
     int2 projectedPoint = spherical_projection(cellCenter, params);
 
     int2 pos = (int2)(projectedPoint.x, projectedPoint.y);
