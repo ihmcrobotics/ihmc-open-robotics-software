@@ -37,7 +37,6 @@ public class GuidedSwapReference<T>
    private final T b;
    private T forLowPriorityThread;
    private T forHighPriorityThread;
-   private final Object swapSynchronizer = new Object();
    private final Consumer<T> accessOnLowPriorityThread;
    private final Consumer<T> accessOnHighPriorityThread;
 
@@ -81,7 +80,7 @@ public class GuidedSwapReference<T>
       // We're done, let's do the swap operation.
       // This will block and wait for the high priority thread to complete its access
       // operation if necessary.
-      synchronized (swapSynchronizer)
+      synchronized (this)
       {
          T wasHighPriorityThread = forHighPriorityThread;
          forHighPriorityThread = forLowPriorityThread;
@@ -93,15 +92,13 @@ public class GuidedSwapReference<T>
     * Call this from the higher priority of the two threads. This
     * calls the cooresponding Consumer given in the constructor.
     * This method will not block.
+    *
+    * High priority. Get in, get out.
+    * Since the other synchronized block is just over the swap operation,
+    * this will effectively not block.
     */
-   public void accessOnHighPriorityThread()
+   public synchronized void accessOnHighPriorityThread()
    {
-      // High priority. Get in, get out.
-      // Since the other synchronized block is just over the swap operation,
-      // this will effectively not block.
-      synchronized (swapSynchronizer)
-      {
-         accessOnHighPriorityThread.accept(forHighPriorityThread);
-      }
+      accessOnHighPriorityThread.accept(forHighPriorityThread);
    }
 }
