@@ -11,7 +11,9 @@ import imgui.internal.ImGui;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
@@ -95,9 +97,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          footstepBeingPlaced.setGizmoPose(pickPointInWorld.getX(),
                                           pickPointInWorld.getY(),
                                           pickPointInWorld.getZ(),
-                                          footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
-
-         footstepBeingPlaced.getBoundingSphere().getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
+                                          footstepBeingPlaced.getFootPose());
 
          // Adjust footstep yaw while placing with Ctrl + Mouse Scroll Up/Down
          double deltaYaw = 0.0;
@@ -115,24 +115,23 @@ public class RDXManualFootstepPlacement implements RenderableProvider
             }
             if (deltaYaw != 0.0)
             {
-               RigidBodyTransform latestFootstepTransform = footstepBeingPlaced.getFootTransformInWorld();
-               double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
+               FramePose3DReadOnly latestFootstepPose = footstepBeingPlaced.getFootPose();
+               double latestFootstepYaw = latestFootstepPose.getRotation().getYaw();
                tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
                RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
                LibGDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
                tempFramePose.set(rigidBodyTransform);
-               tempFramePose.getOrientation().set(new RotationMatrix(latestFootstepYaw + deltaYaw, 0.0, 0.0));
-               tempFramePose.get(footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
-               footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
+               tempFramePose.getOrientation().setToYawOrientation(latestFootstepYaw + deltaYaw);
+               footstepBeingPlaced.updatePose(tempFramePose);
             }
          }
 
-         RigidBodyTransform candidateStepTransform = new RigidBodyTransform();
-         candidateStepTransform.getTranslation().set(pickPointInWorld);
-         candidateStepTransform.getRotation().setToYawOrientation(getFootstepBeingPlacedOrLastFootstepPlaced().getYaw());
+         FramePose3D candidateStepPose = new FramePose3D();
+         candidateStepPose.getPosition().set(pickPointInWorld);
+         candidateStepPose.getRotation().setToYawOrientation(getFootstepBeingPlacedOrLastFootstepPlaced().getYaw());
 
          stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(),
-                                          candidateStepTransform,
+                                          candidateStepPose,
                                           currentFootStepSide,
                                           footstepPlan.getFootsteps().size());
 
@@ -234,7 +233,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void createNewFootStep(RobotSide footstepSide)
    {
       modeNewlyActivated = true;
-      RigidBodyTransform latestFootstepTransform = footstepPlan.getLastFootstepTransform(footstepSide.getOppositeSide());
+      RigidBodyTransformReadOnly latestFootstepTransform = footstepPlan.getLastFootstepTransform(footstepSide.getOppositeSide());
       double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
 
       footstepBeingPlaced = new RDXInteractableFootstep(baseUI, footstepSide, footstepIndex);
@@ -245,9 +244,8 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       LibGDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
       tempFramePose.set(rigidBodyTransform);
-      tempFramePose.getOrientation().set(new RotationMatrix(latestFootstepYaw, 0.0, 0.0));
-      tempFramePose.get(footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
-      footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
+      tempFramePose.getOrientation().setToYawOrientation(latestFootstepYaw);
+      footstepBeingPlaced.updatePose(tempFramePose);
    }
 
    public boolean pollIsModeNewlyActivated()

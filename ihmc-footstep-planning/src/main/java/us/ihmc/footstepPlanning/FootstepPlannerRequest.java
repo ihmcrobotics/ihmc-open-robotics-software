@@ -59,6 +59,11 @@ public class FootstepPlannerRequest
    private boolean planBodyPath;
 
    /**
+    * If true, the planner will plan steps. If false, it will only return the body path.
+    */
+   private boolean planFootsteps;
+
+   /**
     * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
     */
    private boolean performAStarSearch;
@@ -134,6 +139,7 @@ public class FootstepPlannerRequest
       abortIfGoalStepSnappingFails = false;
       abortIfBodyPathPlannerFails = false;
       planBodyPath = false;
+      planFootsteps = true;
       performAStarSearch = true;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
@@ -226,6 +232,11 @@ public class FootstepPlannerRequest
    public void setPlanBodyPath(boolean planBodyPath)
    {
       this.planBodyPath = planBodyPath;
+   }
+
+   public void setPlanFootsteps(boolean planFootsteps)
+   {
+      this.planFootsteps = planFootsteps;
    }
 
    public void setPerformAStarSearch(boolean performAStarSearch)
@@ -323,6 +334,11 @@ public class FootstepPlannerRequest
       return planBodyPath;
    }
 
+   public boolean getPlanFootsteps()
+   {
+      return planFootsteps;
+   }
+
    public boolean getPerformAStarSearch()
    {
       return performAStarSearch;
@@ -399,6 +415,7 @@ public class FootstepPlannerRequest
       setAbortIfGoalStepSnappingFails(requestPacket.getAbortIfGoalStepSnappingFails());
       setAbortIfBodyPathPlannerFails(requestPacket.getAbortIfBodyPathPlannerFails());
       setPlanBodyPath(requestPacket.getPlanBodyPath());
+      setPlanFootsteps(requestPacket.getPlanFootsteps());
       setPerformAStarSearch(requestPacket.getPerformAStarSearch());
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
       setGoalYawProximity(requestPacket.getGoalYawProximity());
@@ -436,6 +453,7 @@ public class FootstepPlannerRequest
       requestPacket.setAbortIfGoalStepSnappingFails(getAbortIfGoalStepSnappingFails());
       requestPacket.setAbortIfBodyPathPlannerFails(getAbortIfBodyPathPlannerFails());
       requestPacket.setPlanBodyPath(getPlanBodyPath());
+      requestPacket.setPlanFootsteps(getPlanFootsteps());
       requestPacket.setPerformAStarSearch(getPerformAStarSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
@@ -480,6 +498,7 @@ public class FootstepPlannerRequest
       this.abortIfBodyPathPlannerFails = other.abortIfBodyPathPlannerFails;
 
       this.planBodyPath = other.planBodyPath;
+      this.planFootsteps = other.planFootsteps;
       this.performAStarSearch = other.performAStarSearch;
       this.goalDistanceProximity = other.goalDistanceProximity;
       this.goalYawProximity = other.goalYawProximity;

@@ -11,11 +11,15 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -24,6 +28,7 @@ import java.util.List;
 
 public class RDXBodyPathPlanGraphic implements RenderableProvider
 {
+   private static final int waypointCapacity = 100;
    private static final double LINE_THICKNESS = 0.025;
    private final float startColorHue;
    private final float goalColorHue;
@@ -72,7 +77,6 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
       double totalPathLength = PathTools.computePosePathLength(bodyPath);
       double currentLength = 0.0;
 
-      // TODO: Draw orientation somehow
       for (int segmentIndex = 0; segmentIndex < bodyPath.size() - 1; segmentIndex++)
       {
          Point3DReadOnly lineStart = bodyPath.get(segmentIndex).getPosition();
@@ -82,6 +86,10 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
          currentLength += lineStart.distance(lineEnd);
          float lineEndHue = (float) EuclidCoreTools.interpolate(startColorHue, goalColorHue, currentLength / totalPathLength);
          meshBuilder.addLine(lineStart, lineEnd, LINE_THICKNESS, new Color().fromHsv(lineStartHue, 1.0f, 0.5f), new Color().fromHsv(lineEndHue, 1.0f, 1.0f));
+      }
+      for (int waypointIndex = 0; waypointIndex < bodyPath.size(); waypointIndex++)
+      {
+         createCoordinateFrame(bodyPath.get(waypointIndex), meshBuilder, 0.2);
       }
 
       buildMeshAndCreateModelInstance = () ->
@@ -101,6 +109,38 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
          lastModel = modelBuilder.end();
          modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
       };
+   }
+
+   private static void createCoordinateFrame(Pose3DReadOnly pose, RDXMultiColorMeshBuilder meshBuilder, double length)
+   {
+      double radius = 0.02 * length;
+      double coneHeight = 0.10 * length;
+      double coneRadius = 0.05 * length;
+
+      Point3D cylinderPoint = new Point3D();
+      AxisAngle xOrientation = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0);
+      AxisAngle yOrientation = new AxisAngle(1.0, 0.0, 0.0, -Math.PI / 2.0);
+      AxisAngle zOrientation = new AxisAngle();
+
+      Point3D xConePoint = new Point3D(length, 0.0, 0.0);
+      Point3D yConePoint = new Point3D(0.0, length, 0.0);
+      Point3D zConePoint = new Point3D(0.0, 0.0, length);
+
+
+      pose.transform(cylinderPoint);
+      pose.transform(xOrientation);
+      pose.transform(yOrientation);
+      pose.transform(zOrientation);
+      pose.transform(xConePoint);
+      pose.transform(yConePoint);
+      pose.transform(zConePoint);
+
+      meshBuilder.addCylinder(length, radius, cylinderPoint, xOrientation, Color.RED);
+      meshBuilder.addCone(coneHeight, coneRadius, xConePoint, xOrientation, Color.RED);
+      meshBuilder.addCylinder(length, radius, cylinderPoint, yOrientation, Color.GREEN);
+      meshBuilder.addCone(coneHeight, coneRadius, yConePoint, yOrientation, Color.GREEN);
+      meshBuilder.addCylinder(length, radius, cylinderPoint, zOrientation, Color.BLUE);
+      meshBuilder.addCone(coneHeight, coneRadius, zConePoint, zOrientation, Color.BLUE);
    }
 
    @Override
