@@ -20,7 +20,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.logging.HDF5ImageBrowser;
-import us.ihmc.rdx.logging.HDF5ImageLogging;
+import us.ihmc.rdx.logging.HDF5ImageLoggingUI;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
@@ -58,7 +58,7 @@ public class BlackflyCalibrationSuite
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXBlackflyReader blackflyReader;
    private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
-   private HDF5ImageLogging hdf5ImageLogging;
+   private HDF5ImageLoggingUI hdf5ImageLoggingUI;
    private HDF5ImageBrowser hdf5ImageBrowser;
    private ImGuiOpenCVSwapVideoPanel undistortedFisheyePanel;
    private RDXCVImagePanel calibrationSourceImagesPanel;
@@ -194,8 +194,8 @@ public class BlackflyCalibrationSuite
                         blackflyReader.readBlackflyImage();
                         calibrationPatternDetectionUI.copyRGBImage(blackflyReader.getRGBImage());
 
-                        if (hdf5ImageLogging != null)
-                           hdf5ImageLogging.copyRGBImage(blackflyReader.getRGBImage());
+                        if (hdf5ImageLoggingUI != null)
+                           hdf5ImageLoggingUI.copyRGBImage(blackflyReader.getRGBImage());
                      }
                   }, "CameraRead");
                   ThreadTools.startAsDaemon(() ->
@@ -262,12 +262,12 @@ public class BlackflyCalibrationSuite
 
          private void blackflyReaderUIThreadPreprocessor(ImGuiOpenCVSwapVideoPanelData data)
          {
-            if (hdf5ImageLogging == null)
+            if (hdf5ImageLoggingUI == null)
             {
-               hdf5ImageLogging = new HDF5ImageLogging(nativesLoadedActivator,
-                                                       blackflyReader.getImageWidth(),
-                                                       blackflyReader.getImageHeight());
-               baseUI.getImGuiPanelManager().addPanel(hdf5ImageLogging.getPanel());
+               hdf5ImageLoggingUI = new HDF5ImageLoggingUI(nativesLoadedActivator,
+                                                           blackflyReader.getImageWidth(),
+                                                           blackflyReader.getImageHeight());
+               baseUI.getImGuiPanelManager().addPanel(hdf5ImageLoggingUI.getPanel());
                baseUI.getLayoutManager().reloadLayout();
             }
 
@@ -331,7 +331,7 @@ public class BlackflyCalibrationSuite
             running = false;
             blackflyReader.dispose();
             hdf5ImageBrowser.destroy();
-            hdf5ImageLogging.destroy();
+            hdf5ImageLoggingUI.destroy();
             baseUI.dispose();
          }
       });
