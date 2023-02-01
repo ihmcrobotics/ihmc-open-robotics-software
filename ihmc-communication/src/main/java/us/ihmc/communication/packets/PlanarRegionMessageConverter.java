@@ -110,7 +110,6 @@ public class PlanarRegionMessageConverter
 
    public static PlanarRegionsListMessage convertToPlanarRegionsListMessage(PlanarRegionsList planarRegionsList)
    {
-
       PlanarRegionsListMessage message = new PlanarRegionsListMessage();
 
       Object<Point3D> vertexBuffer = message.getVertexBuffer();
