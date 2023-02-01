@@ -113,6 +113,11 @@ public class RDXObjectDetector
       return enabled.get();
    }
 
+   public void setEnabled(boolean enable)
+   {
+      this.enabled.set(enable);
+   }
+
    public boolean hasDetectedObject()
    {
       return objectDetector.hasDetectedObject();
