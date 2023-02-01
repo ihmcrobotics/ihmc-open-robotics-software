@@ -236,7 +236,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       RigidBodyTransformReadOnly latestFootstepTransform = footstepPlan.getLastFootstepTransform(footstepSide.getOppositeSide());
       double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
 
-      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, footstepSide, footstepIndex);
+      footstepBeingPlaced = new RDXInteractableFootstep(baseUI, footstepSide, footstepIndex, null);
       currentFootStepSide = footstepSide;
 
       // Set the yaw of the new footstep to the yaw of the previous footstep
