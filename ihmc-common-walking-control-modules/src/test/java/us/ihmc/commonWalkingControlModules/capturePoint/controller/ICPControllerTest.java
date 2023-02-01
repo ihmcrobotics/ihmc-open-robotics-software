@@ -87,8 +87,7 @@ public class ICPControllerTest
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -153,8 +152,7 @@ public class ICPControllerTest
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -221,8 +219,7 @@ public class ICPControllerTest
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -293,13 +290,12 @@ public class ICPControllerTest
       };
 
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
-         SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(10.0, 5.0, stanceWidth);
+      SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(10.0, 5.0, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                   bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -384,8 +380,7 @@ public class ICPControllerTest
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -463,12 +458,16 @@ public class ICPControllerTest
          soleFrames.put(robotSide, soleFrame);
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
-         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
+         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix
+               + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
          contactStates.put(robotSide, yoPlaneContactState);
       }
 
-      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
+      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame",
+                                                            worldFrame,
+                                                            soleZUpFrames.get(RobotSide.LEFT),
+                                                            soleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, null);
@@ -506,6 +505,7 @@ public class ICPControllerTest
 
          return gains;
       }
+
       @Override
       public double getDynamicsObjectiveWeight()
       {
