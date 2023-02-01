@@ -28,8 +28,8 @@ public class RDXBlackflyReader
    private final ImGuiPanel panel = new ImGuiPanel("Blackfly Reader", this::renderImGuiWidgets);
    private final Activator nativesLoadedActivator;
    private final String serialNumber;
-   private volatile long imageWidth = -1;
-   private volatile long imageHeight = -1;
+   private volatile int imageWidth = -1;
+   private volatile int imageHeight = -1;
    private SpinnakerSystemManager spinnakerSystemManager;
    private SpinnakerBlackfly blackfly;
    private spinImage spinImage;
@@ -97,8 +97,8 @@ public class RDXBlackflyReader
             imageWidth = blackfly.getWidth(spinImage);
             imageHeight = blackfly.getHeight(spinImage);
             spinImageDataPointer = new BytePointer(imageWidth * imageHeight * 3); // RGB8
-            blackflySourceMat = new Mat((int) imageHeight, (int) imageWidth, opencv_core.CV_8UC3);
-            swapCVPanel.allocateInitialTextures((int) imageWidth, (int) imageHeight);
+            blackflySourceMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+            swapCVPanel.allocateInitialTextures(imageWidth, imageHeight);
          }
 
          Spinnaker_C.spinImageGetData(spinImage, spinImageDataPointer);
@@ -168,12 +168,12 @@ public class RDXBlackflyReader
       return swapCVPanel;
    }
 
-   public long getImageHeight()
+   public int getImageHeight()
    {
       return imageHeight;
    }
 
-   public long getImageWidth()
+   public int getImageWidth()
    {
       return imageWidth;
    }

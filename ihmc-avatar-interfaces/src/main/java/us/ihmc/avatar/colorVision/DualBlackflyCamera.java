@@ -48,8 +48,8 @@ public class DualBlackflyCamera
    private RealtimeROS2Node realtimeROS2Node;
    private IHMCRealtimeROS2Publisher<BigVideoPacket> ros2VideoPublisher;
    private long numberOfBytesInFrame;
-   private long imageWidth;
-   private long imageHeight;
+   private int imageWidth;
+   private int imageHeight;
    private final FrequencyCalculator imagePublishRateCalculator = new FrequencyCalculator();
    private BytedecoImage blackflySourceImage;
    private Mat cameraMatrix;

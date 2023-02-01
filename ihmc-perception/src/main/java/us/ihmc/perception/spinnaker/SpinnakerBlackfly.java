@@ -97,18 +97,18 @@ public class SpinnakerBlackfly
       return !incomplete;
    }
 
-   public long getHeight(spinImage spinImage)
+   public int getHeight(spinImage spinImage)
    {
       SizeTPointer heightPointer = new SizeTPointer(1);
       assertNoError(Spinnaker_C.spinImageGetHeight(spinImage, heightPointer), "Getting image height");
-      return heightPointer.get();
+      return (int) heightPointer.get();
    }
 
-   public long getWidth(spinImage spinImage)
+   public int getWidth(spinImage spinImage)
    {
       SizeTPointer widthPointer = new SizeTPointer(1);
       assertNoError(Spinnaker_C.spinImageGetWidth(spinImage, widthPointer), "Getting image width");
-      return widthPointer.get();
+      return (int) widthPointer.get();
    }
 
    /**
