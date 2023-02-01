@@ -136,8 +136,6 @@ public class RDXCameraCalibrationDemo
                   videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, imageHeight);
                   videoCapture.set(opencv_videoio.CAP_PROP_FOURCC, VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G'));
                   videoCapture.set(opencv_videoio.CAP_PROP_FPS, requestedFPS);
-                  // videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1280.0);
-                  // videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 720.0);
 
                   imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
                   imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
