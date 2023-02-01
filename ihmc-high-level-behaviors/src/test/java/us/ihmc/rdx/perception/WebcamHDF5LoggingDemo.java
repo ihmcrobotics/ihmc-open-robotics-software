@@ -3,7 +3,7 @@ package us.ihmc.rdx.perception;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.logging.HDF5ImageLogging;
+import us.ihmc.rdx.logging.HDF5ImageLoggingUI;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.Activator;
 
@@ -17,7 +17,7 @@ public class WebcamHDF5LoggingDemo
                                                   "ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources",
                                                   "Webcam HDF5 Logging Demo");
-   private HDF5ImageLogging hdf5ImageLogging;
+   private HDF5ImageLoggingUI hdf5ImageLoggingUI;
    private RDXOpenCVWebcamReader webcamReader;
    private volatile boolean running = true;
 
@@ -44,8 +44,8 @@ public class WebcamHDF5LoggingDemo
                   webcamReader.create();
                   baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
 
-                  hdf5ImageLogging = new HDF5ImageLogging(nativesLoadedActivator, webcamReader.getImageWidth(), webcamReader.getImageHeight());
-                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageLogging.getPanel());
+                  hdf5ImageLoggingUI = new HDF5ImageLoggingUI(nativesLoadedActivator, webcamReader.getImageWidth(), webcamReader.getImageHeight());
+                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageLoggingUI.getPanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
@@ -53,7 +53,7 @@ public class WebcamHDF5LoggingDemo
                      while (running)
                      {
                         webcamReader.readWebcamImage();
-                        hdf5ImageLogging.copyBGRImage(webcamReader.getBGRImage());
+                        hdf5ImageLoggingUI.copyBGRImage(webcamReader.getBGRImage());
                      }
                   }, "CameraRead");
                }
@@ -70,7 +70,7 @@ public class WebcamHDF5LoggingDemo
          {
             running = false;
             webcamReader.dispose();
-            hdf5ImageLogging.destroy();
+            hdf5ImageLoggingUI.destroy();
             baseUI.dispose();
          }
       });
