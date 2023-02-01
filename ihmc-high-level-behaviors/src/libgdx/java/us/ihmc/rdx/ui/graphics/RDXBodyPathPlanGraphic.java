@@ -45,6 +45,7 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
    private final ModelBuilder modelBuilder = new ModelBuilder();
    private ModelInstance modelInstance;
    private Model lastModel;
+   private Texture paletteTexture = null;
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
@@ -98,7 +99,8 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
          Mesh mesh = meshBuilder.generateMesh();
          MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
          com.badlogic.gdx.graphics.g3d.Material material = new Material();
-         Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+         if (paletteTexture == null)
+            paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
          modelBuilder.part(meshPart, material);
