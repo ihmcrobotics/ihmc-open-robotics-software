@@ -175,38 +175,49 @@ public class WalkingMessageHandler
             clearFootTrajectory();
             break;
          case QUEUE:
-            if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
+            // TODO review the use of this. 
+            boolean checkForInconsistencies = !upcomingFootsteps.isEmpty() || currentNumberOfFootsteps.getIntegerValue() > 0;
+            if (checkForInconsistencies)
             {
-               LogTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with execution error!");
-            }
-            if (offsettingHeightPlanWithFootstepError.getValue() != command.isOffsetFootstepsHeightWithExecutionError())
-            {
-               LogTools.warn("Recieved a queued message that has a different setting for offsetting height of footsteps with execution error!");
-            }
-            if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
-            {
-               if (command.getExecutionTiming() == ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS)
+               if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
                {
-                  LogTools.warn("Can not command a queued message with absolute timings if all footsteps were already exectuted. You gotta send faster!");
+                  LogTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with execution error!");
+               }
+               if (offsettingHeightPlanWithFootstepError.getValue() != command.isOffsetFootstepsHeightWithExecutionError())
+               {
+                  LogTools.warn("Recieved a queued message that has a different setting for offsetting height of footsteps with execution error!");
+               }
+               if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
+               {
+                  if (command.getExecutionTiming() == ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS)
+                  {
+                     LogTools.warn("Can not command a queued message with absolute timings if all footsteps were already exectuted. You gotta send faster!");
+                     return;
+                  }
+
+                  if (command.getPreviousCommandId() == lastCommandID.getValue())
+                  {
+                     // If we queued a command and the previous already finished, just continue as if everything is normal
+                     break;
+                  }
+                  else if (upcomingFootsteps.isEmpty())
+                  {
+                     // No footstep, let's do it.
+                     break;
+                  }
+                  else
+                  {
+                     LogTools.warn("Queued footstep previous command id {} != controller's previous command id {}." + " Send an override message instead. Command ignored.", command.getPreviousCommandId(), lastCommandID.getValue());
+                  }
                   return;
                }
-
-               if (command.getPreviousCommandId() == lastCommandID.getValue())
-               {
-                  // If we queued a command and the previous already finished, just continue as if everything is normal
-                  break;
-               }
-               else if (upcomingFootsteps.isEmpty())
-               {
-                  // No footstep, let's do it.
-                  break;
-               }
-               else
-               {
-                  LogTools.warn("Queued footstep previous command id {} != controller's previous command id {}."
-                                + " Send an override message instead. Command ignored.", command.getPreviousCommandId(), lastCommandID.getValue());
-               }
-               return;
+            }
+            else
+            {
+               // We don't have any steps in the queue, so it's effectively the same thing as overriding.
+               offsettingXYPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
+               offsettingHeightPlanWithFootstepError.set(command.isOffsetFootstepsHeightWithExecutionError());
+               planOffsetInWorld.setToZero();
             }
             break;
          default:
