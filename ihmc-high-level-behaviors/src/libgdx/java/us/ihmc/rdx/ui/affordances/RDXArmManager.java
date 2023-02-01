@@ -89,7 +89,7 @@ public class RDXArmManager
    {
       boolean desiredHandsChanged = false;
 
-      handWrenchCalculator.update();
+      handWrenchCalculator.compute();
       for (RobotSide side : interactableHands.sides())
       {
          armManagers.get(side).update(interactableHands.get(side), desiredRobot);
