@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -32,6 +33,7 @@ import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.Timer;
 
@@ -60,13 +62,15 @@ public class RDXInteractableFootstep
 
    private final List<ModelInstance> trajectoryModel = new ArrayList<>();
 
+   private final SideDependentList<ConvexPolygon2D> defaultPolygons;
    private final AtomicReference<PlannedFootstep> plannedFootstepInput = new AtomicReference<>(null);
    private final PlannedFootstep plannedFootstepInternal;
 
    private boolean wasPoseUpdated = false;
 
-   public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index)
+   public RDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index, SideDependentList<ConvexPolygon2D> defaultPolygons)
    {
+      this.defaultPolygons = defaultPolygons;
       plannedFootstepInternal = new PlannedFootstep(footstepSide);
 
       if (footstepSide.equals(RobotSide.LEFT))
@@ -93,9 +97,10 @@ public class RDXInteractableFootstep
       }
    }
 
-   public RDXInteractableFootstep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex)
+   public RDXInteractableFootstep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex, SideDependentList<ConvexPolygon2D> defaultPolygons)
    {
       plannedFootstepInternal = new PlannedFootstep(plannedFootstep);
+      this.defaultPolygons = defaultPolygons;
       updateFromPlannedStep(baseUI,plannedFootstep,footstepIndex);
    }
 
@@ -104,18 +109,25 @@ public class RDXInteractableFootstep
       return plannedFootstepInternal;
    }
 
-   public void updateFromPlannedStep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex )
+   public void updateFromPlannedStep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex)
    {
       plannedFootstepInput.set(null);
       plannedFootstepInternal.set(plannedFootstep);
 
-      if (plannedFootstepInternal.hasFoothold())
+      boolean setCustomFoothold = plannedFootstepInternal.hasFoothold();
+      if (setCustomFoothold)
+      {
+         if (defaultPolygons == null || plannedFootstep.getFoothold().epsilonEquals(defaultPolygons.get(plannedFootstep.getRobotSide()), 1e-3))
+            setCustomFoothold = false;
+      }
+
+      if (setCustomFoothold)
       {
          Color regionColor = RDXFootstepPlanGraphic.footstepColors.get(plannedFootstep.getRobotSide());
          List<Point2DReadOnly> points = new ArrayList<>();
          for (int i = 0; i < plannedFootstep.getFoothold().getNumberOfVertices(); i++)
             points.add(plannedFootstep.getFoothold().getVertex(i));
-         footstepModelInstance = RDXModelBuilder.createLinedPolygon(plannedFootstep.getFootstepPose(), points, 0.02, regionColor, true);
+         footstepModelInstance = RDXModelBuilder.createLinedPolygon(new RigidBodyTransform(), points, 0.05, regionColor, true);
       }
       else
       {
