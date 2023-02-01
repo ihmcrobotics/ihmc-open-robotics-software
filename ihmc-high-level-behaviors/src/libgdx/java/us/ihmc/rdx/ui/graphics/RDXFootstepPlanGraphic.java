@@ -1,16 +1,14 @@
 package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.model.MeshPart;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.lwjgl.opengl.GL41;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,12 +16,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.log.LogTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -39,7 +37,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
    // visualization options
    private final Function<Integer, Color> colorFunction = new RDXIDMappedColorFunction();
-   private final SideDependentList<Color> footstepColors = new SideDependentList<>();
+   public static final SideDependentList<Color> footstepColors = new SideDependentList<>();
    {
       footstepColors.set(RobotSide.LEFT, new Color(RDXFootstepGraphic.LEFT_FOOT_RED_COLOR));
       footstepColors.set(RobotSide.RIGHT, new Color(RDXFootstepGraphic.RIGHT_FOOT_GREEN_COLOR));
@@ -199,20 +197,10 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
             }
          }
 
-         modelBuilder.begin();
-         Mesh mesh = meshBuilder.generateMesh();
-         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
-         Material material = new Material();
-         Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-         material.set(TextureAttribute.createDiffuse(paletteTexture));
-         float shade = 0.6f;
-         material.set(ColorAttribute.createDiffuse(shade, shade, shade, 1.0f));
-         modelBuilder.part(meshPart, material);
-
          if (lastModel != null)
             lastModel.dispose();
 
-         lastModel = modelBuilder.end();
+         lastModel = RDXModelBuilder.buildModelFromMesh(modelBuilder, meshBuilder);
          modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
       };
    }

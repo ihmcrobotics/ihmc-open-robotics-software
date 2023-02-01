@@ -42,6 +42,9 @@ public class OpenCLFloatBuffer
 
    public void resize(int numberOfFloats,  OpenCLManager openCLManager, FloatBuffer backingDirectFloatBuffer)
    {
+      if (numberOfFloats == this.numberOfFloats)
+         return;
+
       this.numberOfFloats = numberOfFloats;
 
       boolean openCLObjectCreated = openCLBufferObject != null;

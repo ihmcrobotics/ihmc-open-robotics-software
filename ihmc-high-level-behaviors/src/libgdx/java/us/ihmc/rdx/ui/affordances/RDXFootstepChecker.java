@@ -5,10 +5,12 @@ import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseHeuristicChecker;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -31,25 +33,29 @@ public class RDXFootstepChecker
    private final ROS2SyncedRobotModel syncedRobot;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
-   private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepSnapAndWiggler snapper;
    private final FootstepPoseHeuristicChecker stepChecker;
    private BipedalFootstepPlannerNodeRejectionReason reason = null;
    private final ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
 
    // TODO: Swap stance and swing if candidate step for the very first step of the footsteparraylist is going to be on different side compared to swing's side.
-   private RigidBodyTransform stanceStepTransform;
+   private RigidBodyTransformReadOnly stanceStepPose;
    private RobotSide stanceSide;
-   private RigidBodyTransform swingStepTransform;
+   private RigidBodyTransformReadOnly swingStepPose;
    private RobotSide swingSide;
 
    private String text = null;
    private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;
 
-   public RDXFootstepChecker(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersReadOnly footstepPlannerParameters)
+   public RDXFootstepChecker(RDXBaseUI baseUI,
+                             ROS2SyncedRobotModel syncedRobot,
+                             SideDependentList<ConvexPolygon2D> footPolygons,
+                             FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
+      this.footPolygons = footPolygons;
       primary3DPanel = baseUI.getPrimary3DPanel();
       primary3DPanel.addImGuiOverlayAddition(this::renderTooltips);
       this.footstepPlannerParameters = footstepPlannerParameters;
@@ -60,9 +66,9 @@ public class RDXFootstepChecker
 
    public void setInitialFeet()
    {
-      swingStepTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
+      swingStepPose = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToRoot();
       swingSide = RobotSide.RIGHT;
-      stanceStepTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
+      stanceStepPose = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToRoot();
       stanceSide = RobotSide.LEFT;
    }
 
@@ -105,13 +111,13 @@ public class RDXFootstepChecker
       // iterate through the list ( + current initial stance and swing) and check validity for all.
       for (int i = 0; i < stepList.size(); ++i)
       {
-         checkValidSingleStep(stepList, stepList.get(i).getFootTransformInWorld(), stepList.get(i).getFootstepSide(), i);
+         checkValidSingleStep(stepList, stepList.get(i).getFootPose(), stepList.get(i).getFootstepSide(), i);
       }
    }
 
    // Check validity of 1 step
    public void checkValidSingleStep(RecyclingArrayList<RDXInteractableFootstep> stepList,
-                                    RigidBodyTransform candidateStepTransform,
+                                    FramePose3DReadOnly candidateStepPose,
                                     RobotSide candidateStepSide,
                                     int indexOfFootBeingChecked /* list.size() if not placed yet*/)
    {
@@ -122,26 +128,26 @@ public class RDXFootstepChecker
          if (candidateStepSide != swingSide)
          {
             swapSides();
-            reason = stepChecker.checkValidity(candidateStepSide, candidateStepTransform, swingStepTransform, stanceStepTransform);
+            reason = stepChecker.checkValidity(candidateStepSide, candidateStepPose, swingStepPose, stanceStepPose);
          }
          else
          {
-            reason = stepChecker.checkValidity(candidateStepSide, candidateStepTransform, stanceStepTransform, swingStepTransform);
+            reason = stepChecker.checkValidity(candidateStepSide, candidateStepPose, stanceStepPose, swingStepPose);
          }
       }
       // 0th element will be stance, previous stance will be swing
       else if (indexOfFootBeingChecked == 1)
       {
          RDXInteractableFootstep tempStance = stepList.get(0);
-         RigidBodyTransform tempStanceTransform = tempStance.getFootTransformInWorld();
-         reason = stepChecker.checkValidity(candidateStepSide, candidateStepTransform, tempStanceTransform, stanceStepTransform);
+         RigidBodyTransformReadOnly tempStanceTransform = tempStance.getFootPose();
+         reason = stepChecker.checkValidity(candidateStepSide, candidateStepPose, tempStanceTransform, stanceStepPose);
       }
       else
       {
          reason = stepChecker.checkValidity(candidateStepSide,
-                                            candidateStepTransform,
-                                            stepList.get(indexOfFootBeingChecked - 1).getFootTransformInWorld(),
-                                            stepList.get(indexOfFootBeingChecked - 2).getFootTransformInWorld());
+                                            candidateStepPose,
+                                            stepList.get(indexOfFootBeingChecked - 1).getFootPose(),
+                                            stepList.get(indexOfFootBeingChecked - 2).getFootPose());
       }
       reasons.add(reason);
    }
@@ -190,14 +196,14 @@ public class RDXFootstepChecker
       return primary3DPanel;
    }
 
-   public RigidBodyTransform getStanceStepTransform()
+   public RigidBodyTransformReadOnly getStanceStepPose()
    {
-      return stanceStepTransform;
+      return stanceStepPose;
    }
 
-   public void setStanceStepTransform(RigidBodyTransform stanceStepTransform)
+   public void setPreviousStepPose(RigidBodyTransformReadOnly previousStepTransform)
    {
-      this.stanceStepTransform = stanceStepTransform;
+      this.stanceStepPose = previousStepTransform;
    }
 
    public RobotSide getStanceSide()
@@ -210,14 +216,14 @@ public class RDXFootstepChecker
       this.stanceSide = stanceSide;
    }
 
-   public RigidBodyTransform getSwingStepTransform()
+   public RigidBodyTransformReadOnly getSwingStepPose()
    {
-      return swingStepTransform;
+      return swingStepPose;
    }
 
-   public void setSwingStepTransform(RigidBodyTransform swingStepTransform)
+   public void setSwingStepPose(RigidBodyTransformReadOnly swingStepTransform)
    {
-      this.swingStepTransform = swingStepTransform;
+      this.swingStepPose = swingStepTransform;
    }
 
    public RobotSide getSwingSide()

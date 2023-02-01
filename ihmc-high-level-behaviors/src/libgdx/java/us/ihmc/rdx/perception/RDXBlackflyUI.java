@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import imgui.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
+import org.bytedeco.spinnaker.Spinnaker_C.spinImageProcessor;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -132,7 +133,10 @@ public class RDXBlackflyUI
 
             spinImage spinImage = new spinImage();
             Spinnaker_C.spinImageCreateEmpty(spinImage);
-            Spinnaker_C.spinImageConvert(currentUnprocessedImage.get(), Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGBa8, spinImage);
+
+            spinImageProcessor imageProcessor = new spinImageProcessor();
+            Spinnaker_C.spinImageProcessorCreate(imageProcessor);
+            Spinnaker_C.spinImageProcessorConvert(imageProcessor, currentUnprocessedImage.get(), spinImage, Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGBa8);
 
             spinImage oldImage = currentImage;
 
