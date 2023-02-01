@@ -124,10 +124,12 @@ public class RDXInteractableFootstep
       if (setCustomFoothold)
       {
          Color regionColor = RDXFootstepPlanGraphic.footstepColors.get(plannedFootstep.getRobotSide());
-         List<Point2DReadOnly> points = new ArrayList<>();
+         List<Point3DReadOnly> points = new ArrayList<>();
          for (int i = 0; i < plannedFootstep.getFoothold().getNumberOfVertices(); i++)
-            points.add(plannedFootstep.getFoothold().getVertex(i));
-         footstepModelInstance = RDXModelBuilder.createLinedPolygon(new RigidBodyTransform(), points, 0.05, regionColor, true);
+         {
+            points.add(new Point3D(plannedFootstep.getFoothold().getVertex(i)));
+         }
+         footstepModelInstance = RDXModelBuilder.createLinedPolygon(points, 0.05, regionColor, true);
       }
       else
       {
