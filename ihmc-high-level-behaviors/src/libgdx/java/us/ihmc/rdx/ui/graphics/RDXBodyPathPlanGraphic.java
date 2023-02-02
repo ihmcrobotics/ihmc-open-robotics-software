@@ -102,7 +102,7 @@ public class RDXBodyPathPlanGraphic implements RenderableProvider
          if (paletteTexture == null)
             paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
-         material.set(ColorAttribute.createDiffuse(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
+         material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
          modelBuilder.part(meshPart, material);
 
          if (lastModel != null)
