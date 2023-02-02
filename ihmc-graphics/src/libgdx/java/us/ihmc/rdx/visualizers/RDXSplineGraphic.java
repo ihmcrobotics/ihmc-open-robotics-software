@@ -20,12 +20,12 @@ public class RDXSplineGraphic implements RenderableProvider
    private static final float sphereRadius = 0.02f;
    private static final float lineWidth = 0.01f;
 
-   private RDXLineMeshModel lineModel = new RDXLineMeshModel(lineWidth);
+   private final RDXLineMeshModel lineModel = new RDXLineMeshModel(lineWidth);
    private final ArrayList<Point3D> linePoints = new ArrayList<>();
    private ModelInstance sphereStartPoint;
    private ModelInstance sphereEndPoint;
    private boolean cleared = true;
-   private RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public void createStart(Point3D point, Color color)
    {
