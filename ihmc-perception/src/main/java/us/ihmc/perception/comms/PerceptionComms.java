@@ -1,9 +1,6 @@
 package us.ihmc.perception.comms;
 
-import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
-import us.ihmc.ros2.ROS2Topic;
 
 public class PerceptionComms
 {
