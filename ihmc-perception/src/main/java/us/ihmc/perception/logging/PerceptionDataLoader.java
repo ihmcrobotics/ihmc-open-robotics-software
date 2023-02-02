@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
@@ -65,21 +66,21 @@ public class PerceptionDataLoader
    public void loadPoint3DList(String namespace, ArrayList<Point3D> points)
    {
       executorService.submit(() ->
-                             {
-                                int count = (int) hdf5Manager.getCount(namespace);
-                                for (int index = 0; index < count; index++)
-                                {
-                                   float[] pointFloatArray = new float[3 * HDF5Manager.MAX_BUFFER_SIZE];
-                                   loadFloatArray(namespace, index, pointFloatArray);
+      {
+         int count = (int) hdf5Manager.getCount(namespace);
+         for (int index = 0; index < count; index++)
+         {
+            float[] pointFloatArray = new float[3 * HDF5Manager.MAX_BUFFER_SIZE];
+            loadFloatArray(namespace, index, pointFloatArray);
 
-                                   for (int i = 0; i < pointFloatArray.length / 3; i++)
-                                   {
-                                      points.add(new Point3D(pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]));
-                                   }
-                                }
+            for (int i = 0; i < pointFloatArray.length / 3; i++)
+            {
+               points.add(new Point3D(pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]));
+            }
+         }
 
-                                LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
-                             });
+         LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
+      });
    }
 
    public void loadQuaternionList(String namespace, ArrayList<Quaternion> quaternions)
@@ -148,8 +149,7 @@ public class PerceptionDataLoader
 
    public static void main(String[] args)
    {
-      String defaultLogDirectory =
-            System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
+      String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
       String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
       String logFileName = "20230117_161540_PerceptionLog.hdf5";
 
