@@ -117,16 +117,16 @@ public class ProMPAssistant
                         List<String> name = new ArrayList<>();
                         List<String> geometry = new ArrayList<>();
                         jsonBodyPartObject.keySet().forEach(bodyPartProperty ->
-                                                            {
-                                                               switch (bodyPartProperty.toString())
-                                                               {
-                                                                  case "name" -> name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
-                                                                  case "geometry" -> geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
-                                                                  default ->
-                                                                  {
-                                                                  }
-                                                               }
-                                                            });
+                        {
+                           switch (bodyPartProperty.toString())
+                           {
+                              case "name" -> name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
+                              case "geometry" -> geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
+                              default ->
+                              {
+                              }
+                           }
+                        });
                         for (int i = 0; i < name.size(); i++)
                            bodyPartsGeometry.put(name.get(i), geometry.get(i));
                      }

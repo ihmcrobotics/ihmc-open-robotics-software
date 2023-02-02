@@ -3,21 +3,26 @@ package us.ihmc.perception.objects;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
 
+import java.util.List;
+
 import static org.junit.Assert.assertTrue;
 
-public class ArUcoObjectInfoTest
+public class ObjectInfoTest
 {
    @Test
    public void infoArUcoObjectTest()
    {
-      ObjectInfo arucoInfo = new ObjectInfo();
-      String name = arucoInfo.getObjectName(0);
+      ObjectInfo objectInfo = new ObjectInfo();
+      String name = objectInfo.getObjectName(0);
       System.out.println("Name: " + name);
       assertTrue(!name.isEmpty());
-      double markerSize = arucoInfo.getMarkerSize(0);
+      List<Integer> markerIds = objectInfo.getMarkersId();
+      System.out.println("Markers: " + markerIds);
+      assertTrue(markerIds.size()>0);
+      double markerSize = objectInfo.getMarkerSize(0);
       System.out.println("Size: " + markerSize);
       assertTrue(markerSize>0.0);
-      Point3D translation = arucoInfo.getObjectTranslation(0);
+      Point3D translation = objectInfo.getMarkerTranslation(0);
       System.out.println("Translation: " + translation);
       assertTrue(translation!=null);
    }

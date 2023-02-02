@@ -1,27 +1,34 @@
 {
-  "objectsWithMarker":[
-    {
-      "markerId": 0,
-      "markerSize": 0.2032,
-      "objectName": "PushDoor",
-      "translationToMarker": [0.05, -0.088, 0.2414],
-      "yawPitchRollToMarker": [0.0, 0.0, 0.0]
-    },
-    {
-      "markerId": 1,
-      "markerSize": 0.2032,
-      "objectName": "PullDoor",
-      "translationToMarker": [0.05, 0.088, 0.2414],
-      "yawPitchRollToMarker": [0.0, 0.0, 0.0]
-    }
-  ],
   "objects":[
     {
-      "markerId": 0,
-      "markerSize": 0.2032,
-      "objectName": "PushDoor",
-      "translationToMarker": [0.05, -0.088, 0.2414],
-      "yawPitchRollToMarker": [0.0, 0.0, 0.0]
+      "name": "PushDoor",
+      "properties": [
+        {
+          "markerId": 0,
+          "markerSize": 0.2032,
+          "translationToMarker": [0.05, -0.088, 0.2414],
+          "yawPitchRollToMarker": [0.0, 0.0, 0.0],
+          "virtualBodyFileName": "environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj",
+          "virtualAppendixFileName": "environmentObjects/door/doorPanel/DoorPanel.g3dj",
+          "translationBodyToAppendix": [0.05, -0.088, 0.2414],
+          "yawPitchRollBodyToAppendix": [0.0, 0.0, 0.0]
+        }
+      ]
+    },
+    {
+      "name": "PullDoor",
+      "properties": [
+        {
+          "markerId": 1,
+          "markerSize": 0.2032,
+          "translationToMarker": [0.05, 0.088, 0.2414],
+          "yawPitchRollToMarker": [0.0, 0.0, 0.0],
+          "virtualBodyFileName": "environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj",
+          "virtualAppendixFileName": "environmentObjects/door/doorPanel/DoorPanel.g3dj",
+          "translationBodyToAppendix": [0.05, -0.088, 0.2414],
+          "yawPitchRollBodyToAppendix": [0.0, 0.0, 0.0]
+        }
+      ]
     }
   ]
 }
