@@ -246,12 +246,11 @@ public class WrenchMatrixCalculator
       inputToPack.reshape(2);
       inputToPack.setConstraintType(command.getConstraintType());
 
-      copObjectiveCalculator.computeTaskJacobian(fullWrenchJacobian,
-                                                 desiredCoP,
-                                                 rhoSize,
-                                                 inputToPack.getTaskJacobian());
-
-      inputToPack.getTaskObjective().zero();
+      copObjectiveCalculator.computeTask(fullWrenchJacobian,
+                                         desiredCoP,
+                                         rhoSize,
+                                         inputToPack.getTaskJacobian(),
+                                         inputToPack.getTaskObjective());
 
       inputToPack.getTaskWeightMatrix().zero();
       if (command.getConstraintType() == ConstraintType.OBJECTIVE)
