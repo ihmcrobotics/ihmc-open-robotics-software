@@ -609,18 +609,7 @@ public class PlanarRegionSLAMTools
       translationToFutureRegion.sub(futureOrigin, mapOrigin);
 
       RigidBodyTransform transform = new RigidBodyTransform(rotationToFutureRegion, translationToFutureRegion);
-      transform.setUnsafe(transform.getM00(),
-                          transform.getM01(),
-                          transform.getM02(),
-                          transform.getM03(),
-                          transform.getM10(),
-                          transform.getM11(),
-                          transform.getM12(),
-                          transform.getM13(),
-                          transform.getM20(),
-                          transform.getM21(),
-                          transform.getM22(),
-                          transform.getM23());
+      transform.normalizeRotationPart();
 
       parentRegion.applyTransform(transform);
    }
