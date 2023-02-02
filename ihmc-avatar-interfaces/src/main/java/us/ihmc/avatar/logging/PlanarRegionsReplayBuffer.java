@@ -14,15 +14,15 @@ import java.util.*;
 public class PlanarRegionsReplayBuffer<T>
 {
    private int buffer_length;
-   private HashMap<Integer, Container<T>> indexBuffer;
-   private TreeSet<Container<T>> timeBuffer;
+   private HashMap<Integer, PlanarRegionsBuffer<T>> indexBuffer;
+   private TreeSet<PlanarRegionsBuffer<T>> timeBuffer;
    private long firstEverTime = Long.MAX_VALUE;
 
    private int index = 0;
 
 
 
-   private static final Comparator<Container> customCompare = (o1, o2) ->
+   private static final Comparator<PlanarRegionsBuffer> customCompare = (o1, o2) ->
    {
       long compare = o1.getTime() - o2.getTime();
       if (compare > 0)
@@ -62,7 +62,7 @@ public class PlanarRegionsReplayBuffer<T>
          else
             list = PlanarRegionFileTools.importPlanarRegionData(temp);
 
-         Container container = new Container(index, time, list);
+         PlanarRegionsBuffer container = new PlanarRegionsBuffer<>(index, time, list);
 
          indexBuffer.put(index, container);
          timeBuffer.add(container);
@@ -109,7 +109,7 @@ public class PlanarRegionsReplayBuffer<T>
 
    public void putAndTick(long time, T list)
    {
-      Container container = new Container(index, time, list);
+      PlanarRegionsBuffer container = new PlanarRegionsBuffer<>(index, time, list);
 
       indexBuffer.put(index, container);
       timeBuffer.add(container);
@@ -128,17 +128,17 @@ public class PlanarRegionsReplayBuffer<T>
 
    public T get(int index)
    {
-      Container container = indexBuffer.get(index);
+      PlanarRegionsBuffer container = indexBuffer.get(index);
       return container == null ? null : (T) container.getList();
    }
 
-   private Container<T> getNearTimeInternal(long time)
+   private PlanarRegionsBuffer<T> getNearTimeInternal(long time)
    {
-      Container<T> lookup = new Container<>(-1, time, null);
-      Container<T> lower = timeBuffer.lower(lookup);
-      Container<T> higher = timeBuffer.higher(lookup);
+      PlanarRegionsBuffer<T> lookup = new PlanarRegionsBuffer<>(-1, time, null);
+      PlanarRegionsBuffer<T> lower = timeBuffer.lower(lookup);
+      PlanarRegionsBuffer<T> higher = timeBuffer.higher(lookup);
 
-      Container<T> value;
+      PlanarRegionsBuffer<T> value;
 
       if (lower == null)
       {
@@ -159,7 +159,7 @@ public class PlanarRegionsReplayBuffer<T>
 
    public T getNearTime(long time)
    {
-      Container<T> container = getNearTimeInternal(time);
+      PlanarRegionsBuffer<T> container = getNearTimeInternal(time);
       return container != null ? container.getList() : null;
    }
 
@@ -168,8 +168,8 @@ public class PlanarRegionsReplayBuffer<T>
       if (indexBuffer.size() < 1)
          return -1;
 
-      Container<T> container = indexBuffer.get(
-            Objects.requireNonNull(getNearTimeInternal(currentTime + 1)).index + 1); //Increment currentTime by 1 to bias towards higher if tied
+      PlanarRegionsBuffer<T> container = indexBuffer.get(
+            Objects.requireNonNull(getNearTimeInternal(currentTime + 1)).getIndex() + 1); //Increment currentTime by 1 to bias towards higher if tied
 
       return container == null ? Long.MAX_VALUE : container.getTime();
    }
@@ -179,7 +179,7 @@ public class PlanarRegionsReplayBuffer<T>
       if (indexBuffer.size() < 1)
          return -1;
 
-      Container container = indexBuffer.get(getNearTimeInternal(currentTime - 1).index - 1); //Decrement currentTime by 1 to bias towards lower if tied
+      PlanarRegionsBuffer container = indexBuffer.get(getNearTimeInternal(currentTime - 1).getIndex() - 1); //Decrement currentTime by 1 to bias towards lower if tied
 
       return container == null ? 0 : container.getTime();
    }
