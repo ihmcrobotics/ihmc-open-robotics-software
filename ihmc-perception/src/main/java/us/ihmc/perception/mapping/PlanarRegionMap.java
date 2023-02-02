@@ -461,10 +461,10 @@ public class PlanarRegionMap
       LogTools.info("------------------------------- Performing Factor Graph Based Smoothing ---------------------------------");
 
       LogTools.info("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
-      factorGraph.addOdometryFactorExtended(poseIndex, PerceptionEuclidTools.toArray(currentToPreviousTransform));
+      factorGraph.addOdometryFactorSE3(poseIndex, PerceptionEuclidTools.toArray(currentToPreviousTransform));
 
       LogTools.info("Adding Pose Initial Value: {}", poseIndex);
-      factorGraph.setPoseInitialValueExtended(poseIndex, PerceptionEuclidTools.toArray(sensorToWorldTransformPrior));
+      factorGraph.setPoseInitialValueSE3(poseIndex, PerceptionEuclidTools.toArray(sensorToWorldTransformPrior));
 
       for (Integer incomingIndex : matches.keySet())
       {
@@ -534,8 +534,8 @@ public class PlanarRegionMap
       factorGraph.createOdometryNoiseModel(new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise});
       factorGraph.createOrientedPlaneNoiseModel(new float[] {planeNoise, planeNoise, planeNoise});
 
-      factorGraph.addPriorPoseFactorExtended(0, PerceptionEuclidTools.toArray(transform));
-      factorGraph.setPoseInitialValueExtended(0, PerceptionEuclidTools.toArray(transform));
+      factorGraph.addPriorPoseFactorSE3(0, PerceptionEuclidTools.toArray(transform));
+      factorGraph.setPoseInitialValueSE3(0, PerceptionEuclidTools.toArray(transform));
 
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {

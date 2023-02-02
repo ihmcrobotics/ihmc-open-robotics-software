@@ -6,14 +6,11 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -77,7 +74,7 @@ public class ZED2ColorStereoPublisher
    private final double outputPeriod = UnitConversions.hertzToSeconds(30.0);
    private final Throttler throttler = new Throttler();
 
-   private VideoCapture capStereo;
+   private VideoCapture stereoVideoCapture;
 
    private volatile boolean running = true;
 
@@ -95,8 +92,8 @@ public class ZED2ColorStereoPublisher
       this.colorTopic = colorTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
-      capStereo = new VideoCapture(cameraId);
-      setVideoCaptureProperties(capStereo);
+      stereoVideoCapture = new VideoCapture(cameraId);
+      setVideoCaptureProperties(stereoVideoCapture);
 
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
@@ -139,10 +136,10 @@ public class ZED2ColorStereoPublisher
    {
       /* Supported Stereo Resolutions: {'1344.0x376.0': 'OK', '2560.0x720.0': 'OK', '3840.0x1080.0': 'OK', '4416.0x1242.0': 'OK'} */
 
-      LogTools.warn("Setting Camera Parameters for ZED2.");
+      LogTools.info("Setting Camera Parameters for ZED2.");
       capture.set(CAP_PROP_FRAME_WIDTH, 2560);
       capture.set(CAP_PROP_FRAME_HEIGHT, 720);
-      LogTools.warn("Frame Rate Available: {}", capture.get(CAP_PROP_FPS));
+      LogTools.info("Frame Rate Available: {}", capture.get(CAP_PROP_FPS));
 
       // TODO: Find more optimal parameters for the following.
       //capture.set(CAP_PROP_BUFFERSIZE, 3);
@@ -156,7 +153,7 @@ public class ZED2ColorStereoPublisher
 
    public void readImage(Mat mat)
    {
-      boolean status = capStereo.read(mat);
+      boolean status = stereoVideoCapture.read(mat);
    }
 
    public static void main(String[] args)
