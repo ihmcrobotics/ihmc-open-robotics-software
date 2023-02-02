@@ -94,12 +94,14 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void setPlanarRegionsList(PlanarRegionsListMessage planarRegionsList)
    {
-      swingPlanningModule.setPlanarRegionList(planarRegionsList);
+      if (swingPlanningModule != null)
+         swingPlanningModule.setPlanarRegionList(planarRegionsList);
    }
 
    public void setHeightMapMessage(HeightMapMessage heightMapMessage)
    {
-      swingPlanningModule.setHeightMapData(heightMapMessage);
+      if (swingPlanningModule != null)
+         swingPlanningModule.setHeightMapData(heightMapMessage);
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)

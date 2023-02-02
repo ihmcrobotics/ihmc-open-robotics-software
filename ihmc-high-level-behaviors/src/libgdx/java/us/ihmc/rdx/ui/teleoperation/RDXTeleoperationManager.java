@@ -136,9 +136,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
       this.communicationHelper = communicationHelper;
       ROS2NodeInterface ros2Node = communicationHelper.getROS2Node();
       robotModel = communicationHelper.getRobotModel();
-      ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
+      ros2Helper = communicationHelper.getControllerHelper();
       this.yoVariableClientHelper = yoVariableClientHelper;
 
+      communicationHelper.setCommunicationCallbacksEnabled(true);
       this.footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       this.bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
 

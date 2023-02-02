@@ -62,6 +62,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    private RemoteEnvironmentMapInterface environmentMap;
    private VisibilityGraphPathPlanner bodyPathPlanner;
    private FootstepPlanningModule footstepPlanner;
+   private RobotLowLevelMessenger lowLevelMessenger;
 
    public CommunicationHelper(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
@@ -74,6 +75,11 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
       this.ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
 
       ros2Helper.setCommunicationCallbacksEnabled(commsEnabledToStart);
+   }
+
+   public ROS2ControllerHelper getControllerHelper()
+   {
+      return ros2Helper;
    }
 
    // Construction-only methods:
@@ -127,9 +133,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
       return new VisibilityGraphPathPlanner(visibilityGraphsParameters, new ObstacleAvoidanceProcessor(visibilityGraphsParameters));
    }
 
-   public RobotLowLevelMessenger newRobotLowLevelMessenger()
+   public RobotLowLevelMessenger getOrCreateRobotLowLevelMessenger()
    {
-      return robotModel.newRobotLowLevelMessenger(ros2Helper.getROS2NodeInterface());
+      if (lowLevelMessenger == null)
+         lowLevelMessenger = robotModel.newRobotLowLevelMessenger(ros2Helper.getROS2NodeInterface());
+
+      return lowLevelMessenger;
    }
 
    public FootstepPlanningModule getOrCreateFootstepPlanner()
