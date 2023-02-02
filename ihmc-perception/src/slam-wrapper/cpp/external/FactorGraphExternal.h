@@ -33,13 +33,13 @@ class FactorGraphExternal
         void createOrientedPlaneNoiseModel(float* lmVariances);
 
         // Expects 4x4 homogenous transform matrix as 16-double array
-        void addOdometryFactorExtended(int poseId, double *odometry);
+        void addOdometryFactorSE3(int poseId, double *odometry);
 
         // Expects 4x4 homogenous transform as 16-double array
-        void setPoseInitialValueExtended(int index, double *value);
+        void setPoseInitialValueSE3(int index, double *value);
 
         // Add Prior Pose Factor with full 4x4 homogenous SE3 matrix
-        void addPriorPoseFactorExtended(int poseId, double *pose);
+        void addPriorPoseFactorSE3(int poseId, double *pose);
 
         bool getPoseById(int poseId, double* pose);
 

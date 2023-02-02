@@ -37,12 +37,10 @@ public static class FactorGraphExternal extends Pointer {
         public native void addPriorPoseFactor(int index, FloatBuffer pose);
         public native void addPriorPoseFactor(int index, float[] pose);
 
-
         // Expects packed Pose3 as XYZYPR
         public native void addOdometryFactor(int poseId, FloatPointer odometry);
         public native void addOdometryFactor(int poseId, FloatBuffer odometry);
         public native void addOdometryFactor(int poseId, float[] odometry);
-
 
         // Expects packed Vector4
         public native void addOrientedPlaneFactor(int lmId, int poseIndex, FloatPointer lmMean);
@@ -76,19 +74,19 @@ public static class FactorGraphExternal extends Pointer {
         public native void createOrientedPlaneNoiseModel(float[] lmVariances);
 
         // Expects 4x4 homogenous transform matrix as 16-double array
-        public native void addOdometryFactorExtended(int poseId, DoublePointer odometry);
-        public native void addOdometryFactorExtended(int poseId, DoubleBuffer odometry);
-        public native void addOdometryFactorExtended(int poseId, double[] odometry);
+        public native void addOdometryFactorSE3(int poseId, DoublePointer odometry);
+        public native void addOdometryFactorSE3(int poseId, DoubleBuffer odometry);
+        public native void addOdometryFactorSE3(int poseId, double[] odometry);
 
         // Expects 4x4 homogenous transform as 16-double array
-        public native void setPoseInitialValueExtended(int index, DoublePointer value);
-        public native void setPoseInitialValueExtended(int index, DoubleBuffer value);
-        public native void setPoseInitialValueExtended(int index, double[] value);
+        public native void setPoseInitialValueSE3(int index, DoublePointer value);
+        public native void setPoseInitialValueSE3(int index, DoubleBuffer value);
+        public native void setPoseInitialValueSE3(int index, double[] value);
 
         // Add Prior Pose Factor with full 4x4 homogenous SE3 matrix
-        public native void addPriorPoseFactorExtended(int poseId, DoublePointer pose);
-        public native void addPriorPoseFactorExtended(int poseId, DoubleBuffer pose);
-        public native void addPriorPoseFactorExtended(int poseId, double[] pose);
+        public native void addPriorPoseFactorSE3(int poseId, DoublePointer pose);
+        public native void addPriorPoseFactorSE3(int poseId, DoubleBuffer pose);
+        public native void addPriorPoseFactorSE3(int poseId, double[] pose);
 
         public native @Cast("bool") boolean getPoseById(int poseId, DoublePointer pose);
         public native @Cast("bool") boolean getPoseById(int poseId, DoubleBuffer pose);

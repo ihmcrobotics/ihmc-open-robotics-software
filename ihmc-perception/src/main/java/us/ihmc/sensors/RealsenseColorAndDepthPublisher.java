@@ -8,6 +8,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
@@ -120,6 +121,22 @@ public class RealsenseColorAndDepthPublisher
 
             depthWidth = sensor.getDepthWidth();
             depthHeight = sensor.getDepthHeight();
+
+            LogTools.info(String.format("Color: [fx:%.4f, fy:%.4f, cx:%.4f, cy:%.4f, h:%d, w:%d]",
+                                        sensor.getColorFocalLengthPixelsX(),
+                                        sensor.getColorFocalLengthPixelsY(),
+                                        sensor.getColorPrincipalOffsetXPixels(),
+                                        sensor.getColorPrincipalOffsetYPixels(),
+                                        colorHeight,
+                                        colorWidth));
+
+            LogTools.info(String.format("Depth: [fx:%.4f, fy:%.4f, cx:%.4f, cy:%.4f, h:%d, w:%d]",
+                                        sensor.getDepthFocalLengthPixelsX(),
+                                        sensor.getDepthFocalLengthPixelsY(),
+                                        sensor.getDepthPrincipalOffsetXPixels(),
+                                        sensor.getDepthPrincipalOffsetYPixels(),
+                                        depthHeight,
+                                        depthWidth));
          }
 
          if (sensor.readFrameData())
@@ -147,37 +164,8 @@ public class RealsenseColorAndDepthPublisher
             PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3Image, yuvColorImage, colorTopic, colorImageMessage, ros2Helper, cameraPose, now,
                                                            colorSequenceNumber++, sensor.getColorHeight(), sensor.getColorWidth());
 
-            /* Debug Only: Show depth and color for quick sensor testing on systems with display */
-            //display(depthU16C1Image, color8UC3Image);
-
-            //LogTools.info(String.format("Depth: [fx:%.4f, fy:%.4f, cx:%.4f, cy:%.4f, h:%d, w:%d]",
-            //                            sensor.getDepthFocalLengthPixelsX(),
-            //                            sensor.getDepthFocalLengthPixelsY(),
-            //                            sensor.getDepthPrincipalOffsetXPixels(),
-            //                            sensor.getDepthPrincipalOffsetYPixels(),
-            //                            depthHeight,
-            //                            depthWidth));
-            //
-            //LogTools.info(String.format("Color: [fx:%.4f, fy:%.4f, cx:%.4f, cy:%.4f, h:%d, w:%d]",
-            //                            sensor.getColorFocalLengthPixelsX(),
-            //                            sensor.getColorFocalLengthPixelsY(),
-            //                            sensor.getColorPrincipalOffsetXPixels(),
-            //                            sensor.getColorPrincipalOffsetYPixels(),
-            //                            colorHeight,
-            //                            colorWidth));
          }
       }
-   }
-
-   private void display(Mat depth, Mat color)
-   {
-      Mat depthDisplay = new Mat();
-      BytedecoOpenCVTools.clampTo8BitUnsignedChar(depth, depthDisplay, 0.0, 255.0);
-      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(depthDisplay, depthDisplay);
-
-      imshow("Depth", depthDisplay);
-      imshow("Color", color);
-      waitKey(1);
    }
 
    private void destroy()

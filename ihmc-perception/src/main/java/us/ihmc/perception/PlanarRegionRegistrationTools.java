@@ -6,6 +6,7 @@ import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -30,7 +31,7 @@ public class PlanarRegionRegistrationTools
 
       float distanceThreshold = 0.1f;
 
-      LogTools.info("Previous Size: {}, Current Size: {}", previousGrid.getTotal(), currentGrid.getTotal());
+      LogTools.debug("Previous Size: {}, Current Size: {}", previousGrid.getTotal(), currentGrid.getTotal());
 
       for (int i = 0; i < previousGrid.getTotal(); i++)
       {
@@ -44,13 +45,7 @@ public class PlanarRegionRegistrationTools
             currentGrid.getCentroid(j, currentCentroid);
             currentNormal.normalize();
 
-            double distance = EuclidGeometryTools.distanceBetweenPoint3Ds(previousCentroid.getX(),
-                                                                          previousCentroid.getY(),
-                                                                          previousCentroid.getZ(),
-                                                                          currentCentroid.getX(),
-                                                                          currentCentroid.getY(),
-                                                                          currentCentroid.getZ());
-
+            double distance = currentCentroid.distance(previousCentroid);
             double similarity = previousNormal.dot(currentNormal);
 
             if (distance < distanceThreshold)
@@ -104,8 +99,8 @@ public class PlanarRegionRegistrationTools
          matrixTwo.set(1, matrixIndex, currentCentroid.getY());
          matrixTwo.set(2, matrixIndex, currentCentroid.getZ());
 
-         LogTools.info("Matrix1: {}", matrixOne);
-         LogTools.info("Matrix2: {}", matrixTwo);
+         LogTools.debug("Matrix1: {}", matrixOne);
+         LogTools.debug("Matrix2: {}", matrixTwo);
 
          CommonOps_DDRM.multAddTransB(matrixOne, matrixTwo, patchMatrix);
 
@@ -127,17 +122,17 @@ public class PlanarRegionRegistrationTools
          DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
          CommonOps_DDRM.mult(svdU, svdVt, rotationMatrix);
 
-         LogTools.info("Rotation Matrix: " + rotationMatrix);
+         LogTools.debug("Rotation Matrix: " + rotationMatrix);
 
          transformToPack.setRotationAndZeroTranslation(rotationMatrix);
          transformToPack.appendTranslation(translation);
 
-         LogTools.info("Transform: \n{}", transformToPack);
+         LogTools.debug("Transform: \n{}", transformToPack);
 
          Point3D angles = new Point3D();
          transformToPack.getRotation().getEuler(angles);
 
-         LogTools.info("Angles: {}", angles);
+         LogTools.debug("Angles: {}", angles);
       }
    }
 
@@ -196,7 +191,7 @@ public class PlanarRegionRegistrationTools
          }
       }
 
-      LogTools.info("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
+      LogTools.debug("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
 
       LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.qr(A.numRows, A.numCols);
       if (!solver.setA(A))
@@ -212,15 +207,12 @@ public class PlanarRegionRegistrationTools
       DMatrixRMaj solution = new DMatrixRMaj(6, 1);
       solver.solve(b, solution);
 
-      //      eulerAnglesToReference = Eigen::Vector3d((double) solution(0), (double) solution(1), (double) solution(2));
-      //      translationToReference = Eigen::Vector3d((double) solution(3), (double) solution(4), (double) solution(5));
+      LogTools.debug("ICP Result: Rotation({}}, {}}, {}})", solution.get(0), solution.get(1), solution.get(2));
+      LogTools.debug("Translation({}}, {}}, {}})", solution.get(3), solution.get(4), solution.get(5));
 
-      LogTools.info("ICP Result: Rotation({}}, {}}, {}})", solution.get(0), solution.get(1), solution.get(2));
-      LogTools.info("Translation({}}, {}}, {}})", solution.get(3), solution.get(4), solution.get(5));
-
-      /* Update relative and total transform from current sensor pose to map frame. Required for initial value for landmarks observed in current pose. */
-      //      _sensorPoseRelative.SetAnglesAndTranslation(eulerAnglesToReference, translationToReference);
-      //      _sensorToMapTransform.MultiplyRight(_sensorPoseRelative);
+      Point3D translation = new Point3D(solution.get(3), solution.get(4), solution.get(5));
+      RotationMatrix rotation = new RotationMatrix(solution.get(2), solution.get(1), solution.get(0));
+      transformToReturn.set(rotation, translation);
 
       return transformToReturn;
    }
