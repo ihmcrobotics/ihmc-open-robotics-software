@@ -9,8 +9,13 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.orientation.Orientation2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
@@ -30,6 +35,7 @@ import java.util.function.Consumer;
 
 public class OusterHeightMapUpdater
 {
+   private static final Vector2D gridCenterOffset = new Vector2D(1.0, 0.0);
    private static final long updateDTMillis = 100;
    private static final int initialPublishFrequency = 5;
 
