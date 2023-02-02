@@ -10,7 +10,7 @@ public class ArUcoObjectInfoTest
    @Test
    public void infoArUcoObjectTest()
    {
-      ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
+      ObjectInfo arucoInfo = new ObjectInfo();
       String name = arucoInfo.getObjectName(0);
       System.out.println("Name: " + name);
       assertTrue(!name.isEmpty());
