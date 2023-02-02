@@ -1417,7 +1417,6 @@ public class GeometryTools
 
    public static Point3D projectPointOntoPlane(Vector4DReadOnly plane, Point3DReadOnly point)
    {
-
       LogTools.info("Plane: " + String.format("%.2f, %.2f, %.2f, %.2f", plane.getX(), plane.getY(), plane.getZ(), plane.getS()));
 
       UnitVector3D planeNormal = new UnitVector3D(plane.getX(), plane.getY(), plane.getZ());
