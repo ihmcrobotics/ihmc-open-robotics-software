@@ -390,90 +390,90 @@ public class RapidPlanarRegionsExtractor
       boundaryVisitedMatrix.zero();
       boundaryMaxSearchDepth = 0;
       gpuPlanarRegions.parallelStream().forEach(planarRegion ->
-                                                {
-                                                   int leafPatchIndex = 0;
-                                                   int regionRingIndex = 0;
-                                                   planarRegion.getRegionsRingsBySize().clear();
-                                                   for (Point2D leafPatch : planarRegion.getBorderIndices())
-                                                   {
-                                                      GPURegionRing regionRing = planarRegion.getRegionRings().add();
-                                                      regionRing.reset();
-                                                      regionRing.setIndex(regionRingIndex);
-                                                      int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
-                                                                                                             (int) leafPatch.getX(),
-                                                                                                             planarRegion.getId(),
-                                                                                                             regionRing,
-                                                                                                             leafPatchIndex,
-                                                                                                             1);
-                                                      if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
-                                                      {
-                                                         //debugger.drawRegionRing(regionRing, patchHeight, patchWidth);
+      {
+         int leafPatchIndex = 0;
+         int regionRingIndex = 0;
+         planarRegion.getRegionsRingsBySize().clear();
+         for (Point2D leafPatch : planarRegion.getBorderIndices())
+         {
+            GPURegionRing regionRing = planarRegion.getRegionRings().add();
+            regionRing.reset();
+            regionRing.setIndex(regionRingIndex);
+            int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
+                                                                   (int) leafPatch.getX(),
+                                                                   planarRegion.getId(),
+                                                                   regionRing,
+                                                                   leafPatchIndex,
+                                                                   1);
+            if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
+            {
+               //debugger.drawRegionRing(regionRing, patchHeight, patchWidth);
 
-                                                         ++regionRingIndex;
-                                                         regionRing.updateConvexPolygon();
-                                                         planarRegion.getRegionsRingsBySize().add(regionRing);
-                                                      }
-                                                      else
-                                                      {
-                                                         planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
-                                                      }
-                                                      ++leafPatchIndex;
-                                                   }
+               ++regionRingIndex;
+               regionRing.updateConvexPolygon();
+               planarRegion.getRegionsRingsBySize().add(regionRing);
+            }
+            else
+            {
+               planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
+            }
+            ++leafPatchIndex;
+         }
 
-                                                   // remove holes
-                                                   for (GPURegionRing regionRing : planarRegion.getRegionsRingsBySize())
-                                                   {
-                                                      planarRegion.getHoleRingsToRemove().clear();
-                                                      for (GPURegionRing otherRegionRing : planarRegion.getRegionRings())
-                                                      {
-                                                         if (otherRegionRing != regionRing)
-                                                         {
-                                                            // We probably only need to check one
-                                                            Vector2D boundaryIndex = otherRegionRing.getBoundaryIndices().get(0);
-                                                            if (regionRing.getConvexPolygon().isPointInside(boundaryIndex.getX(), boundaryIndex.getY()))
-                                                            {
-                                                               planarRegion.getHoleRingsToRemove().add(otherRegionRing);
-                                                            }
-                                                         }
-                                                      }
-                                                      for (GPURegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
-                                                      {
-                                                         planarRegion.getRegionRings().remove(regionRingToRemove);
-                                                      }
-                                                   }
+         // remove holes
+         for (GPURegionRing regionRing : planarRegion.getRegionsRingsBySize())
+         {
+            planarRegion.getHoleRingsToRemove().clear();
+            for (GPURegionRing otherRegionRing : planarRegion.getRegionRings())
+            {
+               if (otherRegionRing != regionRing)
+               {
+                  // We probably only need to check one
+                  Vector2D boundaryIndex = otherRegionRing.getBoundaryIndices().get(0);
+                  if (regionRing.getConvexPolygon().isPointInside(boundaryIndex.getX(), boundaryIndex.getY()))
+                  {
+                     planarRegion.getHoleRingsToRemove().add(otherRegionRing);
+                  }
+               }
+            }
+            for (GPURegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
+            {
+               planarRegion.getRegionRings().remove(regionRingToRemove);
+            }
+         }
 
-                                                   planarRegion.getRegionRings().sort(boundaryLengthComparator);
-                                                });
+         planarRegion.getRegionRings().sort(boundaryLengthComparator);
+      });
    }
 
    public void growRegionBoundaries()
    {
       gpuPlanarRegions.forEach(planarRegion ->
-                               {
-                                  if (!planarRegion.getRegionRings().isEmpty())
-                                  {
-                                     GPURegionRing firstRing = planarRegion.getRegionRings().get(0);
-                                     for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
-                                     {
-                                        // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
+      {
+         if (!planarRegion.getRegionRings().isEmpty())
+         {
+            GPURegionRing firstRing = planarRegion.getRegionRings().get(0);
+            for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
+            {
+               // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
 
-                                        //float vertexX = czImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                        //float vertexY = -cxImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                        //float vertexZ = cyImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               //float vertexX = czImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               //float vertexY = -cxImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               //float vertexZ = cyImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
 
-                                        float vertexX = currentFeatureGrid.getCxImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                        float vertexY = currentFeatureGrid.getCyImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                        float vertexZ = currentFeatureGrid.getCzImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               float vertexX = currentFeatureGrid.getCxImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               float vertexY = currentFeatureGrid.getCyImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               float vertexZ = currentFeatureGrid.getCzImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
 
-                                        Point3D boundaryVertex = planarRegion.getBoundaryVertices().add();
-                                        boundaryVertex.set(vertexX, vertexY, vertexZ);
-                                        boundaryVertex.sub(planarRegion.getCenter());
-                                        boundaryVertex.normalize();
-                                        boundaryVertex.scale(parameters.getRegionGrowthFactor());
-                                        boundaryVertex.add(vertexX, vertexY, vertexZ);
-                                     }
-                                  }
-                               });
+               Point3D boundaryVertex = planarRegion.getBoundaryVertices().add();
+               boundaryVertex.set(vertexX, vertexY, vertexZ);
+               boundaryVertex.sub(planarRegion.getCenter());
+               boundaryVertex.normalize();
+               boundaryVertex.scale(parameters.getRegionGrowthFactor());
+               boundaryVertex.add(vertexX, vertexY, vertexZ);
+            }
+         }
+      });
    }
 
    private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, GPURegionRing regionRing, int leafPatchIndex, int searchDepth)
