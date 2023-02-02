@@ -76,7 +76,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
    private final ArrayList<Point3D> mocapPositionBuffer = new ArrayList<>();
    private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
-   ;
+   
    private Activator nativesLoadedActivator;
    private BytedecoImage bytedecoDepthImage;
    private OpenCLFloatBuffer pointCloudVertexBuffer;
