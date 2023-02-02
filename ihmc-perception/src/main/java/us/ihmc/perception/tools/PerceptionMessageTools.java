@@ -24,7 +24,6 @@ import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
@@ -191,7 +190,7 @@ public class PerceptionMessageTools
    {
       BytePointer compressedDepthPointer = new BytePointer();
       BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-      BytedecoOpenCVTools.fillImageMessage(compressedDepthPointer, depthImageMessage, cameraPose, seq, height, width, ImageMessageFormat.DEPTH_PNG_COMPRESSED_16);
+      BytedecoOpenCVTools.fillImageMessage(compressedDepthPointer, depthImageMessage, cameraPose, seq, height, width, ImageMessageFormat.DEPTH_PNG_R16);
       MessageTools.toMessage(now, depthImageMessage.getAcquisitionTime());
       helper.publish(topic, depthImageMessage);
    }
@@ -201,7 +200,7 @@ public class PerceptionMessageTools
    {
       BytePointer compressedColorPointer = new BytePointer();
       BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
-      BytedecoOpenCVTools.fillImageMessage(compressedColorPointer, colorImageMessage, cameraPose, seq, height, width, ImageMessageFormat.COLOR_JPEG_COMPRESSED_24);
+      BytedecoOpenCVTools.fillImageMessage(compressedColorPointer, colorImageMessage, cameraPose, seq, height, width, ImageMessageFormat.COLOR_JPEG_RGB8);
       MessageTools.toMessage(now, colorImageMessage.getAcquisitionTime());
       helper.publish(topic, colorImageMessage);
    }

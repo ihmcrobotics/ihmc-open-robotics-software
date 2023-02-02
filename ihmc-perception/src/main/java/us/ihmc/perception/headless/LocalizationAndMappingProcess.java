@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class LocalizationAndMappingProcess
 {
-   private final static long PUBLISH_MILLISECONDS = 100;
+   private final static long PUBLISH_PERIOD_MILLISECONDS = 100;
 
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
@@ -76,7 +76,7 @@ public class LocalizationAndMappingProcess
 
    private void launchMapper()
    {
-      updateMapFuture = executorService.scheduleAtFixedRate(this::updateMap, 0, PUBLISH_MILLISECONDS, TimeUnit.MILLISECONDS);
+      updateMapFuture = executorService.scheduleAtFixedRate(this::updateMap, 0, PUBLISH_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
    }
 
    public synchronized void updateMap()

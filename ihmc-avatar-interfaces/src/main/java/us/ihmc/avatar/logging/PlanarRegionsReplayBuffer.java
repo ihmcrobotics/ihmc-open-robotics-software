@@ -62,10 +62,10 @@ public class PlanarRegionsReplayBuffer<T>
          else
             list = PlanarRegionFileTools.importPlanarRegionData(temp);
 
-         PlanarRegionsBuffer container = new PlanarRegionsBuffer<>(index, time, list);
+         PlanarRegionsBuffer planarRegionsBuffer = new PlanarRegionsBuffer<>(index, time, list);
 
-         indexBuffer.put(index, container);
-         timeBuffer.add(container);
+         indexBuffer.put(index, planarRegionsBuffer);
+         timeBuffer.add(planarRegionsBuffer);
 
          firstEverTime = getStartTime();
 
