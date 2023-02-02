@@ -23,17 +23,9 @@ public class RDXSplineDemo
          public void create()
          {
             baseUI.create();
-
             baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
 
             spline = new RDXSplineGraphic();
-         }
-
-         @Override
-         public void render()
-         {
-            baseUI.renderBeforeOnScreenUI();
-
             spline.createStart(new Point3D(0.5,0.5,0.5), Color.BLUE);
             spline.createAdditionalPoint(new Point3D(0.7,0.6,1), Color.YELLOW);
             spline.createAdditionalPoint(new Point3D(1,1,1), Color.YELLOW);
@@ -46,7 +38,12 @@ public class RDXSplineDemo
             spline.createAdditionalPoint(new Point3D(-1,-1,-1), Color.YELLOW);
             spline.createAdditionalPoint(new Point3D(-1.1,-1.1,-1.1), Color.YELLOW);
             spline.createEnd(Color.BLUE);
+         }
 
+         @Override
+         public void render()
+         {
+            baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
 
