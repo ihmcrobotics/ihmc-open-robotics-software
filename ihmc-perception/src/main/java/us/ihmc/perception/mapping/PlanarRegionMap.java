@@ -408,7 +408,7 @@ public class PlanarRegionMap
                                                                    (float) parameters.getMinimumBoundingBoxSize()))
                   {
                      // Request a merge for parent and child regions. If they don't merge, pick the parent if it belongs to the map (based on sign of ID)
-                     if (PlanarRegionSLAMTools.mergeRegionIntoParent(parentRegion, childRegion, parameters.getUpdateAlphaTowardsMatch()))
+                     if (PlanarRegionSLAMTools.mergeRegionIntoParentUsingFilter(parentRegion, childRegion, parameters.getUpdateAlphaTowardsMatch()))
                      {
                         //LogTools.info("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
 

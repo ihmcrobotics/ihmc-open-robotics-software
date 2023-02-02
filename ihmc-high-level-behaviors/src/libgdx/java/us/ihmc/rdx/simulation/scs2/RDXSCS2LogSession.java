@@ -46,6 +46,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    public void createPerceptionDataLoader(String perceptionLogFile)
    {
       loader = new PerceptionDataLoader();
+      loader.openLogFile(perceptionLogFile);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -87,6 +88,11 @@ public class RDXSCS2LogSession extends RDXSCS2Session
       {
          visualizer.renderImGuiWidgets();
       }
+   }
+
+   public void destroy()
+   {
+      loader.destroy();
    }
 
    protected void renderImGuiWidgetsPartOne()

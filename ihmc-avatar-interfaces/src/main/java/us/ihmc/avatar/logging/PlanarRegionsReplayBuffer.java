@@ -3,7 +3,6 @@ package us.ihmc.avatar.logging;
 import org.apache.commons.io.IOUtils;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
 import java.io.File;
@@ -21,34 +20,7 @@ public class PlanarRegionsReplayBuffer<T>
 
    private int index = 0;
 
-   private static class Container<T>
-   {
-      private T list;
-      private long time;
-      private int index;
 
-      Container(int index, long time, T list)
-      {
-         this.list = list;
-         this.index = index;
-         this.time = time;
-      }
-
-      public T getList()
-      {
-         return list;
-      }
-
-      public long getTime()
-      {
-         return time;
-      }
-
-      public int getIndex()
-      {
-         return index;
-      }
-   }
 
    private static final Comparator<Container> customCompare = (o1, o2) ->
    {
@@ -85,11 +57,10 @@ public class PlanarRegionsReplayBuffer<T>
 
          Object list;
 
-         if(type == PlanarRegionsListWithPose.class)
+         if (type == PlanarRegionsListWithPose.class)
             list = PlanarRegionFileTools.importPlanarRegionsWithPoseData(temp);
          else
             list = PlanarRegionFileTools.importPlanarRegionData(temp);
-
 
          Container container = new Container(index, time, list);
 
@@ -163,7 +134,7 @@ public class PlanarRegionsReplayBuffer<T>
 
    private Container<T> getNearTimeInternal(long time)
    {
-      Container<T> lookup = new Container<T>(-1, time, null);
+      Container<T> lookup = new Container<>(-1, time, null);
       Container<T> lower = timeBuffer.lower(lookup);
       Container<T> higher = timeBuffer.higher(lookup);
 
@@ -188,8 +159,8 @@ public class PlanarRegionsReplayBuffer<T>
 
    public T getNearTime(long time)
    {
-      Container<T> c = getNearTimeInternal(time);
-      return c != null ? (T) c.getList() : null;
+      Container<T> container = getNearTimeInternal(time);
+      return container != null ? container.getList() : null;
    }
 
    public long getNextTime(long currentTime)
@@ -197,7 +168,8 @@ public class PlanarRegionsReplayBuffer<T>
       if (indexBuffer.size() < 1)
          return -1;
 
-      Container<T> container = indexBuffer.get(Objects.requireNonNull(getNearTimeInternal(currentTime + 1)).index + 1); //Increment currentTime by 1 to bias towards higher if tied
+      Container<T> container = indexBuffer.get(
+            Objects.requireNonNull(getNearTimeInternal(currentTime + 1)).index + 1); //Increment currentTime by 1 to bias towards higher if tied
 
       return container == null ? Long.MAX_VALUE : container.getTime();
    }
