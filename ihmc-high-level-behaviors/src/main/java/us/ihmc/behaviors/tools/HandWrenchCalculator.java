@@ -13,9 +13,10 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
 
@@ -24,9 +25,14 @@ public class HandWrenchCalculator
    private FullHumanoidRobotModel fullRobotModel;
    private final SideDependentList<GeometricJacobianCalculator> jacobianCalculators = new SideDependentList<>();
    private final SideDependentList<List<OneDoFJointBasics>> armJoints = new SideDependentList<>();
-   private SideDependentList<SpatialVector> wrenches = new SideDependentList<>(new SpatialVector(), new SpatialVector());
+   private SideDependentList<SpatialVector> rawWrenches = new SideDependentList<>(new SpatialVector(), new SpatialVector());
    private final SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators = new SideDependentList<>();
    private final SideDependentList<double[]> jointTorquesForGravity = new SideDependentList<>();
+
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   private SideDependentList<AlphaFilteredYoSpatialVector> alphaFilteredYoSpatialVectors = new SideDependentList<>();
+   private static final double ALPHA_FILTER = 0.5;
 
    public HandWrenchCalculator(ROS2SyncedRobotModel syncedRobot)
    {
@@ -47,6 +53,16 @@ public class HandWrenchCalculator
          inverseDynamicsCalculator.setGravitionalAcceleration(-9.81);
          inverseDynamicsCalculators.set(side, inverseDynamicsCalculator);
          jointTorquesForGravity.set(side, new double [armJoints.get(side).size()]);
+
+         SpatialVector spatialVectorForSetup = new SpatialVector();
+         alphaFilteredYoSpatialVectors.set(side,
+                                           new AlphaFilteredYoSpatialVector("filteredWrench",
+                                                                           side.toString(),
+                                                                           registry,
+                                                                           () -> ALPHA_FILTER,
+                                                                           () -> ALPHA_FILTER,
+                                                                           spatialVectorForSetup.getAngularPart(),
+                                                                           spatialVectorForSetup.getLinearPart()));
       }
    }
 
@@ -79,7 +95,8 @@ public class HandWrenchCalculator
          DMatrixRMaj wrenchVector = new DMatrixRMaj(6,1);
          CommonOps_DDRM.mult(armJacobianTransposedDagger, jointTorqueVector, wrenchVector);
 
-         wrenches.set(side, makeWrench(jacobianCalculators.get(side).getJacobianFrame(), wrenchVector));
+         rawWrenches.set(side, makeWrench(jacobianCalculators.get(side).getJacobianFrame(), wrenchVector));
+         alphaFilteredYoSpatialVectors.get(side).update(rawWrenches.get(side).getAngularPart(), rawWrenches.get(side).getLinearPart());
       }
    }
 
@@ -98,9 +115,9 @@ public class HandWrenchCalculator
       return spatialVector;
    }
 
-   public SideDependentList<SpatialVector> getWrench()
+   public SideDependentList<SpatialVector> getUnfilteredWrench()
    {
-      return wrenches;
+      return rawWrenches;
    }
 
    // TODO: Check if this looks good.
@@ -117,5 +134,10 @@ public class HandWrenchCalculator
          }
       }
       return jointTorquesForGravity.get(side);
+   }
+
+   public SideDependentList<AlphaFilteredYoSpatialVector> getFilteredWrench()
+   {
+      return alphaFilteredYoSpatialVectors;
    }
 }
