@@ -197,13 +197,13 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                                               0,
                                               (int) (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1));
 
-            if (imgui.internal.ImGui.button("Load Previous"))
+            if (ImGui.button("Load Previous"))
             {
                frameIndex.set(Math.max(0, frameIndex.get() - 1));
                changed = true;
             }
-            imgui.internal.ImGui.sameLine();
-            if (imgui.internal.ImGui.button("Load Next"))
+            ImGui.sameLine();
+            if (ImGui.button("Load Next"))
             {
                frameIndex.set(frameIndex.get() + 1);
                changed = true;
