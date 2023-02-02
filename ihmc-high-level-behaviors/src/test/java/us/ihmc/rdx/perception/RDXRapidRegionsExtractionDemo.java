@@ -48,7 +48,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    String PERCEPTION_LOG_FILE = "20230117_162825_PerceptionLog.hdf5";
    String PERCEPTION_LOG_DIRECTORY = System.getProperty("user.home") + "/.ihmc/logs/perception/";
 
-
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
    private ImGuiPanel navigationPanel;
@@ -64,7 +63,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
    private final PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
-   ;
+   
    //   private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("l515ReferenceFrame",
    //                                                                                                              ReferenceFrame.getWorldFrame(),
    //                                                                                                              sensorTransformToWorld);
