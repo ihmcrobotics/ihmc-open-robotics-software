@@ -150,11 +150,11 @@ public class PerceptionDataLoader
    public static void main(String[] args)
    {
       String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
-      String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
+      String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
       String logFileName = "20230117_161540_PerceptionLog.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
-      loader.openLogFile(LOG_DIRECTORY + logFileName);
+      loader.openLogFile(Paths.get(logDirectory, logFileName).toString());
 
       //long total = loader.getHDF5Manager().getCount("/image/");
       //      long total = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.OUSTER_DEPTH_NAME);
