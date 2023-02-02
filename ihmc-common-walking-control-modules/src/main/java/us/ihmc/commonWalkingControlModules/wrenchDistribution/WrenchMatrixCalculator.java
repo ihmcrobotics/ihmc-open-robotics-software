@@ -27,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -210,8 +211,20 @@ public class WrenchMatrixCalculator
       centerOfPressureCommands.add().set(command);
    }
 
-   // FIXME The formulation of the objective should be unified with PlaneContactStateToWrenchMatrixHelper.computeCopObjectiveJacobian(...)
-   public boolean getCenterOfPressureInput(QPInputTypeA inputToPack)
+   public void collectRigidBodiesWithCoPCommands(List<RigidBodyReadOnly> rigidBodies)
+   {
+      rigidBodies.clear();
+
+      for (int i = 0; i < centerOfPressureCommands.size(); i++)
+      {
+         CenterOfPressureCommand command = centerOfPressureCommands.get(i);
+         RigidBodyBasics rigidBody = command.getContactingRigidBody();
+         if (rigidBody != null)
+            rigidBodies.add(rigidBody);
+      }
+   }
+
+   public boolean getNextCenterOfPressureInput(QPInputTypeA inputToPack)
    {
       int commands = centerOfPressureCommands.size();
       if (commands <= 0)
@@ -356,7 +369,7 @@ public class WrenchMatrixCalculator
    private final Vector2D tempDeisredCoPWeight = new Vector2D();
    private final Vector2D tempCoPRateWeight = new Vector2D();
 
-   public void computeMatrices()
+   public void computeMatrices(List<RigidBodyReadOnly> rigidBodiesWithCoPCommands)
    {
       double rhoWeight = this.rhoWeight.getDoubleValue();
       double rhoRateWeight;
@@ -390,12 +403,15 @@ public class WrenchMatrixCalculator
          CommonOps_DDRM.insert(helper.getRhoWeight(), rhoWeightMatrix, rhoStartIndex, rhoStartIndex);
          CommonOps_DDRM.insert(helper.getRhoRateWeight(), rhoRateWeightMatrix, rhoStartIndex, rhoStartIndex);
 
-         CommonOps_DDRM.insert(helper.getCoPRegularizationJacobian(), copRegularizationJacobian, copStartIndex, rhoStartIndex);
-         CommonOps_DDRM.insert(helper.getCoPRegularizationObjective(), copRegularizationObjective, copStartIndex, 0);
+         if (rigidBodiesWithCoPCommands == null || !rigidBodiesWithCoPCommands.contains(rigidBody))
+         {
+            CommonOps_DDRM.insert(helper.getCoPRegularizationJacobian(), copRegularizationJacobian, copStartIndex, rhoStartIndex);
+            CommonOps_DDRM.insert(helper.getCoPRegularizationObjective(), copRegularizationObjective, copStartIndex, 0);
+            CommonOps_DDRM.insert(helper.getCoPRegularizationWeight(), copRegularizationWeight, copStartIndex, copStartIndex);
+         }
+
          CommonOps_DDRM.insert(helper.getCoPRateRegularizationJacobian(), copRateRegularizationJacobian, copStartIndex, rhoStartIndex);
          CommonOps_DDRM.insert(helper.getCoPRateRegularizationObjective(), copRateRegularizationObjective, copStartIndex, 0);
-
-         CommonOps_DDRM.insert(helper.getCoPRegularizationWeight(), copRegularizationWeight, copStartIndex, copStartIndex);
          CommonOps_DDRM.insert(helper.getCoPRateRegularizationWeight(), copRateRegularizationWeight, copStartIndex, copStartIndex);
 
          rhoStartIndex += helper.getRhoSize();

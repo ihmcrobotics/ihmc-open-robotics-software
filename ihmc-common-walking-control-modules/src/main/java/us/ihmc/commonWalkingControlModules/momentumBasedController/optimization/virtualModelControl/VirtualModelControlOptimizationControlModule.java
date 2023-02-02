@@ -126,7 +126,7 @@ public class VirtualModelControlOptimizationControlModule
 
    public VirtualModelControlSolution compute() throws VirtualModelControlModuleException
    {
-      wrenchMatrixCalculator.computeMatrices();
+      wrenchMatrixCalculator.computeMatrices(null);
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());

@@ -372,7 +372,7 @@ public class DynamicsMatrixCalculatorTest
    {
       fullHumanoidRobotModel.updateFrames();
 
-      wrenchMatrixCalculator.computeMatrices();
+      wrenchMatrixCalculator.computeMatrices(null);
       dynamicsMatrixCalculator.compute();
       centroidalMomentumRateCalculator.reset();
    }
@@ -381,7 +381,7 @@ public class DynamicsMatrixCalculatorTest
    {
       fullHumanoidRobotModel.updateFrames();
 
-      wrenchMatrixCalculator.computeMatrices();
+      wrenchMatrixCalculator.computeMatrices(null);
       Map<RigidBodyBasics, Wrench> contactWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       for (int i = 0; i < toolbox.getContactablePlaneBodies().size(); i++)
       {
