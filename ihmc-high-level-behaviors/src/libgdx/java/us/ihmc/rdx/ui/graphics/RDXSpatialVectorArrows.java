@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.rdx.tools.LibGDXTools;
 
 public class RDXSpatialVectorArrows
@@ -53,6 +54,11 @@ public class RDXSpatialVectorArrows
    {
       this.originFrame = originFrame;
       this.indexOfSensor = indexOfSensor;
+   }
+
+   public void update(SpatialVector spatialVector)
+   {
+      update(spatialVector.getLinearPart(), spatialVector.getAngularPart());
    }
 
    public void update(Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
