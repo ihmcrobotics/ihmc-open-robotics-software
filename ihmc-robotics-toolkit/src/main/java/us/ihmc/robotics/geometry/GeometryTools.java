@@ -1251,8 +1251,9 @@ public class GeometryTools
 
    public static double computeBoundingBoxVolume3D(BoundingBox3DReadOnly boundingBox)
    {
-      return Math.abs(boundingBox.getMaxX() - boundingBox.getMinX()) * Math.abs(boundingBox.getMaxY() - boundingBox.getMinY())
-            * Math.abs(boundingBox.getMaxZ() - boundingBox.getMinZ());
+      return Math.abs(boundingBox.getMaxX() - boundingBox.getMinX())
+           * Math.abs(boundingBox.getMaxY() - boundingBox.getMinY())
+           * Math.abs(boundingBox.getMaxZ() - boundingBox.getMinZ());
    }
 
    /**
@@ -1262,7 +1263,7 @@ public class GeometryTools
    {
       BoundingBox3D intersection = getIntersectionOfTwoBoundingBoxes(a, b);
 
-      if(intersection == null)
+      if (intersection == null)
          return 0.0;
 
       double intersectionVolume = GeometryTools.computeBoundingBoxVolume3D(intersection);
@@ -1280,7 +1281,7 @@ public class GeometryTools
    {
       BoundingBox3D intersection = getIntersectionOfTwoBoundingBoxes(a, b);
 
-      if(intersection == null)
+      if (intersection == null)
          return 0.0;
 
       double intersectionVolume = GeometryTools.computeBoundingBoxVolume3D(intersection);
