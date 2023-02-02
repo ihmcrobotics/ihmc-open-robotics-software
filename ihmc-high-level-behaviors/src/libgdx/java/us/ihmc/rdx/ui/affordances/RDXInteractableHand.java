@@ -67,7 +67,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
             // wristWrenchArrows.put(side, new RDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
             sensorWristWrenchArrows = new RDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(),
                                                                  yoVariableClientHelper,
-                                                           side.getLowerCaseName() + "WristSensor");
+                                                                 side.getLowerCaseName() + "WristSensor");
          }
       }
       estimatedHandWrenchArrows = new RDXSpatialVectorArrows(handFrame);
