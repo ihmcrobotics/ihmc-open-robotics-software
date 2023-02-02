@@ -698,7 +698,6 @@ public class GeometryToolsTest
 
       assertEquals(1/15.0, GeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boundingBox1, boundingBox2), EPSILON, "[FAILED] Intersection should be 1/3.0");
       assertEquals( 1/8.0, GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boundingBox2, boundingBox1), EPSILON, "[FAILED] Intersection should be 1/15.0");
-
    }
 
    @Test
@@ -720,7 +719,6 @@ public class GeometryToolsTest
       LogTools.info("Expected projection: {} {} {}", expectedProjection.getX(), expectedProjection.getY(), expectedProjection.getZ());
 
       assertEquals(0.0, projectedPoint.distance(expectedProjection), EPSILON);
-
    }
 
    public static void main(String[] args)
