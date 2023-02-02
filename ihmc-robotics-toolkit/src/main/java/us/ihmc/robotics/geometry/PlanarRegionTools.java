@@ -4,24 +4,19 @@ import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.*;
-import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 
@@ -41,7 +36,9 @@ public class PlanarRegionTools
    private final ConvexPolygon2D regionBPolygonInRegionA = new ConvexPolygon2D();
 
    public PlanarRegionTools()
-   {}
+   {
+
+   }
 
    public double getDistanceBetweenPlanarRegions(PlanarRegion regionA, PlanarRegion regionB)
    {
@@ -667,8 +664,7 @@ public class PlanarRegionTools
       box.applyTransform(planarRegion.getTransformToWorld());
       return box;
    }
-
-
+   
    public static BoundingBox3D getWorldBoundingBox3DWithMargin(PlanarRegion planarRegion, double margin)
    {
       BoundingBox3D boundingBox = planarRegion.getBoundingBox3dInWorldCopy();
