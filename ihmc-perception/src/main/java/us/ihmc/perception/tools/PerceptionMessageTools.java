@@ -185,22 +185,37 @@ public class PerceptionMessageTools
       intrinsicParametersMessage.setCy(sensor.getColorPrincipalOffsetYPixels());
    }
 
-   public static void publishPNGCompressedDepthImage(Mat depth16UC1Image, ROS2Topic<ImageMessage> topic, ImageMessage depthImageMessage,
-                                                     ROS2Helper helper, FramePose3D cameraPose, Instant now, long seq, int height, int width)
+   public static void publishPNGCompressedDepthImage(Mat depth16UC1Image,
+                                                     ROS2Topic<ImageMessage> topic,
+                                                     ImageMessage depthImageMessage,
+                                                     ROS2Helper helper,
+                                                     FramePose3D cameraPose,
+                                                     Instant now,
+                                                     long sequenceNumber,
+                                                     int height,
+                                                     int width)
    {
       BytePointer compressedDepthPointer = new BytePointer();
       BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-      BytedecoOpenCVTools.fillImageMessage(compressedDepthPointer, depthImageMessage, cameraPose, seq, height, width, ImageMessageFormat.DEPTH_PNG_R16);
+      BytedecoOpenCVTools.fillImageMessage(compressedDepthPointer, depthImageMessage, cameraPose, sequenceNumber, height, width, ImageMessageFormat.DEPTH_PNG_R16);
       MessageTools.toMessage(now, depthImageMessage.getAcquisitionTime());
       helper.publish(topic, depthImageMessage);
    }
 
-   public static void publishJPGCompressedColorImage(Mat color8UC3Image, Mat yuvColorImage, ROS2Topic<ImageMessage> topic, ImageMessage colorImageMessage,
-                                                     ROS2Helper helper, FramePose3D cameraPose, Instant now, long seq, int height, int width)
+   public static void publishJPGCompressedColorImage(Mat color8UC3Image,
+                                                     Mat yuvColorImage,
+                                                     ROS2Topic<ImageMessage> topic,
+                                                     ImageMessage colorImageMessage,
+                                                     ROS2Helper helper,
+                                                     FramePose3D cameraPose,
+                                                     Instant now,
+                                                     long sequenceNumber,
+                                                     int height,
+                                                     int width)
    {
       BytePointer compressedColorPointer = new BytePointer();
       BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
-      BytedecoOpenCVTools.fillImageMessage(compressedColorPointer, colorImageMessage, cameraPose, seq, height, width, ImageMessageFormat.COLOR_JPEG_RGB8);
+      BytedecoOpenCVTools.fillImageMessage(compressedColorPointer, colorImageMessage, cameraPose, sequenceNumber, height, width, ImageMessageFormat.COLOR_JPEG_RGB8);
       MessageTools.toMessage(now, colorImageMessage.getAcquisitionTime());
       helper.publish(topic, colorImageMessage);
    }

@@ -356,7 +356,7 @@ public class BytedecoOpenCVTools
    public static void fillImageMessage(BytePointer compressedBytes,
                                        ImageMessage imageMessage,
                                        FramePose3D cameraPose,
-                                       long seq,
+                                       long sequenceNumber,
                                        int height,
                                        int width,
                                        int format)
@@ -371,7 +371,7 @@ public class BytedecoOpenCVTools
       imageMessage.setImageWidth(width);
       imageMessage.getPosition().set(cameraPose.getPosition());
       imageMessage.getOrientation().set(cameraPose.getOrientation());
-      imageMessage.setSequenceNumber(seq);
+      imageMessage.setSequenceNumber(sequenceNumber);
    }
 
    public static Mat decompressImageJPGUsingYUV(byte[] dataArray)
