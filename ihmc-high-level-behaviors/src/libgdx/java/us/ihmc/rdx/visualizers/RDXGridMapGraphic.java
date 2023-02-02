@@ -37,6 +37,7 @@ public class RDXGridMapGraphic implements RenderableProvider
    private final ModelBuilder modelBuilder = new ModelBuilder();
 
    private Model lastModel;
+   private Texture paletteTexture = null;
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
@@ -301,7 +302,8 @@ public class RDXGridMapGraphic implements RenderableProvider
 
       modelBuilder.begin();
       Material material = new Material();
-      Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+      if (paletteTexture == null)
+         paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
       material.set(TextureAttribute.createDiffuse(paletteTexture));
       material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
 

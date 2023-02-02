@@ -51,6 +51,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private ROS2SyncedRobotModel syncedRobot;
    private RDXFootstepChecker stepChecker;
    private RDXSwingPlanningModule swingPlanningModule;
+   private SideDependentList<ConvexPolygon2D> defaultPolygons;
    private RDXTeleoperationParameters teleoperationParameters;
 
    private boolean wasPlanUpdated = false;
@@ -66,13 +67,13 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       this.teleoperationParameters = teleoperationParameters;
       this.syncedRobot = syncedRobot;
 
-      SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
-      stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, footPolygons, footstepPlannerParameters);
+      defaultPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
+      stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, defaultPolygons, footstepPlannerParameters);
       swingPlanningModule = new RDXSwingPlanningModule(syncedRobot,
                                                        footstepPlannerParameters,
                                                        communicationHelper.getRobotModel().getSwingPlannerParameters(),
                                                        communicationHelper.getRobotModel().getWalkingControllerParameters(),
-                                                       footPolygons);
+                                                       defaultPolygons);
       clear();
    }
 
@@ -301,7 +302,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private RDXInteractableFootstep newPlannedFootstep()
    {
       wasPlanUpdated = true;
-      return new RDXInteractableFootstep(baseUI, RobotSide.LEFT, 0);
+      return new RDXInteractableFootstep(baseUI, RobotSide.LEFT, 0, defaultPolygons);
    }
 
    public RDXFootstepChecker getStepChecker()
