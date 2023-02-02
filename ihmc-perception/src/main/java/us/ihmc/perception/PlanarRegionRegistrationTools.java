@@ -90,13 +90,8 @@ public class PlanarRegionRegistrationTools
          previousMean.add(previousCentroid);
          currentMean.add(currentCentroid);
 
-         matrixOne.set(0, matrixIndex, previousCentroid.getX());
-         matrixOne.set(1, matrixIndex, previousCentroid.getY());
-         matrixOne.set(2, matrixIndex, previousCentroid.getZ());
-
-         matrixTwo.set(0, matrixIndex, currentCentroid.getX());
-         matrixTwo.set(1, matrixIndex, currentCentroid.getY());
-         matrixTwo.set(2, matrixIndex, currentCentroid.getZ());
+         previousCentroid.get(0, matrixIndex, matrixOne);
+         currentCentroid.get(0, matrixIndex, matrixTwo);
 
          LogTools.debug("Matrix1: {}", matrixOne);
          LogTools.debug("Matrix2: {}", matrixTwo);
