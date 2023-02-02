@@ -251,7 +251,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
       if (!rapidPlanarRegionsExtractor.isProcessing())
       {
          rapidPlanarRegionsExtractor.getDebugger().setShowPointCloud(rapidRegionsUIPanel.getPointCloudRenderEnabled());
-         if((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
+         if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
          {
             ThreadTools.startAsDaemon(() ->
             {
