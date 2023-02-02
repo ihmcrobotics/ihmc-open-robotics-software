@@ -14,6 +14,7 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXSpatialVectorArrows;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -95,6 +96,11 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    public void updateEstimatedWrench(SpatialVector spatialVector)
    {
       estimatedHandWrenchArrows.update(spatialVector);
+   }
+
+   public void updateEstimatedWrench(AlphaFilteredYoSpatialVector filteredYoSpatialVector)
+   {
+      estimatedHandWrenchArrows.update(filteredYoSpatialVector);
    }
 
    @Override

@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
 
 public class RDXSpatialVectorArrows
 {
@@ -54,6 +55,11 @@ public class RDXSpatialVectorArrows
    {
       this.originFrame = originFrame;
       this.indexOfSensor = indexOfSensor;
+   }
+
+   public void update(AlphaFilteredYoSpatialVector filteredYoSpatialVector)
+   {
+      update(filteredYoSpatialVector.getLinearPart(), filteredYoSpatialVector.getAngularPart());
    }
 
    public void update(SpatialVector spatialVector)
