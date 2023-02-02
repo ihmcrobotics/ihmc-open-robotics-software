@@ -133,7 +133,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(),
                                           candidateStepPose,
                                           currentFootStepSide,
-                                          footstepPlan.getFootsteps().size());
+                                          footstepPlan.getNumberOfFootsteps());
 
          // Get the warnings and flash if the footstep's placement isn't okay
          ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
@@ -155,7 +155,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private void placeFootstep()
    {
       footstepIndex++;
-      RDXInteractableFootstep addedStep = footstepPlan.getFootsteps().add();
+      RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
       addedStep.copyFrom(baseUI, footstepBeingPlaced);
       // Switch sides
       currentFootStepSide = currentFootStepSide.getOppositeSide();

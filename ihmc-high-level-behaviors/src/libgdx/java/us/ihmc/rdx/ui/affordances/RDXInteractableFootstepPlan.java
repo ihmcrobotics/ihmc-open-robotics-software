@@ -144,7 +144,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    {
       ImGui.text("Footstep plan:");
       ImGui.sameLine();
-      if (getFootsteps().size() > 0)
+      if (footsteps.size() > 0)
       {
          // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
          if (ImGui.button(labels.get("Walk")) || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
@@ -176,6 +176,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       for (RDXInteractableFootstep step : footsteps)
       {
          step.getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
+         step.reset();
       }
       footsteps.clear();
 
@@ -257,6 +258,18 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       }
       stepChecker.clear(footsteps);
       clear();
+   }
+
+   public RDXInteractableFootstep getNextFootstep()
+   {
+      RDXInteractableFootstep nextFootstep = footsteps.add();
+      nextFootstep.reset();
+      return nextFootstep;
+   }
+
+   public int getNumberOfFootsteps()
+   {
+      return footsteps.size();
    }
 
    public RecyclingArrayList<RDXInteractableFootstep> getFootsteps()
