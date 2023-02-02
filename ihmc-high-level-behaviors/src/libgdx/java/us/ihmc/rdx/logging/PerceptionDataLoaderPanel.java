@@ -12,6 +12,7 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer;
+import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class PerceptionDataLoaderPanel extends ImGuiPanel
    private Mat cvImage;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString perceptionLogPath = new ImString(System.getProperty("user.home") + "/.ihmc/logs/perception/");
+   private final ImString perceptionLogPath = new ImString(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY + "/");
 
    private final ImInt fileIndex = new ImInt(0);
    private final ImInt topicIndex = new ImInt(0);

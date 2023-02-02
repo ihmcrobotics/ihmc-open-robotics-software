@@ -64,7 +64,6 @@ public class PerceptionLogChannel
       count = 0;
    }
 
-
    public void setCount(int count)
    {
       this.count = count;

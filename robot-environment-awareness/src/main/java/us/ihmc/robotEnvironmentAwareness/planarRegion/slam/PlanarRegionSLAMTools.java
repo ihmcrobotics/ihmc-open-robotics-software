@@ -529,20 +529,25 @@ public class PlanarRegionSLAMTools
       return newDataCollisions;
    }
 
-   public static void findPlanarRegionMatches(PlanarRegionsList map, PlanarRegionsList incoming, HashMap<Integer, TIntArrayList> matches,
-                                              float overlapThreshold, float normalThreshold, float distanceThreshold, float minBoxSize)
+   public static void findPlanarRegionMatches(PlanarRegionsList map,
+                                              PlanarRegionsList incoming,
+                                              HashMap<Integer, TIntArrayList> matches,
+                                              float overlapThreshold,
+                                              float normalThreshold,
+                                              float distanceThreshold,
+                                              float minBoxSize)
    {
       matches.clear();
       List<PlanarRegion> newRegions = incoming.getPlanarRegionsAsList();
       List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
 
-      for (int i = 0; i<newRegions.size(); i++)
+      for (int i = 0; i < newRegions.size(); i++)
       {
          matches.put(i, new TIntArrayList());
 
          PlanarRegion newRegion = newRegions.get(i);
 
-         for (int j = 0; j<mapRegions.size(); j++)
+         for (int j = 0; j < mapRegions.size(); j++)
          {
             PlanarRegion mapRegion = mapRegions.get(j);
 
@@ -604,9 +609,18 @@ public class PlanarRegionSLAMTools
       translationToFutureRegion.sub(futureOrigin, mapOrigin);
 
       RigidBodyTransform transform = new RigidBodyTransform(rotationToFutureRegion, translationToFutureRegion);
-      transform.setUnsafe(transform.getM00(), transform.getM01(), transform.getM02(), transform.getM03(),
-                          transform.getM10(), transform.getM11(), transform.getM12(), transform.getM13(),
-                          transform.getM20(), transform.getM21(), transform.getM22(), transform.getM23());
+      transform.setUnsafe(transform.getM00(),
+                          transform.getM01(),
+                          transform.getM02(),
+                          transform.getM03(),
+                          transform.getM10(),
+                          transform.getM11(),
+                          transform.getM12(),
+                          transform.getM13(),
+                          transform.getM20(),
+                          transform.getM21(),
+                          transform.getM22(),
+                          transform.getM23());
 
       parentRegion.applyTransform(transform);
    }
@@ -619,8 +633,8 @@ public class PlanarRegionSLAMTools
 
    public static boolean mergeRegionIntoParentUsingOptimalPlane(PlanarRegion parentRegion, PlanarRegion childRegion, Vector4D optimalPlane)
    {
-//      PlanarRegionTools.projectInZToPlanarRegion()
-//      (parentRegion, childRegion, optimalPlane);
+      //      PlanarRegionTools.projectInZToPlanarRegion()
+      //      (parentRegion, childRegion, optimalPlane);
       return mergeRegionHulls(parentRegion, childRegion);
    }
 
@@ -709,24 +723,24 @@ public class PlanarRegionSLAMTools
 
       // check to make sure the angles are similar enough
       boolean wasMatched = normalSimilarity > normalThreshold;
-      if(wasMatched)
+      if (wasMatched)
       {
          // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
          normalDistance = Math.abs(originVec.dot(regionA.getNormal()));
          wasMatched &= normalDistance < normalDistanceThreshold;
 
          // TODO Check the logic for this minimum distance computation. In cases of vertical planar regions it generates incorrect distances.
-//         if(wasMatched)
-//         {
-//            closestDistance = planarRegionTools.getDistanceBetweenPlanarRegions(regionA, regionB);
-//            wasMatched &= closestDistance <= distanceThreshold;
-//         }
+         //         if(wasMatched)
+         //         {
+         //            closestDistance = planarRegionTools.getDistanceBetweenPlanarRegions(regionA, regionB);
+         //            wasMatched &= closestDistance <= distanceThreshold;
+         //         }
 
          // Check to make sure there is sufficient overlap in planar region world frame bounding boxes by computing Intersection-over-Smaller (IoS) score
-         if(wasMatched)
+         if (wasMatched)
          {
             overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, minBoxSize);
-            intersects =  overlapScore > overlapThreshold;
+            intersects = overlapScore > overlapThreshold;
             wasMatched &= intersects;
          }
       }

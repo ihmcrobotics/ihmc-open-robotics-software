@@ -83,12 +83,12 @@ public class PatchFeatureGrid
 
    public void getNormal(int i, Vector3D vectorToPack)
    {
-      getNormal(i/columns, i%columns, vectorToPack);
+      getNormal(i / columns, i % columns, vectorToPack);
    }
 
    public void getCentroid(int i, Point3D pointToPack)
    {
-      getCentroid(i/columns, i%columns, pointToPack);
+      getCentroid(i / columns, i % columns, pointToPack);
    }
 
    public void getNormal(int row, int col, Vector3D vectorToPack)

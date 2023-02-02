@@ -112,8 +112,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
    private final CollidingScanRegionFilter collisionFilter;
 
-   private boolean publishTimestamped = false;
-
    public L515AndGPUPlanarRegionsOnRobotProcess(DRCRobotModel robotModel, boolean enableROS1)
    {
       this.enableROS1 = enableROS1;

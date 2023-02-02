@@ -13,9 +13,11 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
 
 import java.io.File;
+import java.nio.file.Path;
 
 public class RDXPlanarRegionMappingDemo
 {
@@ -34,8 +36,7 @@ public class RDXPlanarRegionMappingDemo
    private final RDXLineMeshModel mocapGraphic = new RDXLineMeshModel(0.02f, Color.YELLOW);
    private final RDXLineMeshModel rootJointGraphic = new RDXLineMeshModel(0.02f, Color.RED);
 
-   private final String perceptionLogDirectory = System.getProperty("user.home") + "/.ihmc/logs/perception/";
-   private final String logFileName = "20230117_161540_PerceptionLog.hdf5";
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_PerceptionLog.hdf5").toString();
 
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
@@ -53,7 +54,7 @@ public class RDXPlanarRegionMappingDemo
 
 
             // To Run With Perception Logs (HDF5)
-            mappingManager = new PlanarRegionMappingManager(perceptionLogDirectory + logFileName, true);
+            mappingManager = new PlanarRegionMappingManager(perceptionLogFile, true);
 
             pointCloudRenderer.create(mappingManager.getRapidRegionsExtractor().getImageHeight()
                                           * mappingManager.getRapidRegionsExtractor().getImageWidth());

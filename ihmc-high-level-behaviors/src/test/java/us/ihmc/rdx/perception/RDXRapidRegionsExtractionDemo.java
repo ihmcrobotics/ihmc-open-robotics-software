@@ -35,8 +35,10 @@ import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class RDXRapidRegionsExtractionDemo implements RenderableProvider
@@ -45,8 +47,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    //20230117_162417_PerceptionLog.hdf5 (231 MB)
    //20230117_162825_PerceptionLog.hdf5 (328 MB)
 
-   String PERCEPTION_LOG_FILE = "20230117_162825_PerceptionLog.hdf5";
-   String PERCEPTION_LOG_DIRECTORY = System.getProperty("user.home") + "/.ihmc/logs/perception/";
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_162825_PerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
@@ -117,7 +118,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          private void createOuster(int depthHeight, int depthWidth)
          {
             sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
-            perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
+            perceptionDataLoader.openLogFile(perceptionLogFile);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
 
@@ -137,7 +138,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          private void createL515(int depthHeight, int depthWidth)
          {
             sensorTopicName = PerceptionLoggerConstants.L515_DEPTH_NAME;
-            perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
+            perceptionDataLoader.openLogFile(perceptionLogFile);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());

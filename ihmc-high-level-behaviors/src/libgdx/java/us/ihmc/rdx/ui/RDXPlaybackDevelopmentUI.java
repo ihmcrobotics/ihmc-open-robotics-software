@@ -22,7 +22,7 @@ public class RDXPlaybackDevelopmentUI
 
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
 
-   private PlanarRegionsReplayBuffer prlBuffer = null;
+   private PlanarRegionsReplayBuffer planarRegionsReplayBuffer = null;
 
    private static final File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
@@ -66,7 +66,7 @@ public class RDXPlaybackDevelopmentUI
                   if (ImGui.selectable(f.getName())) {
                      try
                      {
-                        prlBuffer = new PlanarRegionsReplayBuffer(f, PlanarRegionsList.class);
+                        planarRegionsReplayBuffer = new PlanarRegionsReplayBuffer(f, PlanarRegionsList.class);
                      } catch (IOException ex) {
                         LogTools.error(ex.getStackTrace());
                      }
@@ -79,9 +79,9 @@ public class RDXPlaybackDevelopmentUI
 
             ImGui.end();
 
-            if (prlBuffer != null)
+            if (planarRegionsReplayBuffer != null)
             {
-               PlanarRegionsList list = (PlanarRegionsList) prlBuffer.getNearTime(t.get() + prlBuffer.getStartTime());
+               PlanarRegionsList list = (PlanarRegionsList) planarRegionsReplayBuffer.getNearTime(t.get() + planarRegionsReplayBuffer.getStartTime());
                if (list != null)
                   planarRegionsGraphic.generateMeshesAsync(list);
                planarRegionsGraphic.update();
@@ -90,9 +90,9 @@ public class RDXPlaybackDevelopmentUI
             //Time Control
             ImGui.begin("Time Control");
 
-            if (prlBuffer != null)
+            if (planarRegionsReplayBuffer != null)
             {
-               int timeLength = (int) (prlBuffer.getEndTime() - prlBuffer.getStartTime()); //Updates perpetually in case of buffer change
+               int timeLength = (int) (planarRegionsReplayBuffer.getEndTime() - planarRegionsReplayBuffer.getStartTime()); //Updates perpetually in case of buffer change
                ImGui.sliderInt("Time", t.getData(), 0, timeLength, "");
 
                ImGui.sameLine();
@@ -106,12 +106,12 @@ public class RDXPlaybackDevelopmentUI
                ImGui.sameLine();
                if (ImGui.button("<"))
                {
-                  t.set((int) (prlBuffer.getPreviousTime(t.get() + prlBuffer.getStartTime()) - prlBuffer.getStartTime()));
+                  t.set((int) (planarRegionsReplayBuffer.getPreviousTime(t.get() + planarRegionsReplayBuffer.getStartTime()) - planarRegionsReplayBuffer.getStartTime()));
                }
                ImGui.sameLine();
                if (ImGui.button(">"))
                {
-                  t.set((int) (prlBuffer.getNextTime(t.get() + prlBuffer.getStartTime()) - prlBuffer.getStartTime()));
+                  t.set((int) (planarRegionsReplayBuffer.getNextTime(t.get() + planarRegionsReplayBuffer.getStartTime()) - planarRegionsReplayBuffer.getStartTime()));
                }
                ImGui.sameLine();
                if (ImGui.button(">>"))
@@ -125,7 +125,7 @@ public class RDXPlaybackDevelopmentUI
                }
 
                ImGui.sameLine();
-               ImGui.text("Current time: " + prlBuffer.getStartTime() + t.get());
+               ImGui.text("Current time: " + planarRegionsReplayBuffer.getStartTime() + t.get());
             }
             else
             {
