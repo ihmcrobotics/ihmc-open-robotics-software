@@ -27,9 +27,6 @@ import us.ihmc.tools.string.StringTools;
 
 import java.nio.ByteBuffer;
 
-import static org.bytedeco.opencv.global.opencv_highgui.imshow;
-import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
-
 public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 {
    private final String titleBeforeAdditions;
