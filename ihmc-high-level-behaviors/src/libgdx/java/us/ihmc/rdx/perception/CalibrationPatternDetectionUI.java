@@ -45,7 +45,10 @@ public class CalibrationPatternDetectionUI
       simpleBlobDetector = SimpleBlobDetector.create();
    }
 
-   public void copyBGRImage(Mat bgrImageToCopy)
+   /**
+    * Can be called asynchronously from a thread that's reading from a camera.
+    */
+   public void copyInSourceBGRImage(Mat bgrImageToCopy)
    {
       synchronized (avoidCopiedImageTearing)
       {
@@ -53,14 +56,21 @@ public class CalibrationPatternDetectionUI
       }
    }
 
-   public void copyRGBImage(Mat bgrImageToCopy)
+   /**
+    * Can be called asynchronously from a thread that's reading from a camera.
+    */
+   public void copyInSourceRGBImage(Mat rgbImageToCopy)
    {
       synchronized (avoidCopiedImageTearing)
       {
-         opencv_imgproc.cvtColor(bgrImageToCopy, bgrSourceCopy, opencv_imgproc.COLOR_RGB2BGR);
+         opencv_imgproc.cvtColor(rgbImageToCopy, bgrSourceCopy, opencv_imgproc.COLOR_RGB2BGR);
       }
    }
 
+   /**
+    * Called on, for instance, the UI thread. This just gets the detection threads
+    * scheduled if necessary.
+    */
    public void update()
    {
       if (bgrSourceCopy.rows() > 0)
@@ -69,7 +79,7 @@ public class CalibrationPatternDetectionUI
       }
    }
 
-   public void doPatternDetection()
+   private void doPatternDetection()
    {
       synchronized (avoidCopiedImageTearing)
       {
@@ -98,6 +108,11 @@ public class CalibrationPatternDetectionUI
       }
    }
 
+   /**
+    * This can be called from really any thread to draw the corners onto the
+    * provided image. It's synchronous and returns when it's done. It's typically
+    * nearly instantaneous.
+    */
    public void drawCornersOrCenters(Mat rgbaMat)
    {
       rgbaMatForDrawing = rgbaMat;

@@ -57,7 +57,7 @@ public class BlackflyCalibrationPatternDemo
                      while (running)
                      {
                         blackflyReader.readBlackflyImage();
-                        calibrationPatternDetectionUI.copyRGBImage(blackflyReader.getRGBImage());
+                        calibrationPatternDetectionUI.copyInSourceRGBImage(blackflyReader.getRGBImage());
                      }
                   }, "CameraRead");
                }

@@ -192,7 +192,7 @@ public class BlackflyCalibrationSuite
                      while (running)
                      {
                         blackflyReader.readBlackflyImage();
-                        calibrationPatternDetectionUI.copyRGBImage(blackflyReader.getRGBImage());
+                        calibrationPatternDetectionUI.copyInSourceRGBImage(blackflyReader.getRGBImage());
 
                         if (hdf5ImageLoggingUI != null)
                            hdf5ImageLoggingUI.copyRGBImage(blackflyReader.getRGBImage());
