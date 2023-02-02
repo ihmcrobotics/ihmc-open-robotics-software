@@ -46,6 +46,10 @@ bool abort_if_body_path_planner_fails
 # If true, will plan a body path. If false, will follow a straight-line path to the goal
 bool plan_body_path
 
+# If true, will plan footsteps. If false, will not plan footsteps
+# Field default value True
+bool plan_footsteps
+
 # If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
 # Field default value True
 bool perform_a_star_search

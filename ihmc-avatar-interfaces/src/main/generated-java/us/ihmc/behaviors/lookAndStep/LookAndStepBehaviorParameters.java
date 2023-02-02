@@ -171,6 +171,11 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
     */
    public static final DoubleStoredPropertyKey planarRegionsExpiration = keys.addDoubleKey("Planar regions expiration");
    /**
+    * Expiration so we don't use data that's old because we haven't received new data
+    * in a while.
+    */
+   public static final DoubleStoredPropertyKey heightMapExpiration = keys.addDoubleKey("Height map expiration");
+   /**
     * We want to wait a little after footstep planning fails so we can get new sensor
     * data, not free spin, let things settle down, not generate too many failure logs,
     * etc.

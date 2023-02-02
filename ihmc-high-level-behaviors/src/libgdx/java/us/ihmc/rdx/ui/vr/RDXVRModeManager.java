@@ -176,6 +176,7 @@ public class RDXVRModeManager
    {
       leftHandPanel.dispose();
       kinematicsStreamingMode.destroy();
+      joystickBasedStepping.destroy();
    }
 
    public RDXVRKinematicsStreamingMode getKinematicsStreamingMode()

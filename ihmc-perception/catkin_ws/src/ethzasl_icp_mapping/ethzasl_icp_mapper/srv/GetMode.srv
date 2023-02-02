@@ -1,7 +1,0 @@
-bool localize
-bool map
-bool applyChange
----
-bool localize
-bool map
-

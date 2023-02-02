@@ -32,6 +32,8 @@ bool abort_if_body_path_planner_fails
 
 # If true, will plan a body path. If false, will follow a straight-line path to the goal
 bool plan_body_path
+# If true, will plan footsteps. If false, will not plan footsteps
+bool plan_footsteps true
 # If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
 bool perform_a_star_search true
 # Requested body path waypoints in world-frame. If non-empty, planner will follow this path and will not plan a body path

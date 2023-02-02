@@ -318,9 +318,15 @@ public class LibGDXTools
       gdxAffine.setTranslation(euclidPoint.getX32(), euclidPoint.getY32(), euclidPoint.getZ32());
    }
 
+   /**
+    * Converts the euclid pose to a rigid body transform and a Matrix4 gdxAffine
+    * @param euclidPose input pose. Not modified.
+    * @param tempTransform temporary rigid body transform. Modified.
+    * @param gdxAffine Matrix4 representation. Modified.
+    */
    public static void toLibGDX(Pose3DReadOnly euclidPose, RigidBodyTransform tempTransform, Matrix4 gdxAffine)
    {
-      euclidPose.get(tempTransform);
+      tempTransform.set(euclidPose);
       toLibGDX(tempTransform, gdxAffine);
    }
 

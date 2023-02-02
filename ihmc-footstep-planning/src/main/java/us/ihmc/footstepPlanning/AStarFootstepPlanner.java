@@ -32,6 +32,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -297,6 +298,7 @@ public class AStarFootstepPlanner
       if (!request.getAssumeFlatGround())
       {
          swingPlanningModule.computeSwingWaypoints(request.getPlanarRegionsList(),
+                                                   HeightMapMessageTools.unpackMessage(request.getHeightMapMessage()),
                                                    outputToPack.getFootstepPlan(),
                                                    request.getStartFootPoses(),
                                                    request.getSwingPlannerType());
