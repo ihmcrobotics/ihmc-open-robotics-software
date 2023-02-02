@@ -255,28 +255,26 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          if((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
          {
             ThreadTools.startAsDaemon(() ->
-                                      {
-                                         Point3D position = sensorPositionBuffer.get(frameIndex.get());
-                                         Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
+            {
+               Point3D position = sensorPositionBuffer.get(frameIndex.get());
+               Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
 
-                                         //                                      sensorTransformToWorld.set(orientation, position);
-                                         cameraPose.set(position, orientation);
-                                         cameraFrame.setPoseAndUpdate(cameraPose);
+               // sensorTransformToWorld.set(orientation, position);
+               cameraPose.set(position, orientation);
+               cameraFrame.setPoseAndUpdate(cameraPose);
 
-                                         //                                      cameraFrame.update();
+               // cameraFrame.update();
 
-                                         //LogTools.info("Transform to World: {}", cameraFrame.getTransformToWorldFrame());
+               // LogTools.info("Transform to World: {}", cameraFrame.getTransformToWorldFrame());
 
-                                         regionsWithPose.getPlanarRegionsList().clear();
-                                         rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
-                                         regionsWithPose.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
-                                      }, getClass().getSimpleName() + "RapidRegions");
-
+               regionsWithPose.getPlanarRegionsList().clear();
+               rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
+               regionsWithPose.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
+           }, getClass().getSimpleName() + "RapidRegions");
          }
       }
 
       generateMesh(regionsWithPose.getPlanarRegionsList());
-
    }
 
    public synchronized void generateMesh(PlanarRegionsList regionsList)
