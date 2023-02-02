@@ -103,9 +103,7 @@ bool FactorGraphExternal::getPoseById(int poseId, double* pose)
 
     matrix.transposeInPlace();
 
-    std::copy(matrix.data(),
-              matrix.data() + 16,
-              pose);
+    std::copy(matrix.data(), matrix.data() + 16, pose);
 
     return true;
 }
@@ -117,9 +115,7 @@ bool FactorGraphExternal::getPlanarLandmarkById(int landmarkId, double* plane)
 
     auto matrix = factorGraphHandler.getResults().at<gtsam::OrientedPlane3>(gtsam::Symbol('l', landmarkId)).planeCoefficients();
 
-    std::copy(matrix.data(),
-              matrix.data() + 4,
-              plane);
+    std::copy(matrix.data(), matrix.data() + 4, plane);
 
     return true;
 }
