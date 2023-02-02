@@ -102,7 +102,7 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
       return videoPanel;
    }
 
-   public Mat getRGBA8Mat()
+   protected Mat getRGBA8Mat()
    {
       return rgba8Mat;
    }
