@@ -97,7 +97,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          @Override
          public void create()
          {
-
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
