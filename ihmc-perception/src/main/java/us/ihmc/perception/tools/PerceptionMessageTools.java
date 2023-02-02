@@ -220,14 +220,14 @@ public class PerceptionMessageTools
       helper.publish(topic, colorImageMessage);
    }
 
-   public static void publishPlanarRegionsListWithPose(PlanarRegionsListWithPose planarRegionsListWithPose, ROS2Topic<PlanarRegionsListWithPoseMessage> topic,
+   public static void publishPlanarRegionsListWithPose(PlanarRegionsListWithPose planarRegionsListWithPose,
+                                                       ROS2Topic<PlanarRegionsListWithPoseMessage> topic,
                                                        ROS2Helper ros2Helper)
    {
       ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToPlanarRegionsListWithPoseMessage(planarRegionsListWithPose));
    }
 
-   public static void publishPlanarRegionsList(PlanarRegionsList planarRegionsList, ROS2Topic<PlanarRegionsListMessage> topic,
-                                               ROS2Helper ros2Helper)
+   public static void publishPlanarRegionsList(PlanarRegionsList planarRegionsList, ROS2Topic<PlanarRegionsListMessage> topic, ROS2Helper ros2Helper)
    {
       ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
    }
