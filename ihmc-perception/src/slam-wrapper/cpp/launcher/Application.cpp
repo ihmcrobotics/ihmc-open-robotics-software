@@ -1,4 +1,3 @@
-
 #include "FactorGraphHandler.h"
 #include "FactorGraphExternal.h"
 
@@ -17,16 +16,12 @@ void SLAMTest(FactorGraphHandler& factorGraphHandler)
 
    factorGraphHandler.optimizeISAM2(3);
 
-    factorGraphHandler.getResults().print();
-
-
+   factorGraphHandler.getResults().print();
 }
 
 void ExternalSLAMTest(FactorGraphExternal& factorGraphExternal)
 {
    using namespace gtsam;
-
-   
 
    float initialPoseValue[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
    factorGraphExternal.addPriorPoseFactor(1, initialPoseValue);
@@ -39,19 +34,14 @@ void ExternalSLAMTest(FactorGraphExternal& factorGraphExternal)
 
    factorGraphExternal.optimizeISAM2(3);
 
-    factorGraphExternal.printResults();
-
-
+   factorGraphExternal.printResults();
 }
 
 int main()
 {
-    FactorGraphExternal factorGraphExternal;
+   FactorGraphExternal factorGraphExternal;
 
+   ExternalSLAMTest(factorGraphExternal);
 
-    ExternalSLAMTest(factorGraphExternal);
-
-    printf("Welcome To Factor Graphs in Java World!\n");
-
-    
+   printf("Welcome To Factor Graphs in Java World!\n");
 }

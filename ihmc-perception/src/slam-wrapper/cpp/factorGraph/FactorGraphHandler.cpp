@@ -22,8 +22,6 @@ FactorGraphHandler::FactorGraphHandler()
    gtsam::Vector6 priorVariance2;
    priorVariance2 << 1e2, 1e2, 1e2, 1e2, 1e2, 1e2;
    priorNoise2 = gtsam::noiseModel::Diagonal::Variances(priorVariance2);
-
-
 }
 
 void FactorGraphHandler::createOdometryNoiseModel(gtsam::Vector6 odomVariance)
@@ -101,7 +99,6 @@ const gtsam::NonlinearFactorGraph& FactorGraphHandler::getFactorGraph()
    return graph;
 }
 
-
 void FactorGraphHandler::SLAMTest()
 {
    using namespace gtsam;
@@ -131,7 +128,6 @@ void FactorGraphHandler::SLAMTest()
    optimize();
 
    result.print("Result Planes");
-
 
 //
 //   AddPriorPoseFactor(Eigen::MatrixXd());

@@ -32,7 +32,6 @@ void FactorGraphExternal::addOdometryFactorExtended(int poseId, double *odometry
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
 }
 
-
 void FactorGraphExternal::addOrientedPlaneFactor(int lmId, int poseIndex, float *lmMean)
 {
     using namespace gtsam;

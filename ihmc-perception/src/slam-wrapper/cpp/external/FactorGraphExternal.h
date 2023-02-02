@@ -8,10 +8,8 @@ class FactorGraphExternal
         // Expects packed Pose3 as XYZYPR
         void addPriorPoseFactor(int index, float* pose);
 
-
         // Expects packed Pose3 as XYZYPR
         void addOdometryFactor(int poseId, float* odometry);
-
 
         // Expects packed Vector4
         void addOrientedPlaneFactor(int lmId, int poseIndex, float* lmMean);
