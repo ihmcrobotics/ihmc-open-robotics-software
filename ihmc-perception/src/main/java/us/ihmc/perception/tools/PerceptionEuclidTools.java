@@ -9,11 +9,11 @@ public class PerceptionEuclidTools
    public static float[] toArray(Pose3D pose)
    {
       return new float[] {(float) pose.getYaw(),
-                   (float) pose.getPitch(),
-                   (float) pose.getRoll(),
-                   (float) pose.getX(),
-                   (float) pose.getY(),
-                   (float) pose.getZ()};
+                          (float) pose.getPitch(),
+                          (float) pose.getRoll(),
+                          (float) pose.getX(),
+                          (float) pose.getY(),
+                          (float) pose.getZ()};
    }
 
    public static float[] toArray(Vector4D plane)
