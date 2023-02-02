@@ -11,14 +11,19 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.orientation.Orientation2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
@@ -31,6 +36,7 @@ import java.util.function.Supplier;
 
 public class OusterHeightMapUpdater
 {
+   private static final Vector2D gridCenterOffset = new Vector2D(1.0, 0.0);
    private static final long updateDTMillis = 100;
    private static final int initialPublishFrequency = 5;
 
@@ -65,8 +71,12 @@ public class OusterHeightMapUpdater
       double groundHeight = groundFrame.getTransformToRoot().getTranslationZ();
 
       FramePose3D sensorPose = new FramePose3D(sensorFrame);
+
       sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
       Point3D gridCenter = new Point3D(sensorPose.getX(), sensorPose.getY(), groundHeight);
+      Vector2D offset = new Vector2D(gridCenterOffset);
+      new Orientation2D(sensorPose.getYaw()).transform(offset);
+      gridCenter.add(offset.getX(), offset.getY(), 0.0);
       PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInSensorFrame);
 
       heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, sensorPose, gridCenter));
