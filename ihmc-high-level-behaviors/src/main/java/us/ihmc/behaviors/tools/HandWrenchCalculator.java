@@ -14,6 +14,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -32,6 +33,7 @@ public class HandWrenchCalculator
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private SideDependentList<AlphaFilteredYoSpatialVector> alphaFilteredYoSpatialVectors = new SideDependentList<>();
+   // RobotConfigurationData is published at 120Hz -> break freq.: 5Hz - 20Hz
    private static final double ALPHA_FILTER = 0.5;
 
    public HandWrenchCalculator(ROS2SyncedRobotModel syncedRobot)
@@ -55,12 +57,15 @@ public class HandWrenchCalculator
          jointTorquesForGravity.set(side, new double [armJoints.get(side).size()]);
 
          SpatialVector spatialVectorForSetup = new SpatialVector();
+         double breakFrequency = 20;
+         double dt = 1.0 / 120.0;
+         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, dt);
          alphaFilteredYoSpatialVectors.set(side,
                                            new AlphaFilteredYoSpatialVector("filteredWrench",
                                                                            side.toString(),
                                                                            registry,
-                                                                           () -> ALPHA_FILTER,
-                                                                           () -> ALPHA_FILTER,
+                                                                           () -> alpha,
+                                                                           () -> alpha,
                                                                            spatialVectorForSetup.getAngularPart(),
                                                                            spatialVectorForSetup.getLinearPart()));
       }
@@ -77,6 +82,7 @@ public class HandWrenchCalculator
 
    public void compute()
    {
+      // TODO: only compute / update when new RCD received. (try to match the frequency or maybe update at lowrer frequency)
       for (RobotSide side : RobotSide.values)
       {
          double[] jointTorquesForGravity = getGravityCompensationTorques(side);
