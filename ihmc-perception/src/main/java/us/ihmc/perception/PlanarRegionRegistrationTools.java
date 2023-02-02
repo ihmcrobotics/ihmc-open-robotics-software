@@ -5,7 +5,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -207,8 +206,8 @@ public class PlanarRegionRegistrationTools
       DMatrixRMaj solution = new DMatrixRMaj(6, 1);
       solver.solve(b, solution);
 
-      LogTools.debug("ICP Result: Rotation({}}, {}}, {}})", solution.get(0), solution.get(1), solution.get(2));
-      LogTools.debug("Translation({}}, {}}, {}})", solution.get(3), solution.get(4), solution.get(5));
+      LogTools.debug("ICP Result: Rotation({}, {}, {})", solution.get(0), solution.get(1), solution.get(2));
+      LogTools.debug("Translation({}, {}, {})", solution.get(3), solution.get(4), solution.get(5));
 
       Point3D translation = new Point3D(solution.get(3), solution.get(4), solution.get(5));
       RotationMatrix rotation = new RotationMatrix(solution.get(2), solution.get(1), solution.get(0));
