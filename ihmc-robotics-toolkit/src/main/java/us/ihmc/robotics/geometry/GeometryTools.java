@@ -27,10 +27,12 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.UnitVector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -38,6 +40,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
+import us.ihmc.log.LogTools;
 
 public class GeometryTools
 {
@@ -1407,5 +1412,22 @@ public class GeometryTools
                                                                                          planeNormalZ,
                                                                                          true);
       return isFirstQueryAbovePlane == isSecondQueryAbovePlane;
+   }
+
+   public static Point3D projectPointOntoPlane(Vector4DReadOnly plane, Point3DReadOnly point)
+   {
+
+      LogTools.info("Plane: " + String.format("%.2f, %.2f, %.2f, %.2f", plane.getX(), plane.getY(), plane.getZ(), plane.getS()));
+
+      UnitVector3D planeNormal = new UnitVector3D(plane.getX(), plane.getY(), plane.getZ());
+
+      Vector3D scaledNormal = new Vector3D(planeNormal);
+      scaledNormal.scale(planeNormal.dot(point) + plane.getS());
+
+      // proj = point - (normal.dot(point) + planeScalar) * (normal)
+      Point3D projectedPoint = new Point3D();
+      projectedPoint.sub(point, scaledNormal);
+
+      return projectedPoint;
    }
 }

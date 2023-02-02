@@ -2,11 +2,9 @@ package us.ihmc.rdx.logging;
 
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLogChannel;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -24,7 +22,7 @@ import java.util.HashMap;
  * Set the `perception.log.directory` JVM property to override the initial log directory.
  * You can also set this in the UI, though.
  */
-public class PerceptionDataLoggingPanel extends ImGuiPanel
+public class PerceptionDataLoggerPanel extends ImGuiPanel
 {
    public static final String PERCEPTION_DIRECTORY_NAME = "perception";
    public static final String PERCEPTION_LOGS_DEFAULT_DIRECTORY
@@ -40,12 +38,12 @@ public class PerceptionDataLoggingPanel extends ImGuiPanel
 
    private final HashMap<String, ImBoolean> channelFlags = new HashMap<>();
 
-   public PerceptionDataLoggingPanel(PerceptionDataLogger logger)
+   public PerceptionDataLoggerPanel(PerceptionDataLogger logger)
    {
       this("Perception Logger", logger);
    }
 
-   public PerceptionDataLoggingPanel(String panelName, PerceptionDataLogger logger)
+   public PerceptionDataLoggerPanel(String panelName, PerceptionDataLogger logger)
    {
       super(panelName);
       setRenderMethod(this::renderImGuiWidgets);

@@ -87,15 +87,15 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
       executorService.clearQueueAndExecute(() -> generateMeshes(planarRegionsList));
    }
 
-   public synchronized void generateMeshes(PlanarRegionsList regionList)
+   public synchronized void generateMeshes(PlanarRegionsList incomingPlanarRegionsList)
    {
-      planarRegionsList = regionList;
+      planarRegionsList = incomingPlanarRegionsList;
       // if we're passing in null, make an empty list
-      if (regionList == null)
-         regionList = new PlanarRegionsList();
+      if (incomingPlanarRegionsList == null)
+         incomingPlanarRegionsList = new PlanarRegionsList();
 
       ArrayList<RDXMultiColorMeshBuilder> meshBuilders = new ArrayList<>();
-      for (PlanarRegion planarRegion : regionList.getPlanarRegionsAsList())
+      for (PlanarRegion planarRegion : incomingPlanarRegionsList.getPlanarRegionsAsList())
       {
          RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
          meshBuilders.add(meshBuilder);
@@ -176,23 +176,6 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
    }
 
-   public void process3DViewInput(ImGui3DViewInput input)
-   {
-//      modelInstance.setOpacity(mouseHovering ? 0.5f : 1.0f);
-      if (tooltip != null)
-         tooltip.setInput(input);
-   }
-
-   public void setupTooltip(RDX3DPanel panel3D, String text)
-   {
-      tooltip = new RDX3DPanelTooltip(panel3D);
-      panel3D.addImGuiOverlayAddition(() ->
-                                      {
-                                         if (mouseHovering)
-                                            tooltip.render(tooltipText);
-                                      });
-   }
-
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
@@ -219,6 +202,23 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
       selectedRegionId = -1;
       mouseHovering = false;
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+//      modelInstance.setOpacity(mouseHovering ? 0.5f : 1.0f);
+      if (tooltip != null)
+         tooltip.setInput(input);
+   }
+
+   public void setupTooltip(RDX3DPanel panel3D, String text)
+   {
+      tooltip = new RDX3DPanelTooltip(panel3D);
+      panel3D.addImGuiOverlayAddition(() ->
+                                      {
+                                         if (mouseHovering)
+                                            tooltip.render(tooltipText);
+                                      });
    }
 
    @Override
