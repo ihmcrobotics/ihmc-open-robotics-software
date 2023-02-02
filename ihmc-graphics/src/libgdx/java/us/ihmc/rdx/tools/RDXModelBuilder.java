@@ -187,9 +187,9 @@ public class RDXModelBuilder
    public static ModelInstance createLine(Point3DReadOnly start, Point3DReadOnly end, double lineWidth, Color color)
    {
       return buildModelInstance(meshBuilder ->
-                                {
-                                   meshBuilder.addLine(start, end, lineWidth, color);
-                                }, "line");
+      {
+         meshBuilder.addLine(start, end, lineWidth, color);
+      }, "line");
    }
 
    public static ModelInstance createPose(double radius, Color color)
