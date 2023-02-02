@@ -40,7 +40,6 @@ bool check_convergence(float3 va, float3 vb)
 
 float4 back_project_spherical(int2 pos, float depth, global float* params)
 {
-
    float totalPitch = M_PI / 2;
    float totalYaw = 2 * M_PI;
 
@@ -77,50 +76,50 @@ float4 back_project_perspective(int2 pos, float Z, global float* params)
 float3 estimate_perspective_normal(read_write image2d_t in, int rIndex, int cIndex, global float* params)
 {
    float residual = 0;
-      float radius = 0;
-      int m = (int)params[NORMAL_PACK_RANGE];
-      int count = 0;
-      float4 normal = (float4)(0,0,0,0);
+   float radius = 0;
+   int m = (int)params[NORMAL_PACK_RANGE];
+   int count = 0;
+   float4 normal = (float4)(0,0,0,0);
 
-      if   (
-               rIndex >= m && cIndex >= m
-               && (rIndex * ((int) params[PATCH_HEIGHT]) + 2*m) < ((int) params[INPUT_HEIGHT])
-               && (cIndex * ((int) params[PATCH_WIDTH]) + 2*m) < ((int) params[INPUT_WIDTH])
-           )
+   if (
+          rIndex >= m && cIndex >= m
+          && (rIndex * ((int) params[PATCH_HEIGHT]) + 2*m) < ((int) params[INPUT_HEIGHT])
+          && (cIndex * ((int) params[PATCH_WIDTH]) + 2*m) < ((int) params[INPUT_WIDTH])
+      )
+   {
+      for (int i = 0; i < (int) m; i++)
       {
-         for (int i = 0; i < (int) m; i++)
+         for( int j = 0; j < (int) m; j++)
          {
-            for( int j = 0; j < (int) m; j++)
-            {
-               count++;
-               int grIndex = rIndex * (int) params[PATCH_HEIGHT] + i;
-               int gcIndex = cIndex * (int) params[PATCH_WIDTH] + j;
-               int2 pos = (int2) (gcIndex, grIndex);
+            count++;
+            int grIndex = rIndex * (int) params[PATCH_HEIGHT] + i;
+            int gcIndex = cIndex * (int) params[PATCH_WIDTH] + j;
+            int2 pos = (int2) (gcIndex, grIndex);
 
-               pos = (int2) (gcIndex, grIndex);
-               radius = ((float) read_imageui(in, pos).x) / (float) 1000;
-               float4 va = back_project_perspective(pos, radius, params);
+            pos = (int2) (gcIndex, grIndex);
+            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            float4 va = back_project_perspective(pos, radius, params);
 
-               pos = (int2) (gcIndex + m, grIndex);
-               radius = ((float) read_imageui(in, pos).x) / (float) 1000;
-               float4 vb = back_project_perspective(pos, radius, params);
+            pos = (int2) (gcIndex + m, grIndex);
+            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            float4 vb = back_project_perspective(pos, radius, params);
 
-               pos = (int2) (gcIndex + m, grIndex + m);
-               radius = ((float) read_imageui(in, pos).x) / (float) 1000;
-               float4 vc = back_project_perspective(pos, radius, params);
+            pos = (int2) (gcIndex + m, grIndex + m);
+            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            float4 vc = back_project_perspective(pos, radius, params);
 
-               pos = (int2) (gcIndex, grIndex + m);
-               radius = ((float) read_imageui(in, pos).x) / (float) 1000;
-               float4 vd = back_project_perspective(pos, radius, params);
+            pos = (int2) (gcIndex, grIndex + m);
+            radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+            float4 vd = back_project_perspective(pos, radius, params);
 
-               normal += cross((vc - vb),(vb - va));
-               normal += cross((vd - vc),(vc - vb));
-               normal += cross((va - vd),(vd - vc));
-               normal += cross((vb - va),(va - vd));
-            }
+            normal += cross((vc - vb),(vb - va));
+            normal += cross((vd - vc),(vc - vb));
+            normal += cross((va - vd),(vd - vc));
+            normal += cross((vb - va),(va - vd));
          }
       }
-      return normalize((1 / (float) (count)) * normal.xyz);
+   }
+   return normalize((1 / (float) (count)) * normal.xyz);
 }
 
 float3 estimate_spherical_normal(read_write image2d_t in, int rIndex, int cIndex, global float* params)
@@ -131,11 +130,11 @@ float3 estimate_spherical_normal(read_write image2d_t in, int rIndex, int cIndex
    int count = 0;
    float4 normal = (float4)(0,0,0,0);
 
-   if   (
-            rIndex >= m && cIndex >= m
-            && (rIndex * ((int) params[PATCH_HEIGHT]) + 2*m) < ((int) params[INPUT_HEIGHT])
-            && (cIndex * ((int) params[PATCH_WIDTH]) + 2*m) < ((int) params[INPUT_WIDTH])
-        )
+   if (
+          rIndex >= m && cIndex >= m
+          && (rIndex * ((int) params[PATCH_HEIGHT]) + 2*m) < ((int) params[INPUT_HEIGHT])
+          && (cIndex * ((int) params[PATCH_WIDTH]) + 2*m) < ((int) params[INPUT_WIDTH])
+      )
    {
       for (int i = 0; i < (int) m; i++)
       {
@@ -429,11 +428,11 @@ void kernel filterKernel(read_write image2d_t inputImage, write_only image2d_t f
  * patches on a sub-sampled grid of the depth map. The following intrinsic parameters are used to convert to Point Cloud.
  * K: [459.97265625, 0.0, 341.83984375, 0.0, 459.8046875, 249.173828125, 0.0, 0.0, 1.0]
  * */
-void kernel packKernel(  read_write image2d_t in,
-	                        write_only image2d_t out0, write_only image2d_t out1, write_only image2d_t out2, /* float3 maps for normal*/
-                            write_only image2d_t out3, write_only image2d_t out4, write_only image2d_t out5, /* float3 maps for centroids */
-                            global float* params
-                            // write_only image2d_t debug
+void kernel packKernel(read_write image2d_t in,
+	                   write_only image2d_t out0, write_only image2d_t out1, write_only image2d_t out2, /* float3 maps for normal*/
+                       write_only image2d_t out3, write_only image2d_t out4, write_only image2d_t out5, /* float3 maps for centroids */
+                       global float* params
+                       // write_only image2d_t debug
 
  )
 {
@@ -482,10 +481,10 @@ void kernel packKernel(  read_write image2d_t in,
 /* Merge Kernel: Creates the graph-based structure by adding connections between the neighboring
  * patches based on similarity.
  */
-void kernel mergeKernel(  read_write image2d_t in, read_only image2d_t out0, read_only image2d_t out1, read_only image2d_t out2, /* float3 maps for normal*/
-                          read_only image2d_t out3, read_only image2d_t out4, read_only image2d_t out5, /* float3 maps for centroids */
-                          write_only image2d_t out6, /* uint8 map for patch metadata*/
-                          global float* params /* All parameters */
+void kernel mergeKernel(read_write image2d_t in, read_only image2d_t out0, read_only image2d_t out1, read_only image2d_t out2, /* float3 maps for normal*/
+                        read_only image2d_t out3, read_only image2d_t out4, read_only image2d_t out5, /* float3 maps for centroids */
+                        write_only image2d_t out6, /* uint8 map for patch metadata*/
+                        global float* params /* All parameters */
 )
 {
      int cIndex = get_global_id(0);
@@ -536,7 +535,7 @@ void kernel mergeKernel(  read_write image2d_t in, read_only image2d_t out0, rea
         }
         write_imageui(out6, (int2)(cIndex,rIndex), (uint4)(boundaryConnectionsEncodedAsOnes, 0, 0, 0));
 
-//         printf("MergeKernel[%d,%d] -> (%d)\n", rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
+//      printf("MergeKernel[%d,%d] -> (%d)\n", rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
     }
 }
 
@@ -545,38 +544,38 @@ void kernel mergeKernel(  read_write image2d_t in, read_only image2d_t out0, rea
  * */
 void kernel perspectiveBackProjectionKernel(read_write image2d_t in, global float* cloud, global float* params)
 {
-        int cIndex = get_global_id(0);
-        int rIndex = get_global_id(1);
+    int cIndex = get_global_id(0);
+    int rIndex = get_global_id(1);
 
-       //if(rIndex >= 0 && rIndex < (int)params[INPUT_HEIGHT] && cIndex >= 0 && cIndex < (int)params[INPUT_WIDTH])
+    //if(rIndex >= 0 && rIndex < (int)params[INPUT_HEIGHT] && cIndex >= 0 && cIndex < (int)params[INPUT_WIDTH])
+    {
+       int2 pos = (int2)(cIndex,rIndex);
+
+       float scaleToMeters = 0.001f;
+       float radius = ((float)read_imageui(in, pos).x) * scaleToMeters;
+
+       if(radius > 0.3f)
        {
-          int2 pos = (int2)(cIndex,rIndex);
+          float4 point = back_project_perspective(pos, radius, params);
 
-          float scaleToMeters = 0.001f;
-          float radius = ((float)read_imageui(in, pos).x) * scaleToMeters;
+          int index = ((rIndex * params[INPUT_WIDTH]) + cIndex) * 3;
 
-          if(radius > 0.3f)
+          if(length(point.xyz) > 1.5f)
           {
-             float4 point = back_project_perspective(pos, radius, params);
-
-             int index = ((rIndex * params[INPUT_WIDTH]) + cIndex) * 3;
-
-             if(length(point.xyz) > 1.5f)
-             {
-                 cloud[index] = point.x;
-                 cloud[index + 1] = point.y;
-                 cloud[index + 2] = point.z;
-             }
-             else
-             {
-                cloud[index] = 0;
-                cloud[index + 1] = 0;
-                cloud[index + 2] = 0;
-             }
-
-             //printf("[%d] Spherical(%d,%d):\t Radius: %.3lf, Point:(%.4lf, %.4lf, %.4lf)\n", index, rIndex, cIndex, radius, cloud[index], cloud[index+1], cloud[index+2]);
+              cloud[index] = point.x;
+              cloud[index + 1] = point.y;
+              cloud[index + 2] = point.z;
           }
+          else
+          {
+             cloud[index] = 0;
+             cloud[index + 1] = 0;
+             cloud[index + 2] = 0;
+          }
+
+          //printf("[%d] Spherical(%d,%d):\t Radius: %.3lf, Point:(%.4lf, %.4lf, %.4lf)\n", index, rIndex, cIndex, radius, cloud[index], cloud[index+1], cloud[index+2]);
        }
+    }
 }
 
 /*
@@ -610,8 +609,8 @@ void kernel sphericalBackProjectionKernel(read_write image2d_t in, global float*
 }
 
    /*
-   * Copy kernel to move feature grid map into cache buffer
-   * */
+    * Copy kernel to move feature grid map into cache buffer
+    */
    void kernel copyKernel(read_only image2d_t in0, read_only image2d_t in1, read_only image2d_t in2, read_only image2d_t in3, read_only image2d_t in4,
                            read_only image2d_t in5, write_only image2d_t out0, write_only image2d_t out1, write_only image2d_t out2,
                            write_only image2d_t out3, write_only image2d_t out4, write_only image2d_t out5, global float* params)
@@ -639,13 +638,13 @@ void kernel sphericalBackProjectionKernel(read_write image2d_t in, global float*
 
 /*
  * Correspondence Kernel for Iterative Closest Point
- * */
+ */
 void kernel correspondenceKernel(read_only image2d_t one0, read_only image2d_t one1, read_only image2d_t one2,
-                                read_only image2d_t one3, read_only image2d_t one4, read_only image2d_t one5,
-                                read_only image2d_t two0, read_only image2d_t two1, read_only image2d_t two2,
-                                read_only image2d_t two3, read_only image2d_t two4, read_only image2d_t two5,
-                                write_only image2d_t matchRow, write_only image2d_t matchColumn,
-                                global float* params
+                                 read_only image2d_t one3, read_only image2d_t one4, read_only image2d_t one5,
+                                 read_only image2d_t two0, read_only image2d_t two1, read_only image2d_t two2,
+                                 read_only image2d_t two3, read_only image2d_t two4, read_only image2d_t two5,
+                                 write_only image2d_t matchRow, write_only image2d_t matchColumn,
+                                 global float* params
 )
 {
     int cIndex = get_global_id(0);
@@ -741,7 +740,6 @@ void kernel correspondenceKernel(read_only image2d_t one0, read_only image2d_t o
 //        printf("Match: (%d, %d) -> [%d, %d] : {%.2lf}\n", rowOne, columnOne, minRowIndex, minColumnIndex, minLength);
 //    }
 
-
     write_imageui(matchRow, (int2)(cIndex,rIndex), (uint4)(minRowIndex,0,0,0));
     write_imageui(matchColumn, (int2)(cIndex,rIndex), (uint4)(minColumnIndex,0,0,0));
 }
@@ -819,10 +817,10 @@ void kernel centroidReduceKernel(read_write image2d_t one0, read_write image2d_t
 * ICP Kernel for Iterative Closest Point
 * */
 void kernel correlReduceKernel(read_write image2d_t one0, read_write image2d_t one1, read_write image2d_t one2,
-                              read_write image2d_t one3, read_write image2d_t one4, read_write image2d_t one5,
-                              read_write image2d_t two0, read_write image2d_t two1, read_write image2d_t two2,
-                              read_write image2d_t two3, read_write image2d_t two4, read_write image2d_t two5,
-										read_write image2d_t matchRowImage, read_write image2d_t matchColumnImage, global float* correlation, global float* params)
+                               read_write image2d_t one3, read_write image2d_t one4, read_write image2d_t one5,
+                               read_write image2d_t two0, read_write image2d_t two1, read_write image2d_t two2,
+                               read_write image2d_t two3, read_write image2d_t two4, read_write image2d_t two5,
+							   read_write image2d_t matchRowImage, read_write image2d_t matchColumnImage, global float* correlation, global float* params)
 {
     int cIndex = get_global_id(0);
 
@@ -880,10 +878,10 @@ void kernel correlReduceKernel(read_write image2d_t one0, read_write image2d_t o
         }
     }
 
-		// Store final 9x1 "correl" into cIndex'th block in "correlation"
-		for(int k = 0; k<9; k++)
-		{
-			correlation[cIndex * 9 + k] = correl[k];
-		}
+	// Store final 9x1 "correl" into cIndex'th block in "correlation"
+	for(int k = 0; k<9; k++)
+	{
+		correlation[cIndex * 9 + k] = correl[k];
+	}
 }
 
