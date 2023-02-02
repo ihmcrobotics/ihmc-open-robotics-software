@@ -137,6 +137,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       convexPolygons.add().set(convexPolygon);
       updateBoundingBox();
       updateConvexHull();
+      updateArea();
    }
 
    public void set(RigidBodyTransformReadOnly transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
@@ -156,6 +157,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateBoundingBox();
       updateConvexHull();
       updateConcaveHull();
+      updateArea();
 
       regionId = newRegionId;
    }
@@ -175,9 +177,9 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       updateConvexHull();
       updateBoundingBox();
+      updateArea();
 
       regionId = newRegionId;
-      area = PlanarRegionTools.computePlanarRegionArea(this);
    }
 
 
@@ -1180,7 +1182,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateBoundingBox();
       convexHull.set(other.convexHull);
 
-      area = PlanarRegionTools.computePlanarRegionArea(other);
+      updateArea();
    }
 
    public void setTransformOnly(PlanarRegion other)
@@ -1652,6 +1654,11 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    public void transformFromLocalToWorld(Transformable objectToTransform)
    {
       objectToTransform.applyTransform(fromLocalToWorldTransform);
+   }
+
+   public void updateArea()
+   {
+      area = PlanarRegionTools.computePlanarRegionArea(this);
    }
 
    public ConvexPolygonTools getConvexPolygonTools()

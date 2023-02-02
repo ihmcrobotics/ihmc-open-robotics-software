@@ -633,6 +633,9 @@ public class PlanarRegionSLAMTools
 
    public static boolean mergeRegionIntoParentUsingOptimalPlane(PlanarRegion parentRegion, PlanarRegion childRegion, Vector4D optimalPlane)
    {
+      // TODO: Fix this to use the optimal plane from factor graph optimized results
+      // Jira: https://jira.ihmc.us/browse/HS-434
+
       //      PlanarRegionTools.projectInZToPlanarRegion()
       //      (parentRegion, childRegion, optimalPlane);
       return mergeRegionHulls(parentRegion, childRegion);
@@ -713,8 +716,8 @@ public class PlanarRegionSLAMTools
       Point3D mapOrigin = new Point3D();
       regionB.getOrigin(mapOrigin);
 
-      Vector3D originVec = new Vector3D();
-      originVec.sub(newOrigin, mapOrigin);
+      Vector3D originVector = new Vector3D();
+      originVector.sub(newOrigin, mapOrigin);
 
       double normalDistance = 0;
       boolean intersects = false;
@@ -726,7 +729,7 @@ public class PlanarRegionSLAMTools
       if (wasMatched)
       {
          // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
-         normalDistance = Math.abs(originVec.dot(regionA.getNormal()));
+         normalDistance = Math.abs(originVector.dot(regionA.getNormal()));
          wasMatched &= normalDistance < normalDistanceThreshold;
 
          // TODO Check the logic for this minimum distance computation. In cases of vertical planar regions it generates incorrect distances.
