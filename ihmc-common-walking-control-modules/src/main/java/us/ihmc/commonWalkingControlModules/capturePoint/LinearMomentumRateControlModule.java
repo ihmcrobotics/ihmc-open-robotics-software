@@ -109,7 +109,7 @@ public class LinearMomentumRateControlModule
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics desiredCoP = new FramePoint2D();
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
-   private final FixedFramePoint2DBasics desiredCoPInMidFeet;
+   private final FramePoint2D desiredCoPFootFrame;
 
    private boolean controlHeightWithMomentum;
 
@@ -129,6 +129,7 @@ public class LinearMomentumRateControlModule
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
+   private final SideDependentList<ContactableFoot> contactableFeet;
 
    private final FixedFrameVector2DBasics perfectCMPDelta = new FrameVector2D();
 
@@ -179,6 +180,7 @@ public class LinearMomentumRateControlModule
    {
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
+      this.contactableFeet = contactableFeet;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
@@ -202,7 +204,7 @@ public class LinearMomentumRateControlModule
       midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
-      desiredCoPInMidFeet = new FramePoint2D(midFootZUpFrame);
+      desiredCoPFootFrame = new FramePoint2D(midFootZUpFrame);
 
       capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
 
@@ -388,11 +390,58 @@ public class LinearMomentumRateControlModule
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, desiredLinearMomentumRateWeight);
 
-      desiredCoPInMidFeet.setMatchingFrame(desiredCoP);
-      centerOfPressureCommand.setDesiredCoP(desiredCoP);
-      centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
+      computeCenterOfPressureCommand();
 
       return success;
+   }
+
+   private void computeCenterOfPressureCommand()
+   {
+      boolean leftInContact = contactStateCommands.get(RobotSide.LEFT).getNumberOfContactPoints() > 0;
+      boolean rightInContact = contactStateCommands.get(RobotSide.RIGHT).getNumberOfContactPoints() > 0;
+
+      if (leftInContact != rightInContact)
+      {
+         if (leftInContact)
+            centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(RobotSide.LEFT).getRigidBody());
+         else
+            centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(RobotSide.RIGHT).getRigidBody());
+
+         desiredCoPFootFrame.setIncludingFrame(desiredCoP);
+         desiredCoPFootFrame.changeFrame(midFootZUpFrame);
+         centerOfPressureCommand.setDesiredCoP(desiredCoPFootFrame);
+         centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
+      }
+      else if (leftInContact)
+      {
+         // check if it's to the outside of the foot
+         boolean setCommand = false;
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            desiredCoPFootFrame.setIncludingFrame(desiredCoP);
+            desiredCoPFootFrame.changeFrame(contactableFeet.get(robotSide).getSoleFrame());
+            if (robotSide.negateIfRightSide(desiredCoPFootFrame.getY()) > 0.0)
+            {
+               // it is to the outside of the foot, so add the command
+               centerOfPressureCommand.setContactingRigidBody(contactableFeet.get(robotSide).getRigidBody());
+               centerOfPressureCommand.setDesiredCoP(desiredCoPFootFrame);
+               centerOfPressureCommand.setWeight(contactableFeet.get(robotSide).getSoleFrame(), centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
+               setCommand = true;
+               break;
+            }
+         }
+
+         if (!setCommand)
+         {
+            centerOfPressureCommand.setContactingRigidBody(null);
+            centerOfPressureCommand.setWeight(midFootZUpFrame, 0.0, 0.0);
+         }
+      }
+      else
+      {
+         centerOfPressureCommand.setContactingRigidBody(null);
+         centerOfPressureCommand.setWeight(midFootZUpFrame, 0.0, 0.0);
+      }
    }
 
    /**
