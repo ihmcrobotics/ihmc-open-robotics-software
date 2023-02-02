@@ -54,7 +54,7 @@ public class WebcamCalibrationPatternDemo
                      while (running)
                      {
                         webcamReader.readWebcamImage();
-                        calibrationPatternDetectionUI.copyBGRImage(webcamReader.getBGRImage());
+                        calibrationPatternDetectionUI.copyInSourceBGRImage(webcamReader.getBGRImage());
                      }
                   }, "CameraRead");
                }
