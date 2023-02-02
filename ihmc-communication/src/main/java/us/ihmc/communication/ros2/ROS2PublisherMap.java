@@ -14,8 +14,8 @@ import java.util.HashMap;
 public class ROS2PublisherMap
 {
    private final ROS2NodeInterface ros2Node;
-
-   private HashMap<ROS2Topic, IHMCROS2Publisher> map = new HashMap<>();
+   private final HashMap<ROS2Topic, IHMCROS2Publisher> map = new HashMap<>();
+   private final Empty emptyMessage = new Empty();
 
    public ROS2PublisherMap(ROS2NodeInterface ros2Node)
    {
@@ -27,8 +27,15 @@ public class ROS2PublisherMap
       IHMCROS2Publisher publisher = map.get(topic);
       if (publisher == null)
       {
-         publisher = new IHMCROS2Publisher<>(ros2Node, topic);
-         map.put(topic, new IHMCROS2Publisher(ros2Node, topic));
+         if (topic.getType().equals(Pose3D.class))
+         {
+            publisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, topic);
+         }
+         else
+         {
+            publisher = new IHMCROS2Publisher<>(ros2Node, topic);
+         }
+         map.put(topic, publisher);
       }
 
       return publisher;
@@ -36,20 +43,16 @@ public class ROS2PublisherMap
 
    public <T> void publish(ROS2Topic<T> topic, T message)
    {
-      IHMCROS2Publisher publisher = getOrCreatePublisher(topic);
-      publisher.publish(message);
+      getOrCreatePublisher(topic).publish(message);
    }
 
    public void publish(ROS2Topic<Pose3D> topic, Pose3D message)
    {
-      IHMCROS2Publisher publisher = getOrCreatePublisher(topic);
-      publisher.publish(message);
+      getOrCreatePublisher(topic).publish(message);
    }
 
    public void publish(ROS2Topic<Empty> topic)
    {
-      IHMCROS2Publisher publisher = getOrCreatePublisher(topic);
-      Empty message = new Empty();
-      publisher.publish(message);
+      getOrCreatePublisher(topic).publish(emptyMessage);
    }
 }
