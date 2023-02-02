@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.perception.objects.ArUcoMarkerObject;
-import us.ihmc.perception.objects.ArUcoMarkerObjectInfo;
+import us.ihmc.perception.objects.ObjectInfo;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -24,21 +24,20 @@ public class ObjectDetector
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
 
    private final IHMCROS2Input<ArUcoMarkerPoses> arUcoMarkerPosesSubscription;
-   private final HashMap<Long, BiConsumer<Tuple3DReadOnly, QuaternionReadOnly>> markerUpdaters = new HashMap<>();
    private final ROS2Helper ros2;
    private final ArrayList<OpenCVArUcoMarker> arUcoMarkersToTrack;
    private boolean objectDetected = false;
    private ArUcoMarkerObject objectWithArUcoMarker;
-   private ArUcoMarkerObjectInfo arUcoInfo;
+   private ObjectInfo objectInfo;
    private String objectName = "";
 
-   public ObjectDetector(ArUcoMarkerObjectInfo arUcoInfo, ArrayList<OpenCVArUcoMarker> arUcoMarkersToTrack)
+   public ObjectDetector(ObjectInfo objectInfo, ArrayList<OpenCVArUcoMarker> arUcoMarkersToTrack)
    {
       ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "object_detector");
       arUcoMarkerPosesSubscription = ros2.subscribe(ARUCO_MARKER_POSES);
 
       this.arUcoMarkersToTrack = arUcoMarkersToTrack;
-      this.arUcoInfo = arUcoInfo;
+      this.objectInfo = objectInfo;
    }
 
    public void update()
@@ -56,13 +55,13 @@ public class ObjectDetector
             var arUcoMarker = arUcoMarkersToTrack.get(objectId);
             if (arUcoMarker != null)
             {
-               objectName = arUcoInfo.getObjectName(objectId);
+               objectName = objectInfo.getObjectName(objectId);
                //TODO - EXTENSION TO SIMULTANEOUS DETECTION MULTIPLE OBJECTS
                // if multiple objects detected,
                // use VR eye tracking to see what we are focusing on (closer object to where the eye is focusing)
                // highlight selected object and user confirms with button A, rejects button B
                //               objectWithArUcoMarker.add(new ArUcoMarkerObject(marker.getId(),arUcoInfo)); // get object with attached marker
-               objectWithArUcoMarker = new ArUcoMarkerObject(objectId, arUcoInfo);
+               objectWithArUcoMarker = new ArUcoMarkerObject(objectId, objectInfo);
                // get marker pose in camera frame
                FramePose3DBasics markerPose = new FramePose3D();
                markerPose.getPosition().set(arUcoMarkerPosesMessage.getPosition().get(i));

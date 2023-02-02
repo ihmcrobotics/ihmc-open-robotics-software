@@ -22,7 +22,7 @@ public class ArUcoObjectPoseTest
    @Test
    public void framePoseTransformsArUcoTest()
    {
-      ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
+      ObjectInfo arucoInfo = new ObjectInfo();
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       ArUcoMarkerObject objectWithArUco;
 
@@ -53,24 +53,24 @@ public class ArUcoObjectPoseTest
       objectPose.changeFrame(objectWithArUco.getMarkerFrame()); // transform object pose in marker frame
       LogTools.info("Object: {}", objectPose);
       // check that object pose in marker frame equals to transform marker to object
-      assertEquals(objectPose.getTranslation().getX(), arucoInfo.getObjectTranslation(objectId).getX(), 1e-10);
-      assertEquals(objectPose.getTranslation().getY(), arucoInfo.getObjectTranslation(objectId).getY(), 1e-10);
-      assertEquals(objectPose.getTranslation().getZ(), arucoInfo.getObjectTranslation(objectId).getZ(), 1e-10);
-      assertEquals(objectPose.getOrientation().getYaw(), arucoInfo.getObjectYawPitchRoll(objectId).getYaw(), 1e-10);
-      assertEquals(objectPose.getOrientation().getRoll(), arucoInfo.getObjectYawPitchRoll(objectId).getRoll(), 1e-10);
-      assertEquals(objectPose.getOrientation().getPitch(), arucoInfo.getObjectYawPitchRoll(objectId).getPitch(), 1e-10);
+      assertEquals(objectPose.getTranslation().getX(), arucoInfo.getMarkerTranslation(objectId).getX(), 1e-10);
+      assertEquals(objectPose.getTranslation().getY(), arucoInfo.getMarkerTranslation(objectId).getY(), 1e-10);
+      assertEquals(objectPose.getTranslation().getZ(), arucoInfo.getMarkerTranslation(objectId).getZ(), 1e-10);
+      assertEquals(objectPose.getOrientation().getYaw(), arucoInfo.getMarkerYawPitchRoll(objectId).getYaw(), 1e-10);
+      assertEquals(objectPose.getOrientation().getRoll(), arucoInfo.getMarkerYawPitchRoll(objectId).getRoll(), 1e-10);
+      assertEquals(objectPose.getOrientation().getPitch(), arucoInfo.getMarkerYawPitchRoll(objectId).getPitch(), 1e-10);
       objectPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform back to world frame
 
       ReferenceFrame objectFrame = objectWithArUco.getObjectFrame();
       markerPose.changeFrame(objectFrame); // transform marker pose in object frame
       LogTools.info("Marker: {}", markerPose);
       // check that marker pose in object frame equals to inverse transform marker to object
-      assertEquals(markerPose.getTranslation().getX(), -arucoInfo.getObjectTranslation(objectId).getX(), 1e-10);
-      assertEquals(markerPose.getTranslation().getY(), -arucoInfo.getObjectTranslation(objectId).getY(), 1e-10);
-      assertEquals(markerPose.getTranslation().getZ(), -arucoInfo.getObjectTranslation(objectId).getZ(), 1e-10);
-      assertEquals(markerPose.getOrientation().getYaw(), -arucoInfo.getObjectYawPitchRoll(objectId).getYaw(), 1e-10);
-      assertEquals(markerPose.getOrientation().getRoll(), -arucoInfo.getObjectYawPitchRoll(objectId).getRoll(), 1e-10);
-      assertEquals(markerPose.getOrientation().getPitch(), -arucoInfo.getObjectYawPitchRoll(objectId).getPitch(), 1e-10);
+      assertEquals(markerPose.getTranslation().getX(), -arucoInfo.getMarkerTranslation(objectId).getX(), 1e-10);
+      assertEquals(markerPose.getTranslation().getY(), -arucoInfo.getMarkerTranslation(objectId).getY(), 1e-10);
+      assertEquals(markerPose.getTranslation().getZ(), -arucoInfo.getMarkerTranslation(objectId).getZ(), 1e-10);
+      assertEquals(markerPose.getOrientation().getYaw(), -arucoInfo.getMarkerYawPitchRoll(objectId).getYaw(), 1e-10);
+      assertEquals(markerPose.getOrientation().getRoll(), -arucoInfo.getMarkerYawPitchRoll(objectId).getRoll(), 1e-10);
+      assertEquals(markerPose.getOrientation().getPitch(), -arucoInfo.getMarkerYawPitchRoll(objectId).getPitch(), 1e-10);
       markerPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform back to world frame
 
       ///////////////////////////////////////////////////////////////////////////////
