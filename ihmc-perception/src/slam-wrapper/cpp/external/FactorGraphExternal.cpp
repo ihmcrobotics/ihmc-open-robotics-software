@@ -96,7 +96,7 @@ void FactorGraphExternal::createOrientedPlaneNoiseModel(float *variance)
 
 bool FactorGraphExternal::getPoseById(int poseId, double* pose)
 {
-    if(!factorGraphHandler.getResults().exists(gtsam::Symbol('x', poseId)))
+    if (!factorGraphHandler.getResults().exists(gtsam::Symbol('x', poseId)))
         return false;
 
     auto matrix = factorGraphHandler.getResults().at<gtsam::Pose3>(gtsam::Symbol('x', poseId)).matrix();
@@ -112,7 +112,7 @@ bool FactorGraphExternal::getPoseById(int poseId, double* pose)
 
 bool FactorGraphExternal::getPlanarLandmarkById(int landmarkId, double* plane)
 {
-    if(!factorGraphHandler.getResults().exists(gtsam::Symbol('l', landmarkId)))
+    if (!factorGraphHandler.getResults().exists(gtsam::Symbol('l', landmarkId)))
         return false;
 
     auto matrix = factorGraphHandler.getResults().at<gtsam::OrientedPlane3>(gtsam::Symbol('l', landmarkId)).planeCoefficients();
