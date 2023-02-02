@@ -44,7 +44,7 @@ public class PlaneContactStateToWrenchMatrixHelper
     */
    private static final double minFootholdSizeForCoPObjectives = 1.0e-3;
 
-   public static final boolean useOldCoPObjectiveFormulation = true;
+   public static final boolean useOldCoPObjectiveFormulation = false;
 
    private final int maxNumberOfContactPoints;
    private final int numberOfBasisVectorsPerContactPoint;
@@ -56,8 +56,6 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final DMatrixRMaj wrenchJacobianInCoMFrame;
    private final DMatrixRMaj wrenchJacobianInPlaneFrame;
 
-   private final DMatrixRMaj fzRow = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj singleCopRow = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj copRegularizationJacobian;
    private final DMatrixRMaj copRegularizationObjective;
    private final DMatrixRMaj copRateRegularizationJacobian;
@@ -96,6 +94,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final FramePoint2D contactPoint2d = new FramePoint2D();
    private final FrictionConeRotationCalculator coneRotationCalculator;
+   private final CoPObjectiveCalculator copObjectiveCalculator = new CoPObjectiveCalculator();
 
    public PlaneContactStateToWrenchMatrixHelper(ContactablePlaneBody contactablePlaneBody, ReferenceFrame centerOfMassFrame, int maxNumberOfContactPoints,
                                                 int numberOfBasisVectorsPerContactPoint, FrictionConeRotationCalculator coneRotationCalculator,
@@ -174,9 +173,6 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       previousCoP = new YoFramePoint2D(namePrefix + "PreviousCoP", planeFrame, registry);
       desiredCoP = new YoFramePoint2D(namePrefix + "DesiredCoP", planeFrame, registry);
-
-      fzRow.reshape(1, rhoSize);
-      singleCopRow.reshape(1, rhoSize);
 
       parentRegistry.addChild(registry);
    }
@@ -393,20 +389,10 @@ public class PlaneContactStateToWrenchMatrixHelper
       {
          desiredCoP.checkReferenceFrameMatch(planeFrame);
 
-         int fzIndex = 5;
-         CommonOps_DDRM.extractRow(wrenchJacobianInPlaneFrame, fzIndex, fzRow);
-
-         // [x_cop * J_fz + J_ty] * rho == 0
-         int tauYIndex = 1;
-         CommonOps_DDRM.extractRow(wrenchJacobianInPlaneFrame, tauYIndex, singleCopRow);
-         CommonOps_DDRM.add(desiredCoP.getX(), fzRow, 1.0, singleCopRow, singleCopRow);
-         CommonOps_DDRM.insert(singleCopRow, jacobianToPack, 0, 0);
-
-         // [y_cop * J_fz - J_tx] * rho == 0
-         int tauXIndex = 0;
-         CommonOps_DDRM.extractRow(wrenchJacobianInPlaneFrame, tauXIndex, singleCopRow);
-         CommonOps_DDRM.add(desiredCoP.getY(), fzRow, -1.0, singleCopRow, singleCopRow);
-         CommonOps_DDRM.insert(singleCopRow, jacobianToPack, 1, 0);
+         copObjectiveCalculator.computeTaskJacobian(wrenchJacobianInPlaneFrame,
+                                                    desiredCoP,
+                                                    rhoSize,
+                                                    jacobianToPack);
       }
    }
 

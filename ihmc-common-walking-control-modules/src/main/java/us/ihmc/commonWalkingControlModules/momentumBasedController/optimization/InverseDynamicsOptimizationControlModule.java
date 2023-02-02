@@ -337,8 +337,8 @@ public class InverseDynamicsOptimizationControlModule
 
       DMatrixRMaj copRegularizationWeight = wrenchMatrixCalculator.getCoPRegularizationWeight();
       DMatrixRMaj copRegularizationJacobian = wrenchMatrixCalculator.getCoPRegularizationJacobian();
-      DMatrixRMaj coPRegularizationObjective = wrenchMatrixCalculator.getCoPRegularizationObjective();
-      qpSolver.addRhoTask(copRegularizationJacobian, coPRegularizationObjective, copRegularizationWeight);
+      DMatrixRMaj copRegularizationObjective = wrenchMatrixCalculator.getCoPRegularizationObjective();
+      qpSolver.addRhoTask(copRegularizationJacobian, copRegularizationObjective, copRegularizationWeight);
 
       DMatrixRMaj copRateRegularizationWeight = wrenchMatrixCalculator.getCoPRateRegularizationWeight();
       DMatrixRMaj copRateRegularizationJacobian = wrenchMatrixCalculator.getCoPRateRegularizationJacobian();

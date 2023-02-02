@@ -59,6 +59,8 @@ public class WrenchMatrixCalculator
    @Deprecated
    private final YoFrameVector2D copRateHighWeight = new YoFrameVector2D("copRateHighWeight", null, registry);
 
+   private final CoPObjectiveCalculator copObjectiveCalculator = new CoPObjectiveCalculator();
+
    private final DMatrixRMaj rhoJacobianMatrix;
    private final DMatrixRMaj copJacobianMatrix;
    private final DMatrixRMaj rhoPreviousMatrix;
@@ -89,8 +91,6 @@ public class WrenchMatrixCalculator
 
    private final DMatrixRMaj bodyWrenchJacobian = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj fullWrenchJacobian = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj fzRow = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj singleCopRow = new DMatrixRMaj(0, 0);
    private final FrameVector2D weight = new FrameVector2D();
 
    public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
@@ -129,8 +129,6 @@ public class WrenchMatrixCalculator
       copRateRegularizationWeight = new DMatrixRMaj(copTaskSize, copTaskSize);
 
       fullWrenchJacobian.reshape(Wrench.SIZE, rhoSize);
-      fzRow.reshape(1, rhoSize);
-      singleCopRow.reshape(1, rhoSize);
 
       if (contactablePlaneBodies.size() > nContactableBodies)
          throw new RuntimeException("Unexpected number of contactable plane bodies: " + contactablePlaneBodies.size());
@@ -248,22 +246,12 @@ public class WrenchMatrixCalculator
       inputToPack.reshape(2);
       inputToPack.setConstraintType(command.getConstraintType());
 
-      int fzIndex = 5;
-      CommonOps_DDRM.extractRow(fullWrenchJacobian, fzIndex, fzRow);
+      copObjectiveCalculator.computeTaskJacobian(fullWrenchJacobian,
+                                                 desiredCoP,
+                                                 rhoSize,
+                                                 inputToPack.getTaskJacobian());
 
-      // [x_cop * J_fz + J_ty] * rho == 0
-      int tauYIndex = 1;
-      CommonOps_DDRM.extractRow(fullWrenchJacobian, tauYIndex, singleCopRow);
-      CommonOps_DDRM.add(desiredCoP.getX(), fzRow, 1.0, singleCopRow, singleCopRow);
-      CommonOps_DDRM.insert(singleCopRow, inputToPack.getTaskJacobian(), 0, 0);
-      inputToPack.getTaskObjective().set(0, 0.0);
-
-      // [y_cop * J_fz - J_tx] * rho == 0
-      int tauXIndex = 0;
-      CommonOps_DDRM.extractRow(fullWrenchJacobian, tauXIndex, singleCopRow);
-      CommonOps_DDRM.add(desiredCoP.getY(), fzRow, -1.0, singleCopRow, singleCopRow);
-      CommonOps_DDRM.insert(singleCopRow, inputToPack.getTaskJacobian(), 1, 0);
-      inputToPack.getTaskObjective().set(1, 0.0);
+      inputToPack.getTaskObjective().zero();
 
       inputToPack.getTaskWeightMatrix().zero();
       if (command.getConstraintType() == ConstraintType.OBJECTIVE)
