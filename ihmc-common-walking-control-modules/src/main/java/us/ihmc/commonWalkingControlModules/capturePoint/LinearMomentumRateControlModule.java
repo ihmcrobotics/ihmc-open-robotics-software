@@ -140,6 +140,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final FixedFrameVector2DBasics perfectCMPDelta = new FrameVector2D();
 
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
+   private final YoFramePoint2D yoDesiredCoP = new YoFramePoint2D("desiredCoP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
@@ -224,15 +225,18 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition desiredCoPViz = new YoGraphicPosition("Desired CoP", yoDesiredCMP, 0.0075, Purple(), GraphicType.SOLID_BALL);
          YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredCMPViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredCoPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", centerOfMassViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", capturePointViz.createArtifact());
       }
       yoDesiredCMP.setToNaN();
+      yoDesiredCoP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
       yoCapturePoint.setToNaN();
@@ -262,6 +266,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
       capturePointVelocity.reset();
       yoDesiredCMP.setToNaN();
+      yoDesiredCoP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
       yoCapturePoint.setToNaN();
@@ -375,6 +380,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
          desiredLinearMomentumRateWeight.update(linearMomentumRateWeight);
 
       yoDesiredCMP.set(desiredCMP);
+      yoDesiredCoP.set(desiredCoP);
       yoCenterOfMass.setFromReferenceFrame(centerOfMassFrame);
       yoCapturePoint.set(capturePoint);
 
@@ -416,7 +422,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
          for (RobotSide robotSide : RobotSide.values)
          {
             desiredCoPFootFrame.setIncludingFrame(desiredCoP);
-            desiredCoPFootFrame.changeFrame(contactableFeet.get(robotSide).getSoleFrame());
+            desiredCoPFootFrame.changeFrameAndProjectToXYPlane(contactableFeet.get(robotSide).getSoleFrame());
             if (robotSide.negateIfRightSide(desiredCoPFootFrame.getY()) > 0.0)
             {
                // it is to the outside of the foot, so add the command
