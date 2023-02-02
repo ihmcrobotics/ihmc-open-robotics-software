@@ -82,6 +82,11 @@ module toolbox_msgs
          */
         boolean plan_body_path;
         /**
+         * If true, will plan footsteps. If false, will not plan footsteps
+         */
+        @defaultValue(value=True)
+        boolean plan_footsteps;
+        /**
          * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
          */
         @defaultValue(value=True)
