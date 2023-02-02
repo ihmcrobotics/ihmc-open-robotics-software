@@ -21,7 +21,6 @@ import java.util.Set;
 
 public class PlanarRegionRegistrationTools
 {
-
    public static void findPatchMatches(PatchFeatureGrid previousGrid, PatchFeatureGrid currentGrid, HashMap<Integer, Integer> matches)
    {
       Point3D previousCentroid = new Point3D();
