@@ -49,8 +49,6 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:robot-environment-awareness:source")
-   api("us.ihmc:ihmc-perception-slam-wrapper:source")
-   apiBytedecoNatives("hdf5", "1.12.2-")
 }
 
 openpnpDependencies {
