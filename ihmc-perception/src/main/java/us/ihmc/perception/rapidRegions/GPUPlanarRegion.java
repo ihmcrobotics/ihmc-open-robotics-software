@@ -124,7 +124,6 @@ public class GPUPlanarRegion
       {
          normal.negate();
       }
-      //LogTools.info("Normal: " + normal);
    }
 
    public Point3D getCenter()
