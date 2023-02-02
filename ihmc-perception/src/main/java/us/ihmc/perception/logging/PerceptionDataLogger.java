@@ -23,9 +23,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
@@ -622,8 +624,7 @@ public class PerceptionDataLogger
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
-      String defaultLogDirectory =
-            System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
+      String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
       String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
       String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
 
@@ -638,7 +639,7 @@ public class PerceptionDataLogger
 
       //      logger.setChannelEnabled(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, true);
 
-      logger.startLogging(logDirectory + logFileName, "Nadia");
+      logger.startLogging(Paths.get(logDirectory, logFileName).toString(), "Nadia");
 
       // TEST ROS2 node for Ouster Depth
 
