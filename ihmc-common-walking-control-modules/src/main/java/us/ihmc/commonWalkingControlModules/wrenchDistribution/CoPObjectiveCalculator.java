@@ -12,10 +12,11 @@ public class CoPObjectiveCalculator
    private final DMatrixRMaj fzRow = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj singleCopRow = new DMatrixRMaj(0, 0);
 
-   public void computeTaskJacobian(DMatrixRMaj wrenchJacobianInPlaneFrame,
-                                   FramePoint2DReadOnly desiredCoPInPlaneFrame,
-                                   int rhoSize,
-                                   NativeMatrix jacobianToPack)
+   public void computeTask(DMatrixRMaj wrenchJacobianInPlaneFrame,
+                           FramePoint2DReadOnly desiredCoPInPlaneFrame,
+                           int rhoSize,
+                           NativeMatrix jacobianToPack,
+                           NativeMatrix objectiveToPack)
    {
       fzRow.reshape(1, rhoSize);
       singleCopRow.reshape(1, rhoSize);
@@ -34,5 +35,7 @@ public class CoPObjectiveCalculator
       CommonOps_DDRM.extractRow(wrenchJacobianInPlaneFrame, tauXIndex, singleCopRow);
       CommonOps_DDRM.add(desiredCoPInPlaneFrame.getY(), fzRow, -1.0, singleCopRow, singleCopRow);
       jacobianToPack.insert(singleCopRow, 1, 0);
+
+      objectiveToPack.zero();
    }
 }
