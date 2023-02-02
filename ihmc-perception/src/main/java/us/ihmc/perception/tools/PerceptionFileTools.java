@@ -21,7 +21,6 @@ import java.util.List;
 
 public class PerceptionFileTools
 {
-
    public static String getValue(BufferedReader reader, String key) throws IOException
    {
       String line = reader.readLine();
