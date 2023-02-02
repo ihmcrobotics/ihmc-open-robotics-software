@@ -33,6 +33,7 @@ public class RDXSpatialVectorArrows
    private YoDoubleClientHelper angularYYoVariable;
    private YoDoubleClientHelper angularZYoVariable;
    private final Vector3D tempVector = new Vector3D();
+   private boolean drawAngularPart = true;
 
    public RDXSpatialVectorArrows(ReferenceFrame originFrame, YoVariableClientHelper yoVariableClientHelper, String variablePrefix)
    {
@@ -108,11 +109,17 @@ public class RDXSpatialVectorArrows
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       linearPartArrow.getRenderables(renderables, pool);
-      angularPartArrow.getRenderables(renderables, pool);
+      if (drawAngularPart)
+         angularPartArrow.getRenderables(renderables, pool);
    }
 
    public int getIndexOfSensor()
    {
       return indexOfSensor;
+   }
+
+   public void setDrawAngularPart(boolean drawAngularPart)
+   {
+      this.drawAngularPart = drawAngularPart;
    }
 }

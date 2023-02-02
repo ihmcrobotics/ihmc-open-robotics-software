@@ -3,6 +3,7 @@ package us.ihmc.behaviors.tools;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
@@ -23,7 +24,6 @@ import java.util.List;
 
 public class HandWrenchCalculator
 {
-   private FullHumanoidRobotModel fullRobotModel;
    private final SideDependentList<GeometricJacobianCalculator> jacobianCalculators = new SideDependentList<>();
    private final SideDependentList<List<OneDoFJointBasics>> armJoints = new SideDependentList<>();
    private SideDependentList<SpatialVector> rawWrenches = new SideDependentList<>(new SpatialVector(), new SpatialVector());
@@ -35,10 +35,13 @@ public class HandWrenchCalculator
    private SideDependentList<AlphaFilteredYoSpatialVector> alphaFilteredYoSpatialVectors = new SideDependentList<>();
    // RobotConfigurationData is published at 120Hz -> break freq.: 5Hz - 20Hz
    private static final double ALPHA_FILTER = 0.5;
+   private final Notification receivedRCDNotification = new Notification();
 
    public HandWrenchCalculator(ROS2SyncedRobotModel syncedRobot)
    {
-      fullRobotModel = syncedRobot.getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
+      syncedRobot.addRobotConfigurationDataReceivedCallback(receivedRCDNotification::set);
+
       for (RobotSide side : RobotSide.values)
       {
          // set up for each side . . .
@@ -82,27 +85,32 @@ public class HandWrenchCalculator
 
    public void compute()
    {
-      // TODO: only compute / update when new RCD received. (try to match the frequency or maybe update at lowrer frequency)
-      for (RobotSide side : RobotSide.values)
+      // TODO: only compute / update when new RCD received. (try to match the frequency or maybe update at lower frequency)
+      //  Check this
+
+      if (receivedRCDNotification.poll())
       {
-         double[] jointTorquesForGravity = getGravityCompensationTorques(side);
-         List<OneDoFJointBasics> oneSideArmJoints = armJoints.get(side);
-         double[] jointTorques = new double[oneSideArmJoints.size()];
-         for (int i = 0; i < oneSideArmJoints.size(); ++i)
+         for (RobotSide side : RobotSide.values)
          {
-            jointTorques[i] = oneSideArmJoints.get(i).getTau() - jointTorquesForGravity[i];
+            double[] jointTorquesForGravity = getGravityCompensationTorques(side);
+            List<OneDoFJointBasics> oneSideArmJoints = armJoints.get(side);
+            double[] jointTorques = new double[oneSideArmJoints.size()];
+            for (int i = 0; i < oneSideArmJoints.size(); ++i)
+            {
+               jointTorques[i] = oneSideArmJoints.get(i).getTau() - jointTorquesForGravity[i];
+            }
+
+            // getJacobianMatrix updates the matrix and outputs in the form of DMatrixRMaj
+            DMatrixRMaj armJacobian = jacobianCalculators.get(side).getJacobianMatrix();
+            DMatrixRMaj armJacobianTransposed = CommonOps_DDRM.transpose(armJacobian, null);
+            DMatrixRMaj armJacobianTransposedDagger = leftPseudoInverse(armJacobianTransposed);
+            DMatrixRMaj jointTorqueVector = new DMatrixRMaj(jointTorques);
+            DMatrixRMaj wrenchVector = new DMatrixRMaj(6,1);
+            CommonOps_DDRM.mult(armJacobianTransposedDagger, jointTorqueVector, wrenchVector);
+
+            rawWrenches.set(side, makeWrench(jacobianCalculators.get(side).getJacobianFrame(), wrenchVector));
+            alphaFilteredYoSpatialVectors.get(side).update(rawWrenches.get(side).getAngularPart(), rawWrenches.get(side).getLinearPart());
          }
-
-         // getJacobianMatrix updates the matrix and outputs in the form of DMatrixRMaj
-         DMatrixRMaj armJacobian = jacobianCalculators.get(side).getJacobianMatrix();
-         DMatrixRMaj armJacobianTransposed = CommonOps_DDRM.transpose(armJacobian, null);
-         DMatrixRMaj armJacobianTransposedDagger = leftPseudoInverse(armJacobianTransposed);
-         DMatrixRMaj jointTorqueVector = new DMatrixRMaj(jointTorques);
-         DMatrixRMaj wrenchVector = new DMatrixRMaj(6,1);
-         CommonOps_DDRM.mult(armJacobianTransposedDagger, jointTorqueVector, wrenchVector);
-
-         rawWrenches.set(side, makeWrench(jacobianCalculators.get(side).getJacobianFrame(), wrenchVector));
-         alphaFilteredYoSpatialVectors.get(side).update(rawWrenches.get(side).getAngularPart(), rawWrenches.get(side).getLinearPart());
       }
    }
 
