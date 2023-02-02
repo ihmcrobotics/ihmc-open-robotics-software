@@ -1415,16 +1415,21 @@ public class GeometryTools
       return isFirstQueryAbovePlane == isSecondQueryAbovePlane;
    }
 
+   /**
+    * Finds the projection of a 3D point onto a 3D plane given in general form.
+    * Uses: projectedPoint = point - (normal.dot(point) + planeScalar) * (normal)
+    *
+    * @param plane Coefficients of the general form of plane equation (ax + by + cz + d = 0) as Vector4D
+    * @param point Point to be projected onto the plane as Point3D
+    * @return Projected point onto the plane as Point3D
+    */
    public static Point3D projectPointOntoPlane(Vector4DReadOnly plane, Point3DReadOnly point)
    {
-      LogTools.info("Plane: " + String.format("%.2f, %.2f, %.2f, %.2f", plane.getX(), plane.getY(), plane.getZ(), plane.getS()));
-
       UnitVector3D planeNormal = new UnitVector3D(plane.getX(), plane.getY(), plane.getZ());
 
       Vector3D scaledNormal = new Vector3D(planeNormal);
       scaledNormal.scale(planeNormal.dot(point) + plane.getS());
 
-      // proj = point - (normal.dot(point) + planeScalar) * (normal)
       Point3D projectedPoint = new Point3D();
       projectedPoint.sub(point, scaledNormal);
 
