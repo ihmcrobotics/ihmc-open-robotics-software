@@ -406,7 +406,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       bodyPathPlanGraphic.update();
       interactableFootstepPlan.update();
 
-      if (interactableFootstepPlan.getFootsteps().size() > 0)
+      if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
       {
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
