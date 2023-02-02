@@ -39,6 +39,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -101,6 +102,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final ExecutionTimer optimizationTimer = new ExecutionTimer("InvDynOptimizationTimer", registry);
 
    private final ArrayList<QPObjectiveCommand> nullspaceQPObjectiveCommands = new ArrayList<>();
+   private final ArrayList<RigidBodyReadOnly> rigidBodiesWithCoPCommands = new ArrayList<>();
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -206,7 +208,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    public boolean compute()
    {
       optimizationTimer.startMeasurement();
-      wrenchMatrixCalculator.computeMatrices();
+      wrenchMatrixCalculator.collectRigidBodiesWithCoPCommands(rigidBodiesWithCoPCommands);
+      wrenchMatrixCalculator.computeMatrices(rigidBodiesWithCoPCommands);
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
@@ -372,7 +375,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          qpSolver.addRhoInput(rhoQPInput);
       }
 
-      while (wrenchMatrixCalculator.getCenterOfPressureInput(rhoQPInput))
+      while (wrenchMatrixCalculator.getNextCenterOfPressureInput(rhoQPInput))
       {
          qpSolver.addRhoInput(rhoQPInput);
       }

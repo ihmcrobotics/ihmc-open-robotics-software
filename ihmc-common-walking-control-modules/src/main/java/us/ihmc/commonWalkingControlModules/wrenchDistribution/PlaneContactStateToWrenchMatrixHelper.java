@@ -329,7 +329,6 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final FrameVector3D forceFromRho = new FrameVector3D();
 
-   // FIXME Check code duplication in WrenchMatrixCalculator.getCenterOfPressureInput(...)
    public void computeCopObjectiveJacobian(DMatrixRMaj jacobianToPack, DMatrixRMaj objectiveToPack, FramePoint2DReadOnly desiredCoP)
    {
       if (desiredCoP.containsNaN())
