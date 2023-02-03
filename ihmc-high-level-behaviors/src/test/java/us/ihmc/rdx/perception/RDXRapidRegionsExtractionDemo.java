@@ -10,7 +10,9 @@ import imgui.type.ImInt;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -46,7 +48,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    //20230117_162417_PerceptionLog.hdf5 (231 MB)
    //20230117_162825_PerceptionLog.hdf5 (328 MB)
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_162825_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_LoadingSynchReporoduction.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
@@ -84,9 +86,9 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private _cl_kernel unpackPointCloudKernel;
    private PerceptionDataLoader perceptionDataLoader;
 
-   private ImInt frameIndex = new ImInt(0);
-
-   private boolean initialized = false;
+   private final ImInt frameIndex = new ImInt(0);
+   private final Notification userChangedIndex = new Notification();
+   private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
 
    public RDXRapidRegionsExtractionDemo()
    {
@@ -109,9 +111,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
             createL515(768, 1024);
             //createOuster(128, 2048);
-
-            updateRapidRegionsExtractor();
-            updatePointCloudRenderer();
          }
 
          private void createOuster(int depthHeight, int depthWidth)
@@ -178,10 +177,17 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
                }
 
-               if (initialized)
+               if (userChangedIndex.poll())
                {
-                  updateRapidRegionsExtractor();
+                  if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
+                  {
+                     perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+                  }
                }
+
+               updatePointCloudRenderer();
+               rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().clear();
+               updateRapidRegionsExtractor();
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -207,22 +213,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                changed = true;
             }
 
-            if (changed || !initialized)
-            {
-               if((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
-               {
-                  perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
-                  updateRapidRegionsExtractor();
-               }
-
-               updatePointCloudRenderer();
-               rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().clear();
-
-               if (!initialized)
-               {
-                  initialized = true;
-               }
-            }
+            if (changed)
+               userChangedIndex.set();
          }
 
          @Override
@@ -268,11 +260,13 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                regionsWithPose.getPlanarRegionsList().clear();
                rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
                regionsWithPose.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
+               planarRegionsListToRenderNotification.set(regionsWithPose.getPlanarRegionsList().copy());
            }, getClass().getSimpleName() + "RapidRegions");
          }
       }
 
-      generateMesh(regionsWithPose.getPlanarRegionsList());
+      if (planarRegionsListToRenderNotification.poll())
+         generateMesh(planarRegionsListToRenderNotification.read());
    }
 
    public synchronized void generateMesh(PlanarRegionsList regionsList)
