@@ -19,8 +19,8 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.logging.HDF5ImageBrowser;
-import us.ihmc.rdx.logging.HDF5ImageLoggingUI;
+import us.ihmc.rdx.logging.RDXHDF5ImageBrowser;
+import us.ihmc.rdx.logging.RDXHDF5ImageLoggingUI;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
@@ -35,7 +35,7 @@ import us.ihmc.tools.thread.*;
  * Official OpenCV camera calibration tutorial:
  * https://docs.opencv.org/4.x/d4/d94/tutorial_camera_calibration.html
  */
-public class BlackflyCalibrationSuite
+public class RDXBlackflyCalibrationSuite
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
 
@@ -57,9 +57,9 @@ public class BlackflyCalibrationSuite
                                                   "Blackfly Calibration Suite");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXBlackflyReader blackflyReader;
-   private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
-   private HDF5ImageLoggingUI hdf5ImageLoggingUI;
-   private HDF5ImageBrowser hdf5ImageBrowser;
+   private RDXCalibrationPatternDetectionUI calibrationPatternDetectionUI;
+   private RDXHDF5ImageLoggingUI hdf5ImageLoggingUI;
+   private RDXHDF5ImageBrowser hdf5ImageBrowser;
    private ImGuiOpenCVSwapVideoPanel undistortedFisheyePanel;
    private RDXCVImagePanel calibrationSourceImagesPanel;
    private final RecyclingArrayList<Mat> calibrationSourceImages = new RecyclingArrayList<>(Mat::new);
@@ -116,7 +116,7 @@ public class BlackflyCalibrationSuite
    private Mat newCameraMatrixEstimate;
    private final Throttler undistortionThrottler = new Throttler().setFrequency(60.0);
 
-   public BlackflyCalibrationSuite()
+   public RDXBlackflyCalibrationSuite()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -128,7 +128,7 @@ public class BlackflyCalibrationSuite
             blackflyReader = new RDXBlackflyReader(nativesLoadedActivator, BLACKFLY_SERIAL_NUMBER);
             baseUI.getImGuiPanelManager().addPanel(blackflyReader.getStatisticsPanel());
 
-            baseUI.getImGuiPanelManager().addPanel("Calibration", BlackflyCalibrationSuite.this::renderImGuiWidgets);
+            baseUI.getImGuiPanelManager().addPanel("Calibration", RDXBlackflyCalibrationSuite.this::renderImGuiWidgets);
          }
 
          @Override
@@ -142,10 +142,10 @@ public class BlackflyCalibrationSuite
                   blackflyReader.setMonitorPanelUIThreadPreprocessor(this::blackflyReaderUIThreadPreprocessor);
                   baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
 
-                  calibrationPatternDetectionUI = new CalibrationPatternDetectionUI();
+                  calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
 
-                  hdf5ImageBrowser = new HDF5ImageBrowser();
+                  hdf5ImageBrowser = new RDXHDF5ImageBrowser();
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getControlPanel());
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getVideoPanel());
 
@@ -264,9 +264,9 @@ public class BlackflyCalibrationSuite
          {
             if (hdf5ImageLoggingUI == null)
             {
-               hdf5ImageLoggingUI = new HDF5ImageLoggingUI(nativesLoadedActivator,
-                                                           blackflyReader.getImageWidth(),
-                                                           blackflyReader.getImageHeight());
+               hdf5ImageLoggingUI = new RDXHDF5ImageLoggingUI(nativesLoadedActivator,
+                                                              blackflyReader.getImageWidth(),
+                                                              blackflyReader.getImageHeight());
                baseUI.getImGuiPanelManager().addPanel(hdf5ImageLoggingUI.getPanel());
                baseUI.getLayoutManager().reloadLayout();
             }
@@ -430,7 +430,7 @@ public class BlackflyCalibrationSuite
 
          for (int i = 0; i < calibrationSourceImages.size(); i++)
          {
-            CalibrationPatternType pattern = calibrationPatternDetectionUI.getPatternType();
+            RDXCalibrationPatternType pattern = calibrationPatternDetectionUI.getPatternType();
             int patternWidth = calibrationPatternDetectionUI.getPatternWidth();
             int patternHeight = calibrationPatternDetectionUI.getPatternHeight();
             Size patternSize = new Size(patternWidth, patternHeight);
@@ -438,7 +438,7 @@ public class BlackflyCalibrationSuite
             opencv_imgproc.cvtColor(calibrationSourceImages.get(i), grayscaleImage, opencv_imgproc.COLOR_BGR2GRAY);
 
             Mat cornersOrCentersMat = new Mat();
-            if (pattern == CalibrationPatternType.CHESSBOARD)
+            if (pattern == RDXCalibrationPatternType.CHESSBOARD)
             {
                patternFound = opencv_calib3d.findChessboardCorners(grayscaleImage,
                                                                    patternSize,
@@ -581,6 +581,6 @@ public class BlackflyCalibrationSuite
 
    public static void main(String[] args)
    {
-      new BlackflyCalibrationSuite();
+      new RDXBlackflyCalibrationSuite();
    }
 }

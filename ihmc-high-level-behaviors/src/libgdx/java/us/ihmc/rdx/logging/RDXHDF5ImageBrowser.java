@@ -23,7 +23,7 @@ import java.nio.file.Paths;
 /**
  * This can be embedded in applications to browse HDF5 files with compressed images in them.
  */
-public class HDF5ImageBrowser
+public class RDXHDF5ImageBrowser
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiDirectory logDirectory;
@@ -43,14 +43,14 @@ public class HDF5ImageBrowser
    private boolean isPNG;
    private String encoding;
 
-   public HDF5ImageBrowser()
+   public RDXHDF5ImageBrowser()
    {
       imagePanel = new RDXCVImagePanel("HDF5 Image Browser", 100, 100);
 
       logDirectory = new ImGuiDirectory(IHMCCommonPaths.LOGS_DIRECTORY.toString(),
                                         fileName -> h5File != null && selectedFileName.equals(fileName),
                                         pathEntry -> pathEntry.type() == BasicPathVisitor.PathType.FILE
-                                                     && pathEntry.path().getFileName().toString().endsWith(HDF5ImageLoggingUI.FILE_SUFFIX),
+                                                     && pathEntry.path().getFileName().toString().endsWith(RDXHDF5ImageLoggingUI.FILE_SUFFIX),
                                         this::onHDF5FileSelected);
 
       nativeBytesType = new DataType(PredType.NATIVE_B8());
@@ -117,14 +117,14 @@ public class HDF5ImageBrowser
       selectedFileName = hdf5FileName;
       openFile = Paths.get(logDirectory.getDirectoryName(), hdf5FileName).toString();
       h5File = new H5File(openFile, hdf5.H5F_ACC_RDONLY);
-      imageGroup = h5File.openGroup(HDF5ImageLoggingUI.IMAGE_GROUP_NAME);
+      imageGroup = h5File.openGroup(RDXHDF5ImageLoggingUI.IMAGE_GROUP_NAME);
       imageIndex.set(0);
 
       isPNG = true;
-      if (h5File.exists(HDF5ImageLoggingUI.ENCODING_NAME))
+      if (h5File.exists(RDXHDF5ImageLoggingUI.ENCODING_NAME))
       {
          BytePointer stringPointer = new BytePointer(100);
-         DataSet dataSet = h5File.openDataSet(HDF5ImageLoggingUI.ENCODING_NAME);
+         DataSet dataSet = h5File.openDataSet(RDXHDF5ImageLoggingUI.ENCODING_NAME);
          dataSet.read(stringPointer, new DataType(PredType.NATIVE_CHAR())); // intentionally reads a string
          encoding = stringPointer.getString();
          isPNG = encoding.equals("png");
