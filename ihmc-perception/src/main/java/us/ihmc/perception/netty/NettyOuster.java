@@ -37,7 +37,7 @@ import java.util.function.Consumer;
  * Lidar incoming data format:
  * </p>
  *
- * <img src="https://www.ihmc.us/wp-content/uploads/2023/02/OusterLidarDataFormat.png" width="800" alt="description of MyImage">
+ * <img src="https://www.ihmc.us/wp-content/uploads/2023/02/OusterLidarDataFormat.png" width="800">
  *
  */
 public class NettyOuster
