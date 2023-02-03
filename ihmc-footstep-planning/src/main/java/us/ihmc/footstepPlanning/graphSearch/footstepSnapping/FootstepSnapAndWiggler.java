@@ -12,6 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
+import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -48,6 +49,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private HeightMapData heightMapData;
    private final HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
+   private final HeightMapSnapWiggler heightMapSnapWiggler;
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
@@ -66,6 +68,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       this.parameters = parameters;
+      this.heightMapSnapWiggler = new HeightMapSnapWiggler(footPolygonsInSoleFrame,
+                                                           snapDataHolder,
+                                                           heightMapSnapper);
 
       if (tickAndUpdatable == null)
       {
@@ -201,7 +206,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          }
          if (heightMapData != null)
          {
-            snapData.getWiggleTransformInWorld().setIdentity();
+//            snapData.getWiggleTransformInWorld().setIdentity();
             snapData.setRMSErrorHeightMap(heightMapSnapper.getRMSError());
             snapData.setHeightMapArea(heightMapSnapper.getArea());
          }
@@ -258,6 +263,12 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    protected void computeWiggleTransform(DiscreteFootstep footstepToWiggle, DiscreteFootstep stanceStep, FootstepSnapData snapData)
    {
+      if (!computeIfShouldUsePlanarRegions())
+      {
+         heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle, heightMapData, snapData, parameters.getHeightMapSnapThreshold());
+         return;
+      }
+
       int regionIndex = snapData.getRegionIndex();
       if (regionIndex == -1)
       {
