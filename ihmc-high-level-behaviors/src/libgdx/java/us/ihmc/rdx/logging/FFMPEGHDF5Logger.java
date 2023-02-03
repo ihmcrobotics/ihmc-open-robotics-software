@@ -25,6 +25,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
+/**
+ * FIXME: Not working yet. Needs some love.
+ */
 public class FFMPEGHDF5Logger extends FFMPEGLogger
 {
    public static final String NAMESPACE_ROOT = "ffmpeg"; //this will need to be changed later to be user-set
