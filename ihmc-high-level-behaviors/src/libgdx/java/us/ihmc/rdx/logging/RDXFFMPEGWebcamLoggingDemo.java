@@ -12,8 +12,8 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.log.LogTools;
@@ -45,7 +45,7 @@ public class RDXFFMPEGWebcamLoggingDemo
    private int imageWidth = -1;
    private double reportedFPS = -1;
    private String backendName = "";
-   private ImGuiOpenCVSwapVideoPanel swapCVPanel;
+   private RDXOpenCVSwapVideoPanel swapCVPanel;
    private ImPlotStopwatchPlot readPerformancePlot;
    private ImPlotFrequencyPlot readFrequencyPlot;
 
@@ -94,7 +94,7 @@ public class RDXFFMPEGWebcamLoggingDemo
 
                   bgrImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
 
-                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread);
+                  swapCVPanel = new RDXOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
                   baseUI.getLayoutManager().reloadLayout();
 
@@ -116,7 +116,7 @@ public class RDXFFMPEGWebcamLoggingDemo
             baseUI.renderEnd();
          }
 
-         private void videoUpdateOnAsynchronousThread(ImGuiOpenCVSwapVideoPanelData data)
+         private void videoUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
          {
             readPerformancePlot.start();
             boolean imageWasRead = videoCapture.read(bgrImage.getBytedecoOpenCVMat());

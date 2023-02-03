@@ -4,7 +4,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
 import us.ihmc.tools.thread.Activator;
 
 /**
@@ -67,7 +67,7 @@ public class WebcamCalibrationPatternDemo
             baseUI.renderEnd();
          }
 
-         private void monitorPanelUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
+         private void monitorPanelUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
          {
             calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
          }

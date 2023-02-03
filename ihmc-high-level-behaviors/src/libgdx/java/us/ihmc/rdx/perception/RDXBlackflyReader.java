@@ -11,8 +11,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.tools.thread.Activator;
@@ -35,12 +35,12 @@ public class RDXBlackflyReader
    private spinImage spinImage;
    private BytePointer spinImageDataPointer;
    private Mat blackflySourceMat;
-   private ImGuiOpenCVSwapVideoPanel swapCVPanel;
+   private RDXOpenCVSwapVideoPanel swapCVPanel;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
    private boolean imageWasRead = false;
    private long numberOfImagesRead = 0;
-   private Consumer<ImGuiOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor = null;
+   private Consumer<RDXOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor = null;
 
    public RDXBlackflyReader(Activator nativesLoadedActivator, String serialNumber)
    {
@@ -59,7 +59,7 @@ public class RDXBlackflyReader
       blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGB8);
       blackfly.startAcquiringImages();
 
-      swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Blackfly Monitor", this::monitorUpdateOnAsynchronousThread, this::monitorPanelUpdateOnUIThread);
+      swapCVPanel = new RDXOpenCVSwapVideoPanel("Blackfly Monitor", this::monitorUpdateOnAsynchronousThread, this::monitorPanelUpdateOnUIThread);
    }
 
    /**
@@ -67,7 +67,7 @@ public class RDXBlackflyReader
     * on the UI update thread. It's not ideal to do too much processing here,
     * just quick and easy stuff.
     */
-   public void setMonitorPanelUIThreadPreprocessor(Consumer<ImGuiOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor)
+   public void setMonitorPanelUIThreadPreprocessor(Consumer<RDXOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor)
    {
       this.monitorPanelUIThreadPreprocessor = monitorPanelUIThreadPreprocessor;
    }
@@ -86,7 +86,7 @@ public class RDXBlackflyReader
       readFrequencyPlot.ping();
    }
 
-   private void monitorUpdateOnAsynchronousThread(ImGuiOpenCVSwapVideoPanelData data)
+   private void monitorUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
    {
       imageWasRead = blackfly.getNextImage(spinImage);
 
@@ -119,7 +119,7 @@ public class RDXBlackflyReader
       swapCVPanel.updateOnUIThread();
    }
 
-   private void monitorPanelUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
+   private void monitorPanelUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
    {
       if (imageWasRead)
       {
@@ -163,7 +163,7 @@ public class RDXBlackflyReader
       return panel;
    }
 
-   public ImGuiOpenCVSwapVideoPanel getSwapCVPanel()
+   public RDXOpenCVSwapVideoPanel getSwapCVPanel()
    {
       return swapCVPanel;
    }

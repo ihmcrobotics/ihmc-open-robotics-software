@@ -14,30 +14,30 @@ import java.util.function.Consumer;
  * It manages two OpenGL textures that get swapped out and provides an easy way to
  * operate on them with OpenCV.
  */
-public class ImGuiOpenCVSwapVideoPanel
+public class RDXOpenCVSwapVideoPanel
 {
    private final ImGuiVideoPanel videoPanel;
-   private final GuidedSwapReference<ImGuiOpenCVSwapVideoPanelData> dataSwapReferenceManager;
+   private final GuidedSwapReference<RDXOpenCVSwapVideoPanelData> dataSwapReferenceManager;
 
-   public ImGuiOpenCVSwapVideoPanel(String panelName, Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnAsynchronousThread)
+   public RDXOpenCVSwapVideoPanel(String panelName, Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread)
    {
       this(panelName, updateOnAsynchronousThread, null);
    }
 
-   public ImGuiOpenCVSwapVideoPanel(String panelName,
-                                    Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
-                                    Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnUIThread)
+   public RDXOpenCVSwapVideoPanel(String panelName,
+                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
+                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnUIThread)
    {
       this(panelName, false, updateOnAsynchronousThread, updateOnUIThread);
    }
 
-   public ImGuiOpenCVSwapVideoPanel(String panelName,
-                                    boolean flipY,
-                                    Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
-                                    Consumer<ImGuiOpenCVSwapVideoPanelData> updateOnUIThread)
+   public RDXOpenCVSwapVideoPanel(String panelName,
+                                  boolean flipY,
+                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
+                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnUIThread)
    {
       this.videoPanel = new ImGuiVideoPanel(panelName, flipY);
-      dataSwapReferenceManager = new GuidedSwapReference<>(ImGuiOpenCVSwapVideoPanelData::new,
+      dataSwapReferenceManager = new GuidedSwapReference<>(RDXOpenCVSwapVideoPanelData::new,
                                                            updateOnAsynchronousThread,
                                                            updateOnUIThread == null ? this::defaultUpdateOnUIThread : updateOnUIThread);
    }
@@ -61,7 +61,7 @@ public class ImGuiOpenCVSwapVideoPanel
       dataSwapReferenceManager.accessOnHighPriorityThread();
    }
 
-   private void defaultUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
+   private void defaultUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
    {
       if (data.getRGBA8Image() != null)
       {

@@ -18,8 +18,8 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
@@ -46,8 +46,8 @@ public class RDXCameraCalibrationDemo
    private Mat bgrImage;
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
-   private ImGuiOpenCVSwapVideoPanel swapCVPanel;
-   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::generateNewCameraMatrixOnUIThread;
+   private RDXOpenCVSwapVideoPanel swapCVPanel;
+   private final Consumer<RDXOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::generateNewCameraMatrixOnUIThread;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read Duration");
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode Duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read Frequency");
@@ -149,7 +149,7 @@ public class RDXCameraCalibrationDemo
                   yuv420Image = new Mat();
                   jpegImageBytePointer = new BytePointer();
 
-                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
+                  swapCVPanel = new RDXOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
                   undistortedVideoPanel = new RDXCVImagePanel("Undistorted Video", imageWidth, imageHeight);
                   testImagePanel = new RDXCVImagePanel("Test Image 1", imageWidth, imageHeight);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
@@ -233,13 +233,13 @@ public class RDXCameraCalibrationDemo
             baseUI.renderEnd();
          }
 
-         private void videoUpdateOnAsynchronousThread(ImGuiOpenCVSwapVideoPanelData data)
+         private void videoUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
          {
             data.ensureTextureDimensions(imageWidth, imageHeight);
             opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
          }
 
-         private void videoUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
+         private void videoUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
          {
             if (generateCameraMatrixNotification.poll())
             {
@@ -297,7 +297,7 @@ public class RDXCameraCalibrationDemo
       }
    }
 
-   private void generateNewCameraMatrixOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
+   private void generateNewCameraMatrixOnUIThread(RDXOpenCVSwapVideoPanelData data)
    {
       LogTools.info("PATH {}", dir.getAbsolutePath());
       File[] directoryListing = dir.listFiles();
