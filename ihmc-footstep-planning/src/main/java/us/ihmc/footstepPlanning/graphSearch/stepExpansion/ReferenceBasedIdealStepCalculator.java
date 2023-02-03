@@ -49,7 +49,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
       PlannedFootstep referenceFootstep = referenceFootstepPlan.getFootstep(stepIndexInPlan);
       FramePose3D referenceFootstepPose = referenceFootstep.getFootstepPose();
 
-      // TODO figure out if the indexing should match.
+      // TODO: figure out if the indexing should match.
       // If not, search for closest step?
       if (referenceFootstep.getRobotSide() != stanceNode.getRobotSide().getOppositeSide())
       {
