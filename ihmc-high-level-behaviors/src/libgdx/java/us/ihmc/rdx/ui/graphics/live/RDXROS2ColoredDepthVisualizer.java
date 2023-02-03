@@ -363,13 +363,11 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
       ImGui.text(colorTopic.getName());
       if (colorReceivedOne)
       {
-         ImGui.sameLine();
          colorMessageSizeReadout.renderImGuiWidgets();
       }
       ImGui.text(depthTopic.getName());
       if (depthReceivedOne)
       {
-         ImGui.sameLine();
          depthMessageSizeReadout.renderImGuiWidgets();
       }
       if (colorReceivedOne)
