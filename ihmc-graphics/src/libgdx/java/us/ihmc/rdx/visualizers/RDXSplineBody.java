@@ -26,6 +26,7 @@ public class RDXSplineBody implements RenderableProvider
    private ModelInstance modelInstance;
    private Model lastModel;
    private final ArrayList<Point3DReadOnly> points = new ArrayList<>();
+   private static final int VERTEX_BUFFER_MARGIN = MAX_INDEX - 10;
 
    private Color color;
    private float lineWidth = 0.1f;
@@ -49,7 +50,7 @@ public class RDXSplineBody implements RenderableProvider
       meshBuilder.addLine(startPoint, endPoint, lineWidth, color);
       modelBuilder.begin();
       Mesh mesh = meshBuilder.generateMesh();
-      if (mesh.getNumIndices() >= MAX_INDEX - 10) // check we are not inserting too many vertices in the mesh
+      if (mesh.getNumIndices() >= VERTEX_BUFFER_MARGIN) // check we are not inserting too many vertices in the mesh
          mesh = getDecimatedMesh(10);
 
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
