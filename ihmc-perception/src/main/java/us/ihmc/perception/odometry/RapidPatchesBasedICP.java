@@ -145,7 +145,7 @@ public class RapidPatchesBasedICP
          correlBuffer.readOpenCLBufferObject(openCLManager);
 
          correl.zero();
-         colectCorrel(correlBuffer.getBackingDirectFloatBuffer(), correl);
+         collectCorrelation(correlBuffer.getBackingDirectFloatBuffer(), correl);
 
          LogTools.debug("Correlation Matrix: " + correl);
 
@@ -162,7 +162,7 @@ public class RapidPatchesBasedICP
     * @param correlBuffer DirectFloatBuffer containing the tensor of correlation matrices for each column
     * @param correl DMatrixRMaj to store the final correlation matrix
     */
-   private void colectCorrel(FloatBuffer correlBuffer, DMatrixRMaj correl)
+   private void collectCorrelation(FloatBuffer correlBuffer, DMatrixRMaj correl)
    {
       correl.zero();
       for (int i = 0; i < patchColumns; i++)
