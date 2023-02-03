@@ -53,6 +53,7 @@ public class RDXSplineGraphic implements RenderableProvider
       cleared = true;
       line.clear();
       sphereEndPoint = null;
+      lastPoint = null;
    }
 
    @Override
