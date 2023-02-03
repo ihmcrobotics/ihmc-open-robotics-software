@@ -22,8 +22,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.logging.RDXHDF5ImageBrowser;
 import us.ihmc.rdx.logging.RDXHDF5ImageLoggingUI;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.*;
 
@@ -60,7 +60,7 @@ public class RDXBlackflyCalibrationSuite
    private RDXCalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private RDXHDF5ImageLoggingUI hdf5ImageLoggingUI;
    private RDXHDF5ImageBrowser hdf5ImageBrowser;
-   private ImGuiOpenCVSwapVideoPanel undistortedFisheyePanel;
+   private RDXOpenCVSwapVideoPanel undistortedFisheyePanel;
    private RDXCVImagePanel calibrationSourceImagesPanel;
    private final RecyclingArrayList<Mat> calibrationSourceImages = new RecyclingArrayList<>(Mat::new);
    private final ImInt calibrationSourceImageIndex = new ImInt();
@@ -152,8 +152,8 @@ public class RDXBlackflyCalibrationSuite
                   calibrationSourceImagesPanel = new RDXCVImagePanel("Calibration Source Image", 100, 100);
                   baseUI.getImGuiPanelManager().addPanel(calibrationSourceImagesPanel.getVideoPanel());
 
-                  undistortedFisheyePanel = new ImGuiOpenCVSwapVideoPanel("Undistorted Fisheye Monitor",
-                                                                          this::undistortedImageUpdateOnAsynchronousThread);
+                  undistortedFisheyePanel = new RDXOpenCVSwapVideoPanel("Undistorted Fisheye Monitor",
+                                                                        this::undistortedImageUpdateOnAsynchronousThread);
                   baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getVideoPanel());
 
                   baseUI.getLayoutManager().reloadLayout();
@@ -260,7 +260,7 @@ public class RDXBlackflyCalibrationSuite
             baseUI.renderEnd();
          }
 
-         private void blackflyReaderUIThreadPreprocessor(ImGuiOpenCVSwapVideoPanelData data)
+         private void blackflyReaderUIThreadPreprocessor(RDXOpenCVSwapVideoPanelData data)
          {
             if (hdf5ImageLoggingUI == null)
             {
@@ -280,7 +280,7 @@ public class RDXBlackflyCalibrationSuite
             calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
          }
 
-         private void undistortedImageUpdateOnAsynchronousThread(ImGuiOpenCVSwapVideoPanelData data)
+         private void undistortedImageUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
          {
             int width = undistortedImageWidth.get();
             int height = undistortedImageHeight.get();
