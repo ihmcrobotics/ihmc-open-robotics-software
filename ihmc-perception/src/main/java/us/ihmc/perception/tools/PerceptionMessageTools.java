@@ -11,7 +11,6 @@ import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -190,15 +189,21 @@ public class PerceptionMessageTools
                                                      ImageMessage depthImageMessage,
                                                      ROS2Helper helper,
                                                      FramePose3D cameraPose,
-                                                     Instant now,
+                                                     Instant aquisitionTime,
                                                      long sequenceNumber,
                                                      int height,
                                                      int width)
    {
       BytePointer compressedDepthPointer = new BytePointer();
       BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-      BytedecoOpenCVTools.fillImageMessage(compressedDepthPointer, depthImageMessage, cameraPose, sequenceNumber, height, width, ImageMessageFormat.DEPTH_PNG_R16);
-      MessageTools.toMessage(now, depthImageMessage.getAcquisitionTime());
+      BytedecoOpenCVTools.packImageMessage(depthImageMessage,
+                                           compressedDepthPointer,
+                                           cameraPose,
+                                           aquisitionTime,
+                                           sequenceNumber,
+                                           height,
+                                           width,
+                                           ImageMessageFormat.DEPTH_PNG_R16);
       helper.publish(topic, depthImageMessage);
    }
 
@@ -208,15 +213,21 @@ public class PerceptionMessageTools
                                                      ImageMessage colorImageMessage,
                                                      ROS2Helper helper,
                                                      FramePose3D cameraPose,
-                                                     Instant now,
+                                                     Instant aquisitionTime,
                                                      long sequenceNumber,
                                                      int height,
                                                      int width)
    {
       BytePointer compressedColorPointer = new BytePointer();
       BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
-      BytedecoOpenCVTools.fillImageMessage(compressedColorPointer, colorImageMessage, cameraPose, sequenceNumber, height, width, ImageMessageFormat.COLOR_JPEG_RGB8);
-      MessageTools.toMessage(now, colorImageMessage.getAcquisitionTime());
+      BytedecoOpenCVTools.packImageMessage(colorImageMessage,
+                                           compressedColorPointer,
+                                           cameraPose,
+                                           aquisitionTime,
+                                           sequenceNumber,
+                                           height,
+                                           width,
+                                           ImageMessageFormat.COLOR_JPEG_RGB8);
       helper.publish(topic, colorImageMessage);
    }
 
