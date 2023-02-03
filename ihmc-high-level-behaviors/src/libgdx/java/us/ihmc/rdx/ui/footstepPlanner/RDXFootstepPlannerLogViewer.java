@@ -60,7 +60,7 @@ public class RDXFootstepPlannerLogViewer
    private final RDX3DScene scene3D;
    private final RDX3DPanel panel3D;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString logFolder = new ImString();
+   private final ImString logFolder = new ImString(256);
    private final TypedNotification<FootstepPlannerLog> logLoadedNotification = new TypedNotification<>();
    private FootstepPlannerLog footstepPlannerLog = null;
    private final SideDependentList<RDXFootstepGraphic> startFootPoses = new SideDependentList<>();

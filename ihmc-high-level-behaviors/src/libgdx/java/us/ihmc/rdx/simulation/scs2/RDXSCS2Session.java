@@ -71,7 +71,7 @@ public class RDXSCS2Session
    public void create(RDXBaseUI baseUI, ImGuiPanel plotManagerParentPanel)
    {
       baseUI.getPrimaryScene().addRenderableAdapter(renderables);
-      plotManager.create(baseUI.getPerspectiveManager(), plotManagerParentPanel);
+      plotManager.create(baseUI.getLayoutManager(), plotManagerParentPanel);
    }
 
    /**

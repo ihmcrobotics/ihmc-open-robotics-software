@@ -110,7 +110,7 @@ public class RDXNettyOusterUI
                      imagePanel = new RDXCVImagePanel("Ouster Depth Image", depthWidth, depthHeight);
 
                      baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
-                     baseUI.getPerspectiveManager().reloadPerspective();
+                     baseUI.getLayoutManager().reloadLayout();
 
                      numberOfDepthPoints = ouster.getImageWidth() * ouster.getImageHeight();
 

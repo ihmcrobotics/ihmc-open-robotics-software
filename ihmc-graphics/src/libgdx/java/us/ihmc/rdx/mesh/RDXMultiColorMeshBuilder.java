@@ -730,6 +730,20 @@ public class RDXMultiColorMeshBuilder
    }
 
    /**
+    * Add a polygon to this builder. No sanity check is performed on the polygon's vertices.
+    *
+    * @param transformToWorld the transform from the polygon's local coordinates to world. Not
+    *                         modified.
+    * @param polygon the polygon 3D vertices.
+    * @param color   color of the polygon. Color accuracy depends on the color palette in use.
+    */
+   public void addPolygon(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DReadOnly> polygon, Color color)
+   {
+      addMesh(MeshDataGenerator.Polygon(transformToWorld, polygon), color);
+   }
+
+
+   /**
     * Add a sphere centered to this builder.
     *
     * @param radius the sphere radius.

@@ -5,6 +5,7 @@ import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
 import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.string.StringTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -128,7 +129,7 @@ public class OpenCLManager
       sourceAsString += OpenCLTools.readFile(programPath);
 
       // Support loading from CRLF (Windows) checkouts
-      sourceAsString = sourceAsString.replaceAll("\\r\\n", "\n");
+      sourceAsString = StringTools.filterOutCRLFLineEndings(sourceAsString);
 
       /* Create Kernel program from the read in source */
       int count = 1;
@@ -279,6 +280,11 @@ public class OpenCLManager
    public void execute2D(_cl_kernel kernel, long workSizeX, long workSizeY)
    {
       execute(kernel, 2, workSizeX, workSizeY, 0);
+   }
+
+   public void execute3D(_cl_kernel kernel, long workSizeX, long workSizeY, long workSizeZ)
+   {
+      execute(kernel, 3, workSizeX, workSizeY, workSizeZ);
    }
 
    /**

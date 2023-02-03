@@ -23,6 +23,22 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.nio.LongBuffer;
 import java.util.function.Consumer;
 
+/**
+ * 1. Add action to actions.json (also give it a fancy name at the bottom)
+ * 2. Launch the RDX VR UI
+ * 3. Hit the Steam menu button
+ * 4. Go into "Old Controller Bindings UI"
+ * 5. Edit the bindings
+ * 6. Go back, exit steam menu
+ * 7. Copy newly generated bindings from Documents\steamvr\input
+ *    into index_bindings.json
+ * 8. Add programmatic fields and getters to this class for the new action,
+ *    by pattern matching what's here
+ *
+ * It's possible to do this for multiple types of controllers.
+ * Currently, we have mappings for Valve Index and Vive Focus 3 controllers.
+ * You can change the default bindings in actions.json to select the right one for the controller you're using.
+ */
 public class RDXVRController extends RDXVRTrackedDevice
 {
    private final RobotSide side;
@@ -42,6 +58,8 @@ public class RDXVRController extends RDXVRTrackedDevice
    private InputDigitalActionData aTouchedActionData;
    private final LongBuffer bButtonActionHandle = BufferUtils.newLongBuffer(1);
    private InputDigitalActionData bButtonActionData;
+   private final LongBuffer bButtonDoubleClickActionHandle = BufferUtils.newLongBuffer(1);
+   private InputDigitalActionData bButtonDoubleClickActionData;
    private final LongBuffer bTouchedActionHandle = BufferUtils.newLongBuffer(1);
    private InputDigitalActionData bTouchedActionData;
    private final LongBuffer joystickPressActionHandle = BufferUtils.newLongBuffer(1);
@@ -115,6 +133,8 @@ public class RDXVRController extends RDXVRTrackedDevice
       aTouchedActionData = InputDigitalActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_bbutton", bButtonActionHandle);
       bButtonActionData = InputDigitalActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_bbuttondoubleclick", bButtonDoubleClickActionHandle);
+      bButtonDoubleClickActionData = InputDigitalActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_btouched", bTouchedActionHandle);
       bTouchedActionData = InputDigitalActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_joystickpress", joystickPressActionHandle);
@@ -157,6 +177,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetDigitalActionData(aButtonActionHandle.get(0), aButtonActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(aTouchedActionHandle.get(0), aTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(bButtonActionHandle.get(0), bButtonActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetDigitalActionData(bButtonDoubleClickActionHandle.get(0), bButtonDoubleClickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(bTouchedActionHandle.get(0), bTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(joystickPressActionHandle.get(0), joystickPressActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(touchpadActionHandle.get(0), touchpadActionData, VR.k_ulInvalidInputValueHandle);
@@ -203,6 +224,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    public InputDigitalActionData getBButtonActionData()
    {
       return bButtonActionData;
+   }
+
+   public InputDigitalActionData getBButtonDoubleClickActionData()
+   {
+      return bButtonDoubleClickActionData;
    }
 
    public InputDigitalActionData getBTouchedActionData()
