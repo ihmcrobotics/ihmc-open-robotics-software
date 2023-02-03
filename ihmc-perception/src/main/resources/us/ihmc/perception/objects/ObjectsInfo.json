@@ -6,11 +6,11 @@
         {
           "markerId": 0,
           "markerSize": 0.2032,
-          "translationToMarker": [0.05, -0.088, 0.2414],
-          "yawPitchRollToMarker": [0.0, 0.0, 0.0],
+          "translationToMarker": [0.03, -0.188, 0.205],
+          "yawPitchRollToMarker": [3.1416, 0.0, 0.0],
           "virtualBodyFileName": "environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj",
           "virtualAppendixFileName": "environmentObjects/door/doorPanel/DoorPanel.g3dj",
-          "translationBodyToAppendix": [0.05, -0.088, 0.2414],
+          "translationBodyToAppendix": [0.0, 0.0, 0.0],
           "yawPitchRollBodyToAppendix": [0.0, 0.0, 0.0]
         }
       ]
@@ -21,7 +21,7 @@
         {
           "markerId": 1,
           "markerSize": 0.2032,
-          "translationToMarker": [0.05, 0.088, 0.2414],
+          "translationToMarker": [0.05, -0.088, 0.2414],
           "yawPitchRollToMarker": [0.0, 0.0, 0.0],
           "virtualBodyFileName": "environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj",
           "virtualAppendixFileName": "environmentObjects/door/doorPanel/DoorPanel.g3dj",
