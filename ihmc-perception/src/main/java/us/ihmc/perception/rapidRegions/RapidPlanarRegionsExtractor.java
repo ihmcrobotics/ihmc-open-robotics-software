@@ -75,8 +75,8 @@ public class RapidPlanarRegionsExtractor
 
    private final RapidRegionsDebutOutputGenerator debugger = new RapidRegionsDebutOutputGenerator();
    private final Stack<PatchGraphRecursionBlock> depthFirstSearchStack = new Stack<>();
-   private final RecyclingArrayList<GPUPlanarRegion> gpuPlanarRegions = new RecyclingArrayList<>(GPUPlanarRegion::new);
-   private final Comparator<GPURegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
+   private final RecyclingArrayList<RapidPlanarRegion> rapidPlanarRegions = new RecyclingArrayList<>(RapidPlanarRegion::new);
+   private final Comparator<RapidRegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
 
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer parametersBuffer;
@@ -92,7 +92,7 @@ public class RapidPlanarRegionsExtractor
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
-   private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
+   private final RapidPlanarRegionIsland tempIsland = new RapidPlanarRegionIsland();
    private boolean firstRun = true;
 
    /**
@@ -179,7 +179,7 @@ public class RapidPlanarRegionsExtractor
          growRegionBoundaries();
          depthFirstSearchDurationStopwatch.suspend();
 
-         rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(gpuPlanarRegions, cameraFrame, regionsWithPose);
+         rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(rapidPlanarRegions, cameraFrame, regionsWithPose);
 
          wholeAlgorithmDurationStopwatch.suspend();
 
@@ -332,7 +332,7 @@ public class RapidPlanarRegionsExtractor
    {
       int planarRegionIslandIndex = 0;
       regionMaxSearchDepth = 0;
-      gpuPlanarRegions.clear();
+      rapidPlanarRegions.clear();
       regionVisitedMatrix.zero();
       boundaryMatrix.zero();
       regionMatrix.zero();
@@ -348,7 +348,7 @@ public class RapidPlanarRegionsExtractor
                                                                                   parameters.getConnectionThreshold())) // all ones; fully connected
             {
                numberOfRegionPatches = 0; // also number of patches traversed
-               GPUPlanarRegion planarRegion = gpuPlanarRegions.add();
+               RapidPlanarRegion planarRegion = rapidPlanarRegions.add();
                planarRegion.reset(planarRegionIslandIndex);
 
                // Push the first call on stack
@@ -372,10 +372,10 @@ public class RapidPlanarRegionsExtractor
                }
                else
                {
-                  int totalGPURegions = gpuPlanarRegions.size();
+                  int totalGPURegions = rapidPlanarRegions.size();
                   if (totalGPURegions > 0)
                   {
-                     gpuPlanarRegions.remove(gpuPlanarRegions.size() - 1);
+                     rapidPlanarRegions.remove(rapidPlanarRegions.size() - 1);
                   }
                }
                if (numberOfRegionPatches > regionMaxSearchDepth)
@@ -389,14 +389,14 @@ public class RapidPlanarRegionsExtractor
    {
       boundaryVisitedMatrix.zero();
       boundaryMaxSearchDepth = 0;
-      gpuPlanarRegions.parallelStream().forEach(planarRegion ->
+      rapidPlanarRegions.parallelStream().forEach(planarRegion ->
       {
          int leafPatchIndex = 0;
          int regionRingIndex = 0;
          planarRegion.getRegionsRingsBySize().clear();
          for (Point2D leafPatch : planarRegion.getBorderIndices())
          {
-            GPURegionRing regionRing = planarRegion.getRegionRings().add();
+            RapidRegionRing regionRing = planarRegion.getRegionRings().add();
             regionRing.reset();
             regionRing.setIndex(regionRingIndex);
             int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
@@ -421,10 +421,10 @@ public class RapidPlanarRegionsExtractor
          }
 
          // remove holes
-         for (GPURegionRing regionRing : planarRegion.getRegionsRingsBySize())
+         for (RapidRegionRing regionRing : planarRegion.getRegionsRingsBySize())
          {
             planarRegion.getHoleRingsToRemove().clear();
-            for (GPURegionRing otherRegionRing : planarRegion.getRegionRings())
+            for (RapidRegionRing otherRegionRing : planarRegion.getRegionRings())
             {
                if (otherRegionRing != regionRing)
                {
@@ -436,7 +436,7 @@ public class RapidPlanarRegionsExtractor
                   }
                }
             }
-            for (GPURegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
+            for (RapidRegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
             {
                planarRegion.getRegionRings().remove(regionRingToRemove);
             }
@@ -448,11 +448,11 @@ public class RapidPlanarRegionsExtractor
 
    public void growRegionBoundaries()
    {
-      gpuPlanarRegions.forEach(planarRegion ->
+      rapidPlanarRegions.forEach(planarRegion ->
       {
          if (!planarRegion.getRegionRings().isEmpty())
          {
-            GPURegionRing firstRing = planarRegion.getRegionRings().get(0);
+            RapidRegionRing firstRing = planarRegion.getRegionRings().get(0);
             for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
             {
                // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
@@ -476,7 +476,7 @@ public class RapidPlanarRegionsExtractor
       });
    }
 
-   private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, GPURegionRing regionRing, int leafPatchIndex, int searchDepth)
+   private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, RapidRegionRing regionRing, int leafPatchIndex, int searchDepth)
    {
       if (boundaryVisitedMatrix.get(row, column) || searchDepth > parameters.getBoundarySearchDepthLimit())
          return 0;
@@ -573,10 +573,10 @@ public class RapidPlanarRegionsExtractor
       private final int row;
       private final int column;
       private final int planarRegionIslandIndex;
-      private final GPUPlanarRegion planarRegion;
+      private final RapidPlanarRegion planarRegion;
       private final int searchDepth;
 
-      public PatchGraphRecursionBlock(int row, int column, int planarRegionIslandIndex, GPUPlanarRegion planarRegion, int searchDepth)
+      public PatchGraphRecursionBlock(int row, int column, int planarRegionIslandIndex, RapidPlanarRegion planarRegion, int searchDepth)
       {
          this.row = row;
          this.column = column;
@@ -682,9 +682,9 @@ public class RapidPlanarRegionsExtractor
       return numberOfBoundaryPatchesInWholeImage;
    }
 
-   public RecyclingArrayList<GPUPlanarRegion> getGPUPlanarRegions()
+   public RecyclingArrayList<RapidPlanarRegion> getRapidPlanarRegions()
    {
-      return gpuPlanarRegions;
+      return rapidPlanarRegions;
    }
 
    public int getPatchWidth()

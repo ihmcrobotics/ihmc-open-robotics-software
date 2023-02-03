@@ -9,7 +9,6 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.avatar.gpuPlanarRegions.*;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -17,10 +16,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.perception.rapidRegions.GPUPlanarRegion;
-import us.ihmc.perception.rapidRegions.GPUPlanarRegionIsland;
-import us.ihmc.perception.rapidRegions.GPURegionRing;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegion;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionIsland;
+import us.ihmc.perception.rapidRegions.RapidRegionRing;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
@@ -250,7 +248,7 @@ public class RDXGPUPlanarRegionExtractionUI
       debugExtractionPanel.resize(patchImageWidth, patchImageHeight, openCLManager);
    }
 
-   private void forDrawingRegionsInDebugPanel(GPUPlanarRegionIsland island)
+   private void forDrawingRegionsInDebugPanel(RapidPlanarRegionIsland island)
    {
       if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && drawPatches.get())
       {
@@ -269,7 +267,7 @@ public class RDXGPUPlanarRegionExtractionUI
       }
    }
 
-   private void forDrawingRingsInDebugPanel(GPURegionRing regionRing)
+   private void forDrawingRingsInDebugPanel(RapidRegionRing regionRing)
    {
       if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && drawBoundaries.get())
       {
@@ -327,13 +325,13 @@ public class RDXGPUPlanarRegionExtractionUI
          boundaryPointCloudSwap.accessOnLowPriorityThread(boundaryPointCloud ->
          {
             boundaryPointCloud.prepareVertexBufferForAddingPoints();
-            for (GPUPlanarRegion planarRegion : gpuPlanarRegionExtraction.getGPUPlanarRegions())
+            for (RapidPlanarRegion planarRegion : gpuPlanarRegionExtraction.getRapidPlanarRegions())
             {
                if (render3DBoundaries.get())
                {
                   if (!planarRegion.getRegionRings().isEmpty())
                   {
-                     GPURegionRing firstRing = planarRegion.getRegionRings().get(0);
+                     RapidRegionRing firstRing = planarRegion.getRegionRings().get(0);
                      for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
                      {
                         int column = (int) boundaryIndex.getX() * gpuPlanarRegionExtraction.getPatchWidth();
@@ -381,7 +379,7 @@ public class RDXGPUPlanarRegionExtractionUI
       depthFirstSearchDurationPlot.render(depthFirstSearchDurationStopwatch.totalElapsed());
       planarRegionsSegmentationDurationPlot.render(planarRegionsSegmentationDurationStopwatch.totalElapsed());
       gpuHeightMapDurationPlot.render(gpuHeightMapStopwatch.totalElapsed());
-      numberOfPlanarRegionsPlot.render((float) gpuPlanarRegionExtraction.getGPUPlanarRegions().size());
+      numberOfPlanarRegionsPlot.render((float) gpuPlanarRegionExtraction.getRapidPlanarRegions().size());
       regionMaxSearchDepthPlot.render((float) gpuPlanarRegionExtraction.getRegionMaxSearchDepth());
       numberOfBoundaryVerticesPlot.render((float) gpuPlanarRegionExtraction.getNumberOfBoundaryPatchesInWholeImage());
       boundaryMaxSearchDepthPlot.render((float) gpuPlanarRegionExtraction.getBoundaryMaxSearchDepth());
