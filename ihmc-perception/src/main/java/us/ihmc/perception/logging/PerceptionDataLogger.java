@@ -101,8 +101,8 @@ public class PerceptionDataLogger
    public void openLogFile(String logFileName)
    {
       this.filePath = logFileName;
-      File f = new File(logFileName);
-      if (!f.exists() && !f.isDirectory())
+      File logFile = new File(logFileName);
+      if (!logFile.exists() && !logFile.isDirectory())
       {
          LogTools.info("Creating HDF5 File: " + logFileName);
          hdf5Manager = new HDF5Manager(logFileName, hdf5.H5F_ACC_TRUNC);
