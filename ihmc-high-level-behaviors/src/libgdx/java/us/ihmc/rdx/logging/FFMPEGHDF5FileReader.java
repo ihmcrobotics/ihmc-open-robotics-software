@@ -25,6 +25,9 @@ import us.ihmc.perception.logging.HDF5Tools;
 
 import java.nio.ByteBuffer;
 
+/**
+ * FIXME: Not working yet. Needs some love.
+ */
 public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
 {
    private final AVFormatContext avFormatContext;
