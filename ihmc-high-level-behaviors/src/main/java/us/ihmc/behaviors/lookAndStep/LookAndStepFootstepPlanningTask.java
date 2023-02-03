@@ -90,7 +90,7 @@ public class LookAndStepFootstepPlanningTask
    protected YoDouble planarRegionDelay;
    protected YoDouble footstepPlanningDuration;
    protected YoDouble moreInclusivePlanningDuration;
-   protected FootstepPlan previousFootstepPlan;
+   protected FootstepPlan previousFootstepPlan = null;
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
@@ -449,10 +449,17 @@ public class LookAndStepFootstepPlanningTask
       // TODO: maybe it could be swing + stance transition duration + 10% ?
       double expirationTime = 2.0;
       // TODO check if looks ok (revised after Duncan review)
-      if (successfulPlanExpirationTimer.isRunning(expirationTime) && previousFootstepPlan.getNumberOfSteps() >= 2)
+      if (successfulPlanExpirationTimer.isRunning(expirationTime) && previousFootstepPlan != null && previousFootstepPlan.getNumberOfSteps() >= 2)
       {
-         previousFootstepPlan.remove(0);
-         footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
+         if (initialStanceSide == previousFootstepPlan.getFootstep(0).getRobotSide())
+         {
+            LogTools.error("Something is wrong in Look and step using reference plan");
+         }
+         else
+         {
+            previousFootstepPlan.remove(0);
+            footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
+         }
       }
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
@@ -484,7 +491,12 @@ public class LookAndStepFootstepPlanningTask
       // TODO check if looks ok
       if (footstepPlannerOutput.getFootstepPlanningResult().validForExecution())
       {
+         successfulPlanExpirationTimer.reset();
          previousFootstepPlan = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
+      }
+      else
+      {
+         previousFootstepPlan = null;
       }
 
       String latestLogDirectory = FootstepPlannerLogger.generateALogFolderName();
@@ -561,7 +573,7 @@ public class LookAndStepFootstepPlanningTask
          uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(reducedPlan, "Look and Step Planned"));
 
          updatePlannedFootstepDurations(reducedPlan, startFootPoses);
-         successfulPlanExpirationTimer.reset();
+//         successfulPlanExpirationTimer.reset();
 
          if (operatorReviewEnabledSupplier.get())
          {
