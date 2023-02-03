@@ -22,13 +22,13 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * @author Bhavyansh Mishra
- * @author Robert Griffin
- *
  * PlanarRegionMap computes a planar region map using planar region and odometry measurements. The map can be built using either filter-based
  * approach or a smoothing based approach to fusing landmarks. This requires matching incoming planar regions to their closest neighbors in the
  * map. The filter-based approach uses complmentary filtering to merge planar region plane paramters. The smoothing based approach uses a
  * factor graph to optimize the poses and landmark in the map.
+ *
+ * @author Bhavyansh Mishra
+ * @author Robert Griffin
  */
 public class PlanarRegionMap
 {
