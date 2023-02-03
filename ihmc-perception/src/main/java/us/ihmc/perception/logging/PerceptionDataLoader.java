@@ -13,7 +13,6 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ public class PerceptionDataLoader
          hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
          channels.clear();
 
-         ArrayList<String> topicNames = HDF5Tools.getTopicNames(hdf5Manager.getFile());
+         ArrayList<String> topicNames = HDF5Tools.findTopicNames(hdf5Manager.getFile());
          for (String topic : topicNames)
          {
             LogTools.info("[Count: {}]\t Channel Found: {}", hdf5Manager.getCount(topic), topic);
