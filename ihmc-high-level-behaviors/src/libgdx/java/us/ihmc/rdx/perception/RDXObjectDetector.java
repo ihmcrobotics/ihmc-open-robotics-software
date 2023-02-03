@@ -5,12 +5,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.ObjectDetector;
 import us.ihmc.perception.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.objects.ObjectInfo;
@@ -104,7 +103,7 @@ public class RDXObjectDetector
          if (objectInfo.hasAppendix(objectName))
             objectAppendix = new RDXVirtualGhostObject(objectInfo.getVirtualAppendixFileName(objectName));
       }
-      else
+      else if (hasDetectedObject())
       {
          RigidBodyTransform transformObjectToWorld = new RigidBodyTransform();
          objectDetector.getObjectPose().get(transformObjectToWorld);
@@ -112,8 +111,10 @@ public class RDXObjectDetector
          objectBody.update();
          if (objectAppendix != null)
          {
-            objectInfo.getVirtualBodyYawPitchRoll(objectName);
-            transformObjectToWorld.appendYawRotation();
+            YawPitchRoll rotationAppendix = objectInfo.getVirtualBodyYawPitchRoll(objectName);
+            transformObjectToWorld.appendYawRotation(rotationAppendix.getYaw());
+            transformObjectToWorld.appendPitchRotation(rotationAppendix.getPitch());
+            transformObjectToWorld.appendRollRotation(rotationAppendix.getRoll());
             transformObjectToWorld.appendTranslation(objectInfo.getVirtualBodyTranslation(objectName));
             objectAppendix.setTransformToParent(transformObjectToWorld);
             objectAppendix.update();

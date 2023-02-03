@@ -9,9 +9,9 @@
           "translationToMarker": [0.03, -0.188, 0.205],
           "yawPitchRollToMarker": [3.1416, 0.0, 0.0],
           "virtualBodyFileName": "environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj",
-          "virtualAppendixFileName": "environmentObjects/door/doorPanel/DoorPanel.g3dj",
-          "translationBodyToAppendix": [0.0, 0.0, 0.0],
-          "yawPitchRollBodyToAppendix": [0.0, 0.0, 0.0]
+          "virtualAppendixFileName": "environmentObjects/door/doorPanel/DoorPanelSimple.g3dj",
+          "translationBodyToAppendix": [0.03, -0.08, -0.8],
+          "yawPitchRollBodyToAppendix": [0.0, 0.0, 3.1416]
         }
       ]
     },
