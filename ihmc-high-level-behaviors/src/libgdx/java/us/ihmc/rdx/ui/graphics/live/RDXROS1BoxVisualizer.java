@@ -31,6 +31,7 @@ public class RDXROS1BoxVisualizer extends RDXROS1Visualizer implements Renderabl
    private final ModelBuilder modelBuilder = new ModelBuilder();
    private ModelInstance modelInstance;
    private Model lastModel;
+   private Texture paletteTexture = null;
    private volatile Runnable toRender = null;
 
    private AbstractRosTopicSubscriber<GDXBoxesMessage> subscriber;
@@ -152,7 +153,8 @@ public class RDXROS1BoxVisualizer extends RDXROS1Visualizer implements Renderabl
          Mesh mesh = meshBuilder.generateMesh();
          MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
          Material material = new Material();
-         Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+         if (paletteTexture == null)
+            paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(color));
          modelBuilder.part(meshPart, material);

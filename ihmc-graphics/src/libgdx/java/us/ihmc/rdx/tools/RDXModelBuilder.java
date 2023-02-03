@@ -17,6 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 
 import java.util.List;
@@ -232,12 +233,28 @@ public class RDXModelBuilder
       return buildModelInstance(meshBuilder -> meshBuilder.addPolygon(transformToWorld, polygon, color));
    }
 
-   public static ModelInstance createLinedPolygon(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DReadOnly> points, double lineWidth, Color color, boolean close)
+   public static ModelInstance createLinedPolygon(List<? extends Point3DReadOnly> points,
+                                                  double lineWidth,
+                                                  Color color,
+                                                  boolean close)
    {
       return buildModelInstance(meshBuilder ->
-                                {
-                                   meshBuilder.addMultiLine(transformToWorld, points, lineWidth, color, close);
-                                   meshBuilder.addPolygon(transformToWorld, points, color);
-                                });
+      {
+         meshBuilder.addMultiLine(points, lineWidth, color, close);
+         meshBuilder.addPolygon(points, color);
+      });
+   }
+
+   public static ModelInstance createLinedPolygon(RigidBodyTransformReadOnly transformToWorld,
+                                                  List<? extends Point2DReadOnly> points,
+                                                  double lineWidth,
+                                                  Color color,
+                                                  boolean close)
+   {
+      return buildModelInstance(meshBuilder ->
+      {
+         meshBuilder.addMultiLine(transformToWorld, points, lineWidth, color, close);
+         meshBuilder.addPolygon(transformToWorld, points, color);
+      });
    }
 }
