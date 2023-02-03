@@ -68,7 +68,7 @@ public class ObjectDetector
                markerPose.getOrientation().set(arUcoMarkerPosesMessage.getOrientation().get(i));
                // transform in world frame
                markerPose.changeFrame(ReferenceFrame.getWorldFrame());
-               // pack transform marker to world from marker pose
+               // set transform MarkerToWorld to markerPose
                markerPose.get(objectWithArUcoMarker.getMarkerToWorld());
                // update frame of the object
                objectWithArUcoMarker.updateFrame();

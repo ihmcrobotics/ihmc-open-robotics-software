@@ -5,9 +5,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.ObjectDetector;
 import us.ihmc.perception.OpenCVArUcoMarkerROS2Publisher;
@@ -32,6 +34,7 @@ public class RDXObjectDetector
    private RDXVirtualGhostObject objectAppendix;
    private final RDXObjectDetectionMode detectionMode;
    private final ObjectInfo objectInfo = new ObjectInfo();
+   private String objectName = "";
    // aruco related
    private final ArrayList<OpenCVArUcoMarker> arUcoMarkersToTrack = new ArrayList<>();
    // simulated aruco related
@@ -96,12 +99,26 @@ public class RDXObjectDetector
    {
       if (objectBody == null && hasDetectedObject())
       {
-         String objectName = getObjectName();
+         objectName = getObjectName();
          objectBody = new RDXVirtualGhostObject(objectInfo.getVirtualBodyFileName(objectName));
          if (objectInfo.hasAppendix(objectName))
-         {
             objectAppendix = new RDXVirtualGhostObject(objectInfo.getVirtualAppendixFileName(objectName));
+      }
+      else
+      {
+         RigidBodyTransform transformObjectToWorld = new RigidBodyTransform();
+         objectDetector.getObjectPose().get(transformObjectToWorld);
+         objectBody.setTransformToParent(transformObjectToWorld);
+         objectBody.update();
+         if (objectAppendix != null)
+         {
+            objectInfo.getVirtualBodyYawPitchRoll(objectName);
+            transformObjectToWorld.appendYawRotation();
+            transformObjectToWorld.appendTranslation(objectInfo.getVirtualBodyTranslation(objectName));
+            objectAppendix.setTransformToParent(transformObjectToWorld);
+            objectAppendix.update();
          }
+
       }
    }
 
