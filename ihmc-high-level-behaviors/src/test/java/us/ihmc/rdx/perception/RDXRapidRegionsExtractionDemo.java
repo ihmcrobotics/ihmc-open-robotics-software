@@ -39,6 +39,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 
@@ -52,6 +54,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
+   private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor
+         = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress", true, 1);
    private ImGuiPanel navigationPanel;
 
    private final RDXLineMeshModel mocapGraphic = new RDXLineMeshModel(0.02f, Color.YELLOW);
@@ -179,10 +183,14 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
                if (userChangedIndex.poll())
                {
-                  if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
+                  loadAndDecompressThreadExecutor.clearQueueAndExecute(() ->
                   {
-                     perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
-                  }
+                     if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
+                     {
+                        perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+                        ThreadTools.sleep(100);
+                     }
+                  });
                }
 
                updatePointCloudRenderer();
@@ -258,7 +266,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                // LogTools.info("Transform to World: {}", cameraFrame.getTransformToWorldFrame());
 
                regionsWithPose.getPlanarRegionsList().clear();
-               rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
+               synchronized (bytedecoDepthImage.getBytedecoOpenCVMat())
+               {
+                  rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
+               }
                regionsWithPose.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
                planarRegionsListToRenderNotification.set(regionsWithPose.getPlanarRegionsList().copy());
            }, getClass().getSimpleName() + "RapidRegions");

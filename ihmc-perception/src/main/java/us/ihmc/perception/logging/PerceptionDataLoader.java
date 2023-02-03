@@ -64,8 +64,8 @@ public class PerceptionDataLoader
 
    public void loadPoint3DList(String namespace, ArrayList<Point3D> points)
    {
-      executorService.submit(() ->
-      {
+//      executorService.submit(() ->
+//      {
          int count = (int) hdf5Manager.getCount(namespace);
          for (int index = 0; index < count; index++)
          {
@@ -79,13 +79,13 @@ public class PerceptionDataLoader
          }
 
          LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
-      });
+//      });
    }
 
    public void loadQuaternionList(String namespace, ArrayList<Quaternion> quaternions)
    {
-      executorService.submit(() ->
-        {
+//      executorService.submit(() ->
+//        {
            int count = (int) hdf5Manager.getCount(namespace);
            for (int index = 0; index < count; index++)
            {
@@ -102,7 +102,7 @@ public class PerceptionDataLoader
            }
 
            LogTools.info("[{}] Total Quaternions Loaded: {}", namespace, quaternions.size());
-        });
+//        });
    }
 
    public void loadFloatArray(String namespace, int index, float[] array)
@@ -111,19 +111,22 @@ public class PerceptionDataLoader
       HDF5Tools.loadFloatArray(group, index, array);
    }
 
-   public synchronized void loadCompressedImage(String namespace, int index, Mat mat)
+   public void loadCompressedImage(String namespace, int index, Mat mat)
    {
       Group group = hdf5Manager.getGroup(namespace);
       byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
       mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(compressedByteArray));
    }
 
-   public synchronized void loadCompressedDepth(String namespace, int index, Mat mat)
+   public void loadCompressedDepth(String namespace, int index, Mat mat)
    {
       byte[] compressedByteArray;
       Group group = hdf5Manager.getGroup(namespace);
       compressedByteArray = HDF5Tools.loadByteArray(group, index);
-      BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
+      synchronized (mat)
+      {
+         BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
+      }
    }
 
    public String getFilePath()
