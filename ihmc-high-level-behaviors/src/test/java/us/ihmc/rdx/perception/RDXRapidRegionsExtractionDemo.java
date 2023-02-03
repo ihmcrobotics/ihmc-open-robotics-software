@@ -38,7 +38,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public class RDXRapidRegionsExtractionDemo implements RenderableProvider
