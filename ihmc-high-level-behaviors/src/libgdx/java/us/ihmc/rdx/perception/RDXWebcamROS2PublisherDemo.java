@@ -27,7 +27,7 @@ import java.time.Instant;
 /**
  * Publishes webcam images to ROS 2 with best performance.
  */
-public class WebcamROS2PublisherDemo
+public class RDXWebcamROS2PublisherDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
@@ -51,7 +51,7 @@ public class WebcamROS2PublisherDemo
    private final Object measurementSyncObject = new Object();
    private final Object encodeAndPublishMakeSureTheresOne = new Object();
 
-   public WebcamROS2PublisherDemo()
+   public RDXWebcamROS2PublisherDemo()
    {
       baseUI.getImGuiPanelManager().addPanel(diagnosticPanel);
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -197,6 +197,6 @@ public class WebcamROS2PublisherDemo
 
    public static void main(String[] args)
    {
-      new WebcamROS2PublisherDemo();
+      new RDXWebcamROS2PublisherDemo();
    }
 }

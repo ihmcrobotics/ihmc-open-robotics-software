@@ -4,24 +4,22 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
 import us.ihmc.tools.thread.Activator;
 
 /**
- * Interactive calibration pattern detection with a webcam.
+ * Renders a webcam with good performance.
  */
-public class WebcamCalibrationPatternDemo
+public class RDXWebcamDisplayDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                  "Webcam Calibration Pattern Demo");
+                                                  "Webcam Display Demo");
    private RDXOpenCVWebcamReader webcamReader;
-   private RDXCalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private volatile boolean running = true;
 
-   public WebcamCalibrationPatternDemo()
+   public RDXWebcamDisplayDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -31,7 +29,6 @@ public class WebcamCalibrationPatternDemo
             baseUI.create();
 
             webcamReader = new RDXOpenCVWebcamReader(nativesLoadedActivator);
-            webcamReader.setMonitorPanelUIThreadPreprocessor(this::monitorPanelUpdateOnUIThread);
             baseUI.getImGuiPanelManager().addPanel(webcamReader.getStatisticsPanel());
          }
 
@@ -44,9 +41,6 @@ public class WebcamCalibrationPatternDemo
                {
                   webcamReader.create();
                   baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
-
-                  calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
-                  baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
@@ -54,22 +48,15 @@ public class WebcamCalibrationPatternDemo
                      while (running)
                      {
                         webcamReader.readWebcamImage();
-                        calibrationPatternDetectionUI.copyInSourceBGRImage(webcamReader.getBGRImage());
                      }
                   }, "CameraRead");
                }
 
-               calibrationPatternDetectionUI.update();
                webcamReader.updateOnUIThread();
             }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
-         }
-
-         private void monitorPanelUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
-         {
-            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
          }
 
          @Override
@@ -84,6 +71,6 @@ public class WebcamCalibrationPatternDemo
 
    public static void main(String[] args)
    {
-      new WebcamCalibrationPatternDemo();
+      new RDXWebcamDisplayDemo();
    }
 }
