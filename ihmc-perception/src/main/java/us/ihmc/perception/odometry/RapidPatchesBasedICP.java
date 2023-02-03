@@ -19,13 +19,13 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 /**
- * @author Bhavyansh Mishra
- *
  * This class is used to compute the transform between two PatchFeatureGrids using Iterative Closest Point (ICP) on the GPU.
  * It has its own associated OpenCL kernel to perform matching, similarity and centroid calculations necessary for ICP.
  *
  * {@link PatchFeatureGrid} is a class that stores the class that manages OpenCL handles for centroid and surface normals
  * computed on a depth map or height map or polar grid map.
+ *
+ * @author Bhavyansh Mishra
  */
 public class RapidPatchesBasedICP
 {
