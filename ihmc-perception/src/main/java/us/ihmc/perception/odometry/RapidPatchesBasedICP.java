@@ -18,6 +18,15 @@ import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
+/**
+ * @author Bhavyansh Mishra
+ *
+ * This class is used to compute the transform between two PatchFeatureGrids using Iterative Closest Point (ICP) on the GPU.
+ * It has its own associated OpenCL kernel to perform matching, similarity and centroid calculations necessary for ICP.
+ *
+ * {@link PatchFeatureGrid} is a class that stores the class that manages OpenCL handles for centroid and surface normals
+ * computed on a depth map or height map or polar grid map.
+ */
 public class RapidPatchesBasedICP
 {
    private int patchColumns;
@@ -48,7 +57,14 @@ public class RapidPatchesBasedICP
    private final DMatrixRMaj svdVt = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj correl = new DMatrixRMaj(3, 3);
 
-
+   /**
+    * Sets up the kernels and buffers required for ICP on the GPU.
+    *
+    * @param openCLManager OpenCLManager passed in from the calling class
+    * @param program OpenCL program passed in from the calling class
+    * @param patchRows Number of rows in feature grid map
+    * @param patchColumns Number of columns in feature grid map
+    */
    public void create(OpenCLManager openCLManager, _cl_program program, int patchRows, int patchColumns)
    {
       this.openCLManager = openCLManager;
@@ -69,6 +85,12 @@ public class RapidPatchesBasedICP
 
    }
 
+   /**
+    * Computes the transform between two PatchFeatureGrids using ICP on the GPU. The final result is stored in transformToPrevious.
+    *
+    * @param previousFeatureGrid PatchFeatureGrid from previous frame
+    * @param currentFeatureGrid PatchFeatureGrid from current frame
+    */
    public void update(PatchFeatureGrid previousFeatureGrid, PatchFeatureGrid currentFeatureGrid)
    {
       parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) currentFeatureGrid.getRows());
@@ -108,11 +130,11 @@ public class RapidPatchesBasedICP
          centroidPrevious.setToZero();
          centroidCurrent.setToZero();
 
-         LogTools.info("Before -> Centroid One: " + centroidPrevious + ", Centroid Two: " + centroidCurrent);
+         LogTools.debug("Before -> Centroid One: " + centroidPrevious + ", Centroid Two: " + centroidCurrent);
 
          collectCentroid(centroidBuffer.getBackingDirectFloatBuffer(), centroidPrevious, centroidCurrent);
 
-         LogTools.info("After -> Centroid One: " + centroidPrevious + ", Centroid Two: " + centroidCurrent);
+         LogTools.debug("After -> Centroid One: " + centroidPrevious + ", Centroid Two: " + centroidCurrent);
 
          setFeatureGridKernelArguments(correlReduceKernel, previousFeatureGrid, currentFeatureGrid);
          openCLManager.setKernelArgument(correlReduceKernel, 12, rowMatchIndexImage.getOpenCLImageObject());
@@ -125,15 +147,21 @@ public class RapidPatchesBasedICP
          correl.zero();
          colectCorrel(correlBuffer.getBackingDirectFloatBuffer(), correl);
 
-         LogTools.info("Correlation Matrix: " + correl);
+         LogTools.debug("Correlation Matrix: " + correl);
 
          openCLManager.finish();
 
          computeTransform(centroidPrevious, centroidCurrent, correl, transformToPrevious);
-         LogTools.info("Transform: \n" + transformToPrevious);
+         LogTools.debug("Transform: \n" + transformToPrevious);
       }
    }
 
+   /**
+    * Performs reduction across all columns of the correlation matrix
+    *
+    * @param correlBuffer DirectFloatBuffer containing the tensor of correlation matrices for each column
+    * @param correl DMatrixRMaj to store the final correlation matrix
+    */
    private void colectCorrel(FloatBuffer correlBuffer, DMatrixRMaj correl)
    {
       correl.zero();
@@ -149,7 +177,14 @@ public class RapidPatchesBasedICP
       }
    }
 
-   private void collectCentroid(FloatBuffer buffer, Point3D centroidOneToPack, Point3D centroidTwoToPack)
+   /**
+    * Performs reduction across all columns of the centroid vectors
+    *
+    * @param centroidBuffer DirectFloatBuffer containing the matrix of centroid vectors for each column
+    * @param centroidOneToPack Vector3D to store the final centroid vector for the first feature grid
+    * @param centroidTwoToPack Vector3D to store the final centroid vector for the second feature grid
+    */
+   private void collectCentroid(FloatBuffer centroidBuffer, Point3D centroidOneToPack, Point3D centroidTwoToPack)
    {
       int countOne = 0;
       int countTwo = 0;
@@ -157,8 +192,8 @@ public class RapidPatchesBasedICP
       Point3D centroidTwo = new Point3D();
       for (int i = 0; i < patchColumns; i++)
       {
-         centroidOne.set(buffer.get(i * 6), buffer.get(i * 6 + 1), buffer.get(i * 6 + 2));
-         centroidTwo.set(buffer.get(i * 6 + 3), buffer.get(i * 6 + 4), buffer.get(i * 6 + 5));
+         centroidOne.set(centroidBuffer.get(i * 6), centroidBuffer.get(i * 6 + 1), centroidBuffer.get(i * 6 + 2));
+         centroidTwo.set(centroidBuffer.get(i * 6 + 3), centroidBuffer.get(i * 6 + 4), centroidBuffer.get(i * 6 + 5));
 
          if (centroidOne.norm() > 0.3 && centroidOne.norm() < 100)
          {
@@ -172,11 +207,19 @@ public class RapidPatchesBasedICP
             centroidTwoToPack.add(centroidTwo);
          }
       }
-      LogTools.info("Unscaled -> Centroid One: " + centroidOneToPack + ", Centroid Two: " + centroidTwoToPack);
+      LogTools.debug("Unscaled -> Centroid One: " + centroidOneToPack + ", Centroid Two: " + centroidTwoToPack);
       centroidOneToPack.scale(1.0 / countOne);
       centroidTwoToPack.scale(1.0 / countTwo);
    }
 
+   /**
+    * Computes the transform from the second feature grid to the first feature grid
+    *
+    * @param centroidPrevious Centroid vector for the previous feature grid
+    * @param centroidCurrent Centroid vector for the current feature grid
+    * @param correl Correlation matrix
+    * @param transformToPack Transform from the second feature grid to the first feature grid
+    */
    private void computeTransform(Point3D centroidPrevious, Point3D centroidCurrent, DMatrixRMaj correl, RigidBodyTransform transformToPack)
    {
       if (svd.decompose(correl))
@@ -261,8 +304,8 @@ public class RapidPatchesBasedICP
          matrixTwo.set(1, i, pointTwo.getY());
          matrixTwo.set(2, i, pointTwo.getZ());
 
-         LogTools.info("Matrix1: {}", matrixOne);
-         LogTools.info("Matrix2: {}", matrixTwo);
+         LogTools.debug("Matrix1: {}", matrixOne);
+         LogTools.debug("Matrix2: {}", matrixTwo);
 
          CommonOps_DDRM.multAddTransB(matrixOne, matrixTwo, patchMatrix);
       }
@@ -275,17 +318,17 @@ public class RapidPatchesBasedICP
          DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
          CommonOps_DDRM.mult(svdU, svdVt, rotationMatrix);
 
-         LogTools.info("Rotation Matrix: " + rotationMatrix);
+         LogTools.debug("Rotation Matrix: " + rotationMatrix);
 
          RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
          rigidBodyTransform.setRotationAndZeroTranslation(rotationMatrix);
 
-         LogTools.info("Transform: \n{}", rigidBodyTransform);
+         LogTools.debug("Transform: \n{}", rigidBodyTransform);
 
          Point3D angles = new Point3D();
          rigidBodyTransform.getRotation().getEuler(angles);
 
-         LogTools.info("Angles: {}", angles);
+         LogTools.debug("Angles: {}", angles);
       }
    }
 }

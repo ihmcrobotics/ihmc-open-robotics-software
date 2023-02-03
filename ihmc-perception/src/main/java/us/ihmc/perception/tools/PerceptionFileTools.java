@@ -21,7 +21,7 @@ import java.util.List;
 
 public class PerceptionFileTools
 {
-   public static String getValue(BufferedReader reader, String key) throws IOException
+   private static String getColonSeparatedValueWithKey(BufferedReader reader, String key) throws IOException
    {
       String line = reader.readLine();
       //LogTools.info("Line: {}", line);
@@ -69,7 +69,7 @@ public class PerceptionFileTools
          reader = new BufferedReader(new FileReader(file));
 
          int numRegions = 0;
-         value = getValue(reader, "NumRegions");
+         value = getColonSeparatedValueWithKey(reader, "NumRegions");
          LogTools.info("NumRegions: {}", value);
          if (value != null)
          {
@@ -77,7 +77,7 @@ public class PerceptionFileTools
             for (int r = 0; r < numRegions; r++)
             {
 
-               int regionId = Integer.parseInt(getValue(reader, "RegionID"));
+               int regionId = Integer.parseInt(getColonSeparatedValueWithKey(reader, "RegionID"));
                Point3D origin = getPoint3D(reader, "Center");
                Point3D normal = getPoint3D(reader, "Normal");
 
@@ -87,7 +87,7 @@ public class PerceptionFileTools
 
                List<Point3D> loadedPoints = new ArrayList<>();
 
-               int numPatches = Integer.parseInt(getValue(reader, "NumPatches"));
+               int numPatches = Integer.parseInt(getColonSeparatedValueWithKey(reader, "NumPatches"));
 
                for (int patchIndex = 0; patchIndex < numPatches; patchIndex++)
                {
