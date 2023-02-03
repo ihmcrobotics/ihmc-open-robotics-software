@@ -26,8 +26,10 @@ import us.ihmc.tools.thread.Throttler;
 
 /**
  * Subscribes to ROS 2 webcam images with best performance.
+ *
+ * TODO Okay, well it's got some potential optimizations. See commented code.
  */
-public class WebcamROS2SubscriberDemo
+public class RDXWebcamROS2SubscriberDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
@@ -58,7 +60,7 @@ public class WebcamROS2SubscriberDemo
    private Mat inputYUVI420Mat;
    private Mat bgr8Mat;
 
-   public WebcamROS2SubscriberDemo()
+   public RDXWebcamROS2SubscriberDemo()
    {
       baseUI.getImGuiPanelManager().addPanel(diagnosticPanel);
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
@@ -205,6 +207,6 @@ public class WebcamROS2SubscriberDemo
 
    public static void main(String[] args)
    {
-      new WebcamROS2SubscriberDemo();
+      new RDXWebcamROS2SubscriberDemo();
    }
 }

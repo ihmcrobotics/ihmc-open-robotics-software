@@ -10,7 +10,7 @@ import us.ihmc.tools.thread.Activator;
 /**
  * Log webcam images to HDF5.
  */
-public class WebcamHDF5LoggingDemo
+public class RDXWebcamHDF5LoggingDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
@@ -21,7 +21,7 @@ public class WebcamHDF5LoggingDemo
    private RDXOpenCVWebcamReader webcamReader;
    private volatile boolean running = true;
 
-   public WebcamHDF5LoggingDemo()
+   public RDXWebcamHDF5LoggingDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -78,6 +78,6 @@ public class WebcamHDF5LoggingDemo
 
    public static void main(String[] args)
    {
-      new WebcamHDF5LoggingDemo();
+      new RDXWebcamHDF5LoggingDemo();
    }
 }
