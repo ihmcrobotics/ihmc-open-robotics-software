@@ -21,6 +21,8 @@ import us.ihmc.graphicsDescription.TexCoord2f;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.badlogic.gdx.graphics.g3d.utils.MeshBuilder.MAX_INDEX;
+
 /**
  * TODO: Make interface and use Color from ihmc-graphics-description
  */
