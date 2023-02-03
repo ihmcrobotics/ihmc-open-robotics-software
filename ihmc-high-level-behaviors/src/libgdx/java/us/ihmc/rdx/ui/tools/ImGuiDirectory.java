@@ -58,7 +58,7 @@ public class ImGuiDirectory
       ImGui.sameLine();
       ImGui.text("Available paths:");
 
-      ImGui.beginChild(labels.get("Scroll area"), ImGui.getColumnWidth(), 150.0f);
+      ImGui.beginChild(labels.get("Scroll area"), ImGui.getColumnWidth(), ImGuiTools.REASONABLE_HEIGHT_FOR_A_SCROLL_AREA);
       for (Path sortedPath : sortedPaths)
       {
          String pathName = sortedPath.getFileName().toString();
