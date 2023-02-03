@@ -41,7 +41,7 @@ public class RDXCalibrationPatternDetectionUI
       bgrSourceCopy = new Mat();
       grayscaleImage = new Mat();
       patternSize = new Size(patternWidth.get(), patternHeight.get());
-      cornersOrCenters = new GuidedSwapReference<>(Mat::new, this::accessOnLowPriorityThread, this::accessOnHighPriorityThread);
+      cornersOrCenters = new GuidedSwapReference<>(Mat::new, this::findCornersOnAsynchronousThread, this::drawCornersOrCentersOnAnyThread);
       simpleBlobDetector = SimpleBlobDetector.create();
    }
 
@@ -89,7 +89,7 @@ public class RDXCalibrationPatternDetectionUI
       cornersOrCenters.accessOnLowPriorityThread();
    }
 
-   private void accessOnLowPriorityThread(Mat cornersOrCenters)
+   private void findCornersOnAsynchronousThread(Mat cornersOrCenters)
    {
       if (pattern == RDXCalibrationPatternType.CHESSBOARD)
       {
@@ -119,7 +119,7 @@ public class RDXCalibrationPatternDetectionUI
       cornersOrCenters.accessOnHighPriorityThread();
    }
 
-   private void accessOnHighPriorityThread(Mat cornersOrCenters)
+   private void drawCornersOrCentersOnAnyThread(Mat cornersOrCenters)
    {
       opencv_calib3d.drawChessboardCorners(rgbaMatForDrawing, patternSize, cornersOrCenters, patternFound);
    }
