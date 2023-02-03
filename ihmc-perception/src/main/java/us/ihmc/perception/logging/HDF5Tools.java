@@ -13,7 +13,6 @@ import us.ihmc.log.LogTools;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class HDF5Tools
 {
