@@ -40,6 +40,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
    private ModelInstance modelInstance;
    private Model lastModel;
+   private Texture paletteTexture = null;
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
@@ -80,7 +81,8 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
       {
          modelBuilder.begin();
          Material material = new Material();
-         Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+         if (paletteTexture == null)
+            paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
 
