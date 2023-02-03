@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui;
 
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -17,7 +16,6 @@ import us.ihmc.rdx.ui.graphics.live.*;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.thread.Activator;
 
 import java.net.URISyntaxException;
 
@@ -34,16 +32,12 @@ public class RDXPerceptionUI
 
    private RDXEnvironmentBuilder environmentBuilder;
    private RDXBuildingConstructor buildingConstructor;
-
    private RDXRemotePerceptionUI rapidRegionsExtractionUI;
-
-   private Activator nativesLoadedActivator;
 
    public RDXPerceptionUI()
    {
       logger = new PerceptionDataLogger();
 
-      nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "perception_ui_node");
 
       globalVisualizersUI = new RDXGlobalVisualizersPanel();
@@ -120,14 +114,10 @@ public class RDXPerceptionUI
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
-            {
+            globalVisualizersUI.update();
 
-               globalVisualizersUI.update();
-
-               baseUI.renderBeforeOnScreenUI();
-               baseUI.renderEnd();
-            }
+            baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
          }
 
          @Override
