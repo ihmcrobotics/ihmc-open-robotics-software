@@ -2,10 +2,8 @@ package us.ihmc.rdx.logging;
 
 import org.bytedeco.ffmpeg.avcodec.AVCodec;
 import org.bytedeco.ffmpeg.avcodec.AVCodecContext;
-import org.bytedeco.ffmpeg.avcodec.AVCodecParameters;
 import org.bytedeco.ffmpeg.avcodec.AVPacket;
 import org.bytedeco.ffmpeg.avformat.AVFormatContext;
-import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avformat.AVOutputFormat;
 import org.bytedeco.ffmpeg.avformat.AVStream;
 import org.bytedeco.ffmpeg.avutil.AVDictionary;
@@ -17,16 +15,10 @@ import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
-import org.bytedeco.ffmpeg.swscale.SwsFilter;
-import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.PointerPointer;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-
-import java.nio.file.Paths;
 
 /**
  * Doxygen:
