@@ -3,25 +3,23 @@ package us.ihmc.rdx.perception;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.logging.HDF5ImageLoggingUI;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.Activator;
 
 /**
- * Log webcam images to HDF5.
+ * Renders a webcam with good performance.
  */
-public class WebcamHDF5LoggingDemo
+public class WebcamDisplayDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  "Webcam HDF5 Logging Demo");
-   private HDF5ImageLoggingUI hdf5ImageLoggingUI;
+                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                  "Webcam Display Demo");
    private RDXOpenCVWebcamReader webcamReader;
    private volatile boolean running = true;
 
-   public WebcamHDF5LoggingDemo()
+   public WebcamDisplayDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -43,9 +41,6 @@ public class WebcamHDF5LoggingDemo
                {
                   webcamReader.create();
                   baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
-
-                  hdf5ImageLoggingUI = new HDF5ImageLoggingUI(nativesLoadedActivator, webcamReader.getImageWidth(), webcamReader.getImageHeight());
-                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageLoggingUI.getPanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
@@ -53,7 +48,6 @@ public class WebcamHDF5LoggingDemo
                      while (running)
                      {
                         webcamReader.readWebcamImage();
-                        hdf5ImageLoggingUI.copyBGRImage(webcamReader.getBGRImage());
                      }
                   }, "CameraRead");
                }
@@ -70,7 +64,6 @@ public class WebcamHDF5LoggingDemo
          {
             running = false;
             webcamReader.dispose();
-            hdf5ImageLoggingUI.destroy();
             baseUI.dispose();
          }
       });
@@ -78,6 +71,6 @@ public class WebcamHDF5LoggingDemo
 
    public static void main(String[] args)
    {
-      new WebcamHDF5LoggingDemo();
+      new WebcamDisplayDemo();
    }
 }

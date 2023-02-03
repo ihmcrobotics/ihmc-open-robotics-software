@@ -3,25 +3,25 @@ package us.ihmc.rdx.perception;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.logging.HDF5ImageLoggingUI;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
 import us.ihmc.tools.thread.Activator;
 
 /**
- * Interactive calibration pattern detection with a webcam.
+ * Log webcam images to HDF5.
  */
-public class WebcamCalibrationPatternDemo
+public class WebcamHDF5LoggingDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  "Webcam Calibration Pattern Demo");
+                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                  "Webcam HDF5 Logging Demo");
+   private HDF5ImageLoggingUI hdf5ImageLoggingUI;
    private RDXOpenCVWebcamReader webcamReader;
-   private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private volatile boolean running = true;
 
-   public WebcamCalibrationPatternDemo()
+   public WebcamHDF5LoggingDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -31,7 +31,6 @@ public class WebcamCalibrationPatternDemo
             baseUI.create();
 
             webcamReader = new RDXOpenCVWebcamReader(nativesLoadedActivator);
-            webcamReader.setMonitorPanelUIThreadPreprocessor(this::monitorPanelUpdateOnUIThread);
             baseUI.getImGuiPanelManager().addPanel(webcamReader.getStatisticsPanel());
          }
 
@@ -45,8 +44,8 @@ public class WebcamCalibrationPatternDemo
                   webcamReader.create();
                   baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
 
-                  calibrationPatternDetectionUI = new CalibrationPatternDetectionUI();
-                  baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
+                  hdf5ImageLoggingUI = new HDF5ImageLoggingUI(nativesLoadedActivator, webcamReader.getImageWidth(), webcamReader.getImageHeight());
+                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageLoggingUI.getPanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
@@ -54,12 +53,11 @@ public class WebcamCalibrationPatternDemo
                      while (running)
                      {
                         webcamReader.readWebcamImage();
-                        calibrationPatternDetectionUI.copyInSourceBGRImage(webcamReader.getBGRImage());
+                        hdf5ImageLoggingUI.copyBGRImage(webcamReader.getBGRImage());
                      }
                   }, "CameraRead");
                }
 
-               calibrationPatternDetectionUI.update();
                webcamReader.updateOnUIThread();
             }
 
@@ -67,16 +65,12 @@ public class WebcamCalibrationPatternDemo
             baseUI.renderEnd();
          }
 
-         private void monitorPanelUpdateOnUIThread(ImGuiOpenCVSwapVideoPanelData data)
-         {
-            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
-         }
-
          @Override
          public void dispose()
          {
             running = false;
             webcamReader.dispose();
+            hdf5ImageLoggingUI.destroy();
             baseUI.dispose();
          }
       });
@@ -84,6 +78,6 @@ public class WebcamCalibrationPatternDemo
 
    public static void main(String[] args)
    {
-      new WebcamCalibrationPatternDemo();
+      new WebcamHDF5LoggingDemo();
    }
 }
