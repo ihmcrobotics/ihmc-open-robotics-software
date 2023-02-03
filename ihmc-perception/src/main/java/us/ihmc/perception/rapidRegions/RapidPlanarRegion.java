@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 
-public class GPUPlanarRegion
+public class RapidPlanarRegion
 {
    private final Vector3D normalAverage = new Vector3D();
    private final Vector3D normalSVD = new Vector3D();
@@ -26,7 +26,7 @@ public class GPUPlanarRegion
    private final RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
    private final RecyclingArrayList<Point2D> borderIndices = new RecyclingArrayList<>(Point2D::new);
    private final RecyclingArrayList<Point3D> boundaryVertices = new RecyclingArrayList<>(Point3D::new);
-   private final RecyclingArrayList<GPURegionRing> regionRings = new RecyclingArrayList<>(GPURegionRing::new);
+   private final RecyclingArrayList<RapidRegionRing> regionRings = new RecyclingArrayList<>(RapidRegionRing::new);
    // TODO: kd tree
    private int numberOfPatches;
    private int id;
@@ -35,8 +35,8 @@ public class GPUPlanarRegion
    private final DMatrixRMaj svdU = new DMatrixRMaj(3, 3);
    private final Stopwatch svdStopwatch = new Stopwatch();
    private double svdDuration = Double.NaN;
-   private final TreeSet<GPURegionRing> regionsRingsBySize = new TreeSet<>(Comparator.comparing(gpuRegionRing -> -gpuRegionRing.getConvexPolygon().getArea()));
-   private final ArrayList<GPURegionRing> holeRingsToRemove = new ArrayList<>();
+   private final TreeSet<RapidRegionRing> regionsRingsBySize = new TreeSet<>(Comparator.comparing(gpuRegionRing -> -gpuRegionRing.getConvexPolygon().getArea()));
+   private final ArrayList<RapidRegionRing> holeRingsToRemove = new ArrayList<>();
 
    public void reset(int id)
    {
@@ -76,7 +76,7 @@ public class GPUPlanarRegion
       return borderIndices;
    }
 
-   public RecyclingArrayList<GPURegionRing> getRegionRings()
+   public RecyclingArrayList<RapidRegionRing> getRegionRings()
    {
       return regionRings;
    }
@@ -146,12 +146,12 @@ public class GPUPlanarRegion
       return svdDuration;
    }
 
-   public TreeSet<GPURegionRing> getRegionsRingsBySize()
+   public TreeSet<RapidRegionRing> getRegionsRingsBySize()
    {
       return regionsRingsBySize;
    }
 
-   public ArrayList<GPURegionRing> getHoleRingsToRemove()
+   public ArrayList<RapidRegionRing> getHoleRingsToRemove()
    {
       return holeRingsToRemove;
    }

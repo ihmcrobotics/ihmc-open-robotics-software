@@ -1,7 +1,7 @@
 package us.ihmc.perception.rapidRegions;
 
-public class GPUPlanarRegionIsland
+public class RapidPlanarRegionIsland
 {
-   public GPUPlanarRegion planarRegion;
+   public RapidPlanarRegion planarRegion;
    public int planarRegionIslandIndex;
 }

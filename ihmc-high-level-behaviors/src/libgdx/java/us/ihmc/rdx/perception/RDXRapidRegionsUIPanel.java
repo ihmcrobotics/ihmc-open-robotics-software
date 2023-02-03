@@ -10,7 +10,6 @@ import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidRegionsDebutOutputGenerator;
@@ -23,7 +22,6 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.utilities.ros.RosTools;
 
 public class RDXRapidRegionsUIPanel implements RenderableProvider
 {
@@ -165,7 +163,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
       depthFirstSearchDurationPlot.render(rapidPlanarRegionsExtractor.getDepthFirstSearchDurationStopwatch().totalElapsed());
       planarRegionCustomizationDurationPlot.render(rapidPlanarRegionsCustomizer.getStopWatch().totalElapsed());
 
-      numberOfPlanarRegionsPlot.render((float) rapidPlanarRegionsExtractor.getGPUPlanarRegions().size());
+      numberOfPlanarRegionsPlot.render((float) rapidPlanarRegionsExtractor.getRapidPlanarRegions().size());
       regionMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getRegionMaxSearchDepth());
       boundaryMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getBoundaryMaxSearchDepth());
 

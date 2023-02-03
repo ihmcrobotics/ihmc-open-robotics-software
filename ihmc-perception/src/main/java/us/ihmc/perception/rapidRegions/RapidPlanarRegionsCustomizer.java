@@ -37,7 +37,7 @@ public class RapidPlanarRegionsCustomizer
       polygonizerParameters = new PolygonizerParameters(version);
    }
 
-   public List<PlanarRegion> convertToPlanarRegions(GPUPlanarRegion rapidRegion)
+   public List<PlanarRegion> convertToPlanarRegions(RapidPlanarRegion rapidRegion)
    {
       List<PlanarRegion> planarRegions = new ArrayList<>();
       List<LineSegment2D> intersections = new ArrayList<>();
@@ -60,7 +60,7 @@ public class RapidPlanarRegionsCustomizer
       return planarRegions;
    }
 
-   private List<Point2D> getPointCloudInPlane(GPUPlanarRegion rapidRegion, Point3D origin, Quaternion orientation)
+   private List<Point2D> getPointCloudInPlane(RapidPlanarRegion rapidRegion, Point3D origin, Quaternion orientation)
    {
       return rapidRegion.getBoundaryVertices()
                         .stream()
@@ -74,13 +74,13 @@ public class RapidPlanarRegionsCustomizer
                         .collect(Collectors.toList());
    }
 
-   public void createCustomPlanarRegionsList(List<GPUPlanarRegion> gpuPlanarRegions, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsToPack)
+   public void createCustomPlanarRegionsList(List<RapidPlanarRegion> rapidPlanarRegions, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsToPack)
    {
       stopWatch.start();
       RigidBodyTransform sensorToWorldFrameTransform = new RigidBodyTransform();
       AtomicBoolean listCaughtException = new AtomicBoolean(false);
 
-      List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
+      List<List<PlanarRegion>> listOfListsOfRegions = rapidPlanarRegions.parallelStream()
                                                                       .map(this::convertToPlanarRegions)
                                                                       .toList();
       regionsToPack.getPlanarRegionsList().clear();
