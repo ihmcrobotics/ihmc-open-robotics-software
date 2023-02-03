@@ -30,7 +30,6 @@ import java.util.List;
  * map. The filter-based approach uses complmentary filtering to merge planar region plane paramters. The smoothing based approach uses a
  * factor graph to optimize the poses and landmark in the map.
  */
-
 public class PlanarRegionMap
 {
    public enum MergingMode
