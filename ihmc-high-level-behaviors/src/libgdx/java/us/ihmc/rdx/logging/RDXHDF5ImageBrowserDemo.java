@@ -5,16 +5,16 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.Activator;
 
-public class HDF5ImageBrowserDemo
+public class RDXHDF5ImageBrowserDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/libgdx/resources",
                                                   "HDF5 Image Browser Demo");
-   private HDF5ImageBrowser hdf5ImageBrowser;
+   private RDXHDF5ImageBrowser hdf5ImageBrowser;
 
-   public HDF5ImageBrowserDemo()
+   public RDXHDF5ImageBrowserDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -31,7 +31,7 @@ public class HDF5ImageBrowserDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  hdf5ImageBrowser = new HDF5ImageBrowser();
+                  hdf5ImageBrowser = new RDXHDF5ImageBrowser();
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getControlPanel());
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getVideoPanel());
                   baseUI.getLayoutManager().reloadLayout();
@@ -55,6 +55,6 @@ public class HDF5ImageBrowserDemo
 
    public static void main(String[] args)
    {
-      new HDF5ImageBrowserDemo();
+      new RDXHDF5ImageBrowserDemo();
    }
 }

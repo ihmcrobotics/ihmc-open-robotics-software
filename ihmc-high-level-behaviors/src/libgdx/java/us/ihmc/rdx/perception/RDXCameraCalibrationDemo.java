@@ -30,7 +30,7 @@ import java.io.File;
 import java.util.function.Consumer;
 
 /**
- * This is an old class that is around for reference only. {@link BlackflyCalibrationSuite} is the new one.
+ * This is an old class that is around for reference only. {@link RDXBlackflyCalibrationSuite} is the new one.
  */
 public class RDXCameraCalibrationDemo
 {

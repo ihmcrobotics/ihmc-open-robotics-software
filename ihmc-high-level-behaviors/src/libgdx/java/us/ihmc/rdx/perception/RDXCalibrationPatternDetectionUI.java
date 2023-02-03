@@ -17,7 +17,7 @@ import us.ihmc.tools.thread.GuidedSwapReference;
 /**
  * This can be embedded in applications to support interactive calibration pattern detection.
  */
-public class CalibrationPatternDetectionUI
+public class RDXCalibrationPatternDetectionUI
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiPanel panel = new ImGuiPanel("Calibration Pattern", this::renderImGuiWidgets);
@@ -33,10 +33,10 @@ public class CalibrationPatternDetectionUI
    private final Runnable doPatternDetection = this::doPatternDetection;
    private final ResettableExceptionHandlingExecutorService patternDetectionThreadQueue
          = MissingThreadTools.newSingleThreadExecutor("PatternDetection", true, 1);
-   private CalibrationPatternType pattern = CalibrationPatternType.CIRCLES;
+   private RDXCalibrationPatternType pattern = RDXCalibrationPatternType.CIRCLES;
    private Mat rgbaMatForDrawing;
 
-   public CalibrationPatternDetectionUI()
+   public RDXCalibrationPatternDetectionUI()
    {
       bgrSourceCopy = new Mat();
       grayscaleImage = new Mat();
@@ -91,7 +91,7 @@ public class CalibrationPatternDetectionUI
 
    private void accessOnLowPriorityThread(Mat cornersOrCenters)
    {
-      if (pattern == CalibrationPatternType.CHESSBOARD)
+      if (pattern == RDXCalibrationPatternType.CHESSBOARD)
       {
          patternFound = opencv_calib3d.findChessboardCorners(grayscaleImage,
                                                              patternSize,
@@ -128,14 +128,14 @@ public class CalibrationPatternDetectionUI
    {
       ImGui.text("Pattern:");
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Chessboard"), pattern == CalibrationPatternType.CHESSBOARD))
+      if (ImGui.radioButton(labels.get("Chessboard"), pattern == RDXCalibrationPatternType.CHESSBOARD))
       {
-         pattern = CalibrationPatternType.CHESSBOARD;
+         pattern = RDXCalibrationPatternType.CHESSBOARD;
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Circles"), pattern == CalibrationPatternType.CIRCLES))
+      if (ImGui.radioButton(labels.get("Circles"), pattern == RDXCalibrationPatternType.CIRCLES))
       {
-         pattern = CalibrationPatternType.CIRCLES;
+         pattern = RDXCalibrationPatternType.CIRCLES;
       }
       if (ImGuiTools.volatileInputInt(labels.get("Pattern width"), patternWidth))
       {
@@ -153,7 +153,7 @@ public class CalibrationPatternDetectionUI
       return panel;
    }
 
-   public CalibrationPatternType getPatternType()
+   public RDXCalibrationPatternType getPatternType()
    {
       return pattern;
    }

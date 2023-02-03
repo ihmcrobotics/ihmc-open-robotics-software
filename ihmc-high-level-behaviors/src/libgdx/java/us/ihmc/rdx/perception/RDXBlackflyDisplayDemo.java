@@ -4,27 +4,24 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
 import us.ihmc.tools.thread.Activator;
 
 /**
- * This app view the live feed of a locally plugged in Blackfly and visualizes
- * calibration pattern detection on it.
+ * This application shows the live feed of a locally plugged in Blackfly camera.
  */
-public class BlackflyCalibrationPatternDemo
+public class RDXBlackflyDisplayDemo
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
 
-   private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                  "Blackfly Calibration Pattern Demo");
+                                                  "Blackfly Display Demo");
+   private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
    private RDXBlackflyReader blackflyReader;
-   private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private volatile boolean running = true;
 
-   public BlackflyCalibrationPatternDemo()
+   public RDXBlackflyDisplayDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -45,11 +42,7 @@ public class BlackflyCalibrationPatternDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   blackflyReader.create();
-                  blackflyReader.setMonitorPanelUIThreadPreprocessor(this::monitorUIThreadPreprocessor);
                   baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
-
-                  calibrationPatternDetectionUI = new CalibrationPatternDetectionUI();
-                  baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->
@@ -57,23 +50,15 @@ public class BlackflyCalibrationPatternDemo
                      while (running)
                      {
                         blackflyReader.readBlackflyImage();
-                        calibrationPatternDetectionUI.copyInSourceRGBImage(blackflyReader.getRGBImage());
                      }
                   }, "CameraRead");
                }
 
-
-               calibrationPatternDetectionUI.update();
                blackflyReader.updateOnUIThread();
             }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
-         }
-
-         private void monitorUIThreadPreprocessor(ImGuiOpenCVSwapVideoPanelData data)
-         {
-            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
          }
 
          @Override
@@ -88,6 +73,6 @@ public class BlackflyCalibrationPatternDemo
 
    public static void main(String[] args)
    {
-      new BlackflyCalibrationPatternDemo();
+      new RDXBlackflyDisplayDemo();
    }
 }

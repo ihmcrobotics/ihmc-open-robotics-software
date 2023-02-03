@@ -18,7 +18,7 @@ public class WebcamCalibrationPatternDemo
                                                   "ihmc-high-level-behaviors/src/libgdx/resources",
                                                   "Webcam Calibration Pattern Demo");
    private RDXOpenCVWebcamReader webcamReader;
-   private CalibrationPatternDetectionUI calibrationPatternDetectionUI;
+   private RDXCalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private volatile boolean running = true;
 
    public WebcamCalibrationPatternDemo()
@@ -45,7 +45,7 @@ public class WebcamCalibrationPatternDemo
                   webcamReader.create();
                   baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
 
-                  calibrationPatternDetectionUI = new CalibrationPatternDetectionUI();
+                  calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
                   baseUI.getLayoutManager().reloadLayout();
 

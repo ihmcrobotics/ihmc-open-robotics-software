@@ -29,7 +29,7 @@ import java.util.Date;
 /**
  * This can be embedded in applications to record compressed images to HDF5 files.
  */
-public class HDF5ImageLoggingUI
+public class RDXHDF5ImageLoggingUI
 {
    public static final String FILE_SUFFIX = "Images" + HDF5Tools.HDF5_FILE_EXTENSION;
    public static final String IMAGE_GROUP_NAME = "image";
@@ -57,7 +57,7 @@ public class HDF5ImageLoggingUI
    private Group imageGroup;
    private long imageIndex;
 
-   public HDF5ImageLoggingUI(Activator nativesLoadedActivator, int imageWidth, int imageHeight)
+   public RDXHDF5ImageLoggingUI(Activator nativesLoadedActivator, int imageWidth, int imageHeight)
    {
       this.nativesLoadedActivator = nativesLoadedActivator;
       pngCompressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);

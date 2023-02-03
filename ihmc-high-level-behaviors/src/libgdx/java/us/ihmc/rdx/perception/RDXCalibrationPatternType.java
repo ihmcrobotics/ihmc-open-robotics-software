@@ -1,6 +1,6 @@
 package us.ihmc.rdx.perception;
 
-public enum CalibrationPatternType
+public enum RDXCalibrationPatternType
 {
    CHESSBOARD,
    CIRCLES
