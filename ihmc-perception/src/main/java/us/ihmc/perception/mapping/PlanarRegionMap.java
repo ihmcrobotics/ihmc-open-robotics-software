@@ -21,6 +21,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * @author Bhavyansh Mishra
+ * @author Robert Griffin
+ *
+ * PlanarRegionMap computes a planar region map using planar region and odometry measurements. The map can be built using either filter-based
+ * approach or a smoothing based approach to fusing landmarks. This requires matching incoming planar regions to their closest neighbors in the
+ * map. The filter-based approach uses complmentary filtering to merge planar region plane paramters. The smoothing based approach uses a
+ * factor graph to optimize the poses and landmark in the map.
+ */
+
 public class PlanarRegionMap
 {
    public enum MergingMode
@@ -99,6 +109,14 @@ public class PlanarRegionMap
       finalMap.clear();
    }
 
+   /**
+    * This method takes in a planar region list along with the sensor pose and updates the map. The map is updated by matching incoming planar regions
+    * to their closest neighbors in the map. The matching is performed iteratively using three-nested while loops. The planar region landmarks are
+    * updated using either a filter-based approach or a smoothing based approach. The final landmark results replace the existing old regions in the map.
+    * New regions are added for incoming regions that don't find a match in the map.
+    *
+    * @param regionsWithPose - PlanarRegionsListWithPose object containing the planar regions and the sensor pose
+    */
    public void submitRegionsUsingIterativeReduction(PlanarRegionsListWithPose regionsWithPose)
    {
       PlanarRegionsList regionsInSensorFrame = new PlanarRegionsList();
@@ -115,8 +133,8 @@ public class PlanarRegionMap
       PlanarRegionsList priorRegionsInWorld = new PlanarRegionsList();
       PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
 
-      LogTools.info("--------------------------------------------- New Iteration [{}] ------------------------------------------", sensorPoseIndex);
-      LogTools.info("Incoming: {}", regionsInSensorFrame.getPlanarRegionsAsList().size());
+      LogTools.debug("--------------------------------------------- New Iteration [{}] ------------------------------------------", sensorPoseIndex);
+      LogTools.debug("Incoming: {}", regionsInSensorFrame.getPlanarRegionsAsList().size());
 
       if (regionsInSensorFrame.getNumberOfPlanarRegions() == 0)
       {
@@ -132,9 +150,9 @@ public class PlanarRegionMap
       sensorToWorldFrameTransformPrior.set(currentToPreviousSensorTransform);
       sensorToWorldFrameTransformPrior.multiply(sensorToWorldTransformPosterior);
 
-      LogTools.info("Current to Previous: \n{}", currentToPreviousSensorTransform);
-      LogTools.info("Sensor To World [Prior]: \n{}", sensorToWorldFrameTransformPrior);
-      LogTools.info("Sensor To World [Posterior]: \n{}", sensorToWorldTransformPosterior);
+      LogTools.debug("Current to Previous: \n{}", currentToPreviousSensorTransform);
+      LogTools.debug("Sensor To World [Prior]: \n{}", sensorToWorldFrameTransformPrior);
+      LogTools.debug("Sensor To World [Posterior]: \n{}", sensorToWorldTransformPosterior);
 
       // Generate regions in world frame with prior transform
       priorRegionsInWorld.addPlanarRegionsList(regionsInSensorFrame.copy());
@@ -195,9 +213,9 @@ public class PlanarRegionMap
                posteriorRegionsInWorld.addPlanarRegion(region);
             });
 
-            LogTools.info("Estimated Transform: \n{}", regionsWithPose.getSensorToWorldFrameTransform());
-            LogTools.info("Sensor To World [Prior]: \n{}", sensorToWorldFrameTransformPrior);
-            LogTools.info("Sensor To World [Posterior (Optimized)]: \n{}", sensorToWorldTransformPosterior);
+            LogTools.debug("Estimated Transform: \n{}", regionsWithPose.getSensorToWorldFrameTransform());
+            LogTools.debug("Sensor To World [Prior]: \n{}", sensorToWorldFrameTransformPrior);
+            LogTools.debug("Sensor To World [Posterior (Optimized)]: \n{}", sensorToWorldTransformPosterior);
          }
 
          // merge all the new regions in
@@ -216,7 +234,7 @@ public class PlanarRegionMap
       finalMap.getPlanarRegionsAsList().forEach(region -> mapIDs.add(region.getRegionId()));
       priorRegionsInWorld.getPlanarRegionsAsList().forEach(region -> incomingIDs.add(region.getRegionId()));
 
-      LogTools.info("Map IDs: {}", Arrays.toString(mapIDs.toArray()));
+      LogTools.debug("Map IDs: {}", Arrays.toString(mapIDs.toArray()));
 
       mapIDs.clear();
       incomingIDs.clear();
@@ -225,6 +243,14 @@ public class PlanarRegionMap
       LogTools.debug("-------------------------------------------------------- Done --------------------------------------------------------------\n");
    }
 
+   /**
+    * This method takes in a planar region list along with the sensor pose and updates the map. The map is updated by matching incoming planar regions
+    * to their closest neighbors in the map. The matching is performed by creating a graph of connections for matching regions. The planar region
+    * landmarks are updated using either a filter-based approach or a smoothing based approach. The final landmark results replace the existing
+    * old regions in the map. New regions are added for incoming regions that don't find a match in the map.
+    *
+    * @param regionsWithPose - PlanarRegionsListWithPose object containing the planar regions and the sensor pose
+    */
    public void submitRegionsUsingGraphicalReduction(PlanarRegionsListWithPose regionsWithPose)
    {
       PlanarRegionsList regions = regionsWithPose.getPlanarRegionsList();
@@ -279,7 +305,7 @@ public class PlanarRegionMap
       }
    }
 
-   public static void addIncomingRegionsToGraph(PlanarRegionsList map,
+   private static void addIncomingRegionsToGraph(PlanarRegionsList map,
                                                 PlanarRegionsList incoming,
                                                 PlanarRegionGraph graphToUpdate,
                                                 float normalThreshold,
@@ -346,7 +372,7 @@ public class PlanarRegionMap
       }
    }
 
-   public static void checkMapRegionsForOverlap(PlanarRegionGraph graphToUpdate, float normalThreshold, float normalDistanceThreshold, float distanceThreshold, float minBoxSize)
+   private static void checkMapRegionsForOverlap(PlanarRegionGraph graphToUpdate, float normalThreshold, float normalDistanceThreshold, float distanceThreshold, float minBoxSize)
    {
       List<PlanarRegion> mapRegions = graphToUpdate.getAsPlanarRegionsList().getPlanarRegionsAsList();
 
@@ -368,7 +394,7 @@ public class PlanarRegionMap
       }
    }
 
-   public PlanarRegionsList selfReduceRegionsIteratively(PlanarRegionsList map)
+   private PlanarRegionsList selfReduceRegionsIteratively(PlanarRegionsList map)
    {
       boolean changed = false;
       do
@@ -378,11 +404,11 @@ public class PlanarRegionMap
          int parentIndex = 0;
          int childIndex = 0;
 
-         //LogTools.info("Change Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
+         //LogTools.debug("Change Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
 
          while (parentIndex < map.getNumberOfPlanarRegions())
          {
-            //LogTools.info("Parent Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
+            //LogTools.debug("Parent Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
             childIndex = 0;
             PlanarRegion parentRegion = map.getPlanarRegion(parentIndex);
             while (childIndex < map.getNumberOfPlanarRegions())
@@ -398,7 +424,7 @@ public class PlanarRegionMap
 
                   PlanarRegion childRegion = map.getPlanarRegion(childIndex);
 
-                  //LogTools.info("Checking Match: Parent({}) - Child({})", parentId, childId);
+                  //LogTools.debug("Checking Match: Parent({}) - Child({})", parentId, childId);
 
                   if (PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion,
                                                                    childRegion,
@@ -410,7 +436,7 @@ public class PlanarRegionMap
                      // Request a merge for parent and child regions. If they don't merge, pick the parent if it belongs to the map (based on sign of ID)
                      if (PlanarRegionSLAMTools.mergeRegionIntoParentUsingFilter(parentRegion, childRegion, parameters.getUpdateAlphaTowardsMatch()))
                      {
-                        //LogTools.info("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
+                        //LogTools.debug("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
 
                         // Generate ID for the merged region
                         int finalId = generatePostMergeId(parentRegion.getRegionId(), childRegion.getRegionId());
@@ -443,27 +469,27 @@ public class PlanarRegionMap
       return map;
    }
 
-   public PlanarRegionsList crossReduceRegionsIteratively(PlanarRegionsList map, PlanarRegionsList regions)
+   private PlanarRegionsList crossReduceRegionsIteratively(PlanarRegionsList map, PlanarRegionsList regions)
    {
-      LogTools.info("Performing Cross Reduction");
+      LogTools.debug("Performing Cross Reduction");
       map.addPlanarRegionsList(regions);
       map = selfReduceRegionsIteratively(map);
       return map;
    }
 
-   public void applyFactorGraphBasedSmoothing(PlanarRegionsList mapRegionList,
+   private void applyFactorGraphBasedSmoothing(PlanarRegionsList mapRegionList,
                                               PlanarRegionsList incomingRegionList,
                                               RigidBodyTransform sensorToWorldTransformPrior,
                                               RigidBodyTransform currentToPreviousTransform,
                                               HashMap<Integer, TIntArrayList> matches,
                                               int poseIndex)
    {
-      LogTools.info("------------------------------- Performing Factor Graph Based Smoothing ---------------------------------");
+      LogTools.debug("------------------------------- Performing Factor Graph Based Smoothing ---------------------------------");
 
-      LogTools.info("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
+      LogTools.debug("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
       factorGraph.addOdometryFactorSE3(poseIndex, PerceptionEuclidTools.toArray(currentToPreviousTransform));
 
-      LogTools.info("Adding Pose Initial Value: {}", poseIndex);
+      LogTools.debug("Adding Pose Initial Value: {}", poseIndex);
       factorGraph.setPoseInitialValueSE3(poseIndex, PerceptionEuclidTools.toArray(sensorToWorldTransformPrior));
 
       for (Integer incomingIndex : matches.keySet())
@@ -475,17 +501,17 @@ public class PlanarRegionMap
 
          if(landmarkId > 0)
          {
-            LogTools.info("Best Match: Incoming({}) -> Map({})", incomingId, landmarkId);
+            LogTools.debug("Best Match: Incoming({}) -> Map({})", incomingId, landmarkId);
             insertLandmarkFactorAndValue(incomingRegion, sensorToWorldTransformPrior, poseIndex, landmarkId);
          }
       }
 
-      LogTools.info("Solving factor graph");
+      LogTools.debug("Solving factor graph");
       factorGraph.optimizeISAM2((byte) 4);
 
       factorGraph.printResults();
 
-      LogTools.info("+++++++++ --------- +++++++++ Done (Smoothing) +++++++++ --------- +++++++++");
+      LogTools.debug("+++++++++ --------- +++++++++ Done (Smoothing) +++++++++ --------- +++++++++");
    }
 
    public void insertLandmarkFactorAndValue(PlanarRegion childRegion,
@@ -511,7 +537,7 @@ public class PlanarRegionMap
       float[] planeInSensorFrame = new float[] {childNormal.getX32(), childNormal.getY32(), childNormal.getZ32(), (float) -localDot};
 
       // Insert plane factor based on planar region normal and origin in sensor frame
-      LogTools.info("Adding plane factor: x{} -> l{} ({})", poseId, landmarkId, Arrays.toString(planeInSensorFrame));
+      LogTools.debug("Adding plane factor: x{} -> l{} ({})", poseId, landmarkId, Arrays.toString(planeInSensorFrame));
       factorGraph.addOrientedPlaneFactor(landmarkId, poseId, planeInSensorFrame);
 
       // Compute plane parameters in world frame
@@ -519,13 +545,13 @@ public class PlanarRegionMap
       float[] planeInWorldFrame = new float[] {childNormalInWorld.getX32(), childNormalInWorld.getY32(), childNormalInWorld.getZ32(), (float) -worldDot};
 
       // Set initial value for plane based on planar region normal and origin in world frame
-      LogTools.info("Setting plane value: {} {}", landmarkId, Arrays.toString(planeInWorldFrame));
+      LogTools.debug("Setting plane value: {} {}", landmarkId, Arrays.toString(planeInWorldFrame));
       factorGraph.setOrientedPlaneInitialValue(landmarkId, planeInWorldFrame);
    }
 
    public void initializeFactorGraphForSmoothing(PlanarRegionsList map, RigidBodyTransform transform)
    {
-      LogTools.info("------------------------------- Initializing Factor Graph ---------------------------------");
+      LogTools.debug("------------------------------- Initializing Factor Graph ---------------------------------");
 
       // Set up the factor graph noise models
       odomNoise = (float) parameters.getOdometryNoiseVariance();
@@ -552,7 +578,7 @@ public class PlanarRegionMap
          factorGraph.setOrientedPlaneInitialValue(region.getRegionId(), plane);
       }
 
-      LogTools.info("+++++++++ --------- +++++++++ Done (Smoothing Initialization) +++++++++ --------- +++++++++");
+      LogTools.debug("+++++++++ --------- +++++++++ Done (Smoothing Initialization) +++++++++ --------- +++++++++");
    }
 
    private int findBestMatchIndex(int incomingId, PlanarRegionsList mapRegions, TIntArrayList matchedMapIndices)
@@ -585,34 +611,34 @@ public class PlanarRegionMap
       else if (parentIndex > 0 && childIndex > 0) // Both belong to the map
       {
          idToReturn = Math.min(parentIndex, childIndex);
-         //LogTools.info("Action: Both belong to the map: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+         //LogTools.debug("Action: Both belong to the map: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
       }
       else if (parentIndex > 0 && childIndex < 0) // Parent belongs to the map, child belongs to the incoming regions
       {
          idToReturn = parentIndex;
-         //LogTools.info("Action: Parent in map, child incoming: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+         //LogTools.debug("Action: Parent in map, child incoming: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
       }
       else if (parentIndex < 0 && childIndex > 0) // Parent belongs to the incoming regions, child belongs to the map
       {
          idToReturn = childIndex;
-         //LogTools.info("Action: Parent incoming, child in map: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+         //LogTools.debug("Action: Parent incoming, child in map: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
       }
       else if (parentIndex < 0 && childIndex < 0) // Both belong to the incoming regions
       {
          idToReturn = Math.max(parentIndex, childIndex);
-         //LogTools.info("Action: Both incoming: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+         //LogTools.debug("Action: Both incoming: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
       }
       return idToReturn;
    }
 
    private void processUniqueRegions(PlanarRegionsList map)
    {
-      LogTools.info("------------------------------- Processing Unique Region IDs ---------------------------------");
+      LogTools.debug("------------------------------- Processing Unique Region IDs ---------------------------------");
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {
          region.setRegionId(Math.abs(region.getRegionId()));
       }
-      LogTools.info("+++++++++ --------- +++++++++ Done (Processing Unique Region IDs) +++++++++ --------- +++++++++");
+      LogTools.debug("+++++++++ --------- +++++++++ Done (Processing Unique Region IDs) +++++++++ --------- +++++++++");
    }
 
    public PlanarRegionsList getMapRegions()
