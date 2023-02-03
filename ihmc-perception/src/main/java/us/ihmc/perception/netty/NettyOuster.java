@@ -33,9 +33,11 @@ import java.util.function.Consumer;
  * To test, use the GNU netcat command:
  * netcat -ul 7502
  *
+ * <p>
  * Lidar incoming data format:
+ * </p>
  *
- * <img src="https://i.imgur.com/tB4dI3H.png" width="800" alt="description of MyImage">
+ * <img src="https://www.ihmc.us/wp-content/uploads/2023/02/OusterLidarDataFormat.png" width="800" alt="description of MyImage">
  *
  */
 public class NettyOuster
