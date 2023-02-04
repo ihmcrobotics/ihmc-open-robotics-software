@@ -50,7 +50,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    //20230117_162417_PerceptionLog.hdf5 (231 MB)
    //20230117_162825_PerceptionLog.hdf5 (328 MB)
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_LoadingSynchReporoduction.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_PerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
@@ -265,13 +265,13 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
                // LogTools.info("Transform to World: {}", cameraFrame.getTransformToWorldFrame());
 
-               regionsWithPose.getPlanarRegionsList().clear();
                synchronized (bytedecoDepthImage.getBytedecoOpenCVMat())
                {
+                  regionsWithPose.getPlanarRegionsList().clear();
                   rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
+                  regionsWithPose.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
+                  planarRegionsListToRenderNotification.set(regionsWithPose.getPlanarRegionsList().copy());
                }
-               regionsWithPose.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
-               planarRegionsListToRenderNotification.set(regionsWithPose.getPlanarRegionsList().copy());
            }, getClass().getSimpleName() + "RapidRegions");
          }
       }
