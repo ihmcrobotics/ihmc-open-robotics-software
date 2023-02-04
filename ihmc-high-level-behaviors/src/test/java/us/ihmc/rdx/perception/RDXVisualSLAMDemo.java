@@ -43,42 +43,36 @@ public class RDXVisualSLAMDemo
    private final ScheduledExecutorService executor = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(),
                                                                                                            ExecutorServiceTools.ExceptionHandling.CANCEL_AND_REPORT);
 
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
-   private final VisualSLAMModule vslam;
-   private final ImGuiPanel panel = new ImGuiPanel("Visual SLAM");
-
    private static final int COUNT_SKIP = 100;
    private static final int FRAME_SKIP = 1;
    private static final String LEFT_CAMERA_NAME = "image_0/";
    private static final String RIGHT_CAMERA_NAME = "image_1/";
-
    private static final String DATASET_PATH = System.getProperty("user.home") + "/Workspace/Data/Datasets/sequences/00/";
-
    private static final String GROUND_TRUTH_PATH = System.getProperty("user.home") + "/Workspace/Data/Datasets/poses/";
-
-   private ImageMat currentImageRight;
-   private ImageMat currentImageLeft;
-
-   private String leftImageName;
-   private String rightImageName;
-   private String fileName = "000000.png";
-
-   private final Scanner gtPoseReader;
-
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final ArrayList<RigidBodyTransform> gtSensorTransforms = new ArrayList<>();
-   private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
-   private final ArrayList<ModelInstance> groundTruthPoseModels = new ArrayList<>();
-
-   private ModelInstance modelInstance;
-   private ModelInstance gtModelInstance;
-   private ModelInstance landmarksLineMesh;
-
-   private ReferenceFrame frame;
 
    private boolean active = false;
    private int updateCount = 0;
    private int fileIndex = 0;
+   private final Scanner gtPoseReader;
+   private String fileName = "000000.png";
+   private String leftImageName;
+   private String rightImageName;
+
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final ImGuiPanel panel = new ImGuiPanel("Visual SLAM");
+   private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
+   private final ArrayList<ModelInstance> groundTruthPoseModels = new ArrayList<>();
+   private ModelInstance modelInstance;
+   private ModelInstance gtModelInstance;
+   private ModelInstance landmarksLineMesh;
+
+   private final VisualSLAMModule vslam;
+   private ImageMat currentImageRight;
+   private ImageMat currentImageLeft;
+
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final ArrayList<RigidBodyTransform> gtSensorTransforms = new ArrayList<>();
+
 
    public RDXVisualSLAMDemo() throws FileNotFoundException
    {
