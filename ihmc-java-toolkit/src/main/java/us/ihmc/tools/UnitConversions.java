@@ -31,4 +31,14 @@ public class UnitConversions
    {
       return 1.0 / hertz;
    }
+
+   public static double inchesToMeters(double inches)
+   {
+      return inches * INCH_TO_METER;
+   }
+
+   public static double metersToInches(double meters)
+   {
+      return meters / INCH_TO_METER;
+   }
 }
