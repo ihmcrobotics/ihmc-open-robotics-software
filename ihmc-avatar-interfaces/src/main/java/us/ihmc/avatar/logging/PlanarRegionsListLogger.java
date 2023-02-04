@@ -90,7 +90,7 @@ public class PlanarRegionsListLogger
       }
    }
 
-   public void update(long time, FramePlanarRegionsList listWithPose)
+   public void update(long time, FramePlanarRegionsList frameRegions)
    {
       if (!started)
          return;
@@ -101,7 +101,7 @@ public class PlanarRegionsListLogger
          writer.write(time + "\n");
          writer.flush();
 
-         PlanarRegionFileTools.exportPlanarRegionWithPoseDataToStream(out, listWithPose);
+         PlanarRegionFileTools.exportFramePlanarRegionDataToStream(out, frameRegions);
       }
       catch (IOException ioException)
       {

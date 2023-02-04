@@ -128,14 +128,14 @@ public class PlanarRegionFileTools
     * {@code planarRegionData}.
     *
     * @param ostream               the stream to which the data should be written.
-    * @param planarRegionsWithPose the planar regions with pose to be exported. Not modified.
+    * @param framePlanarRegions the planar regions with pose to be exported. Not modified.
     * @return whether the exportation succeeded or not.
     */
-   public static boolean exportPlanarRegionWithPoseDataToStream(OutputStream ostream, FramePlanarRegionsList planarRegionsWithPose)
+   public static boolean exportFramePlanarRegionDataToStream(OutputStream ostream, FramePlanarRegionsList framePlanarRegions)
    {
       try
       {
-         writePlanarRegionsWithPoseDataToStream(ostream, planarRegionsWithPose);
+         writeFramePlanarRegionsDataToStream(ostream, framePlanarRegions);
          return true;
       }
       catch (IOException e)
@@ -197,12 +197,12 @@ public class PlanarRegionFileTools
     * @param data the data folder or file containing the planar region data.
     * @return the planar regions if succeeded, {@code null} otherwise.
     */
-   public static FramePlanarRegionsList importPlanarRegionsWithPoseData(File data)
+   public static FramePlanarRegionsList importFramePlanarRegionsData(File data)
    {
       try
       {
          FramePlanarRegionsList loadedRegions;
-         loadedRegions = importPlanarRegionWithPoseFromFile(data);
+         loadedRegions = importFramePlanarRegionFromFile(data);
 
          if (loadedRegions == null)
             LogTools.error("Could not load the file: " + data.getName());
@@ -418,7 +418,7 @@ public class PlanarRegionFileTools
       return new PlanarRegionsList(planarRegions);
    }
 
-   private static FramePlanarRegionsList importPlanarRegionWithPoseFromFile(File file) throws IOException
+   private static FramePlanarRegionsList importFramePlanarRegionFromFile(File file) throws IOException
    {
       Scanner scan = new Scanner(file);
       scan.useDelimiter("\\*\n");
@@ -705,11 +705,11 @@ public class PlanarRegionFileTools
       return writeQueue;
    }
 
-   private static void writePlanarRegionsWithPoseDataToStream(OutputStream ostream, FramePlanarRegionsList planarRegionsWithPose) throws IOException
+   private static void writeFramePlanarRegionsDataToStream(OutputStream ostream, FramePlanarRegionsList framePlanarRegions) throws IOException
    {
       OutputStreamWriter ow = new OutputStreamWriter(ostream);
 
-      HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = writePlanarRegionsWithPoseHeader(ow, planarRegionsWithPose);
+      HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = writeFramePlanarRegionsHeader(ow, framePlanarRegions);
 
       for (Map.Entry<String, Pair<PlanarRegion, Integer>> entry : writeQueue.entrySet())
       {
@@ -723,12 +723,12 @@ public class PlanarRegionFileTools
       ow.flush();
    }
 
-   private static void writePlanarRegionsWithPoseData(Path folderPath, FramePlanarRegionsList planarRegionsWithPose) throws IOException
+   private static void writeFramePlanarRegionsData(Path folderPath, FramePlanarRegionsList framePlanarRegions) throws IOException
    {
       File header = new File(folderPath.toFile(), "header.txt");
 
       FileWriter headerWriter = new FileWriter(header);
-      HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = writePlanarRegionsWithPoseHeader(headerWriter, planarRegionsWithPose);
+      HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = writeFramePlanarRegionsHeader(headerWriter, framePlanarRegions);
       headerWriter.close();
 
       for (Map.Entry<String, Pair<PlanarRegion, Integer>> entry : writeQueue.entrySet())
@@ -743,14 +743,14 @@ public class PlanarRegionFileTools
       }
    }
 
-   private static HashMap<String, Pair<PlanarRegion, Integer>> writePlanarRegionsWithPoseHeader(OutputStreamWriter fw,
-                                                                                                FramePlanarRegionsList planarRegionsWithPose)
+   private static HashMap<String, Pair<PlanarRegion, Integer>> writeFramePlanarRegionsHeader(OutputStreamWriter fw,
+                                                                                             FramePlanarRegionsList framePlanarRegions)
          throws IOException
    {
       HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = new HashMap<>();
       Map<Integer, MutableInt> regionIdToIndex = new HashMap<>();
 
-      RigidBodyTransformReadOnly sensorToWorldTransform = planarRegionsWithPose.getSensorToWorldFrameTransform();
+      RigidBodyTransformReadOnly sensorToWorldTransform = framePlanarRegions.getSensorToWorldFrameTransform();
 
       AxisAngle sensorOrientation = new AxisAngle();
       sensorToWorldTransform.getRotation().get(sensorOrientation);
@@ -761,7 +761,7 @@ public class PlanarRegionFileTools
                + sensorOrientation.getAngle());
       fw.write("\n");
 
-      for (PlanarRegion region : planarRegionsWithPose.getPlanarRegionsList().getPlanarRegionsAsList())
+      for (PlanarRegion region : framePlanarRegions.getPlanarRegionsList().getPlanarRegionsAsList())
       {
          Point3D origin = new Point3D();
          region.getPointInRegion(origin);

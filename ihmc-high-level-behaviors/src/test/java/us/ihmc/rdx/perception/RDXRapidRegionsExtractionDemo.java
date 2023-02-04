@@ -68,7 +68,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
 
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
-   private final FramePlanarRegionsList regionsWithPose = new FramePlanarRegionsList();
+   private final FramePlanarRegionsList frameRegions = new FramePlanarRegionsList();
    
    //   private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("l515ReferenceFrame",
    //                                                                                                              ReferenceFrame.getWorldFrame(),
@@ -267,10 +267,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
                synchronized (bytedecoDepthImage.getBytedecoOpenCVMat())
                {
-                  regionsWithPose.getPlanarRegionsList().clear();
-                  rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
-                  regionsWithPose.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
-                  planarRegionsListToRenderNotification.set(regionsWithPose.getPlanarRegionsList().copy());
+                  frameRegions.getPlanarRegionsList().clear();
+                  rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, frameRegions);
+                  frameRegions.getPlanarRegionsList().applyTransform(cameraFrame.getTransformToWorldFrame());
+                  planarRegionsListToRenderNotification.set(frameRegions.getPlanarRegionsList().copy());
                }
            }, getClass().getSimpleName() + "RapidRegions");
          }
