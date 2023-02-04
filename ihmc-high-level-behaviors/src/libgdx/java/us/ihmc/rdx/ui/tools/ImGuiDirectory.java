@@ -24,7 +24,7 @@ public class ImGuiDirectory
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   private final ImString directory = new ImString(256);
+   private final ImString directory = new ImString(ImGuiTools.MAX_STRING_SIZE_FOR_PATH);
    private final Comparator<Path> naturalOrderComparator = Comparator.comparing(path -> path.getFileName().toString());
    private final SortedSet<Path> sortedPaths = new TreeSet<>(naturalOrderComparator.reversed());
    private boolean indexedDirectoryOnce = false;
