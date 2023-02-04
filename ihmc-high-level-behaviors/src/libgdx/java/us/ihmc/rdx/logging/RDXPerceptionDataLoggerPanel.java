@@ -22,7 +22,7 @@ import java.util.HashMap;
  * Set the `perception.log.directory` JVM property to override the initial log directory.
  * You can also set this in the UI, though.
  */
-public class PerceptionDataLoggerPanel extends ImGuiPanel
+public class RDXPerceptionDataLoggerPanel extends ImGuiPanel
 {
    public static final String PERCEPTION_DIRECTORY_NAME = "perception";
    public static final String PERCEPTION_LOGS_DEFAULT_DIRECTORY
@@ -38,12 +38,12 @@ public class PerceptionDataLoggerPanel extends ImGuiPanel
 
    private final HashMap<String, ImBoolean> channelFlags = new HashMap<>();
 
-   public PerceptionDataLoggerPanel(PerceptionDataLogger logger)
+   public RDXPerceptionDataLoggerPanel(PerceptionDataLogger logger)
    {
       this("Perception Logger", logger);
    }
 
-   public PerceptionDataLoggerPanel(String panelName, PerceptionDataLogger logger)
+   public RDXPerceptionDataLoggerPanel(String panelName, PerceptionDataLogger logger)
    {
       super(panelName);
       setRenderMethod(this::renderImGuiWidgets);

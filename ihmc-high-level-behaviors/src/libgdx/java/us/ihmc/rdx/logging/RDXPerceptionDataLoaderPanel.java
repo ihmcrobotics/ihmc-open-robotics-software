@@ -20,7 +20,7 @@ import java.util.HashMap;
 
 import static org.bytedeco.opencv.global.opencv_highgui.destroyAllWindows;
 
-public class PerceptionDataLoaderPanel extends ImGuiPanel
+public class RDXPerceptionDataLoaderPanel extends ImGuiPanel
 {
    private PerceptionDataLoader loader;
    private Mat cvImage;
@@ -40,12 +40,12 @@ public class PerceptionDataLoaderPanel extends ImGuiPanel
 
    private boolean modified = false;
 
-   public PerceptionDataLoaderPanel(PerceptionDataLoader loader)
+   public RDXPerceptionDataLoaderPanel(PerceptionDataLoader loader)
    {
       this("Perception Loader", loader);
    }
 
-   public PerceptionDataLoaderPanel(String panelName, PerceptionDataLoader loader)
+   public RDXPerceptionDataLoaderPanel(String panelName, PerceptionDataLoader loader)
    {
       super(panelName);
       setRenderMethod(this::renderImGuiWidgets);

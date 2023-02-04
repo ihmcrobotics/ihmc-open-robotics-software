@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.perception.tools.MocapTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -17,7 +18,6 @@ import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
 
 import java.io.File;
-import java.nio.file.Path;
 
 public class RDXPlanarRegionMappingDemo
 {
@@ -28,8 +28,8 @@ public class RDXPlanarRegionMappingDemo
    private static final File regionLogDirectory = new File(
          System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
-   private PlanarRegionMappingManager mappingManager;
-   private PlanarRegionMappingUIPanel planarRegionMappingUI;
+   private PlanarRegionMappingHandler mappingManager;
+   private RDXPlanarRegionMappingUIPanel planarRegionMappingUI;
 
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
@@ -54,7 +54,7 @@ public class RDXPlanarRegionMappingDemo
 
 
             // To Run With Perception Logs (HDF5)
-            mappingManager = new PlanarRegionMappingManager(perceptionLogFile, true);
+            mappingManager = new PlanarRegionMappingHandler(perceptionLogFile, true);
 
             pointCloudRenderer.create(mappingManager.getRapidRegionsExtractor().getImageHeight()
                                           * mappingManager.getRapidRegionsExtractor().getImageWidth());
@@ -71,7 +71,7 @@ public class RDXPlanarRegionMappingDemo
             mapPlanarRegionsGraphic.update();
             mapPlanarRegionsGraphic.setupTooltip(baseUI.getPrimary3DPanel(), "");
 
-            planarRegionMappingUI = new PlanarRegionMappingUIPanel("Filtered Map", mappingManager);
+            planarRegionMappingUI = new RDXPlanarRegionMappingUIPanel("Filtered Map", mappingManager);
             baseUI.getImGuiPanelManager().addPanel(planarRegionMappingUI.getImGuiPanel());
             baseUI.getPrimaryScene().addRenderableProvider(mapPlanarRegionsGraphic::getRenderables, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer::getRenderables, RDXSceneLevel.VIRTUAL);
