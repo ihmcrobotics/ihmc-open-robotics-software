@@ -41,7 +41,17 @@ import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
 /**
- * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
+ * StructuralPerceptionProcessWithDriver is a headless process that runs the perception frontend for structure-specific measurements such as planar regions.
+ * color, depth, and point cloud data using the depth data obtained from the structure sensor on the robot. (usually a large FOV sensor, Ouster currently).
+ * Structure refers to the surrounding geometric structures such as walls, pillars, ceilings, and other large objects. It may also assist the
+ * TerrainPerceptionProcess by publishing additional signals measured over the terrain. This class may be extended in the future to support height map
+ * extraction, iterative-closest point based registration, LidarScanMessage publisher, and more.
+ *
+ * Primary responsibilities include (but are not limited to):
+ * 1. Reads depth data from the sensor.
+ * 2. Extracts planar regions from the depth data.
+ * 3. Publishes compressed depth images on the depth topic
+ * 4. Publishes planar regions on the planar regions topic
  */
 public class StructuralPerceptionProcessWithDriver
 {

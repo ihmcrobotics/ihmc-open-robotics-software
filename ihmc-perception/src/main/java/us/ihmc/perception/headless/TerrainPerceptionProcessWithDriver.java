@@ -37,6 +37,19 @@ import java.util.function.Supplier;
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
+/**
+ * TerrainPerceptionProcessWithDriver is a headless process that runs the perception frontend for terrain-specific measurements such as planar regions.
+ * color, depth, and point cloud data using the depth data obtained from the terrain sensor on the robot. (L515 currently). This class may be extended
+ * in the future to support height map extraction, iterative-closest point based registration, LidarScanMessage publisher, and more.
+ *
+ * Primary responsibilities include (but are not limited to):
+ * 1. Loads depth data from the sensor.
+ * 2. Loads color data from the sensor.
+ * 3. Extracts planar regions from the depth data.
+ * 4. Publishes color images on the color topic
+ * 5. Publishes depth images on the depth topic
+ * 6. Publishes planar regions on the planar regions topic
+ */
 public class TerrainPerceptionProcessWithDriver
 {
    private final PausablePeriodicThread thread;

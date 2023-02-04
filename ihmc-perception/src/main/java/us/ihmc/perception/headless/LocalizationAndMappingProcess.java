@@ -25,6 +25,20 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * LocalizationAndMappingProcess is a headless process that operates as the SLAM-backend by optimizing a factor graph generated from incoming landmark
+ * and odometry measurements from ROS2 topics. It asynchronously updates the mapping and localization estimates as more measurements are received. However,
+ * it publishes the most recent results of the optimization at a fixed rate. This class may be extended to include visual keypoint landmarks and visual
+ * odometry from the visual perception process.
+ *
+ * Primary responsibilities include (but are not limited to):
+ * 1. Receive planar regions from terrain perception process
+ * 2. Receive planar regions from structural perception process
+ * 3. Insert all landmark and odometry measurements (received in form of FramePlanarRegionsList objects)
+ * 4. Perform factor graph optimization
+ * 5. Publish optimized results for both map and localization estimates
+ */
+
 public class LocalizationAndMappingProcess
 {
    private final static long PUBLISH_PERIOD_MILLISECONDS = 100;
