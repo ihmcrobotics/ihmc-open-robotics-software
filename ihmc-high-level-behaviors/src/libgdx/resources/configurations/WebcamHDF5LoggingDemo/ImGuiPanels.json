@@ -1,0 +1,11 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : false,
+    "Logging" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false,
+    "Webcam Monitor" : true,
+    "Webcam Reader" : true
+  }
+}
