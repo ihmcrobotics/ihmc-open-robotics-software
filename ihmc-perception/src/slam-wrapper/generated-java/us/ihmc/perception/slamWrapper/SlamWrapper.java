@@ -33,24 +33,19 @@ public static class FactorGraphExternal extends Pointer {
     }
 
         // Expects packed Pose3 as XYZYPR
-        public native void addPriorPoseFactor(int index, FloatPointer pose);
-        public native void addPriorPoseFactor(int index, FloatBuffer pose);
-        public native void addPriorPoseFactor(int index, float[] pose);
+        public native void addPriorPoseFactor(int index, DoublePointer pose);
+        public native void addPriorPoseFactor(int index, DoubleBuffer pose);
+        public native void addPriorPoseFactor(int index, double[] pose);
 
         // Expects packed Pose3 as XYZYPR
-        public native void addOdometryFactor(FloatPointer odometry, int poseId);
-        public native void addOdometryFactor(FloatBuffer odometry, int poseId);
-        public native void addOdometryFactor(float[] odometry, int poseId);
-
-        // Expects 4x4 homogenous transform matrix to insert Pose3 factor
-        public native void addOdometryFactorExtended(DoublePointer odometry, int poseId);
-        public native void addOdometryFactorExtended(DoubleBuffer odometry, int poseId);
-        public native void addOdometryFactorExtended(double[] odometry, int poseId);
+        public native void addOdometryFactor(int poseId, DoublePointer odometry);
+        public native void addOdometryFactor(int poseId, DoubleBuffer odometry);
+        public native void addOdometryFactor(int poseId, double[] odometry);
 
         // Expects packed Vector4
-        public native void addOrientedPlaneFactor(FloatPointer lmMean, int lmId, int poseIndex);
-        public native void addOrientedPlaneFactor(FloatBuffer lmMean, int lmId, int poseIndex);
-        public native void addOrientedPlaneFactor(float[] lmMean, int lmId, int poseIndex);
+        public native void addOrientedPlaneFactor(int lmId, int poseIndex, FloatPointer lmMean);
+        public native void addOrientedPlaneFactor(int lmId, int poseIndex, FloatBuffer lmMean);
+        public native void addOrientedPlaneFactor(int lmId, int poseIndex, float[] lmMean);
 
         public native void optimize();
 
@@ -59,14 +54,9 @@ public static class FactorGraphExternal extends Pointer {
         public native void clearISAM2();
 
         // Expects packed Pose3
-        public native void setPoseInitialValue(int index, FloatPointer value);
-        public native void setPoseInitialValue(int index, FloatBuffer value);
-        public native void setPoseInitialValue(int index, float[] value);
-
-        // Expects 4x4 homogenous transform matrix as initial value for Pose3
-        public native void setPoseInitialValueExtended(int index, FloatPointer value);
-        public native void setPoseInitialValueExtended(int index, FloatBuffer value);
-        public native void setPoseInitialValueExtended(int index, float[] value);
+        public native void setPoseInitialValue(int index, DoublePointer value);
+        public native void setPoseInitialValue(int index, DoubleBuffer value);
+        public native void setPoseInitialValue(int index, double[] value);
 
         // Expects packed OrientedPlane3
         public native void setOrientedPlaneInitialValue(int landmarkId, FloatPointer value);
@@ -98,6 +88,29 @@ public static class FactorGraphExternal extends Pointer {
         public native void setPointLandmarkInitialValue(int landmarkId, FloatPointer value);
         public native void setPointLandmarkInitialValue(int landmarkId, FloatBuffer value);
         public native void setPointLandmarkInitialValue(int landmarkId, float[] value);
+
+        // Expects 4x4 homogenous transform matrix as 16-double array
+        public native void addOdometryFactorSE3(int poseId, DoublePointer odometry);
+        public native void addOdometryFactorSE3(int poseId, DoubleBuffer odometry);
+        public native void addOdometryFactorSE3(int poseId, double[] odometry);
+
+        // Expects 4x4 homogenous transform as 16-double array
+        public native void setPoseInitialValueSE3(int index, DoublePointer value);
+        public native void setPoseInitialValueSE3(int index, DoubleBuffer value);
+        public native void setPoseInitialValueSE3(int index, double[] value);
+
+        // Add Prior Pose Factor with full 4x4 homogenous SE3 matrix
+        public native void addPriorPoseFactorSE3(int poseId, DoublePointer pose);
+        public native void addPriorPoseFactorSE3(int poseId, DoubleBuffer pose);
+        public native void addPriorPoseFactorSE3(int poseId, double[] pose);
+
+        public native @Cast("bool") boolean getPoseById(int poseId, DoublePointer pose);
+        public native @Cast("bool") boolean getPoseById(int poseId, DoubleBuffer pose);
+        public native @Cast("bool") boolean getPoseById(int poseId, double[] pose);
+
+        public native @Cast("bool") boolean getPlanarLandmarkById(int poseId, DoublePointer plane);
+        public native @Cast("bool") boolean getPlanarLandmarkById(int poseId, DoubleBuffer plane);
+        public native @Cast("bool") boolean getPlanarLandmarkById(int poseId, double[] plane);
 
         public native void printResults();
 

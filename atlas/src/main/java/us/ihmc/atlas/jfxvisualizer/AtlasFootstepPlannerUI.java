@@ -65,6 +65,7 @@ public class AtlasFootstepPlannerUI extends ApplicationNoModule
       ui = FootstepPlannerUI.createUI(primaryStage,
                                       messager,
                                       drcRobotModel.getVisibilityGraphsParameters(),
+                                      drcRobotModel.getAStarBodyPathPlannerParameters(),
                                       drcRobotModel.getFootstepPlannerParameters("ForLookAndStep"),
                                       drcRobotModel.getSwingPlannerParameters(),
                                       drcRobotModel,

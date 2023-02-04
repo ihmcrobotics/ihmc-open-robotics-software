@@ -27,9 +27,6 @@ import us.ihmc.tools.string.StringTools;
 
 import java.nio.ByteBuffer;
 
-import static org.bytedeco.opencv.global.opencv_highgui.imshow;
-import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
-
 public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 {
    private final String titleBeforeAdditions;
@@ -94,7 +91,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 
             if (incomingCompressedImageBuffer == null)
             {
-               if(imageFormat == ImageMessageFormat.DEPTH_PNG_COMPRESSED_16)
+               if(imageFormat == ImageMessageFormat.DEPTH_PNG_16UC1)
                {
                   LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_COMPRESSED_16", topic.getName());
                   bytesIfUncompressed = numberOfPixels * 2;
@@ -105,7 +102,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
                   decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
                   normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
                }
-               else if(imageFormat == ImageMessageFormat.COLOR_JPEG_COMPRESSED_24)
+               else if(imageFormat == ImageMessageFormat.COLOR_JPEG_RGB8)
                {
                   LogTools.info("Creating Image Message Visualizer for {} with type COLOR_JPEG_COMPRESSED_24", topic.getName());
                   bytesIfUncompressed = numberOfPixels * 3;
@@ -140,15 +137,14 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
          {
             updateImageDimensions(imageMessage.getImageWidth(), imageMessage.getImageHeight());
 
-            if(imageFormat == ImageMessageFormat.DEPTH_PNG_COMPRESSED_16)
+            if(imageFormat == ImageMessageFormat.DEPTH_PNG_16UC1)
             {
                BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
                BytedecoOpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
             }
-            else if (imageFormat == ImageMessageFormat.COLOR_JPEG_COMPRESSED_24)
+            else if (imageFormat == ImageMessageFormat.COLOR_JPEG_RGB8)
             {
-               opencv_imgproc.cvtColor(decompressedImage, decompressedImage, opencv_imgproc.COLOR_YUV2RGBA_I420);
-               opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA);
+               opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
             }
          }
       });

@@ -363,13 +363,11 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
       ImGui.text(colorTopic.getName());
       if (colorReceivedOne)
       {
-         ImGui.sameLine();
          colorMessageSizeReadout.renderImGuiWidgets();
       }
       ImGui.text(depthTopic.getName());
       if (depthReceivedOne)
       {
-         ImGui.sameLine();
          depthMessageSizeReadout.renderImGuiWidgets();
       }
       if (colorReceivedOne)
@@ -395,6 +393,13 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 
+   @Override
+   public void destroy()
+   {
+      unsubscribe();
+      super.destroy();
+   }
+
    public void setSubscribed(boolean subscribed)
    {
       if (subscribed && realtimeROS2Node == null)
@@ -410,8 +415,11 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private void unsubscribe()
    {
       subscribed.set(false);
-      realtimeROS2Node.destroy();
-      realtimeROS2Node = null;
+      if (realtimeROS2Node != null)
+      {
+         realtimeROS2Node.destroy();
+         realtimeROS2Node = null;
+      }
    }
 
    public boolean isSubscribed()

@@ -39,4 +39,19 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
    {
       return get(minimumPlanarRegionArea);
    }
+
+   default double getMinimumBoundingBoxSize()
+   {
+      return get(minimumBoundingBoxSize);
+   }
+
+   default double getPlaneNoiseVariance()
+   {
+      return get(planeNoiseVariance);
+   }
+
+   default double getOdometryNoiseVariance()
+   {
+      return get(odometryNoiseVariance);
+   }
 }

@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui;
 import imgui.ImGui;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.tools.property.*;
 

@@ -40,8 +40,8 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.rapidRegions.GPUPlanarRegionIsland;
-import us.ihmc.perception.rapidRegions.GPURegionRing;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionIsland;
+import us.ihmc.perception.rapidRegions.RapidRegionRing;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.comms.GPUPlanarRegionExtractionComms;
@@ -106,13 +106,11 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private CameraPinholeBrown depthCameraIntrinsics;
    private final GPUPlanarRegionExtraction gpuPlanarRegionExtraction;
    private final Runnable onPatchSizeResized = this::onPatchSizeResized;
-   private final Consumer<GPUPlanarRegionIsland> doNothingIslandConsumer = this::onFindRegionIsland;
-   private final Consumer<GPURegionRing> doNothingRingConsumer = this::onFindBoundariesAndHolesRing;
+   private final Consumer<RapidPlanarRegionIsland> doNothingIslandConsumer = this::onFindRegionIsland;
+   private final Consumer<RapidRegionRing> doNothingRingConsumer = this::onFindBoundariesAndHolesRing;
    private final Throttler parameterOutputThrottler = new Throttler();
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
    private final CollidingScanRegionFilter collisionFilter;
-
-   private boolean publishTimestamped = false;
 
    public L515AndGPUPlanarRegionsOnRobotProcess(DRCRobotModel robotModel, boolean enableROS1)
    {
@@ -405,7 +403,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       }
    }
 
-   private void onFindRegionIsland(GPUPlanarRegionIsland island)
+   private void onFindRegionIsland(RapidPlanarRegionIsland island)
    {
       for (Point2D regionIndex : island.planarRegion.getRegionIndices())
       {
@@ -421,7 +419,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       }
    }
 
-   private void onFindBoundariesAndHolesRing(GPURegionRing regionRing)
+   private void onFindBoundariesAndHolesRing(RapidRegionRing regionRing)
    {
       for (Vector2D boundaryIndex : regionRing.getBoundaryIndices())
       {

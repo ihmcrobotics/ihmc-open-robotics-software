@@ -1,27 +1,19 @@
 package us.ihmc.perception.rapidRegions;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.LinearTransform3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
-
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +37,7 @@ public class RapidPlanarRegionsCustomizer
       polygonizerParameters = new PolygonizerParameters(version);
    }
 
-   public List<PlanarRegion> convertToPlanarRegions(GPUPlanarRegion rapidRegion)
+   public List<PlanarRegion> convertToPlanarRegions(RapidPlanarRegion rapidRegion)
    {
       List<PlanarRegion> planarRegions = new ArrayList<>();
       List<LineSegment2D> intersections = new ArrayList<>();
@@ -68,7 +60,7 @@ public class RapidPlanarRegionsCustomizer
       return planarRegions;
    }
 
-   private List<Point2D> getPointCloudInPlane(GPUPlanarRegion rapidRegion, Point3D origin, Quaternion orientation)
+   private List<Point2D> getPointCloudInPlane(RapidPlanarRegion rapidRegion, Point3D origin, Quaternion orientation)
    {
       return rapidRegion.getBoundaryVertices()
                         .stream()
@@ -82,13 +74,13 @@ public class RapidPlanarRegionsCustomizer
                         .collect(Collectors.toList());
    }
 
-   public void createCustomPlanarRegionsList(List<GPUPlanarRegion> gpuPlanarRegions, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsToPack)
+   public void createCustomPlanarRegionsList(List<RapidPlanarRegion> rapidPlanarRegions, ReferenceFrame cameraFrame, FramePlanarRegionsList regionsToPack)
    {
       stopWatch.start();
       RigidBodyTransform sensorToWorldFrameTransform = new RigidBodyTransform();
       AtomicBoolean listCaughtException = new AtomicBoolean(false);
 
-      List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
+      List<List<PlanarRegion>> listOfListsOfRegions = rapidPlanarRegions.parallelStream()
                                                                       .map(this::convertToPlanarRegions)
                                                                       .toList();
       regionsToPack.getPlanarRegionsList().clear();

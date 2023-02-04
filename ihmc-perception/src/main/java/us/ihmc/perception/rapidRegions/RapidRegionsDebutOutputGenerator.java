@@ -1,7 +1,6 @@
 package us.ihmc.perception.rapidRegions;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -11,20 +10,12 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
-import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.concurrent.ScheduledExecutorService;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
@@ -45,7 +36,7 @@ public class RapidRegionsDebutOutputGenerator
       debugImage = new Mat(height, width, opencv_core.CV_8UC4);
    }
 
-   public void drawRegionInternalPatches(GPUPlanarRegionIsland island, int patchHeight, int patchWidth)
+   public void drawRegionInternalPatches(RapidPlanarRegionIsland island, int patchHeight, int patchWidth)
    {
       if (!enabled)
          return;
@@ -64,7 +55,7 @@ public class RapidRegionsDebutOutputGenerator
       }
    }
 
-   public void drawRegionRing(GPURegionRing regionRing, int patchHeight, int patchWidth)
+   public void drawRegionRing(RapidRegionRing regionRing, int patchHeight, int patchWidth)
    {
       if (!enabled)
          return;

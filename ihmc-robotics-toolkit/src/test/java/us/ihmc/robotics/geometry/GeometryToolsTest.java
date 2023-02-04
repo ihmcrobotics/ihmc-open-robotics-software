@@ -32,8 +32,11 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class GeometryToolsTest
@@ -695,7 +698,27 @@ public class GeometryToolsTest
 
       assertEquals(1/15.0, GeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boundingBox1, boundingBox2), EPSILON, "[FAILED] Intersection should be 1/3.0");
       assertEquals( 1/8.0, GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boundingBox2, boundingBox1), EPSILON, "[FAILED] Intersection should be 1/15.0");
+   }
 
+   @Test
+   public void testPointProjectionsOntoPlane()
+   {
+      Point3D pointOnPlane = new Point3D(1.0, 1.0, 1.0);
+      UnitVector3D planeNormal = new UnitVector3D(1.0, 1.0, 1.0);
+
+      Vector4D plane = new Vector4D(planeNormal.getX(), planeNormal.getY(), planeNormal.getZ(), -pointOnPlane.dot(planeNormal));
+
+      Point3D pointToProject = new Point3D(0.0, 0.0, 0.0);
+
+      Point3D projectedPoint = GeometryTools.projectPointOntoPlane(plane, pointToProject);
+
+
+      Point3D expectedProjection = new Point3D(1.0, 1.0, 1.0);
+
+      LogTools.info("Projected point: {} {} {}", projectedPoint.getX(), projectedPoint.getY(), projectedPoint.getZ());
+      LogTools.info("Expected projection: {} {} {}", expectedProjection.getX(), expectedProjection.getY(), expectedProjection.getZ());
+
+      assertEquals(0.0, projectedPoint.distance(expectedProjection), EPSILON);
    }
 
    public static void main(String[] args)

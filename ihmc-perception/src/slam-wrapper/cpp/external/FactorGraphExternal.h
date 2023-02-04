@@ -6,16 +6,13 @@ class FactorGraphExternal
 {
     public:
         // Expects packed Pose3 as XYZYPR
-        void addPriorPoseFactor(int index, float* pose);
+        void addPriorPoseFactor(int index, double* pose);
 
         // Expects packed Pose3 as XYZYPR
-        void addOdometryFactor(float* odometry, int poseId);
-
-        // Expects 4x4 homogenous transform matrix to insert Pose3 factor
-        void addOdometryFactorExtended(double *odometry, int poseId);
+        void addOdometryFactor(int poseId, double* odometry);
 
         // Expects packed Vector4
-        void addOrientedPlaneFactor(float* lmMean, int lmId, int poseIndex);
+        void addOrientedPlaneFactor(int lmId, int poseIndex, float* lmMean);
 
         void optimize();
 
@@ -24,10 +21,7 @@ class FactorGraphExternal
         void clearISAM2();
 
         // Expects packed Pose3
-        void setPoseInitialValue(int index, float* value);
-
-        // Expects 4x4 homogenous transform matrix as initial value for Pose3
-        void setPoseInitialValueExtended(int index, float *value);
+        void setPoseInitialValue(int index, double* value);
 
         // Expects packed OrientedPlane3
         void setOrientedPlaneInitialValue(int landmarkId, float* value);
@@ -45,6 +39,19 @@ class FactorGraphExternal
         void addGenericProjectionFactor(float *point, int lmId, int poseIndex);
 
         void setPointLandmarkInitialValue(int landmarkId, float* value);
+
+        // Expects 4x4 homogenous transform matrix as 16-double array
+        void addOdometryFactorSE3(int poseId, double* odometry);
+
+        // Expects 4x4 homogenous transform as 16-double array
+        void setPoseInitialValueSE3(int index, double* value);
+
+        // Add Prior Pose Factor with full 4x4 homogenous SE3 matrix
+        void addPriorPoseFactorSE3(int poseId, double* pose);
+
+        bool getPoseById(int poseId, double* pose);
+
+        bool getPlanarLandmarkById(int poseId, double* plane);
 
         void printResults();
 

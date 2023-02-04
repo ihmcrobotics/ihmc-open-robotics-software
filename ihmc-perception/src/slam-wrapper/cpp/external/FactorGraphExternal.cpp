@@ -1,6 +1,6 @@
 #include "FactorGraphExternal.h"
 
-void FactorGraphExternal::addPriorPoseFactor(int index, float *pose)
+void FactorGraphExternal::addPriorPoseFactor(int index, double* pose)
 {
     // printf("addPriorPoseFactor(%d)\n", index);
     using namespace gtsam;
@@ -8,7 +8,16 @@ void FactorGraphExternal::addPriorPoseFactor(int index, float *pose)
     factorGraphHandler.addPriorPoseFactor(index, initPose);
 }
 
-void FactorGraphExternal::addOdometryFactor(float *odometry, int poseId)
+void FactorGraphExternal::addPriorPoseFactorSE3(int poseId, double* pose)
+{
+    using namespace gtsam;
+    Eigen::Matrix4d eigenMatrixSE3 = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(pose);
+
+    Pose3 poseValue(eigenMatrixSE3);
+    factorGraphHandler.addPriorPoseFactor(poseId, poseValue);
+}
+
+void FactorGraphExternal::addOdometryFactor(int poseId, double* odometry)
 {
     // printf("addOdometryFactor(%d -> %d)\n", poseId - 1, poseId);
     using namespace gtsam;
@@ -16,17 +25,16 @@ void FactorGraphExternal::addOdometryFactor(float *odometry, int poseId)
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
 }
 
-void FactorGraphExternal::addOdometryFactorExtended(double *odometry, int poseId)
+void FactorGraphExternal::addOdometryFactorSE3(int poseId, double* odometry)
 {
     // printf("addOdometryFactorExtended(%d -> %d)\n", poseId - 1, poseId);
     using namespace gtsam;
-    Eigen::Matrix4d M = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(odometry);
+    Eigen::Matrix4d eigenMatrixSE3 = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(odometry);
 
-    // std::cout << "Add Odometry Factor Extended: " << std::endl << M << std::endl;
-
-    Pose3 odometryValue(M);
+    Pose3 odometryValue(eigenMatrixSE3);
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
 }
+
 
 void FactorGraphExternal::addGenericProjectionFactor(float *point, int lmId, int poseIndex)
 {
@@ -41,11 +49,11 @@ void FactorGraphExternal::setPointLandmarkInitialValue(int landmarkId, float* va
 }
 
 
-void FactorGraphExternal::addOrientedPlaneFactor(float *lmMean, int lmId, int poseIndex)
+void FactorGraphExternal::addOrientedPlaneFactor(int landmarkId, int poseId, float* landmarkMean)
 {
     using namespace gtsam;
-    Vector4 planeValue(lmMean[0], lmMean[1], lmMean[2], lmMean[3]);
-    factorGraphHandler.addOrientedPlaneFactor(planeValue, lmId, poseIndex);
+    Vector4 planeValue(landmarkMean[0], landmarkMean[1], landmarkMean[2], landmarkMean[3]);
+    factorGraphHandler.addOrientedPlaneFactor(planeValue, landmarkId, poseId);
 }
 
 void FactorGraphExternal::optimize()
@@ -66,7 +74,7 @@ void FactorGraphExternal::clearISAM2()
     factorGraphHandler.clearISAM2();
 }
 
-void FactorGraphExternal::setPoseInitialValue(int index, float *value)
+void FactorGraphExternal::setPoseInitialValue(int index, double* value)
 {
     printf("setPoseInitialValue(%d)\n", index);
     using namespace gtsam;
@@ -74,19 +82,19 @@ void FactorGraphExternal::setPoseInitialValue(int index, float *value)
     factorGraphHandler.setPoseInitialValue(index, initialValue);
 }
 
-void FactorGraphExternal::setPoseInitialValueExtended(int index, float *value)
+void FactorGraphExternal::setPoseInitialValueSE3(int index, double* value)
 {
-    printf("setPoseInitialValueExtended(%d)\n", index);
+    printf("setPoseInitialValueSE3(%d)\n", index); fflush(stdout);
     using namespace gtsam;
-    Eigen::Matrix4f M = Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor> >(value);
+    Eigen::Matrix4d eigenMatrixSE3 = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(value);
 
     // std::cout << "Set Pose Initial Extended: " << std::endl << M << std::endl;
 
-    Pose3 initialValue(M.cast<double>());
+    Pose3 initialValue(eigenMatrixSE3);
     factorGraphHandler.setPoseInitialValue(index, initialValue);
 }
 
-void FactorGraphExternal::setOrientedPlaneInitialValue(int landmarkId, float *value)
+void FactorGraphExternal::setOrientedPlaneInitialValue(int landmarkId, float* value)
 {
     // printf("setOrientedPlaneInitialValue(%d)\n", landmarkId);
     using namespace gtsam;
@@ -94,15 +102,20 @@ void FactorGraphExternal::setOrientedPlaneInitialValue(int landmarkId, float *va
     factorGraphHandler.setOrientedPlaneInitialValue(landmarkId, initialValue);
 }
 
-void FactorGraphExternal::createOdometryNoiseModel(float *odomVariance)
+void FactorGraphExternal::createOdometryNoiseModel(float* variance)
 {
-    // printf("createOdometryNoiseModel()\n");
+    gtsam::Vector6 odomVariance;
+    odomVariance << variance[0], variance[1], variance[2], variance[3], variance[4], variance[5];
+    factorGraphHandler.createOdometryNoiseModel(odomVariance);
 }
 
-void FactorGraphExternal::createOrientedPlaneNoiseModel(float *lmVariances)
+void FactorGraphExternal::createOrientedPlaneNoiseModel(float* variance)
 {
-    // printf("createOrientedPlaneNoiseModel()\n");
+    gtsam::Vector3 lmVariance;
+    lmVariance << variance[0], variance[1], variance[2];
+    factorGraphHandler.createOrientedPlaneNoiseModel(lmVariance);
 }
+
 
 void FactorGraphExternal::getResultPoses(double* poses, uint32_t* poseIDs, uint32_t count)
 {
@@ -128,6 +141,32 @@ void FactorGraphExternal::getResultLandmarks(double* landmarks, uint32_t* landma
                     factorGraphHandler.getResults().at<gtsam::Point3>(gtsam::Symbol('p', landmarkIDs[i])).data() + 3,
                     landmarks + 3 * i);
     }
+}
+
+bool FactorGraphExternal::getPoseById(int poseId, double* pose)
+{
+    if (!factorGraphHandler.getResults().exists(gtsam::Symbol('x', poseId)))
+        return false;
+
+    auto matrix = factorGraphHandler.getResults().at<gtsam::Pose3>(gtsam::Symbol('x', poseId)).matrix();
+
+    matrix.transposeInPlace();
+
+    std::copy(matrix.data(), matrix.data() + 16, pose);
+
+    return true;
+}
+
+bool FactorGraphExternal::getPlanarLandmarkById(int landmarkId, double* plane)
+{
+    if (!factorGraphHandler.getResults().exists(gtsam::Symbol('l', landmarkId)))
+        return false;
+
+    auto matrix = factorGraphHandler.getResults().at<gtsam::OrientedPlane3>(gtsam::Symbol('l', landmarkId)).planeCoefficients();
+
+    std::copy(matrix.data(), matrix.data() + 4, plane);
+
+    return true;
 }
 
 void FactorGraphExternal::printResults()

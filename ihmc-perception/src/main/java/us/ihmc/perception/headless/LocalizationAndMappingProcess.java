@@ -2,7 +2,7 @@ package us.ihmc.perception.headless;
 
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.CommunicationMode;
@@ -14,8 +14,8 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMap;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ExecutorServiceTools;
@@ -25,16 +25,30 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * LocalizationAndMappingProcess is a headless process that operates as the SLAM-backend by optimizing a factor graph generated from incoming landmark
+ * and odometry measurements from ROS2 topics. It asynchronously updates the mapping and localization estimates as more measurements are received. However,
+ * it publishes the most recent results of the optimization at a fixed rate. This class may be extended to include visual keypoint landmarks and visual
+ * odometry from the visual perception process.
+ *
+ * Primary responsibilities include (but are not limited to):
+ * 1. Receive planar regions from terrain perception process
+ * 2. Receive planar regions from structural perception process
+ * 3. Insert all landmark and odometry measurements (received in form of FramePlanarRegionsList objects)
+ * 4. Perform factor graph optimization
+ * 5. Publish optimized results for both map and localization estimates
+ */
+
 public class LocalizationAndMappingProcess
 {
-   private final static long PUBLISH_MILLISECONDS = 100;
+   private final static long PUBLISH_PERIOD_MILLISECONDS = 100;
 
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
    private PlanarRegionMap planarRegionMap;
    private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
 
-   private final AtomicReference<PlanarRegionsListWithPoseMessage> latestIncomingRegions = new AtomicReference<>(null);
+   private final AtomicReference<FramePlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForRendering = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
 
@@ -47,10 +61,10 @@ public class LocalizationAndMappingProcess
    private ScheduledFuture<?> updateMapFuture;
    private boolean enableLiveMode = false;
 
-   private ROS2Topic<PlanarRegionsListWithPoseMessage> terrainRegionsTopic;
-   private ROS2Topic<PlanarRegionsListWithPoseMessage> structuralRegionsTopic;
+   private ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic;
+   private ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic;
 
-   public LocalizationAndMappingProcess(String simpleRobotName, ROS2Topic<PlanarRegionsListWithPoseMessage> terrainRegionsTopic, ROS2Topic<PlanarRegionsListWithPoseMessage> structuralRegionsTopic, ROS2Node ros2Node, boolean smoothing)
+   public LocalizationAndMappingProcess(String simpleRobotName, ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic, ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic, ROS2Node ros2Node, boolean smoothing)
    {
       planarRegionMap = new PlanarRegionMap(true);
 
@@ -76,7 +90,7 @@ public class LocalizationAndMappingProcess
 
    private void launchMapper()
    {
-      updateMapFuture = executorService.scheduleAtFixedRate(this::updateMap, 0, PUBLISH_MILLISECONDS, TimeUnit.MILLISECONDS);
+      updateMapFuture = executorService.scheduleAtFixedRate(this::updateMap, 0, PUBLISH_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
    }
 
    public synchronized void updateMap()
@@ -84,12 +98,12 @@ public class LocalizationAndMappingProcess
       if (latestIncomingRegions.get() == null)
          return;
 
-      PlanarRegionsListWithPose planarRegionsWithPose = PlanarRegionMessageConverter.convertToPlanarRegionsListWithPose(latestIncomingRegions.getAndSet(null));
+      FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(latestIncomingRegions.getAndSet(null));
 
       if (enableLiveMode)
       {
          LogTools.debug("Registering Regions");
-         updateMapWithNewRegions(planarRegionsWithPose);
+         updateMapWithNewRegions(framePlanarRegionsList);
       }
 
       PlanarRegionsList regionsToPublish = latestPlanarRegionsForPublishing.getAndSet(null);
@@ -100,7 +114,7 @@ public class LocalizationAndMappingProcess
       }
    }
 
-   public void updateMapWithNewRegions(PlanarRegionsListWithPose regions)
+   public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
       planarRegionMap.submitRegionsUsingIterativeReduction(regions);
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());

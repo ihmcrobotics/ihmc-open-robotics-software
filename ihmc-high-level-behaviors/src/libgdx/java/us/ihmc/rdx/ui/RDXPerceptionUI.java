@@ -1,15 +1,13 @@
 package us.ihmc.rdx.ui;
 
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.logging.PerceptionDataLoadingPanel;
-import us.ihmc.rdx.logging.PerceptionDataLoggingPanel;
+import us.ihmc.rdx.logging.RDXPerceptionDataLoaderPanel;
+import us.ihmc.rdx.logging.RDXPerceptionDataLoggerPanel;
 import us.ihmc.rdx.perception.RDXRemotePerceptionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
@@ -18,7 +16,6 @@ import us.ihmc.rdx.ui.graphics.live.*;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.thread.Activator;
 
 import java.net.URISyntaxException;
 
@@ -29,22 +26,18 @@ public class RDXPerceptionUI
    private RDXBaseUI baseUI;
    private RDXGlobalVisualizersPanel globalVisualizersUI;
 
-   private PerceptionDataLoadingPanel perceptionLogLoaderPanel;
-   private PerceptionDataLoggingPanel perceptionLoggingPanel;
+   private RDXPerceptionDataLoaderPanel perceptionLogLoaderPanel;
+   private RDXPerceptionDataLoggerPanel perceptionLoggingPanel;
    private PerceptionDataLogger logger;
 
    private RDXEnvironmentBuilder environmentBuilder;
    private RDXBuildingConstructor buildingConstructor;
-
    private RDXRemotePerceptionUI rapidRegionsExtractionUI;
-
-   private Activator nativesLoadedActivator;
 
    public RDXPerceptionUI()
    {
       logger = new PerceptionDataLogger();
 
-      nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "perception_ui_node");
 
       globalVisualizersUI = new RDXGlobalVisualizersPanel();
@@ -92,10 +85,10 @@ public class RDXPerceptionUI
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             buildingConstructor = new RDXBuildingConstructor(baseUI.getPrimary3DPanel());
 
-            perceptionLoggingPanel = new PerceptionDataLoggingPanel("Perception Logger", logger);
+            perceptionLoggingPanel = new RDXPerceptionDataLoggerPanel("Perception Logger", logger);
             baseUI.getImGuiPanelManager().addPanel(perceptionLoggingPanel);
 
-            perceptionLogLoaderPanel = new PerceptionDataLoadingPanel(perceptionDataLoader);
+            perceptionLogLoaderPanel = new RDXPerceptionDataLoaderPanel(perceptionDataLoader);
             baseUI.getImGuiPanelManager().addPanel(perceptionLogLoaderPanel);
 
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
@@ -121,14 +114,10 @@ public class RDXPerceptionUI
          @Override
          public void render()
          {
-            if (nativesLoadedActivator.poll())
-            {
+            globalVisualizersUI.update();
 
-               globalVisualizersUI.update();
-
-               baseUI.renderBeforeOnScreenUI();
-               baseUI.renderEnd();
-            }
+            baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
          }
 
          @Override

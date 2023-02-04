@@ -23,9 +23,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
@@ -99,8 +101,8 @@ public class PerceptionDataLogger
    public void openLogFile(String logFileName)
    {
       this.filePath = logFileName;
-      File f = new File(logFileName);
-      if (!f.exists() && !f.isDirectory())
+      File logFile = new File(logFileName);
+      if (!logFile.exists() && !logFile.isDirectory())
       {
          LogTools.info("Creating HDF5 File: " + logFileName);
          hdf5Manager = new HDF5Manager(logFileName, hdf5.H5F_ACC_TRUNC);
@@ -276,8 +278,11 @@ public class PerceptionDataLogger
          }
       }
 
-      hdf5Manager.closeFile();
-      LogTools.info("HDF5 File Saved: {}", filePath);
+      if(hdf5Manager != null)
+      {
+         hdf5Manager.closeFile();
+         LogTools.info("HDF5 File Saved: {}", filePath);
+      }
    }
 
    public void collectStatistics()
@@ -429,24 +434,24 @@ public class PerceptionDataLogger
    public void storeCompressedImage(String namespace, VideoPacket packet)
    {
       executorService.submit(() ->
-                             {
-                                synchronized (hdf5Manager)
-                                {
-                                   Group group = hdf5Manager.getGroup(namespace);
+      {
+         synchronized (hdf5Manager)
+         {
+            Group group = hdf5Manager.getGroup(namespace);
 
-                                   byte[] heapArray = byteBuffers.get(namespace);
-                                   int imageCount = counts.get(namespace);
-                                   IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+            byte[] heapArray = byteBuffers.get(namespace);
+            int imageCount = counts.get(namespace);
+            IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
 
-                                   LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
-                                   counts.put(namespace, imageCount + 1);
+            LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
+            counts.put(namespace, imageCount + 1);
 
-                                   imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-                                   HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+            imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
+            HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
-                                   LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
-                                }
-                             });
+            LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
+         }
+      });
    }
 
    /*
@@ -455,24 +460,24 @@ public class PerceptionDataLogger
    public void storeCompressedImage(String namespace, BigVideoPacket packet)
    {
       executorService.submit(() ->
-                             {
-                                synchronized (hdf5Manager)
-                                {
-                                   Group group = hdf5Manager.getGroup(namespace);
+      {
+         synchronized (hdf5Manager)
+         {
+            Group group = hdf5Manager.getGroup(namespace);
 
-                                   byte[] heapArray = byteBuffers.get(namespace);
-                                   int imageCount = counts.get(namespace);
-                                   IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+            byte[] heapArray = byteBuffers.get(namespace);
+            int imageCount = counts.get(namespace);
+            IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
 
-                                   LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
-                                   counts.put(namespace, imageCount + 1);
+            LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
+            counts.put(namespace, imageCount + 1);
 
-                                   imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-                                   HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+            imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
+            HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
-                                   LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
-                                }
-                             });
+            LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
+         }
+      });
    }
 
    public void storeCompressedImage(String namespace, ImageMessage packet)
@@ -481,103 +486,103 @@ public class PerceptionDataLogger
 
       long begin_store = System.nanoTime();
       executorService.submit(() ->
-                             {
-                                synchronized (hdf5Manager)
-                                {
-                                   Group group = hdf5Manager.getGroup(namespace);
+      {
+         synchronized (hdf5Manager)
+         {
+            Group group = hdf5Manager.getGroup(namespace);
 
-                                   byte[] heapArray = byteBuffers.get(namespace);
-                                   int imageCount = counts.get(namespace);
-                                   IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+            byte[] heapArray = byteBuffers.get(namespace);
+            int imageCount = counts.get(namespace);
+            IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
 
-                                   counts.put(namespace, imageCount + 1);
+            counts.put(namespace, imageCount + 1);
 
-                                   imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-                                   HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+            imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
+            HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
-                                   if (stopLoggingRequest.get())
-                                   {
-                                      channels.get(namespace).setEnabled(false);
-                                   }
-                                }
-                             });
+            if (stopLoggingRequest.get())
+            {
+               channels.get(namespace).setEnabled(false);
+            }
+         }
+      });
       long end_store = System.nanoTime();
    }
 
    public void storePointCloud(String namespace, LidarScanMessage message)
    {
       executorService.submit(() ->
-                             {
-                                synchronized (hdf5Manager)
-                                {
-                                   Group group = hdf5Manager.getGroup(namespace);
-                                   int index = hdf5Manager.getCount(namespace);
-                                   HDF5Tools.storeByteArray(group, index, message.getScan().toArray(), message.getScan().size());
+      {
+         synchronized (hdf5Manager)
+         {
+            Group group = hdf5Manager.getGroup(namespace);
+            int index = hdf5Manager.getCount(namespace);
+            HDF5Tools.storeByteArray(group, index, message.getScan().toArray(), message.getScan().size());
 
-                                   if (stopLoggingRequest.get())
-                                   {
-                                      channels.get(namespace).setEnabled(false);
-                                   }
-                                }
-                             });
+            if (stopLoggingRequest.get())
+            {
+               channels.get(namespace).setEnabled(false);
+            }
+         }
+      });
    }
 
    public void storeFloatArray(String namespace, float[] array)
    {
       executorService.submit(() ->
-                             {
-                                synchronized (hdf5Manager)
-                                {
-                                   Group group = hdf5Manager.getGroup(namespace);
-                                   TFloatArrayList buffer = hdf5Manager.getFloatBuffer(namespace);
+      {
+         synchronized (hdf5Manager)
+         {
+            Group group = hdf5Manager.getGroup(namespace);
+            TFloatArrayList buffer = hdf5Manager.getFloatBuffer(namespace);
 
-                                   int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
-                                   if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
-                                   {
-                                      long count = hdf5Manager.getCount(namespace);
-                                      HDF5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
-                                      hdf5Manager.resetBuffer(namespace);
-                                   }
-                                   buffer.addAll(array);
+            int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
+            if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
+            {
+               long count = hdf5Manager.getCount(namespace);
+               HDF5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
+               hdf5Manager.resetBuffer(namespace);
+            }
+            buffer.addAll(array);
 
-                                   if (stopLoggingRequest.get())
-                                   {
-                                      LogTools.warn("Logging Last Remaining: [{}] -> Count: [{}]", namespace, bufferSize);
-                                      long count = hdf5Manager.getCount(namespace);
-                                      HDF5Tools.storeFloatArray2D(group, count, buffer, bufferSize, array.length);
-                                      channels.get(namespace).setEnabled(false);
-                                   }
-                                }
-                             });
+            if (stopLoggingRequest.get())
+            {
+               LogTools.warn("Logging Last Remaining: [{}] -> Count: [{}]", namespace, bufferSize);
+               long count = hdf5Manager.getCount(namespace);
+               HDF5Tools.storeFloatArray2D(group, count, buffer, bufferSize, array.length);
+               channels.get(namespace).setEnabled(false);
+            }
+         }
+      });
    }
 
    public void storeLongArray(String namespace, long[] array)
    {
       executorService.submit(() ->
-                             {
-                                synchronized (hdf5Manager)
-                                {
-                                   Group group = hdf5Manager.getGroup(namespace);
-                                   TLongArrayList buffer = hdf5Manager.getLongBuffer(namespace);
+      {
+         synchronized (hdf5Manager)
+         {
+            Group group = hdf5Manager.getGroup(namespace);
+            TLongArrayList buffer = hdf5Manager.getLongBuffer(namespace);
 
-                                   int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
-                                   if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
-                                   {
-                                      long count = hdf5Manager.getCount(namespace);
-                                      HDF5Tools.storeLongArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
-                                      hdf5Manager.resetBuffer(namespace);
-                                   }
-                                   buffer.addAll(array);
+            int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
+            if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
+            {
+               long count = hdf5Manager.getCount(namespace);
+               HDF5Tools.storeLongArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
+               hdf5Manager.resetBuffer(namespace);
+            }
+            buffer.addAll(array);
 
-                                   if (stopLoggingRequest.get())
-                                   {
-                                      LogTools.warn("Logging Last Remaining: [{}] -> Count: [{}]", namespace, bufferSize);
-                                      long count = hdf5Manager.getCount(namespace);
-                                      HDF5Tools.storeLongArray2D(group, count, buffer, bufferSize, array.length);
-                                      channels.get(namespace).setEnabled(false);
-                                   }
-                                }
-                             });
+            if (stopLoggingRequest.get())
+            {
+               LogTools.warn("Logging Last Remaining: [{}] -> Count: [{}]", namespace, bufferSize);
+               long count = hdf5Manager.getCount(namespace);
+               HDF5Tools.storeLongArray2D(group, count, buffer, bufferSize, array.length);
+               channels.get(namespace).setEnabled(false);
+            }
+         }
+      });
    }
 
    public void storeLongArray(String namespace, long value)
@@ -622,8 +627,7 @@ public class PerceptionDataLogger
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
-      String defaultLogDirectory =
-            System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
+      String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
       String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
       String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
 
@@ -638,7 +642,7 @@ public class PerceptionDataLogger
 
       //      logger.setChannelEnabled(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, true);
 
-      logger.startLogging(logDirectory + logFileName, "Nadia");
+      logger.startLogging(Paths.get(logDirectory, logFileName).toString(), "Nadia");
 
       // TEST ROS2 node for Ouster Depth
 

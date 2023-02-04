@@ -174,8 +174,8 @@ public class ROS2Tools
 
    /** MoCap Topics */
    public static final ROS2Topic<RigidBodyTransformMessage> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
-                                                                                                 .withModule("frame_update")
-                                                                                                 .withSuffix("mocap");
+                                                                                        .withModule("frame_update")
+                                                                                        .withSuffix("mocap");
 
    /** Output regions from Lidar (Multisense) from REA */
    public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withTypeName(PlanarRegionsListMessage.class);
@@ -187,10 +187,10 @@ public class ROS2Tools
    /** Rapid regions are generated in Java, come with epoch second and nano timestamp, are pre-filtered for body collisions, and in world frame.
     *  They are prre filtered using the polygonizer, segmentation, and concave hull filtering parameters. There is no need for delay compensation. */
 
-   public static final ROS2Topic<PlanarRegionsListWithPoseMessage> PERSPECTIVE_RAPID_REGIONS_WITH_POSE = MAPSENSE_MODULE.withOutput().withTypeName(PlanarRegionsListWithPoseMessage.class);
+   public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS_WITH_POSE = MAPSENSE_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class);
    public static final ROS2Topic<PlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
 
-   public static final ROS2Topic<PlanarRegionsListWithPoseMessage> SPHERICAL_RAPID_REGIONS_WITH_POSE = MAPSENSE_MODULE.withOutput().withTypeName(PlanarRegionsListWithPoseMessage.class);
+   public static final ROS2Topic<FramePlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS_WITH_POSE = MAPSENSE_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class);
    public static final ROS2Topic<PlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
 
    /** Output regions from experimental mapping module which assembles the above outputs */

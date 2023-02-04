@@ -20,9 +20,6 @@ public class SlamWrapperTest
       Pose3D poseInitial = new Pose3D();
       RigidBodyTransform odometry = new RigidBodyTransform();
 
-      factorGraphExternal.addPriorPoseFactor(1, PerceptionEuclidTools.toArray(poseInitial));
-      factorGraphExternal.addOdometryFactor(PerceptionEuclidTools.toArray(odometry), 2);
-
       factorGraphExternal.setPoseInitialValue(1, PerceptionEuclidTools.toArray(poseInitial));
       factorGraphExternal.setPoseInitialValue(2, PerceptionEuclidTools.toArray(odometry));
 
@@ -46,10 +43,10 @@ public class SlamWrapperTest
       Vector4D planeMeasTwo = new Vector4D(0.0f, 0.0f, 1.0f, 0.0f);
 
       factorGraph.addPriorPoseFactor(1,  PerceptionEuclidTools.toArray(poseInitial));
-      factorGraph.addOdometryFactor(PerceptionEuclidTools.toArray(odometry), 2);
+      factorGraph.addOdometryFactor(2, PerceptionEuclidTools.toArray(odometry));
 
-      factorGraph.addOrientedPlaneFactor(PerceptionEuclidTools.toArray(planeMeasOne), 1, 1);
-      factorGraph.addOrientedPlaneFactor(PerceptionEuclidTools.toArray(planeMeasTwo), 1, 2);
+      factorGraph.addOrientedPlaneFactor(1, 1, PerceptionEuclidTools.toArray(planeMeasOne));
+      factorGraph.addOrientedPlaneFactor(1, 2, PerceptionEuclidTools.toArray(planeMeasTwo));
 
       factorGraph.setPoseInitialValue(1, PerceptionEuclidTools.toArray(poseInitial));
       factorGraph.setPoseInitialValue(2, PerceptionEuclidTools.toArray(odometry));
