@@ -35,7 +35,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
@@ -68,7 +68,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
 
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
-   private final PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
+   private final FramePlanarRegionsList regionsWithPose = new FramePlanarRegionsList();
    
    //   private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("l515ReferenceFrame",
    //                                                                                                              ReferenceFrame.getWorldFrame(),

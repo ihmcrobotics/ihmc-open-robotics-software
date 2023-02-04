@@ -2,21 +2,21 @@ package perception_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "PlanarRegionsListWithPoseMessage" defined in "PlanarRegionsListWithPoseMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "FramePlanarRegionsListMessage" defined in "FramePlanarRegionsListMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from PlanarRegionsListWithPoseMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit PlanarRegionsListWithPoseMessage_.idl instead.
+* This file was automatically generated from FramePlanarRegionsListMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit FramePlanarRegionsListMessage_.idl instead.
 *
 */
-public class PlanarRegionsListWithPoseMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage>
+public class FramePlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.FramePlanarRegionsListMessage>
 {
-   public static final java.lang.String name = "perception_msgs::msg::dds_::PlanarRegionsListWithPoseMessage_";
+   public static final java.lang.String name = "perception_msgs::msg::dds_::FramePlanarRegionsListMessage_";
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(perception_msgs.msg.dds.FramePlanarRegionsListMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +24,7 @@ public class PlanarRegionsListWithPoseMessagePubSubType implements us.ihmc.pubsu
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.FramePlanarRegionsListMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -52,12 +52,12 @@ public class PlanarRegionsListWithPoseMessagePubSubType implements us.ihmc.pubsu
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage data)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.FramePlanarRegionsListMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.FramePlanarRegionsListMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -74,7 +74,7 @@ public class PlanarRegionsListWithPoseMessagePubSubType implements us.ihmc.pubsu
       return current_alignment - initial_alignment;
    }
 
-   public static void write(perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(perception_msgs.msg.dds.FramePlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_4(data.getSequenceId());
 
@@ -83,7 +83,7 @@ public class PlanarRegionsListWithPoseMessagePubSubType implements us.ihmc.pubsu
       perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegions(), cdr);
    }
 
-   public static void read(perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(perception_msgs.msg.dds.FramePlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
       	
@@ -94,7 +94,7 @@ public class PlanarRegionsListWithPoseMessagePubSubType implements us.ihmc.pubsu
    }
 
    @Override
-   public final void serialize(perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(perception_msgs.msg.dds.FramePlanarRegionsListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("sensor_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getSensorPosition());
@@ -106,7 +106,7 @@ public class PlanarRegionsListWithPoseMessagePubSubType implements us.ihmc.pubsu
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.FramePlanarRegionsListMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("sensor_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getSensorPosition());
@@ -117,15 +117,15 @@ public class PlanarRegionsListWithPoseMessagePubSubType implements us.ihmc.pubsu
 
    }
 
-   public static void staticCopy(perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage src, perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage dest)
+   public static void staticCopy(perception_msgs.msg.dds.FramePlanarRegionsListMessage src, perception_msgs.msg.dds.FramePlanarRegionsListMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage createData()
+   public perception_msgs.msg.dds.FramePlanarRegionsListMessage createData()
    {
-      return new perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage();
+      return new perception_msgs.msg.dds.FramePlanarRegionsListMessage();
    }
    @Override
    public int getTypeSize()
@@ -139,24 +139,24 @@ public class PlanarRegionsListWithPoseMessagePubSubType implements us.ihmc.pubsu
       return name;
    }
    
-   public void serialize(perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(perception_msgs.msg.dds.FramePlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(perception_msgs.msg.dds.FramePlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage src, perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage dest)
+   public void copy(perception_msgs.msg.dds.FramePlanarRegionsListMessage src, perception_msgs.msg.dds.FramePlanarRegionsListMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public PlanarRegionsListWithPoseMessagePubSubType newInstance()
+   public FramePlanarRegionsListMessagePubSubType newInstance()
    {
-      return new PlanarRegionsListWithPoseMessagePubSubType();
+      return new FramePlanarRegionsListMessagePubSubType();
    }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import perception_msgs.msg.dds.PlanarRegionMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionMessageConverter
@@ -225,20 +225,20 @@ public class PlanarRegionMessageConverter
       return message;
    }
 
-   public static PlanarRegionsListWithPose convertToPlanarRegionsListWithPose(PlanarRegionsListWithPoseMessage message)
+   public static FramePlanarRegionsList convertToFramePlanarRegionsList(FramePlanarRegionsListMessage message)
    {
-      PlanarRegionsListWithPose planarRegionsListWithPoseToReturn = new PlanarRegionsListWithPose();
+      FramePlanarRegionsList framePlanarRegionsListToReturn = new FramePlanarRegionsList();
 
       PlanarRegionsList planarRegionsList = convertToPlanarRegionsList(message.getPlanarRegions());
-      planarRegionsListWithPoseToReturn.setPlanarRegionsList(planarRegionsList);
-      planarRegionsListWithPoseToReturn.getSensorToWorldFrameTransform().set(message.getSensorOrientation(), message.getSensorPosition());
+      framePlanarRegionsListToReturn.setPlanarRegionsList(planarRegionsList);
+      framePlanarRegionsListToReturn.getSensorToWorldFrameTransform().set(message.getSensorOrientation(), message.getSensorPosition());
 
-      return planarRegionsListWithPoseToReturn;
+      return framePlanarRegionsListToReturn;
    }
 
-   public static PlanarRegionsListWithPoseMessage convertToPlanarRegionsListWithPoseMessage(PlanarRegionsListWithPose listWithPose)
+   public static FramePlanarRegionsListMessage convertToFramePlanarRegionsListMessage(FramePlanarRegionsList listWithPose)
    {
-      PlanarRegionsListWithPoseMessage messageToReturn = new PlanarRegionsListWithPoseMessage();
+      FramePlanarRegionsListMessage messageToReturn = new FramePlanarRegionsListMessage();
 
       PlanarRegionsListMessage planarRegionsListMessage = convertToPlanarRegionsListMessage(listWithPose.getPlanarRegionsList());
       messageToReturn.getPlanarRegions().set(planarRegionsListMessage);

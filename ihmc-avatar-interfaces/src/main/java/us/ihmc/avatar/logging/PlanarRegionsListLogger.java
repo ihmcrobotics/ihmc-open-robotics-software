@@ -3,7 +3,7 @@ package us.ihmc.avatar.logging;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -90,7 +90,7 @@ public class PlanarRegionsListLogger
       }
    }
 
-   public void update(long time, PlanarRegionsListWithPose listWithPose)
+   public void update(long time, FramePlanarRegionsList listWithPose)
    {
       if (!started)
          return;

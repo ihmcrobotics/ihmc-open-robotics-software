@@ -5,7 +5,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -22,8 +22,8 @@ import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -65,7 +65,7 @@ public class TerrainPerceptionProcessWithDriver
    private final FramePose3D cameraPose = new FramePose3D();
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
-   private final ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic;
+   private final ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
    private final ROS2Topic<PlanarRegionsListMessage> regionsTopic;
 
    private int depthWidth;
@@ -78,14 +78,14 @@ public class TerrainPerceptionProcessWithDriver
    public TerrainPerceptionProcessWithDriver(RealsenseConfiguration realsenseConfiguration,
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic,
-                                             ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic,
+                                             ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
                                              ROS2Topic<PlanarRegionsListMessage> regionsTopic,
                                              Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.realsenseConfiguration = realsenseConfiguration;
       this.depthTopic = depthTopic;
       this.colorTopic = colorTopic;
-      this.regionsWithPoseTopic = regionsWithPoseTopic;
+      this.frameRegionsTopic = frameRegionsTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
       this.regionsTopic = regionsTopic;
 
@@ -195,16 +195,14 @@ public class TerrainPerceptionProcessWithDriver
 
             depthU16C1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
 
-            PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
-            extractPlanarRegionsListWithPose(depthBytedecoImage, ReferenceFrame.getWorldFrame(), planarRegionsListWithPose);
-            PlanarRegionsList planarRegionsList = planarRegionsListWithPose.getPlanarRegionsList();
+            FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
+            extractFramePlanarRegionsList(depthBytedecoImage, ReferenceFrame.getWorldFrame(), framePlanarRegionsList);
+            PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
 
             //            LogTools.info("Planar regions: {}", planarRegionsList.getNumberOfPlanarRegions());
 
             // TODO:  Filter out regions that are colliding with the body before publishing
-            //            PerceptionMessageTools.publishPlanarRegionsListWithPose(planarRegionsListWithPose, ROS2Tools.MAPSENSE_REGIONS_WITH_POSE, ros2Helper);
-
-            PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, ROS2Tools.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+            PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
             PerceptionMessageTools.publishPNGCompressedDepthImage(depthU16C1Image,
                                                            depthTopic,
                                                            depthImageMessage,
@@ -237,9 +235,9 @@ public class TerrainPerceptionProcessWithDriver
       debugExtractionImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC4);
    }
 
-   private void extractPlanarRegionsListWithPose(BytedecoImage depthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose planarRegionsListWithPose)
+   private void extractFramePlanarRegionsList(BytedecoImage depthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList framePlanarRegionsList)
    {
-      rapidRegionsExtractor.update(depthImage, cameraFrame, planarRegionsListWithPose);
+      rapidRegionsExtractor.update(depthImage, cameraFrame, framePlanarRegionsList);
       rapidRegionsExtractor.setProcessing(false);
    }
 

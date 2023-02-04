@@ -18,7 +18,6 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -26,9 +25,9 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
 public class PlanarRegionFileTools
 {
@@ -132,7 +131,7 @@ public class PlanarRegionFileTools
     * @param planarRegionsWithPose the planar regions with pose to be exported. Not modified.
     * @return whether the exportation succeeded or not.
     */
-   public static boolean exportPlanarRegionWithPoseDataToStream(OutputStream ostream, PlanarRegionsListWithPose planarRegionsWithPose)
+   public static boolean exportPlanarRegionWithPoseDataToStream(OutputStream ostream, FramePlanarRegionsList planarRegionsWithPose)
    {
       try
       {
@@ -198,11 +197,11 @@ public class PlanarRegionFileTools
     * @param data the data folder or file containing the planar region data.
     * @return the planar regions if succeeded, {@code null} otherwise.
     */
-   public static PlanarRegionsListWithPose importPlanarRegionsWithPoseData(File data)
+   public static FramePlanarRegionsList importPlanarRegionsWithPoseData(File data)
    {
       try
       {
-         PlanarRegionsListWithPose loadedRegions;
+         FramePlanarRegionsList loadedRegions;
          loadedRegions = importPlanarRegionWithPoseFromFile(data);
 
          if (loadedRegions == null)
@@ -419,7 +418,7 @@ public class PlanarRegionFileTools
       return new PlanarRegionsList(planarRegions);
    }
 
-   private static PlanarRegionsListWithPose importPlanarRegionWithPoseFromFile(File file) throws IOException
+   private static FramePlanarRegionsList importPlanarRegionWithPoseFromFile(File file) throws IOException
    {
       Scanner scan = new Scanner(file);
       scan.useDelimiter("\\*\n");
@@ -476,9 +475,9 @@ public class PlanarRegionFileTools
       headerBufferedReader.close();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
-      PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose(planarRegionsList, sensorToWorldTransform);
+      FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList(planarRegionsList, sensorToWorldTransform);
 
-      return planarRegionsListWithPose;
+      return framePlanarRegionsList;
    }
 
    private interface FileCreator
@@ -706,7 +705,7 @@ public class PlanarRegionFileTools
       return writeQueue;
    }
 
-   private static void writePlanarRegionsWithPoseDataToStream(OutputStream ostream, PlanarRegionsListWithPose planarRegionsWithPose) throws IOException
+   private static void writePlanarRegionsWithPoseDataToStream(OutputStream ostream, FramePlanarRegionsList planarRegionsWithPose) throws IOException
    {
       OutputStreamWriter ow = new OutputStreamWriter(ostream);
 
@@ -724,7 +723,7 @@ public class PlanarRegionFileTools
       ow.flush();
    }
 
-   private static void writePlanarRegionsWithPoseData(Path folderPath, PlanarRegionsListWithPose planarRegionsWithPose) throws IOException
+   private static void writePlanarRegionsWithPoseData(Path folderPath, FramePlanarRegionsList planarRegionsWithPose) throws IOException
    {
       File header = new File(folderPath.toFile(), "header.txt");
 
@@ -745,7 +744,7 @@ public class PlanarRegionFileTools
    }
 
    private static HashMap<String, Pair<PlanarRegion, Integer>> writePlanarRegionsWithPoseHeader(OutputStreamWriter fw,
-                                                                                                PlanarRegionsListWithPose planarRegionsWithPose)
+                                                                                                FramePlanarRegionsList planarRegionsWithPose)
          throws IOException
    {
       HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = new HashMap<>();

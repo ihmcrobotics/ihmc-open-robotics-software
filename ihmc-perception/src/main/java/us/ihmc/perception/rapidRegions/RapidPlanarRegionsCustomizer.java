@@ -13,7 +13,7 @@ import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +74,7 @@ public class RapidPlanarRegionsCustomizer
                         .collect(Collectors.toList());
    }
 
-   public void createCustomPlanarRegionsList(List<RapidPlanarRegion> rapidPlanarRegions, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsToPack)
+   public void createCustomPlanarRegionsList(List<RapidPlanarRegion> rapidPlanarRegions, ReferenceFrame cameraFrame, FramePlanarRegionsList regionsToPack)
    {
       stopWatch.start();
       RigidBodyTransform sensorToWorldFrameTransform = new RigidBodyTransform();

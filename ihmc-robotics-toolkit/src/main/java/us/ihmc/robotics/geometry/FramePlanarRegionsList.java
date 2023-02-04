@@ -1,21 +1,19 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
 
-public class PlanarRegionsListWithPose
+public class FramePlanarRegionsList
 {
    private PlanarRegionsList planarRegionsList;
    private RigidBodyTransform sensorToWorldFrameTransform;
 
-   public PlanarRegionsListWithPose(PlanarRegionsList planarRegionsList, RigidBodyTransform sensorToWorldFrameTransform)
+   public FramePlanarRegionsList(PlanarRegionsList planarRegionsList, RigidBodyTransform sensorToWorldFrameTransform)
    {
       this.planarRegionsList = planarRegionsList;
       this.sensorToWorldFrameTransform = sensorToWorldFrameTransform;
    }
 
-   public PlanarRegionsListWithPose()
+   public FramePlanarRegionsList()
    {
       this.sensorToWorldFrameTransform = new RigidBodyTransform();
       this.planarRegionsList = new PlanarRegionsList();

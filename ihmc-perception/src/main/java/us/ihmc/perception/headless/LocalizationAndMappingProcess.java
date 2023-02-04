@@ -2,7 +2,7 @@ package us.ihmc.perception.headless;
 
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.CommunicationMode;
@@ -14,8 +14,8 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMap;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ExecutorServiceTools;
@@ -34,7 +34,7 @@ public class LocalizationAndMappingProcess
    private PlanarRegionMap planarRegionMap;
    private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
 
-   private final AtomicReference<PlanarRegionsListWithPoseMessage> latestIncomingRegions = new AtomicReference<>(null);
+   private final AtomicReference<FramePlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForRendering = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
 
@@ -47,10 +47,10 @@ public class LocalizationAndMappingProcess
    private ScheduledFuture<?> updateMapFuture;
    private boolean enableLiveMode = false;
 
-   private ROS2Topic<PlanarRegionsListWithPoseMessage> terrainRegionsTopic;
-   private ROS2Topic<PlanarRegionsListWithPoseMessage> structuralRegionsTopic;
+   private ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic;
+   private ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic;
 
-   public LocalizationAndMappingProcess(String simpleRobotName, ROS2Topic<PlanarRegionsListWithPoseMessage> terrainRegionsTopic, ROS2Topic<PlanarRegionsListWithPoseMessage> structuralRegionsTopic, ROS2Node ros2Node, boolean smoothing)
+   public LocalizationAndMappingProcess(String simpleRobotName, ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic, ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic, ROS2Node ros2Node, boolean smoothing)
    {
       planarRegionMap = new PlanarRegionMap(true);
 
@@ -84,7 +84,7 @@ public class LocalizationAndMappingProcess
       if (latestIncomingRegions.get() == null)
          return;
 
-      PlanarRegionsListWithPose planarRegionsWithPose = PlanarRegionMessageConverter.convertToPlanarRegionsListWithPose(latestIncomingRegions.getAndSet(null));
+      FramePlanarRegionsList planarRegionsWithPose = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(latestIncomingRegions.getAndSet(null));
 
       if (enableLiveMode)
       {
@@ -100,7 +100,7 @@ public class LocalizationAndMappingProcess
       }
    }
 
-   public void updateMapWithNewRegions(PlanarRegionsListWithPose regions)
+   public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
       planarRegionMap.submitRegionsUsingIterativeReduction(regions);
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
