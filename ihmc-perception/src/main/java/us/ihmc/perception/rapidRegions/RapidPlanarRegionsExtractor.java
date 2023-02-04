@@ -161,7 +161,7 @@ public class RapidPlanarRegionsExtractor
       LogTools.info("Finished creating buffers and kernels for OpenCL program.");
    }
 
-   public void update(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList regionsWithPose)
+   public void update(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList frameRegions)
    {
       if (!processing)
       {
@@ -179,7 +179,7 @@ public class RapidPlanarRegionsExtractor
          growRegionBoundaries();
          depthFirstSearchDurationStopwatch.suspend();
 
-         rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(rapidPlanarRegions, cameraFrame, regionsWithPose);
+         rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(rapidPlanarRegions, cameraFrame, frameRegions);
 
          wholeAlgorithmDurationStopwatch.suspend();
 

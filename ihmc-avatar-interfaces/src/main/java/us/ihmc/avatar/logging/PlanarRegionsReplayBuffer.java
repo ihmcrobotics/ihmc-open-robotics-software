@@ -14,15 +14,15 @@ import java.util.*;
 public class PlanarRegionsReplayBuffer<T>
 {
    private int buffer_length;
-   private HashMap<Integer, PlanarRegionsBuffer<T>> indexBuffer;
-   private TreeSet<PlanarRegionsBuffer<T>> timeBuffer;
+   private HashMap<Integer, PlanarRegionsBufferElement<T>> indexBuffer;
+   private TreeSet<PlanarRegionsBufferElement<T>> timeBuffer;
    private long firstEverTime = Long.MAX_VALUE;
 
    private int index = 0;
 
 
 
-   private static final Comparator<PlanarRegionsBuffer> customCompare = (o1, o2) ->
+   private static final Comparator<PlanarRegionsBufferElement> customCompare = (o1, o2) ->
    {
       long compare = o1.getTime() - o2.getTime();
       if (compare > 0)
@@ -58,14 +58,14 @@ public class PlanarRegionsReplayBuffer<T>
          Object list;
 
          if (type == FramePlanarRegionsList.class)
-            list = PlanarRegionFileTools.importPlanarRegionsWithPoseData(temp);
+            list = PlanarRegionFileTools.importFramePlanarRegionsData(temp);
          else
             list = PlanarRegionFileTools.importPlanarRegionData(temp);
 
-         PlanarRegionsBuffer planarRegionsBuffer = new PlanarRegionsBuffer<>(index, time, list);
+         PlanarRegionsBufferElement planarRegionsBufferElement = new PlanarRegionsBufferElement<>(index, time, list);
 
-         indexBuffer.put(index, planarRegionsBuffer);
-         timeBuffer.add(planarRegionsBuffer);
+         indexBuffer.put(index, planarRegionsBufferElement);
+         timeBuffer.add(planarRegionsBufferElement);
 
          firstEverTime = getStartTime();
 
@@ -109,10 +109,10 @@ public class PlanarRegionsReplayBuffer<T>
 
    public void putAndTick(long time, T list)
    {
-      PlanarRegionsBuffer container = new PlanarRegionsBuffer<>(index, time, list);
+      PlanarRegionsBufferElement bufferElement = new PlanarRegionsBufferElement<>(index, time, list);
 
-      indexBuffer.put(index, container);
-      timeBuffer.add(container);
+      indexBuffer.put(index, bufferElement);
+      timeBuffer.add(bufferElement);
 
       if (index > buffer_length)
       {
@@ -128,17 +128,17 @@ public class PlanarRegionsReplayBuffer<T>
 
    public T get(int index)
    {
-      PlanarRegionsBuffer container = indexBuffer.get(index);
+      PlanarRegionsBufferElement container = indexBuffer.get(index);
       return container == null ? null : (T) container.getList();
    }
 
-   private PlanarRegionsBuffer<T> getNearTimeInternal(long time)
+   private PlanarRegionsBufferElement<T> getNearTimeInternal(long time)
    {
-      PlanarRegionsBuffer<T> lookup = new PlanarRegionsBuffer<>(-1, time, null);
-      PlanarRegionsBuffer<T> lower = timeBuffer.lower(lookup);
-      PlanarRegionsBuffer<T> higher = timeBuffer.higher(lookup);
+      PlanarRegionsBufferElement<T> lookup = new PlanarRegionsBufferElement<>(-1, time, null);
+      PlanarRegionsBufferElement<T> lower = timeBuffer.lower(lookup);
+      PlanarRegionsBufferElement<T> higher = timeBuffer.higher(lookup);
 
-      PlanarRegionsBuffer<T> value;
+      PlanarRegionsBufferElement<T> value;
 
       if (lower == null)
       {
@@ -159,7 +159,7 @@ public class PlanarRegionsReplayBuffer<T>
 
    public T getNearTime(long time)
    {
-      PlanarRegionsBuffer<T> container = getNearTimeInternal(time);
+      PlanarRegionsBufferElement<T> container = getNearTimeInternal(time);
       return container != null ? container.getList() : null;
    }
 
@@ -168,7 +168,7 @@ public class PlanarRegionsReplayBuffer<T>
       if (indexBuffer.size() < 1)
          return -1;
 
-      PlanarRegionsBuffer<T> container = indexBuffer.get(
+      PlanarRegionsBufferElement<T> container = indexBuffer.get(
             Objects.requireNonNull(getNearTimeInternal(currentTime + 1)).getIndex() + 1); //Increment currentTime by 1 to bias towards higher if tied
 
       return container == null ? Long.MAX_VALUE : container.getTime();
@@ -179,7 +179,7 @@ public class PlanarRegionsReplayBuffer<T>
       if (indexBuffer.size() < 1)
          return -1;
 
-      PlanarRegionsBuffer container = indexBuffer.get(getNearTimeInternal(currentTime - 1).getIndex() - 1); //Decrement currentTime by 1 to bias towards lower if tied
+      PlanarRegionsBufferElement container = indexBuffer.get(getNearTimeInternal(currentTime - 1).getIndex() - 1); //Decrement currentTime by 1 to bias towards lower if tied
 
       return container == null ? 0 : container.getTime();
    }

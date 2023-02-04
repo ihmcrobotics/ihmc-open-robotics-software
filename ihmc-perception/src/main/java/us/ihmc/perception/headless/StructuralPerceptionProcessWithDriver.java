@@ -77,19 +77,19 @@ public class StructuralPerceptionProcessWithDriver
    private final ROS2Helper ros2Helper;
    private ROS2Topic<ImageMessage> depthTopic;
    private ROS2Topic<PlanarRegionsListMessage> regionsTopic;
-   private ROS2Topic<FramePlanarRegionsListMessage> regionsWithPoseTopic;
+   private ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
    private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
 
    public StructuralPerceptionProcessWithDriver(ROS2Topic<ImageMessage> depthTopic,
                                                 ROS2Topic<PlanarRegionsListMessage> regionsTopic,
-                                                ROS2Topic<FramePlanarRegionsListMessage> regionsWithPoseTopic,
+                                                ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
                                                 Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.depthTopic = depthTopic;
       this.regionsTopic = regionsTopic;
-      this.regionsWithPoseTopic = regionsWithPoseTopic;
+      this.frameRegionsTopic = frameRegionsTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 

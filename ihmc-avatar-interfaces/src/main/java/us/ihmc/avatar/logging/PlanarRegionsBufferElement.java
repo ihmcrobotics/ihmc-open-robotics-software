@@ -1,12 +1,12 @@
 package us.ihmc.avatar.logging;
 
-public class PlanarRegionsBuffer<T>
+public class PlanarRegionsBufferElement<T>
 {
    private T list;
    private long time;
    private int index;
 
-   PlanarRegionsBuffer(int index, long time, T list)
+   PlanarRegionsBufferElement(int index, long time, T list)
    {
       this.list = list;
       this.index = index;

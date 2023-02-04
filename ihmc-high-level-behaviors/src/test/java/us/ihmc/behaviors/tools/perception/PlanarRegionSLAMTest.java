@@ -1097,13 +1097,13 @@ class PlanarRegionSLAMTest
       PlanarRegionsList listOne = createSomeRightAngledWalls(-3, false, new RigidBodyTransform(), true, true, true);
       PlanarRegionsList listTwo = createSomeRightAngledWalls(-6, false, worldToSensorTransform, true, true, true);
 
-      FramePlanarRegionsList listOneWithPose = new FramePlanarRegionsList(listOne, new RigidBodyTransform());
-      FramePlanarRegionsList listTwoWithPose = new FramePlanarRegionsList(listTwo, sensorToWorldTransform);
+      FramePlanarRegionsList frameRegionsListOne = new FramePlanarRegionsList(listOne, new RigidBodyTransform());
+      FramePlanarRegionsList frameRegionsListTwo = new FramePlanarRegionsList(listTwo, sensorToWorldTransform);
 
       PlanarRegionMap map = new PlanarRegionMap(true);
 
-      map.submitRegionsUsingIterativeReduction(listOneWithPose);
-      map.submitRegionsUsingIterativeReduction(listTwoWithPose);
+      map.submitRegionsUsingIterativeReduction(frameRegionsListOne);
+      map.submitRegionsUsingIterativeReduction(frameRegionsListTwo);
 
       RigidBodyTransform optimalTransform = map.getOptimalSensorToWorldTransform();
 

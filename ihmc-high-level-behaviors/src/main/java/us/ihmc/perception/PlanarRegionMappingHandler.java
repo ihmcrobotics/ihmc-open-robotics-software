@@ -228,12 +228,12 @@ public class PlanarRegionMappingHandler
       if (latestIncomingRegions.get() == null)
          return;
 
-      FramePlanarRegionsList planarRegionsWithPose = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(latestIncomingRegions.getAndSet(null));
+      FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(latestIncomingRegions.getAndSet(null));
 
       if (enableLiveMode)
       {
          LogTools.debug("Registering Regions");
-         updateMapWithNewRegions(planarRegionsWithPose);
+         updateMapWithNewRegions(framePlanarRegionsList);
       }
 
       PlanarRegionsList regionsToPublish = latestPlanarRegionsForPublishing.getAndSet(null);
