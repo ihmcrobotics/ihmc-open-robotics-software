@@ -25,8 +25,7 @@ public class RDXPlanarRegionMappingDemo
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
 
-   private static final File regionLogDirectory = new File(
-         System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
+   private static final File regionLogDirectory = new File(IHMCCommonPaths.LOGS_DIRECTORY + "/");
 
    private PlanarRegionMappingHandler mappingManager;
    private RDXPlanarRegionMappingUIPanel planarRegionMappingUI;

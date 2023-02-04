@@ -120,8 +120,7 @@ public class StructuralPerceptionProcessWithDriver
                                                       }, getClass().getSimpleName() + "Shutdown"));
    }
 
-   // If we aren't doing anything, copy the data and publish it.
-   private synchronized void onFrameReceived()
+   private void onFrameReceived()
    {
       if (nativesLoadedActivator.poll())
       {
@@ -163,11 +162,7 @@ public class StructuralPerceptionProcessWithDriver
       }
    }
 
-   /**
-    * Synchronized to make sure it's only running ever once at a time.
-    * This should also be guaranteed by the ResettableExceptionHandlingExecutorService.
-    */
-   private synchronized void extractCompressAndPublish()
+   private void extractCompressAndPublish()
    {
       // Important not to store as a field, as update() needs to be called each frame
       ReferenceFrame cameraFrame = sensorFrameUpdater.get();
