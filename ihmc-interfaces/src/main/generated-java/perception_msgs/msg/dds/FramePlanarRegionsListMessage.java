@@ -12,7 +12,7 @@ import us.ihmc.pubsub.TopicDataType;
        * A planar region is a finite area that lies on a 3D plane and that is delimited by a concave hull.
        * As concave hulls are complex to manipulate, a set of convex polygons are also provided, altogether they approximate the area of the planar region.
        */
-public class PlanarRegionsListWithPoseMessage extends Packet<PlanarRegionsListWithPoseMessage> implements Settable<PlanarRegionsListWithPoseMessage>, EpsilonComparable<PlanarRegionsListWithPoseMessage>
+public class FramePlanarRegionsListMessage extends Packet<FramePlanarRegionsListMessage> implements Settable<FramePlanarRegionsListMessage>, EpsilonComparable<FramePlanarRegionsListMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -31,20 +31,20 @@ public class PlanarRegionsListWithPoseMessage extends Packet<PlanarRegionsListWi
             */
    public perception_msgs.msg.dds.PlanarRegionsListMessage planar_regions_;
 
-   public PlanarRegionsListWithPoseMessage()
+   public FramePlanarRegionsListMessage()
    {
       sensor_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       sensor_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       planar_regions_ = new perception_msgs.msg.dds.PlanarRegionsListMessage();
    }
 
-   public PlanarRegionsListWithPoseMessage(PlanarRegionsListWithPoseMessage other)
+   public FramePlanarRegionsListMessage(FramePlanarRegionsListMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(PlanarRegionsListWithPoseMessage other)
+   public void set(FramePlanarRegionsListMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -96,19 +96,19 @@ public class PlanarRegionsListWithPoseMessage extends Packet<PlanarRegionsListWi
    }
 
 
-   public static Supplier<PlanarRegionsListWithPoseMessagePubSubType> getPubSubType()
+   public static Supplier<FramePlanarRegionsListMessagePubSubType> getPubSubType()
    {
-      return PlanarRegionsListWithPoseMessagePubSubType::new;
+      return FramePlanarRegionsListMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return PlanarRegionsListWithPoseMessagePubSubType::new;
+      return FramePlanarRegionsListMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(PlanarRegionsListWithPoseMessage other, double epsilon)
+   public boolean epsilonEquals(FramePlanarRegionsListMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -127,9 +127,9 @@ public class PlanarRegionsListWithPoseMessage extends Packet<PlanarRegionsListWi
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof PlanarRegionsListWithPoseMessage)) return false;
+      if(!(other instanceof FramePlanarRegionsListMessage)) return false;
 
-      PlanarRegionsListWithPoseMessage otherMyClass = (PlanarRegionsListWithPoseMessage) other;
+      FramePlanarRegionsListMessage otherMyClass = (FramePlanarRegionsListMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -145,7 +145,7 @@ public class PlanarRegionsListWithPoseMessage extends Packet<PlanarRegionsListWi
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("PlanarRegionsListWithPoseMessage {");
+      builder.append("FramePlanarRegionsListMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("sensor_position=");

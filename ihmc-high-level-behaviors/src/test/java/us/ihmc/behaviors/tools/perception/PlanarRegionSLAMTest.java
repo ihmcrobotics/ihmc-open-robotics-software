@@ -38,7 +38,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerLis
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
-import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 import us.ihmc.perception.tools.PerceptionPrintTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
@@ -47,11 +46,10 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
-import us.ihmc.robotics.TestTools;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.tools.lists.PairList;
 
 class PlanarRegionSLAMTest
@@ -1099,8 +1097,8 @@ class PlanarRegionSLAMTest
       PlanarRegionsList listOne = createSomeRightAngledWalls(-3, false, new RigidBodyTransform(), true, true, true);
       PlanarRegionsList listTwo = createSomeRightAngledWalls(-6, false, worldToSensorTransform, true, true, true);
 
-      PlanarRegionsListWithPose listOneWithPose = new PlanarRegionsListWithPose(listOne, new RigidBodyTransform());
-      PlanarRegionsListWithPose listTwoWithPose = new PlanarRegionsListWithPose(listTwo, sensorToWorldTransform);
+      FramePlanarRegionsList listOneWithPose = new FramePlanarRegionsList(listOne, new RigidBodyTransform());
+      FramePlanarRegionsList listTwoWithPose = new FramePlanarRegionsList(listTwo, sensorToWorldTransform);
 
       PlanarRegionMap map = new PlanarRegionMap(true);
 

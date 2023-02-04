@@ -10,7 +10,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -25,7 +25,7 @@ import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.nio.ByteBuffer;
@@ -203,7 +203,7 @@ public class PerceptionMessageTools
                                            sequenceNumber,
                                            height,
                                            width,
-                                           ImageMessageFormat.DEPTH_PNG_R16);
+                                           ImageMessageFormat.DEPTH_PNG_16UC1);
       helper.publish(topic, depthImageMessage);
    }
 
@@ -231,11 +231,11 @@ public class PerceptionMessageTools
       helper.publish(topic, colorImageMessage);
    }
 
-   public static void publishPlanarRegionsListWithPose(PlanarRegionsListWithPose planarRegionsListWithPose,
-                                                       ROS2Topic<PlanarRegionsListWithPoseMessage> topic,
+   public static void publishFramePlanarRegionsList(FramePlanarRegionsList framePlanarRegionsList,
+                                                       ROS2Topic<FramePlanarRegionsListMessage> topic,
                                                        ROS2Helper ros2Helper)
    {
-      ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToPlanarRegionsListWithPoseMessage(planarRegionsListWithPose));
+      ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
    }
 
    public static void publishPlanarRegionsList(PlanarRegionsList planarRegionsList, ROS2Topic<PlanarRegionsListMessage> topic, ROS2Helper ros2Helper)

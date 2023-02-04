@@ -18,7 +18,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
 import java.util.Comparator;
 import java.util.Stack;
@@ -91,7 +91,7 @@ public class RapidPlanarRegionsExtractor
    private OpenCLFloatBuffer cloudBuffer;
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
-   private final PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
+   private final FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
    private final RapidPlanarRegionIsland tempIsland = new RapidPlanarRegionIsland();
    private boolean firstRun = true;
 
@@ -161,7 +161,7 @@ public class RapidPlanarRegionsExtractor
       LogTools.info("Finished creating buffers and kernels for OpenCL program.");
    }
 
-   public void update(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsWithPose)
+   public void update(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList regionsWithPose)
    {
       if (!processing)
       {

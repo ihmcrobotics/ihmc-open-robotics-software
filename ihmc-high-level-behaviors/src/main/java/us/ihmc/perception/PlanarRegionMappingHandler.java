@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -27,7 +27,7 @@ import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.odometry.RapidPatchesBasedICP;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
@@ -59,7 +59,7 @@ public class PlanarRegionMappingHandler
                                                                                                         ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> updateMapFuture;
 
-   private final AtomicReference<PlanarRegionsListWithPoseMessage> latestIncomingRegions = new AtomicReference<>(null);
+   private final AtomicReference<FramePlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForRendering = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
 
@@ -75,7 +75,7 @@ public class PlanarRegionMappingHandler
 
    private PlanarRegionsReplayBuffer planarRegionsListBuffer = null;
 
-   private PlanarRegionsListWithPose planarRegionsListWithPose;
+   private FramePlanarRegionsList framePlanarRegionsList;
    private PlanarRegionMap planarRegionMap;
    private PlanarRegionsListLogger planarRegionsListLogger;
 
@@ -190,7 +190,7 @@ public class PlanarRegionMappingHandler
          {
             try
             {
-               planarRegionsListBuffer = new PlanarRegionsReplayBuffer(file, PlanarRegionsListWithPose.class);
+               planarRegionsListBuffer = new PlanarRegionsReplayBuffer(file, FramePlanarRegionsList.class);
             }
             catch (IOException ioException)
             {
@@ -201,7 +201,7 @@ public class PlanarRegionMappingHandler
       }
    }
 
-   public void planarRegionCallback(PlanarRegionsListWithPoseMessage planarRegionsListWithPoseMessage)
+   public void planarRegionCallback(FramePlanarRegionsListMessage framePlanarRegionsListMessage)
    {
       if (enableCapture)
       {
@@ -210,10 +210,10 @@ public class PlanarRegionMappingHandler
             planarRegionsListLogger = new PlanarRegionsListLogger("planar-region-logger", 1);
             planarRegionsListLogger.start();
          }
-         planarRegionsListWithPose = PlanarRegionMessageConverter.convertToPlanarRegionsListWithPose(planarRegionsListWithPoseMessage);
-         LogTools.info("Regions Captured: {}", planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions());
+         framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(framePlanarRegionsListMessage);
+         LogTools.info("Regions Captured: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
 
-         planarRegionsListLogger.update(System.currentTimeMillis(), planarRegionsListWithPose);
+         planarRegionsListLogger.update(System.currentTimeMillis(), framePlanarRegionsList);
          enableCapture = false;
       }
    }
@@ -228,7 +228,7 @@ public class PlanarRegionMappingHandler
       if (latestIncomingRegions.get() == null)
          return;
 
-      PlanarRegionsListWithPose planarRegionsWithPose = PlanarRegionMessageConverter.convertToPlanarRegionsListWithPose(latestIncomingRegions.getAndSet(null));
+      FramePlanarRegionsList planarRegionsWithPose = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(latestIncomingRegions.getAndSet(null));
 
       if (enableLiveMode)
       {
@@ -253,10 +253,10 @@ public class PlanarRegionMappingHandler
    {
       if (source == DataSource.PLANAR_REGIONS_LOG && (planarRegionListIndex < planarRegionsListBuffer.getBufferLength()))
       {
-         planarRegionsListWithPose = (PlanarRegionsListWithPose) planarRegionsListBuffer.get(planarRegionListIndex);
-         LogTools.info("Transform: {}", planarRegionsListWithPose.getSensorToWorldFrameTransform());
+         framePlanarRegionsList = (FramePlanarRegionsList) planarRegionsListBuffer.get(planarRegionListIndex);
+         LogTools.info("Transform: {}", framePlanarRegionsList.getSensorToWorldFrameTransform());
 
-         updateMapWithNewRegions(planarRegionsListWithPose);
+         updateMapWithNewRegions(framePlanarRegionsList);
          planarRegionListIndex++;
       }
 
@@ -268,18 +268,18 @@ public class PlanarRegionMappingHandler
 
             loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
 
-            planarRegionsListWithPose = new PlanarRegionsListWithPose();
-            rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, planarRegionsListWithPose);
+            framePlanarRegionsList = new FramePlanarRegionsList();
+            rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, framePlanarRegionsList);
 
-            LogTools.info("Regions Found: {}", planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions());
+            LogTools.info("Regions Found: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
 
             //rapidPatchesBasedICP.update(rapidRegionsExtractor.getPreviousFeatureGrid(), rapidRegionsExtractor.getCurrentFeatureGrid());
             //rapidRegionsExtractor.copyFeatureGridMapUsingOpenCL();
 
-            if (planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+            if (framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
             {
                modified = true;
-               updateMapWithNewRegions(planarRegionsListWithPose);
+               updateMapWithNewRegions(framePlanarRegionsList);
             }
          }
 
@@ -313,7 +313,7 @@ public class PlanarRegionMappingHandler
       return latestPlanarRegionsForRendering.get() != null;
    }
 
-   public void updateMapWithNewRegions(PlanarRegionsListWithPose regions)
+   public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
       LogTools.info("Adding Regions to Map.");
       planarRegionMap.submitRegionsUsingIterativeReduction(regions);
@@ -386,9 +386,9 @@ public class PlanarRegionMappingHandler
       this.enableLiveMode = enableLiveMode;
    }
 
-   public PlanarRegionsListWithPose getPlanarRegionsListWithPose()
+   public FramePlanarRegionsList getFramePlanarRegionsList()
    {
-      return planarRegionsListWithPose;
+      return framePlanarRegionsList;
    }
 
    public RapidPlanarRegionsExtractor getRapidRegionsExtractor()

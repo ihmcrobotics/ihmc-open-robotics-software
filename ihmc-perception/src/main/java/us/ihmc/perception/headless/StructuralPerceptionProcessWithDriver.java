@@ -6,7 +6,7 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -27,8 +27,8 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -67,14 +67,14 @@ public class StructuralPerceptionProcessWithDriver
    private final ROS2Helper ros2Helper;
    private ROS2Topic<ImageMessage> depthTopic;
    private ROS2Topic<PlanarRegionsListMessage> regionsTopic;
-   private ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic;
+   private ROS2Topic<FramePlanarRegionsListMessage> regionsWithPoseTopic;
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
    private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
 
    public StructuralPerceptionProcessWithDriver(ROS2Topic<ImageMessage> depthTopic,
                                                 ROS2Topic<PlanarRegionsListMessage> regionsTopic,
-                                                ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic,
+                                                ROS2Topic<FramePlanarRegionsListMessage> regionsWithPoseTopic,
                                                 Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.depthTopic = depthTopic;
@@ -185,18 +185,18 @@ public class StructuralPerceptionProcessWithDriver
 
       BytedecoImage depthImage = depthExtractionKernel.getExtractedDepthImage();
 
-      PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
-      extractPlanarRegionsListWithPose(depthImage, ReferenceFrame.getWorldFrame(), planarRegionsListWithPose);
-      PlanarRegionsList planarRegionsList = planarRegionsListWithPose.getPlanarRegionsList();
+      FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
+      extractFramePlanarRegionsList(depthImage, ReferenceFrame.getWorldFrame(), framePlanarRegionsList);
+      PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
 
       LogTools.info("Extracted {} planar regions", planarRegionsList.getNumberOfPlanarRegions());
 
       PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
    }
 
-   private void extractPlanarRegionsListWithPose(BytedecoImage depthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose planarRegionsListWithPose)
+   private void extractFramePlanarRegionsList(BytedecoImage depthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList framePlanarRegionsList)
    {
-      rapidRegionsExtractor.update(depthImage, cameraFrame, planarRegionsListWithPose);
+      rapidRegionsExtractor.update(depthImage, cameraFrame, framePlanarRegionsList);
    }
 
    public static void main(String[] args)

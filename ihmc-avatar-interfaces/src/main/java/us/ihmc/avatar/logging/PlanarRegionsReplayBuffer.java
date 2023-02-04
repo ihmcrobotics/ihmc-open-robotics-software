@@ -3,7 +3,7 @@ package us.ihmc.avatar.logging;
 import org.apache.commons.io.IOUtils;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,7 +57,7 @@ public class PlanarRegionsReplayBuffer<T>
 
          Object list;
 
-         if (type == PlanarRegionsListWithPose.class)
+         if (type == FramePlanarRegionsList.class)
             list = PlanarRegionFileTools.importPlanarRegionsWithPoseData(temp);
          else
             list = PlanarRegionFileTools.importPlanarRegionData(temp);

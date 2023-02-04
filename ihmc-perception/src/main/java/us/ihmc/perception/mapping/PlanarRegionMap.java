@@ -14,7 +14,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -114,14 +114,14 @@ public class PlanarRegionMap
     * updated using either a filter-based approach or a smoothing based approach. The final landmark results replace the existing old regions in the map.
     * New regions are added for incoming regions that don't find a match in the map.
     *
-    * @param regionsWithPose - PlanarRegionsListWithPose object containing the planar regions and the sensor pose
+    * @param frameRegions - FramePlanarRegionsList object containing the planar regions and the sensor pose
     */
-   public void submitRegionsUsingIterativeReduction(PlanarRegionsListWithPose regionsWithPose)
+   public void submitRegionsUsingIterativeReduction(FramePlanarRegionsList frameRegions)
    {
       PlanarRegionsList regionsInSensorFrame = new PlanarRegionsList();
 
       // Filters out regions that have area less than threshold
-      for (PlanarRegion region : regionsWithPose.getPlanarRegionsList().getPlanarRegionsAsList())
+      for (PlanarRegion region : frameRegions.getPlanarRegionsList().getPlanarRegionsAsList())
       {
          if (region.getArea() > parameters.getMinimumPlanarRegionArea())
          {
@@ -142,7 +142,7 @@ public class PlanarRegionMap
       }
 
       // Compute relative (t) to (t-1) transform
-      currentToPreviousSensorTransform.set(regionsWithPose.getSensorToWorldFrameTransform());
+      currentToPreviousSensorTransform.set(frameRegions.getSensorToWorldFrameTransform());
       currentToPreviousSensorTransform.multiply(worldToPreviousSensorFrameTransform);
 
       // Compute the new prior (t_prior) transform
@@ -177,7 +177,7 @@ public class PlanarRegionMap
          {
             initializeFactorGraphForSmoothing(finalMap, sensorToWorldFrameTransformPrior);
          }
-         sensorToWorldTransformPosterior.set(regionsWithPose.getSensorToWorldFrameTransform());
+         sensorToWorldTransformPosterior.set(frameRegions.getSensorToWorldFrameTransform());
 
          initialized = true;
       }
@@ -212,7 +212,7 @@ public class PlanarRegionMap
                posteriorRegionsInWorld.addPlanarRegion(region);
             });
 
-            LogTools.debug("Estimated Transform: \n{}", regionsWithPose.getSensorToWorldFrameTransform());
+            LogTools.debug("Estimated Transform: \n{}", frameRegions.getSensorToWorldFrameTransform());
             LogTools.debug("Sensor To World [Prior]: \n{}", sensorToWorldFrameTransformPrior);
             LogTools.debug("Sensor To World [Posterior (Optimized)]: \n{}", sensorToWorldTransformPosterior);
          }
@@ -225,7 +225,7 @@ public class PlanarRegionMap
          factorGraph.clearISAM2();
       }
 
-      previousSensorToWorldFrameTransform.set(regionsWithPose.getSensorToWorldFrameTransform());
+      previousSensorToWorldFrameTransform.set(frameRegions.getSensorToWorldFrameTransform());
       worldToPreviousSensorFrameTransform.setAndInvert(previousSensorToWorldFrameTransform);
 
       sensorPoseIndex++;
@@ -248,11 +248,11 @@ public class PlanarRegionMap
     * landmarks are updated using either a filter-based approach or a smoothing based approach. The final landmark results replace the existing
     * old regions in the map. New regions are added for incoming regions that don't find a match in the map.
     *
-    * @param regionsWithPose - PlanarRegionsListWithPose object containing the planar regions and the sensor pose
+    * @param frameRegions - FramePlanarRegionsList object containing the planar regions and the sensor pose
     */
-   public void submitRegionsUsingGraphicalReduction(PlanarRegionsListWithPose regionsWithPose)
+   public void submitRegionsUsingGraphicalReduction(FramePlanarRegionsList frameRegions)
    {
-      PlanarRegionsList regions = regionsWithPose.getPlanarRegionsList();
+      PlanarRegionsList regions = frameRegions.getPlanarRegionsList();
       modified = true;
       if (!initialized)
       {
