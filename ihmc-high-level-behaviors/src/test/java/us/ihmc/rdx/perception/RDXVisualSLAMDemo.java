@@ -66,6 +66,7 @@ public class RDXVisualSLAMDemo
    private final Scanner gtPoseReader;
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final ArrayList<RigidBodyTransform> gtSensorTransforms = new ArrayList<>();
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
    private final ArrayList<ModelInstance> groundTruthPoseModels = new ArrayList<>();
 
@@ -82,6 +83,7 @@ public class RDXVisualSLAMDemo
    public RDXVisualSLAMDemo() throws FileNotFoundException
    {
       gtPoseReader = new Scanner(new File(GROUND_TRUTH_PATH + "00.txt"));
+      getGroundTruthPose();
 
       vslam = new VisualSLAMModule();
       panel.setRenderMethod(this::renderImGuiWidgets);
@@ -172,7 +174,6 @@ public class RDXVisualSLAMDemo
 
    public void update()
    {
-      getGroundTruthPose();
 
       fileName = String.format("%1$6s", fileIndex).replace(' ', '0') + ".png";
       leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + fileName;
@@ -184,6 +185,8 @@ public class RDXVisualSLAMDemo
       boolean initialized = vslam.update(currentImageLeft, currentImageRight);
 
       LogTools.info("Visual SLAM Update Completed");
+
+      renderGroundTruthPose(fileIndex);
 
       fileIndex += FRAME_SKIP;
 
@@ -212,27 +215,37 @@ public class RDXVisualSLAMDemo
 
    public void getGroundTruthPose()
    {
-      String[] gtPoseSplit = gtPoseReader.nextLine().split(" ");
+      while(gtPoseReader.hasNextLine())
+      {
+         String[] gtPoseSplit = gtPoseReader.nextLine().split(" ");
 
-      LogTools.info("GT Pose: {}", gtPoseReader.nextLine());
+         //LogTools.info("GT Pose: {}", Arrays.toString(gtPoseSplit));
 
-      // r11 r12 r13 tx r21 r22 r23 ty r31 r32 r33 tz
-      RigidBodyTransform gtTransform = new RigidBodyTransform();
-      gtTransform.setUnsafe(Double.parseDouble(gtPoseSplit[0]),
-                            Double.parseDouble(gtPoseSplit[1]),
-                            Double.parseDouble(gtPoseSplit[2]),
-                            Double.parseDouble(gtPoseSplit[3]),
-                            Double.parseDouble(gtPoseSplit[4]),
-                            Double.parseDouble(gtPoseSplit[5]),
-                            Double.parseDouble(gtPoseSplit[6]),
-                            Double.parseDouble(gtPoseSplit[7]),
-                            Double.parseDouble(gtPoseSplit[8]),
-                            Double.parseDouble(gtPoseSplit[9]),
-                            Double.parseDouble(gtPoseSplit[10]),
-                            Double.parseDouble(gtPoseSplit[11]));
+         // r11 r12 r13 tx r21 r22 r23 ty r31 r32 r33 tz
+         RigidBodyTransform gtTransform = new RigidBodyTransform();
+         gtTransform.setUnsafe(Double.parseDouble(gtPoseSplit[0]),
+                               Double.parseDouble(gtPoseSplit[1]),
+                               Double.parseDouble(gtPoseSplit[2]),
+                               Double.parseDouble(gtPoseSplit[3]),
+                               Double.parseDouble(gtPoseSplit[4]),
+                               Double.parseDouble(gtPoseSplit[5]),
+                               Double.parseDouble(gtPoseSplit[6]),
+                               Double.parseDouble(gtPoseSplit[7]),
+                               Double.parseDouble(gtPoseSplit[8]),
+                               Double.parseDouble(gtPoseSplit[9]),
+                               Double.parseDouble(gtPoseSplit[10]),
+                               Double.parseDouble(gtPoseSplit[11]));
 
+         gtSensorTransforms.add(gtTransform);
+      }
+
+      LogTools.info("Total Ground Truth Transforms Loaded: {}", gtSensorTransforms.size());
+   }
+
+   public void renderGroundTruthPose(int index)
+   {
       FramePose3D gtFramePose = new FramePose3D();
-      gtFramePose.set(gtTransform);
+      gtFramePose.set(gtSensorTransforms.get(index));
       gtFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
       ////LogTools.info("Optimized Sensor Pose: \n{}\n", gtFramePose);

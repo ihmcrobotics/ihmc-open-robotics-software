@@ -40,7 +40,7 @@ public class VisualSLAMModule
       BytedecoTools.loadSlamWrapper();
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
-      float[] poseInitial = new float[] {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+      double[] poseInitial = new double[] {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
       //LogTools.info("Inserting Prior Pose Factor: x{}", 0);
       factorGraphExternal.addPriorPoseFactor(0, poseInitial);
       factorGraphExternal.setPoseInitialValue(0, poseInitial);
@@ -75,7 +75,7 @@ public class VisualSLAMModule
       if (initialized)
       {
          //LogTools.info("Inserting Odometry Factor: x{}", keyframeID[0]);
-         factorGraphExternal.addOdometryFactorExtended(relativePoseTransformAsArray, keyframeID[0]);
+         factorGraphExternal.addOdometryFactorSE3(keyframeID[0], relativePoseTransformAsArray);
 
          //LogTools.info("Compute transform world-to-sensor.");
          /* Update sensorToWorldTransform based on last sensor pose and most recent odometry */
@@ -86,11 +86,11 @@ public class VisualSLAMModule
          //LogTools.info("Sensor Transform: {}", worldToSensorTransform);
 
          /* Compute and insert keyframe pose in world frame as initial value */
-         float[] poseValue = new float[16];
+         double[] poseValue = new double[16];
          worldToSensorTransform.get(poseValue);
          //LogTools.info("World to Sensor Transform: {}", worldToSensorTransform);
          LogTools.info("Setting Initial Pose Value: x{} = [{}]", keyframeID[0], Arrays.toString(poseValue));
-         factorGraphExternal.setPoseInitialValueExtended(keyframeID[0], poseValue);
+         factorGraphExternal.setPoseInitialValueSE3(keyframeID[0], poseValue);
       }
 
       //LogTools.info("Extracting Landmarks External");
