@@ -278,8 +278,11 @@ public class PerceptionDataLogger
          }
       }
 
-      hdf5Manager.closeFile();
-      LogTools.info("HDF5 File Saved: {}", filePath);
+      if(hdf5Manager != null)
+      {
+         hdf5Manager.closeFile();
+         LogTools.info("HDF5 File Saved: {}", filePath);
+      }
    }
 
    public void collectStatistics()

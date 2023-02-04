@@ -1,30 +1,21 @@
 package us.ihmc.rdx.perception;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
+import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.RDX3DPanelTooltip;
-import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
-public class PlanarRegionMappingUIPanel
+public class RDXPlanarRegionMappingUIPanel
 {
    private ImGuiStoredPropertySetTuner mappingParametersTuner;
-   private PlanarRegionMappingManager mappingManager;
+   private PlanarRegionMappingHandler mappingManager;
    private ImGuiPanel imGuiPanel;
    private final ImBoolean liveModeEnabled = new ImBoolean();
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private boolean captured = false;
   
-   public PlanarRegionMappingUIPanel(String name, PlanarRegionMappingManager mappingManager)
+   public RDXPlanarRegionMappingUIPanel(String name, PlanarRegionMappingHandler mappingManager)
    {
       this.mappingManager = mappingManager;
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.perception;
+package us.ihmc.perception;
 
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import org.bytedeco.opencl._cl_program;
@@ -19,8 +19,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
@@ -41,7 +39,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PlanarRegionMappingManager
+public class PlanarRegionMappingHandler
 {
    private enum DataSource
    {
@@ -74,7 +72,6 @@ public class PlanarRegionMappingManager
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
    private RapidPlanarRegionsExtractor rapidRegionsExtractor;
-   private RDXRapidRegionsUIPanel rapidRegionsUIPanel;
 
    private PlanarRegionsReplayBuffer planarRegionsListBuffer = null;
 
@@ -102,13 +99,13 @@ public class PlanarRegionMappingManager
 
    private PerceptionDataLoader perceptionDataLoader;
 
-   public PlanarRegionMappingManager(boolean smoothing)
+   public PlanarRegionMappingHandler(boolean smoothing)
    {
       source = DataSource.SUBMIT_API;
       planarRegionMap = new PlanarRegionMap(smoothing);
    }
 
-   public PlanarRegionMappingManager(String simpleRobotName, ROS2Node ros2Node, boolean smoothing)
+   public PlanarRegionMappingHandler(String simpleRobotName, ROS2Node ros2Node, boolean smoothing)
    {
       source = DataSource.ROS2_CALLBACK;
       planarRegionMap = new PlanarRegionMap(smoothing);
@@ -130,7 +127,7 @@ public class PlanarRegionMappingManager
       }
    }
 
-   public PlanarRegionMappingManager(String logFile, boolean smoothing)
+   public PlanarRegionMappingHandler(String logFile, boolean smoothing)
    {
       source = DataSource.PERCEPTION_LOG;
 
@@ -141,11 +138,6 @@ public class PlanarRegionMappingManager
 
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
       rapidRegionsExtractor.getDebugger().setEnabled(true);
-
-      //rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
-      //rapidRegionsUIPanel.create(rapidRegionsExtractor);
-      //baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
-      //baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUIPanel, RDXSceneLevel.VIRTUAL);
 
       openCLManager = new OpenCLManager();
       openCLManager.create();
@@ -187,7 +179,7 @@ public class PlanarRegionMappingManager
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
    }
 
-   public PlanarRegionMappingManager(File planarRegionLogDirectory, boolean smoothing)
+   public PlanarRegionMappingHandler(File planarRegionLogDirectory, boolean smoothing)
    {
       source = DataSource.PLANAR_REGIONS_LOG;
       planarRegionMap = new PlanarRegionMap(smoothing);
@@ -270,7 +262,7 @@ public class PlanarRegionMappingManager
 
       if (source == DataSource.PERCEPTION_LOG)
       {
-         if(perceptionLogIndex % HDF5Manager.MAX_BUFFER_SIZE != (HDF5Manager.MAX_BUFFER_SIZE - 1))
+         if (perceptionLogIndex % HDF5Manager.MAX_BUFFER_SIZE != (HDF5Manager.MAX_BUFFER_SIZE - 1))
          {
             LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
 
@@ -351,7 +343,7 @@ public class PlanarRegionMappingManager
       planarRegionMap.setModified(true);
       perceptionLogIndex = 0;
 
-      if(updateMapFuture != null)
+      if (updateMapFuture != null)
       {
          if (updateMapFuture.isCancelled() || updateMapFuture.isDone())
             launchMapper();
