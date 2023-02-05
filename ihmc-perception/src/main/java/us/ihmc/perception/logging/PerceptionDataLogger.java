@@ -278,7 +278,7 @@ public class PerceptionDataLogger
          }
       }
 
-      if(hdf5Manager != null)
+      if (hdf5Manager != null)
       {
          hdf5Manager.closeFile();
          LogTools.info("HDF5 File Saved: {}", filePath);
