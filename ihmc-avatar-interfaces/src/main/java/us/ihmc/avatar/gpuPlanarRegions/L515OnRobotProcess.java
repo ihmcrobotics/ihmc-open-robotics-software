@@ -150,7 +150,7 @@ public class L515OnRobotProcess
             {
                for (int y = 0; y < depthHeight; y++)
                {
-                  float eyeDepth = depth32FC1Image.getFloat(x, y);
+                  float eyeDepth = depth32FC1Image.getFloat(y, x);
                   framePoint.setToZero(cameraFrame);
                   framePoint.setX(eyeDepth);
                   framePoint.setY(-(x - depthCameraIntrinsics.getCx()) / l515.getDepthFocalLengthPixelsX() * eyeDepth);

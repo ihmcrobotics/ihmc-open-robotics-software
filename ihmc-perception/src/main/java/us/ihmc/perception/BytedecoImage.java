@@ -221,40 +221,50 @@ public class BytedecoImage
       return imageHeight;
    }
 
-   public float getFloatDirect(int row, int col)
+   /**
+    * Retrieve a float from the image.
+    *
+    * This uses a precalulated pointer to allow for faster access.
+    */
+   public float getFloat(int row, int column)
    {
-      return backingDirectByteBuffer.asFloatBuffer().get(row * imageWidth + col);
+      return pointerForAccessSpeed.getFloat(getLinearizedIndex(row, column) * Float.BYTES);
    }
 
-   public int getCharDirect(int row, int col)
+   /**
+    * Set a float in the image.
+    *
+    * This uses a precalulated pointer to allow for faster access.
+    */
+   public void setValue(int row, int column, float value)
    {
-      return Byte.toUnsignedInt(backingDirectByteBuffer.get(row * imageWidth + col));
+      pointerForAccessSpeed.putFloat(getLinearizedIndex(row, column) * Float.BYTES, value);
    }
 
-   public float getFloat(int column, int row)
+   /**
+    * Retrieve a byte from the image. The value of the byte is given as a positive value
+    * in and int.
+    *
+    * This uses a precalulated pointer to allow for faster access.
+    */
+   public int getByteAsInteger(int row, int column)
    {
-      return pointerForAccessSpeed.getFloat((getDataKey(column, row)) * Float.BYTES);
+      return Byte.toUnsignedInt(pointerForAccessSpeed.get(getLinearizedIndex(row, column)));
    }
 
-   public void setValue(int column, int row, float value)
-   {
-      pointerForAccessSpeed.putFloat((getDataKey(column, row)) * Float.BYTES, value);
-   }
-
-   public int getByteAsInteger(int column, int row)
-   {
-      return Byte.toUnsignedInt(pointerForAccessSpeed.get(getDataKey(column, row)));
-   }
-
+   /**
+    * Retrieve a byte from the image. The value of the byte is given as a positive value
+    * in and int.
+    */
    public int getByteAsInteger(int byteIndex)
    {
       return Byte.toUnsignedInt(backingDirectByteBuffer.get(byteIndex));
    }
 
    /**
-    * Accesses the key for the data entry located at (column, row). This handles whether the image is row major or column major.
-     */
-   public long getDataKey(int column, int row)
+    * Calculate the index for the data entry located at (column, row). This handles whether the image is row major or column major.
+    */
+   private long getLinearizedIndex(int row, int column)
    {
       return (long) row * imageWidth + column;
    }
