@@ -91,7 +91,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 
             if (incomingCompressedImageBuffer == null)
             {
-               if(imageFormat == ImageMessageFormat.DEPTH_PNG_16UC1)
+               if (imageFormat == ImageMessageFormat.DEPTH_PNG_16UC1)
                {
                   LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_COMPRESSED_16", topic.getName());
                   bytesIfUncompressed = numberOfPixels * 2;
@@ -102,7 +102,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
                   decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
                   normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
                }
-               else if(imageFormat == ImageMessageFormat.COLOR_JPEG_RGB8)
+               else if (imageFormat == ImageMessageFormat.COLOR_JPEG_RGB8)
                {
                   LogTools.info("Creating Image Message Visualizer for {} with type COLOR_JPEG_COMPRESSED_24", topic.getName());
                   bytesIfUncompressed = numberOfPixels * 3;
@@ -112,7 +112,6 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
                   compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
                   decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
                }
-
             }
 
             numberOfBytes = imageMessage.getData().size();
@@ -132,12 +131,11 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
          compressedBytesMat.data(incomingCompressedImageBytePointer);
          opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedImage);
 
-
          synchronized (this) // synchronize with the update method
          {
             updateImageDimensions(imageMessage.getImageWidth(), imageMessage.getImageHeight());
 
-            if(imageFormat == ImageMessageFormat.DEPTH_PNG_16UC1)
+            if (imageFormat == ImageMessageFormat.DEPTH_PNG_16UC1)
             {
                BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
                BytedecoOpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
