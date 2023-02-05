@@ -13,30 +13,17 @@ import java.util.*;
 
 public class PlanarRegionsReplayBuffer<T>
 {
-   private int buffer_length;
+   private int bufferLength;
    private HashMap<Integer, PlanarRegionsBufferElement<T>> indexBuffer;
    private TreeSet<PlanarRegionsBufferElement<T>> timeBuffer;
    private long firstEverTime = Long.MAX_VALUE;
-
    private int index = 0;
-
-
-
-   private static final Comparator<PlanarRegionsBufferElement> customCompare = (o1, o2) ->
-   {
-      long compare = o1.getTime() - o2.getTime();
-      if (compare > 0)
-         return 1;
-      else if (compare == 0)
-         return 0;
-      else
-         return -1;
-   };
+   private final Comparator<PlanarRegionsBufferElement<T>> compareByTime = Comparator.comparingLong(PlanarRegionsBufferElement::getTime);
 
    public void loadFromLog(File planarRegionListLog, Class<?> type) throws IOException
    {
       indexBuffer = new HashMap<>();
-      timeBuffer = new TreeSet<>(customCompare);
+      timeBuffer = new TreeSet<>(compareByTime);
 
       Scanner in = new Scanner(planarRegionListLog);
       in.useDelimiter("##\n");
@@ -72,10 +59,10 @@ public class PlanarRegionsReplayBuffer<T>
          index++;
       }
 
-      if (buffer_length < indexBuffer.size())
-         buffer_length = indexBuffer.size();
+      if (bufferLength < indexBuffer.size())
+         bufferLength = indexBuffer.size();
 
-      if (buffer_length <= 0)
+      if (bufferLength <= 0)
       {
          LogTools.warn("Loaded empty log into TBuffer");
       }
@@ -84,7 +71,7 @@ public class PlanarRegionsReplayBuffer<T>
    public PlanarRegionsReplayBuffer(File planarRegionListLog, Class<?> type) throws IOException
    {
       loadFromLog(planarRegionListLog, type);
-      buffer_length = indexBuffer.size();
+      bufferLength = indexBuffer.size();
    }
 
    public PlanarRegionsReplayBuffer()
@@ -92,11 +79,11 @@ public class PlanarRegionsReplayBuffer<T>
       this(Integer.MAX_VALUE);
    }
 
-   public PlanarRegionsReplayBuffer(int buffer_length)
+   public PlanarRegionsReplayBuffer(int bufferLength)
    {
-      this.buffer_length = buffer_length;
+      this.bufferLength = bufferLength;
       this.indexBuffer = new HashMap<>();
-      this.timeBuffer = new TreeSet<>(customCompare);
+      this.timeBuffer = new TreeSet<>(compareByTime);
    }
 
    public void expandBuffer(long additionalSize)
@@ -104,7 +91,7 @@ public class PlanarRegionsReplayBuffer<T>
       if (additionalSize <= 0)
          return;
 
-      buffer_length += additionalSize;
+      bufferLength += additionalSize;
    }
 
    public void putAndTick(long time, T list)
@@ -114,9 +101,9 @@ public class PlanarRegionsReplayBuffer<T>
       indexBuffer.put(index, bufferElement);
       timeBuffer.add(bufferElement);
 
-      if (index > buffer_length)
+      if (index > bufferLength)
       {
-         indexBuffer.remove(index - buffer_length);
+         indexBuffer.remove(index - bufferLength);
          timeBuffer.remove(timeBuffer.first());
       }
 
@@ -128,8 +115,8 @@ public class PlanarRegionsReplayBuffer<T>
 
    public T get(int index)
    {
-      PlanarRegionsBufferElement container = indexBuffer.get(index);
-      return container == null ? null : (T) container.getList();
+      PlanarRegionsBufferElement bufferElement = indexBuffer.get(index);
+      return bufferElement == null ? null : (T) bufferElement.getList();
    }
 
    private PlanarRegionsBufferElement<T> getNearTimeInternal(long time)
@@ -159,8 +146,8 @@ public class PlanarRegionsReplayBuffer<T>
 
    public T getNearTime(long time)
    {
-      PlanarRegionsBufferElement<T> container = getNearTimeInternal(time);
-      return container != null ? container.getList() : null;
+      PlanarRegionsBufferElement<T> nearTimeElement = getNearTimeInternal(time);
+      return nearTimeElement != null ? nearTimeElement.getList() : null;
    }
 
    public long getNextTime(long currentTime)
@@ -168,10 +155,10 @@ public class PlanarRegionsReplayBuffer<T>
       if (indexBuffer.size() < 1)
          return -1;
 
-      PlanarRegionsBufferElement<T> container = indexBuffer.get(
-            Objects.requireNonNull(getNearTimeInternal(currentTime + 1)).getIndex() + 1); //Increment currentTime by 1 to bias towards higher if tied
+      // Increment currentTime by 1 to bias towards higher if tied
+      PlanarRegionsBufferElement<T> nextTimeElement = indexBuffer.get(getNearTimeInternal(currentTime + 1).getIndex() + 1);
 
-      return container == null ? Long.MAX_VALUE : container.getTime();
+      return nextTimeElement == null ? Long.MAX_VALUE : nextTimeElement.getTime();
    }
 
    public long getPreviousTime(long currentTime)
@@ -179,7 +166,8 @@ public class PlanarRegionsReplayBuffer<T>
       if (indexBuffer.size() < 1)
          return -1;
 
-      PlanarRegionsBufferElement container = indexBuffer.get(getNearTimeInternal(currentTime - 1).getIndex() - 1); //Decrement currentTime by 1 to bias towards lower if tied
+      // Decrement currentTime by 1 to bias towards lower if tied
+      PlanarRegionsBufferElement container = indexBuffer.get(getNearTimeInternal(currentTime - 1).getIndex() - 1);
 
       return container == null ? 0 : container.getTime();
    }
@@ -191,7 +179,7 @@ public class PlanarRegionsReplayBuffer<T>
 
    public int getBufferLength()
    {
-      return buffer_length;
+      return bufferLength;
    }
 
    public long getFirstEverTime()
