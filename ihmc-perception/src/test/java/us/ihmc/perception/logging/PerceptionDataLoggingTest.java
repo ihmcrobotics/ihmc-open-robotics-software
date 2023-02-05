@@ -10,18 +10,13 @@ import org.bytedeco.javacpp.indexer.ShortBufferIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
-import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -51,7 +46,6 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
-   @Disabled
    public void testLoggingByteArray()
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -81,7 +75,6 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
-   @Disabled
    public void testLoggingLargeByteArray()
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -123,7 +116,6 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
-   @Disabled
    public void testLoggingIntArray()
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -151,11 +143,9 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
-   @Disabled
    public void testCompressedFloatDepthLoggingPNG()
    {
-      WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-perception/src/slam-wrapper/resources");
-      hdf5ManagerWriter = new HDF5Manager(resourcesDirectory.getPathNecessaryForClasspathLoading() + "hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
+      hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
 
       Mat depthFloat = new Mat(128, 128, opencv_core.CV_32FC1);
       depthFloat.put(new Scalar(1.234));
@@ -211,10 +201,8 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
-   @Disabled
    public void testCompressedDepthMapLoggingPNG()
    {
-
       hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
 
       Mat depth = new Mat(128, 128, opencv_core.CV_16UC1);
@@ -268,10 +256,8 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
-   @Disabled
    public void testCompressedDepthLoggingJPG()
    {
-
 //      hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
 
       Mat depth = new Mat(128, 128, opencv_core.CV_16UC1);
@@ -325,10 +311,8 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
-   @Disabled
    public void testDepthCompressionJPG()
    {
-
       Mat depth = new Mat(128, 128, opencv_core.CV_16UC1);
       depth.put(new Scalar(12345));
 
@@ -363,10 +347,8 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
-   @Disabled
    public void testStoreAndLoadFloatArray()
    {
-
       hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
 
       Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
@@ -395,10 +377,9 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
-   @Disabled
    public void testNativeHDF5API()
    {
-      File f = new File("hdf5_test.hdf5");
+      File file = new File("hdf5_test.hdf5");
       long fileId = hdf5.H5Fcreate("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC, hdf5.H5P_DEFAULT, hdf5.H5P_DEFAULT());
 
       // Create a link creation property list
@@ -437,5 +418,4 @@ public class PerceptionDataLoggingTest
 
       assertEquals(123, data[0], 1e-5);
    }
-
 }
