@@ -38,7 +38,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * 4. Perform factor graph optimization
  * 5. Publish optimized results for both map and localization estimates
  */
-
 public class LocalizationAndMappingProcess
 {
    private final static long PUBLISH_PERIOD_MILLISECONDS = 100;
