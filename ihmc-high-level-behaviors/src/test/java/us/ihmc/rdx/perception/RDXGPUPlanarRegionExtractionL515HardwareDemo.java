@@ -17,8 +17,7 @@ import us.ihmc.tools.thread.Activator;
 
 public class RDXGPUPlanarRegionExtractionL515HardwareDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources");
    private Activator nativesLoadedActivator;
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
