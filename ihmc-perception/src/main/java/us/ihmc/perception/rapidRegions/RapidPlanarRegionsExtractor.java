@@ -599,12 +599,12 @@ public class RapidPlanarRegionsExtractor
          regionVisitedMatrix.set(row, column, true);
          regionMatrix.set(row, column, planarRegionIslandIndex);
 
-         float nx = currentFeatureGrid.getNxImage().getFloatDirect(row, column);
-         float ny = currentFeatureGrid.getNyImage().getFloatDirect(row, column);
-         float nz = currentFeatureGrid.getNzImage().getFloatDirect(row, column);
-         float cx = currentFeatureGrid.getCxImage().getFloatDirect(row, column);
-         float cy = currentFeatureGrid.getCyImage().getFloatDirect(row, column);
-         float cz = currentFeatureGrid.getCzImage().getFloatDirect(row, column);
+         float nx = currentFeatureGrid.getNxImage().getFloat(row, column);
+         float ny = currentFeatureGrid.getNyImage().getFloat(row, column);
+         float nz = currentFeatureGrid.getNzImage().getFloat(row, column);
+         float cx = currentFeatureGrid.getCxImage().getFloat(row, column);
+         float cy = currentFeatureGrid.getCyImage().getFloat(row, column);
+         float cz = currentFeatureGrid.getCzImage().getFloat(row, column);
 
          planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
 
