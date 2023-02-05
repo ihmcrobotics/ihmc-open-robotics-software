@@ -45,6 +45,11 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       create(storedPropertySet, true, onParametersUpdatedCallback);
    }
 
+   /**
+    * This method allows to decide whether to make some radio buttons that allow you to switch between
+    * versions of a stored property set. That is, if there's several suffixes found, in addition to the
+    * possibility that one without a suffix is found, which we call the "Primary" version.
+    */
    public void create(StoredPropertySetBasics storedPropertySet, boolean buildSelectorForMultipleVersions, Runnable onParametersUpdatedCallback)
    {
       this.storedPropertySet = storedPropertySet;
@@ -64,12 +69,6 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
             }
             return FileVisitResult.CONTINUE;
          });
-         if (storedPropertySet.getCurrentVersionSuffix().equals(""))
-         {
-            String currentWorkingVersion = versions.first();
-            storedPropertySet.updateBackingSaveFile(currentWorkingVersion);
-         }
-         storedPropertySet.load();
       }
 
       for (StoredPropertyKey<?> propertyKey : storedPropertySet.getKeyList().keys())
