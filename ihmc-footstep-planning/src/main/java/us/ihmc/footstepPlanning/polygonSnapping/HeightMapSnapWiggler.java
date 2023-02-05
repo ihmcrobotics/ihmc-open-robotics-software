@@ -25,7 +25,7 @@ public class HeightMapSnapWiggler
    private final HeightMapPolygonSnapper heightMapSnapper;
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
 
-   private static final double searchRadius = 0.10;
+   private static final double searchRadius = 0.06;
    private static final int searchPoints = 20;
 
    private final double[] wiggleAreas = new double[searchPoints];
@@ -55,7 +55,7 @@ public class HeightMapSnapWiggler
    {
       RobotSide robotSide = footstepToWiggle.getRobotSide();
       double maxArea = footPolygonsInSoleFrame.get(robotSide).getArea();
-      double maxRMSError = MathTools.square(snapHeightThreshold / heightMapData.getGridResolutionXY()) * maxArea;
+      double maxRMSError = MathTools.square((0.5 * snapHeightThreshold) / heightMapData.getGridResolutionXY()) * maxArea;
 
       Point2D currentPosition = new Point2D(footstepToWiggle.getX(), footstepToWiggle.getY());
       Point2D originalPosition = new Point2D(footstepToWiggle.getX(), footstepToWiggle.getY());
@@ -117,19 +117,23 @@ public class HeightMapSnapWiggler
                                                          heightMapData,
                                                          snapHeightThreshold);
 
-      RigidBodyTransform wiggledTransform = new RigidBodyTransform(wiggledSnapData.getSnapTransform());
-      wiggledTransform.prependTranslation((currentPosition.getX() - originalPosition.getX()), (currentPosition.getY() - originalPosition.getY()), 0.0);
 
-      FixedReferenceFrame originalFrame = new FixedReferenceFrame("originalFrame", ReferenceFrame.getWorldFrame(), snapData.getSnapTransform());
-      FixedReferenceFrame wiggledFrame = new FixedReferenceFrame("wiggledFrame", ReferenceFrame.getWorldFrame(), wiggledTransform);
+      FramePose3D snappedPose = new FramePose3D();
+      snappedPose.getPosition().set(originalPosition);
+      snappedPose.applyTransform(snapData.getSnapTransform());
 
-      FramePose3D wigglePose = new FramePose3D(wiggledFrame);
-      wigglePose.changeFrame(originalFrame);
+      FixedReferenceFrame originalFrame = new FixedReferenceFrame("originalFrame", ReferenceFrame.getWorldFrame(), snappedPose);
 
-      snapData.getWiggleTransformInWorld().set(wigglePose);
+      FramePose3D wiggledPose = new FramePose3D();
+      wiggledPose.getPosition().set(currentPosition);
+      wiggledPose.applyTransform(wiggledSnapData.getSnapTransform());
+
+      wiggledPose.changeFrame(originalFrame);
+
+      // TODO need to do a wiggle rotation
+      snapData.getWiggleTransformInWorld().getTranslation().set(wiggledPose.getPosition());
 
       originalFrame.remove();
-      wiggledFrame.remove();
    }
 
    private void computeWiggleOffsets()
