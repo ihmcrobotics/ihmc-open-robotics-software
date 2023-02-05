@@ -34,9 +34,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.bytedeco.opencv.global.opencv_highgui.imshow;
-import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
-
+/**
+ * Architecture diagram:
+ * <p></p>
+ * <img src="https://www.ihmc.us/wp-content/uploads/2023/02/perceptionLoggerArchitecture-1024x754.png" width="800">
+ */
 public class PerceptionDataLogger
 {
    /* TODO:
