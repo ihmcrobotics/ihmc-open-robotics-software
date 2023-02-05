@@ -15,7 +15,7 @@ import us.ihmc.pubsub.DomainFactory;
 
 public class RDXARDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
