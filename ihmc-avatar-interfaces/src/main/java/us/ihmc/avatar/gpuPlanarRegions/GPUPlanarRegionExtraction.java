@@ -399,12 +399,12 @@ public class GPUPlanarRegionExtraction
          regionVisitedMatrix.set(row, column, true);
          regionMatrix.set(row, column, planarRegionIslandIndex);
          // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
-         float ny = -nxImage.getFloat(column, row);
-         float nz = nyImage.getFloat(column, row);
-         float nx = nzImage.getFloat(column, row);
-         float cy = -cxImage.getFloat(column, row);
-         float cz = cyImage.getFloat(column, row);
-         float cx = czImage.getFloat(column, row);
+         float ny = -nxImage.getFloat(row, column);
+         float nz = nyImage.getFloat(row, column);
+         float nx = nzImage.getFloat(row, column);
+         float cy = -cxImage.getFloat(row, column);
+         float cz = cyImage.getFloat(row, column);
+         float cx = czImage.getFloat(row, column);
          planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
 
          int count = 0;
@@ -412,7 +412,7 @@ public class GPUPlanarRegionExtraction
          {
             if (row + adjacentY[i] < patchImageHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < patchImageWidth - 1 && column + adjacentX[i] > 1)
             {
-               int boundaryConnectionsEncodedAsOnes = graphImage.getByteAsInteger((column + adjacentX[i]), (row + adjacentY[i]));
+               int boundaryConnectionsEncodedAsOnes = graphImage.getByteAsInteger((row + adjacentY[i]), (column + adjacentX[i]));
                if (boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
                {
                   ++count;

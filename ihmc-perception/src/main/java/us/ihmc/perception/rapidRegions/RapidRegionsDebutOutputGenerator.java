@@ -180,7 +180,7 @@ public class RapidRegionsDebutOutputGenerator
       {
          for (int j = 0; j < patchGraph.getImageWidth(); j++)
          {
-            int value = patchGraph.getCharDirect(i, j);
+            int value = patchGraph.getByteAsInteger(i, j);
             if (value == 255)
                System.out.print("o");
             else if (value > 0)
