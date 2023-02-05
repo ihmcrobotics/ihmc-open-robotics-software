@@ -16,53 +16,53 @@ using namespace boost::assign;
 
 class FactorGraphHandler
 {
-    public:
-        int getPoseId() const;
+   public:
+      int getPoseId() const;
 
-        FactorGraphHandler();
+      FactorGraphHandler();
 
-        //      void getPoses(std::vector<RigidBodyTransform>& poses);
+      //      void getPoses(std::vector<RigidBodyTransform>& poses);
 
-        void addPriorPoseFactor(int index, gtsam::Pose3 mean);
+      void addPriorPoseFactor(int index, gtsam::Pose3 mean);
 
-        void addOdometryFactor(gtsam::Pose3 odometry, int poseId);
+      void addOdometryFactor(gtsam::Pose3 odometry, int poseId);
 
-        void addOrientedPlaneFactor(gtsam::Vector4 lmMean, int lmId, int poseIndex);
+      void addOrientedPlaneFactor(gtsam::Vector4 lmMean, int lmId, int poseIndex);
 
-        void optimize();
+      void optimize();
 
-        void optimizeISAM2(uint8_t numberOfUpdates);
+      void optimizeISAM2(uint8_t numberOfUpdates);
 
-        void clearISAM2();
+      void clearISAM2();
 
-        void setPoseInitialValue(int index, gtsam::Pose3 value);
+      void setPoseInitialValue(int index, gtsam::Pose3 value);
 
-        void setOrientedPlaneInitialValue(int landmarkId, gtsam::OrientedPlane3 value);
+      void setOrientedPlaneInitialValue(int landmarkId, gtsam::OrientedPlane3 value);
 
-        const gtsam::Values& getResults() const {return result;};
+      const gtsam::Values& getResults() const {return result;};
 
-        const gtsam::Values& getInitialValues() const {return initial;};
+      const gtsam::Values& getInitialValues() const {return initial;};
 
-        const gtsam::NonlinearFactorGraph& getFactorGraph();
+      const gtsam::NonlinearFactorGraph& getFactorGraph();
 
-        void createOdometryNoiseModel(gtsam::Vector6 odomVariance);
+      void createOdometryNoiseModel(gtsam::Vector6 odomVariance);
 
-        void createOrientedPlaneNoiseModel(gtsam::Vector3 lmVariances);
+      void createOrientedPlaneNoiseModel(gtsam::Vector3 lmVariances);
 
-        void incrementPoseId();
+      void incrementPoseId();
 
-        void SLAMTest();
+      void SLAMTest();
 
-    private:
-        gtsam::ISAM2Params parameters;
+   private:
+      gtsam::ISAM2Params parameters;
 
-        gtsam::ISAM2 isam;
-        std::unordered_set<std::string> structure;
-        gtsam::Values initial, result;
-        gtsam::NonlinearFactorGraph graph;
-        gtsam::noiseModel::Diagonal::shared_ptr priorNoise;
-        gtsam::noiseModel::Diagonal::shared_ptr priorNoise2;
-        gtsam::noiseModel::Diagonal::shared_ptr odometryNoise;
-        gtsam::noiseModel::Diagonal::shared_ptr orientedPlaneNoise;
+      gtsam::ISAM2 isam;
+      std::unordered_set<std::string> structure;
+      gtsam::Values initial, result;
+      gtsam::NonlinearFactorGraph graph;
+      gtsam::noiseModel::Diagonal::shared_ptr priorNoise;
+      gtsam::noiseModel::Diagonal::shared_ptr priorNoise2;
+      gtsam::noiseModel::Diagonal::shared_ptr odometryNoise;
+      gtsam::noiseModel::Diagonal::shared_ptr orientedPlaneNoise;
 
 };
