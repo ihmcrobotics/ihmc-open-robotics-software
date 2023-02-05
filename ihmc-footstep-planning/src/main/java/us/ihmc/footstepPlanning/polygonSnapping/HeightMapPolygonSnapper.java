@@ -1,8 +1,10 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -71,13 +73,19 @@ public class HeightMapPolygonSnapper
 
             double x = HeightMapTools.indexToCoordinate(xIndex, gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
             double y = HeightMapTools.indexToCoordinate(yIndex, gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
+            Point2D point = new Point2D(x, y);
+            double signedDistance = polygonToSnap.signedDistance(new Point2D(x, y));
 
-            if (polygonToSnap.signedDistance(new Point2D(x, y)) > epsilonDistance)
+            if (signedDistance > epsilonDistance)
             {
                continue;
             }
 
-            pointsInsidePolyon.add(new Point3D(x, y, height));
+            // we want this to be on the polygon, not outside of it, so that when we get the area we aren't over inflating
+//            if (signedDistance > 0.0)
+               polygonToSnap.orthogonalProjection(point);
+
+            pointsInsidePolyon.add(new Point3D(point.getX(), point.getY(), height));
          }
       }
 
@@ -89,12 +97,13 @@ public class HeightMapPolygonSnapper
       double maxZ = pointsInsidePolyon.stream().mapToDouble(Point3D::getZ).max().getAsDouble();
       double minZ = maxZ - snapHeightThreshold;
       pointsInsidePolyon.removeIf(point -> point.getZ() < minZ);
-      area = pointsInsidePolyon.size() * areaPerCell;
-
       if (pointsInsidePolyon.size() < 3)
       {
+         area = Double.NaN;
          return null;
       }
+      ConvexPolygon2D snappedPolygon = new ConvexPolygon2D(Vertex3DSupplier.asVertex3DSupplier(pointsInsidePolyon));
+      area = snappedPolygon.getArea();
 
       planeFitter.fitPlaneToPoints(pointsInsidePolyon, bestFitPlane);
       rootMeanSquaredError = 0.0;
