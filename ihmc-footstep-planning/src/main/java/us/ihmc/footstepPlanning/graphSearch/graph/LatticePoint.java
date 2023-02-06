@@ -15,7 +15,7 @@ public class LatticePoint
 
    public LatticePoint(double x, double y, double yaw)
    {
-      this(computePositionIndex(x), computePositionIndex(y), Math.floorMod((int) (Math.round((yaw) / gridSizeYaw)), yawDivisions));
+      this((int) Math.round(x / gridSizeXY), (int) Math.round(y / gridSizeXY), Math.floorMod((int) (Math.round((yaw) / gridSizeYaw)), yawDivisions));
    }
 
    public LatticePoint(int xIndex, int yIndex, int yawIndex)
@@ -25,12 +25,6 @@ public class LatticePoint
       this.yawIndex = yawIndex;
       hashCode = computeHashCode(this);
    }
-
-   public static int computePositionIndex(double position)
-   {
-      return (int) Math.round(position / gridSizeXY);
-   }
-
 
    public int getXIndex()
    {
