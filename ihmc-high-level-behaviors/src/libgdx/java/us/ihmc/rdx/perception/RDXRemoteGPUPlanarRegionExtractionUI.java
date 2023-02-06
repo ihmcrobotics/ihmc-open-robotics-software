@@ -7,7 +7,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
-import us.ihmc.rdx.ui.graphics.live.RDXROS1VideoVisualizer;
+import us.ihmc.rdx.ui.graphics.live.ros1.RDXROS1VideoVisualizer;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.utilities.ros.ROS1Helper;

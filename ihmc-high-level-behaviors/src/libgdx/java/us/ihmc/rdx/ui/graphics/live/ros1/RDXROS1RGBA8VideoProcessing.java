@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.live.ros1;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -7,6 +7,7 @@ import us.ihmc.utilities.ros.RosTools;
 
 import java.nio.ByteBuffer;
 
+@Deprecated
 public class RDXROS1RGBA8VideoProcessing implements RDXROS1VideoProcessor
 {
    private ChannelBuffer nettyChannelBuffer;
