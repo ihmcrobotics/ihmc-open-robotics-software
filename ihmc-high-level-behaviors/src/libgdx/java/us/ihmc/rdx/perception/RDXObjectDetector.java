@@ -96,14 +96,14 @@ public class RDXObjectDetector
 
    private void updateGraphics()
    {
-      if (objectBody == null && hasDetectedObject())
+      if (hasDetectedObject() && objectBody == null)
       {
          objectName = getObjectName();
          objectBody = new RDXVirtualGhostObject(objectInfo.getVirtualBodyFileName(objectName));
          if (objectInfo.hasAppendix(objectName))
             objectAppendix = new RDXVirtualGhostObject(objectInfo.getVirtualAppendixFileName(objectName));
       }
-      else if (hasDetectedObject())
+      if (hasDetectedObject() && objectBody != null)
       {
          RigidBodyTransform transformObjectToWorld = new RigidBodyTransform();
          objectDetector.getObjectPose().get(transformObjectToWorld);
@@ -111,15 +111,17 @@ public class RDXObjectDetector
          objectBody.update();
          if (objectAppendix != null)
          {
-            YawPitchRoll rotationAppendix = objectInfo.getVirtualBodyYawPitchRoll(objectName);
-            transformObjectToWorld.appendYawRotation(rotationAppendix.getYaw());
-            transformObjectToWorld.appendPitchRotation(rotationAppendix.getPitch());
-            transformObjectToWorld.appendRollRotation(rotationAppendix.getRoll());
-            transformObjectToWorld.appendTranslation(objectInfo.getVirtualBodyTranslation(objectName));
-            objectAppendix.setTransformToParent(transformObjectToWorld);
+            RigidBodyTransform transformAppendixToWorld = new RigidBodyTransform();
+            objectDetector.getObjectAppendixPose().get(transformAppendixToWorld);
+            objectBody.setTransformToParent(transformAppendixToWorld);
+            objectAppendix.setTransformToParent(transformAppendixToWorld);
             objectAppendix.update();
          }
-
+      }
+      else
+      {
+         objectBody = null;
+         objectAppendix = null;
       }
    }
 

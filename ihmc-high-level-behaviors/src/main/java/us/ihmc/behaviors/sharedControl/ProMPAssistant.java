@@ -197,7 +197,7 @@ public class ProMPAssistant
                this.objectFrame = objectFrame;
                lastObservedPose.changeFrame(objectFrame);
             }
-            if (userIsMoving(lastObservedPose, bodyPart)) // check if user has started moving after activating the assistance (pressed the button)
+            if (userIsMoving(lastObservedPose, bodyPart)) // check if user has started moving after activating the assistance (after pressing the button)
             {
                // store observed pose
                bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
@@ -287,7 +287,7 @@ public class ProMPAssistant
                isMoving = distance > 0.04;
             else
                isMoving = distance > isMovingThreshold;
-            LogTools.info("IsMoving {}, distance {}", isMoving, distance);
+            LogTools.info("Is user moving? {}, body part moved by {}[m]", isMoving, distance);
          }
       }
       return isMoving;

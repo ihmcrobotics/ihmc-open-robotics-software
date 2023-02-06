@@ -89,6 +89,11 @@ public class ObjectDetector
       return objectWithArUcoMarker.getObjectPose();
    }
 
+   public FramePose3D getObjectAppendixPose()
+   {
+      return objectWithArUcoMarker.getAppendixPose();
+   }
+
    public ReferenceFrame getObjectFrame()
    {
       return objectWithArUcoMarker.getObjectFrame();

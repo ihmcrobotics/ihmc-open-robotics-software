@@ -21,12 +21,12 @@ public class ObjectInfo
    private final List<Integer> markerIds = new ArrayList<>();
    private final List<String> objectNames = new ArrayList<>();
    private final List<Double> markerSizes = new ArrayList<>();
-   private final List<List<Double>> markerTranslations = new ArrayList<>();
-   private final List<List<Double>> markerRotations = new ArrayList<>();
+   private final List<List<Double>> markerToBodyTranslations = new ArrayList<>();
+   private final List<List<Double>> markerToBodyRotations = new ArrayList<>();
+   private final List<List<Double>> bodyToAppendixTranslations = new ArrayList<>();
+   private final List<List<Double>> bodyToAppendixRotations = new ArrayList<>();
    private final HashMap<String, String> virtualBodyFileName = new HashMap<>();
    private final HashMap<String, String> virtualAppendixFileName = new HashMap<>();
-   private final HashMap<String, List<Double>> virtualBodyTranslations = new HashMap();
-   private final HashMap<String, List<Double>> virtualBodyRotations = new HashMap<>();
 
    public ObjectInfo()
    {
@@ -61,56 +61,52 @@ public class ObjectInfo
                         {
                            switch (propertiesMap.getKey().toString())
                            {
-                              case "markerId" ->
-                              {
-                                 markerIds.add((int) ((long) propertiesMap.getValue()));
-                              }
+                              case "markerId" -> markerIds.add((int) ((long) propertiesMap.getValue()));
                               case "markerSize" -> markerSizes.add((double) propertiesMap.getValue());
-                              case "translationToMarker" ->
+                              case "translationMarkerToMainBody" ->
                               {
                                  JSONArray translationArray = (JSONArray) propertiesMap.getValue();
                                  Iterator translationIterator = translationArray.iterator();
                                  List<Double> translation = new ArrayList<>(3);
                                  while (translationIterator.hasNext())
                                     translation.add((Double) translationIterator.next());
-                                 markerTranslations.add(translation);
+                                 markerToBodyTranslations.add(translation);
                               }
-                              case "yawPitchRollToMarker" ->
+                              case "yawPitchRollMarkerToMainBody" ->
                               {
                                  JSONArray rotationArray = (JSONArray) propertiesMap.getValue();
                                  Iterator rotationIterator = rotationArray.iterator();
                                  List<Double> rotation = new ArrayList<>(3);
                                  while (rotationIterator.hasNext())
                                     rotation.add((Double) rotationIterator.next());
-                                 markerRotations.add(rotation);
+                                 markerToBodyRotations.add(rotation);
                               }
-                              case "virtualBodyFileName" ->
+                              case "translationMainBodyToAppendix" ->
+                              {
+                                 JSONArray translationArray = (JSONArray) propertiesMap.getValue();
+                                 Iterator translationIterator = translationArray.iterator();
+                                 List<Double> translation = new ArrayList<>(3);
+                                 while (translationIterator.hasNext())
+                                    translation.add((Double) translationIterator.next());
+                                 bodyToAppendixTranslations.add(translation);
+                              }
+                              case "yawPitchRollMainBodyToAppendix" ->
+                              {
+                                 JSONArray rotationArray = (JSONArray) propertiesMap.getValue();
+                                 Iterator rotationIterator = rotationArray.iterator();
+                                 List<Double> rotation = new ArrayList<>(3);
+                                 while (rotationIterator.hasNext())
+                                    rotation.add((Double) rotationIterator.next());
+                                 bodyToAppendixRotations.add(rotation);
+                              }
+
+                              case "virtualMainBodyFileName" ->
                               {
                                  // insert in the hashmap the last objectName and the filename
                                  virtualBodyFileName.put(objectNames.get(objectNames.size() - 1), (String) propertiesMap.getValue());
                               }
                               case "virtualAppendixFileName" ->
-                              {
-                                 virtualAppendixFileName.put(objectNames.get(objectNames.size() - 1), (String) propertiesMap.getValue());
-                              }
-                              case "translationBodyToAppendix" ->
-                              {
-                                 JSONArray translationArray = (JSONArray) propertiesMap.getValue();
-                                 Iterator translationIterator = translationArray.iterator();
-                                 List<Double> translation = new ArrayList<>(3);
-                                 while (translationIterator.hasNext())
-                                    translation.add((Double) translationIterator.next());
-                                 virtualBodyTranslations.put(objectNames.get(objectNames.size() - 1), translation);
-                              }
-                              case "yawPitchRollBodyToAppendix" ->
-                              {
-                                 JSONArray rotationArray = (JSONArray) propertiesMap.getValue();
-                                 Iterator rotationIterator = rotationArray.iterator();
-                                 List<Double> rotation = new ArrayList<>(3);
-                                 while (rotationIterator.hasNext())
-                                    rotation.add((Double) rotationIterator.next());
-                                 virtualBodyRotations.put(objectNames.get(objectNames.size() - 1), rotation);
-                              }
+                                    virtualAppendixFileName.put(objectNames.get(objectNames.size() - 1), (String) propertiesMap.getValue());
                               default ->
                               {
                               }
@@ -153,13 +149,25 @@ public class ObjectInfo
    public Point3D getMarkerTranslation(int id)
    {
       int realIndex = markerIds.indexOf(id);
-      return new Point3D(markerTranslations.get(realIndex).get(0), markerTranslations.get(realIndex).get(1), markerTranslations.get(realIndex).get(2));
+      return new Point3D(markerToBodyTranslations.get(realIndex).get(0), markerToBodyTranslations.get(realIndex).get(1), markerToBodyTranslations.get(realIndex).get(2));
    }
 
    public YawPitchRoll getMarkerYawPitchRoll(int id)
    {
       int realIndex = markerIds.indexOf(id);
-      return new YawPitchRoll(markerRotations.get(realIndex).get(0), markerRotations.get(realIndex).get(1), markerRotations.get(realIndex).get(2));
+      return new YawPitchRoll(markerToBodyRotations.get(realIndex).get(0), markerToBodyRotations.get(realIndex).get(1), markerToBodyRotations.get(realIndex).get(2));
+   }
+
+   public Point3D getAppendixTranslation(int id)
+   {
+      int realIndex = markerIds.indexOf(id);
+      return new Point3D(bodyToAppendixTranslations.get(realIndex).get(0), bodyToAppendixTranslations.get(realIndex).get(1), bodyToAppendixTranslations.get(realIndex).get(2));
+   }
+
+   public YawPitchRoll getAppendixYawPitchRoll(int id)
+   {
+      int realIndex = markerIds.indexOf(id);
+      return new YawPitchRoll(bodyToAppendixRotations.get(realIndex).get(0), bodyToAppendixRotations.get(realIndex).get(1), bodyToAppendixRotations.get(realIndex).get(2));
    }
 
    public String getVirtualBodyFileName(String objectName)
@@ -172,22 +180,13 @@ public class ObjectInfo
       return virtualAppendixFileName.get(objectName);
    }
 
+   public boolean hasAppendix(int id)
+   {
+      return virtualAppendixFileName.containsKey(getObjectName(id));
+   }
+
    public boolean hasAppendix(String objectName)
    {
       return virtualAppendixFileName.containsKey(objectName);
-   }
-
-   public Point3D getVirtualBodyTranslation(String objectName)
-   {
-      return new Point3D(virtualBodyTranslations.get(objectName).get(0),
-                         virtualBodyTranslations.get(objectName).get(1),
-                         virtualBodyTranslations.get(objectName).get(2));
-   }
-
-   public YawPitchRoll getVirtualBodyYawPitchRoll(String objectName)
-   {
-      return new YawPitchRoll(virtualBodyRotations.get(objectName).get(0),
-                              virtualBodyRotations.get(objectName).get(1),
-                              virtualBodyRotations.get(objectName).get(2));
    }
 }
