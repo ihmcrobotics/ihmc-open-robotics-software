@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.live.ros1;
 
 import imgui.internal.ImGui;
 import sensor_msgs.Image;
@@ -13,6 +13,7 @@ import us.ihmc.tools.thread.GuidedSwapReference;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
+@Deprecated
 public class RDXROS1RGBA8VideoVisualizer extends RDXVisualizer implements RDXROS1VisualizerInterface
 {
    private AbstractRosTopicSubscriber<Image> subscriber;

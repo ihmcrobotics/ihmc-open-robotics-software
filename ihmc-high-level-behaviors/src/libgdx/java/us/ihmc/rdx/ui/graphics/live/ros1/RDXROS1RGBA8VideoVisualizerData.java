@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.live.ros1;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,6 +13,7 @@ import us.ihmc.utilities.ros.RosTools;
 
 import java.nio.ByteBuffer;
 
+@Deprecated
 public class RDXROS1RGBA8VideoVisualizerData
 {
    private Pixmap pixmap;

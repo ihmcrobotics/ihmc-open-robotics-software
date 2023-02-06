@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.live.ros2;
 
 import perception_msgs.msg.dds.VideoPacket;
 import imgui.internal.ImGui;
@@ -10,6 +10,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
