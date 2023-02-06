@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.affordances;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -43,6 +44,7 @@ public class RDXArmManager
    private volatile boolean readyToCopySolution = false;
 
    private final HandWrenchCalculator handWrenchCalculator;
+   private ImBoolean printWrench = new ImBoolean(false);
 
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -96,6 +98,11 @@ public class RDXArmManager
 
          // wrench expressed in wrist pitch body fixed-frame
          interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getFilteredWrench().get(side));
+         if (printWrench.get())
+         {
+            LogTools.info("Estimated wrench Linear: {}", handWrenchCalculator.getFilteredWrench().get(side).getLinearPart());
+            LogTools.info("Estimated wrench Angular: {}", handWrenchCalculator.getFilteredWrench().get(side).getAngularPart());
+         }
 
          // We only want to evaluate this when we are going to take action on it
          // Otherwise, we will not notice the desired changed while the solver was still solving
@@ -193,6 +200,8 @@ public class RDXArmManager
          armControlModeChanged = true;
          armControlMode = RDXArmControlMode.POSE_CHEST;
       }
+
+      ImGui.checkbox(labels.get("Print hand wrench for debug: "), printWrench);
 
    }
 
