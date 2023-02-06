@@ -1,4 +1,4 @@
-package us.ihmc.tools;
+package us.ihmc.tools.io;
 
 public class WorkingDirectoryPathComponents
 {

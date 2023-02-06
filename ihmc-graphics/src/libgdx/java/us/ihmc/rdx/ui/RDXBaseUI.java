@@ -29,7 +29,7 @@ import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.WorkingDirectoryPathComponents;
+import us.ihmc.tools.io.WorkingDirectoryPathComponents;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;

@@ -2,7 +2,6 @@ package us.ihmc.tools.io;
 
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.WorkingDirectoryPathComponents;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
