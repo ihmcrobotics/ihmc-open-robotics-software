@@ -207,7 +207,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          }
          if (heightMapData != null)
          {
-            //            snapData.getWiggleTransformInWorld().setIdentity();
             snapData.setRMSErrorHeightMap(heightMapSnapper.getNormalizedRMSError());
             snapData.setHeightMapArea(heightMapSnapper.getArea());
          }
