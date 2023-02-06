@@ -26,8 +26,8 @@ public class HeightMapSnapWiggler
    private static final double minSearchRadius = 0.02;
    private static final int searchPoints = 12;
 
-   private final static double wiggleAreaWeight = 2.0;
-   private final static double gradientGain = 0.25;
+   private final static double wiggleAreaWeight = 2.0; // prioritize weighting the area over the RMS value.
+   private final static double gradientGain = 0.5;
    private final static double maxWiggle = 0.03;
    private final static double maxTotalWiggle = 0.07;
    private final static int maxIterations = 5;
