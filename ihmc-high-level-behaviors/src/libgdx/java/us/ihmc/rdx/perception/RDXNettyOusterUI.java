@@ -25,7 +25,7 @@ import java.nio.ByteOrder;
 
 public class RDXNettyOusterUI
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Activator nativesLoadedActivator;
    private NettyOuster ouster;
    private RDXCVImagePanel imagePanel;
