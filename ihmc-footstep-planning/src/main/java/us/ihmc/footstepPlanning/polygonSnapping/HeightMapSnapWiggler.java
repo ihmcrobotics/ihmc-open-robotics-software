@@ -26,12 +26,9 @@ public class HeightMapSnapWiggler
    private static final double minSearchRadius = 0.02;
    private static final int searchPoints = 12;
 
-   private final static double[] blurWeight = new double[] {0.0, 0.0, 7.5, 0.0, 0.0};
-   private final static int[] blurOffsets = new int[] {-2, -1, 0, 1, 2};
-
    private final static double wiggleAreaWeight = 2.0;
-   private final static double gradientGain = 0.5;
-   private final static double maxWiggle = 0.06;
+   private final static double gradientGain = 0.25;
+   private final static double maxWiggle = 0.03;
    private final static double maxTotalWiggle = 0.07;
    private final static int maxIterations = 5;
 
@@ -41,20 +38,18 @@ public class HeightMapSnapWiggler
 
    private final double[] wiggleAreas = new double[searchPoints];
    private final double[] wiggleRMSErrors = new double[searchPoints];
-
-   private final double[] blurredWiggleAreas = new double[searchPoints];
-   private final double[] blurredRMSErrors = new double[searchPoints];
    private final Vector2D[] offsets = new Vector2D[searchPoints];
    private final double[] gradientMagnitudes = new double[searchPoints];
    private final double[] offsetCosts = new double[searchPoints];
 
    public HeightMapSnapWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
-                               WiggleParameters wiggleParameters,
-                               HeightMapPolygonSnapper heightMapSnapper)
+                               WiggleParameters wiggleParameters)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-      this.heightMapSnapper = heightMapSnapper;
+      this.heightMapSnapper = new HeightMapPolygonSnapper();
       this.wiggleParameters = wiggleParameters;
+      // we want to use a finer resolution for this wiggle than the standard search
+      this.heightMapSnapper.setSnapAreaResolution(0.05);
    }
 
    public void computeWiggleTransform(DiscreteFootstep footstepToWiggle, HeightMapData heightMapData, FootstepSnapData snapData, double snapHeightThreshold)
@@ -79,8 +74,6 @@ public class HeightMapSnapWiggler
             wiggleAreas[wiggleIndex] = Double.isNaN(footstepSnapData.getHeightMapArea()) ? 0.0 : Math.min(footstepSnapData.getHeightMapArea() / maxArea, 1.0);
             wiggleRMSErrors[wiggleIndex] = Double.isNaN(footstepSnapData.getRMSErrorHeightMap()) ? 1.0 : footstepSnapData.getRMSErrorHeightMap();
          }
-
-         blurValuesWithNeighbors();
 
          FootstepSnapData currentSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold);
 
@@ -166,31 +159,6 @@ public class HeightMapSnapWiggler
       }
    }
 
-   private void blurValuesWithNeighbors()
-   {
-      double totalWeight = 0.0;
-      for (int offset = 0; offset < blurOffsets.length; offset++)
-      {
-         totalWeight += blurWeight[offset];
-      }
-      for (int index = 0; index < searchPoints; index++)
-      {
-         double blurredArea = 0.0;
-         double blurredRMS = 0.0;
-         for (int offset = 0; offset < blurOffsets.length; offset++)
-         {
-            int offsetIndex = blurOffsets[offset] + index;
-            offsetIndex = moveIndexInRange(offsetIndex, searchPoints);
-
-            blurredArea += blurWeight[offset] * wiggleAreas[offsetIndex];
-            blurredRMS += blurWeight[offset] * wiggleRMSErrors[offsetIndex];
-         }
-
-         blurredWiggleAreas[index] = blurredArea / totalWeight;
-         blurredRMSErrors[index] = blurredRMS / totalWeight;
-      }
-   }
-
    private Vector2D computeWiggleGradient()
    {
       double maxMagnitude = 1e-2; // This is the minimum gradient we care about, if it's less than this, do nothing
@@ -226,7 +194,7 @@ public class HeightMapSnapWiggler
 
       for (int index = 0; index < searchPoints; index++)
       {
-         double offsetCost = computeCost(blurredWiggleAreas[index], blurredRMSErrors[index]);
+         double offsetCost = computeCost(wiggleAreas[index], wiggleRMSErrors[index]);
          double gradientMagnitude = (originCost - offsetCost) / offsets[index].norm();
          gradientMagnitudes[index] = gradientMagnitude;
          offsetCosts[index] = offsetCost;

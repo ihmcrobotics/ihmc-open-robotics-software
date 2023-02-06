@@ -30,7 +30,7 @@ public class HeightMapSnapWigglerTest
       double gridCenterXY = 0.0;
       HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY, gridCenterXY, gridCenterXY);
 
-      for (double x = -0.10; x <= 0.1; x += gridResolution)
+      for (double x = -0.10; x <= 0.15; x += gridResolution)
       {
          for (double y = -0.20; y <= 0.2; y += gridResolution)
          {
@@ -50,7 +50,7 @@ public class HeightMapSnapWigglerTest
 
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(new ConvexPolygon2D(polygonToSnap), new ConvexPolygon2D(polygonToSnap));
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
-      HeightMapSnapWiggler wiggler = new HeightMapSnapWiggler(footPolygons, new WiggleParameters(), snapper);
+      HeightMapSnapWiggler wiggler = new HeightMapSnapWiggler(footPolygons, new WiggleParameters());
 
       FootstepSnapData snapData = new FootstepSnapData();
       DiscreteFootstep footstep = new DiscreteFootstep(0.0, 0.0);
@@ -70,7 +70,7 @@ public class HeightMapSnapWigglerTest
       Assertions.assertFalse(snapData.getWiggleTransformInWorld().hasRotation());
       Assertions.assertTrue(snapData.getWiggleTransformInWorld().hasTranslation());
 
-      Assertions.assertEquals(0.03, snapData.getWiggleTransformInWorld().getTranslation().getX(), 2e-2);
+      Assertions.assertEquals(-footstep.getX(), snapData.getWiggleTransformInWorld().getTranslation().getX(), 2e-2);
       Assertions.assertEquals(0.0, snapData.getWiggleTransformInWorld().getTranslation().getY(), 1e-3);
    }
 }
