@@ -182,17 +182,12 @@ public class DiscreteFootstep
 
    public static int computeHashCode(DiscreteFootstep footstep)
    {
-      return computeHashCode(footstep.robotSide, footstep.getXIndex(), footstep.getXIndex(), footstep.getYawIndex());
-   }
-
-   public static int computeHashCode(RobotSide robotSide, int xIndex, int yIndex, int yawIndex)
-   {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((robotSide == null) ? 0 : robotSide.hashCode());
-      result = prime * result + xIndex;
-      result = prime * result + yIndex;
-      result = prime * result + yawIndex;
+      result = prime * result + ((footstep.robotSide == null) ? 0 : footstep.robotSide.hashCode());
+      result = prime * result + footstep.getLatticePoint().getXIndex();
+      result = prime * result + footstep.getLatticePoint().getYIndex();
+      result = prime * result + footstep.getLatticePoint().getYawIndex();
       return result;
    }
 

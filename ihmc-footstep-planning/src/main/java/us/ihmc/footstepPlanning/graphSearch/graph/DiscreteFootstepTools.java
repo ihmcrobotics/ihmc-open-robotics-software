@@ -45,7 +45,6 @@ public class DiscreteFootstepTools
       stepToWorldTransformToPack.getTranslation().set(x, y, 0.0);
    }
 
-
    /**
     * Computes a step-to-world RigidBodyTransform which transforms from step frame to world frame
     * by applying snapTransform to the given step's transform
