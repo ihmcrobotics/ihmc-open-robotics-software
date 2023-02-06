@@ -19,8 +19,7 @@ import us.ihmc.utilities.ros.publisher.RosTunningParamPublisher;
 public class RDXObstacleDetectionUI
 {
    public static final String APPLICATION_NAME = "Object Detection UI";
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/libgdx/resources",
                                                   APPLICATION_NAME);
    ImFloat tunableParameter1 = new ImFloat(0.1f);

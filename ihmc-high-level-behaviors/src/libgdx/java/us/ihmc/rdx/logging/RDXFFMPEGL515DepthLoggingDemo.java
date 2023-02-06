@@ -24,7 +24,7 @@ import java.nio.ByteOrder;
 public class RDXFFMPEGL515DepthLoggingDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final boolean lossless = false;
    private final int framerate = 15;
    private final int bitrate = 1450000;
