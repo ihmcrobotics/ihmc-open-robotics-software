@@ -211,6 +211,8 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
     */
    public static final BooleanStoredPropertyKey stopForImpassibilities = keys.addBooleanKey("Stop for impassibilities");
 
+   public static final BooleanStoredPropertyKey useReferencePlan = keys.addBooleanKey("Use reference plan");
+
    /**
     * Loads this property set.
     */

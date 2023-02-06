@@ -8,11 +8,13 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -88,6 +90,11 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final Notification planningFailedNotification = new Notification();
    private volatile int numberOfPlannedSteps = 0;
 
+   private ImBooleanWrapper useReferencePlan;
+   private ImDouble ball_x = new ImDouble();
+   private ImDouble ball_y = new ImDouble();
+   private ImDouble ball_yaw = new ImDouble();
+
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
       this.helper = helper;
@@ -156,6 +163,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
                                                                            helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"),
                                                                            SWING_PLANNER_PARAMETERS);
       stopForImpassibilities = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(), LookAndStepBehaviorParameters.stopForImpassibilities);
+
+      useReferencePlan = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(), LookAndStepBehaviorParameters.useReferencePlan);
    }
 
    @Override
@@ -264,6 +273,23 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
 
+      useReferencePlan.accessImBoolean(useReferencePlan ->
+      {
+         if (ImGui.checkbox(labels.get("Use referencePlan"), useReferencePlan))
+         {
+            lookAndStepRemotePropertySet.setPropertyChanged();
+         }
+      });
+
+      ImGuiTools.volatileInputDouble("ball_x", ball_x);
+      ImGuiTools.volatileInputDouble("ball_y", ball_y);
+      ImGuiTools.volatileInputDouble("ball_yaw", ball_yaw);
+
+      if (ImGui.button(labels.get("send ball to (x,y,yaw), z,rpy are zeros")))
+      {
+         sendBallToXYYaw();
+      }
+
 //      footholdVolumePlot.render();
 
 //      ImGui.checkbox("Show graphics", showGraphics);
@@ -308,6 +334,11 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 //      {
 //         ImGui.checkbox("Show tuner", showSwingPlanningParametersTuner);
 //      }
+   }
+
+   private void sendBallToXYYaw()
+   {
+      setGoal(new Pose3D(ball_x.get(), ball_y.get(), 0, ball_yaw.get(), 0, 0));
    }
 
    @Override
