@@ -68,7 +68,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       this.parameters = parameters;
-      this.heightMapSnapWiggler = new HeightMapSnapWiggler(footPolygonsInSoleFrame, wiggleParameters, heightMapSnapper);
+      this.heightMapSnapWiggler = new HeightMapSnapWiggler(footPolygonsInSoleFrame, wiggleParameters);
 
       if (tickAndUpdatable == null)
       {

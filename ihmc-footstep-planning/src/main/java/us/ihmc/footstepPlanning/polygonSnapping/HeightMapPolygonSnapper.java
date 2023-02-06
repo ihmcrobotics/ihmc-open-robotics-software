@@ -29,6 +29,13 @@ public class HeightMapPolygonSnapper
    private double rootMeanSquaredError;
    private double area;
 
+   private double snapAreaResolution = 0.2;
+
+   public void setSnapAreaResolution(double snapAreaResolution)
+   {
+      this.snapAreaResolution = snapAreaResolution;
+   }
+
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap)
    {
       return snapPolygonToHeightMap(polygonToSnap, heightMap, Double.MAX_VALUE, -Double.MAX_VALUE);
@@ -58,15 +65,14 @@ public class HeightMapPolygonSnapper
       Point2DReadOnly corner2 = polygonToSnap.getVertex(2);
       Point2DReadOnly corner3 = polygonToSnap.getVertex(3);
 
-      double resolution = 0.2;
-      for (double edgeAlpha = 0.0; edgeAlpha <= 1.0; edgeAlpha += resolution)
+      for (double edgeAlpha = 0.0; edgeAlpha <= 1.0; edgeAlpha += snapAreaResolution)
       {
          Point2D pointOnEdge1 = new Point2D();
          Point2D pointOnEdge2 = new Point2D();
          pointOnEdge1.interpolate(corner0, corner1, edgeAlpha);
          pointOnEdge2.interpolate(corner3, corner2, edgeAlpha);
 
-         for (double interiorAlpha = 0.0; interiorAlpha <= 1.0; interiorAlpha += resolution)
+         for (double interiorAlpha = 0.0; interiorAlpha <= 1.0; interiorAlpha += snapAreaResolution)
          {
             Point2D point = new Point2D();
             point.interpolate(pointOnEdge1, pointOnEdge2, interiorAlpha);
@@ -105,7 +111,7 @@ public class HeightMapPolygonSnapper
          double predictedHeight = bestFitPlane.getZOnPlane(pointsInsidePolyon.get(i).getX(), pointsInsidePolyon.get(i).getY());
          rootMeanSquaredError += MathTools.square(predictedHeight - pointsInsidePolyon.get(i).getZ());
       }
-      maxPossibleRMSError = MathTools.square(1.0 / resolution) * MathTools.square(0.5 * snapHeightThreshold);
+      maxPossibleRMSError = MathTools.square(1.0 / snapAreaResolution) * MathTools.square(0.5 * snapHeightThreshold);
 
       if (bestFitPlane.containsNaN())
       {
