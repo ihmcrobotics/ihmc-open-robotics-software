@@ -30,8 +30,6 @@ FactorGraphHandler::FactorGraphHandler()
    /* TODO: Create setter for camera params.*/
    // KITTI Left: 718.856, 718.856, 607.193, 185.216
    K = gtsam::Cal3_S2::shared_ptr(new gtsam::Cal3_S2(718.856, 718.856, 0.0, 607.193, 185.216));
-
-
 }
 
 void FactorGraphHandler::createOdometryNoiseModel(gtsam::Vector6 odomVariance)
@@ -154,21 +152,6 @@ void FactorGraphHandler::SLAMTest()
    optimize();
 
    result.print("Result Planes");
-
-//
-//   AddPriorPoseFactor(Eigen::MatrixXd());
-//
-//   currentPoseId = AddOdometryFactor(Eigen::MatrixXd());
-//   SetPoseInitialValue(currentPoseId, Eigen::MatrixXd());
-//
-//   /* Initialize poses and landmarks with map frame values. */
-//   SetOrientedPlaneInitialValue(currentPoseId, gtsam::OrientedPlane3());
-//
-//   optimize();
-//
-//   ClearISAM2();
-
-      /* Load previous and current regions. Separated by SKIP_REGIONS. */
 }
 
 #include <gtsam/geometry/Pose3.h>

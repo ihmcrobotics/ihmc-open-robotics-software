@@ -342,7 +342,7 @@ public class RapidPlanarRegionsExtractor
       {
          for (int column = 0; column < patchImageWidth; column++)
          {
-            int boundaryConnectionsEncodedAsOnes = patchGraph.getCharDirect(row, column);
+            int boundaryConnectionsEncodedAsOnes = patchGraph.getByteAsInteger(row, column);
 
             if (!regionVisitedMatrix.get(row, column) && checkConnectionThreshold(boundaryConnectionsEncodedAsOnes,
                                                                                   parameters.getConnectionThreshold())) // all ones; fully connected
@@ -457,13 +457,13 @@ public class RapidPlanarRegionsExtractor
             {
                // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
 
-               //float vertexX = czImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-               //float vertexY = -cxImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-               //float vertexZ = cyImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               //float vertexX = czImage.getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               //float vertexY = -cxImage.getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               //float vertexZ = cyImage.getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
 
-               float vertexX = currentFeatureGrid.getCxImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-               float vertexY = currentFeatureGrid.getCyImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-               float vertexZ = currentFeatureGrid.getCzImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               float vertexX = currentFeatureGrid.getCxImage().getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               float vertexY = currentFeatureGrid.getCyImage().getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+               float vertexZ = currentFeatureGrid.getCzImage().getFloat((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
 
                Point3D boundaryVertex = planarRegion.getBoundaryVertices().add();
                boundaryVertex.set(vertexX, vertexY, vertexZ);
@@ -599,12 +599,12 @@ public class RapidPlanarRegionsExtractor
          regionVisitedMatrix.set(row, column, true);
          regionMatrix.set(row, column, planarRegionIslandIndex);
 
-         float nx = currentFeatureGrid.getNxImage().getFloatDirect(row, column);
-         float ny = currentFeatureGrid.getNyImage().getFloatDirect(row, column);
-         float nz = currentFeatureGrid.getNzImage().getFloatDirect(row, column);
-         float cx = currentFeatureGrid.getCxImage().getFloatDirect(row, column);
-         float cy = currentFeatureGrid.getCyImage().getFloatDirect(row, column);
-         float cz = currentFeatureGrid.getCzImage().getFloatDirect(row, column);
+         float nx = currentFeatureGrid.getNxImage().getFloat(row, column);
+         float ny = currentFeatureGrid.getNyImage().getFloat(row, column);
+         float nz = currentFeatureGrid.getNzImage().getFloat(row, column);
+         float cx = currentFeatureGrid.getCxImage().getFloat(row, column);
+         float cy = currentFeatureGrid.getCyImage().getFloat(row, column);
+         float cz = currentFeatureGrid.getCzImage().getFloat(row, column);
 
          planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
 
@@ -615,7 +615,7 @@ public class RapidPlanarRegionsExtractor
          {
             if (row + adjacentY[i] < patchImageHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < patchImageWidth - 1 && column + adjacentX[i] > 1)
             {
-               int boundaryConnectionsEncodedAsOnes = patchGraph.getCharDirect((row + adjacentY[i]), (column + adjacentX[i]));
+               int boundaryConnectionsEncodedAsOnes = patchGraph.getByteAsInteger((row + adjacentY[i]), (column + adjacentX[i]));
                if (checkConnectionThreshold(boundaryConnectionsEncodedAsOnes, parameters.getConnectionThreshold())) // all ones; fully connected
                {
                   ++count;
