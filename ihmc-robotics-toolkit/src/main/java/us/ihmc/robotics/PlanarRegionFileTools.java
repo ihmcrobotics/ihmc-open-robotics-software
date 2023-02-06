@@ -670,7 +670,6 @@ public class PlanarRegionFileTools
       HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = new HashMap<>();
       Map<Integer, MutableInt> regionIdToIndex = new HashMap<>();
 
-      fw.write("\n");
 
       for (PlanarRegion region : planarRegionData.getPlanarRegionsAsList())
       {
