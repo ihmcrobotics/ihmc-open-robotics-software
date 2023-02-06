@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
+import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.orientation.Orientation2D;
@@ -22,19 +23,8 @@ import java.util.HashMap;
 
 public class HeightMapSnapWiggler
 {
-   private final HeightMapPolygonSnapper heightMapSnapper;
-   private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-
-   private static final double searchRadius = 0.06;
+   private static final double minSearchRadius = 0.02;
    private static final int searchPoints = 20;
-
-   private final double[] wiggleAreas = new double[searchPoints];
-   private final double[] wiggleRMSErrors = new double[searchPoints];
-
-   private final double[] blurredWiggleAreas = new double[searchPoints];
-   private final double[] blurredRMSErrors = new double[searchPoints];
-   private final Vector2D[] offsets = new Vector2D[searchPoints];
-   private final double[] gradientMagnitudes = new double[searchPoints];
 
    private final static double[] blurWeight = new double[] {0.0, 1.0, 7.5, 1.0, 0.0};
    private final static int[] blurOffsets = new int[] {-2, -1, 0, 1, 2};
@@ -45,10 +35,25 @@ public class HeightMapSnapWiggler
    private final static double maxTotalWiggle = 0.07;
    private final static int maxIterations = 5;
 
-   public HeightMapSnapWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, HeightMapPolygonSnapper heightMapSnapper)
+   private final WiggleParameters wiggleParameters;
+   private final HeightMapPolygonSnapper heightMapSnapper;
+   private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+
+   private final double[] wiggleAreas = new double[searchPoints];
+   private final double[] wiggleRMSErrors = new double[searchPoints];
+
+   private final double[] blurredWiggleAreas = new double[searchPoints];
+   private final double[] blurredRMSErrors = new double[searchPoints];
+   private final Vector2D[] offsets = new Vector2D[searchPoints];
+   private final double[] gradientMagnitudes = new double[searchPoints];
+
+   public HeightMapSnapWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
+                               WiggleParameters wiggleParameters,
+                               HeightMapPolygonSnapper heightMapSnapper)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       this.heightMapSnapper = heightMapSnapper;
+      this.wiggleParameters = wiggleParameters;
    }
 
    public void computeWiggleTransform(DiscreteFootstep footstepToWiggle, HeightMapData heightMapData, FootstepSnapData snapData, double snapHeightThreshold)
@@ -60,7 +65,7 @@ public class HeightMapSnapWiggler
       Point2D currentPosition = new Point2D(footstepToWiggle.getX(), footstepToWiggle.getY());
       Point2D originalPosition = new Point2D(footstepToWiggle.getX(), footstepToWiggle.getY());
 
-      computeWiggleOffsets();
+      computeWiggleOffsets(footstepToWiggle.getYaw());
 
       for (int iteration = 0; iteration < maxIterations; iteration++)
       {
@@ -69,23 +74,17 @@ public class HeightMapSnapWiggler
             Point2D offsetPosition = new Point2D(currentPosition);
             offsetPosition.add(offsets[wiggleIndex]);
 
-            FootstepSnapData footstepSnapData = computeSnapData(offsetPosition,
-                                                                footstepToWiggle.getYaw(),
-                                                                robotSide,
-                                                                heightMapData,
-                                                                snapHeightThreshold);
+            FootstepSnapData footstepSnapData = computeSnapData(offsetPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold);
 
             wiggleAreas[wiggleIndex] = Double.isNaN(footstepSnapData.getHeightMapArea()) ? 0.0 : Math.min(footstepSnapData.getHeightMapArea() / maxArea, 1.0);
-            wiggleRMSErrors[wiggleIndex] = Double.isNaN(footstepSnapData.getRMSErrorHeightMap()) ? maxRMSError : footstepSnapData.getRMSErrorHeightMap() / maxRMSError;
+            wiggleRMSErrors[wiggleIndex] = Double.isNaN(footstepSnapData.getRMSErrorHeightMap()) ?
+                  maxRMSError :
+                  footstepSnapData.getRMSErrorHeightMap() / maxRMSError;
          }
 
          blurValuesWithNeighbors();
 
-         FootstepSnapData currentSnapData = computeSnapData(currentPosition,
-                                                            footstepToWiggle.getYaw(),
-                                                            robotSide,
-                                                            heightMapData,
-                                                            snapHeightThreshold);
+         FootstepSnapData currentSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold);
 
          double normalizedArea = Math.min(currentSnapData.getHeightMapArea() / maxArea, 1.0);
          double normalizedError = currentSnapData.getRMSErrorHeightMap() / maxRMSError;
@@ -111,12 +110,7 @@ public class HeightMapSnapWiggler
          }
       }
 
-      FootstepSnapData wiggledSnapData = computeSnapData(currentPosition,
-                                                         footstepToWiggle.getYaw(),
-                                                         robotSide,
-                                                         heightMapData,
-                                                         snapHeightThreshold);
-
+      FootstepSnapData wiggledSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold);
 
       FramePose3D snappedPose = new FramePose3D();
       snappedPose.getPosition().set(originalPosition);
@@ -136,12 +130,13 @@ public class HeightMapSnapWiggler
       originalFrame.remove();
    }
 
-   private void computeWiggleOffsets()
+   private void computeWiggleOffsets(double stepYaw)
    {
+      double offsetDistance = Math.max(minSearchRadius, Math.abs(wiggleParameters.deltaInside));
       for (int wiggleIndex = 0; wiggleIndex < searchPoints; wiggleIndex++)
       {
-         double yaw = ((double) wiggleIndex / searchPoints) * 2.0 * Math.PI;
-         Vector2D offset = new Vector2D(searchRadius, 0.0);
+         double yaw = stepYaw + ((double) wiggleIndex / searchPoints) * 2.0 * Math.PI;
+         Vector2D offset = new Vector2D(offsetDistance, 0.0);
          new Orientation2D(yaw).transform(offset);
          offsets[wiggleIndex] = offset;
       }
@@ -234,11 +229,11 @@ public class HeightMapSnapWiggler
       for (int index = 0; index < searchPoints; index++)
       {
          double offsetCost = computeCost(blurredWiggleAreas[index], blurredRMSErrors[index]);
-         double gradientMagnitude = (originCost - offsetCost) / searchRadius;
+         double gradientMagnitude = (originCost - offsetCost) / offsets[index].norm();
          gradientMagnitudes[index] = gradientMagnitude;
       }
 
-      // Here, we want to zero out the unstable gradients
+      // Here, we want to zero out the unstable gradients, which are gradients that are pointing in the opposite direction but both negative
       int oppositeOffset = searchPoints / 2;
       for (int index = 0; index < searchPoints; index++)
       {
@@ -251,7 +246,6 @@ public class HeightMapSnapWiggler
          }
       }
    }
-
 
    private static double computeCost(double areaFraction, double rmsError)
    {
