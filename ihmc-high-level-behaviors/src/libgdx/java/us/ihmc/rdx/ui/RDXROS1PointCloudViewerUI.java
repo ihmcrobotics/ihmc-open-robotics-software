@@ -11,8 +11,7 @@ import us.ihmc.utilities.ros.RosTools;
 
 public class RDXROS1PointCloudViewerUI
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/libgdx/resources",
                                                   "ROS 1 Point Cloud Viewer");
 
