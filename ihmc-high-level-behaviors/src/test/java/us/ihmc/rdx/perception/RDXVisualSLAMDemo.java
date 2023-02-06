@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class RDXVisualSLAMDemo
@@ -59,6 +60,8 @@ public class RDXVisualSLAMDemo
    private String fileName = "000000.png";
    private String leftImageName;
    private String rightImageName;
+
+   private ScheduledFuture<?> scheduledFuture = null;
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final ImGuiPanel panel = new ImGuiPanel("Visual SLAM");
@@ -104,15 +107,6 @@ public class RDXVisualSLAMDemo
          public void render()
          {
             baseUI.renderBeforeOnScreenUI();
-
-            //if (active)
-            //{
-            //   //if(updateCount % COUNT_SKIP == 0)
-            //   {
-            //      update();
-            //   }
-            //   updateCount++;
-            //}
 
             if (posesToRenderNotification.poll())
             {
@@ -167,8 +161,12 @@ public class RDXVisualSLAMDemo
 
       if (ImGui.button("Start"))
       {
-         //active = true;
-         executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
+         active = true;
+
+         if(scheduledFuture == null)
+         {
+            scheduledFuture = executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
+         }
       }
 
       if (ImGui.button("Pause"))
@@ -179,25 +177,27 @@ public class RDXVisualSLAMDemo
 
    public void update()
    {
+      if(active)
+      {
+         fileName = String.format("%1$6s", fileIndex).replace(' ', '0') + ".png";
+         leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + fileName;
+         rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + fileName;
 
-      fileName = String.format("%1$6s", fileIndex).replace(' ', '0') + ".png";
-      leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + fileName;
-      rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + fileName;
+         currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
+         currentImageRight = ImageTools.loadAsImageMat(rightImageName);
 
-      currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
-      currentImageRight = ImageTools.loadAsImageMat(rightImageName);
+         initialized = vslam.update(currentImageLeft, currentImageRight);
 
-      initialized = vslam.update(currentImageLeft, currentImageRight);
+         posesToRenderNotification.set(vslam);
 
-      posesToRenderNotification.set(vslam);
+         LogTools.info("Visual SLAM Update Completed");
 
-      LogTools.info("Visual SLAM Update Completed");
+         //renderPoses(fileIndex, initialized);
 
-      //renderPoses(fileIndex, initialized);
+         fileIndex += FRAME_SKIP;
 
-      fileIndex += FRAME_SKIP;
-
-      updateCount++;
+         updateCount++;
+      }
    }
 
    public void getGroundTruthPose()
