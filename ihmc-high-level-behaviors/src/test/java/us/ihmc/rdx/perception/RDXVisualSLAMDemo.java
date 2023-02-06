@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,6 +38,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class RDXVisualSLAMDemo
 {
@@ -70,6 +72,10 @@ public class RDXVisualSLAMDemo
    private ImageMat currentImageRight;
    private ImageMat currentImageLeft;
 
+   private boolean initialized = false;
+
+   private final TypedNotification<VisualSLAMModule> posesToRenderNotification = new TypedNotification<>();
+
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ArrayList<RigidBodyTransform> gtSensorTransforms = new ArrayList<>();
 
@@ -99,13 +105,18 @@ public class RDXVisualSLAMDemo
          {
             baseUI.renderBeforeOnScreenUI();
 
-            if (active)
+            //if (active)
+            //{
+            //   //if(updateCount % COUNT_SKIP == 0)
+            //   {
+            //      update();
+            //   }
+            //   updateCount++;
+            //}
+
+            if (posesToRenderNotification.poll())
             {
-               //if(updateCount % COUNT_SKIP == 0)
-               {
-                  update();
-               }
-               updateCount++;
+               renderPoses(fileIndex, initialized);
             }
 
             baseUI.renderEnd();
@@ -156,8 +167,8 @@ public class RDXVisualSLAMDemo
 
       if (ImGui.button("Start"))
       {
-         active = true;
-         //executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
+         //active = true;
+         executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
       }
 
       if (ImGui.button("Pause"))
@@ -176,35 +187,17 @@ public class RDXVisualSLAMDemo
       currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
       currentImageRight = ImageTools.loadAsImageMat(rightImageName);
 
-      boolean initialized = vslam.update(currentImageLeft, currentImageRight);
+      initialized = vslam.update(currentImageLeft, currentImageRight);
+
+      posesToRenderNotification.set(vslam);
 
       LogTools.info("Visual SLAM Update Completed");
 
-      renderGroundTruthPose(fileIndex);
+      //renderPoses(fileIndex, initialized);
 
       fileIndex += FRAME_SKIP;
 
-      if (initialized)
-      {
-         /* For Visualization Only */
-         poseModels.clear();
-         for (int i = 0; i < fileIndex / FRAME_SKIP; i++)
-         {
-            FramePose3D framePose = vslam.getSensorPose(i);
-            framePose.changeFrame(ReferenceFrame.getWorldFrame());
-
-            ////LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
-            modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.4, Color.CYAN);
-            LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
-            modelInstance.transform.val[Matrix4.M03] *= 0.1;
-            modelInstance.transform.val[Matrix4.M13] *= 0.1;
-            modelInstance.transform.val[Matrix4.M23] *= 0.1;
-            poseModels.add(modelInstance);
-         }
-
-         vslam.clearISAM2();
-      }
-      LogTools.info("Total Model Instances: {}", poseModels.size());
+      updateCount++;
    }
 
    public void getGroundTruthPose()
@@ -236,7 +229,7 @@ public class RDXVisualSLAMDemo
       LogTools.info("Total Ground Truth Transforms Loaded: {}", gtSensorTransforms.size());
    }
 
-   public void renderGroundTruthPose(int index)
+   public void renderPoses(int index, boolean initialized)
    {
       FramePose3D gtFramePose = new FramePose3D();
       gtFramePose.set(gtSensorTransforms.get(index));
@@ -249,6 +242,28 @@ public class RDXVisualSLAMDemo
       gtModelInstance.transform.val[Matrix4.M13] *= 0.1;
       gtModelInstance.transform.val[Matrix4.M23] *= 0.1;
       groundTruthPoseModels.add(gtModelInstance);
+
+      if (initialized)
+      {
+         /* For Visualization Only */
+         poseModels.clear();
+         for (int i = 0; i < fileIndex / FRAME_SKIP; i++)
+         {
+            FramePose3D framePose = vslam.getSensorPose(i);
+            framePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+            ////LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
+            modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.4, Color.CYAN);
+            LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
+            modelInstance.transform.val[Matrix4.M03] *= 0.1;
+            modelInstance.transform.val[Matrix4.M13] *= 0.1;
+            modelInstance.transform.val[Matrix4.M23] *= 0.1;
+            poseModels.add(modelInstance);
+         }
+
+         vslam.clearISAM2();
+      }
+      LogTools.info("Total Model Instances: {}", poseModels.size());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
