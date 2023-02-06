@@ -12,7 +12,7 @@ public class RDXPlanarRegionFilteredMapDemo
 {
    private PlanarRegionMappingManager mapHandler;
    private PlanarRegionFilteredMapUIPanel planarRegionFilteredMapUIPanel;
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
 

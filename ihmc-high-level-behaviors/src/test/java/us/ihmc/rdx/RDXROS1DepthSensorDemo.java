@@ -14,9 +14,7 @@ import us.ihmc.utilities.ros.RosTools;
 
 public class RDXROS1DepthSensorDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  getClass().getSimpleName());
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass().getSimpleName());
    private RDXGlobalVisualizersPanel globalVisualizersUI;
    private RDXHighLevelDepthSensorSimulator l515;
    private final RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo();

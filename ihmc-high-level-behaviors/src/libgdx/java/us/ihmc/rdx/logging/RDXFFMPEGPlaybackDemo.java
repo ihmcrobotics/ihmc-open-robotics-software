@@ -40,7 +40,7 @@ public class RDXFFMPEGPlaybackDemo
                                                                                        RDXFFMPEGPlaybackDemo.class),
                                                                 "example.webm");
 
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXCVImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private FFMPEGVideoPlaybackManager video;

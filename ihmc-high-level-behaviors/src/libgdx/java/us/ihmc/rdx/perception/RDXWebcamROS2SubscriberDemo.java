@@ -32,9 +32,7 @@ import us.ihmc.tools.thread.Throttler;
 public class RDXWebcamROS2SubscriberDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                  "ROS 2 Webcam Subscriber");
+   private final RDXBaseUI baseUI = new RDXBaseUI("ROS 2 Webcam Subscriber");
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
 //   private ImGuiVideoPanel videoPanel;
    private RDXCVImagePanel cvImagePanel;

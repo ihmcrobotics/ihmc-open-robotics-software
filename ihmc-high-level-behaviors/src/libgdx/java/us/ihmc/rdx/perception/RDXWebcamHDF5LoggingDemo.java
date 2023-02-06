@@ -13,9 +13,7 @@ import us.ihmc.tools.thread.Activator;
 public class RDXWebcamHDF5LoggingDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                  "Webcam HDF5 Logging Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Webcam HDF5 Logging Demo");
    private RDXHDF5ImageLoggingUI hdf5ImageLoggingUI;
    private RDXOpenCVWebcamReader webcamReader;
    private volatile boolean running = true;

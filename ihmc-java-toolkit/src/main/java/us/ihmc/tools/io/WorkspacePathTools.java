@@ -6,6 +6,8 @@ import us.ihmc.log.LogTools;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 
 public class WorkspacePathTools
 {
@@ -44,7 +46,7 @@ public class WorkspacePathTools
     */
    public static Path handleWorkingDirectoryFuzziness(String directoryNameToFind)
    {
-      Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
+      Path absoluteWorkingDirectory = getWorkingDirectory();
       Path pathBuiltFromSystemRoot = Paths.get("/").toAbsolutePath().normalize(); // start with system root
 
       boolean directoryFound = false;
@@ -75,5 +77,87 @@ public class WorkspacePathTools
       }
 
       return pathBuiltFromSystemRoot;
+   }
+
+   /**
+    * Get the working directory, absolute and normalized.
+    */
+   public static Path getWorkingDirectory()
+   {
+      return Paths.get(".").toAbsolutePath().normalize();
+   }
+
+   public record InferredPathComponents(String directoryNameToAssumePresent, String subsequentPathToResourceFolder) { }
+
+   public static InferredPathComponents inferWorkingDirectoryPathComponents(Class<?> classForLoading)
+   {
+      InferredPathComponents inferredPathComponents = null;
+      ProtectionDomain protectionDomain;
+      try
+      {
+         protectionDomain = classForLoading.getProtectionDomain();
+         CodeSource codeSource = protectionDomain.getCodeSource();
+         if (codeSource != null && codeSource.getLocation() != null && !codeSource.getLocation().getPath().isEmpty())
+         {
+            Path classDirectory = Paths.get(codeSource.getLocation().getPath());
+            LogTools.debug("Class path: {}", classDirectory);
+            Path workingDirectory = WorkspacePathTools.getWorkingDirectory();
+            LogTools.debug("Working directory: {}", workingDirectory);
+
+            int lastIndexOfSrc = -1;
+            for (int nameElementIndex = 0; nameElementIndex < classDirectory.getNameCount(); nameElementIndex++)
+            {
+               if (classDirectory.getName(nameElementIndex).toString().equals("src"))
+               {
+                  lastIndexOfSrc = nameElementIndex;
+               }
+            }
+
+            if (lastIndexOfSrc >= 0)
+            {
+               // Add 2 to keep 'src' and the source set part after 'src'
+               Path pathBeforeResources = classDirectory.subpath(0, lastIndexOfSrc + 2);
+               LogTools.debug("Path before resources: {}", pathBeforeResources);
+
+               Path pathWithResources = pathBeforeResources.resolve("resources").normalize();
+               LogTools.debug("Path with resources: {}", pathWithResources);
+
+               int indexWhereWorkingDirectoryEnds = -1;
+               for (int nameElementIndex = 0; nameElementIndex < pathWithResources.getNameCount()
+                                              && nameElementIndex < workingDirectory.getNameCount(); nameElementIndex++)
+               {
+                  if (pathWithResources.getName(nameElementIndex).toString().equals(workingDirectory.getName(nameElementIndex).toString()))
+                  {
+                     indexWhereWorkingDirectoryEnds = nameElementIndex + 1;
+                  }
+               }
+
+               if (indexWhereWorkingDirectoryEnds >= 0)
+               {
+                  String directoryNameToAssumePresent = pathWithResources.getName(indexWhereWorkingDirectoryEnds).toString();
+                  String subsequentPathToResourceFolder
+                        = pathWithResources.subpath(indexWhereWorkingDirectoryEnds + 1, pathWithResources.getNameCount()) .toString();
+                  inferredPathComponents = new InferredPathComponents(directoryNameToAssumePresent, subsequentPathToResourceFolder);
+
+                  LogTools.info("Inferred workspace directory components:\n Directory name to assume present: {}\n Subsequent path to resource folder: {}",
+                                directoryNameToAssumePresent, subsequentPathToResourceFolder);
+               }
+            }
+            else
+            {
+               LogTools.warn("No src folder found.");
+            }
+         }
+         else
+         {
+            LogTools.warn("This class is not normally compiled or JAR not normally built.");
+         }
+      }
+      catch (SecurityException securityException) // We never seal JARs or apply security, so this will probably never happen
+      {
+         LogTools.error(securityException.getMessage());
+      }
+
+      return inferredPathComponents;
    }
 }
