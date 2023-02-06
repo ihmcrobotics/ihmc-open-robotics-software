@@ -180,7 +180,7 @@ public class DiscreteFootstep
       return true;
    }
 
-   public static int computeHashCode(DiscreteFootstep footstep)
+   private static int computeHashCode(DiscreteFootstep footstep)
    {
       final int prime = 31;
       int result = 1;
