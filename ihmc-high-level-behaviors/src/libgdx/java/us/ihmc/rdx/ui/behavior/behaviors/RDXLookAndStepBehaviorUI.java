@@ -285,7 +285,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       ImGuiTools.volatileInputDouble("ball_y", ball_y);
       ImGuiTools.volatileInputDouble("ball_yaw", ball_yaw);
 
-      if (ImGui.button(labels.get("send ball to (x,y,yaw), z,rpy are zeros")))
+      if (ImGui.button(labels.get("send ball to (x,y,yaw), z,roll, pitch are zeros")))
       {
          sendBallToXYYaw();
       }

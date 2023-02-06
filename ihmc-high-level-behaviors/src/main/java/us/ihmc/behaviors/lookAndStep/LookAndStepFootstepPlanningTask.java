@@ -448,7 +448,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setMaximumIterations(100);
 
       // TODO: maybe it could be swing + stance transition duration + 10% ?
-      double expirationTime = 2.0;
+      double expirationTime = 4.0;
       // TODO check if looks ok (revised after Duncan review)
       if (lookAndStepParameters.getUseReferencePlan())
       {
@@ -462,6 +462,7 @@ public class LookAndStepFootstepPlanningTask
             {
                previousFootstepPlan.remove(0);
                footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
+               LogTools.warn("using previous plan as reference . . .");
             }
          }
       }
