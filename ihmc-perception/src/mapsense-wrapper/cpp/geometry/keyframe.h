@@ -2,6 +2,7 @@
 
 using KeyPointVec = std::vector<cv::KeyPoint>;
 using Point2fVec = std::vector<cv::Point2f>;
+using Point3fVec = std::vector<cv::Point3f>;
 
 struct Keyframe
 {

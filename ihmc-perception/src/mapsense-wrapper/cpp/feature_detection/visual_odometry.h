@@ -16,15 +16,27 @@ using DMatchVec = std::vector<cv::DMatch>;
 
 class VisualOdometry
 {
+
+
    public:
+      
+      enum State
+      {
+         WARMING_UP,
+         INITIALIZING,
+         TRACKING
+      };
+      
+      
       VisualOdometry(ApplicationState& app);
       
       void PreInitialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, cv::Mat descCurLeft,  DMatchVec& stereoMatches);
-      // cv::Mat Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, DMatchVec& stereoMatches, KeyframeVec& keyframes, PointLandmarkVec& landmarks);
+      cv::Mat Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, DMatchVec& stereoMatches, KeyframeVec& keyframes, PointLandmarkVec& landmarks);
       bool UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage);
       // void UpdateMonocular(const cv::Mat& image);
+      void MatchKeypointsToLandmarks(const KeyPointVec& kpCur, const cv::Mat& descCur, const PointLandmarkVec& landmarks, DMatchVec& matches);
 
-      void InsertLandmarks(const PointLandmarkVec& landmarks);
+      void AppendLandmarks(const PointLandmarkVec& landmarks);
 
       void InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs);
       void InsertKeyframe(Eigen::Matrix4d pose, const cv::Mat& descLeft, const cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight);
@@ -49,9 +61,9 @@ class VisualOdometry
       void TriangulateKeypointsByDisparity(const KeyPointVec& kp, const cv::Mat& disparity, std::vector<Eigen::Vector3f>& points3d);
       void ExtractMatchesAsPoints(const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, const DMatchVec& matches, Point2fVec& pointsTrain, Point2fVec& pointsQuery);
 
-      cv::Mat EstimateMotionPnP(Point2fVec& points2d, const PointLandmarkVec& points3d, cv::Mat& mask, const CameraModel& cam);
+      cv::Mat EstimateMotionPnP(Point2fVec& points2d, const Point3fVec& points3d, cv::Mat& mask, const CameraModel& cam);
       cv::Mat EstimateMotion(Point2fVec& prevFeatures, Point2fVec& curFeatures, cv::Mat& mask, const CameraModel& cam);
-      Eigen::Matrix4f TrackCameraPose(const KeyPointVec& kp, const cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkVec& landmarks);
+      Eigen::Matrix4f TrackCameraPose(const KeyPointVec& kp, cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkVec& landmarks);
       cv::Mat TriangulatePoints(Point2fVec& prevPoints, Point2fVec& curPoints, const CameraModel& cam, cv::Mat relativePose);
       cv::Mat CalculateStereoDepth(cv::Mat left, cv::Mat right);
       
@@ -68,6 +80,8 @@ class VisualOdometry
    private:
       ApplicationState _appState;
       Eigen::Matrix4f _cameraPose;
+
+      State _state = State::WARMING_UP;
 
       bool _preInitialized = false;
       bool _initialized = false;

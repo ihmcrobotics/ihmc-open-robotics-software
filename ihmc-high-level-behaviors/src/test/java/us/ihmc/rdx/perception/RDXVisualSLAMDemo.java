@@ -16,7 +16,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -77,7 +77,7 @@ public class RDXVisualSLAMDemo
 
    private boolean initialized = false;
 
-   private final TypedNotification<VisualSLAMModule> posesToRenderNotification = new TypedNotification<>();
+   private final Notification posesToRenderNotification = new Notification();
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ArrayList<RigidBodyTransform> gtSensorTransforms = new ArrayList<>();
@@ -188,7 +188,7 @@ public class RDXVisualSLAMDemo
 
          initialized = vslam.update(currentImageLeft, currentImageRight);
 
-         posesToRenderNotification.set(vslam);
+         posesToRenderNotification.set();
 
          LogTools.info("Visual SLAM Update Completed");
 
