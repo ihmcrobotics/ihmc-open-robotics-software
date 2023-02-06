@@ -24,13 +24,13 @@ import java.util.HashMap;
 public class HeightMapSnapWiggler
 {
    private static final double minSearchRadius = 0.02;
-   private static final int searchPoints = 20;
+   private static final int searchPoints = 12;
 
-   private final static double[] blurWeight = new double[] {0.0, 1.0, 7.5, 1.0, 0.0};
+   private final static double[] blurWeight = new double[] {0.0, 0.0, 7.5, 0.0, 0.0};
    private final static int[] blurOffsets = new int[] {-2, -1, 0, 1, 2};
 
    private final static double wiggleAreaWeight = 2.0;
-   private final static double gradientGain = 0.75;
+   private final static double gradientGain = 0.5;
    private final static double maxWiggle = 0.06;
    private final static double maxTotalWiggle = 0.07;
    private final static int maxIterations = 5;
@@ -46,6 +46,7 @@ public class HeightMapSnapWiggler
    private final double[] blurredRMSErrors = new double[searchPoints];
    private final Vector2D[] offsets = new Vector2D[searchPoints];
    private final double[] gradientMagnitudes = new double[searchPoints];
+   private final double[] offsetCosts = new double[searchPoints];
 
    public HeightMapSnapWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
                                WiggleParameters wiggleParameters,
@@ -60,7 +61,6 @@ public class HeightMapSnapWiggler
    {
       RobotSide robotSide = footstepToWiggle.getRobotSide();
       double maxArea = footPolygonsInSoleFrame.get(robotSide).getArea();
-      double maxRMSError = MathTools.square((0.5 * snapHeightThreshold) / heightMapData.getGridResolutionXY()) * maxArea;
 
       Point2D currentPosition = new Point2D(footstepToWiggle.getX(), footstepToWiggle.getY());
       Point2D originalPosition = new Point2D(footstepToWiggle.getX(), footstepToWiggle.getY());
@@ -77,9 +77,7 @@ public class HeightMapSnapWiggler
             FootstepSnapData footstepSnapData = computeSnapData(offsetPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold);
 
             wiggleAreas[wiggleIndex] = Double.isNaN(footstepSnapData.getHeightMapArea()) ? 0.0 : Math.min(footstepSnapData.getHeightMapArea() / maxArea, 1.0);
-            wiggleRMSErrors[wiggleIndex] = Double.isNaN(footstepSnapData.getRMSErrorHeightMap()) ?
-                  maxRMSError :
-                  footstepSnapData.getRMSErrorHeightMap() / maxRMSError;
+            wiggleRMSErrors[wiggleIndex] = Double.isNaN(footstepSnapData.getRMSErrorHeightMap()) ? 1.0 : footstepSnapData.getRMSErrorHeightMap();
          }
 
          blurValuesWithNeighbors();
@@ -87,8 +85,7 @@ public class HeightMapSnapWiggler
          FootstepSnapData currentSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, heightMapData, snapHeightThreshold);
 
          double normalizedArea = Math.min(currentSnapData.getHeightMapArea() / maxArea, 1.0);
-         double normalizedError = currentSnapData.getRMSErrorHeightMap() / maxRMSError;
-         computeGradientMagnitudes(normalizedArea, normalizedError);
+         computeGradientMagnitudes(normalizedArea, currentSnapData.getRMSErrorHeightMap());
 
          Vector2D wiggleGradient = computeWiggleGradient();
          if (wiggleGradient.normSquared() < MathTools.square(0.01))
@@ -126,6 +123,7 @@ public class HeightMapSnapWiggler
 
       // TODO need to do a wiggle rotation
       snapData.getWiggleTransformInWorld().getTranslation().set(wiggledPose.getPosition());
+      snapData.getWiggleTransformInWorld().getRotation().setToZero();
 
       originalFrame.remove();
    }
@@ -160,7 +158,7 @@ public class HeightMapSnapWiggler
 
          if (heightMapData != null)
          {
-            snapData.setRMSErrorHeightMap(heightMapSnapper.getRMSError());
+            snapData.setRMSErrorHeightMap(heightMapSnapper.getNormalizedRMSError());
             snapData.setHeightMapArea(heightMapSnapper.getArea());
          }
 
@@ -231,6 +229,7 @@ public class HeightMapSnapWiggler
          double offsetCost = computeCost(blurredWiggleAreas[index], blurredRMSErrors[index]);
          double gradientMagnitude = (originCost - offsetCost) / offsets[index].norm();
          gradientMagnitudes[index] = gradientMagnitude;
+         offsetCosts[index] = offsetCost;
       }
 
       // Here, we want to zero out the unstable gradients, which are gradients that are pointing in the opposite direction but both negative
@@ -240,9 +239,22 @@ public class HeightMapSnapWiggler
          int oppositeIndex = moveIndexInRange(index + oppositeOffset, searchPoints);
          if (gradientMagnitudes[index] < 0.0 && gradientMagnitudes[oppositeIndex] < 0.0)
          {
-            // trying to push away, so let's zero this out if the opposite direction is bad
-            gradientMagnitudes[index] = 0.0;
-            gradientMagnitudes[oppositeIndex] = 0.0;
+            if (gradientMagnitudes[index] < gradientMagnitudes[oppositeIndex] - 1e-3)
+            {
+               gradientMagnitudes[index] -= gradientMagnitudes[oppositeIndex];
+               gradientMagnitudes[oppositeIndex] = 0.0;
+            }
+            else if (gradientMagnitudes[index] > gradientMagnitudes[oppositeIndex] + 1e-3)
+            {
+               gradientMagnitudes[oppositeIndex] -= gradientMagnitudes[index];
+               gradientMagnitudes[index] = 0.0;
+            }
+            else
+            {
+               // trying to push away, so let's zero this out if the opposite direction is bad
+               gradientMagnitudes[index] = 0.0;
+               gradientMagnitudes[oppositeIndex] = 0.0;
+            }
          }
       }
    }
