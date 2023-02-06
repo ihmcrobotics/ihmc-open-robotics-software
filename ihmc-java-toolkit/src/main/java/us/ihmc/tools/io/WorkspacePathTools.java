@@ -2,6 +2,7 @@ package us.ihmc.tools.io;
 
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.WorkingDirectoryPathComponents;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -87,11 +88,16 @@ public class WorkspacePathTools
       return Paths.get(".").toAbsolutePath().normalize();
    }
 
-   public record InferredPathComponents(String directoryNameToAssumePresent, String subsequentPathToResourceFolder) { }
-
-   public static InferredPathComponents inferWorkingDirectoryPathComponents(Class<?> classForLoading)
+   /**
+    * Uses Java's security functionality to find the source code path and
+    * use it, along with the current working directory, to figure out where
+    * the resources directory is, if possible. This method probably works
+    * for most of our use cases, which is just to save configuration files
+    * to version control from applications as we are developing them.
+    */
+   public static WorkingDirectoryPathComponents inferWorkingDirectoryPathComponents(Class<?> classForLoading)
    {
-      InferredPathComponents inferredPathComponents = null;
+      WorkingDirectoryPathComponents inferredPathComponents = null;
       ProtectionDomain protectionDomain;
       try
       {
@@ -137,7 +143,7 @@ public class WorkspacePathTools
                   String directoryNameToAssumePresent = pathWithResources.getName(indexWhereWorkingDirectoryEnds).toString();
                   String subsequentPathToResourceFolder
                         = pathWithResources.subpath(indexWhereWorkingDirectoryEnds + 1, pathWithResources.getNameCount()) .toString();
-                  inferredPathComponents = new InferredPathComponents(directoryNameToAssumePresent, subsequentPathToResourceFolder);
+                  inferredPathComponents = new WorkingDirectoryPathComponents(directoryNameToAssumePresent, subsequentPathToResourceFolder);
 
                   LogTools.info("Inferred workspace directory components:\n Directory name to assume present: {}\n Subsequent path to resource folder: {}",
                                 directoryNameToAssumePresent, subsequentPathToResourceFolder);

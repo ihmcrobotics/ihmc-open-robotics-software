@@ -29,6 +29,7 @@ import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.WorkingDirectoryPathComponents;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
@@ -38,8 +39,6 @@ import us.ihmc.tools.time.FrequencyCalculator;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.CodeSource;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -158,11 +157,11 @@ public class RDXBaseUI
       // Try to figure out where the resources for this class are
       if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
       {
-         WorkspacePathTools.InferredPathComponents inferredPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForLoading);
+         WorkingDirectoryPathComponents inferredPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForLoading);
          if (inferredPathComponents != null)
          {
-            directoryNameToAssumePresent = inferredPathComponents.directoryNameToAssumePresent();
-            subsequentPathToResourceFolder = inferredPathComponents.subsequentPathToResourceFolder();
+            directoryNameToAssumePresent = inferredPathComponents.getDirectoryNameToAssumePresent();
+            subsequentPathToResourceFolder = inferredPathComponents.getSubsequentPathToResourceFolder();
          }
       }
 
