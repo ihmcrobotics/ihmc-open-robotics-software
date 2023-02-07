@@ -45,7 +45,7 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
 
    if(_state == State::INITIALIZING)
    {
-      cv::Mat pose = Initialize(_kpCurLeft, _kpCurRight, _curMatchesStereo, _keyframes, _landmarks);
+      cv::Mat pose = Initialize(_kpCurLeft, _kpCurRight, _curMatchesStereo, _keyframes);
 
       Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigPose(reinterpret_cast<float *>(pose.data));
       Eigen::Matrix4d initialRelativePose = eigPose.cast<double>();
@@ -54,13 +54,6 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       _lastKeyframeImage = leftImage.clone();
 
       _state = State::TRACKING;
-
-      // if (cameraPose.block<3, 1>(0, 3).norm() > 1)
-      // {
-
-      // }
-
-      return false;
    }
    else if(_state == State::TRACKING)
    {
@@ -69,73 +62,21 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
 
       Eigen::Matrix4f trackedPose = TrackCameraPose(_kpCurLeft, _descCurLeft, _keyframes[_keyframes.size() - 1], _landmarks);
 
+      // Keyframe Insertion Check. Triangulate if Keypoint
       if (trackedPose.block<3, 1>(0, 3).norm() > 1)
       {
-         // TriangulateLandmarks(_keyframes, _landmarks);
+         InsertKeyframe();
+
+         TriangulateLandmarks(_keyframes, _landmarks);
       }
-
-      auto lastKeyframe = _keyframes[_keyframes.size() - 1];
-      cv::Mat descPrev = lastKeyframe.descLeft;
-      KeyPointVec& kpPrev = lastKeyframe.keypointsLeft;
-
-      DMatchVec matches;
-      MatchKeypoints(descPrev, _descCurLeft, matches);
-      printf("Total Matches to Keyframe: %ld\n", matches.size());fflush(stdout);
-
-      GridSampleKeypoints(kpPrev, matches);
-      printf("Total Matches After Grid Sampling: %ld\n", matches.size());fflush(stdout);
-
-      FilterMatchesByDistance(matches, kpPrev, _kpCurLeft, 150.0f);
-      printf("Total Matches After Distance Filter: %ld\n", matches.size());fflush(stdout);
-
-      std::vector<int> keypointIDs(_kpCurLeft.size(), -1);
-      TransferKeypointIDs(lastKeyframe.keypointIDs, keypointIDs, matches);
-      printf("Total Keypoints: %ld\n", keypointIDs.size());fflush(stdout);
-
-      Point2fVec pointsTrain;
-      Point2fVec pointsQuery;
-      ExtractMatchesAsPoints(kpPrev, _kpCurLeft, matches, pointsTrain, pointsQuery);
-      printf("Total Motion Correspondences: %ld\n", pointsTrain.size());fflush(stdout);
-
-      cv::Mat mask;
-      cv::Mat pose = EstimateMotion(pointsTrain, pointsQuery, mask, _leftCamera);
-      printf("Total Motion Correspondences (After Mask): %ld\n", pointsTrain.size());fflush(stdout);
-
-      cv::Mat cvPose = pose;
-      Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPoseFloat(reinterpret_cast<float *>(cvPose.data));
-      Eigen::Matrix4d eigenPose = eigenPoseFloat.cast<double>();
-      eigenPose.transposeInPlace();
-
-      Eigen::AngleAxisd rotation(eigenPose.block<3,3>(0,0));
-      // eigenPose.block<3,3>(0,0) = rotation.toRotationMatrix();
-
-      Eigen::Quaterniond quat(rotation);
-      quat.normalize();
-      eigenPose.block<3,3>(0,0) = quat.toRotationMatrix();
-
-      _curPoints3D.clear();
-      TriangulateLandmarksStereoNormal(_kpCurLeft, _kpCurRight, _descCurLeft, _curMatchesStereo, keypointIDs, _curPoints3D);
-      printf("Total Landmarks Triangulated: %ld\n", _curPoints3D.size());fflush(stdout);
-
-      std::cout << "Pose:" << std::endl << eigenPose << std::endl;
-      std::cout << "Determinant: " << eigenPose.determinant() << std::endl;
-
-      _lastKeyframeImage = leftImage.clone();
-      InsertKeyframe(eigenPose, _descCurLeft, _kpCurLeft, keypointIDs);
-      
-      AppendLandmarks(_curPoints3D);
       
       PrintKeyframeIDs();
 
       // Visualization and Logging Only --------------------------------------------
-
       std::cout << "Camera Pose: " << std::endl << pose << std::endl;
-
       cv::Mat outImage;
       OpenCVTools::DrawMatchesDouble(_lastKeyframeImage, kpPrev, leftImage, _kpCurLeft, matches, outImage);
       OpenCVTools::DisplayImage("TestMatchKeypointsMonocular", outImage, 1);
-
-      // Visualization and Logging Only --------------------------------------------
    }
    printf("Total Keyframes: %ld\n", _keyframes.size());fflush(stdout);
 
@@ -258,6 +199,40 @@ void VisualOdometry::GridSampleKeypoints(KeyPointVec& keypoints, DMatchVec& matc
 }
 
 
+void VisualOdometry::TriangulateLandmarks(const Keyframe& kfPrev, const Keyframe& kfCur, PointLandmarkVec& points3D)
+{
+   auto lastKeyframe = _keyframes[_keyframes.size() - 1];
+   cv::Mat descPrev = lastKeyframe.descLeft;
+   KeyPointVec& kpPrev = lastKeyframe.keypointsLeft;
+
+   DMatchVec matches;
+   MatchKeypoints(descPrev, _descCurLeft, matches);
+   printf("Total Matches to Keyframe: %ld\n", matches.size());fflush(stdout);
+
+   GridSampleKeypoints(kpPrev, matches);
+   printf("Total Matches After Grid Sampling: %ld\n", matches.size());fflush(stdout);
+
+   FilterMatchesByDistance(matches, kpPrev, _kpCurLeft, 150.0f);
+   printf("Total Matches After Distance Filter: %ld\n", matches.size());fflush(stdout);
+
+   std::vector<int> keypointIDs(_kpCurLeft.size(), -1);
+   TransferKeypointIDs(lastKeyframe.keypointIDs, keypointIDs, matches);
+   printf("Total Keypoints: %ld\n", keypointIDs.size());fflush(stdout);
+
+   Point2fVec pointsTrain;
+   Point2fVec pointsQuery;
+   ExtractMatchesAsPoints(kpPrev, _kpCurLeft, matches, pointsTrain, pointsQuery);
+   printf("Total Motion Correspondences: %ld\n", pointsTrain.size());fflush(stdout);
+
+   _curPoints3D.clear();
+   TriangulateLandmarksStereoNormal(_kpCurLeft, _kpCurRight, _descCurLeft, _curMatchesStereo, keypointIDs, _curPoints3D);
+   printf("Total Landmarks Triangulated: %ld\n", _curPoints3D.size());fflush(stdout);
+
+   _lastKeyframeImage = leftImage.clone();
+   InsertKeyframe(eigenPose, _descCurLeft, _kpCurLeft, keypointIDs);
+   
+   AppendLandmarks(_curPoints3D);
+}
 
 void VisualOdometry::TriangulateLandmarksStereoNormal(const KeyPointVec& pointsTrain, const KeyPointVec& pointsQuery, 
                                                       const cv::Mat& descTrain, const DMatchVec& matches,
@@ -442,7 +417,7 @@ void VisualOdometry::TriangulateKeypointsByDisparity(const KeyPointVec& kp, cons
    }
 }
 
-cv::Mat VisualOdometry::Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, DMatchVec& stereoMatches, KeyframeVec& keyframes, PointLandmarkVec& landmarks)
+cv::Mat VisualOdometry::Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, DMatchVec& stereoMatches, KeyframeVec& keyframes)
 {
 
       printf("----------------------------------- INITIALIZATION -----------------------------------\n");fflush(stdout);
@@ -516,11 +491,11 @@ void VisualOdometry::PreInitialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRig
 }
 
 
-Eigen::Matrix4f VisualOdometry::TrackCameraPose(const KeyPointVec& kp, cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkVec& landmarks)
+Eigen::Matrix4f VisualOdometry::TrackCameraPose(const KeyPointVec& kp, cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkMap& landmarks)
 {
 
-   printf("TrackCameraPose: (KPs: %ld, KF: %d, Desc:(%d, %d), Landmarks:%ld)\n", kp.size(), lastKF.id, fflush(stdout);
-            desc.rows, desc.cols, landmarks.size());
+   printf("TrackCameraPose: (KPs: %ld, KF: %d, Desc:(%d, %d), Landmarks:%ld)\n", kp.size(), lastKF.id, 
+            desc.rows, desc.cols, landmarks.size()); fflush(stdout);
 
    _leftCamera.SetTransform(lastKF.pose.inverse().cast<float>());
    
@@ -534,12 +509,12 @@ Eigen::Matrix4f VisualOdometry::TrackCameraPose(const KeyPointVec& kp, cv::Mat& 
    {
       Eigen::Vector3f camPoint;
       Eigen::Vector2f imgPoint;
-      bool hasValidZ = _leftCamera.Project(landmark.GetPoint3D(), camPoint, imgPoint);
+      bool hasValidZ = _leftCamera.Project(landmark.second.GetPoint3D(), camPoint, imgPoint);
       
       if(hasValidZ) 
       {
          candidateMapPoints.emplace_back(landmark);
-         candidateDescMat.push_back(landmark._descriptor);
+         candidateDescMat.push_back(landmark.second._descriptor);
       }
    }
 
@@ -614,6 +589,6 @@ void VisualOdometry::AppendLandmarks(const PointLandmarkVec& landmarks)
 {
    for(auto landmark : landmarks)
    {
-      _landmarks.emplace_back(landmark);
+      _landmarks[landmark.GetLandmarkID()] = std::move(landmark);
    }
 }

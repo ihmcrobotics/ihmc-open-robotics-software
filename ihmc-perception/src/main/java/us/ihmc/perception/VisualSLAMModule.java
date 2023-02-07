@@ -29,6 +29,9 @@ public class VisualSLAMModule
    private int frameIndex = 0;
    private boolean initialized = false;
 
+   private double[] landmarkPoints;
+   private int[] idInts;
+   private double[] latestSensorPose = new double[16];
    private HashMap<Integer, Keyframe> keyframes = new HashMap<>();
    private HashMap<Integer, Landmark> landmarks = new HashMap<>();
 
@@ -59,7 +62,8 @@ public class VisualSLAMModule
        *  Compute both relative pose in last key-frame, and 2D-3D keypoint landmark measurements in current camera frame.
       */
       LogTools.info("Update Stereo(Dims: {}, {})", leftImage.getRows(), leftImage.getCols());
-      boolean initialized = visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols());
+      boolean initialized = visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols(),
+                                                                latestSensorPose, idInts, landmarkPoints, idInts.length);
 
       LogTools.info("Extracting Keyframe External");
       double[] relativePoseTransformAsArray = new double[16];
@@ -141,6 +145,10 @@ public class VisualSLAMModule
       if (initialized)
       {
             factorGraphExternal.optimize();
+
+            factorGraphExternal.getPoseById(keyframeID[0], latestSensorPose);
+            getLandmarkPoints(landmarks.keySet());
+
             //factorGraphExternal.optimizeISAM2((byte) 4);
          //factorGraphExternal.optimize();
       }
@@ -178,8 +186,8 @@ public class VisualSLAMModule
    public ArrayList<Point3D> getLandmarkPoints(Set<Integer> ids)
    {
       Integer[] idIntObjects = (Integer[]) ids.toArray();
-      int[] idInts = ArrayUtils.toPrimitive(idIntObjects);
-      double[] landmarkPoints = new double[idInts.length * 3];
+      idInts = ArrayUtils.toPrimitive(idIntObjects);
+      landmarkPoints = new double[idInts.length * 3];
       factorGraphExternal.getResultLandmarks(landmarkPoints, idInts, idInts.length);
 
       ArrayList<Point3D> points = new ArrayList<>();

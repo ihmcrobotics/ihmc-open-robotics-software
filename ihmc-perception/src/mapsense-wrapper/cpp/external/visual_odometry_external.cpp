@@ -60,13 +60,20 @@ void VisualOdometryExternal::displayMat(uint8_t* buffer, int height, int width, 
 //     _visualOdometry->UpdateMonocular(final);
 // }
 
-bool VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width)
+bool VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width, 
+                                            double* latestPose, int* ids, double* latestPoints, int numPoints)
 {
     cv::Mat matLeft(height, width, CV_8UC1, bufferLeft);
     cv::Mat matRight(height, width, CV_8UC1, bufferRight);
 
     // cv::cvtColor(matLeft, matLeft, cv::COLOR_GRAY2BGR);
     // cv::cvtColor(matRight, matRight, cv::COLOR_GRAY2BGR);
+
+    PointLandmarkVec landmarks;
+    for(int i = 0; i<numPoints; i++)
+    {
+        
+    }
 
     bool result =_visualOdometry->UpdateStereo(matLeft, matRight);
     return result;

@@ -11,6 +11,7 @@
 using KeyPointVec = std::vector<cv::KeyPoint>;
 using Point2fVec = std::vector<cv::Point2f>;
 using PointLandmarkVec = std::vector<PointLandmark>;
+using PointLandmarkMap = std::unordered_map<uint32_t, PointLandmark>;
 using KeyframeVec = std::vector<Keyframe>;
 using DMatchVec = std::vector<cv::DMatch>;
 
@@ -31,7 +32,7 @@ class VisualOdometry
       VisualOdometry(ApplicationState& app);
       
       void PreInitialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, cv::Mat descCurLeft,  DMatchVec& stereoMatches);
-      cv::Mat Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, DMatchVec& stereoMatches, KeyframeVec& keyframes, PointLandmarkVec& landmarks);
+      cv::Mat Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, DMatchVec& stereoMatches, KeyframeVec& keyframes);
       bool UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage);
       // void UpdateMonocular(const cv::Mat& image);
       void MatchKeypointsToLandmarks(const KeyPointVec& kpCur, const cv::Mat& descCur, const PointLandmarkVec& landmarks, DMatchVec& matches);
@@ -58,12 +59,15 @@ class VisualOdometry
       void TriangulateLandmarksStereoNormal(const KeyPointVec& pointsTrain, const KeyPointVec& pointsQuery, 
                                           const cv::Mat& descTrain, const DMatchVec& matches,
                                           const std::vector<int>& kpIDs, PointLandmarkVec& points3D);
+
+      void TriangulateLandmarks(const Keyframe& kfPrev, const Keyframe& kfCur, PointLandmarkVec& points3D);
+
       void TriangulateKeypointsByDisparity(const KeyPointVec& kp, const cv::Mat& disparity, std::vector<Eigen::Vector3f>& points3d);
       void ExtractMatchesAsPoints(const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, const DMatchVec& matches, Point2fVec& pointsTrain, Point2fVec& pointsQuery);
 
       cv::Mat EstimateMotionPnP(Point2fVec& points2d, const Point3fVec& points3d, cv::Mat& mask, const CameraModel& cam);
       cv::Mat EstimateMotion(Point2fVec& prevFeatures, Point2fVec& curFeatures, cv::Mat& mask, const CameraModel& cam);
-      Eigen::Matrix4f TrackCameraPose(const KeyPointVec& kp, cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkVec& landmarks);
+      Eigen::Matrix4f TrackCameraPose(const KeyPointVec& kp, cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkMap& landmarks);
       cv::Mat TriangulatePoints(Point2fVec& prevPoints, Point2fVec& curPoints, const CameraModel& cam, cv::Mat relativePose);
       cv::Mat CalculateStereoDepth(cv::Mat left, cv::Mat right);
       
@@ -105,7 +109,7 @@ class VisualOdometry
       cv::Ptr<cv::ORB> _orb;
 
       KeyframeVec _keyframes;
-      PointLandmarkVec _landmarks;
+      PointLandmarkMap _landmarks;
 
       DMatchVec _matchesLeft, _matchesRight, _prevMatchesStereo, _curMatchesStereo;
       KeyPointVec _kpPrevLeft, _kpPrevRight, _kpCurLeft, _kpCurRight;

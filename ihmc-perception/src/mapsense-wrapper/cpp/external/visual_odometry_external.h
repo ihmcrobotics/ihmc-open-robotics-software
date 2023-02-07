@@ -16,7 +16,8 @@ class VisualOdometryExternal
         void displayMat(uint8_t* buffer, int height, int width, int delayMilliSeconds);
         
         // void updateMonocular(uint8_t* buffer, int height, int width);
-        bool updateStereo(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width);
+        bool updateStereo(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width,
+                        double* latestPose, int* ids, double* latestPoints, int numPoints);
         
 
         void getExternalKeyframe(double* odometry, uint32_t* id);
