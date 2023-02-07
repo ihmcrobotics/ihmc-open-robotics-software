@@ -62,10 +62,15 @@ public class RDXOpenCVArUcoMarkerDetectionUI
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImPlotDoublePlotLine restOfStuffPlotLine = new ImPlotDoublePlotLine("Other stuff");
 
+   public RDXOpenCVArUcoMarkerDetectionUI()
+   {
+      this("");
+   }
+
    public RDXOpenCVArUcoMarkerDetectionUI(String namePostfix)
    {
       this.namePostfix = namePostfix;
-      mainPanel = new ImGuiPanel("ArUco Marker Detection " + namePostfix, this::renderImGuiWidgets);
+      mainPanel = new ImGuiPanel("ArUco Marker Detection" + namePostfix, this::renderImGuiWidgets);
    }
 
    public void create(OpenCVArUcoMarkerDetection arUcoMarkerDetection, ArrayList<OpenCVArUcoMarker> markersToTrack, ReferenceFrame cameraFrame)
@@ -76,7 +81,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
 
       imageForDrawing = new BytedecoImage(100, 100, opencv_core.CV_8UC3);
       boolean flipY = false;
-      markerImagePanel = new RDXCVImagePanel("ArUco Marker Detection Image " + namePostfix, 100, 100, flipY);
+      markerImagePanel = new RDXCVImagePanel("ArUco Marker Detection Image" + namePostfix, 100, 100, flipY);
       mainPanel.addChild(markerImagePanel.getVideoPanel());
 
       adaptiveThresholdWindowSizeMin.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMin());

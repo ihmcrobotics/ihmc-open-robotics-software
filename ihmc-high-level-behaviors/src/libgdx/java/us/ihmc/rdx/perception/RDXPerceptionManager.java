@@ -49,7 +49,7 @@ public class RDXPerceptionManager
       arUcoMarkerDetection.create(objectDetectionBlackflySimulator.getSensorFrame());
       arUcoMarkerDetection.setSourceImageForDetection(objectDetectionBlackflySimulator.getLowLevelSimulator().getRGBA8888ColorImage());
       arUcoMarkerDetection.setCameraInstrinsics(objectDetectionBlackflySimulator.getDepthCameraIntrinsics());
-      arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("from Blackfly Right");
+      arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" from Blackfly Right");
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       markersToTrack.add(pullDoorPanel.getArUcoMarker());
       markersToTrack.add(box.getArUcoMarker());
