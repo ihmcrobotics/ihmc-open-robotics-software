@@ -168,7 +168,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
     *
     * @param pelvisPosition
     */
-   public void initialize(FramePoint3D pelvisPosition)
+   public void initialize(FramePoint3DReadOnly pelvisPosition)
    {
       for (SingleFootEstimator footEstimator : footEstimators)
       {
