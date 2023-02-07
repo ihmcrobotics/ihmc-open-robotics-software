@@ -37,7 +37,6 @@ public class PerceptionMessageTools
    public PerceptionMessageTools()
    {
       openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLProgram = openCLManager.loadProgram("PerceptionMessageTools");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
    }

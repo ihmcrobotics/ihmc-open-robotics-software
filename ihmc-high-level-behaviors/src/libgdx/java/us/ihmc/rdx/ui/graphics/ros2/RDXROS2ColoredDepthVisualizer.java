@@ -159,7 +159,6 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
       super.create();
 
       openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLProgram = openCLManager.loadProgram("ColoredPointCloudCreator", "PerceptionCommon.cl");
       createPointCloudKernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
 
