@@ -10,7 +10,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class AffordanceTemplateHandMovement implements AffordanceTemplateAction
+public class AffordanceTemplateHandMovement
 {
    private final ReferenceFrame affordanceFrame;
    private final FramePose3D handPose = new FramePose3D();
