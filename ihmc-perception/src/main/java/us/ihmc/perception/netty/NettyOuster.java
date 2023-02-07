@@ -29,7 +29,10 @@ import java.util.function.Consumer;
  *
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
  * Software User Manual: https://data.ouster.io/downloads/software-user-manual/software-user-manual-v2p0.pdf
- * 
+ *
+ * To connect to the Ouster, type in os-122221003063.local into the browser, finding the serial number
+ * from the Confluence page: https://confluence.ihmc.us/display/PER/In-House+Perception+Sensors+Tracker
+ *
  * To test, use the GNU netcat command:
  * netcat -ul 7502
  *
@@ -163,7 +166,7 @@ public class NettyOuster
       });
 
       // Ouster OS0-128 uses about 1.5 MB for the buffer, so let's set the allocator to 2 MB to leave a little wiggle room
-      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(Conversions.megabytesToBytes(2)));
+      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(Conversions.megabytesToBytes(4)));
    }
 
    private void configureTCP()
