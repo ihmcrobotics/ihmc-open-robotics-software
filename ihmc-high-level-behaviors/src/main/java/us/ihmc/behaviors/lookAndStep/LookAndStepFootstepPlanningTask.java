@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import com.esotericsoftware.minlog.Log;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -450,27 +451,21 @@ public class LookAndStepFootstepPlanningTask
       // TODO: maybe it could be swing + stance transition duration + 10% ?
       double expirationTime = 3.0;
       // TODO check if looks ok (revised after Duncan review)
-      if (lookAndStepParameters.getUseReferencePlan() && successfulPlanExpirationTimer.isRunning(expirationTime))
+      if (lookAndStepParameters.getUseReferencePlan()
+          && successfulPlanExpirationTimer.isRunning(expirationTime)
+          && previousFootstepPlan != null
+          && previousFootstepPlan.getNumberOfSteps() >= 2)
       {
-         if (previousFootstepPlan != null && previousFootstepPlan.getNumberOfSteps() >= 2)
+         if (initialStanceSide == previousFootstepPlan.getFootstep(0).getRobotSide())
          {
-            if (initialStanceSide == previousFootstepPlan.getFootstep(0).getRobotSide())
-            {
-               previousFootstepPlan.remove(0);
-               footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
-               footstepPlanningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceFootstepPlan(previousFootstepPlan);
-               LogTools.warn("USING PREVIOUS PLAN AS REFERENCE . . .");
-//               LogTools.error("Something is wrong in Look and step using reference plan");
-            }
-            else
-            {
-//               previousFootstepPlan.remove(0);
-//               footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
-
-               LogTools.error("Something is wrong in Look and step using reference plan");
-//               LogTools.warn("USING PREVIOUS PLAN AS REFERENCE . . .");
-            }
+            previousFootstepPlan.remove(0);
          }
+         else
+         {
+            LogTools.warn("stance about to be taken has opposite side from previous plan's first step side");
+         }
+         LogTools.warn("SETTING PREVIOUS PLAN AS REFERENCE . . .");
+         footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
       }
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
@@ -498,18 +493,6 @@ public class LookAndStepFootstepPlanningTask
                         footstepPlannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
                         plannerTimeout));
       footstepPlanningDuration.set(footstepPlannerOutput.getPlannerTimings().getTotalElapsedSeconds());
-
-      // TODO check if looks ok
-      if (footstepPlannerOutput.getFootstepPlanningResult().validForExecution())
-      {
-         successfulPlanExpirationTimer.reset();
-         previousFootstepPlan = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
-      }
-      else
-      {
-         LogTools.warn("Previous plan output was not valid to be used as reference for next plan");
-         previousFootstepPlan = null;
-      }
 
       String latestLogDirectory = FootstepPlannerLogger.generateALogFolderName();
       statusLogger.info("Footstep planner log folder: {}", latestLogDirectory);
@@ -546,6 +529,7 @@ public class LookAndStepFootstepPlanningTask
          uiPublisher.publishToUI(FootstepPlannerRejectionReasons, rejectionReasonsMessage);
          uiPublisher.publishToUI(PlanningFailed, true);
 
+         previousFootstepPlan = null;
          doFailureAction("Footstep planning failure. Aborting task...");
       }
       else
@@ -566,6 +550,9 @@ public class LookAndStepFootstepPlanningTask
 
             startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
          }
+
+         successfulPlanExpirationTimer.reset();
+         previousFootstepPlan = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
 
 //         if (!checkToMakeSurePlanIsStillReachable(fullPlan, startFootPoses))
 //         {

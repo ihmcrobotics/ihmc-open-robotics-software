@@ -15,7 +15,7 @@ public class HumanoidKinematicsSimulationParameters
    private double playbackSpeedMultiplier = 10.0;
    private double dt = UnitConversions.hertzToSeconds(70);
    private boolean runNoFasterThanMaxRealtimeRate = true;
-   private double maxRealtimeRate = 1.0;
+   private double maxRealtimeRate = 3.0;
 
    public double getInitialGroundHeight()
    {
