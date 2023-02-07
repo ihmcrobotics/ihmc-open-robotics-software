@@ -152,7 +152,9 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
 
    public void update(FrameTuple3DReadOnly rawPosition, FrameTuple3DReadOnly rawRate)
    {
-      checkReferenceFrameMatch(rawPosition, rawRate);
+      if (rawPosition != null)
+         checkReferenceFrameMatch(rawPosition);
+      checkReferenceFrameMatch(rawRate);
       update((Tuple3DReadOnly) rawPosition, (Tuple3DReadOnly) rawRate);
    }
 
@@ -160,8 +162,11 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
    {
       if (!hasBeenCalled.getBooleanValue())
       {
-         hasBeenCalled.set(true);
-         set(rawPosition);
+         if (rawPosition != null)
+         {
+            hasBeenCalled.set(true);
+            set(rawPosition);
+         }
          estimatedRate.set(rawRate);
          error.setToZero();
          estimatedRateBias.setToZero();
@@ -175,9 +180,16 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
       xd_filt.add(rawRate, intermediateBias); // = xd_filt_new
       xd_filt.interpolate(estimatedRate, 0.5); // = 0.5 * (xd_filt_new + xd_filt_old)
       x_pred.scaleAdd(dt, xd_filt, x_filt);
-      error.sub(rawPosition, x_pred);
-      x_filt.scaleAdd(kp.getValue(), error, x_pred);
-      intermediateBias.scaleAdd(ki.getValue(), error, intermediateBias);
+      if (rawPosition != null)
+      {
+         error.sub(rawPosition, x_pred);
+         x_filt.scaleAdd(kp.getValue(), error, x_pred);
+         intermediateBias.scaleAdd(ki.getValue(), error, intermediateBias);
+      }
+      else
+      { // No position update, using the prediction
+         x_filt.set(x_pred);
+      }
       estimatedRate.add(rawRate, intermediateBias);
       estimatedRateBias.setMatchingFrame(intermediateBias);
    }
