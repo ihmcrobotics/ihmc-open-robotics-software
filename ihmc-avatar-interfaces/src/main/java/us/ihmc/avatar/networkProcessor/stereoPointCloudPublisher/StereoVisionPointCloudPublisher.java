@@ -32,6 +32,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -82,7 +83,15 @@ public class StereoVisionPointCloudPublisher
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
-      this(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), ros2Node, topic);
+      this(modelFactory, ros2Node, topic, ROS2QosProfile.DEFAULT());
+   }
+
+   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory,
+                                          ROS2NodeInterface ros2Node,
+                                          ROS2Topic<StereoVisionPointCloudMessage> topic,
+                                          ROS2QosProfile qosProfile)
+   {
+      this(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), ros2Node, topic, qosProfile);
    }
 
    public StereoVisionPointCloudPublisher(String robotName,
@@ -90,29 +99,23 @@ public class StereoVisionPointCloudPublisher
                                           ROS2NodeInterface ros2Node,
                                           ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
-      this.robotName = robotName;
-      this.fullRobotModel = fullRobotModel;
-
-         ROS2Tools.createCallbackSubscription(ros2Node,
-                                              ROS2Tools.getRobotConfigurationDataTopic(robotName),
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
-      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, topic)::publish;
+      this(robotName, fullRobotModel, ros2Node, topic, ROS2QosProfile.DEFAULT());
    }
 
    public StereoVisionPointCloudPublisher(String robotName,
                                           FullRobotModel fullRobotModel,
-                                          RealtimeROS2Node realtimeROS2Node,
-                                          ROS2Topic<StereoVisionPointCloudMessage> topic)
+                                          ROS2NodeInterface ros2Node,
+                                          ROS2Topic<StereoVisionPointCloudMessage> topic,
+                                          ROS2QosProfile qosProfile)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node,
+      ROS2Tools.createCallbackSubscription(ros2Node,
                                            ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
-      pointcloudPublisher = ROS2Tools.createPublisher(realtimeROS2Node, topic)::publish;
+      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, topic, qosProfile)::publish;
    }
 
    public void setMaximumNumberOfPoints(int maximumNumberOfPoints)
