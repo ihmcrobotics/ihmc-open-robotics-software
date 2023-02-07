@@ -47,11 +47,13 @@ public class RDXROS2VideoSensorDemo
 
             PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
             globalVisualizersPanel = new RDXGlobalVisualizersPanel(false);
+
             RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
                                                                                       pubSubImplementation,
-                                                                                      ROS2Tools.BIG_VIDEO,
-                                                                                      true);
+                                                                                      ROS2Tools.BIG_VIDEO);
+            videoVisualizer.setSubscribed(true);
             globalVisualizersPanel.addVisualizer(videoVisualizer);
+
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
 

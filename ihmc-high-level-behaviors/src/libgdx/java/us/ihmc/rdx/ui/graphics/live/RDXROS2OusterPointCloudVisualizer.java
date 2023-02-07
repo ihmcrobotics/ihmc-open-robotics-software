@@ -60,15 +60,12 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private int depthWidth;
    private int depthHeight;
 
-   public RDXROS2OusterPointCloudVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic, boolean subscribe)
+   public RDXROS2OusterPointCloudVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
    {
       super(title + " (ROS 2)");
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
-
-      if (subscribe)
-         subscribe();
    }
 
    private void subscribe()
