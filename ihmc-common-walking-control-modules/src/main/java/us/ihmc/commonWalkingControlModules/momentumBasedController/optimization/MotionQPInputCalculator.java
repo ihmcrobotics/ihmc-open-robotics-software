@@ -799,8 +799,32 @@ public class MotionQPInputCalculator
       return true;
    }
 
+   private final QPInputTypeB tempBInput = new QPInputTypeB(6);
    /**
-    * Converts a {@link LinearMomentumRateCostCommand} into a {@link QPInputTypeB}.
+    * Converts a {@link LinearMomentumRateCostCommand} into a {@link NativeQPInputTypeB}.
+    *
+    * @return true if the command was successfully converted.
+    */
+   public boolean convertLinearMomentumRateCostCommand(LinearMomentumRateCostCommand commandToConvert, NativeQPInputTypeB qpInputToPack)
+   {
+      if (convertLinearMomentumRateCostCommand(commandToConvert, tempBInput))
+      {
+         qpInputToPack.getTaskWeightMatrix().set(tempBInput.getTaskWeightMatrix());
+         qpInputToPack.getDirectCostHessian().set(tempBInput.getDirectCostHessian());
+         qpInputToPack.getDirectCostGradient().set(tempBInput.getDirectCostGradient());
+         qpInputToPack.getTaskJacobian().set(tempBInput.getTaskJacobian());
+         qpInputToPack.getTaskConvectiveTerm().set(tempBInput.getTaskConvectiveTerm());
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   /**
+    * Converts a {@link LinearMomentumRateCostCommand} into a {@link NativeQPInputTypeB}.
     *
     * @return true if the command was successfully converted.
     */

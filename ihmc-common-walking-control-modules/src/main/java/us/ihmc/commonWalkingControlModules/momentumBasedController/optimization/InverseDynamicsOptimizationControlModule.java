@@ -65,7 +65,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    private final BasisVectorVisualizer basisVectorVisualizer;
    private final InverseDynamicsQPSolver qpSolver;
-   private final QPInputTypeB directMotionQPInput;
+   private final NativeQPInputTypeB directMotionQPInput;
    private final NativeQPInputTypeA motionQPInput;
    private final NativeQPInputTypeA rhoQPInput;
    private final NativeQPVariableSubstitution motionQPVariableSubstitution;
@@ -139,7 +139,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          basisVectorVisualizer = null;
 
       motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
-      directMotionQPInput = new QPInputTypeB(numberOfDoFs);
+      directMotionQPInput = new NativeQPInputTypeB(numberOfDoFs);
       rhoQPInput = new NativeQPInputTypeA(rhoSize);
       motionQPVariableSubstitution = new NativeQPVariableSubstitution();
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
