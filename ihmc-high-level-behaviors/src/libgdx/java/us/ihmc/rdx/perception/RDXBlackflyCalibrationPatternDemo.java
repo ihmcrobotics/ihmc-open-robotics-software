@@ -16,8 +16,7 @@ public class RDXBlackflyCalibrationPatternDemo
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
 
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/libgdx/resources",
                                                   "Blackfly Calibration Pattern Demo");
    private RDXBlackflyReader blackflyReader;

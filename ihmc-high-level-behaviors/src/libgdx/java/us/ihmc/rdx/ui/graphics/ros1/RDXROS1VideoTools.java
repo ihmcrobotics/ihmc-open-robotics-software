@@ -1,5 +1,6 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.ros1;
 
+@Deprecated
 public class RDXROS1VideoTools
 {
 //   private void decodeUsingOpenCV(Image image)

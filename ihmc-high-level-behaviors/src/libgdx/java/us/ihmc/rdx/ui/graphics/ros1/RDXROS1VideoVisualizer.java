@@ -1,16 +1,18 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.ros1;
 
 import imgui.internal.ImGui;
 import org.bytedeco.opencv.global.opencv_core;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXROS1VisualizerInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
+@Deprecated
 public class RDXROS1VideoVisualizer extends RDXOpenCVVideoVisualizer implements RDXROS1VisualizerInterface
 {
    private final boolean isCompressed;

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -26,6 +26,8 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
+import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
@@ -59,7 +61,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private final SampleInfo depthSampleInfo = new SampleInfo();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(true);
+   private final ImBoolean subscribed = new ImBoolean(false);
    private final String titleBeforeAdditions;
    private final PubSubImplementation pubSubImplementation;
    private RealtimeROS2Node realtimeROS2Node;
@@ -119,8 +121,6 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
       this.pubSubImplementation = pubSubImplementation;
       this.depthTopic = depthTopic;
       this.colorTopic = colorTopic;
-
-      setSubscribed(subscribed.get());
    }
 
    private void subscribe()
