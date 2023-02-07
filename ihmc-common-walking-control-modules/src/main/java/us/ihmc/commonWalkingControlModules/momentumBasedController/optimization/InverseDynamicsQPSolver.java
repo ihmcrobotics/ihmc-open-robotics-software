@@ -44,18 +44,12 @@ public class InverseDynamicsQPSolver
    private final NativeMatrix solver_H_previous;
    private final NativeMatrix solver_f_previous;
 
-   private final NativeMatrix nativeSolverInput_Aeq;
-   private final NativeMatrix nativeSolverInput_beq;
+   private final NativeMatrix solver_Aeq;
+   private final NativeMatrix solver_beq;
    private final NativeMatrix solver_Ain;
    private final NativeMatrix solver_bin;
    private final NativeMatrix temp_A;
    private final NativeMatrix temp_b;
-
-   private final DMatrixRMaj solverInput_Aeq;
-   private final DMatrixRMaj solverInput_beq;
-
-   private final NativeMatrix finalSolverInput_Aeq;
-   private final NativeMatrix finalSolverInput_beq;
 
    private final NativeMatrix solver_lb;
    private final NativeMatrix solver_ub;
@@ -82,7 +76,6 @@ public class InverseDynamicsQPSolver
    private final YoDouble jointTorqueWeight = new YoDouble("jointTorqueWeight", registry);
    private final NativeMatrix regularizationMatrix;
 
-   private final DMatrixRMaj tempJtW;
    private final NativeMatrix nativeTempJtW = new NativeMatrix(0, 0);
 
    private final int numberOfDoFs;
@@ -121,18 +114,16 @@ public class InverseDynamicsQPSolver
       solver_H_previous = new NativeMatrix(problemSize, problemSize);
       solver_f_previous = new NativeMatrix(problemSize, 1);
 
-      nativeSolverInput_Aeq = new NativeMatrix(problemSize, problemSize);
-      nativeSolverInput_beq = new NativeMatrix(problemSize, 1);
+      solver_Aeq = qpSolver.getAeqUnsafe();
+      solver_beq = qpSolver.getBeqUnsafe();
+      solver_Aeq.reshape(problemSize, problemSize);
+      solver_beq.reshape(problemSize, 1);
       solver_Ain = qpSolver.getAinUnsafe();
       solver_bin = qpSolver.getAinUnsafe();
       solver_Ain.reshape(problemSize, problemSize);
       solver_bin.reshape(problemSize, 1);
-      finalSolverInput_Aeq = qpSolver.getAeqUnsafe();
-      finalSolverInput_beq = qpSolver.getBeqUnsafe();
       temp_A = new NativeMatrix(problemSize, problemSize);
       temp_b = new NativeMatrix(problemSize, 1);
-      solverInput_Aeq = new DMatrixRMaj(0, problemSize);
-      solverInput_beq = new DMatrixRMaj(0, 1);
 
       solver_lb = qpSolver.getLowerBoundsUnsafe();
       solver_ub = qpSolver.getUpperBoundsUnsafe();
@@ -151,8 +142,6 @@ public class InverseDynamicsQPSolver
       solverOutput = new NativeMatrix(problemSize, 1);
       solverOutput_jointAccelerations = new NativeMatrix(numberOfDoFs, 1);
       solverOutput_rhos = new NativeMatrix(rhoSize, 1);
-
-      tempJtW = new DMatrixRMaj(problemSize, problemSize);
 
       jointAccelerationRegularization.set(0.005);
       jointJerkRegularization.set(0.1);
@@ -237,10 +226,8 @@ public class InverseDynamicsQPSolver
       solver_H.zero();
       solver_f.zero();
 
-      nativeSolverInput_Aeq.reshape(0, problemSize);
-      nativeSolverInput_beq.reshape(0, 1);
-      solverInput_Aeq.reshape(0, problemSize);
-      solverInput_beq.reshape(0, 1);
+      solver_Aeq.reshape(0, problemSize);
+      solver_beq.reshape(0, 1);
 
       solver_Ain.reshape(0, problemSize);
       solver_bin.reshape(0, 1);
@@ -489,8 +476,6 @@ public class InverseDynamicsQPSolver
          throw new RuntimeException("This task does not fit.");
       }
 
-      tempJtW.reshape(variables, taskSize);
-
       // J^T Q
       nativeTempJtW.multTransA(taskJacobian, taskWeight);
 
@@ -560,19 +545,18 @@ public class InverseDynamicsQPSolver
          throw new RuntimeException("This task does not fit.");
       }
 
-      int previousSize = nativeSolverInput_beq.getNumRows();
+      int previousSize = solver_beq.getNumRows();
 
-      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      temp_A.set(nativeSolverInput_Aeq);
-      temp_b.set(nativeSolverInput_beq);
-      nativeSolverInput_Aeq.reshape(previousSize + taskSize, problemSize);
-      nativeSolverInput_beq.reshape(previousSize + taskSize, 1);
+      temp_A.set(solver_Aeq);
+      temp_b.set(solver_beq);
+      solver_Aeq.reshape(previousSize + taskSize, problemSize);
+      solver_beq.reshape(previousSize + taskSize, 1);
 
-      nativeSolverInput_Aeq.insert(temp_A, 0, 0);
-      nativeSolverInput_Aeq.insert(taskJacobian, previousSize, offset);
-      nativeSolverInput_Aeq.zeroBlock(previousSize, previousSize + taskSize, 0, offset);
-      nativeSolverInput_beq.insert(temp_b, 0, 0);
-      nativeSolverInput_beq.insert(taskObjective, previousSize, 0);
+      solver_Aeq.insert(temp_A, 0, 0);
+      solver_Aeq.insert(taskJacobian, previousSize, offset);
+      solver_Aeq.zeroBlock(previousSize, previousSize + taskSize, 0, offset);
+      solver_beq.insert(temp_b, 0, 0);
+      solver_beq.insert(taskObjective, previousSize, 0);
    }
 
    public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective)
@@ -641,9 +625,6 @@ public class InverseDynamicsQPSolver
    {
       int taskSize = torqueObjective.getNumRows();
 
-      tempJtW.reshape(taskSize, problemSize);
-      CommonOps_DDRM.insert(torqueQddotJacobian, tempJtW, 0, 0);
-      CommonOps_DDRM.insert(torqueRhoJacobian, tempJtW, 0, numberOfDoFs);
       nativeTempJtW.reshape(taskSize, problemSize);
       nativeTempJtW.insert(torqueQddotJacobian, 0, 0);
       nativeTempJtW.insert(torqueRhoJacobian, 0, numberOfDoFs);
@@ -709,16 +690,19 @@ public class InverseDynamicsQPSolver
       else
       {
          int constraintSize = Wrench.SIZE;
-         int previousSize = solverInput_beq.getNumRows();
+         int previousSize = solver_beq.getNumRows();
 
-         // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-         solverInput_Aeq.reshape(previousSize + constraintSize, problemSize, true);
-         solverInput_beq.reshape(previousSize + constraintSize, 1, true);
+         temp_A.set(solver_Aeq);
+         temp_b.set(solver_beq);
+         solver_Aeq.reshape(previousSize + constraintSize, problemSize);
+         solver_beq.reshape(previousSize + constraintSize, 1);
 
-         MatrixTools.setMatrixBlock(solverInput_Aeq, previousSize, 0, centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, -1.0);
-         CommonOps_DDRM.insert(rhoJacobian, solverInput_Aeq, previousSize, numberOfDoFs);
+         solver_Aeq.insert(temp_A, 0, 0);
+         solver_Aeq.insertScaled(centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, previousSize, 0, -1.0);
+         solver_Aeq.insert(rhoJacobian, previousSize, numberOfDoFs);
 
-         CommonOps_DDRM.insert(tempWrenchConstraint_RHS, solverInput_beq, previousSize, 0);
+         solver_beq.insert(temp_b, 0, 0);
+         solver_beq.insert(tempWrenchConstraint_RHS, previousSize, 0);
       }
 
       hasWrenchesEquilibriumConstraintBeenSetup = true;
@@ -741,9 +725,9 @@ public class InverseDynamicsQPSolver
 
       addRegularization();
 
-      numberOfEqualityConstraints.set(solverInput_Aeq.getNumRows());
+      numberOfEqualityConstraints.set(solver_Aeq.getNumRows());
       numberOfInequalityConstraints.set(solver_Ain.getNumRows());
-      numberOfConstraints.set(solverInput_Aeq.getNumRows() + numberOfInequalityConstraints.getIntegerValue());
+      numberOfConstraints.set(numberOfEqualityConstraints.getIntegerValue() + numberOfInequalityConstraints.getIntegerValue());
 
       qpSolverTimer.startMeasurement();
 
@@ -753,21 +737,6 @@ public class InverseDynamicsQPSolver
       qpSolver.setMaxNumberOfIterations(maxNumberOfIterations);
       if (useWarmStart && pollResetActiveSet())
          qpSolver.resetActiveSet();
-
-      if (solverInput_Aeq.getNumRows() > 0)
-      {
-         finalSolverInput_Aeq.reshape(solverInput_Aeq.getNumRows() + nativeSolverInput_Aeq.getNumRows(), problemSize);
-         finalSolverInput_beq.reshape(solverInput_beq.getNumRows() + nativeSolverInput_beq.getNumRows(), 1);
-         finalSolverInput_Aeq.insert(solverInput_Aeq, 0, 0);
-         finalSolverInput_Aeq.insert(nativeSolverInput_Aeq, solverInput_Aeq.getNumRows(), 0);
-         finalSolverInput_beq.insert(solverInput_beq, 0, 0);
-         finalSolverInput_beq.insert(nativeSolverInput_beq, solverInput_beq.getNumRows(), 0);
-      }
-      else
-      {
-         finalSolverInput_Aeq.set(nativeSolverInput_Aeq);
-         finalSolverInput_beq.set(nativeSolverInput_beq);
-      }
 
       TIntArrayList inactiveIndices = applySubstitution(); // This needs to be done right before configuring the QP and solving.
 
@@ -829,7 +798,7 @@ public class InverseDynamicsQPSolver
          return null;
 
       accelerationVariablesSubstitution.applySubstitutionToObjectiveFunction(solver_H, solver_f);
-      accelerationVariablesSubstitution.applySubstitutionToLinearConstraint(finalSolverInput_Aeq, finalSolverInput_beq);
+      accelerationVariablesSubstitution.applySubstitutionToLinearConstraint(solver_Aeq, solver_beq);
       accelerationVariablesSubstitution.applySubstitutionToLinearConstraint(solver_Ain, solver_bin);
       accelerationVariablesSubstitution.applySubstitutionToBounds(solver_lb, solver_ub, solver_Ain, solver_bin);
       return accelerationVariablesSubstitution.getInactiveIndices();
