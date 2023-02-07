@@ -5,7 +5,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithInactiveVariablesInterface;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -24,7 +23,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class InverseDynamicsQPSolver
 {
-   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = false;
+   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -660,7 +659,7 @@ public class InverseDynamicsQPSolver
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
          tempWrenchConstraint_J.reshape(Wrench.SIZE, problemSize);
-         MatrixTools.setMatrixBlock(tempWrenchConstraint_J, 0, 0, centroidalMomentumMatrix, 0, 0, Wrench.SIZE, numberOfDoFs, -1.0);
+         tempWrenchConstraint_J.insertScaled(centroidalMomentumMatrix, 0, Wrench.SIZE, 0, numberOfDoFs, 0, 0, -1.0);
          tempWrenchConstraint_J.insert(rhoJacobian, 0, numberOfDoFs);
 
          nativeTempWrenchConstraint_RHS.set(tempWrenchConstraint_RHS);
@@ -676,7 +675,7 @@ public class InverseDynamicsQPSolver
 
          solver_Aeq.growRows(constraintSize);
 
-         MatrixTools.setMatrixBlock(solver_Aeq, previousSize, 0, centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, -1.0);
+         solver_Aeq.insertScaled(centroidalMomentumMatrix, 0, constraintSize, 0, numberOfDoFs, previousSize, 0, -1.0);
          solver_Aeq.insert(rhoJacobian, previousSize, numberOfDoFs);
 
          solver_beq.growRows(constraintSize);
