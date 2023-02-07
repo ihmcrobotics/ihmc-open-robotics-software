@@ -98,7 +98,6 @@ public class RDXNettyOusterUI
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   openCLManager = new OpenCLManager();
-                  openCLManager.create();
                }
 
                if (openCLManager != null && ouster.isInitialized())
