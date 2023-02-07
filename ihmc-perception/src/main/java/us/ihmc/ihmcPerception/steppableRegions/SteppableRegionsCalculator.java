@@ -93,6 +93,8 @@ public class SteppableRegionsCalculator
                                                               HeightMapData heightMapData)
    {
       List<Point3D> outerRing = getOuterRingPoints(regionDataHolder, heightMapData, 0.75);
+      if (outerRing == null)
+         return new ArrayList<>();
       Point3DReadOnly centroid = regionDataHolder.getCentroidInWorld();
       Vector3DReadOnly normal = regionDataHolder.getNormalInWorld();
       AxisAngle orientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normal);
@@ -120,6 +122,9 @@ public class SteppableRegionsCalculator
 
    private static List<Point3D> getOuterRingPoints(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData, double inflationFraction)
    {
+      if (regionDataHolder.getBorderRings().size() == 0)
+         return null;
+
       List<List<SteppableCell>> ringList = new ArrayList<>(regionDataHolder.getBorderRings());
       ringList.sort(Comparator.comparingInt(List::size));
 

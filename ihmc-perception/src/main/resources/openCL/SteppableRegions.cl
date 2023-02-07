@@ -17,15 +17,21 @@
 
 float get_yaw_from_index(global float* params, int idx_yaw)
 {
-    return M_PI_2_F * ((float) (idx_yaw / params[TOTAL_YAW_DISCRETIZATIONS]));
+    return M_PI_F * ((float) idx_yaw) / ((float) (params[TOTAL_YAW_DISCRETIZATIONS] - 1));
 }
 
 float signed_distance_to_foot_polygon(global float* params, int2 foot_key, float foot_yaw, int2 query)
 {
+    int cells_per_side = 2 * params[HEIGHT_MAP_CENTER_INDEX] + 1;
+    int map_idx_x = cells_per_side - query.y;
+    int map_idx_y = query.x;
+    // we're flipping the axes because it's image vs world
     float2 vector_to_point = params[HEIGHT_MAP_RESOLUTION] * (float2) ((float) (query.x - foot_key.x), (float) (query.y - foot_key.y));
+
     float2 vector_in_foot_frame = applyYawRotationToVector2D(vector_to_point, -foot_yaw);
-    float x_outside = fabs(vector_in_foot_frame.x) - params[FOOT_LENGTH];
-    float y_outside = fabs(vector_in_foot_frame.y) - params[FOOT_WIDTH];
+
+    float x_outside = fabs(vector_in_foot_frame.x) - params[FOOT_LENGTH] / 2.0f;
+    float y_outside = fabs(vector_in_foot_frame.y) - params[FOOT_WIDTH] / 2.0f;
 
     if (x_outside > 0.0f && y_outside > 0.0f)
     {
@@ -73,7 +79,10 @@ void kernel computeSteppability(global float* params,
 
     int map_idx_x = cells_per_side - idx_y;
     int map_idx_y = idx_x;
-    float2 foot_position = indices_to_coordinate((int2) (map_idx_x, map_idx_y), center, map_resolution, center_index);
+    int2 map_key = (int2) (map_idx_x, map_idx_y);
+    float2 foot_position = indices_to_coordinate(map_key, center, map_resolution, center_index);
+
+
 
     // TODO check these
     float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
