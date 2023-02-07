@@ -9,7 +9,7 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.live.RDXROS2PointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;

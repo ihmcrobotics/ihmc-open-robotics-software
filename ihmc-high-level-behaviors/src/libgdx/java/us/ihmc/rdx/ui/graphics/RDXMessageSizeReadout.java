@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics;
 
 import imgui.internal.ImGui;
 import us.ihmc.commons.FormattingTools;

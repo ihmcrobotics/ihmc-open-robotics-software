@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.ros1;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -28,6 +28,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Deprecated
 public class RDXROS1FusedPointCloudVisualizer extends RDXROS1Visualizer
 {
    private static final int MAX_POINTS = 250000;

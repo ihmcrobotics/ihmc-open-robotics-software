@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics;
 
 import gnu.trove.list.array.TLongArrayList;
 import org.bytedeco.opencv.opencv_core.Mat;
