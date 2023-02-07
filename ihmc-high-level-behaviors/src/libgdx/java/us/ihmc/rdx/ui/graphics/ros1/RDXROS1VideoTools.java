@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live.ros1;
+package us.ihmc.rdx.ui.graphics.ros1;
 
 @Deprecated
 public class RDXROS1VideoTools

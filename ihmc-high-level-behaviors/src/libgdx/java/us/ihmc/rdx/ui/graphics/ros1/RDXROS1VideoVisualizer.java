@@ -1,11 +1,11 @@
-package us.ihmc.rdx.ui.graphics.live.ros1;
+package us.ihmc.rdx.ui.graphics.ros1;
 
 import imgui.internal.ImGui;
 import org.bytedeco.opencv.global.opencv_core;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
-import us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXROS1VisualizerInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;

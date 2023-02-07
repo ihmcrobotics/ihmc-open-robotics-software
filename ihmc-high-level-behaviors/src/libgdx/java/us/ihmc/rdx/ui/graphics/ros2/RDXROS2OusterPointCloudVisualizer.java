@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live.ros2;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
@@ -23,8 +23,8 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
-import us.ihmc.rdx.ui.graphics.live.RDXMessageSizeReadout;
-import us.ihmc.rdx.ui.graphics.live.RDXSequenceDiscontinuityPlot;
+import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
+import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;

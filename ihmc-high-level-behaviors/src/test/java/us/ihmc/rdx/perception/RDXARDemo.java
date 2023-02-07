@@ -9,7 +9,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDX3DSituatedImagePanel;
-import us.ihmc.rdx.ui.graphics.live.ros2.RDXROS2BigVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.pubsub.DomainFactory;
 
