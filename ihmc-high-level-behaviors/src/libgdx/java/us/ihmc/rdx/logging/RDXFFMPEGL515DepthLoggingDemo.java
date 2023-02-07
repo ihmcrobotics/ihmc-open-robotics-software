@@ -14,7 +14,6 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
@@ -25,7 +24,7 @@ import java.nio.ByteOrder;
 public class RDXFFMPEGL515DepthLoggingDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final boolean lossless = false;
    private final int framerate = 15;
    private final int bitrate = 1450000;
@@ -39,7 +38,6 @@ public class RDXFFMPEGL515DepthLoggingDemo
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
-   private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private int imageWidth;
    private int imageHeight;
    private BytedecoImage normalizedDepthImage;
@@ -113,9 +111,6 @@ public class RDXFFMPEGL515DepthLoggingDemo
                   l515.setPublishColorImageROS2(false);
                   CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
                   baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
-
-                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
-                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
 
                   normalizedDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
                   rgbaDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);

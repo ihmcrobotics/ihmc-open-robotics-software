@@ -74,6 +74,16 @@ public class RDXCVImagePanel
    }
 
    /**
+    * Draw a Mat image to the panel that can be any size.
+    */
+   public void drawResizeAndCopy(Mat sourceImage)
+   {
+      resize(sourceImage.cols(), sourceImage.rows(), null);
+      sourceImage.copyTo(bytedecoImage.getBytedecoOpenCVMat());
+      draw();
+   }
+
+   /**
     * Texture must be drawn to before panel will display the image.
     * This is where the image gets transferred to the GPU.
     */
