@@ -8,6 +8,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.matrixlib.NativeMatrix;
+import us.ihmc.matrixlib.NativeMatrixTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -91,7 +92,7 @@ public class JointIndexHandler
          
          if (indicesIntoFullBlock == null) // don't do anything for joints that are not in the list
             return false;
-         
+
          for (int i = 0; i < indicesIntoCompactBlock.size(); i++)
          {
             int compactBlockIndex = indicesIntoCompactBlock.get(i);
@@ -170,12 +171,7 @@ public class JointIndexHandler
          if (indicesIntoFullBlock == null) // don't do anything for joints that are not in the list
             continue;
 
-         for (int i = 0; i < indicesIntoCompactBlock.size(); i++)
-         {
-            int compactBlockIndex = indicesIntoCompactBlock.get(i);
-            int fullBlockIndex = indicesIntoFullBlock[i];
-            fullMatrix.insert(compactMatrix, 0, rows, compactBlockIndex, compactBlockIndex + 1, 0, fullBlockIndex);
-         }
+         NativeMatrixTools.extractColumns(compactMatrix, fullMatrix, indicesIntoFullBlock);
       }
    }
 
