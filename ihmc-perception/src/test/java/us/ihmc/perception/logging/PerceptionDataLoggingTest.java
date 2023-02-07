@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -121,6 +122,12 @@ public class PerceptionDataLoggingTest
    @Test
    public void testLoggingIntArray() throws InterruptedException
    {
+      LogTools.info("Walking bytedeco");
+      ResourceTools.walkResourcesFlat("org/bytedeco/javacpp/linux-x86_64", (s, pathType) ->
+      {
+         LogTools.info(s);
+      });
+
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_int_array.hdf5", hdf5.H5F_ACC_TRUNC());
       Group writeGroup = hdf5ManagerWriter.getGroup("/test/ints/");
 
