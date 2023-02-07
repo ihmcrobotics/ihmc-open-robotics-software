@@ -1,17 +1,20 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.BigVideoPacket;
 import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.robotics.time.TimeTools;
@@ -20,7 +23,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 
-public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
+public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
 {
    private final String titleBeforeAdditions;
    private final PubSubImplementation pubSubImplementation;
@@ -31,14 +34,14 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
-   private byte[] messageDataHeapArray;
-   private BytePointer messageBytePointer;
-   private Mat inputDepthMat;
-   private Mat normalizedScaledImage;
+   private final byte[] messageDataHeapArray = new byte[25000000];
+   private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
+   private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
+   private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
-   public RDXROS2BigDepthVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
+   public RDXROS2BigVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
    {
       super(title + " (ROS 2)", topic.getName(), false);
       titleBeforeAdditions = title;
@@ -51,8 +54,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    private void subscribe()
    {
       subscribed.set(true);
-
-      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
       ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT(), subscriber ->
       {
          synchronized (syncObject)
@@ -65,41 +67,26 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
          {
             synchronized (syncObject)
             {
-               IDLSequence.Byte imageTByteArrayList = videoPacket.getData();
-               int numberOfBytes = imageTByteArrayList.size();
+               IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
+               int numberOfBytes = imageEncodedTByteArrayList.size();
+               imageEncodedTByteArrayList.toArray(messageDataHeapArray);
+               messageEncodedBytePointer.put(messageDataHeapArray, 0, numberOfBytes);
+               messageEncodedBytePointer.limit(numberOfBytes);
 
-               if (messageDataHeapArray == null || messageDataHeapArray.length != imageTByteArrayList.size())
-               {
-                  messageDataHeapArray = new byte[imageTByteArrayList.size()];
-                  messageBytePointer = new BytePointer(imageTByteArrayList.size());
-               }
-
-               imageTByteArrayList.toArray(messageDataHeapArray);
-               messageBytePointer.position(0);
-               messageBytePointer.put(messageDataHeapArray, 0, imageTByteArrayList.size());
-               messageBytePointer.limit(imageTByteArrayList.size());
-
-               if (inputDepthMat == null)
-               {
-                  inputDepthMat = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_32FC1);
-               }
-
-               inputDepthMat.data(messageBytePointer);
+               inputJPEGMat.cols(numberOfBytes);
+               inputJPEGMat.data(messageEncodedBytePointer);
 
                messageSizeReadout.update(numberOfBytes);
             }
 
-            if (normalizedScaledImage == null)
-            {
-               normalizedScaledImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_32FC1);
-            }
-
-            BytedecoOpenCVTools.clampTo8BitUnsignedChar(inputDepthMat, normalizedScaledImage, 0.0, 255.0);
+            // imdecode takes the longest by far out of all this stuff
+            opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
 
             synchronized (this) // synchronize with the update method
             {
-               updateImageDimensions(videoPacket.getImageWidth(), videoPacket.getImageHeight());
-               BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, getRGBA8Mat());
+               // YUV I420 has 1.5 times the height of the image
+               updateImageDimensions(inputYUVI420Mat.cols(), (int) (inputYUVI420Mat.rows() / 1.5f));
+               opencv_imgproc.cvtColor(inputYUVI420Mat, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
             }
          });
       });
@@ -152,5 +139,10 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
          realtimeROS2Node.destroy();
          realtimeROS2Node = null;
       }
+   }
+
+   public boolean isSubscribed()
+   {
+      return subscribed.get();
    }
 }

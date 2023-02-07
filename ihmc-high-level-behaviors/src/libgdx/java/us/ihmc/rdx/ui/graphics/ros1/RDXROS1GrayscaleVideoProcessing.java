@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.ros1;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -8,6 +8,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.ROSOpenCVTools;
 
+@Deprecated
 public class RDXROS1GrayscaleVideoProcessing implements RDXROS1VideoProcessor
 {
    private Mat input8UC1Mat;
