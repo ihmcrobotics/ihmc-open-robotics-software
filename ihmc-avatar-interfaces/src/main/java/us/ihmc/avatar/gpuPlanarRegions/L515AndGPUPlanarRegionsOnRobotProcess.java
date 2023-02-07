@@ -15,9 +15,8 @@ import sensor_msgs.Image;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanRegionFilter;
+import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
@@ -41,8 +40,11 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionIsland;
+import us.ihmc.perception.rapidRegions.RapidRegionRing;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.comms.GPUPlanarRegionExtractionComms;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -77,7 +79,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final RealtimeROS2Node realtimeROS2Node;
    private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2DepthVideoPublisher;
    private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2DebugExtractionVideoPublisher;
-   private IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
 
    private final BigVideoPacket depthImagePacket = new BigVideoPacket();
    private final BigVideoPacket debugExtractionImagePacket = new BigVideoPacket();
@@ -105,12 +106,11 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private CameraPinholeBrown depthCameraIntrinsics;
    private final GPUPlanarRegionExtraction gpuPlanarRegionExtraction;
    private final Runnable onPatchSizeResized = this::onPatchSizeResized;
-   private final Consumer<GPUPlanarRegionIsland> doNothingIslandConsumer = this::onFindRegionIsland;
-   private final Consumer<GPURegionRing> doNothingRingConsumer = this::onFindBoundariesAndHolesRing;
+   private final Consumer<RapidPlanarRegionIsland> doNothingIslandConsumer = this::onFindRegionIsland;
+   private final Consumer<RapidRegionRing> doNothingRingConsumer = this::onFindBoundariesAndHolesRing;
    private final Throttler parameterOutputThrottler = new Throttler();
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
    private final CollidingScanRegionFilter collisionFilter;
-
 
    public L515AndGPUPlanarRegionsOnRobotProcess(DRCRobotModel robotModel, boolean enableROS1)
    {
@@ -128,7 +128,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ROS2Topic<BigVideoPacket> debugExtractionTopic = ROS2Tools.L515_DEBUG_EXTRACTION;
       LogTools.info("Publishing ROS 2 debug extraction video: {}", debugExtractionTopic);
       ros2DebugExtractionVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, debugExtractionTopic, ROS2QosProfile.BEST_EFFORT());
-      controllerRegionsPublisher = ROS2Tools.createPublisher(realtimeROS2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, robotModel.getSimpleRobotName()));
       realtimeROS2Node.spin();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_node");
@@ -306,7 +305,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
             MessageTools.toMessage(now, planarRegionsListMessage.getLastUpdated());
-            ros2Helper.publish(ROS2Tools.RAPID_REGIONS, planarRegionsListMessage);
+            ros2Helper.publish(ROS2Tools.PERSPECTIVE_RAPID_REGIONS, planarRegionsListMessage);
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 
@@ -404,7 +403,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       }
    }
 
-   private void onFindRegionIsland(GPUPlanarRegionIsland island)
+   private void onFindRegionIsland(RapidPlanarRegionIsland island)
    {
       for (Point2D regionIndex : island.planarRegion.getRegionIndices())
       {
@@ -420,7 +419,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       }
    }
 
-   private void onFindBoundariesAndHolesRing(GPURegionRing regionRing)
+   private void onFindBoundariesAndHolesRing(RapidRegionRing regionRing)
    {
       for (Vector2D boundaryIndex : regionRing.getBoundaryIndices())
       {

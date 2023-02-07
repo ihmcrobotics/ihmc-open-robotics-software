@@ -6,33 +6,18 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.OpenCVImageFormat;
-import us.ihmc.perception.memory.NativeMemoryTools;
-import us.ihmc.perception.netty.NettyOuster;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.tools.thread.Activator;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
@@ -56,10 +41,7 @@ public class OusterDepthPublisher
    private final int depthWidth;
    private final int numberOfPointsPerFullScan;
 
-   public OusterDepthPublisher(HashMap<ROS2Topic<?>, IHMCRealtimeROS2Publisher> publisherMap,
-                               int depthWidth,
-                               int depthHeight,
-                               ROS2Topic<?>... outputTopics)
+   public OusterDepthPublisher(HashMap<ROS2Topic<?>, IHMCRealtimeROS2Publisher> publisherMap, int depthWidth, int depthHeight, ROS2Topic<?>... outputTopics)
    {
       this.outputTopics = outputTopics;
       this.publisherMap = publisherMap;

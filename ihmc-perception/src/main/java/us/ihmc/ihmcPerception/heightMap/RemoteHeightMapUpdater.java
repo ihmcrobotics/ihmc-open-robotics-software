@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
-import us.ihmc.perception.PerceptionMessageTools;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -39,12 +39,13 @@ public class RemoteHeightMapUpdater
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
-                                                                                                    ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+                                                                                                                  ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+
    public RemoteHeightMapUpdater(Supplier<ReferenceFrame> groundFrameProvider, RealtimeROS2Node ros2Node)
    {
       this.ros2Node = ros2Node;
 
-      IHMCRealtimeROS2Publisher<HeightMapMessage > heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
+      IHMCRealtimeROS2Publisher<HeightMapMessage> heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.HEIGHT_MAP_STATE_REQUEST, m -> consumeStateRequestMessage(m.readNextData()));
 
       heightMapUpdater = new HeightMapUpdater();
