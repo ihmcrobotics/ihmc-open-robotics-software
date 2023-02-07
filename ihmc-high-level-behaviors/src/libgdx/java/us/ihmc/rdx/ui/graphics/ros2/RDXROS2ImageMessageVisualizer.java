@@ -60,8 +60,6 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
-
-      setSubscribed(subscribed.get());
    }
 
    private void subscribe()

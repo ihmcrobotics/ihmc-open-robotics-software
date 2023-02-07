@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 public class VideoPacketHandler implements CompressedVideoHandler
@@ -25,11 +26,21 @@ public class VideoPacketHandler implements CompressedVideoHandler
    {
       this(ros2Node, ROS2Tools.VIDEO);
    }
-   
+
+   public VideoPacketHandler(ROS2NodeInterface ros2Node, ROS2QosProfile qosProfile)
+   {
+      this(ros2Node, ROS2Tools.VIDEO, qosProfile);
+   }
+
    public VideoPacketHandler(ROS2NodeInterface ros2Node, ROS2Topic<VideoPacket> topic)
    {
+      this(ros2Node, topic, ROS2QosProfile.DEFAULT());
+   }
+
+   public VideoPacketHandler(ROS2NodeInterface ros2Node, ROS2Topic<VideoPacket> topic, ROS2QosProfile qosProfile)
+   {
       LogTools.info("Creating video publisher on topic: {}", topic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, topic);
+      publisher = ROS2Tools.createPublisher(ros2Node, topic, qosProfile);
    }
 
    private Stopwatch timer;
