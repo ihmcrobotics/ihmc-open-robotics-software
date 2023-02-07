@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -126,7 +125,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    private final FramePoint3D initialRootJointPosition = new FramePoint3D(worldFrame);
 
    // Temporary variables
-   private final Vector3D tempRootJointTranslation = new Vector3D();
    private final FramePoint3D footPositionInWorld = new FramePoint3D();
 
    private final BooleanProvider trustOnlyLowestFoot = new BooleanParameter("TrustOnlyLowestFoot", registry, false);
@@ -313,8 +311,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    public void updateForFrozenState()
    {
       // Keep setting the position so the localization updater works properly.
-      tempRootJointTranslation.set(rootJointPosition);
-      rootJoint.setJointPosition(tempRootJointTranslation);
+      rootJoint.setJointPosition(rootJointPosition);
       kinematicsBasedLinearStateCalculator.updateKinematics();
       kinematicsBasedLinearStateCalculator.updateFeetPositionsWhenTrustingIMUOnly(rootJointPosition);
       kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityToZero();
