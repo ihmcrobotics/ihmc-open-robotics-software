@@ -1,6 +1,10 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
+import static us.ihmc.scs2.definition.visual.ColorDefinitions.DarkOrange;
+import static us.ihmc.scs2.definition.visual.ColorDefinitions.Purple;
+import static us.ihmc.scs2.definition.visual.ColorDefinitions.Red;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_PLUS;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -27,6 +31,8 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -217,7 +223,7 @@ public class ICPController implements ICPControllerInterface
             + "ReferenceFeedForwardCoP", this.referenceFeedForwardCoP, 0.005, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
       YoGraphicPosition unconstrainedFeedbackCMP = new YoGraphicPosition(yoNamePrefix
-            + "UnconstrainedFeedbackCoP", this.unconstrainedFeedbackCMP, 0.006, Purple(), GraphicType.BALL_WITH_CROSS);
+            + "UnconstrainedFeedbackCMP", this.unconstrainedFeedbackCMP, 0.006, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS);
 
       artifactList.add(feedbackCoP.createArtifact());
       artifactList.add(feedForwardCoP.createArtifact());
@@ -226,6 +232,16 @@ public class ICPController implements ICPControllerInterface
       artifactList.setVisible(VISUALIZE);
 
       yoGraphicsListRegistry.registerArtifactList(artifactList);
+   }
+
+   public YoGraphicDefinition createSCS2Visualization()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicPoint2D(yoNamePrefix + "FeedbackCoP", feedbackCoP, 0.005, DarkOrange(), CIRCLE_PLUS));
+      group.addChild(newYoGraphicPoint2D(yoNamePrefix + "ReferenceFeedForwardCoP", referenceFeedForwardCoP, 0.005, Red(), CIRCLE_PLUS));
+      group.addChild(newYoGraphicPoint2D(yoNamePrefix + "UnconstrainedFeedbackCMP", unconstrainedFeedbackCMP, 0.006, Purple(), CIRCLE_PLUS));
+      return group;
+
    }
 
    /**
