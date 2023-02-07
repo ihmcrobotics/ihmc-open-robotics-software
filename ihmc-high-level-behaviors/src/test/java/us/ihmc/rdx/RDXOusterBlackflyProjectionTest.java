@@ -23,8 +23,7 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 public class RDXOusterBlackflyProjectionTest
 {
 
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources");
    private final RDXPose3DGizmo ousterPointInWorldGizmo = new RDXPose3DGizmo(ReferenceFrame.getWorldFrame());
    private RigidBodyTransform userTransformToParent;

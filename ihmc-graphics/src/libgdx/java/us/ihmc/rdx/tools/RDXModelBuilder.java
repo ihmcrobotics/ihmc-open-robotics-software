@@ -241,12 +241,28 @@ public class RDXModelBuilder
       return buildModelInstance(meshBuilder -> meshBuilder.addPolygon(transformToWorld, polygon, color));
    }
 
-   public static ModelInstance createLinedPolygon(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DReadOnly> points, double lineWidth, Color color, boolean close)
+   public static ModelInstance createLinedPolygon(List<? extends Point3DReadOnly> points,
+                                                  double lineWidth,
+                                                  Color color,
+                                                  boolean close)
    {
       return buildModelInstance(meshBuilder ->
-                                {
-                                   meshBuilder.addMultiLine(transformToWorld, points, lineWidth, color, close);
-                                   meshBuilder.addPolygon(transformToWorld, points, color);
-                                });
+      {
+         meshBuilder.addMultiLine(points, lineWidth, color, close);
+         meshBuilder.addPolygon(points, color);
+      });
+   }
+
+   public static ModelInstance createLinedPolygon(RigidBodyTransformReadOnly transformToWorld,
+                                                  List<? extends Point2DReadOnly> points,
+                                                  double lineWidth,
+                                                  Color color,
+                                                  boolean close)
+   {
+      return buildModelInstance(meshBuilder ->
+      {
+         meshBuilder.addMultiLine(transformToWorld, points, lineWidth, color, close);
+         meshBuilder.addPolygon(transformToWorld, points, color);
+      });
    }
 }
