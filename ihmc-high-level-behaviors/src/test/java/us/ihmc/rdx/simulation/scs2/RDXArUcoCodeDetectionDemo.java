@@ -24,8 +24,7 @@ import java.util.ArrayList;
 
 public class RDXArUcoCodeDetectionDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources");
    private final Activator nativesLoadedActivator;
    private RDXEnvironmentBuilder environmentBuilder;

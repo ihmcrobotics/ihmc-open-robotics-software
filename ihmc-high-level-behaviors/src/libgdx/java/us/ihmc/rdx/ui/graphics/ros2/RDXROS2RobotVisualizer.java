@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 import imgui.ImGui;
 import imgui.type.ImBoolean;

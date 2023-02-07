@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 public class RDXCameraCalibrationDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources");
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
    private VideoCapture videoCapture;
    private int imageHeight = 1080;

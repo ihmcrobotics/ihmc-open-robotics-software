@@ -6,8 +6,7 @@ import us.ihmc.rdx.ui.ImGui3DViewInputDebugger;
 
 public class RDXSCS2EnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/libgdx/resources",
                                                   "SCS 2 Environment Builder");
    private final RDXSCS2EnvironmentBuilder environmentBuilder = new RDXSCS2EnvironmentBuilder(baseUI.getPrimary3DPanel());
