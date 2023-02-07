@@ -5,6 +5,8 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -201,7 +203,7 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       yoMeasurementFrameLinearVelocityInWorld.add(correctionVelocityForMeasurementFrameOffset);
    }
 
-   public void updatePelvisPosition(FramePoint3D rootJointPositionPrevValue, FramePoint3D rootJointPositionToPack)
+   public void updatePelvisPosition(FramePoint3DReadOnly rootJointPositionPrevValue, FramePoint3DBasics rootJointPositionToPack)
    {
       if (!isEstimationEnabled())
          throw new RuntimeException("IMU estimation module for pelvis linear velocity is disabled.");

@@ -126,7 +126,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    private final FramePoint3D initialRootJointPosition = new FramePoint3D(worldFrame);
 
    // Temporary variables
-   private final FramePoint3D rootJointPosition = new FramePoint3D(worldFrame);
    private final FrameVector3D rootJointVelocity = new FrameVector3D(worldFrame);
    private final Vector3D tempRootJointTranslation = new Vector3D();
    private final FramePoint3D footPositionInWorld = new FramePoint3D();
@@ -275,12 +274,12 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    {
       if (!initializeToActual)
       {
-         rootJointPosition.setIncludingFrame(worldFrame, rootJoint.getJointPose().getPosition());
+         yoRootJointPosition.set(worldFrame, rootJoint.getJointPose().getPosition());
 
          if (zeroRootXYPositionAtInitialization.getValue())
          {
-            rootJointPosition.setX(0.0);
-            rootJointPosition.setY(0.0);
+            yoRootJointPosition.setX(0.0);
+            yoRootJointPosition.setY(0.0);
          }
 
          if (zeroFootHeightAtInitialization.getValue())
@@ -291,19 +290,18 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
             footPositionInWorld.changeFrame(rootJointFrame);
 
             // By setting the root joint to be at -footZ, the foot will be at a height of zero.
-            rootJointPosition.setZ(-footPositionInWorld.getZ());
+            yoRootJointPosition.setZ(-footPositionInWorld.getZ());
          }
       }
       else
       {
-         rootJointPosition.set(initialRootJointPosition);
+         yoRootJointPosition.set(initialRootJointPosition);
       }
 
       rootJointVelocity.setToZero(worldFrame);
-      yoRootJointPosition.set(rootJointPosition);
       yoRootJointVelocity.setToZero();
 
-      kinematicsBasedLinearStateCalculator.initialize(rootJointPosition);
+      kinematicsBasedLinearStateCalculator.initialize(yoRootJointPosition);
 
       imuBasedLinearStateCalculator.initialize();
    }
@@ -360,17 +358,14 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       {
          if (trustImuWhenNoFeetAreInContact.getValue())
          {
-            rootJointPosition.set(yoRootJointPosition);
-            kinematicsBasedLinearStateCalculator.updateFeetPositionsWhenTrustingIMUOnly(rootJointPosition);
-
             imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(rootJointVelocity);
             yoRootJointVelocity.set(rootJointVelocity);
             imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity);
 
-            rootJointPosition.set(yoRootJointPosition);
-            imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
-            rootJointPosition.set(pelvisPositionIMUPart);
-            yoRootJointPosition.set(rootJointPosition);
+            imuBasedLinearStateCalculator.updatePelvisPosition(yoRootJointPosition, pelvisPositionIMUPart);
+            yoRootJointPosition.set(pelvisPositionIMUPart);
+
+            kinematicsBasedLinearStateCalculator.updateFeetPositionsWhenTrustingIMUOnly(yoRootJointPosition);
          }
          else
             throw new RuntimeException("No foot trusted!");
@@ -378,8 +373,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       else if (numberOfEndEffectorsTrusted.getIntegerValue() > 0)
       {
          updateTrustedFeetLists();
-         rootJointPosition.set(yoRootJointPosition);
-         kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
+         kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, yoRootJointPosition);
 
          if (imuBasedLinearStateCalculator.isEstimationEnabled())
          {
@@ -387,7 +381,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          }
          else
          {
-            rootJointPosition.set(yoRootJointPosition);
             yoRootJointPosition.set(kinematicsBasedLinearStateCalculator.getPelvisPosition());
             yoRootJointVelocity.set(kinematicsBasedLinearStateCalculator.getPelvisVelocity());
          }
@@ -654,24 +647,20 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    {
       if (!useNewFusingFilter.getValue())
       {
-         rootJointPosition.set(yoRootJointPosition);
-         imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
+         imuBasedLinearStateCalculator.updatePelvisPosition(yoRootJointPosition, pelvisPositionIMUPart);
          pelvisPositionKinPart.setIncludingFrame(kinematicsBasedLinearStateCalculator.getPelvisPosition());
 
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForPositionBreakFrequency.getValue(), estimatorDT);
          pelvisPositionIMUPart.scale(alpha);
          pelvisPositionKinPart.scale(1.0 - alpha);
 
-         rootJointPosition.set(pelvisPositionIMUPart);
-         rootJointPosition.add(pelvisPositionKinPart);
-         yoRootJointPosition.set(rootJointPosition);
+         yoRootJointPosition.add(pelvisPositionIMUPart, pelvisPositionKinPart);
       }
 
       pelvisPositionEstimate.update(kinematicsBasedLinearStateCalculator.getPelvisPosition(), pelvisNewLinearVelocityEstimate);
 
       if (useNewFusingFilter.getValue())
       {
-         rootJointPosition.set(pelvisPositionEstimate);
          yoRootJointPosition.set(pelvisPositionEstimate);
       }
    }
