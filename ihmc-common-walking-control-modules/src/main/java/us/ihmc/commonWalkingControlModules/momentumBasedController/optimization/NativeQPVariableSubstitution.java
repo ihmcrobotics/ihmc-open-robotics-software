@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.matrixlib.NativeMatrix;
+import us.ihmc.matrixlib.NativeMatrixTools;
 
 import java.util.Arrays;
 
@@ -248,7 +249,7 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
       NativeMatrix GTH = tempC;
       sub_H.reshape(variableIndices.length, H.getNumCols());
       sub_H.zero();
-      MissingNativeMatrixTools.extractRows(H, variableIndices, sub_H, 0);
+      NativeMatrixTools.extractRows(H, variableIndices, sub_H, 0);
       GTH.multTransA(G, sub_H);
 
       // Re-inserting the rows into H. Since there are less rows than when we started, we'll add padding with zeros to prevent changing H size.
@@ -266,7 +267,7 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
       NativeMatrix GTf = tempD;
       sub_f.reshape(G.getNumRows(), 1);
       sub_f.zero();
-      MissingNativeMatrixTools.extract(f, variableIndices, variableIndices.length, sub_f);
+      NativeMatrixTools.extract(f, variableIndices, variableIndices.length, sub_f);
       // G^T*f
       GTf.multTransA(G, sub_f);
 
@@ -280,7 +281,7 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
          NativeMatrix sub_GTH = tempE;
          sub_GTH.reshape(G.getNumCols(), variableIndices.length);
          sub_GTH.zero();
-         MissingNativeMatrixTools.extractColumns(GTH, variableIndices, sub_GTH, 0);
+         NativeMatrixTools.extractColumns(GTH, variableIndices, sub_GTH, 0);
          sub_f.mult(sub_GTH, g);
          // G^T*f + G^T*H*g
          sub_f.addEquals(GTf);
@@ -302,7 +303,7 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
       NativeMatrix HG = tempC;
       sub_H.reshape(H.getNumRows(), variableIndices.length);
       sub_H.zero();
-      MissingNativeMatrixTools.extractColumns(H, variableIndices, sub_H, 0);
+      NativeMatrixTools.extractColumns(H, variableIndices, sub_H, 0);
       HG.mult(sub_H, G);
 
       // Re-inserting the columns into H. Since there are less columns than when we started, we'll add padding with zeros to prevent changing H size.
@@ -361,7 +362,7 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
       NativeMatrix AG = tempC;
       sub_A.reshape(A.getNumRows(), variableIndices.length);
       sub_A.zero();
-      MissingNativeMatrixTools.extractColumns(A, variableIndices, sub_A, 0);
+      NativeMatrixTools.extractColumns(A, variableIndices, sub_A, 0);
       AG.mult(sub_A, G);
 
       // Re-inserting the columns into A. Since there are less columns than when we started, we'll add padding with zeros to prevent changing A size.
