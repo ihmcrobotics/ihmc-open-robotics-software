@@ -11,7 +11,7 @@ import us.ihmc.perception.logging.PerceptionLogChannel;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
