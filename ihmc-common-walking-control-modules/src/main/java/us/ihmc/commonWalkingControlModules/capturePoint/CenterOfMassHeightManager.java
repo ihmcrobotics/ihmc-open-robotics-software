@@ -200,6 +200,9 @@ public class CenterOfMassHeightManager
          return;
       }
 
+      // Without this, the walking height will resume from its last desired which can be quite different.
+      if (stateMachine.getCurrentStateKey() != PelvisHeightControlMode.WALKING_CONTROLLER)
+         centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
       centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
       requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
    }

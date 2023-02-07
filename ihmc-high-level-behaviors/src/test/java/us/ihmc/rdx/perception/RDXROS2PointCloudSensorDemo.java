@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -11,7 +12,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 
 public class RDXROS2PointCloudSensorDemo
@@ -48,9 +48,13 @@ public class RDXROS2PointCloudSensorDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             globalVisualizersPanel = new RDXGlobalVisualizersPanel(false);
-            globalVisualizersPanel.addVisualizer(new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
-                                                                                 ros2Node,
-                                                                                 ROS2Tools.OUSTER_POINT_CLOUD));
+
+            RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
+                                                                                                     ros2Node,
+                                                                                                     ROS2Tools.OUSTER_POINT_CLOUD);
+            ousterPointCloudVisualizer.setSubscribed(true);
+            globalVisualizersPanel.addVisualizer(ousterPointCloudVisualizer);
+
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel, RDXSceneLevel.VIRTUAL);

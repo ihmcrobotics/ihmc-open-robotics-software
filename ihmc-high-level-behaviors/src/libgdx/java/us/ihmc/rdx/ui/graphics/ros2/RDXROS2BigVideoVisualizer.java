@@ -47,8 +47,6 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
-
-      setSubscribed(subscribed.get());
    }
 
    private void subscribe()
