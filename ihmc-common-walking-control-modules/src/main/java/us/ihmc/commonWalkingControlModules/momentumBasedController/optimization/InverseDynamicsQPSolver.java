@@ -48,8 +48,6 @@ public class InverseDynamicsQPSolver
    private final NativeMatrix solver_beq;
    private final NativeMatrix solver_Ain;
    private final NativeMatrix solver_bin;
-   private final NativeMatrix temp_A;
-   private final NativeMatrix temp_b;
 
    private final NativeMatrix solver_lb;
    private final NativeMatrix solver_ub;
@@ -122,8 +120,6 @@ public class InverseDynamicsQPSolver
       solver_bin = qpSolver.getAinUnsafe();
       solver_Ain.reshape(problemSize, problemSize);
       solver_bin.reshape(problemSize, 1);
-      temp_A = new NativeMatrix(problemSize, problemSize);
-      temp_b = new NativeMatrix(problemSize, 1);
 
       solver_lb = qpSolver.getLowerBoundsUnsafe();
       solver_ub = qpSolver.getUpperBoundsUnsafe();
@@ -547,15 +543,10 @@ public class InverseDynamicsQPSolver
 
       int previousSize = solver_beq.getNumRows();
 
-      temp_A.set(solver_Aeq);
-      temp_b.set(solver_beq);
-      solver_Aeq.reshape(previousSize + taskSize, problemSize);
-      solver_beq.reshape(previousSize + taskSize, 1);
-
-      solver_Aeq.insert(temp_A, 0, 0);
+      solver_Aeq.growRows(taskSize);
       solver_Aeq.insert(taskJacobian, previousSize, offset);
-      solver_Aeq.zeroBlock(previousSize, previousSize + taskSize, 0, offset);
-      solver_beq.insert(temp_b, 0, 0);
+
+      solver_beq.growRows(taskSize);
       solver_beq.insert(taskObjective, previousSize, 0);
    }
 
@@ -600,15 +591,10 @@ public class InverseDynamicsQPSolver
 
       int previousSize = solver_bin.getNumRows();
 
-      temp_A.set(solver_Ain);
-      temp_b.set(solver_bin);
-      solver_Ain.reshape(previousSize + taskSize, problemSize);
-      solver_bin.reshape(previousSize + taskSize, 1);
-
-      solver_Ain.insertScaled(temp_A, 0, 0, sign);
+      solver_Ain.growRows(taskSize);
       solver_Ain.insertScaled(taskJacobian, previousSize, offset, sign);
-      solver_Ain.zeroBlock(previousSize, previousSize + taskSize, 0, offset);
-      solver_bin.insertScaled(temp_b, 0, 0, sign);
+
+      solver_bin.growRows(taskSize);
       solver_bin.insertScaled(taskObjective, previousSize, 0, sign);
    }
 
@@ -692,16 +678,11 @@ public class InverseDynamicsQPSolver
          int constraintSize = Wrench.SIZE;
          int previousSize = solver_beq.getNumRows();
 
-         temp_A.set(solver_Aeq);
-         temp_b.set(solver_beq);
-         solver_Aeq.reshape(previousSize + constraintSize, problemSize);
-         solver_beq.reshape(previousSize + constraintSize, 1);
-
-         solver_Aeq.insert(temp_A, 0, 0);
+         solver_Aeq.growRows(constraintSize);
          solver_Aeq.insertScaled(centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, previousSize, 0, -1.0);
          solver_Aeq.insert(rhoJacobian, previousSize, numberOfDoFs);
 
-         solver_beq.insert(temp_b, 0, 0);
+         solver_beq.growRows(constraintSize);
          solver_beq.insert(tempWrenchConstraint_RHS, previousSize, 0);
       }
 
