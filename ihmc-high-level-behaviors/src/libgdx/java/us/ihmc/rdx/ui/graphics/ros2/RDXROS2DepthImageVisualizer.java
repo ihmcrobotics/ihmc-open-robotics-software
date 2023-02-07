@@ -56,8 +56,6 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
-
-      setSubscribed(subscribed.get());
    }
 
    private void subscribe()

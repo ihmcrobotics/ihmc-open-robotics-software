@@ -46,8 +46,13 @@ public class RDXARDemo
 
             DomainFactory.PubSubImplementation pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
             globalVisualizersPanel = new RDXGlobalVisualizersPanel(false);
-            RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video", pubSubImplementation, ROS2Tools.BIG_VIDEO);
+
+            RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
+                                                                                      pubSubImplementation,
+                                                                                      ROS2Tools.BIG_VIDEO);
+            videoVisualizer.setSubscribed(true);
             globalVisualizersPanel.addVisualizer(videoVisualizer);
+
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
 

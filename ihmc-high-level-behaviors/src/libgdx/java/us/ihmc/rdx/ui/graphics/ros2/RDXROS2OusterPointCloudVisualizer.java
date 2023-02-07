@@ -49,7 +49,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(true);
+   private final ImBoolean subscribed = new ImBoolean(false);
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private int totalNumberOfPoints;
    private OpenCLManager openCLManager;
@@ -68,8 +68,6 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
-
-      setSubscribed(subscribed.get());
    }
 
    private void subscribe()
