@@ -24,6 +24,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.logging.RDXHDF5ImageBrowser;
 import us.ihmc.rdx.logging.RDXHDF5ImageLoggingUI;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
@@ -169,6 +170,8 @@ public class RDXBlackflyCalibrationSuite
                   ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
                   markersToTrack.add(new OpenCVArUcoMarker(0, 0.2));
                   arUcoMarkerDetectionUI.create(openCVArUcoMarkerDetection, markersToTrack, ReferenceFrame.getWorldFrame()); // FIXME: Make frames
+                  baseUI.getImGuiPanelManager().addPanel(arUcoMarkerDetectionUI.getMainPanel());
+                  baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
 
                   baseUI.getLayoutManager().reloadLayout();
 
@@ -259,6 +262,7 @@ public class RDXBlackflyCalibrationSuite
                blackflyReader.updateOnUIThread();
                hdf5ImageBrowser.update();
                undistortedFisheyePanel.updateOnUIThread();
+               arUcoMarkerDetectionUI.update();
 
                if (calibrationSourceImageDrawRequest.poll())
                {
