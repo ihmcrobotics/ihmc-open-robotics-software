@@ -1,7 +1,9 @@
 {
   "dockspacePanels" : { },
   "windows" : {
-    "3D View" : false,
+    "3D View" : true,
+    "ArUco Marker Detection" : true,
+    "ArUco Marker Detection Image" : false,
     "Blackfly Monitor" : true,
     "Blackfly Reader" : true,
     "Calibration" : true,
