@@ -77,9 +77,9 @@ public class RDXArUcoCodeDetectionDemo
                   baseUI.getPrimaryScene().addRenderableProvider(cameraSensor::getRenderables);
 
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  arUcoMarkerDetection.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage(),
-                                              cameraSensor.getDepthCameraIntrinsics(),
-                                              cameraSensor.getSensorFrame());
+                  arUcoMarkerDetection.create(cameraSensor.getSensorFrame());
+                  arUcoMarkerDetection.setSourceImageForDetection(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
+                  arUcoMarkerDetection.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
                   arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("from Sensor");
                   ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
                   markersToTrack.add(new OpenCVArUcoMarker(0, 0.2032));
@@ -91,9 +91,9 @@ public class RDXArUcoCodeDetectionDemo
                   loadTestImage();
 
                   testImageArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  testImageArUcoMarkerDetection.create(testRGB888ColorImage,
-                                                       cameraSensor.getDepthCameraIntrinsics(),
-                                                       cameraSensor.getSensorFrame());
+                  testImageArUcoMarkerDetection.create(cameraSensor.getSensorFrame());
+                  testImageArUcoMarkerDetection.setSourceImageForDetection(testRGB888ColorImage);
+                  testImageArUcoMarkerDetection.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
                   testImageArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("Test");
                   testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection, new ArrayList<>(), sensorPoseGizmo.getGizmoFrame());
                   ImGuiPanel testUIPanel = new ImGuiPanel("Test image detection", this::renderTestUIImGuiWidgets);

@@ -388,4 +388,9 @@ public class BytedecoOpenCVTools
 
       return outputMat;
    }
+
+   public static boolean dimensionsMatch(BytedecoImage a, BytedecoImage b)
+   {
+      return a.getImageWidth() == b.getImageWidth() && a.getImageHeight() == b.getImageHeight();
+   }
 }

@@ -28,8 +28,6 @@ import java.util.ArrayList;
 public class RDXOpenCVArUcoMarkerDetectionUI
 {
    private final String namePostfix;
-   private int imageWidth;
-   private int imageHeight;
    private ReferenceFrame cameraFrame;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private BytedecoImage imageForDrawing;
@@ -76,11 +74,9 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       this.markersToTrack = markersToTrack;
       this.cameraFrame = cameraFrame;
 
-      imageWidth = arUcoMarkerDetection.getImageWidth();
-      imageHeight = arUcoMarkerDetection.getImageHeight();
-      imageForDrawing = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+      imageForDrawing = new BytedecoImage(100, 100, opencv_core.CV_8UC3);
       boolean flipY = false;
-      markerImagePanel = new RDXCVImagePanel("ArUco Marker Detection Image " + namePostfix, imageWidth, imageHeight, flipY);
+      markerImagePanel = new RDXCVImagePanel("ArUco Marker Detection Image " + namePostfix, 100, 100, flipY);
       mainPanel.addChild(markerImagePanel.getVideoPanel());
 
       adaptiveThresholdWindowSizeMin.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMin());
@@ -122,12 +118,15 @@ public class RDXOpenCVArUcoMarkerDetectionUI
 
          if (markerImagePanel.getVideoPanel().getIsShowing().get())
          {
-            arUcoMarkerDetection.getCopyOfSourceRGBImage(imageForDrawing.getBytedecoOpenCVMat());
+            arUcoMarkerDetection.getCopyOfSourceRGBImage(imageForDrawing);
 
             arUcoMarkerDetection.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
             arUcoMarkerDetection.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());
 
-            opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(), markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+            markerImagePanel.getBytedecoImage().ensureDimensionsMatch(imageForDrawing);
+            opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(),
+                                    markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),
+                                    opencv_imgproc.COLOR_RGB2RGBA);
 
             markerImagePanel.draw();
          }
@@ -156,7 +155,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
          arUcoMarkerDetection.setEnabled(detectionEnabled.get());
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
-      ImGui.text("Image width: " + imageWidth + " height: " + imageHeight);
+      ImGui.text("Image width: " + imageForDrawing.getImageWidth() + " height: " + imageForDrawing.getImageHeight());
       detectionDurationPlot.render();
       ImGui.text("Detected ArUco Markers:");
       arUcoMarkerDetection.forEachDetectedID(id -> ImGui.text("ID: " + id));
