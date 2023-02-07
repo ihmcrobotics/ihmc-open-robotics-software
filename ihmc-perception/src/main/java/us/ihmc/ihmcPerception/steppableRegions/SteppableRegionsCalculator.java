@@ -192,18 +192,13 @@ public class SteppableRegionsCalculator
                                                         HeightMapData heightMapData)
    {
       double resolution = heightMapData.getGridResolutionXY();
-      int xWidth = regionDataHolder.getMaxX() - regionDataHolder.getMinX();
-      int yWidth = regionDataHolder.getMaxY() - regionDataHolder.getMinY();
 
       HeightMapData regionHeightMap = new HeightMapData(resolution, heightMapData.getGridSizeXY(), heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY());
 
       for (SteppableCell cell : regionDataHolder.getCells())
       {
          int key = HeightMapTools.indicesToKey(cell.x, cell.y, heightMapData.getCenterIndex());
-         double height = heightMapData.getHeightAt(key);
-         if (Double.isNaN(height))
-            LogTools.info("shoot");
-         regionHeightMap.setHeightAt(key, height);//cell.getZ());
+         regionHeightMap.setHeightAt(key, cell.z, cell.normal);
       }
 
       return regionHeightMap;
