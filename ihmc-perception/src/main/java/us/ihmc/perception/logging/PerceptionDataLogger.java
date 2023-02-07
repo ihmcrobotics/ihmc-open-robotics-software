@@ -145,7 +145,7 @@ public class PerceptionDataLogger
       {
          byteBuffers.put(PerceptionLoggerConstants.D435_COLOR_NAME, new byte[BUFFER_SIZE]);
          counts.put(PerceptionLoggerConstants.D435_COLOR_NAME, 0);
-         var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.D435_COLOR);
+         var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.D435_COLOR_IMAGE);
          d435VideoSubscription.addCallback(this::logColorD435);
          runnablesToStopLogging.addLast(d435VideoSubscription::destroy);
       }
