@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live.ros2;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 public enum ROS2VideoFormat
 {

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live.ros1;
+package us.ihmc.rdx.ui.graphics.ros1;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;

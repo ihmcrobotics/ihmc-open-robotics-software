@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live.ros2;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.BigVideoPacket;
@@ -9,8 +9,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.graphics.live.RDXMessageSizeReadout;
-import us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.BytedecoOpenCVTools;

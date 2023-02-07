@@ -5,7 +5,7 @@ import imgui.internal.ImGui;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.graphics.live.ros1.RDXROS1PointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros1.RDXROS1PointCloudVisualizer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 

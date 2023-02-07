@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live.ros2;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;

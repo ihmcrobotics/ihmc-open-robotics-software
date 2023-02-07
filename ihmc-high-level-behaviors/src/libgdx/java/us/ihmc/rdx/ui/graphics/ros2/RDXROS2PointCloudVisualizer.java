@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live.ros2;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -19,14 +19,13 @@ import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.graphics.live.RDXMessageSizeReadout;
+import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
