@@ -114,7 +114,7 @@ public class SteppableRegionsCalculationModule
 
       openCLManager.create();
 
-      steppableRegionsProgram = openCLManager.loadProgram("SteppableRegions");
+      steppableRegionsProgram = openCLManager.loadProgram("SteppableRegions", "HeightMapUtils.cl");
       computeSteppabilityKernel = openCLManager.createKernel(steppableRegionsProgram, "computeSteppability");
       computeSteppabilityConnectionsKernel = openCLManager.createKernel(steppableRegionsProgram, "computeSteppabilityConnections");
 
@@ -207,6 +207,8 @@ public class SteppableRegionsCalculationModule
    {
       steppableParameters.setParameter(heightMapData.getCenterIndex());
       steppableParameters.setParameter((float) heightMapData.getGridResolutionXY());
+      steppableParameters.setParameter((float) heightMapData.getGridCenter().getX());
+      steppableParameters.setParameter((float) heightMapData.getGridCenter().getY());
       steppableParameters.setParameter((float) parameters.getDistanceFromCliffTops());
       steppableParameters.setParameter((float) parameters.getDistanceFromCliffBottoms());
       steppableParameters.setParameter(parameters.getYawDiscretizations());
