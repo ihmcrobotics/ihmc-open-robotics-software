@@ -55,7 +55,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final AtomicReference<ArrayList<MinimalFootstep>> latestCommandedFootsteps;
    private String currentState = "";
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean operatorReview = new ImBoolean(true);
+   private final ImBoolean operatorReview = new ImBoolean(false);
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private long numberOfSteppingRegionsReceived = 0;
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 250, 15);
@@ -91,9 +91,9 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private volatile int numberOfPlannedSteps = 0;
 
    private ImBooleanWrapper useReferencePlan;
-   private ImDouble ball_x = new ImDouble();
-   private ImDouble ball_y = new ImDouble();
-   private ImDouble ball_yaw = new ImDouble();
+   private ImDouble ball_x = new ImDouble(7.0);
+   private ImDouble ball_y = new ImDouble(0.3);
+   private ImDouble ball_yaw = new ImDouble(0.1);
 
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {

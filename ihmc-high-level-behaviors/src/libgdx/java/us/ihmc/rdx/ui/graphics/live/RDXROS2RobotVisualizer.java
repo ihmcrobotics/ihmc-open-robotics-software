@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
 {
    private final RDXBaseUI baseUI;
-   private final ImBoolean trackRobot = new ImBoolean(false);
+   private final ImBoolean trackRobot = new ImBoolean(true);
    private final ImBoolean hideChest = new ImBoolean(false);
    private final Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier;
    private RDXFocusBasedCamera cameraForTracking;

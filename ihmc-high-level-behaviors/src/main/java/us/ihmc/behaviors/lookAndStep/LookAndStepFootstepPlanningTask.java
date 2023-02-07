@@ -448,21 +448,27 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setMaximumIterations(100);
 
       // TODO: maybe it could be swing + stance transition duration + 10% ?
-      double expirationTime = 4.0;
+      double expirationTime = 3.0;
       // TODO check if looks ok (revised after Duncan review)
-      if (lookAndStepParameters.getUseReferencePlan())
+      if (lookAndStepParameters.getUseReferencePlan() && successfulPlanExpirationTimer.isRunning(expirationTime))
       {
-         if (successfulPlanExpirationTimer.isRunning(expirationTime) && previousFootstepPlan != null && previousFootstepPlan.getNumberOfSteps() >= 2)
+         if (previousFootstepPlan != null && previousFootstepPlan.getNumberOfSteps() >= 2)
          {
             if (initialStanceSide == previousFootstepPlan.getFootstep(0).getRobotSide())
             {
-               LogTools.error("Something is wrong in Look and step using reference plan");
+               previousFootstepPlan.remove(0);
+               footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
+               footstepPlanningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceFootstepPlan(previousFootstepPlan);
+               LogTools.warn("USING PREVIOUS PLAN AS REFERENCE . . .");
+//               LogTools.error("Something is wrong in Look and step using reference plan");
             }
             else
             {
-               previousFootstepPlan.remove(0);
-               footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
-               LogTools.warn("using previous plan as reference . . .");
+//               previousFootstepPlan.remove(0);
+//               footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
+
+               LogTools.error("Something is wrong in Look and step using reference plan");
+//               LogTools.warn("USING PREVIOUS PLAN AS REFERENCE . . .");
             }
          }
       }
@@ -501,6 +507,7 @@ public class LookAndStepFootstepPlanningTask
       }
       else
       {
+         LogTools.warn("Previous plan output was not valid to be used as reference for next plan");
          previousFootstepPlan = null;
       }
 
