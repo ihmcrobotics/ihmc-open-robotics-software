@@ -29,6 +29,7 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.filters.CollidingScanPointFilter;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.ros2.ROS2NodeInterface;
