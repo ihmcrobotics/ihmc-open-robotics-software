@@ -64,6 +64,14 @@ public class RDXPerceptionUI
                                                                                 PubSubImplementation.FAST_RTPS,
                                                                                 ROS2Tools.L515_DEPTH_IMAGE));
 
+            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D435 Color",
+                                                                                PubSubImplementation.FAST_RTPS,
+                                                                                ROS2Tools.D435_COLOR_IMAGE));
+
+            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D435 Depth",
+                                                                                PubSubImplementation.FAST_RTPS,
+                                                                                ROS2Tools.D435_DEPTH_IMAGE));
+
             globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED2 Color Stereo",
                                                                                 PubSubImplementation.FAST_RTPS,
                                                                                 ROS2Tools.ZED2_STEREO_COLOR));
@@ -76,6 +84,11 @@ public class RDXPerceptionUI
                                                                                 PubSubImplementation.FAST_RTPS,
                                                                                 ROS2Tools.L515_DEPTH_IMAGE,
                                                                                 ROS2Tools.L515_COLOR_IMAGE));
+
+            globalVisualizersUI.addVisualizer(new RDXROS2ColoredDepthVisualizer("D435 Colored Depth",
+                                                                                PubSubImplementation.FAST_RTPS,
+                                                                                ROS2Tools.D435_DEPTH_IMAGE,
+                                                                                ROS2Tools.D435_COLOR_IMAGE));
 
             globalVisualizersUI.addVisualizer(new RDXROS2OusterPointCloudVisualizer("Ouster Point Cloud",
                                                                                     PubSubImplementation.FAST_RTPS,
