@@ -14,8 +14,10 @@ import org.bytedeco.opencv.opencv_features2d.SimpleBlobDetector;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -115,6 +117,8 @@ public class RDXBlackflyCalibrationSuite
    private Mat rectificationTransformation;
    private Mat newCameraMatrixEstimate;
    private final Throttler undistortionThrottler = new Throttler().setFrequency(60.0);
+   private OpenCVArUcoMarkerDetection openCVArUcoMarkerDetection;
+   private Mat spareRGBMatForArUcoDrawing;
 
    public RDXBlackflyCalibrationSuite()
    {
@@ -156,6 +160,9 @@ public class RDXBlackflyCalibrationSuite
                                                                         this::undistortedImageUpdateOnAsynchronousThread);
                   baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getVideoPanel());
 
+                  openCVArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
+                  openCVArUcoMarkerDetection.create(ReferenceFrame.getWorldFrame());
+
                   baseUI.getLayoutManager().reloadLayout();
 
                   grayscaleImage = new Mat();
@@ -186,6 +193,7 @@ public class RDXBlackflyCalibrationSuite
                   sourceImageSize = new Size((int) BFLY_U3_23S6C_WIDTH_PIXELS, (int) BFLY_U3_23S6C_HEIGHT_PIXELS);
                   undistortedImageSize = new Size(undistortedImageWidth.get(), undistortedImageHeight.get());
                   imageForUndistortion = new SwapReference<>(Mat::new);
+                  spareRGBMatForArUcoDrawing = new Mat(100, 100, opencv_core.CV_8UC3);
 
                   ThreadTools.startAsDaemon(() ->
                   {
@@ -320,6 +328,14 @@ public class RDXBlackflyCalibrationSuite
 
 //            opencv_calib3d.initUndistortRectifyMap();
 //            opencv_calib3d.remap();
+
+            newCameraMatrixEstimate.copyTo(openCVArUcoMarkerDetection.getCameraMatrix());
+            openCVArUcoMarkerDetection.update(data.getRGBA8Image());
+
+            opencv_imgproc.cvtColor(data.getRGBA8Mat(), spareRGBMatForArUcoDrawing, opencv_imgproc.COLOR_RGBA2RGB);
+            openCVArUcoMarkerDetection.drawDetectedMarkers(spareRGBMatForArUcoDrawing);
+            openCVArUcoMarkerDetection.drawRejectedPoints(spareRGBMatForArUcoDrawing);
+            opencv_imgproc.cvtColor(spareRGBMatForArUcoDrawing, data.getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA);
 
             cameraMatrixForUndistortion.swap();
             distortionCoefficientsForUndistortion.swap();

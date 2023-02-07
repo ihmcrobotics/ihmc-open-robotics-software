@@ -46,9 +46,9 @@ public class RDXObjectDetector
       box = new RDXArUcoVirtualBox(2);
 
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-      arUcoMarkerDetection.create(objectDetectionBlackflySimulator.getLowLevelSimulator().getRGBA8888ColorImage(),
-                                  objectDetectionBlackflySimulator.getDepthCameraIntrinsics(),
-                                  objectDetectionBlackflySimulator.getSensorFrame());
+      arUcoMarkerDetection.create(objectDetectionBlackflySimulator.getSensorFrame());
+      arUcoMarkerDetection.setSourceImageForDetection(objectDetectionBlackflySimulator.getLowLevelSimulator().getRGBA8888ColorImage());
+      arUcoMarkerDetection.setCameraInstrinsics(objectDetectionBlackflySimulator.getDepthCameraIntrinsics());
       arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("from Blackfly Right");
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       markersToTrack.add(pullDoorPanel.getArUcoMarker());

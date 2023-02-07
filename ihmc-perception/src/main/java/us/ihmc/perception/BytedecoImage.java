@@ -185,6 +185,20 @@ public class BytedecoImage
       }
    }
 
+   /**
+    * Resizes this image to match the dimensions of other if necessary.
+    *
+    * Warning: Assumes we are not using OpenCL on this image and this BytedecoImage is not
+    *   backed by an external buffer.
+    */
+   public void ensureDimensionsMatch(BytedecoImage other)
+   {
+      if (!BytedecoOpenCVTools.dimensionsMatch(this, other))
+      {
+         resize(other.getImageWidth(), other.getImageHeight(), null, null);
+      }
+   }
+
    public void rewind()
    {
       backingDirectByteBuffer.rewind();
