@@ -55,7 +55,10 @@ void kernel computeSteppability(global float* params,
                                 read_only image2d_t height_map,
                                 global float* idx_yaw_singular_buffer,
                                 write_only image2d_t steppable_map,
-                                write_only image2d_t snapped_height_map)
+                                write_only image2d_t snapped_height_map,
+                                write_only image2d_t snapped_normal_x_map,
+                                write_only image2d_t snapped_normal_y_map,
+                                write_only image2d_t snapped_normal_z_map)
 {
     // Remember, these are x and y in image coordinates, not world
     int idx_x = get_global_id(0); // column
@@ -154,6 +157,19 @@ void kernel computeSteppability(global float* params,
     float resolution = 0.02f;
     float half_length = foot_length / 2.0f;
     float half_width = foot_width / 2.0f;
+
+    // these are values that will be used for the plane calculation
+     float n = 0.0f;
+     float x = 0.0f;
+     float y = 0.0f;
+     float z = 0.0f;
+     float xx = 0.0f;
+     float xy = 0.0f;
+     float xz = 0.0f;
+     float yy = 0.0f;
+     float yz = 0.0f;
+     float zz = 0.0f;
+
     for (float x_value = -half_length; x_value <= half_length; x_value += resolution)
     {
         for (float y_value = -half_width; y_value <= half_width; y_value += resolution)
@@ -168,11 +184,22 @@ void kernel computeSteppability(global float* params,
             int2 query_key = (int2) (image_query_x, image_query_y);
             float query_height = (float) read_imagef(height_map, query_key).x;
 
-            if (query_height < min_height)
+            if (isnan(query_height) || query_height < min_height)
                continue;
 
             points_inside_polygon++;
             running_height_total += query_height;
+
+            n += 1.0f;
+            x += point_query.x;
+            y += point_query.y;
+            z += query_height;
+            xx += point_query.x * point_query.x;
+            xy += point_query.x * point_query.y;
+            xz += point_query.x * query_height;
+            yy += point_query.y * point_query.y;
+            yz += point_query.y * query_height;
+            zz += query_height * query_height;
         }
     }
 
@@ -187,14 +214,31 @@ void kernel computeSteppability(global float* params,
     {
         float snap_height = running_height_total / points_inside_polygon;
 
+        float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
+        float z_variance_vector[3] = {-xz, -yz, -z};
+        float* coefficients = solveForPlaneCoefficients(covariance_matrix, z_variance_vector);
+
+        float x_solution = x / n;
+        float y_solution = y / n;
+        float z_solution = -coefficients[0] * x_solution - coefficients[1] * y_solution - coefficients[2];
+
+        float3 normal = (float3) (coefficients[0], coefficients[1], 1.0);
+        normal = normalize(normal);
+
         // we can step here!
         write_imageui(steppable_map, key, (uint4)(VALID,0,0,0));
         write_imagef(snapped_height_map, key, (float4)(snap_height, 0.0f, 0.0f, 0.0f));
+        write_imagef(snapped_normal_x_map, key, (float4)(normal.x, 0.0f, 0.0f, 0.0f));
+        write_imagef(snapped_normal_x_map, key, (float4)(normal.y, 0.0f, 0.0f, 0.0f));
+        write_imagef(snapped_normal_x_map, key, (float4)(normal.z, 0.0f, 0.0f, 0.0f));
     }
     else
     {
         write_imageui(steppable_map, key, (uint4)(SNAP_FAILED,0,0,0));
         write_imagef(snapped_height_map, key, (float4)(NAN, 0.0f, 0.0f, 0.0f));
+        write_imagef(snapped_normal_x_map, key, (float4)(NAN, 0.0f, 0.0f, 0.0f));
+        write_imagef(snapped_normal_x_map, key, (float4)(NAN, 0.0f, 0.0f, 0.0f));
+        write_imagef(snapped_normal_x_map, key, (float4)(NAN, 0.0f, 0.0f, 0.0f));
     }
 }
 

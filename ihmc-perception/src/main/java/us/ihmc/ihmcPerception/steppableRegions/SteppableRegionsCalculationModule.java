@@ -45,6 +45,9 @@ public class SteppableRegionsCalculationModule
 
    private final List<BytedecoImage> steppabilityImages = new ArrayList<>();
    private final List<BytedecoImage> snapHeightImages = new ArrayList<>();
+   private final List<BytedecoImage> snapNormalXImages = new ArrayList<>();
+   private final List<BytedecoImage> snapNormalYImages = new ArrayList<>();
+   private final List<BytedecoImage> snapNormalZImages = new ArrayList<>();
    private final List<BytedecoImage> steppabilityConnections = new ArrayList<>();
 
    private final List<List<SteppableRegion>> regions = new ArrayList<>();
@@ -64,6 +67,9 @@ public class SteppableRegionsCalculationModule
       {
          steppabilityImages.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
          snapHeightImages.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
+         snapNormalXImages.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
+         snapNormalYImages.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
+         snapNormalZImages.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
          steppabilityConnections.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
       }
 
@@ -123,6 +129,9 @@ public class SteppableRegionsCalculationModule
       {
          steppabilityImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          snapHeightImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         snapNormalXImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         snapNormalYImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         snapNormalZImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          steppabilityConnections.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
       }
    }
@@ -147,6 +156,9 @@ public class SteppableRegionsCalculationModule
          openCLManager.setKernelArgument(computeSteppabilityKernel, 2, yaw.getOpenCLBufferObject());
          openCLManager.setKernelArgument(computeSteppabilityKernel, 3, steppabilityImages.get(yawValue).getOpenCLImageObject());
          openCLManager.setKernelArgument(computeSteppabilityKernel, 4, snapHeightImages.get(yawValue).getOpenCLImageObject());
+         openCLManager.setKernelArgument(computeSteppabilityKernel, 5, snapNormalXImages.get(yawValue).getOpenCLImageObject());
+         openCLManager.setKernelArgument(computeSteppabilityKernel, 6, snapNormalYImages.get(yawValue).getOpenCLImageObject());
+         openCLManager.setKernelArgument(computeSteppabilityKernel, 7, snapNormalZImages.get(yawValue).getOpenCLImageObject());
 
          openCLManager.execute2D(computeSteppabilityKernel, cellsPerSide, cellsPerSide);
 
@@ -158,6 +170,9 @@ public class SteppableRegionsCalculationModule
 
          steppabilityImages.get(yawValue).readOpenCLImage(openCLManager);
          snapHeightImages.get(yawValue).readOpenCLImage(openCLManager);
+         snapNormalXImages.get(yawValue).readOpenCLImage(openCLManager);
+         snapNormalYImages.get(yawValue).readOpenCLImage(openCLManager);
+         snapNormalZImages.get(yawValue).readOpenCLImage(openCLManager);
          steppabilityConnections.get(yawValue).readOpenCLImage(openCLManager);
 
          openCLManager.finish();
@@ -167,6 +182,9 @@ public class SteppableRegionsCalculationModule
          SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.mergeCellsIntoSteppableRegionEnvironment(
                steppabilityImages.get(yawValue),
                snapHeightImages.get(yawValue),
+               snapNormalXImages.get(yawValue),
+               snapNormalYImages.get(yawValue),
+               snapNormalZImages.get(yawValue),
                steppabilityConnections.get(yawValue));
          polygonizerParameters.setLengthThreshold(0.4 * heightMapData.getGridResolutionXY()); // this is critical to prevent it from filtering small regions
          List<SteppableRegion> regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
@@ -200,6 +218,9 @@ public class SteppableRegionsCalculationModule
          steppabilityImages.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
          steppabilityConnections.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
          snapHeightImages.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
+         snapNormalXImages.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
+         snapNormalYImages.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
+         snapNormalZImages.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
       }
    }
 

@@ -28,9 +28,17 @@ public class SteppableRegionsCalculator
 {
    public static SteppableRegionsEnvironmentModel mergeCellsIntoSteppableRegionEnvironment(BytedecoImage steppability,
                                                                                            BytedecoImage snappedHeight,
+                                                                                           BytedecoImage snappedNormalX,
+                                                                                           BytedecoImage snappedNormalY,
+                                                                                           BytedecoImage snappedNormalZ,
                                                                                            BytedecoImage connections)
    {
-      SteppableRegionsEnvironmentModel environmentModel = createUnsortedSteppableRegionEnvironment(steppability, snappedHeight, connections);
+      SteppableRegionsEnvironmentModel environmentModel = createUnsortedSteppableRegionEnvironment(steppability,
+                                                                                                   snappedHeight,
+                                                                                                   snappedNormalX,
+                                                                                                   snappedNormalY,
+                                                                                                   snappedNormalZ,
+                                                                                                   connections);
 
       if (steppability.getImageHeight() != steppability.getImageWidth())
          throw new RuntimeException("Should be square");
@@ -201,7 +209,12 @@ public class SteppableRegionsCalculator
       return regionHeightMap;
    }
 
-   private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(BytedecoImage steppability, BytedecoImage snappedHeight, BytedecoImage connections)
+   private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(BytedecoImage steppability,
+                                                                                            BytedecoImage snappedHeight,
+                                                                                            BytedecoImage snappedNormalX,
+                                                                                            BytedecoImage snappedNormalY,
+                                                                                            BytedecoImage snappedNormalZ,
+                                                                                            BytedecoImage connections)
    {
       int cellsPerSide = steppability.getImageHeight();
       SteppableRegionsEnvironmentModel steppableRegionsToConvert = new SteppableRegionsEnvironmentModel(cellsPerSide);
@@ -213,14 +226,17 @@ public class SteppableRegionsCalculator
             if (x == 0 && y == 0)
                continue;
 
-            int row = cellsPerSide - x - 1;
-            int col = cellsPerSide - y - 1;
+            int column = cellsPerSide - x - 1;
+            int row = cellsPerSide - y - 1;
             // this cell is steppable. Also remember the image x-y is switched
-            if (steppability.getInt(row, col) == 0)
+            if (steppability.getInt(column, row) == 0)
             {
-               boolean isBorderCell = connections.getInt(row, col) == 255;
-               double z = snappedHeight.getFloat(row, col);
-               SteppableCell cell = new SteppableCell(x, y, z, cellsPerSide, isBorderCell);
+               boolean isBorderCell = connections.getInt(column, row) == 255;
+               double z = snappedHeight.getFloat(column, row);
+               Vector3D normal = new Vector3D(snappedNormalX.getFloat(column, row),
+                                              snappedNormalY.getFloat(column, row),
+                                              snappedNormalZ.getFloat(column, row));
+               SteppableCell cell = new SteppableCell(x, y, z, normal, cellsPerSide, isBorderCell);
                steppableRegionsToConvert.addUnexpandedSteppableCell(cell);
             }
          }
@@ -628,6 +644,7 @@ public class SteppableRegionsCalculator
       private final int x;
       private final int y;
       private final double z;
+      private final Vector3D normal;
 
       private final int hashCode;
       private final boolean isBorderCell;
@@ -636,11 +653,12 @@ public class SteppableRegionsCalculator
       private SteppableRegionDataHolder region;
       private boolean cellHasBeenExpanded = false;
 
-      public SteppableCell(int x, int y, double z, int cellsPerSide, boolean isBorderCell)
+      public SteppableCell(int x, int y, double z, Vector3DReadOnly normal, int cellsPerSide, boolean isBorderCell)
       {
          this.x = x;
          this.y = y;
          this.z = z;
+         this.normal = new Vector3D(normal);
          this.isBorderCell = isBorderCell;
 
          hashCode = x * cellsPerSide + y;
