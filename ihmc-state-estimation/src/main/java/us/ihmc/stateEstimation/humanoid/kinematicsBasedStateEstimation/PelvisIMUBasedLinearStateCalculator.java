@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -170,7 +171,7 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
 
    private final FrameVector3D correctionVelocityForMeasurementFrameOffset = new FrameVector3D();
 
-   public void updateIMUAndRootJointLinearVelocity(FrameVector3D rootJointVelocityToPack)
+   public void updateIMUAndRootJointLinearVelocity(FixedFrameVector3DBasics rootJointVelocityToPack)
    {
       updateLinearAccelerationMeasurement();
 
@@ -178,7 +179,7 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       linearAccelerationMeasurement.scale(estimatorDT);
 
       yoMeasurementFrameLinearVelocityInWorld.add(linearAccelerationMeasurement);
-      rootJointVelocityToPack.setIncludingFrame(yoMeasurementFrameLinearVelocityInWorld);
+      rootJointVelocityToPack.set(yoMeasurementFrameLinearVelocityInWorld);
 
       getCorrectionVelocityForMeasurementFrameOffset(correctionVelocityForMeasurementFrameOffset);
       correctionVelocityForMeasurementFrameOffset.changeFrame(worldFrame);
@@ -196,7 +197,7 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       return yoLinearAccelerationMeasurement;
    }
 
-   public void correctIMULinearVelocity(FrameVector3D rootJointVelocity)
+   public void correctIMULinearVelocity(FrameVector3DReadOnly rootJointVelocity)
    {
       rootJointLinearVelocity.set(rootJointVelocity);
       yoMeasurementFrameLinearVelocityInWorld.set(rootJointVelocity);
