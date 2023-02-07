@@ -8,7 +8,7 @@ import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.live.RDXROS2BigVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 

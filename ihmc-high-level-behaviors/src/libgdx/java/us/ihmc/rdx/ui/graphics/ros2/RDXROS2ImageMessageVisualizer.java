@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -18,6 +18,9 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;

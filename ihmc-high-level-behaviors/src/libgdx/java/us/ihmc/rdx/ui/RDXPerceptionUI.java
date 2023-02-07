@@ -12,7 +12,7 @@ import us.ihmc.rdx.perception.RDXRemotePerceptionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
-import us.ihmc.rdx.ui.graphics.live.*;
+import us.ihmc.rdx.ui.graphics.ros2.*;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
