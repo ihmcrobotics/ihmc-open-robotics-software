@@ -14,8 +14,7 @@ import us.ihmc.scs2.simulation.collision.Collidable;
 
 public class RDXInteractableRobotLinkDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources",
                                                   "Interactable Robot Link Demo");
    private RDXInteractableRobotLink interactableRobotLink;

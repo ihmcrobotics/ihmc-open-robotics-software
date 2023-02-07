@@ -8,8 +8,7 @@ import us.ihmc.tools.thread.Activator;
 public class RDXHDF5ImageBrowserDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/libgdx/resources",
                                                   "HDF5 Image Browser Demo");
    private RDXHDF5ImageBrowser hdf5ImageBrowser;
