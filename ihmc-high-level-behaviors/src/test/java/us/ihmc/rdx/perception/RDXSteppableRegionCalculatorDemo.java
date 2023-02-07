@@ -127,7 +127,7 @@ public class RDXSteppableRegionCalculatorDemo
 
                   baseUI.getPrimaryScene().addRenderableProvider(steppableRegionsCalculatorModule::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                   realtimeRos2Node.spin();
                   heightMap.start();
                }

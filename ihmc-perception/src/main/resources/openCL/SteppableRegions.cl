@@ -1,12 +1,14 @@
 #define HEIGHT_MAP_CENTER_INDEX 0
 #define HEIGHT_MAP_RESOLUTION 1
-#define MIN_DISTANCE_FROM_CLIFF_TOPS 2
-#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 3
-#define TOTAL_YAW_DISCRETIZATIONS 4
-#define FOOT_WIDTH 5
-#define FOOT_LENGTH 6
-#define CLIFF_START_HEIGHT_TO_AVOID 7
-#define CLIFF_END_HEIGHT_TO_AVOID 8
+#define CENTER_X 2
+#define CENTER_Y 3
+#define MIN_DISTANCE_FROM_CLIFF_TOPS 4
+#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 5
+#define TOTAL_YAW_DISCRETIZATIONS 6
+#define FOOT_WIDTH 7
+#define FOOT_LENGTH 8
+#define CLIFF_START_HEIGHT_TO_AVOID 9
+#define CLIFF_END_HEIGHT_TO_AVOID 10
 
 #define VALID 0
 #define CLIFF_TOP 1
@@ -18,20 +20,10 @@ float get_yaw_from_index(global float* params, int idx_yaw)
     return M_PI_2_F * ((float) (idx_yaw / params[TOTAL_YAW_DISCRETIZATIONS]));
 }
 
-float2 rotate_vector(float2 vector, float yaw)
-{
-    float cH = cos(yaw);
-    float sH = sin(yaw);
-    float dxLocal = cH * vector.x - sH * vector.y;
-    float dyLocal = sH * vector.x + cH * vector.y;
-
-    return (float2) (dxLocal, dyLocal);
-}
-
 float signed_distance_to_foot_polygon(global float* params, int2 foot_key, float foot_yaw, int2 query)
 {
     float2 vector_to_point = params[HEIGHT_MAP_RESOLUTION] * (float2) ((float) (query.x - foot_key.x), (float) (query.y - foot_key.y));
-    float2 vector_in_foot_frame = rotate_vector(vector_to_point, -foot_yaw);
+    float2 vector_in_foot_frame = applyYawRotationToVector2D(vector_to_point, -foot_yaw);
     float x_outside = fabs(vector_in_foot_frame.x) - params[FOOT_LENGTH];
     float y_outside = fabs(vector_in_foot_frame.y) - params[FOOT_WIDTH];
 
@@ -73,19 +65,23 @@ void kernel computeSteppability(global float* params,
     float distance_from_bottom = params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
     float distance_from_top = params[MIN_DISTANCE_FROM_CLIFF_TOPS];
 
+    float map_resolution = params[HEIGHT_MAP_RESOLUTION];
     float max_dimension = max(params[FOOT_WIDTH], params[FOOT_LENGTH]);
-    int cells_per_side = 2 * params[HEIGHT_MAP_CENTER_INDEX] + 1;
+    int center_index = params[HEIGHT_MAP_CENTER_INDEX];
+    float2 center = (float2) (params[CENTER_X], params[CENTER_Y]);
+    int cells_per_side = 2 * center_index + 1;
+
+    int map_idx_x = cells_per_side - idx_y;
+    int map_idx_y = idx_x;
+    float2 foot_position = indices_to_coordinate((int2) (map_idx_x, map_idx_y), center, map_resolution, center_index);
 
     // TODO check these
     float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
-    int cliff_offset_indices = (int) ceil(cliff_search_offset / params[HEIGHT_MAP_RESOLUTION]);
+    int cliff_offset_indices = (int) ceil(cliff_search_offset / map_resolution);
 
     // search for a cliff base that's too close
     float max_height = -INFINITY;
-    int min_x_query = INFINITY;
-    int max_x_query = -INFINITY;
-    int min_y_query = INFINITY;
-    int max_y_query = -INFINITY;
+
     for (int x_query = idx_x - cliff_offset_indices; x_query <= idx_x + cliff_offset_indices; x_query++)
     {
         if (x_query < 0 || x_query >= cells_per_side)
@@ -135,12 +131,8 @@ void kernel computeSteppability(global float* params,
             }
 
             //  TODO extract epsilon
-            if (distance_to_foot < 1e-5f)
+            if (distance_to_foot < 1e-3f)
             {
-                min_x_query = min(x_query, min_x_query);
-                max_x_query = max(x_query, max_x_query);
-                min_y_query = min(y_query, min_y_query);
-                max_y_query = max(y_query, max_y_query);
                 max_height = max(query_height, max_height);
             }
         }
@@ -149,32 +141,39 @@ void kernel computeSteppability(global float* params,
 
     int points_inside_polygon = 0;
     float running_height_total = 0.0f;
-    float min_height = max_height - 0.05f; // TODO extract
-    for (int x_query = min_x_query; x_query <= max_x_query; x_query++)
+    float min_height = max_height - 0.05f;
+    float resolution = 0.02f;
+    float half_length = foot_length / 2.0f;
+    float half_width = foot_width / 2.0f;
+    for (float x_value = -half_length; x_value <= half_length; x_value += resolution)
     {
-        for (int y_query = min_y_query; y_query <= max_y_query; y_query++)
+        for (float y_value = -half_width; y_value <= half_width; y_value += resolution)
         {
-            // get the x,y position and height
-            int2 query_key = (int2) (x_query, y_query);
+            float2 vector_in_foot = applyYawRotationToVector2D((float2) (x_value, y_value), foot_yaw);
+            float2 point_query = vector_in_foot + foot_position;
+
+            int map_query_x = coordinate_to_index(point_query.x, center.x, map_resolution, center_index);
+            int map_query_y = coordinate_to_index(point_query.y, center.y, map_resolution, center_index);
+            int image_query_x = map_query_y;
+            int image_query_y = cells_per_side - map_query_x;
+            int2 query_key = (int2) (image_query_x, image_query_y);
             float query_height = (float) read_imagef(height_map, query_key).x;
 
             if (query_height < min_height)
-                continue;
+               continue;
 
-            float distance_to_foot = signed_distance_to_foot_polygon(params, key, foot_yaw, query_key);
-
-            //  TODO extract epsilon
-            if (distance_to_foot < 1e-5f)
-            {
-                points_inside_polygon++;
-                running_height_total += query_height;
-            }
+            points_inside_polygon++;
+            running_height_total += query_height;
         }
     }
 
-    // TODO extract area
-    float min_area = 0.75 * (params[FOOT_LENGTH] * params[FOOT_WIDTH]);
-    int min_points = (int) (min_area / (params[HEIGHT_MAP_RESOLUTION] * params[HEIGHT_MAP_RESOLUTION]));
+    int lengths = (int) floor(foot_length / resolution);
+    int widths = (int) floor(foot_width / resolution);
+    int max_points = lengths * widths;
+
+    // TODO extract area fraction
+    float min_area_fraction = 0.75f;
+    int min_points = (int) (min_area_fraction * max_points);
     if (points_inside_polygon > min_points)
     {
         float snap_height = running_height_total / points_inside_polygon;
