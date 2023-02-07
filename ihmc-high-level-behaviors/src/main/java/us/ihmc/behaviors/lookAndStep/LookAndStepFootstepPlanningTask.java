@@ -465,8 +465,12 @@ public class LookAndStepFootstepPlanningTask
             LogTools.warn("stance about to be taken has opposite side from previous plan's first step side");
          }
          LogTools.warn("SETTING PREVIOUS PLAN AS REFERENCE . . .");
-         footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
       }
+      else
+      {
+         previousFootstepPlan = null;
+      }
+      footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getSwingPlanningModule().getSwingPlannerParameters().set(swingPlannerParameters);
