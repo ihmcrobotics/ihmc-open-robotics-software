@@ -17,6 +17,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -28,6 +29,8 @@ import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.*;
+
+import java.util.ArrayList;
 
 /**
  * This application allows to create calibration datasets, load datasets,
@@ -119,6 +122,7 @@ public class RDXBlackflyCalibrationSuite
    private final Throttler undistortionThrottler = new Throttler().setFrequency(60.0);
    private OpenCVArUcoMarkerDetection openCVArUcoMarkerDetection;
    private Mat spareRGBMatForArUcoDrawing;
+   private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
 
    public RDXBlackflyCalibrationSuite()
    {
@@ -161,7 +165,11 @@ public class RDXBlackflyCalibrationSuite
                   baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getVideoPanel());
 
                   openCVArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  openCVArUcoMarkerDetection.create(ReferenceFrame.getWorldFrame());
+                  openCVArUcoMarkerDetection.create(ReferenceFrame.getWorldFrame()); // FIXME: Make frames
+                  arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();
+                  ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
+                  markersToTrack.add(new OpenCVArUcoMarker(0, 0.2));
+                  arUcoMarkerDetectionUI.create(openCVArUcoMarkerDetection, markersToTrack, ReferenceFrame.getWorldFrame()); // FIXME: Make frames
 
                   baseUI.getLayoutManager().reloadLayout();
 

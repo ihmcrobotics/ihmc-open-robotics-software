@@ -80,7 +80,7 @@ public class RDXArUcoCodeDetectionDemo
                   arUcoMarkerDetection.create(cameraSensor.getSensorFrame());
                   arUcoMarkerDetection.setSourceImageForDetection(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
                   arUcoMarkerDetection.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
-                  arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("from Sensor");
+                  arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" from Sensor");
                   ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
                   markersToTrack.add(new OpenCVArUcoMarker(0, 0.2032));
                   markersToTrack.add(new OpenCVArUcoMarker(1, 0.2032));
@@ -94,7 +94,7 @@ public class RDXArUcoCodeDetectionDemo
                   testImageArUcoMarkerDetection.create(cameraSensor.getSensorFrame());
                   testImageArUcoMarkerDetection.setSourceImageForDetection(testRGB888ColorImage);
                   testImageArUcoMarkerDetection.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
-                  testImageArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("Test");
+                  testImageArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" Test");
                   testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection, new ArrayList<>(), sensorPoseGizmo.getGizmoFrame());
                   ImGuiPanel testUIPanel = new ImGuiPanel("Test image detection", this::renderTestUIImGuiWidgets);
                   testUIPanel.addChild(testImageArUcoMarkerDetectionUI.getMarkerImagePanel().getVideoPanel());
