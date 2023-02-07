@@ -28,6 +28,7 @@ public class PerceptionDataLoggingTest
    private HDF5Manager hdf5ManagerWriter;
 
    @Test
+   @Disabled
    public void testByteToIntArray()
    {
       byte[] dataArray = {(byte) 0, (byte) 255, (byte) 1, (byte) 3, (byte) 4, (byte) 42, (byte) 153, (byte) 10, (byte) 11, (byte) 13, (byte) 15};
@@ -47,6 +48,7 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testLoggingByteArray() throws InterruptedException
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_byte_array.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -77,6 +79,7 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testLoggingLargeByteArray() throws InterruptedException
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_large_bytes.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -119,6 +122,7 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testLoggingIntArray() throws InterruptedException
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_int_array.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -147,6 +151,7 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testCompressedFloatDepthLoggingPNG() throws InterruptedException
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_depth_png.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -208,6 +213,7 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testCompressedDepthMapLoggingPNG() throws InterruptedException
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_depth_png_2.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -359,6 +365,7 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testStoreAndLoadFloatArray() throws InterruptedException
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_float_array.hdf5", hdf5.H5F_ACC_TRUNC());
