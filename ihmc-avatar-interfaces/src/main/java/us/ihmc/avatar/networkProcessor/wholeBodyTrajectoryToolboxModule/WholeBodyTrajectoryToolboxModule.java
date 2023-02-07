@@ -13,6 +13,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -22,7 +23,6 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Rigi
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.RealtimeROS2Node;
 
 public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 {
@@ -116,11 +116,11 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
+   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s -> {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s -> {
          if (wholeBodyTrajectoryToolboxController != null)
             wholeBodyTrajectoryToolboxController.updateRobotConfigurationData(s.takeNextData());
       });

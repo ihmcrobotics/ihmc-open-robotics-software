@@ -3,13 +3,18 @@ package us.ihmc.avatar.networkProcessor.directionalControlToolboxModule;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -18,14 +23,15 @@ import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.Direc
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
 public class DirectionalControlModule extends ToolboxModule
 {
-   private IHMCRealtimeROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
-   private IHMCRealtimeROS2Publisher<FootstepDataListMessage> footstepPublisher;
-   private IHMCRealtimeROS2Publisher<FootstepDataListMessage> footstepVisualizationPublisher;
+   private IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
+   private IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
+   private IHMCROS2Publisher<FootstepDataListMessage> footstepVisualizationPublisher;
    private final DirectionalControlController steppingController;
 
    /*
@@ -93,31 +99,31 @@ public class DirectionalControlModule extends ToolboxModule
     * standalone mode.
     */
    @Override
-   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
+   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
       ROS2Topic<?> controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
       {
          if (steppingController != null)
             steppingController.updateRobotConfigurationData(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
       {
          if (steppingController != null)
             steppingController.updateFootstepStatusMessage(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, s ->
       {
          if (steppingController != null)
             steppingController.updatePlanarRegionsListMessage(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, WalkingControllerFailureStatusMessage.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerFailureStatusMessage.class, controllerPubGenerator, s ->
       {
          if (steppingController != null)
             steppingController.updateWalkingControllerFailureStatusMessage(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
       {
          if (steppingController != null)
             steppingController.updateCapturabilityBasedStatus(s.takeNextData());
@@ -125,9 +131,9 @@ public class DirectionalControlModule extends ToolboxModule
 
       ROS2Topic<?> controllerSubGenerator = ControllerAPIDefinition.getInputTopic(robotName);
 
-      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, PauseWalkingMessage.class, controllerSubGenerator);
-      footstepPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, FootstepDataListMessage.class, controllerSubGenerator);
-      footstepVisualizationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
+      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
+      footstepPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
+      footstepVisualizationPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                           FootstepDataListMessage.class,
                                                                           DirectionalControlModule.getOutputTopic(robotName));
 
