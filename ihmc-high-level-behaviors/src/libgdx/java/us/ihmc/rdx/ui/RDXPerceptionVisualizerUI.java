@@ -43,8 +43,8 @@ public class RDXPerceptionVisualizerUI
             globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Mapsense Regions", ros2Node, ROS2Tools.MAPSENSE_REGIONS));
 
             RDXROS2DepthImageVisualizer ousterDepthVisualizer = new RDXROS2DepthImageVisualizer("Ouster Depth",
-                                            PubSubImplementation.FAST_RTPS,
-                                            ROS2Tools.OUSTER_DEPTH_IMAGE);
+                                                                                                PubSubImplementation.FAST_RTPS,
+                                                                                                ROS2Tools.OUSTER_DEPTH_IMAGE);
             ousterDepthVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(ousterDepthVisualizer);
 
