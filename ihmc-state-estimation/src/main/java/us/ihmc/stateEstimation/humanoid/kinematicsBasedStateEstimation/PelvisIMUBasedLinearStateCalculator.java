@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -204,7 +205,7 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       yoMeasurementFrameLinearVelocityInWorld.add(correctionVelocityForMeasurementFrameOffset);
    }
 
-   public void updatePelvisPosition(FramePoint3DReadOnly rootJointPositionPrevValue, FramePoint3DBasics rootJointPositionToPack)
+   public void updatePelvisPosition(FramePoint3DReadOnly rootJointPositionPrevValue, FixedFramePoint3DBasics rootJointPositionToPack)
    {
       if (!isEstimationEnabled())
          throw new RuntimeException("IMU estimation module for pelvis linear velocity is disabled.");
@@ -221,7 +222,7 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
 
       rootJointPosition.set(rootJointPositionPrevValue);
       rootJointPosition.add(tempRootJointVelocityIntegrated);
-      rootJointPositionToPack.setIncludingFrame(rootJointPosition);
+      rootJointPositionToPack.set(rootJointPosition);
    }
 
    private final Twist tempRootJointTwist = new Twist();
