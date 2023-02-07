@@ -112,16 +112,13 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private int colorHeight;
    private int totalColorPixels;
 
-   public RDXROS2ColoredDepthVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic, boolean subscribe)
+   public RDXROS2ColoredDepthVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic)
    {
       super(title + " (ROS 2)");
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.depthTopic = depthTopic;
       this.colorTopic = colorTopic;
-
-      if (subscribe)
-         subscribe();
    }
 
    private void subscribe()

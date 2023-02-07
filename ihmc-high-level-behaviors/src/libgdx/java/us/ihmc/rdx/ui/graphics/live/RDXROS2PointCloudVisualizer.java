@@ -72,15 +72,12 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
-   public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic, boolean subscribe)
+   public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
       super(title + " (ROS 2)");
       this.ros2Node = ros2Node;
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-
-      if (subscribe)
-         subscribe();
    }
 
    private void subscribe()
