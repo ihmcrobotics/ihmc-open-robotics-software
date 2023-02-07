@@ -3,10 +3,7 @@ package us.ihmc.perception.logging;
 import gnu.trove.list.array.TFloatArrayList;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.*;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -15,7 +12,6 @@ import us.ihmc.log.LogTools;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class HDF5Tools
 {
@@ -279,6 +275,20 @@ public class HDF5Tools
       dataset.write(new BytePointer(data), new DataType(PredType.NATIVE_UCHAR()));
 
       dataSpace.close();
+      dataset.close();
+   }
+
+   public static void storeBytesFromPointer(Group group, long index, BytePointer bytes, long size)
+   {
+      LogTools.info("Store Byte Array: Index: {} Size: {}", index, size);
+      long[] dims = {size};
+
+      DataSpace ds = new DataSpace(1, dims);
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_B8()), ds);
+
+      dataset.write((Pointer) bytes, new DataType(PredType.NATIVE_B8()));
+
+      ds.close();
       dataset.close();
    }
 

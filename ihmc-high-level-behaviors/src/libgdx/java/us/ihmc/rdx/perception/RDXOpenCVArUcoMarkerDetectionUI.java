@@ -122,7 +122,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
 
          if (markerImagePanel.getVideoPanel().getIsShowing().get())
          {
-            arUcoMarkerDetection.getImageOfDetection(imageForDrawing.getBytedecoOpenCVMat());
+            arUcoMarkerDetection.getCopyOfSourceRGBImage(imageForDrawing.getBytedecoOpenCVMat());
 
             arUcoMarkerDetection.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
             arUcoMarkerDetection.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());

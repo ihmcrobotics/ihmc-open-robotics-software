@@ -22,6 +22,9 @@ public class MissingThreadTools
       return newSingleThreadExecutor(prefix, false);
    }
 
+   /**
+    * Creates a single thread executor with no limit on the queue size.
+    */
    public static ResettableExceptionHandlingExecutorService newSingleThreadExecutor(String prefix, boolean daemon)
    {
       return newSingleThreadExecutor(prefix, daemon, -1);

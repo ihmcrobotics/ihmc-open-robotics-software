@@ -12,6 +12,7 @@ import imgui.type.ImInt;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.time.Stopwatch;
@@ -121,14 +122,33 @@ public class RDXBaseUI
    private Path themeFilePath;
    private final String shadePrefix = "shade=";
 
-   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public RDXBaseUI(String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
-      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+      this(0, directoryNameToAssumePresent, subsequentPathToResourceFolder, null);
    }
 
-   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public RDXBaseUI(String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
    {
-      this.windowTitle = windowTitle;
+      this(0, directoryNameToAssumePresent, subsequentPathToResourceFolder, windowTitle);
+   }
+
+   /**
+    * Typically you won't need this method. It's package private unless we find a use for it.
+    *
+    * @param additionalStackHeightForFindingCaller This is if you have something that sets up a RDXBaseUI for another class.
+    *                                              We want the highest level calling class to be the one used for loading resources.
+    */
+   /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller,
+                                  String directoryNameToAssumePresent,
+                                  String subsequentPathToResourceFolder,
+                                  String windowTitle)
+   {
+      StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+      Class<?> classForLoading = ExceptionTools.handle(() -> Class.forName(stackTraceElements[3 + additionalStackHeightForFindingCaller].getClassName()),
+                                                       DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      LogTools.info("Using class for loading resources: {}", classForLoading.getName());
+
+      this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
 
       configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
