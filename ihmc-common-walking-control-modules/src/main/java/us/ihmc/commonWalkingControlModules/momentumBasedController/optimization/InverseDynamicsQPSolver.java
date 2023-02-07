@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class InverseDynamicsQPSolver
 {
-   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
+   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -74,7 +74,7 @@ public class InverseDynamicsQPSolver
    private final YoDouble jointTorqueWeight = new YoDouble("jointTorqueWeight", registry);
    private final NativeMatrix regularizationMatrix;
 
-   private final NativeMatrix nativeTempJtW = new NativeMatrix(0, 0);
+   private final NativeMatrix tempJtW = new NativeMatrix(0, 0);
 
    private final int numberOfDoFs;
    private final int rhoSize;
@@ -434,13 +434,13 @@ public class InverseDynamicsQPSolver
       }
 
       // J^T W
-      nativeTempJtW.multTransA(taskJacobian, taskWeight);
+      tempJtW.multTransA(taskJacobian, taskWeight);
 
       // Compute: H += J^T W J
-      solver_H.multAddBlock(nativeTempJtW, taskJacobian, offset, offset);
+      solver_H.multAddBlock(tempJtW, taskJacobian, offset, offset);
 
       // Compute: f += - J^T W Objective
-      solver_f.multAddBlock(-1.0, nativeTempJtW, taskObjective, offset, 0);
+      solver_f.multAddBlock(-1.0, tempJtW, taskObjective, offset, 0);
    }
 
    private void addTaskInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight, int offset)
@@ -465,7 +465,6 @@ public class InverseDynamicsQPSolver
                                 NativeMatrix directCostGradient,
                                 int offset)
    {
-      int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
       if (offset + variables > problemSize)
       {
@@ -473,19 +472,19 @@ public class InverseDynamicsQPSolver
       }
 
       // J^T Q
-      nativeTempJtW.multTransA(taskJacobian, taskWeight);
+      tempJtW.multTransA(taskJacobian, taskWeight);
 
       // Compute: f += J^T Q g
-      solver_f.multAddBlock(nativeTempJtW, directCostGradient, offset, 0);
+      solver_f.multAddBlock(tempJtW, directCostGradient, offset, 0);
 
       // J^T (Q + H)
-      nativeTempJtW.multAddTransA(taskJacobian, directCostHessian);
+      tempJtW.multAddTransA(taskJacobian, directCostHessian);
 
       // Compute: H += J^T (H + Q) J
-      solver_H.multAddBlock(nativeTempJtW, taskJacobian, offset, offset);
+      solver_H.multAddBlock(tempJtW, taskJacobian, offset, offset);
 
       // Compute: f += J^T (Q + H) b
-      solver_f.multAddBlock(nativeTempJtW, taskConvectiveTerm, offset, 0);
+      solver_f.multAddBlock(tempJtW, taskConvectiveTerm, offset, 0);
    }
 
    private void addTaskInternal(NativeMatrix taskJacobian,
@@ -505,13 +504,13 @@ public class InverseDynamicsQPSolver
       solver_f.multAddBlock(taskWeight, taskJacobian, directCostGradient, offset, 0);
 
       // J^T (Q + H)
-      nativeTempJtW.multTransA(taskWeight, taskJacobian, directCostHessian);
+      tempJtW.multTransA(taskWeight, taskJacobian, directCostHessian);
 
       // Compute: H += J^T (H + Q) J
-      solver_H.multAddBlock(nativeTempJtW, taskJacobian, offset, offset);
+      solver_H.multAddBlock(tempJtW, taskJacobian, offset, offset);
 
       // Compute: f += J^T (Q + H) b
-      solver_f.multAddBlock(nativeTempJtW, taskConvectiveTerm, offset, 0);
+      solver_f.multAddBlock(tempJtW, taskConvectiveTerm, offset, 0);
    }
 
    public void addMotionEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective)
@@ -611,17 +610,14 @@ public class InverseDynamicsQPSolver
    {
       int taskSize = torqueObjective.getNumRows();
 
-      nativeTempJtW.reshape(taskSize, problemSize);
-      nativeTempJtW.insert(torqueQddotJacobian, 0, 0);
-      nativeTempJtW.insert(torqueRhoJacobian, 0, numberOfDoFs);
+      tempJtW.reshape(taskSize, problemSize);
+      tempJtW.insert(torqueQddotJacobian, 0, 0);
+      tempJtW.insert(torqueRhoJacobian, 0, numberOfDoFs);
 
       tempObjective.set(torqueObjective);
 
-      addTorqueMinimizationObjective(nativeTempJtW, tempObjective);
+      addTorqueMinimizationObjective(tempJtW, tempObjective);
    }
-
-   private final NativeMatrix nativeAdditionalExternalWrench = new NativeMatrix(1, 1);
-   private final NativeMatrix nativeGravityWrench = new NativeMatrix(1, 1);
 
    /**
     * Need to be called before {@link #solve()}. It sets up the constraint that ensures that the
@@ -665,7 +661,7 @@ public class InverseDynamicsQPSolver
       {
          tempWrenchConstraint_J.reshape(Wrench.SIZE, problemSize);
          MatrixTools.setMatrixBlock(tempWrenchConstraint_J, 0, 0, centroidalMomentumMatrix, 0, 0, Wrench.SIZE, numberOfDoFs, -1.0);
-         CommonOps_DDRM.insert(rhoJacobian, tempWrenchConstraint_J, 0, numberOfDoFs);
+         tempWrenchConstraint_J.insert(rhoJacobian, 0, numberOfDoFs);
 
          nativeTempWrenchConstraint_RHS.set(tempWrenchConstraint_RHS);
 
@@ -679,7 +675,8 @@ public class InverseDynamicsQPSolver
          int previousSize = solver_beq.getNumRows();
 
          solver_Aeq.growRows(constraintSize);
-         solver_Aeq.insertScaled(centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, previousSize, 0, -1.0);
+
+         MatrixTools.setMatrixBlock(solver_Aeq, previousSize, 0, centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, -1.0);
          solver_Aeq.insert(rhoJacobian, previousSize, numberOfDoFs);
 
          solver_beq.growRows(constraintSize);
