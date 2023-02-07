@@ -6,6 +6,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -134,6 +135,49 @@ public class SelectionCalculator
       }
 
       checkResult(taskJacobianToPack, taskObjectiveToPack, taskWeightToPack);
+
+      return reducedTaskSize;
+   }
+
+   public int applySelectionToTask(SelectionMatrix6D selectionMatrix,
+                                   WeightMatrix6D weightMatrix,
+                                   ReferenceFrame taskFrame,
+                                   DMatrixRMaj taskJacobian,
+                                   DMatrixRMaj taskObjective,
+                                   NativeMatrix taskJacobianToPack,
+                                   NativeMatrix taskObjectiveToPack,
+                                   NativeMatrix taskWeightToPack)
+   {
+      int problemSize = taskJacobian.getNumCols();
+      int taskSize = 6;
+      checkMatrixSizes(taskJacobian, taskObjective, taskSize);
+      int reducedTaskSize = selectionMatrix.getNumberOfSelectedAxes();
+
+      // Split the problem up into two parts (angular and linear).
+      taskJacobian3D.reshape(3, problemSize);
+      taskObjective3D.reshape(3, 1);
+
+      taskJacobianToPack.reshape(reducedTaskSize, problemSize);
+      taskObjectiveToPack.reshape(reducedTaskSize, 1);
+      taskWeightToPack.reshape(reducedTaskSize, reducedTaskSize);
+
+      // Do the angular part:
+      CommonOps_DDRM.extract(taskJacobian, 0, 3, 0, problemSize, taskJacobian3D, 0, 0);
+      CommonOps_DDRM.extract(taskObjective, 0, 3, 0, 1, taskObjective3D, 0, 0);
+      int offset = applySelectionToTask(selectionMatrix.getAngularPart(), weightMatrix.getAngularPart(), taskFrame, taskJacobian3D, taskObjective3D,
+                                        taskJacobianSelected3D, taskObjectiveSelected3D, taskWeightSelected3D);
+      taskJacobianToPack.insert(taskJacobianSelected3D, 0, 0);
+      taskObjectiveToPack.insert(taskObjectiveSelected3D, 0, 0);
+      taskWeightToPack.insert(taskWeightSelected3D, 0, 0);
+
+      // Do the linear part:
+      CommonOps_DDRM.extract(taskJacobian, 3, 6, 0, problemSize, taskJacobian3D, 0, 0);
+      CommonOps_DDRM.extract(taskObjective, 3, 6, 0, 1, taskObjective3D, 0, 0);
+      applySelectionToTask(selectionMatrix.getLinearPart(), weightMatrix.getLinearPart(), taskFrame, taskJacobian3D, taskObjective3D, taskJacobianSelected3D,
+                           taskObjectiveSelected3D, taskWeightSelected3D);
+      taskJacobianToPack.insert(taskJacobianSelected3D, offset, 0);
+      taskObjectiveToPack.insert(taskObjectiveSelected3D, offset, 0);
+      taskWeightToPack.insert(taskWeightSelected3D, offset, offset);
 
       return reducedTaskSize;
    }
