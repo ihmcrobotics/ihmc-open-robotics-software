@@ -195,7 +195,7 @@ public class BytedecoImage
    {
       if (!BytedecoOpenCVTools.dimensionsMatch(this, other))
       {
-         resize(other.getImageWidth(), other.getImageHeight(), null, null);
+         resize(other.getImageWidth(), other.getImageHeight(), null, backingDirectByteBuffer);
       }
    }
 
