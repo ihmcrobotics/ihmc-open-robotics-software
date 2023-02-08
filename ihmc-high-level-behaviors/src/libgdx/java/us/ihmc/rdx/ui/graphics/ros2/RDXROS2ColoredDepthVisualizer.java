@@ -20,7 +20,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
-import us.ihmc.perception.memory.NativeMemoryTools;
+import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -363,13 +363,11 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
       ImGui.text(colorTopic.getName());
       if (colorReceivedOne)
       {
-         ImGui.sameLine();
          colorMessageSizeReadout.renderImGuiWidgets();
       }
       ImGui.text(depthTopic.getName());
       if (depthReceivedOne)
       {
-         ImGui.sameLine();
          depthMessageSizeReadout.renderImGuiWidgets();
       }
       if (colorReceivedOne)

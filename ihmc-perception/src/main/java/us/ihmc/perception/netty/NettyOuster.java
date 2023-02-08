@@ -12,7 +12,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.memory.NativeMemoryTools;
+import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.io.*;
 import java.net.Socket;
