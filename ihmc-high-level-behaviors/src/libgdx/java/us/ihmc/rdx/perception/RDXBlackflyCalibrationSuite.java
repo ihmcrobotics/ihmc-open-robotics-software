@@ -20,6 +20,7 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.logging.RDXHDF5ImageBrowser;
@@ -28,6 +29,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.*;
 
@@ -123,6 +125,8 @@ public class RDXBlackflyCalibrationSuite
    private OpenCVArUcoMarkerDetection openCVArUcoMarkerDetection;
    private Mat spareRGBMatForArUcoDrawing;
    private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
+   private final RDXNettyOusterUI nettyOusterUI = new RDXNettyOusterUI();
+   private RDXInteractableBlackflyFujinon interactableBlackflyFujinon;
 
    public RDXBlackflyCalibrationSuite()
    {
@@ -137,6 +141,10 @@ public class RDXBlackflyCalibrationSuite
             baseUI.getImGuiPanelManager().addPanel(blackflyReader.getStatisticsPanel());
 
             baseUI.getImGuiPanelManager().addPanel("Calibration", RDXBlackflyCalibrationSuite.this::renderImGuiWidgets);
+
+            nettyOusterUI.create(baseUI);
+            ImGuiPanel panel = new ImGuiPanel("Ouster", nettyOusterUI::renderImGuiWidgets);
+            baseUI.getImGuiPanelManager().addPanel(panel);
          }
 
          @Override
@@ -164,14 +172,21 @@ public class RDXBlackflyCalibrationSuite
                                                                         this::undistortedImageUpdateOnAsynchronousThread);
                   baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getVideoPanel());
 
+                  interactableBlackflyFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel());
+
                   openCVArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  openCVArUcoMarkerDetection.create(ReferenceFrame.getWorldFrame()); // FIXME: Make frames
+                  ReferenceFrame blackflySensorFrame = interactableBlackflyFujinon.getInteractableFrameModel().getReferenceFrame();
+                  openCVArUcoMarkerDetection.create(blackflySensorFrame);
                   arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();
                   ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
-                  markersToTrack.add(new OpenCVArUcoMarker(0, 0.2));
-                  arUcoMarkerDetectionUI.create(openCVArUcoMarkerDetection, markersToTrack, ReferenceFrame.getWorldFrame()); // FIXME: Make frames
+                  double sideLength = 0.1421;
+                  markersToTrack.add(new OpenCVArUcoMarker(0, sideLength));
+                  // TODO: Use frame from openCVArUcoMarkerDetection? i.e. remove redudant parameter
+                  arUcoMarkerDetectionUI.create(openCVArUcoMarkerDetection, markersToTrack, blackflySensorFrame);
                   baseUI.getImGuiPanelManager().addPanel(arUcoMarkerDetectionUI.getMainPanel());
                   baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
+
+                  nettyOusterUI.createAfterNativesLoaded();
 
                   baseUI.getLayoutManager().reloadLayout();
 
@@ -230,6 +245,8 @@ public class RDXBlackflyCalibrationSuite
                   }, "Undistortion");
                }
 
+               interactableBlackflyFujinon.update();
+
                synchronized (cameraMatrixForUndistortion)
                {
                   cameraMatrix.copyTo(cameraMatrixForUndistortion.getForThreadOne());
@@ -272,6 +289,20 @@ public class RDXBlackflyCalibrationSuite
                {
                   drawPatternOnCurrentImage();
                   calibrationSourceImagesPanel.drawResizeAndCopy(calibrationPatternOutput);
+               }
+
+               if (nettyOusterUI.isOusterInitialized())
+               {
+                  if (nettyOusterUI.getImagePanel() == null)
+                  {
+                     nettyOusterUI.createAfterOusterInitialized();
+
+                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI.getPointCloudRenderer(), RDXSceneLevel.MODEL);
+                     baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getVideoPanel());
+                     baseUI.getLayoutManager().reloadLayout();
+                  }
+
+                  nettyOusterUI.update();
                }
             }
 
@@ -356,6 +387,7 @@ public class RDXBlackflyCalibrationSuite
          public void dispose()
          {
             running = false;
+            nettyOusterUI.destroy();
             blackflyReader.dispose();
             hdf5ImageBrowser.destroy();
             hdf5ImageLoggingUI.destroy();
