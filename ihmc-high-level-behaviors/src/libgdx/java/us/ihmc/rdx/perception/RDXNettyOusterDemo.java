@@ -23,7 +23,7 @@ import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.nio.ByteOrder;
 
-public class RDXNettyOusterUI
+public class RDXNettyOusterDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
@@ -43,7 +43,7 @@ public class RDXNettyOusterUI
    private int depthHeight;
    private volatile boolean isReady = false;
 
-   public RDXNettyOusterUI()
+   public RDXNettyOusterDemo()
    {
       nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
 
@@ -171,6 +171,6 @@ public class RDXNettyOusterUI
 
    public static void main(String[] args)
    {
-      new RDXNettyOusterUI();
+      new RDXNettyOusterDemo();
    }
 }
