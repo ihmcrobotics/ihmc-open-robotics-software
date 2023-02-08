@@ -1140,4 +1140,11 @@ class PlanarRegionSLAMTest
       LogTools.info("Plane Three: " + planeThree);
 
    }
+
+   @Test
+   public void testPointToPlaneICP()
+   {
+
+   }
+
 }

@@ -221,8 +221,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                   });
                }
 
-               updatePointCloudRenderer();
-               //rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().clear();
                updateRapidRegionsExtractor();
             }
 
@@ -305,7 +303,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
       }
 
       if (planarRegionsListToRenderNotification.poll())
+      {
          generateMesh(planarRegionsListToRenderNotification.read());
+         updatePointCloudRenderer();
+      }
    }
 
    public synchronized void generateMesh(PlanarRegionsList regionsList)

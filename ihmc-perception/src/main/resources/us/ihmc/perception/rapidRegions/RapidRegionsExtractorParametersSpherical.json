@@ -16,7 +16,7 @@
     "upperBound" : 10
   },
   "Merge orthogonal threshold" : {
-    "value" : 0.061856,
+    "value" : 0.07732,
     "lowerBound" : 0.0,
     "upperBound" : 1.5
   },
@@ -26,7 +26,7 @@
     "upperBound" : 5.0
   },
   "Merge angular threshold" : {
-    "value" : 0.828479,
+    "value" : 0.899676,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
