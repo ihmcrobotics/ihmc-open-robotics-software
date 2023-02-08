@@ -50,9 +50,9 @@ public class OpenCLManager
          checkReturnCode(clGetPlatformIDs(maxNumberOfEntries, platforms, numberOfPlatforms));
          checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, maxNumberOfEntries, devices, numberOfDevices));
 
-         int numberOfPlatforms = this.numberOfPlatforms.get();
+         int numberOfPlatforms = OpenCLManager.numberOfPlatforms.get();
          LogTools.info("Number of platforms: {}", numberOfPlatforms);
-         int numberOfDevices = this.numberOfDevices.get();
+         int numberOfDevices = OpenCLManager.numberOfDevices.get();
          LogTools.info("Number of devices: {}", numberOfDevices);
 
          for (int i = 0; i < numberOfPlatforms; i++)
