@@ -29,7 +29,6 @@ public class OpenCLManager
    private static _cl_command_queue commandQueue = null;
    private static final IntPointer numberOfDevices = new IntPointer(1);
    private static final IntPointer numberOfPlatforms = new IntPointer(3);
-   private static final IntPointer returnCode = new IntPointer(1);
    private static volatile boolean initialized = false;
 
    private final ArrayList<_cl_program> programs = new ArrayList<>();
@@ -40,6 +39,7 @@ public class OpenCLManager
    private long pointerPointerSize = Pointer.sizeof(PointerPointer.class);
    private SizeTPointer origin = new SizeTPointer(3);
    private final SizeTPointer region = new SizeTPointer(3);
+   private final IntPointer returnCode = new IntPointer(1);
    //   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Rethink this
 
    public OpenCLManager()
