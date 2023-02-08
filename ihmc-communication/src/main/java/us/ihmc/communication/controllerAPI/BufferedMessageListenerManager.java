@@ -61,18 +61,13 @@ public class BufferedMessageListenerManager
    private final List<HasReceivedInputListener> hasReceivedInputListeners = new ArrayList<>();
 
    /**
-    * Protocols for unpacking certain types of messages.
-    */
-   private final Map<Class<? extends Settable<?>>, BiConsumer<? extends Settable<?>, ? extends Settable<?>>> messageUnpackers = new HashMap<>();
-
-   /**
     * Only constructor to build a new API. No new constructors will be tolerated.
     *
-    * @param messagesAndUnpackersToRegister list of the messages and set methods that this API should support.
+    * @param messagesToRegister list of the messages that this API should support.
     */
-   public BufferedMessageListenerManager(PairList<Class<? extends Settable<?>>, BiConsumer<? extends Settable<?>, ? extends Settable<?>>> messagesAndUnpackersToRegister)
+   public BufferedMessageListenerManager(List<Class<? extends Settable<?>>> messagesToRegister)
    {
-      this(null, messagesAndUnpackersToRegister);
+      this(null, messagesToRegister);
    }
 
    /**
@@ -80,12 +75,11 @@ public class BufferedMessageListenerManager
     *
     * @param name                           name used when printing statements. It should preferably be unique to
     *                                       distinguish the different modules using this class.
-    * @param messagesAndUnpackersToRegister list of the messages and set methods that this API should support.
+    * @param messagesToRegister list of the messages that this API should support.
     */
-   public BufferedMessageListenerManager(String name,
-                                         PairList<Class<? extends Settable<?>>, BiConsumer<? extends Settable<?>, ? extends Settable<?>>> messagesAndUnpackersToRegister)
+   public BufferedMessageListenerManager(String name, List<Class<? extends Settable<?>>> messagesToRegister)
    {
-      this(name, messagesAndUnpackersToRegister, 16);
+      this(name, messagesToRegister, 16);
    }
 
    /**
@@ -93,16 +87,14 @@ public class BufferedMessageListenerManager
     *
     * @param name                           name used when printing statements. It should preferably be unique to
     *                                       distinguish the different modules using this class.
-    * @param messagesAndUnpackersToRegister list of the messages and set methods that this API should support.
+    * @param messagesToRegister list of the messages that this API should support.
     * @param buffersCapacity                the capacity of the internal buffers, should be a power of 2.
     */
-   public BufferedMessageListenerManager(String name,
-                                         PairList<Class<? extends Settable<?>>, BiConsumer<? extends Settable<?>, ? extends Settable<?>>> messagesAndUnpackersToRegister,
-                                         int buffersCapacity)
+   public BufferedMessageListenerManager(String name, List<Class<? extends Settable<?>>> messagesToRegister, int buffersCapacity)
    {
       this.printStatementPrefix = name == null ? "" : name + ": ";
       this.buffersCapacity = buffersCapacity;
-      registerNewMessages(messagesAndUnpackersToRegister);
+      registerNewMessages(messagesToRegister);
    }
 
    /**
@@ -111,10 +103,10 @@ public class BufferedMessageListenerManager
     * @param messagesAndUnpackersToRegister
     */
    @SuppressWarnings("unchecked")
-   private <C extends Settable<C>, M extends Settable<M>> void registerNewMessages(PairList<Class<? extends Settable<?>>, BiConsumer<? extends Settable<?>, ? extends Settable<?>>> messagesAndUnpackersToRegister)
+   private <C extends Settable<C>, M extends Settable<M>> void registerNewMessages(List<Class<? extends Settable<?>>> messagesToRegister)
    {
-      for (int i = 0; i < messagesAndUnpackersToRegister.size(); i++)
-         registerNewMessage((Class<C>) messagesAndUnpackersToRegister.get(i).getLeft(), messagesAndUnpackersToRegister.get(i).getRight());
+      for (int i = 0; i < messagesToRegister.size(); i++)
+         registerNewMessage((Class<C>) messagesToRegister.get(i));
    }
 
    /**
@@ -122,7 +114,7 @@ public class BufferedMessageListenerManager
     *
     * @param messageClass
     */
-   private <M extends Settable<M>> void registerNewMessage(Class<M> messageClass, BiConsumer<? extends Settable<?>, ? extends Settable<?>> messageUnpacker)
+   private <M extends Settable<M>> void registerNewMessage(Class<M> messageClass)
    {
       Builder<M> builer = createBuilderWithEmptyConstructor(messageClass);
       ConcurrentRingBuffer<M> newBuffer = new ConcurrentRingBuffer<>(builer, buffersCapacity);
@@ -130,7 +122,6 @@ public class BufferedMessageListenerManager
       // This is silly, but I could not find another way that is more elegant.
       messageClassToBufferMap.put(messageClass, newBuffer);
       messagesMap.put(messageClass, new RecyclingArrayList<>(buffersCapacity, messageClass));
-      messageUnpackers.put(messageClass, messageUnpacker);
 
       listOfSupportedMessages.add(messageClass);
    }
@@ -174,16 +165,9 @@ public class BufferedMessageListenerManager
          LogTools.warn("{}The buffer for the message: {} is full. Message ignored.", printStatementPrefix, message.getClass().getSimpleName());
          return;
       }
-      BiConsumer<M, M> messageUnpacker = (BiConsumer<M, M>) messageUnpackers.get(message.getClass());
-      if (messageUnpacker == null)
-      {
-         LogTools.warn("{}The unpacker for the message type {} is not supported.", printStatementPrefix, message.getClass().getSimpleName());
-         return;
-      }
 
       Class<M> messageClass = (Class<M>) nextMessage.getClass();
-
-      messageUnpacker.accept(message, nextMessage);
+      nextMessage.set(message);
 
       buffer.commit();
 
