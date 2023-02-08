@@ -108,6 +108,6 @@ public class OusterDriverAndDepthPublisher
    public static void main(String[] args)
    {
       RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_image_node");
-      new OusterDriverAndDepthPublisher(realtimeROS2Node, ReferenceFrame::getWorldFrame, ROS2Tools.OUSTER_DEPTH_IMAGE);
+      new OusterDriverAndDepthPublisher(realtimeROS2Node, ReferenceFrame::getWorldFrame, ROS2Tools.OUSTER_DEPTH_IMAGE).start();
    }
 }
