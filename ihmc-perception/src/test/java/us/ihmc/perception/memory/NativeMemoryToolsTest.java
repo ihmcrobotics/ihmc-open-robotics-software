@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;
 
