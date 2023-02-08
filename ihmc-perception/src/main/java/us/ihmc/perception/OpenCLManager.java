@@ -31,8 +31,6 @@ public class OpenCLManager
    private static final IntPointer numberOfPlatforms = new IntPointer(3);
    private static final IntPointer returnCode = new IntPointer(1);
    private static volatile boolean initialized = false;
-   private static volatile boolean destroyed = false;
-   private static final Object destroyLock = new Object();
 
    private final ArrayList<_cl_program> programs = new ArrayList<>();
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
@@ -411,20 +409,6 @@ public class OpenCLManager
       for (_cl_mem bufferObject : bufferObjects)
          checkReturnCode(clReleaseMemObject(bufferObject));
       bufferObjects.clear();
-
-      synchronized (destroyLock)
-      {
-         if (!destroyed)
-         {
-            checkReturnCode(clFlush(commandQueue));
-            checkReturnCode(clFinish(commandQueue));
-            checkReturnCode(clReleaseCommandQueue(commandQueue));
-            commandQueue = null;
-            checkReturnCode(clReleaseContext(context));
-            context = null;
-            destroyed = true;
-         }
-      }
    }
 
    public int getReturnCode()
