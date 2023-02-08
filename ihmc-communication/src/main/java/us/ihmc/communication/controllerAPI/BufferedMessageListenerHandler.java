@@ -1,12 +1,10 @@
 package us.ihmc.communication.controllerAPI;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.lists.PairList;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -14,14 +12,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 /**
  * BufferedMessageListenerManager is used to generate a thread-safe input API reading data from another thread. Messages
  * can be submitted through the methods {@link #submitMessage(Settable)}. Only registered inputs (Packet) will make it through
  * to controller side. Unregistered inputs are ignored and the user is averted by a message error
  * with the information on the input class. Registering inputs is done in the constructor
- * {@link BufferedMessageListenerManager}, this is how one wants to define the API. The list of
+ * {@link BufferedMessageListenerHandler}, this is how one wants to define the API. The list of
  * supported inputs can be accessed using {@link #getListOfSupportedMessages()}. BufferedMessageListenerManager assumes that the different methods for
  * submitting a inputs are called from another thread. ABSOLUTELY NO Packet should be
  * directly passed to controller, any Packet has to go through this API to ensure that
@@ -29,7 +26,7 @@ import java.util.function.BiConsumer;
  *
  * @author Robert
  */
-public class BufferedMessageListenerManager
+public class BufferedMessageListenerHandler
 {
    private final String printStatementPrefix;
    private final int buffersCapacity;
@@ -65,7 +62,7 @@ public class BufferedMessageListenerManager
     *
     * @param messagesToRegister list of the messages that this API should support.
     */
-   public BufferedMessageListenerManager(List<Class<? extends Settable<?>>> messagesToRegister)
+   public BufferedMessageListenerHandler(List<Class<? extends Settable<?>>> messagesToRegister)
    {
       this(null, messagesToRegister);
    }
@@ -77,7 +74,7 @@ public class BufferedMessageListenerManager
     *                                       distinguish the different modules using this class.
     * @param messagesToRegister list of the messages that this API should support.
     */
-   public BufferedMessageListenerManager(String name, List<Class<? extends Settable<?>>> messagesToRegister)
+   public BufferedMessageListenerHandler(String name, List<Class<? extends Settable<?>>> messagesToRegister)
    {
       this(name, messagesToRegister, 16);
    }
@@ -90,7 +87,7 @@ public class BufferedMessageListenerManager
     * @param messagesToRegister list of the messages that this API should support.
     * @param buffersCapacity                the capacity of the internal buffers, should be a power of 2.
     */
-   public BufferedMessageListenerManager(String name, List<Class<? extends Settable<?>>> messagesToRegister, int buffersCapacity)
+   public BufferedMessageListenerHandler(String name, List<Class<? extends Settable<?>>> messagesToRegister, int buffersCapacity)
    {
       this.printStatementPrefix = name == null ? "" : name + ": ";
       this.buffersCapacity = buffersCapacity;
