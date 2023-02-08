@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * BufferedMessageListenerManager is used to generate a thread-safe input API reading data from another thread. Messages
+ * BufferedMessageListenerHandler is used to generate a thread-safe input API reading data from another thread. Messages
  * can be submitted through the methods {@link #submitMessage(Settable)}. Only registered inputs (Packet) will make it through
  * to controller side. Unregistered inputs are ignored and the user is averted by a message error
  * with the information on the input class. Registering inputs is done in the constructor
  * {@link BufferedMessageListenerHandler}, this is how one wants to define the API. The list of
- * supported inputs can be accessed using {@link #getListOfSupportedMessages()}. BufferedMessageListenerManager assumes that the different methods for
+ * supported inputs can be accessed using {@link #getListOfSupportedMessages()}. BufferedMessageListenerHandler assumes that the different methods for
  * submitting a inputs are called from another thread. ABSOLUTELY NO Packet should be
  * directly passed to controller, any Packet has to go through this API to ensure that
  * multi-threading is done properly.
@@ -70,8 +70,8 @@ public class BufferedMessageListenerHandler
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
     *
-    * @param name                           name used when printing statements. It should preferably be unique to
-    *                                       distinguish the different modules using this class.
+    * @param name               name used when printing statements. It should preferably be unique to
+    *                           distinguish the different modules using this class.
     * @param messagesToRegister list of the messages that this API should support.
     */
    public BufferedMessageListenerHandler(String name, List<Class<? extends Settable<?>>> messagesToRegister)
@@ -82,10 +82,10 @@ public class BufferedMessageListenerHandler
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
     *
-    * @param name                           name used when printing statements. It should preferably be unique to
-    *                                       distinguish the different modules using this class.
+    * @param name               name used when printing statements. It should preferably be unique to
+    *                           distinguish the different modules using this class.
     * @param messagesToRegister list of the messages that this API should support.
-    * @param buffersCapacity                the capacity of the internal buffers, should be a power of 2.
+    * @param buffersCapacity    the capacity of the internal buffers, should be a power of 2.
     */
    public BufferedMessageListenerHandler(String name, List<Class<? extends Settable<?>>> messagesToRegister, int buffersCapacity)
    {
@@ -97,7 +97,7 @@ public class BufferedMessageListenerHandler
    /**
     * This method has to remain private. It is used to register in the API a list of messages.
     *
-    * @param messagesAndUnpackersToRegister
+    * @param messagesToRegister
     */
    @SuppressWarnings("unchecked")
    private <C extends Settable<C>, M extends Settable<M>> void registerNewMessages(List<Class<? extends Settable<?>>> messagesToRegister)
@@ -113,8 +113,8 @@ public class BufferedMessageListenerHandler
     */
    private <M extends Settable<M>> void registerNewMessage(Class<M> messageClass)
    {
-      Builder<M> builer = createBuilderWithEmptyConstructor(messageClass);
-      ConcurrentRingBuffer<M> newBuffer = new ConcurrentRingBuffer<>(builer, buffersCapacity);
+      Builder<M> builder = CommandInputManager.createBuilderWithEmptyConstructor(messageClass);
+      ConcurrentRingBuffer<M> newBuffer = new ConcurrentRingBuffer<>(builder, buffersCapacity);
       allBuffers.add(newBuffer);
       // This is silly, but I could not find another way that is more elegant.
       messageClassToBufferMap.put(messageClass, newBuffer);
@@ -294,50 +294,6 @@ public class BufferedMessageListenerHandler
          }
          buffer.flush();
       }
-   }
-
-   /**
-    * Method to help creating a {@link ConcurrentRingBuffer} for a given class. The class has to have
-    * an empty constructor.
-    *
-    * @param clazz For which a new builder needs to be created.
-    * @return The new builder.
-    */
-   public static <U> Builder<U> createBuilderWithEmptyConstructor(Class<U> clazz)
-   {
-      final Constructor<U> emptyConstructor;
-      // Trying to get an empty constructor from clazz
-      try
-      {
-         emptyConstructor = clazz.getConstructor();
-      }
-      catch (NoSuchMethodException | SecurityException e)
-      {
-         throw new RuntimeException("Could not find a visible empty constructor in the class: " + clazz.getSimpleName());
-      }
-
-      Builder<U> builder = new Builder<U>()
-      {
-         @Override
-         public U newInstance()
-         {
-            U newInstance = null;
-
-            try
-            {
-               newInstance = emptyConstructor.newInstance();
-            }
-            catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-            {
-               e.printStackTrace();
-               throw new RuntimeException(
-                     "Something went wrong the empty constructor implemented in the class: " + emptyConstructor.getDeclaringClass().getSimpleName());
-            }
-
-            return newInstance;
-         }
-      };
-      return builder;
    }
 
    /**
