@@ -559,6 +559,34 @@ public class PlanarRegionSLAMTools
       }
    }
 
+   public static void findBestPlanarRegionMatches(PlanarRegionsList map,
+                                              PlanarRegionsList incoming,
+                                              HashMap<Integer, Integer> matches,
+                                              float overlapThreshold,
+                                              float normalThreshold,
+                                              float distanceThreshold,
+                                              float minBoxSize)
+   {
+      matches.clear();
+      List<PlanarRegion> newRegions = incoming.getPlanarRegionsAsList();
+      List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
+
+      for (int i = 0; i < newRegions.size(); i++)
+      {
+         PlanarRegion newRegion = newRegions.get(i);
+
+         for (int j = 0; j < mapRegions.size(); j++)
+         {
+            PlanarRegion mapRegion = mapRegions.get(j);
+
+            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold, minBoxSize))
+            {
+               matches.put(i, j);
+            }
+         }
+      }
+   }
+
    public static boolean boxesIn3DIntersect(PlanarRegion a, PlanarRegion b, double boxHeight)
    {
       Box3D boxA = PlanarRegionTools.getLocalBoundingBox3DInWorld(a, boxHeight);

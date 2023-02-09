@@ -1,5 +1,6 @@
 package us.ihmc.perception;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -130,6 +132,16 @@ public class PlanarRegionRegistrationTools
       }
    }
 
+   public static RigidBodyTransform computeIterativeClosestPlane(PlanarRegionsList previousRegions,
+                                                                 PlanarRegionsList currentRegions, HashMap<Integer, Integer> matches)
+   {
+      RigidBodyTransform transformToReturn = new RigidBodyTransform();;
+
+      transformToReturn.multiply(computeTransformFromRegions(previousRegions, currentRegions, matches));
+
+      return transformToReturn;
+   }
+
    public static RigidBodyTransform computeTransformFromRegions(PlanarRegionsList previousRegions,
                                                                 PlanarRegionsList currentRegions,
                                                                 HashMap<Integer, Integer> matches)
@@ -156,7 +168,7 @@ public class PlanarRegionRegistrationTools
             currentRegion.getTransformToLocal().get(orientation, origin);
 
             Point3D latestPoint = PolygonizerTools.toPointInWorld(currentRegion.getConcaveHullVertex(n).getX(),
-                                                                  currentRegion.getConcaveHullVertex(n).getX(),
+                                                                  currentRegion.getConcaveHullVertex(n).getY(),
                                                                   origin,
                                                                   orientation);
             Vector3D latestPointVector = new Vector3D(latestPoint);
@@ -182,10 +194,13 @@ public class PlanarRegionRegistrationTools
 
             b.set(i, -diff.dot(correspondingMapNormal));
             i++;
+
+            LogTools.info("Point: ({}, {}, {})",  latestPoint.getX(), latestPoint.getY(), latestPoint.getZ());
+            LogTools.info("Corresponding Point: ({}, {}, {})",correspondingMapCentroid.getX(), correspondingMapCentroid.getY(), correspondingMapCentroid.getZ());
          }
       }
 
-      LogTools.debug("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
+      LogTools.info("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
 
       LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.qr(A.numRows, A.numCols);
       if (!solver.setA(A))
@@ -201,11 +216,11 @@ public class PlanarRegionRegistrationTools
       DMatrixRMaj solution = new DMatrixRMaj(6, 1);
       solver.solve(b, solution);
 
-      LogTools.debug("ICP Result: Rotation({}, {}, {})", solution.get(0), solution.get(1), solution.get(2));
-      LogTools.debug("Translation({}, {}, {})", solution.get(3), solution.get(4), solution.get(5));
+      LogTools.info("Rotation({}, {}, {})", solution.get(0), solution.get(1), solution.get(2));
+      LogTools.info("Translation({}, {}, {})", solution.get(3), solution.get(4), solution.get(5));
 
-      Point3D translation = new Point3D(solution.get(3), solution.get(4), solution.get(5));
       RotationMatrix rotation = new RotationMatrix(solution.get(2), solution.get(1), solution.get(0));
+      Point3D translation = new Point3D(solution.get(3), solution.get(4), solution.get(5));
       transformToReturn.set(rotation, translation);
 
       return transformToReturn;
