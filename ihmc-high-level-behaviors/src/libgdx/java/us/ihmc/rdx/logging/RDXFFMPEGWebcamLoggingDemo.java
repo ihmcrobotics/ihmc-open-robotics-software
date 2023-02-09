@@ -13,7 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.log.LogTools;
@@ -116,7 +116,7 @@ public class RDXFFMPEGWebcamLoggingDemo
             baseUI.renderEnd();
          }
 
-         private void videoUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
+         private void videoUpdateOnAsynchronousThread(RDXImagePanelTexture texture)
          {
             readPerformancePlot.start();
             boolean imageWasRead = videoCapture.read(bgrImage.getBytedecoOpenCVMat());
@@ -130,8 +130,8 @@ public class RDXFFMPEGWebcamLoggingDemo
 
             ffmpegLoggerDemoHelper.getLogger().put(bgrImage);
 
-            data.ensureTextureDimensions(imageWidth, imageHeight);
-            opencv_imgproc.cvtColor(bgrImage.getBytedecoOpenCVMat(), data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+            texture.ensureTextureDimensions(imageWidth, imageHeight);
+            opencv_imgproc.cvtColor(bgrImage.getBytedecoOpenCVMat(), texture.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
          }
 
          private void renderImGuiWidgets()

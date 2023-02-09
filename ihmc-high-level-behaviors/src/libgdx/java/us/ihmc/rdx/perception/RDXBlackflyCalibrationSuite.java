@@ -23,7 +23,7 @@ import us.ihmc.rdx.logging.RDXHDF5ImageBrowser;
 import us.ihmc.rdx.logging.RDXHDF5ImageLoggingUI;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.*;
 
@@ -259,7 +259,7 @@ public class RDXBlackflyCalibrationSuite
             baseUI.renderEnd();
          }
 
-         private void blackflyReaderUIThreadPreprocessor(RDXOpenCVSwapVideoPanelData data)
+         private void blackflyReaderUIThreadPreprocessor(RDXImagePanelTexture texture)
          {
             if (hdf5ImageLoggingUI == null)
             {
@@ -273,19 +273,19 @@ public class RDXBlackflyCalibrationSuite
             // Access the image before it gets drawn on; copy for the other thread
             synchronized (imageForUndistortion)
             {
-               data.getRGBA8Mat().copyTo(imageForUndistortion.getForThreadOne());
+               texture.getRGBA8Mat().copyTo(imageForUndistortion.getForThreadOne());
             }
 
-            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
+            calibrationPatternDetectionUI.drawCornersOrCenters(texture.getRGBA8Mat());
          }
 
-         private void undistortedImageUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
+         private void undistortedImageUpdateOnAsynchronousThread(RDXImagePanelTexture texture)
          {
             int width = undistortedImageWidth.get();
             int height = undistortedImageHeight.get();
             undistortedImageSize.width(width);
             undistortedImageSize.height(height);
-            data.ensureTextureDimensions(width, height);
+            texture.ensureTextureDimensions(width, height);
 
             opencv_calib3d.estimateNewCameraMatrixForUndistortRectify(cameraMatrixForUndistortion.getForThreadTwo(),
                                                                       distortionCoefficientsForUndistortion.getForThreadTwo(),
@@ -311,7 +311,7 @@ public class RDXBlackflyCalibrationSuite
             // Fisheye undistortion
             // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
             opencv_calib3d.undistortImage(imageForUndistortion.getForThreadTwo(),
-                                          data.getRGBA8Mat(),
+                                          texture.getRGBA8Mat(),
                                           cameraMatrixForUndistortion.getForThreadTwo(),
                                           distortionCoefficientsForUndistortion.getForThreadTwo(),
                                           newCameraMatrixEstimate,

@@ -17,27 +17,27 @@ import java.util.function.Consumer;
 public class RDXOpenCVSwapVideoPanel
 {
    private final ImGuiVideoPanel videoPanel;
-   private final GuidedSwapReference<RDXOpenCVSwapVideoPanelData> dataSwapReferenceManager;
+   private final GuidedSwapReference<RDXImagePanelTexture> dataSwapReferenceManager;
 
-   public RDXOpenCVSwapVideoPanel(String panelName, Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread)
+   public RDXOpenCVSwapVideoPanel(String panelName, Consumer<RDXImagePanelTexture> updateOnAsynchronousThread)
    {
       this(panelName, updateOnAsynchronousThread, null);
    }
 
    public RDXOpenCVSwapVideoPanel(String panelName,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnUIThread)
+                                  Consumer<RDXImagePanelTexture> updateOnAsynchronousThread,
+                                  Consumer<RDXImagePanelTexture> updateOnUIThread)
    {
       this(panelName, false, updateOnAsynchronousThread, updateOnUIThread);
    }
 
    public RDXOpenCVSwapVideoPanel(String panelName,
                                   boolean flipY,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnUIThread)
+                                  Consumer<RDXImagePanelTexture> updateOnAsynchronousThread,
+                                  Consumer<RDXImagePanelTexture> updateOnUIThread)
    {
       this.videoPanel = new ImGuiVideoPanel(panelName, flipY);
-      dataSwapReferenceManager = new GuidedSwapReference<>(RDXOpenCVSwapVideoPanelData::new,
+      dataSwapReferenceManager = new GuidedSwapReference<>(RDXImagePanelTexture::new,
                                                            updateOnAsynchronousThread,
                                                            updateOnUIThread == null ? this::defaultUpdateOnUIThread : updateOnUIThread);
    }
@@ -61,11 +61,11 @@ public class RDXOpenCVSwapVideoPanel
       dataSwapReferenceManager.accessOnHighPriorityThread();
    }
 
-   private void defaultUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
+   private void defaultUpdateOnUIThread(RDXImagePanelTexture texture)
    {
-      if (data.getRGBA8Image() != null)
+      if (texture.getRGBA8Image() != null)
       {
-         data.updateOnUIThread(videoPanel);
+         texture.updateOnUIThread(videoPanel);
       }
    }
 
