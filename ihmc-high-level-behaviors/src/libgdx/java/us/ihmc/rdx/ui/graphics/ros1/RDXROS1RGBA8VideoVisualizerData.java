@@ -8,7 +8,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.Image;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.utilities.ros.RosTools;
 
 import java.nio.ByteBuffer;
@@ -49,7 +49,7 @@ public class RDXROS1RGBA8VideoVisualizerData
       }
    }
 
-   public void updateOnUIThread(ImGuiVideoPanel videoPanel)
+   public void updateOnUIThread(RDXImagePanel imagePanel)
    {
       if (rgba8Mat != null)
       {
@@ -62,7 +62,7 @@ public class RDXROS1RGBA8VideoVisualizerData
             }
 
             texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-            videoPanel.setTexture(texture);
+            imagePanel.setTexture(texture);
          }
 
          texture.draw(pixmap, 0, 0);

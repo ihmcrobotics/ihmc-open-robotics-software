@@ -81,7 +81,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       imageForDrawing = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
       boolean flipY = false;
       markerImagePanel = new RDXCVImagePanel("ArUco Marker Detection Image " + namePostfix, imageWidth, imageHeight, flipY);
-      mainPanel.addChild(markerImagePanel.getVideoPanel());
+      mainPanel.addChild(markerImagePanel.getImagePanel());
 
       adaptiveThresholdWindowSizeMin.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMin());
       adaptiveThresholdWindowSizeMax.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMax());
@@ -120,7 +120,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
          stopwatch.lap();
          detectionDurationPlotLine.addValue(arUcoMarkerDetection.getTimeTakenToDetect());
 
-         if (markerImagePanel.getVideoPanel().getIsShowing().get())
+         if (markerImagePanel.getImagePanel().getIsShowing().get())
          {
             arUcoMarkerDetection.getCopyOfSourceRGBImage(imageForDrawing.getBytedecoOpenCVMat());
 

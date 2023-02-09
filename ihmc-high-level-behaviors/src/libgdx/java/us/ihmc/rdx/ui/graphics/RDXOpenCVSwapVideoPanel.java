@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.graphics;
 
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.tools.thread.GuidedSwapReference;
 
 import java.util.function.Consumer;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  */
 public class RDXOpenCVSwapVideoPanel
 {
-   private final ImGuiVideoPanel videoPanel;
+   private final RDXImagePanel imagePanel;
    private final GuidedSwapReference<RDXImagePanelTexture> dataSwapReferenceManager;
 
    public RDXOpenCVSwapVideoPanel(String panelName, Consumer<RDXImagePanelTexture> updateOnAsynchronousThread)
@@ -36,7 +36,7 @@ public class RDXOpenCVSwapVideoPanel
                                   Consumer<RDXImagePanelTexture> updateOnAsynchronousThread,
                                   Consumer<RDXImagePanelTexture> updateOnUIThread)
    {
-      this.videoPanel = new ImGuiVideoPanel(panelName, flipY);
+      this.imagePanel = new RDXImagePanel(panelName, flipY);
       dataSwapReferenceManager = new GuidedSwapReference<>(RDXImagePanelTexture::new,
                                                            updateOnAsynchronousThread,
                                                            updateOnUIThread == null ? this::defaultUpdateOnUIThread : updateOnUIThread);
@@ -65,12 +65,12 @@ public class RDXOpenCVSwapVideoPanel
    {
       if (texture.getRGBA8Image() != null)
       {
-         texture.updateOnUIThread(videoPanel);
+         texture.updateOnUIThread(imagePanel);
       }
    }
 
-   public ImGuiVideoPanel getVideoPanel()
+   public RDXImagePanel getImagePanel()
    {
-      return videoPanel;
+      return imagePanel;
    }
 }

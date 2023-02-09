@@ -23,7 +23,7 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtraction;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
@@ -124,26 +124,26 @@ public class RDXGPUPlanarRegionExtractionUI
       setImGuiWidgetsFromParameters();
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
-      blurredDepthPanel = new RDXCVImagePanel("Blurred Depth", imageWidth, imageHeight, ImGuiVideoPanel.FLIP_Y);
-      filteredDepthPanel = new RDXCVImagePanel("Filtered Depth", imageWidth, imageHeight, ImGuiVideoPanel.FLIP_Y);
+      blurredDepthPanel = new RDXCVImagePanel("Blurred Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
+      filteredDepthPanel = new RDXCVImagePanel("Filtered Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
       int patchImageWidth = gpuPlanarRegionExtraction.getPatchImageWidth();
       int patchImageHeight = gpuPlanarRegionExtraction.getPatchImageHeight();
-      nxImagePanel = new RDXCVImagePanel("Nx Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
-      nyImagePanel = new RDXCVImagePanel("Ny Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
-      nzImagePanel = new RDXCVImagePanel("Nz Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
-      gxImagePanel = new RDXCVImagePanel("Gx Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
-      gyImagePanel = new RDXCVImagePanel("Gy Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
-      gzImagePanel = new RDXCVImagePanel("Gz Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
-      debugExtractionPanel = new RDXCVImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight, ImGuiVideoPanel.FLIP_Y);
-      imguiPanel.addChild(blurredDepthPanel.getVideoPanel());
-      imguiPanel.addChild(filteredDepthPanel.getVideoPanel());
-      imguiPanel.addChild(nxImagePanel.getVideoPanel());
-      imguiPanel.addChild(nyImagePanel.getVideoPanel());
-      imguiPanel.addChild(nzImagePanel.getVideoPanel());
-      imguiPanel.addChild(gxImagePanel.getVideoPanel());
-      imguiPanel.addChild(gyImagePanel.getVideoPanel());
-      imguiPanel.addChild(gzImagePanel.getVideoPanel());
-      imguiPanel.addChild(debugExtractionPanel.getVideoPanel());
+      nxImagePanel = new RDXCVImagePanel("Nx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      nyImagePanel = new RDXCVImagePanel("Ny Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      nzImagePanel = new RDXCVImagePanel("Nz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      gxImagePanel = new RDXCVImagePanel("Gx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      gyImagePanel = new RDXCVImagePanel("Gy Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      gzImagePanel = new RDXCVImagePanel("Gz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      debugExtractionPanel = new RDXCVImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      imguiPanel.addChild(blurredDepthPanel.getImagePanel());
+      imguiPanel.addChild(filteredDepthPanel.getImagePanel());
+      imguiPanel.addChild(nxImagePanel.getImagePanel());
+      imguiPanel.addChild(nyImagePanel.getImagePanel());
+      imguiPanel.addChild(nzImagePanel.getImagePanel());
+      imguiPanel.addChild(gxImagePanel.getImagePanel());
+      imguiPanel.addChild(gyImagePanel.getImagePanel());
+      imguiPanel.addChild(gzImagePanel.getImagePanel());
+      imguiPanel.addChild(debugExtractionPanel.getImagePanel());
 
       numberOfPlanarRegionsPlot = new ImGuiPlot(labels.get("Number of planar regions"), 1000, 300, 50);
       regionMaxSearchDepthPlot = new ImGuiPlot(labels.get("Regions max search depth"), 1000, 300, 50);
@@ -210,7 +210,7 @@ public class RDXGPUPlanarRegionExtractionUI
 
       gpuDurationStopwatch.suspend();
 
-      if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && (drawPatches.get() || drawBoundaries.get()))
+      if (debugExtractionPanel.getImagePanel().getIsShowing().get() && (drawPatches.get() || drawBoundaries.get()))
          debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
 
       depthFirstSearchDurationStopwatch.start();
@@ -252,7 +252,7 @@ public class RDXGPUPlanarRegionExtractionUI
 
    private void forDrawingRegionsInDebugPanel(RapidPlanarRegionIsland island)
    {
-      if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && drawPatches.get())
+      if (debugExtractionPanel.getImagePanel().getIsShowing().get() && drawPatches.get())
       {
          for (Point2D regionIndex : island.planarRegion.getRegionIndices())
          {
@@ -271,7 +271,7 @@ public class RDXGPUPlanarRegionExtractionUI
 
    private void forDrawingRingsInDebugPanel(RapidRegionRing regionRing)
    {
-      if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && drawBoundaries.get())
+      if (debugExtractionPanel.getImagePanel().getIsShowing().get() && drawBoundaries.get())
       {
          for (Vector2D boundaryIndex : regionRing.getBoundaryIndices())
          {

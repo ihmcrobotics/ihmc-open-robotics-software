@@ -95,7 +95,7 @@ public class RDXFFMPEGWebcamLoggingDemo
                   bgrImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
 
                   swapCVPanel = new RDXOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread);
-                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat)");

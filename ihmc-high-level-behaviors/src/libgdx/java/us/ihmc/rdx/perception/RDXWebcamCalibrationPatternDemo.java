@@ -42,7 +42,7 @@ public class RDXWebcamCalibrationPatternDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   webcamReader.create();
-                  baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getImagePanel());
 
                   calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());

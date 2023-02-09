@@ -8,20 +8,17 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 
-import static org.bytedeco.opencv.global.opencv_highgui.imshow;
-import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
-
-public class RDXImagePanel
+public class RDXRapidRegionsDebugImagePanel
 {
    private Mat image;
    private Mat normalizedScaledImage;
    private Pixmap pixmap;
-   private ImGuiVideoPanel videoPanel;
+   private RDXImagePanel imagePanel;
    private Texture panelTexture;
 
-   public RDXImagePanel(String name, Mat image)
+   public RDXRapidRegionsDebugImagePanel(String name, Mat image)
    {
       int imageWidth = image.cols();
       int imageHeight = image.rows();
@@ -34,12 +31,12 @@ public class RDXImagePanel
       setup(name, imageWidth, imageHeight, flipY);
    }
 
-   public RDXImagePanel(String name, int imageWidth, int imageHeight)
+   public RDXRapidRegionsDebugImagePanel(String name, int imageWidth, int imageHeight)
    {
       this(name, imageWidth, imageHeight, false);
    }
 
-   public RDXImagePanel(String name, int imageWidth, int imageHeight, boolean flipY)
+   public RDXRapidRegionsDebugImagePanel(String name, int imageWidth, int imageHeight, boolean flipY)
    {
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       image = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new MutableBytePointer(pixmap.getPixels()));
@@ -49,10 +46,10 @@ public class RDXImagePanel
 
    private void setup(String name, int imageWidth, int imageHeight, boolean flipY)
    {
-      videoPanel = new ImGuiVideoPanel(name, flipY);
+      imagePanel = new RDXImagePanel(name, flipY);
 
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-      videoPanel.setTexture(panelTexture);
+      imagePanel.setTexture(panelTexture);
 
       BytedecoOpenCVTools.setRGBA8888ImageAlpha(image, 255);
    }
@@ -62,7 +59,7 @@ public class RDXImagePanel
     */
    public void displayFloat(Mat singleChannelImage)
    {
-      if (videoPanel.getIsShowing().get())
+      if (imagePanel.getIsShowing().get())
       {
          BytedecoOpenCVTools.clampTo8BitUnsignedChar(singleChannelImage, normalizedScaledImage, 0.0, 255.0);
          BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, image);
@@ -72,7 +69,7 @@ public class RDXImagePanel
 
    public void displayByte(Mat rgbImage)
    {
-      if (videoPanel.getIsShowing().get())
+      if (imagePanel.getIsShowing().get())
       {
          image.put(rgbImage);
          display();
@@ -85,7 +82,7 @@ public class RDXImagePanel
     */
    public void display()
    {
-      if (videoPanel.getIsShowing().get())
+      if (imagePanel.getIsShowing().get())
          panelTexture.draw(pixmap, 0, 0);
    }
 
@@ -106,7 +103,7 @@ public class RDXImagePanel
       this.image = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, image.data());
       createPixmap(imageWidth, imageHeight);
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-      videoPanel.setTexture(panelTexture);
+      imagePanel.setTexture(panelTexture);
 
       normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
 
@@ -120,7 +117,7 @@ public class RDXImagePanel
 
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-      videoPanel.setTexture(panelTexture);
+      imagePanel.setTexture(panelTexture);
 
       image = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new MutableBytePointer(pixmap.getPixels()));
       normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1, null);
@@ -128,9 +125,9 @@ public class RDXImagePanel
       BytedecoOpenCVTools.setRGBA8888ImageAlpha(image, 255);
    }
 
-   public ImGuiVideoPanel getVideoPanel()
+   public us.ihmc.rdx.ui.RDXImagePanel getImagePanel()
    {
-      return videoPanel;
+      return imagePanel;
    }
 
    public Pixmap getPixmap()

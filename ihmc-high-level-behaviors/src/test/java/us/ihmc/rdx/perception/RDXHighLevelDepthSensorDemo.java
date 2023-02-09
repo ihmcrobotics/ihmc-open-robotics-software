@@ -132,7 +132,7 @@ public class RDXHighLevelDepthSensorDemo
                   mainViewDepthPanel = new RDXCVImagePanel("Main view depth", (int) baseUI.getPrimary3DPanel().getRenderSizeX(),
                                                            (int) baseUI.getPrimary3DPanel().getRenderSizeY(),
                                                            true);
-                  baseUI.getImGuiPanelManager().addPanel(mainViewDepthPanel.getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(mainViewDepthPanel.getImagePanel());
 
                   baseUI.getLayoutManager().reloadLayout();
                }

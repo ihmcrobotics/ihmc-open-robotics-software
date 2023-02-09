@@ -139,21 +139,21 @@ public class RDXBlackflyCalibrationSuite
                {
                   blackflyReader.create();
                   blackflyReader.setMonitorPanelUIThreadPreprocessor(this::blackflyReaderUIThreadPreprocessor);
-                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getImagePanel());
 
                   calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
 
                   hdf5ImageBrowser = new RDXHDF5ImageBrowser();
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getControlPanel());
-                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getImagePanel());
 
                   calibrationSourceImagesPanel = new RDXCVImagePanel("Calibration Source Image", 100, 100);
-                  baseUI.getImGuiPanelManager().addPanel(calibrationSourceImagesPanel.getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(calibrationSourceImagesPanel.getImagePanel());
 
                   undistortedFisheyePanel = new RDXOpenCVSwapVideoPanel("Undistorted Fisheye Monitor",
                                                                         this::undistortedImageUpdateOnAsynchronousThread);
-                  baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getImagePanel());
 
                   baseUI.getLayoutManager().reloadLayout();
 
