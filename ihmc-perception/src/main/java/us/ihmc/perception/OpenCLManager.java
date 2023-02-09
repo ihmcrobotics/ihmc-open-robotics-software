@@ -83,6 +83,15 @@ public class OpenCLManager
          checkReturnCode();
 
          initialized = true;
+
+         Thread shutdownHook = new Thread(() ->
+         {
+            checkReturnCode(clFlush(commandQueue));
+            checkReturnCode(clFinish(commandQueue));
+            checkReturnCode(clReleaseCommandQueue(commandQueue));
+            checkReturnCode(clReleaseContext(context));
+         }, "OpenCLManager-Shutdown-Hook");
+         Runtime.getRuntime().addShutdownHook(shutdownHook);
       }
    }
 
