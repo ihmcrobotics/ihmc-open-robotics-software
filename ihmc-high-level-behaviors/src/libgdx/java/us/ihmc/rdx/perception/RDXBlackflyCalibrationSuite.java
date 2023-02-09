@@ -17,7 +17,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
@@ -173,8 +172,7 @@ public class RDXBlackflyCalibrationSuite
                   calibrationSourceImagesPanel = new RDXCVImagePanel("Calibration Source Image", 100, 100);
                   baseUI.getImGuiPanelManager().addPanel(calibrationSourceImagesPanel.getVideoPanel());
 
-                  undistortedFisheyePanel = new RDXOpenCVSwapVideoPanel("Undistorted Fisheye Monitor",
-                                                                        this::undistortedImageUpdateOnAsynchronousThread);
+                  undistortedFisheyePanel = new RDXOpenCVSwapVideoPanel("Undistorted Fisheye Monitor");
                   baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getVideoPanel());
 
                   interactableBlackflyFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel());
@@ -266,7 +264,10 @@ public class RDXBlackflyCalibrationSuite
                         undistortionThrottler.waitAndRun();
 
                         if (imageForUndistortion.getForThreadTwo().rows() > 0 && imageForUndistortion.getForThreadTwo().cols() > 0)
-                           undistortedFisheyePanel.updateOnAsynchronousThread();
+                        {
+                           undistortedImageUpdateOnAsynchronousThread(undistortedFisheyePanel.getAsynchronousThreadData());
+                           undistortedFisheyePanel.swap();
+                        }
 
                         imageForUndistortion.swap();
                      }
@@ -306,7 +307,7 @@ public class RDXBlackflyCalibrationSuite
                calibrationPatternDetectionUI.update();
                blackflyReader.updateOnUIThread();
                hdf5ImageBrowser.update();
-               undistortedFisheyePanel.updateOnUIThread();
+               undistortedFisheyePanel.updateTextureAndDrawOnUIThread();
                arUcoMarkerDetectionUI.update();
 
                if (calibrationSourceImageDrawRequest.poll())

@@ -22,6 +22,7 @@ public class RDXOpenCVSwapVideoPanelData
 
    /**
     * Ensure the texture is allocated and is the correct dimensions.
+    * Does not require active OpenGL context.
     */
    public void ensureTextureDimensions(int imageWidth, int imageHeight)
    {
@@ -43,7 +44,7 @@ public class RDXOpenCVSwapVideoPanelData
     * OpenGL context. This does what we can't do asynchronously:
     * creating textures and copying textures to the GPU.
     */
-   public void updateOnUIThread(ImGuiVideoPanel videoPanel)
+   public void updateTextureAndDraw(ImGuiVideoPanel videoPanel)
    {
       if (pixmap != null)
       {

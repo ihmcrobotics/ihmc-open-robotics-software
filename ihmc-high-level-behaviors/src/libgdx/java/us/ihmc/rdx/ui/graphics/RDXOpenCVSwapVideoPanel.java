@@ -1,9 +1,7 @@
 package us.ihmc.rdx.ui.graphics;
 
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
-import us.ihmc.tools.thread.GuidedSwapReference;
-
-import java.util.function.Consumer;
+import us.ihmc.tools.thread.SwapReference;
 
 /**
  * This class is designed to (at most) double the display frame rate of images which
@@ -17,29 +15,12 @@ import java.util.function.Consumer;
 public class RDXOpenCVSwapVideoPanel
 {
    private final ImGuiVideoPanel videoPanel;
-   private final GuidedSwapReference<RDXOpenCVSwapVideoPanelData> dataSwapReferenceManager;
+   private final SwapReference<RDXOpenCVSwapVideoPanelData> dataSwapReference;
 
-   public RDXOpenCVSwapVideoPanel(String panelName, Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread)
+   public RDXOpenCVSwapVideoPanel(String panelName)
    {
-      this(panelName, updateOnAsynchronousThread, null);
-   }
-
-   public RDXOpenCVSwapVideoPanel(String panelName,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnUIThread)
-   {
-      this(panelName, false, updateOnAsynchronousThread, updateOnUIThread);
-   }
-
-   public RDXOpenCVSwapVideoPanel(String panelName,
-                                  boolean flipY,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnUIThread)
-   {
-      this.videoPanel = new ImGuiVideoPanel(panelName, flipY);
-      dataSwapReferenceManager = new GuidedSwapReference<>(RDXOpenCVSwapVideoPanelData::new,
-                                                           updateOnAsynchronousThread,
-                                                           updateOnUIThread == null ? this::defaultUpdateOnUIThread : updateOnUIThread);
+      this.videoPanel = new ImGuiVideoPanel(panelName, false);
+      dataSwapReference = new SwapReference<>(RDXOpenCVSwapVideoPanelData::new);
    }
 
    /**
@@ -48,29 +29,54 @@ public class RDXOpenCVSwapVideoPanel
     */
    public void allocateInitialTextures(int imageWidth, int imageHeight)
    {
-      dataSwapReferenceManager.initializeBoth(data -> data.ensureTextureDimensions(imageWidth, imageHeight));
-   }
-
-   public void updateOnAsynchronousThread()
-   {
-      dataSwapReferenceManager.accessOnLowPriorityThread();
-   }
-
-   public void updateOnUIThread()
-   {
-      dataSwapReferenceManager.accessOnHighPriorityThread();
-   }
-
-   private void defaultUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
-   {
-      if (data.getRGBA8Image() != null)
-      {
-         data.updateOnUIThread(videoPanel);
-      }
+      dataSwapReference.initializeBoth(data -> data.ensureTextureDimensions(imageWidth, imageHeight));
    }
 
    public ImGuiVideoPanel getVideoPanel()
    {
       return videoPanel;
+   }
+
+   /**
+    * Synchronize on this object around accessing this data.
+    */
+   public RDXOpenCVSwapVideoPanelData getUIThreadData()
+   {
+      return dataSwapReference.getForThreadOne();
+   }
+
+   /**
+    * Most of the time this is all you need to do on the UI thread.
+    *
+    * This method has internal synchronization so you don't have to do it outside
+    * of this if it is the only thing you need to do on the UI thread.
+    */
+   public void updateTextureAndDrawOnUIThread()
+   {
+      synchronized (dataSwapReference)
+      {
+         RDXOpenCVSwapVideoPanelData data = getUIThreadData();
+         if (data.getRGBA8Image() != null)
+         {
+            data.updateTextureAndDraw(videoPanel);
+         }
+      }
+   }
+
+   /**
+    * Access this data at any time on the asynchronous thread, no synchronization
+    * required, just call swap() when you're done.
+    */
+   public RDXOpenCVSwapVideoPanelData getAsynchronousThreadData()
+   {
+      return dataSwapReference.getForThreadTwo();
+   }
+
+   /**
+    * Atomic swap operation. Call only from the asynchronous thread.
+    */
+   public void swap()
+   {
+      dataSwapReference.swap();
    }
 }
