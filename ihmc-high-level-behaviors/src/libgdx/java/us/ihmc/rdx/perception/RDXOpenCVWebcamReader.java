@@ -131,7 +131,7 @@ public class RDXOpenCVWebcamReader
          if (monitorPanelUIThreadPreprocessor != null && texture.getRGBA8Image() != null)
             monitorPanelUIThreadPreprocessor.accept(texture);
 
-         texture.updateOnUIThread(swapCVPanel.getVideoPanel());
+         texture.updateOnUIThread(swapCVPanel.getImagePanel());
       }
    }
 

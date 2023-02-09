@@ -152,9 +152,9 @@ public class RDXCameraCalibrationDemo
                   swapCVPanel = new RDXOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
                   undistortedVideoPanel = new RDXCVImagePanel("Undistorted Video", imageWidth, imageHeight);
                   testImagePanel = new RDXCVImagePanel("Test Image 1", imageWidth, imageHeight);
-                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
-                  baseUI.getImGuiPanelManager().addPanel(undistortedVideoPanel.getVideoPanel());
-                  baseUI.getImGuiPanelManager().addPanel(testImagePanel.getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getImagePanel());
+                  baseUI.getImGuiPanelManager().addPanel(undistortedVideoPanel.getImagePanel());
+                  baseUI.getImGuiPanelManager().addPanel(testImagePanel.getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
@@ -267,7 +267,7 @@ public class RDXCameraCalibrationDemo
                currentNumberOfImagesInDirectory++;
             }
 
-            texture.updateOnUIThread(swapCVPanel.getVideoPanel());
+            texture.updateOnUIThread(swapCVPanel.getImagePanel());
          }
       });
    }

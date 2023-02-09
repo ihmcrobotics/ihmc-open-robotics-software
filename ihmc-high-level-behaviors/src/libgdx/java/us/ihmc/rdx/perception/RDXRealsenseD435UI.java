@@ -78,7 +78,7 @@ public class RDXRealsenseD435UI
 
                      depth32FC1Image = new BytedecoImage(d435.getDepthWidth(), d435.getDepthHeight(), opencv_core.CV_32FC1);
                      depthImagePanel = new RDXCVImagePanel("D435 Depth", d435.getDepthWidth(), d435.getDepthHeight());
-                     baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getVideoPanel());
+                     baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getImagePanel());
 
                      baseUI.getLayoutManager().reloadLayout();
                   }

@@ -120,7 +120,7 @@ public class RDXFFMPEGPlaybackDemo
             if (videoReload)
             {
                videoReload = false;
-               baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
+               baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
                baseUI.getLayoutManager().reloadLayout();
             }
          }

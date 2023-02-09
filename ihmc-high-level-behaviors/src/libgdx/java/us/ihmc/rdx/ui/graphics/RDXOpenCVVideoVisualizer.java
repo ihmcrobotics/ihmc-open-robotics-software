@@ -8,7 +8,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -25,13 +25,13 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
    private final ResettableExceptionHandlingExecutorService threadQueue;
    private Pixmap pixmap;
    private Texture texture;
-   private final ImGuiVideoPanel videoPanel;
+   private final RDXImagePanel imagePanel;
 
    public RDXOpenCVVideoVisualizer(String title, String panelName, boolean flipY)
    {
       super(title);
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-      videoPanel = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, panelName), flipY);
+      imagePanel = new RDXImagePanel(ImGuiTools.uniqueLabel(this, panelName), flipY);
    }
 
    protected void doReceiveMessageOnThread(Runnable receiveMessageOnThread)
@@ -87,7 +87,7 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
                   }
 
                   texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-                  videoPanel.setTexture(texture);
+                  imagePanel.setTexture(texture);
                }
 
                texture.draw(pixmap, 0, 0);
@@ -97,9 +97,9 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
    }
 
    @Override
-   public ImGuiVideoPanel getPanel()
+   public RDXImagePanel getPanel()
    {
-      return videoPanel;
+      return imagePanel;
    }
 
    protected Mat getRGBA8Mat()

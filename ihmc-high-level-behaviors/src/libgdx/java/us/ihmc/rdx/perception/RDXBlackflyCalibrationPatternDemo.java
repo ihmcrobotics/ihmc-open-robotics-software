@@ -45,7 +45,7 @@ public class RDXBlackflyCalibrationPatternDemo
                {
                   blackflyReader.create();
                   blackflyReader.setMonitorPanelUIThreadPreprocessor(this::monitorUIThreadPreprocessor);
-                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getImagePanel());
 
                   calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());

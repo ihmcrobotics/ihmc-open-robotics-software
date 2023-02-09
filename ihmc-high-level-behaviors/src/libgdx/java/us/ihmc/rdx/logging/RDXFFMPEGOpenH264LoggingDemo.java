@@ -67,7 +67,7 @@ public class RDXFFMPEGOpenH264LoggingDemo
                   image = new BytedecoImage(WIDTH, HEIGHT, opencv_core.CV_8UC4);
                   imagePanel = new RDXCVImagePanel("Sample Image", image);
 
-                  baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
                }
 

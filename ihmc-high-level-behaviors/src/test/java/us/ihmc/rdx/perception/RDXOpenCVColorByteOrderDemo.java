@@ -59,7 +59,7 @@ public class RDXOpenCVColorByteOrderDemo
             baseUI.getImGuiPanelManager().addPanel(panel);
 
             openCVImagePanel = new RDXCVImagePanel("OpenCV Image Panel", highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage());
-            baseUI.getImGuiPanelManager().addPanel(openCVImagePanel.getVideoPanel());
+            baseUI.getImGuiPanelManager().addPanel(openCVImagePanel.getImagePanel());
          }
 
          private void renderImGuiWidgets()

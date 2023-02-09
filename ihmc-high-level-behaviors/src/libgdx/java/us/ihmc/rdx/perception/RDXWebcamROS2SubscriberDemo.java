@@ -97,7 +97,7 @@ public class RDXWebcamROS2SubscriberDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   cvImagePanel = new RDXCVImagePanel("Video1", 1920, 1080);
-                  baseUI.getImGuiPanelManager().addPanel(cvImagePanel.getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(cvImagePanel.getImagePanel());
 
                   baseUI.getLayoutManager().reloadLayout();
 
