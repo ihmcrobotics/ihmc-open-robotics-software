@@ -15,8 +15,8 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
 import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
+import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
-import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.nio.ByteOrder;
 
@@ -24,7 +24,6 @@ public class RDXNettyOusterUI
 {
    private NettyOuster ouster;
    private RDXCVImagePanel imagePanel;
-   private final FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private int numberOfDepthPoints;
    private OpenCLManager openCLManager;
@@ -37,6 +36,7 @@ public class RDXNettyOusterUI
    private int depthWidth;
    private int depthHeight;
    private volatile boolean isReady = false;
+   private final ImPlotFrequencyPlot frameReadFrequency = new ImPlotFrequencyPlot("Frame read frequency");
    private final ImPlotStopwatchPlot depthExtractionSynchronizedBlockStopwatchPlot = new ImPlotStopwatchPlot("Depth extraction kernel block");
    private final ImPlotStopwatchPlot depthExtractionKernelStopwatchPlot = new ImPlotStopwatchPlot("Depth extraction kernel");
    private final ImPlotStopwatchPlot drawDepthImageStopwatchPlot = new ImPlotStopwatchPlot("Draw depth image");
@@ -130,11 +130,6 @@ public class RDXNettyOusterUI
    {
       ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
 
-      if (imagePanel != null)
-      {
-         ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
-      }
-
       ImGuiTools.volatileInputFloat(labels.get("Vertical field of view"), verticalFieldOfView);
       ImGuiTools.volatileInputFloat(labels.get("Horizontal field of view"), horizontalFieldOfView);
 
@@ -142,6 +137,7 @@ public class RDXNettyOusterUI
       {
          ImGui.text("Columns per frame: " + ouster.getColumnsPerFrame());
          ImGui.text("Pixels per column: " + ouster.getPixelsPerColumn());
+         frameReadFrequency.renderImGuiWidgets();
          depthExtractionSynchronizedBlockStopwatchPlot.renderImGuiWidgets();
          depthExtractionKernelStopwatchPlot.renderImGuiWidgets();
          drawDepthImageStopwatchPlot.renderImGuiWidgets();
