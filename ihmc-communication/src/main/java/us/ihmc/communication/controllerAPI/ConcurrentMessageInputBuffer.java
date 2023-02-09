@@ -6,27 +6,25 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.log.LogTools;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * BufferedMessageListenerHandler is used to generate a thread-safe input API reading data from another thread. Messages
+ * ConcurrentMessageInputBuffer is used to generate a thread-safe input API reading data from another thread. Messages
  * can be submitted through the methods {@link #submitMessage(Settable)}. Only registered inputs (Packet) will make it through
  * to controller side. Unregistered inputs are ignored and the user is averted by a message error
  * with the information on the input class. Registering inputs is done in the constructor
- * {@link BufferedMessageListenerHandler}, this is how one wants to define the API. The list of
- * supported inputs can be accessed using {@link #getListOfSupportedMessages()}. BufferedMessageListenerHandler assumes that the different methods for
+ * {@link ConcurrentMessageInputBuffer}, this is how one wants to define the API. The list of
+ * supported inputs can be accessed using {@link #getListOfSupportedMessages()}. ConcurrentMessageInputBuffer assumes that the different methods for
  * submitting a inputs are called from another thread. ABSOLUTELY NO Packet should be
  * directly passed to controller, any Packet has to go through this API to ensure that
  * multi-threading is done properly.
  *
  * @author Robert
  */
-public class BufferedMessageListenerHandler
+public class ConcurrentMessageInputBuffer
 {
    private final String printStatementPrefix;
    private final int buffersCapacity;
@@ -62,7 +60,7 @@ public class BufferedMessageListenerHandler
     *
     * @param messagesToRegister list of the messages that this API should support.
     */
-   public BufferedMessageListenerHandler(List<Class<? extends Settable<?>>> messagesToRegister)
+   public ConcurrentMessageInputBuffer(List<Class<? extends Settable<?>>> messagesToRegister)
    {
       this(null, messagesToRegister);
    }
@@ -74,7 +72,7 @@ public class BufferedMessageListenerHandler
     *                           distinguish the different modules using this class.
     * @param messagesToRegister list of the messages that this API should support.
     */
-   public BufferedMessageListenerHandler(String name, List<Class<? extends Settable<?>>> messagesToRegister)
+   public ConcurrentMessageInputBuffer(String name, List<Class<? extends Settable<?>>> messagesToRegister)
    {
       this(name, messagesToRegister, 16);
    }
@@ -87,7 +85,7 @@ public class BufferedMessageListenerHandler
     * @param messagesToRegister list of the messages that this API should support.
     * @param buffersCapacity    the capacity of the internal buffers, should be a power of 2.
     */
-   public BufferedMessageListenerHandler(String name, List<Class<? extends Settable<?>>> messagesToRegister, int buffersCapacity)
+   public ConcurrentMessageInputBuffer(String name, List<Class<? extends Settable<?>>> messagesToRegister, int buffersCapacity)
    {
       this.printStatementPrefix = name == null ? "" : name + ": ";
       this.buffersCapacity = buffersCapacity;
