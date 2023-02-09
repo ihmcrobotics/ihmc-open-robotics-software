@@ -137,10 +137,16 @@ public class RDXNettyOusterUI
 
       ImGuiTools.volatileInputFloat(labels.get("Vertical field of view"), verticalFieldOfView);
       ImGuiTools.volatileInputFloat(labels.get("Horizontal field of view"), horizontalFieldOfView);
-      depthExtractionSynchronizedBlockStopwatchPlot.renderImGuiWidgets();
-      depthExtractionKernelStopwatchPlot.renderImGuiWidgets();
-      drawDepthImageStopwatchPlot.renderImGuiWidgets();
-      depthImageToPointCloudStopwatchPlot.renderImGuiWidgets();
+
+      if (isOusterInitialized())
+      {
+         ImGui.text("Columns per frame: " + ouster.getColumnsPerFrame());
+         ImGui.text("Pixels per column: " + ouster.getPixelsPerColumn());
+         depthExtractionSynchronizedBlockStopwatchPlot.renderImGuiWidgets();
+         depthExtractionKernelStopwatchPlot.renderImGuiWidgets();
+         drawDepthImageStopwatchPlot.renderImGuiWidgets();
+         depthImageToPointCloudStopwatchPlot.renderImGuiWidgets();
+      }
    }
 
    public void destroy()
