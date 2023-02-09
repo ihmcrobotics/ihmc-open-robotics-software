@@ -296,10 +296,13 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       }
 
       rootJointVelocity.setToZero();
-
       kinematicsBasedLinearStateCalculator.initialize(rootJointPosition);
 
       imuBasedLinearStateCalculator.initialize();
+      mainIMULinearVelocityEstimate.getPositionEstimation().setToZero();
+      mainIMULinearVelocityEstimate.getRateEstimation().setToZero();
+      pelvisPositionEstimate.getPositionEstimation().set(rootJointPosition);
+      pelvisPositionEstimate.getRateEstimation().setToZero();
    }
 
    public void initializeRootJointPosition(Tuple3DReadOnly rootJointPosition)
@@ -352,7 +355,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       {
          if (trustImuWhenNoFeetAreInContact.getValue())
          {
-            imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(rootJointVelocity);
+            imuBasedLinearStateCalculator.estimateRootJointLinearVelocity(rootJoint.getJointTwist(), rootJointVelocity);
+//            rootJointPosition.scaleAdd(estimatorDT, rootJointVelocity, rootJointPosition);
+            imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition, rootJoint.getJointTwist(), rootJointPosition);
 
             mainIMULinearVelocityEstimate.update(null, imuBasedLinearStateCalculator.getLinearAccelerationMeasurement());
             tempTwist.setToZero(rootJointFrame, rootJointFrame.getRootFrame(), imuBasedLinearStateCalculator.getIMUMeasurementFrame());
@@ -360,26 +365,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
             tempTwist.getLinearPart().set((Vector3DReadOnly) mainIMULinearVelocityEstimate);
             tempTwist.changeFrame(rootJointFrame);
             pelvisNewLinearVelocityEstimate.setMatchingFrame(tempTwist.getLinearPart());
-
-            if (useNewFusingFilter.getValue())
-            {
-               rootJointVelocity.set(pelvisNewLinearVelocityEstimate);
-            }
-
-            imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity);
-
-            if (!useNewFusingFilter.getValue())
-            {
-               imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, rootJointPosition);
-            }
-
-            pelvisPositionEstimate.update(rootJointPosition, pelvisNewLinearVelocityEstimate);
-
-            if (useNewFusingFilter.getValue())
-            {
-               rootJointPosition.set(pelvisPositionEstimate);
-            }
-
+            pelvisPositionEstimate.update(null, pelvisNewLinearVelocityEstimate);
             kinematicsBasedLinearStateCalculator.updateNoTrustedFeet(rootJointPosition, rootJointVelocity);
          }
          else
@@ -624,7 +610,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
    private void computeLinearVelocityFromMergingMeasurements()
    {
-      imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(pelvisVelocityIMUPart);
+      imuBasedLinearStateCalculator.estimateRootJointLinearVelocity(rootJoint.getJointTwist(), pelvisVelocityIMUPart);
 
       if (!useNewFusingFilter.getValue())
       {
@@ -652,15 +638,14 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       {
          rootJointVelocity.set(pelvisNewLinearVelocityEstimate);
       }
-
-      imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity);
    }
 
    private void computePositionFromMergingMeasurements()
    {
       if (!useNewFusingFilter.getValue())
       {
-         imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
+         imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition, rootJoint.getJointTwist(), pelvisPositionIMUPart);
+//         pelvisPositionIMUPart.scaleAdd(estimatorDT, rootJointVelocity, rootJointPosition);
          pelvisPositionKinPart.setIncludingFrame(kinematicsBasedLinearStateCalculator.getPelvisPosition());
 
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForPositionBreakFrequency.getValue(), estimatorDT);

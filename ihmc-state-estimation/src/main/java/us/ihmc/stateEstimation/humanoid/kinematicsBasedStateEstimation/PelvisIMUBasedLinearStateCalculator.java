@@ -2,17 +2,19 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import java.util.List;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -22,8 +24,6 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
 {
@@ -31,21 +31,10 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final BooleanProvider cancelGravityFromAccelerationMeasurement;// = new YoBoolean("cancelGravityFromAccelerationMeasurement", registry);
+   private final BooleanProvider cancelGravityFromAccelerationMeasurement;
 
-   private final FrameVector3D accelerationBias = new FrameVector3D(worldFrame);
-   private final FrameVector3D gravityVector = new FrameVector3D();
+   private final FrameVector3DReadOnly gravityVector;
 
-   private final YoFrameVector3D rootJointLinearVelocity = new YoFrameVector3D("imuRootJointLinearVelocity", worldFrame, registry);
-   private final YoFrameVector3D rootJointPosition = new YoFrameVector3D("imuRootJointPosition", worldFrame, registry);
-   private final YoBoolean setRootJointPositionImuOnlyToCurrent = new YoBoolean("setRootJointPositionImuOnlyToCurrent", registry);
-   private final YoDouble alphaLeakIMUOnly = new YoDouble("imuOnlyAlphaLeak", registry);
-   private final YoFrameVector3D rootJointPositionImuOnly = new YoFrameVector3D("imuOnlyIntregratedRootJointPosition", worldFrame, registry);
-   private final YoFrameVector3D imuLinearVelocityIMUOnly = new YoFrameVector3D("imuOnlyIntegratedIMULinearVelocity", worldFrame, registry);
-   private final YoFrameVector3D rootJointLinearVelocityIMUOnly = new YoFrameVector3D("imuOnlyIntegratedRootJointLinearVelocity", worldFrame, registry);
-
-   private final YoFrameVector3D yoMeasurementFrameLinearVelocityInWorld;
-   private final YoFrameVector3D yoRootJointIMUBasedLinearVelocityInWorld;
    private final YoFrameVector3D yoLinearAccelerationMeasurementInWorld;
    private final YoFrameVector3D yoLinearAccelerationMeasurement;
 
@@ -59,7 +48,6 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
 
    // Temporary variables
    private final FrameVector3D linearAccelerationMeasurement = new FrameVector3D();
-   private final FrameVector3D tempRootJointVelocityIntegrated = new FrameVector3D();
 
    private final IMUSensorReadOnly imuProcessedOutput;
    private final IMUBiasProvider imuBiasProvider;
@@ -89,7 +77,7 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
          useAccelerometerForEstimation = new BooleanParameter("useAccelerometerForEstimation", registry, initialValue);
       }
 
-      gravityVector.setIncludingFrame(worldFrame, 0.0, 0.0, -Math.abs(gravitationalAcceleration));
+      gravityVector = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(() -> worldFrame, new Vector3D(0, 0, -Math.abs(gravitationalAcceleration)));
 
       if (imuProcessedOutputs.size() == 0)
       {
@@ -105,22 +93,14 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
          measurementFrame = imuProcessedOutput.getMeasurementFrame();
       }
 
-      yoMeasurementFrameLinearVelocityInWorld = new YoFrameVector3D("imuLinearVelocityInWorld", worldFrame, registry);
-      yoRootJointIMUBasedLinearVelocityInWorld = new YoFrameVector3D("rootJointIMUBasedLinearVelocityInWorld", worldFrame, registry);
       yoLinearAccelerationMeasurement = new YoFrameVector3D("imuLinearAcceleration", measurementFrame, registry);
       yoLinearAccelerationMeasurementInWorld = new YoFrameVector3D("imuLinearAccelerationInWorld", worldFrame, registry);
-
-      setRootJointPositionImuOnlyToCurrent.set(true);
-      alphaLeakIMUOnly.set(0.999);
 
       parentRegistry.addChild(registry);
    }
 
    public void initialize()
    {
-      yoMeasurementFrameLinearVelocityInWorld.setToZero();
-      imuLinearVelocityIMUOnly.setToZero();
-      setRootJointPositionImuOnlyToCurrent.set(true);
    }
 
    public boolean isEstimationEnabled()
@@ -128,41 +108,26 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       return useAccelerometerForEstimation.getValue() && imuProcessedOutput != null;
    }
 
-   private final FrameVector3D tempVector = new FrameVector3D();
-
    private void updateLinearAccelerationMeasurement()
    {
       if (!isEstimationEnabled())
          return;
 
-      accelerationBias.setIncludingFrame(imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuProcessedOutput));
+      FrameVector3DReadOnly biasInput = imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuProcessedOutput);
+      Vector3DReadOnly rawInput = imuProcessedOutput.getLinearAccelerationMeasurement();
 
-      linearAccelerationMeasurement.setToZero(measurementFrame);
-      linearAccelerationMeasurement.set(imuProcessedOutput.getLinearAccelerationMeasurement());
-      linearAccelerationMeasurement.sub(accelerationBias);
+      linearAccelerationMeasurement.setReferenceFrame(measurementFrame);
+      linearAccelerationMeasurement.sub(rawInput, biasInput);
 
       // Update acceleration in world (minus gravity)
-      linearAccelerationMeasurement.changeFrame(worldFrame);
       if (cancelGravityFromAccelerationMeasurement.getValue())
       {
-         tempVector.setIncludingFrame(gravityVector);
-         tempVector.changeFrame(linearAccelerationMeasurement.getReferenceFrame());
-         linearAccelerationMeasurement.add(tempVector);
+         linearAccelerationMeasurement.changeFrame(worldFrame);
+         linearAccelerationMeasurement.add(gravityVector);
       }
-      yoLinearAccelerationMeasurementInWorld.set(linearAccelerationMeasurement);
 
-      // Update acceleration in local frame (minus gravity)
-      linearAccelerationMeasurement.setToZero(measurementFrame);
-      linearAccelerationMeasurement.set(imuProcessedOutput.getLinearAccelerationMeasurement());
-      linearAccelerationMeasurement.sub(accelerationBias);
-
-      if (cancelGravityFromAccelerationMeasurement.getValue())
-      {
-         tempVector.setIncludingFrame(gravityVector);
-         tempVector.changeFrame(linearAccelerationMeasurement.getReferenceFrame());
-         linearAccelerationMeasurement.add(tempVector);
-      }
-      yoLinearAccelerationMeasurement.set(linearAccelerationMeasurement);
+      yoLinearAccelerationMeasurementInWorld.setMatchingFrame(linearAccelerationMeasurement);
+      yoLinearAccelerationMeasurement.setMatchingFrame(linearAccelerationMeasurement);
    }
 
    public ReferenceFrame getIMUMeasurementFrame()
@@ -170,27 +135,31 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       return measurementFrame;
    }
 
-   private final FrameVector3D correctionVelocityForMeasurementFrameOffset = new FrameVector3D();
+   private final Twist measurementFrameTwist = new Twist();
 
-   public void updateIMUAndRootJointLinearVelocity(FixedFrameVector3DBasics rootJointVelocityToPack)
+   public void estimateRootJointLinearVelocity(TwistReadOnly previousRootJointTwistEstimate, FixedFrameVector3DBasics rootJointVelocityUpdate)
    {
       updateLinearAccelerationMeasurement();
+      measurementFrameTwist.setIncludingFrame(previousRootJointTwistEstimate);
+      measurementFrameTwist.changeFrame(measurementFrame);
+      measurementFrameTwist.getLinearPart().scaleAdd(estimatorDT, yoLinearAccelerationMeasurement, measurementFrameTwist.getLinearPart());
+      measurementFrameTwist.changeFrame(rootJoint.getFrameAfterJoint());
+      rootJointVelocityUpdate.setMatchingFrame(measurementFrameTwist.getLinearPart());
+   }
 
-      linearAccelerationMeasurement.setIncludingFrame(yoLinearAccelerationMeasurementInWorld);
-      linearAccelerationMeasurement.scale(estimatorDT);
+   private final FrameVector3D tempVector = new FrameVector3D();
 
-      yoMeasurementFrameLinearVelocityInWorld.add(linearAccelerationMeasurement);
-      rootJointVelocityToPack.set(yoMeasurementFrameLinearVelocityInWorld);
-
-      getCorrectionVelocityForMeasurementFrameOffset(correctionVelocityForMeasurementFrameOffset);
-      correctionVelocityForMeasurementFrameOffset.changeFrame(worldFrame);
-      rootJointVelocityToPack.sub(correctionVelocityForMeasurementFrameOffset);
-      yoRootJointIMUBasedLinearVelocityInWorld.set(rootJointVelocityToPack);
-
-      imuLinearVelocityIMUOnly.add(linearAccelerationMeasurement);
-      imuLinearVelocityIMUOnly.scale(alphaLeakIMUOnly.getDoubleValue());
-      rootJointLinearVelocityIMUOnly.set(imuLinearVelocityIMUOnly);
-      rootJointLinearVelocityIMUOnly.sub(correctionVelocityForMeasurementFrameOffset);
+   public void estimateRootJointPosition(FramePoint3DReadOnly previousRootJointPosition,
+                                         TwistReadOnly previousRootJointTwistEstimate,
+                                         FixedFramePoint3DBasics rootJointPositionUpdate)
+   {
+      measurementFrameTwist.setIncludingFrame(previousRootJointTwistEstimate);
+      measurementFrameTwist.changeFrame(measurementFrame);
+      measurementFrameTwist.getLinearPart().scaleAdd(0.5 * estimatorDT, yoLinearAccelerationMeasurement, measurementFrameTwist.getLinearPart());
+      measurementFrameTwist.changeFrame(rootJoint.getFrameAfterJoint());
+      tempVector.setIncludingFrame(measurementFrameTwist.getLinearPart());
+      tempVector.changeFrame(worldFrame);
+      rootJointPositionUpdate.scaleAdd(estimatorDT, tempVector, previousRootJointPosition);
    }
 
    public FrameVector3DReadOnly getLinearAccelerationMeasurement()
@@ -198,47 +167,9 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       return yoLinearAccelerationMeasurement;
    }
 
-   public void correctIMULinearVelocity(FrameVector3DReadOnly rootJointVelocity)
+   public FrameVector3DReadOnly getLinearAccelerationMeasurementInWorld()
    {
-      rootJointLinearVelocity.set(rootJointVelocity);
-      yoMeasurementFrameLinearVelocityInWorld.set(rootJointVelocity);
-      yoMeasurementFrameLinearVelocityInWorld.add(correctionVelocityForMeasurementFrameOffset);
-   }
-
-   public void updatePelvisPosition(FramePoint3DReadOnly rootJointPositionPrevValue, FixedFramePoint3DBasics rootJointPositionToPack)
-   {
-      if (!isEstimationEnabled())
-         throw new RuntimeException("IMU estimation module for pelvis linear velocity is disabled.");
-
-      tempRootJointVelocityIntegrated.setIncludingFrame(rootJointLinearVelocity);
-      tempRootJointVelocityIntegrated.scale(estimatorDT);
-
-      if (setRootJointPositionImuOnlyToCurrent.getBooleanValue())
-      {
-         rootJointPositionImuOnly.set(rootJointPositionPrevValue);
-         setRootJointPositionImuOnlyToCurrent.set(false);
-      }
-      rootJointPositionImuOnly.add(tempRootJointVelocityIntegrated);
-
-      rootJointPosition.set(rootJointPositionPrevValue);
-      rootJointPosition.add(tempRootJointVelocityIntegrated);
-      rootJointPositionToPack.set(rootJointPosition);
-   }
-
-   private final Twist tempRootJointTwist = new Twist();
-   private final FrameVector3D tempRootJointAngularVelocity = new FrameVector3D();
-   private final FramePoint3D measurementOffset = new FramePoint3D();
-
-   private void getCorrectionVelocityForMeasurementFrameOffset(FrameVector3D correctionTermToPack)
-   {
-      tempRootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
-      tempRootJointAngularVelocity.setIncludingFrame(tempRootJointTwist.getAngularPart());
-
-      measurementOffset.setToZero(measurementFrame);
-      measurementOffset.changeFrame(rootJoint.getFrameAfterJoint());
-
-      correctionTermToPack.setToZero(tempRootJointAngularVelocity.getReferenceFrame());
-      correctionTermToPack.cross(tempRootJointAngularVelocity, measurementOffset);
+      return yoLinearAccelerationMeasurementInWorld;
    }
 
    @Override
