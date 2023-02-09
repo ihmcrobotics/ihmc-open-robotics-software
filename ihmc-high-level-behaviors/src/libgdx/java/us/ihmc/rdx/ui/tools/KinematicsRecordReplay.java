@@ -52,6 +52,7 @@ public class KinematicsRecordReplay
          if (objectDetector != null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
          {
             objectFrame = objectDetector.getObjectFrame();
+            objectDetector.setEnabled(false);
          }
          // check if recording file path has been set to a different one from previous recording. In case update file path.
          if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))

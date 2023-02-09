@@ -225,6 +225,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
                objectName = objectDetector.getObjectName();
                objectPose = objectDetector.getObjectPose();
                objectFrame = objectDetector.getObjectFrame();
+               objectDetector.setEnabled(false);
                LogTools.info("Detected object {} pose: {}", objectName, objectPose);
             }
 

@@ -18,10 +18,10 @@ import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
-public class ProMPAssistantTest
+public class ProMPAssistantWorldFrameTest
 {
    @Test
-   public void testProMPTrajectoryGeneration() throws IOException
+   public void ProMPTrajectoryGenerationWorldFrameTest() throws IOException
    {
       // learn ProMPs
       // Check ProMPAssistant.json if you want to change parameters (e.g, task to learn, body parts to consider in the motion)
@@ -47,7 +47,7 @@ public class ProMPAssistantTest
       TrajectoryRecordReplay<Double> trajectoryPlayer = new TrajectoryRecordReplay<>(Double.class, testFilePath, 2); //2 body parts: the hands
       trajectoryPlayer.setDoneReplay(false);
       // start parsing data immedediately, assuming user is moving from beginning of recorded test trajectory
-      proMPAssistant.setIsMovingThreshold(0.0);
+      proMPAssistant.setIsMovingThreshold(0.00001);
 
       //let's focus on the hands
       List<String> bodyParts = new ArrayList<>();
