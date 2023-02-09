@@ -1,14 +1,14 @@
 {
-  "testNumberUseOnlyForTesting": 2,
-  "logging" : false,
+  "testNumberUseOnlyForTesting": 1,
+  "logging" : true,
   "numberBasisFunctions": 20,
-  "numberObservations": 10,
+  "numberObservations": 15,
   "conditionOnlyLastObservation": true,
   "allowedIncreaseDecreaseSpeedFactor": 2,
   "numberOfInferredSpeeds": 30,
   "tasks":[
     {
-      "name":"PushDoor",
+      "name":"Door",
       "bodyPartForRecognition": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
       "translationGoalToEE": [0.135, -0.027,  0.174],

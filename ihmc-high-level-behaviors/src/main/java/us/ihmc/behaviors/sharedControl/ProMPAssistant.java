@@ -260,15 +260,24 @@ public class ProMPAssistant
          // TODO A.1. if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
          // TODO B.1. what if someone is lefthanded, or simply wants to use the left hand for that task?
          //  Learn task for both hands and called them ...L and ...R, just check initial velocity of hands to determine which one is being used
-         currentTask = objectName;
-         // get the body part used for recognition for this task
-         bodyPartRecognition = taskBodyPartRecognitionMap.get(currentTask);
-         // get the body part that has to reach a goal for this task
-         bodyPartGoal = taskBodyPartGoalMap.get(currentTask);
+         if(proMPManagers.containsKey(objectName))
+         {
+            currentTask = objectName;
+            // get the body part used for recognition for this task
+            bodyPartRecognition = taskBodyPartRecognitionMap.get(currentTask);
+            // get the body part that has to reach a goal for this task
+            bodyPartGoal = taskBodyPartGoalMap.get(currentTask);
 
-         // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
-         for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
-            bodyPartObservedTrajectoryMap.put(bodyPart, new ArrayList<>());
+            // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
+            for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
+               bodyPartObservedTrajectoryMap.put(bodyPart, new ArrayList<>());
+         }
+         else
+         {
+            LogTools.info("Detected object ({}) does not have any associated learned policy for assistance", objectName);
+            return false;
+         }
+
       }
       return !currentTask.isEmpty();
    }
@@ -295,9 +304,6 @@ public class ProMPAssistant
 
    private void updateTask()
    {
-      //      if(!bodyPartGoal.isEmpty() && taskGoalPose != null)
-      //         proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get(bodyPartGoal), taskGoalPose, bodyPartGoal);
-      //      else
       proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get(bodyPartRecognition), bodyPartRecognition);
       // update all proMP trajectories based on initial observations (stored observed poses)
       for (String robotPart : bodyPartObservedTrajectoryMap.keySet())
@@ -376,8 +382,8 @@ public class ProMPAssistant
             else
             { // pack the frame using the trajectory generated from prediction
                FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter);
-               if (objectFrame != null) // change back to world frame if before it was changed to object frame
-                  generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+
                framePose.getPosition().set(generatedFramePose.getPosition());
                framePose.getOrientation().set(generatedFramePose.getOrientation());
             }
