@@ -4,13 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
 
@@ -36,9 +33,11 @@ import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.PlanarRegionRegistrationTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
 import us.ihmc.perception.tools.PerceptionPrintTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerTest;
@@ -1144,7 +1143,23 @@ class PlanarRegionSLAMTest
    @Test
    public void testPointToPlaneICP()
    {
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.03, 0.04, 0.0), new Vector3D(0.15, 0.05, 0.25));
+      RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
+      worldToSensorTransform.setAndInvert(sensorToWorldTransform);
 
+      PlanarRegionsList listOne = createSomeRightAngledWalls(-3, false, new RigidBodyTransform(), true, true, true);
+      PlanarRegionsList listTwo = createSomeRightAngledWalls(-6, false, worldToSensorTransform, true, true, true);
+
+      HashMap<Integer, Integer> matches = new HashMap<>();
+
+      PlanarRegionSLAMTools.findBestPlanarRegionMatches(listOne, listTwo, matches, 0.5f, 0.7f, 0.4f, 0.2f);
+
+      for(Integer key : matches.keySet())
+      {
+         LogTools.info("Match: " + key + " " + matches.get(key));
+      }
+
+      RigidBodyTransform transform = PlanarRegionRegistrationTools.computeTransformFromRegions(listOne, listTwo, matches);
    }
 
 }
