@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import imgui.ImGui;
 import imgui.type.ImFloat;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.netty.NettyOuster;
@@ -41,6 +42,7 @@ public class RDXNettyOusterUI
    private final ImPlotStopwatchPlot depthExtractionKernelStopwatchPlot = new ImPlotStopwatchPlot("Depth extraction kernel");
    private final ImPlotStopwatchPlot drawDepthImageStopwatchPlot = new ImPlotStopwatchPlot("Draw depth image");
    private final ImPlotStopwatchPlot depthImageToPointCloudStopwatchPlot = new ImPlotStopwatchPlot("Image to point cloud kernel");
+   private final Notification newFrameAvailable = new Notification();
 
    public void create(RDXBaseUI baseUI)
    {
@@ -93,27 +95,30 @@ public class RDXNettyOusterUI
 
    public void update()
    {
-      // Synchronize with copying the Ouster's buffer to the buffer used for this kernel
-      // All this is included in the block because it's not clear where the actual memory
-      // operations occur. Probably in the finish method.
-      depthExtractionSynchronizedBlockStopwatchPlot.start();
-      synchronized (this)
+      if (newFrameAvailable.poll())
       {
-         depthExtractionSynchronizedBlockStopwatchPlot.stop();
-         depthExtractionKernelStopwatchPlot.start();
-         depthExtractionKernel.runKernel(ousterInteractable.getReferenceFrame().getTransformToRoot());
-         depthExtractionKernelStopwatchPlot.stop();
+         // Synchronize with copying the Ouster's buffer to the buffer used for this kernel
+         // All this is included in the block because it's not clear where the actual memory
+         // operations occur. Probably in the finish method.
+         depthExtractionSynchronizedBlockStopwatchPlot.start();
+         synchronized (this)
+         {
+            depthExtractionSynchronizedBlockStopwatchPlot.stop();
+            depthExtractionKernelStopwatchPlot.start();
+            depthExtractionKernel.runKernel(ousterInteractable.getReferenceFrame().getTransformToRoot());
+            depthExtractionKernelStopwatchPlot.stop();
+         }
+
+         drawDepthImageStopwatchPlot.start();
+         imagePanel.drawDepthImage(depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat());
+         drawDepthImageStopwatchPlot.stop();
+
+         depthImageToPointCloudKernel.updateSensorTransform(ousterInteractable.getReferenceFrame());
+         depthImageToPointCloudStopwatchPlot.start();
+         float pointSize = 0.01f;
+         depthImageToPointCloudKernel.runKernel(horizontalFieldOfView.get(), verticalFieldOfView.get(), pointSize);
+         depthImageToPointCloudStopwatchPlot.stop();
       }
-
-      drawDepthImageStopwatchPlot.start();
-      imagePanel.drawDepthImage(depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat());
-      drawDepthImageStopwatchPlot.stop();
-
-      depthImageToPointCloudKernel.updateSensorTransform(ousterInteractable.getReferenceFrame());
-      depthImageToPointCloudStopwatchPlot.start();
-      float pointSize = 0.01f;
-      depthImageToPointCloudKernel.runKernel(horizontalFieldOfView.get(), verticalFieldOfView.get(), pointSize);
-      depthImageToPointCloudStopwatchPlot.stop();
    }
 
    private synchronized void onFrameReceived()
@@ -121,8 +126,8 @@ public class RDXNettyOusterUI
       if (isReady)
       {
          depthExtractionKernel.copyLidarFrameBuffer();
-
          frameReadFrequency.ping();
+         newFrameAvailable.set();
       }
    }
 
