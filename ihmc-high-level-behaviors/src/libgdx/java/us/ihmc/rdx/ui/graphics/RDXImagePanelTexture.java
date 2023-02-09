@@ -13,7 +13,7 @@ import us.ihmc.perception.BytedecoImage;
  * two sets of pixmaps, textures, and images where each set shares some
  * native memory, that gets copied to the GPU in the UI update method.
  */
-public class RDXOpenCVSwapVideoPanelData
+public class RDXImagePanelTexture
 {
    private Pixmap pixmap;
    private boolean needNewTexture = false;
