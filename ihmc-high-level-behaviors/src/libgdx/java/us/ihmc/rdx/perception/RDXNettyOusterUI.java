@@ -15,6 +15,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
 import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
+import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.nio.ByteOrder;
@@ -36,6 +37,10 @@ public class RDXNettyOusterUI
    private int depthWidth;
    private int depthHeight;
    private volatile boolean isReady = false;
+   private final ImPlotStopwatchPlot depthExtractionSynchronizedBlockStopwatchPlot = new ImPlotStopwatchPlot("Depth extraction kernel block");
+   private final ImPlotStopwatchPlot depthExtractionKernelStopwatchPlot = new ImPlotStopwatchPlot("Depth extraction kernel");
+   private final ImPlotStopwatchPlot drawDepthImageStopwatchPlot = new ImPlotStopwatchPlot("Draw depth image");
+   private final ImPlotStopwatchPlot depthImageToPointCloudStopwatchPlot = new ImPlotStopwatchPlot("Image to point cloud kernel");
 
    public void create(RDXBaseUI baseUI)
    {
@@ -91,16 +96,24 @@ public class RDXNettyOusterUI
       // Synchronize with copying the Ouster's buffer to the buffer used for this kernel
       // All this is included in the block because it's not clear where the actual memory
       // operations occur. Probably in the finish method.
+      depthExtractionSynchronizedBlockStopwatchPlot.start();
       synchronized (this)
       {
+         depthExtractionSynchronizedBlockStopwatchPlot.stop();
+         depthExtractionKernelStopwatchPlot.start();
          depthExtractionKernel.runKernel(ousterInteractable.getReferenceFrame().getTransformToRoot());
+         depthExtractionKernelStopwatchPlot.stop();
       }
 
+      drawDepthImageStopwatchPlot.start();
       imagePanel.drawDepthImage(depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat());
+      drawDepthImageStopwatchPlot.stop();
 
       depthImageToPointCloudKernel.updateSensorTransform(ousterInteractable.getReferenceFrame());
+      depthImageToPointCloudStopwatchPlot.start();
       float pointSize = 0.01f;
       depthImageToPointCloudKernel.runKernel(horizontalFieldOfView.get(), verticalFieldOfView.get(), pointSize);
+      depthImageToPointCloudStopwatchPlot.stop();
    }
 
    private synchronized void onFrameReceived()
@@ -124,6 +137,10 @@ public class RDXNettyOusterUI
 
       ImGuiTools.volatileInputFloat(labels.get("Vertical field of view"), verticalFieldOfView);
       ImGuiTools.volatileInputFloat(labels.get("Horizontal field of view"), horizontalFieldOfView);
+      depthExtractionSynchronizedBlockStopwatchPlot.renderImGuiWidgets();
+      depthExtractionKernelStopwatchPlot.renderImGuiWidgets();
+      drawDepthImageStopwatchPlot.renderImGuiWidgets();
+      depthImageToPointCloudStopwatchPlot.renderImGuiWidgets();
    }
 
    public void destroy()
