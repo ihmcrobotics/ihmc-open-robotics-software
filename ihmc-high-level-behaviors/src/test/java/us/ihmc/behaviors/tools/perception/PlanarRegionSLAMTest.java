@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
 
@@ -1089,7 +1088,7 @@ class PlanarRegionSLAMTest
       BytedecoTools.loadSlamWrapper();
       SlamWrapper.FactorGraphExternal slam = new SlamWrapper.FactorGraphExternal();
 
-      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.03, 0.02, 0.04), new Vector3D(0.05, 0.05, -0.05));
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.03, 0.0, 0.0), new Vector3D(0.05, 0.05, -0.05));
       RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
       worldToSensorTransform.setAndInvert(sensorToWorldTransform);
 
@@ -1143,7 +1142,7 @@ class PlanarRegionSLAMTest
    @Test
    public void testPointToPlaneICP()
    {
-      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.03, 0.04, 0.0), new Vector3D(0.15, 0.05, 0.25));
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.4, -0.5, 0.2), new Vector3D(0.15, 0.2, -0.2));
       RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
       worldToSensorTransform.setAndInvert(sensorToWorldTransform);
 
@@ -1159,7 +1158,27 @@ class PlanarRegionSLAMTest
          LogTools.info("Match: " + key + " " + matches.get(key));
       }
 
-      RigidBodyTransform transform = PlanarRegionRegistrationTools.computeTransformFromRegions(listOne, listTwo, matches);
+      RigidBodyTransform transform;
+      RigidBodyTransform totalTransform = new RigidBodyTransform();
+
+      LogTools.info("{}",listTwo.getPlanarRegion(1).getDebugString());
+
+      int numIterations = 5;
+
+      for(int i = 0; i<numIterations; i++)
+      {
+         transform = PlanarRegionRegistrationTools.computeTransformFromRegions(listOne, listTwo, matches);
+         transform.invert();
+         listTwo.applyTransform(transform);
+         totalTransform.multiply(transform);
+      }
+
+      Point3D eulerAngles = new Point3D();
+      totalTransform.getRotation().getEuler(eulerAngles);
+      LogTools.info("Rotation: {} {} {}", eulerAngles.getX(), eulerAngles.getY(), eulerAngles.getZ());
+      LogTools.info("Translation: {} {} {}", totalTransform.getTranslationX(), totalTransform.getTranslationY(), totalTransform.getTranslationZ());
+
+      LogTools.info("{}",listTwo.getPlanarRegion(0).getDebugString());
    }
 
 }

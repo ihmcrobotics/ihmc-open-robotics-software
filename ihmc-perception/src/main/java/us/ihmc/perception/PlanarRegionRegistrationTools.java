@@ -1,6 +1,5 @@
 package us.ihmc.perception;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
@@ -15,6 +14,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -132,12 +132,34 @@ public class PlanarRegionRegistrationTools
       }
    }
 
-   public static RigidBodyTransform computeIterativeClosestPlane(PlanarRegionsList previousRegions,
-                                                                 PlanarRegionsList currentRegions, HashMap<Integer, Integer> matches)
+   /**
+    * Computes the transform from the previous to the current planar regions list.
+    * Uses approach described in the paper: https://www.comp.nus.edu.sg/~lowkl/publications/lowk_point-to-plane_icp_techrep.pdf
+    *
+    * Use Iterative Linear Least Squares on SE3 tranform parameterized using the exponential map, as a tangent space vector. Every iteration
+    * moves the current planar regions closer to the previous planar regions. Usually 4-5 iterations are enough for convergence. Minizes a similarity metric
+    * between the corresponding planar regions (point-to-plane).
+    *
+    * @param previousRegions
+    * @param currentRegions
+    * @param maxIterations
+    */
+   public static RigidBodyTransform computeIterativeClosestPlane(FramePlanarRegionsList previousRegions, FramePlanarRegionsList currentRegions, int maxIterations)
    {
-      RigidBodyTransform transformToReturn = new RigidBodyTransform();;
+      RigidBodyTransform transformToReturn = new RigidBodyTransform();
+      RigidBodyTransform transform;
 
-      transformToReturn.multiply(computeTransformFromRegions(previousRegions, currentRegions, matches));
+      HashMap<Integer, Integer> matches = new HashMap<>();
+      PlanarRegionSLAMTools.findBestPlanarRegionMatches(previousRegions.getPlanarRegionsList(), currentRegions.getPlanarRegionsList(),
+                                                        matches, 0.5f, 0.7f, 0.4f, 0.2f);
+
+      for (int i = 0; i < maxIterations; i++)
+      {
+         transform = PlanarRegionRegistrationTools.computeTransformFromRegions(previousRegions.getPlanarRegionsList(), currentRegions.getPlanarRegionsList(), matches);
+         transform.invert();
+         currentRegions.getPlanarRegionsList().applyTransform(transform);
+         transformToReturn.multiply(transform);
+      }
 
       return transformToReturn;
    }
@@ -156,11 +178,37 @@ public class PlanarRegionRegistrationTools
       DMatrixRMaj A = new DMatrixRMaj(totalNumOfBoundaryPoints, 6);
       DMatrixRMaj b = new DMatrixRMaj(totalNumOfBoundaryPoints, 1);
 
+      constructLeastSquaresProblem(previousRegions, currentRegions, matches, A, b);
+      DMatrixRMaj solutionQR = solveUsingQRDecomposition(A, b);
+      DMatrixRMaj solutionSVD = solveUsingSVDDecomposition(A, b);
+
+      //LogTools.info("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
+      //
+      LogTools.info("[SVD] Rotation({}, {}, {})", solutionSVD.get(0), solutionSVD.get(1), solutionSVD.get(2));
+      LogTools.info("[SVD] Translation({}, {}, {})", solutionSVD.get(3), solutionSVD.get(4), solutionSVD.get(5));
+      //
+      //LogTools.info("[QR] Rotation({}, {}, {})", solutionQR.get(0), solutionQR.get(1), solutionQR.get(2));
+      //LogTools.info("[QR] Translation({}, {}, {})", solutionQR.get(3), solutionQR.get(4), solutionQR.get(5));
+
+      RotationMatrix rotation = new RotationMatrix(solutionSVD.get(2), solutionSVD.get(1), solutionSVD.get(0));
+      Point3D translation = new Point3D(solutionSVD.get(3), solutionSVD.get(4), solutionSVD.get(5));
+      transformToReturn.set(rotation, translation);
+
+      return transformToReturn;
+   }
+
+   public static void constructLeastSquaresProblem(PlanarRegionsList previousRegions,
+                                                   PlanarRegionsList currentRegions,
+                                                   HashMap<Integer, Integer> matches,
+                                                   DMatrixRMaj A,
+                                                   DMatrixRMaj b)
+   {
       int i = 0;
       for (Integer m : matches.keySet())
       {
          PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(m);
          PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(m));
+
          for (int n = 0; n < currentRegion.getConcaveHullSize(); n++)
          {
             Point3D origin = new Point3D();
@@ -195,13 +243,63 @@ public class PlanarRegionRegistrationTools
             b.set(i, -diff.dot(correspondingMapNormal));
             i++;
 
-            LogTools.info("Point: ({}, {}, {})",  latestPoint.getX(), latestPoint.getY(), latestPoint.getZ());
-            LogTools.info("Corresponding Point: ({}, {}, {})",correspondingMapCentroid.getX(), correspondingMapCentroid.getY(), correspondingMapCentroid.getZ());
+            //LogTools.info(String.format("[%d, %d] Point: (%.2f, %.2f, %.2f), Corresponding Point: (%.2f, %.2f, %.2f)", m, matches.get(m),
+            //                            latestPoint.getX(),
+            //                            latestPoint.getY(),
+            //                            latestPoint.getZ(),
+            //                            correspondingMapCentroid.getX(),
+            //                            correspondingMapCentroid.getY(),
+            //                            correspondingMapCentroid.getZ()));
+            //
+            //LogTools.info(String.format("[%d, %d] Normal: (%.2f, %.2f, %.2f), Corresponding Normal: (%.2f, %.2f, %.2f)", m, matches.get(m),
+            //                            currentRegion.getNormal().getX(),
+            //                            currentRegion.getNormal().getY(),
+            //                            currentRegion.getNormal().getZ(),
+            //                            correspondingMapNormal.getX(),
+            //                            correspondingMapNormal.getY(),
+            //                            correspondingMapNormal.getZ()));
          }
       }
+   }
 
-      LogTools.info("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
+   public static DMatrixRMaj solveUsingSVDDecomposition(DMatrixRMaj A, DMatrixRMaj b)
+   {
+      SvdImplicitQrDecompose_DDRM svd = new SvdImplicitQrDecompose_DDRM(false, true, true, true);
 
+      int singularCount = svd.numberOfSingularValues();
+
+      DMatrixRMaj svdUt = new DMatrixRMaj(singularCount, A.numRows);
+      DMatrixRMaj svdWInv = new DMatrixRMaj(singularCount, singularCount);
+      DMatrixRMaj svdV = new DMatrixRMaj(singularCount, A.numCols);
+
+      DMatrixRMaj solution = new DMatrixRMaj(6, 1);
+
+      if (svd.decompose(A))
+      {
+         svd.getU(svdUt, true);
+         svd.getV(svdV, false);
+         svd.getW(svdWInv);
+         CommonOps_DDRM.invert(svdWInv);
+         CommonOps_DDRM.transpose(svdWInv);
+
+         DMatrixRMaj svdVWinv = new DMatrixRMaj(6, A.numRows);
+         DMatrixRMaj svdInverse = new DMatrixRMaj(6, A.numRows);
+
+         //LogTools.info("SVD V, Winv, Ut: ({}, {}, {})", svdV, svdWInv, svdUt);
+
+         CommonOps_DDRM.mult(svdV, svdWInv, svdVWinv);
+         CommonOps_DDRM.mult(svdVWinv, svdUt, svdInverse);
+         CommonOps_DDRM.mult(svdInverse, b, solution);
+      }
+
+      //DMatrixRMaj pInverse = new DMatrixRMaj(3, 3);
+      //CommonOps_DDRM.pinv(A, pInverse);
+
+      return solution;
+   }
+
+   public static DMatrixRMaj solveUsingQRDecomposition(DMatrixRMaj A, DMatrixRMaj b)
+   {
       LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.qr(A.numRows, A.numCols);
       if (!solver.setA(A))
       {
@@ -216,13 +314,6 @@ public class PlanarRegionRegistrationTools
       DMatrixRMaj solution = new DMatrixRMaj(6, 1);
       solver.solve(b, solution);
 
-      LogTools.info("Rotation({}, {}, {})", solution.get(0), solution.get(1), solution.get(2));
-      LogTools.info("Translation({}, {}, {})", solution.get(3), solution.get(4), solution.get(5));
-
-      RotationMatrix rotation = new RotationMatrix(solution.get(2), solution.get(1), solution.get(0));
-      Point3D translation = new Point3D(solution.get(3), solution.get(4), solution.get(5));
-      transformToReturn.set(rotation, translation);
-
-      return transformToReturn;
+      return solution;
    }
 }
