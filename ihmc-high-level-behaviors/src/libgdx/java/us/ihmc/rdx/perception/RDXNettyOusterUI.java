@@ -18,6 +18,7 @@ import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
 import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 import java.nio.ByteOrder;
 
@@ -33,6 +34,7 @@ public class RDXNettyOusterUI
    private RDXPointCloudRenderer pointCloudRenderer;
    private final ImFloat verticalFieldOfView = new ImFloat((float) Math.toRadians(90.0));
    private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
+   private ModifiableReferenceFrame sensorFrame;
    private RDXInteractableFrameModel ousterInteractable;
    private int depthWidth;
    private int depthHeight;
@@ -49,7 +51,9 @@ public class RDXNettyOusterUI
       ModelData ousterSensorModel = RDXModelLoader.loadModelData("environmentObjects/ousterSensor/Ouster.g3dj");
       CylinderRayIntersection cylinderIntersection = new CylinderRayIntersection();
       ousterInteractable = new RDXInteractableFrameModel();
-      ousterInteractable.create(ReferenceFrame.getWorldFrame(),
+      sensorFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+      ousterInteractable.create(sensorFrame.getReferenceFrame(),
+                                sensorFrame.getTransformToParent(),
                                 baseUI.getPrimary3DPanel(),
                                 ousterSensorModel,
                                 pickRay ->
@@ -164,5 +168,15 @@ public class RDXNettyOusterUI
    public RDXPointCloudRenderer getPointCloudRenderer()
    {
       return pointCloudRenderer;
+   }
+
+   public ModifiableReferenceFrame getSensorFrame()
+   {
+      return sensorFrame;
+   }
+
+   public RDXInteractableFrameModel getOusterInteractable()
+   {
+      return ousterInteractable;
    }
 }

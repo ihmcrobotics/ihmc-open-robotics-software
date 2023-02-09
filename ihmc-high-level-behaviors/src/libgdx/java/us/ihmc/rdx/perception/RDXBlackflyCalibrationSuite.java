@@ -14,7 +14,11 @@ import org.bytedeco.opencv.opencv_features2d.SimpleBlobDetector;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
@@ -30,6 +34,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
 import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.*;
 
@@ -187,6 +192,29 @@ public class RDXBlackflyCalibrationSuite
                   baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
 
                   nettyOusterUI.createAfterNativesLoaded();
+                  nettyOusterUI.getSensorFrame().update(transformToBlackfly ->
+                  {
+                     // For the benchtop sensorhead setup
+                     FramePose3D ousterPose = new FramePose3D();
+                     ousterPose.getPosition().set(0.225, 0.004, 0.459);
+                     RotationMatrix rotationMatrix = new RotationMatrix();
+                     rotationMatrix.setAndNormalize( 0.779, -0.155,  0.607,
+                                                     0.189,  0.982,  0.009,
+                                                    -0.598,  0.108,  0.794);
+                     ousterPose.getOrientation().set(rotationMatrix);
+                     ousterPose.getOrientation().appendPitchRotation(Math.toRadians(-2));
+
+                     RigidBodyTransform transformChestToBlackflyFujinon = new RigidBodyTransform();
+                     transformChestToBlackflyFujinon.setIdentity();
+                     transformChestToBlackflyFujinon.getTranslation().set(0.160, -0.095, 0.419);
+                     transformChestToBlackflyFujinon.getRotation().setAndNormalize( 0.986, -0.000, 0.167, 0.000, 1.000, -0.000, -0.167, 0.000, 0.986);
+                     ReferenceFrame blackflyFrame
+                           = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                      transformChestToBlackflyFujinon);
+
+                     ousterPose.changeFrame(blackflyFrame);
+                     ousterPose.get(transformToBlackfly);
+                  });
 
                   baseUI.getLayoutManager().reloadLayout();
 
