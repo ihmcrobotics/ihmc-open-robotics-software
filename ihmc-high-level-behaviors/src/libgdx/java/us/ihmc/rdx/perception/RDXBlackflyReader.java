@@ -11,7 +11,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
@@ -35,7 +35,7 @@ public class RDXBlackflyReader
    private spinImage spinImage;
    private BytePointer spinImageDataPointer;
    private Mat blackflySourceMat;
-   private RDXOpenCVSwapVideoPanel swapCVPanel;
+   private RDXOpenCVGuidedSwapVideoPanel swapCVPanel;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
    private boolean imageWasRead = false;
@@ -59,7 +59,7 @@ public class RDXBlackflyReader
       blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGB8);
       blackfly.startAcquiringImages();
 
-      swapCVPanel = new RDXOpenCVSwapVideoPanel("Blackfly Monitor", this::monitorUpdateOnAsynchronousThread, this::monitorPanelUpdateOnUIThread);
+      swapCVPanel = new RDXOpenCVGuidedSwapVideoPanel("Blackfly Monitor", this::monitorUpdateOnAsynchronousThread, this::monitorPanelUpdateOnUIThread);
    }
 
    /**
@@ -129,7 +129,7 @@ public class RDXBlackflyReader
          if (monitorPanelUIThreadPreprocessor != null && data.getRGBA8Image() != null)
             monitorPanelUIThreadPreprocessor.accept(data);
 
-         data.updateOnUIThread(swapCVPanel.getVideoPanel());
+         data.updateTextureAndDraw(swapCVPanel.getVideoPanel());
       }
    }
 
@@ -163,7 +163,7 @@ public class RDXBlackflyReader
       return panel;
    }
 
-   public RDXOpenCVSwapVideoPanel getSwapCVPanel()
+   public RDXOpenCVGuidedSwapVideoPanel getSwapCVPanel()
    {
       return swapCVPanel;
    }

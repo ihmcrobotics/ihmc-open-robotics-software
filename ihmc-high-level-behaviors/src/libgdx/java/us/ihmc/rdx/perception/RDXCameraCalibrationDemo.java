@@ -18,7 +18,7 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
@@ -46,7 +46,7 @@ public class RDXCameraCalibrationDemo
    private Mat bgrImage;
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
-   private RDXOpenCVSwapVideoPanel swapCVPanel;
+   private RDXOpenCVGuidedSwapVideoPanel swapCVPanel;
    private final Consumer<RDXOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::generateNewCameraMatrixOnUIThread;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read Duration");
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode Duration");
@@ -149,7 +149,7 @@ public class RDXCameraCalibrationDemo
                   yuv420Image = new Mat();
                   jpegImageBytePointer = new BytePointer();
 
-                  swapCVPanel = new RDXOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
+                  swapCVPanel = new RDXOpenCVGuidedSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
                   undistortedVideoPanel = new RDXCVImagePanel("Undistorted Video", imageWidth, imageHeight);
                   testImagePanel = new RDXCVImagePanel("Test Image 1", imageWidth, imageHeight);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
@@ -267,7 +267,7 @@ public class RDXCameraCalibrationDemo
                currentNumberOfImagesInDirectory++;
             }
 
-            data.updateOnUIThread(swapCVPanel.getVideoPanel());
+            data.updateTextureAndDraw(swapCVPanel.getVideoPanel());
          }
       });
    }
