@@ -49,6 +49,7 @@ public class PlanarRegionMappingHandler
    private final DataSource source;
 
    private final static long PUBLISH_MILLISECONDS = 100;
+   private final static int ICP_MAX_ITERATIONS = 5;
 
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
@@ -76,6 +77,9 @@ public class PlanarRegionMappingHandler
    private PlanarRegionsReplayBuffer planarRegionsListBuffer = null;
 
    private FramePlanarRegionsList framePlanarRegionsList;
+   private FramePlanarRegionsList previousRegions;
+   private FramePlanarRegionsList currentRegions;
+
    private PlanarRegionMap planarRegionMap;
    private PlanarRegionsListLogger planarRegionsListLogger;
 
@@ -146,10 +150,10 @@ public class PlanarRegionMappingHandler
       perceptionDataLoader = new PerceptionDataLoader();
       perceptionDataLoader.openLogFile(logFile);
 
-      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
-      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
+      //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
+      //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
-      createOuster(128, 2048, smoothing);
+      createOuster(128, 1024, smoothing);
       //createL515(768, 1024, smoothing);
    }
 
@@ -348,6 +352,35 @@ public class PlanarRegionMappingHandler
          if (updateMapFuture.isCancelled() || updateMapFuture.isDone())
             launchMapper();
       }
+   }
+
+   public void loadRegionsFromLogIntoPrevious(int index)
+   {
+      LogTools.info("[Previous] Loading Perception Log: {}", index);
+      loadDataFromPerceptionLog(perceptionDataLoader, index);
+
+      previousRegions = new FramePlanarRegionsList();
+      rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, previousRegions);
+      LogTools.info("[Previous] Regions Found: {}", previousRegions.getPlanarRegionsList().getNumberOfPlanarRegions());
+   }
+
+   public void loadRegionsFromLogIntoCurrent(int index)
+   {
+      LogTools.info("[Current] Loading Perception Log: {}", index);
+      loadDataFromPerceptionLog(perceptionDataLoader, index);
+
+      currentRegions = new FramePlanarRegionsList();
+      rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, currentRegions);
+      LogTools.info("[Current] Regions Found: {}", currentRegions.getPlanarRegionsList().getNumberOfPlanarRegions());
+   }
+
+   public void computeICP()
+   {
+      RigidBodyTransform currentToPreviousTransform = PlanarRegionRegistrationTools.computeIterativeClosestPlane(previousRegions,
+                                                                                                                 currentRegions,
+                                                                                                                 ICP_MAX_ITERATIONS);
+
+      LogTools.info("Current to Previous Transform: \n{}", currentToPreviousTransform);
    }
 
    public void hardResetTheMap()
