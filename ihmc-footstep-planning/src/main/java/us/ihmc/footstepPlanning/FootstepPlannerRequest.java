@@ -500,7 +500,7 @@ public class FootstepPlannerRequest
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
       }
 
-      if(getPlanarRegionsList() != null)
+      if (getPlanarRegionsList() != null)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
          requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
@@ -509,6 +509,11 @@ public class FootstepPlannerRequest
       if (getHeightMapMessage() != null)
       {
          requestPacket.getHeightMapMessage().set(getHeightMapMessage());
+      }
+
+      if (referencePlan != null && !referencePlan.isEmpty())
+      {
+         requestPacket.getReferencePlan().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(referencePlan, -1.0, -1.0));
       }
    }
 
