@@ -167,7 +167,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                                                                             yoGraphicsListRegistry,
                                                                                             registry);
 
-      imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure,
+      imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(rootJoint,
                                                                               imuProcessedOutputs,
                                                                               imuBiasProvider,
                                                                               cancelGravityFromAccelerationMeasurement,
