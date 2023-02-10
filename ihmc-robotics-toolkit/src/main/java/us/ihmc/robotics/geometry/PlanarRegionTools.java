@@ -36,7 +36,9 @@ public class PlanarRegionTools
    private final ConvexPolygon2D regionBPolygonInRegionA = new ConvexPolygon2D();
 
    public PlanarRegionTools()
-   {}
+   {
+
+   }
 
    public double getDistanceBetweenPlanarRegions(PlanarRegion regionA, PlanarRegion regionB)
    {
@@ -662,15 +664,13 @@ public class PlanarRegionTools
       box.applyTransform(planarRegion.getTransformToWorld());
       return box;
    }
-
-   public static Box3D getLocalBoundingBox3DInWorldWithMargin(PlanarRegion planarRegion, double margin)
+   
+   public static BoundingBox3D getWorldBoundingBox3DWithMargin(PlanarRegion planarRegion, double margin)
    {
-      BoundingBox3D boundingBox3DInLocal = getLocalBoundingBox3DInLocal(planarRegion);
-      boundingBox3DInLocal.getMaxPoint().add(margin, margin, margin);
-      boundingBox3DInLocal.getMinPoint().sub(margin, margin, margin);
-      Box3D box = GeometryTools.convertBoundingBox3DToBox3D(boundingBox3DInLocal);
-      box.applyTransform(planarRegion.getTransformToWorld());
-      return box;
+      BoundingBox3D boundingBox = planarRegion.getBoundingBox3dInWorldCopy();
+      boundingBox.getMaxPoint().add(margin, margin, margin);
+      boundingBox.getMinPoint().sub(margin, margin, margin);
+      return boundingBox;
    }
 
    public static List<PlanarRegion> filterPlanarRegionsByHullSize(int minNumberOfVertices, List<PlanarRegion> planarRegions)

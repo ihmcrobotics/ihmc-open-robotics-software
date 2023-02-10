@@ -38,19 +38,14 @@ public static class FactorGraphExternal extends Pointer {
         public native void addPriorPoseFactor(int index, float[] pose);
 
         // Expects packed Pose3 as XYZYPR
-        public native void addOdometryFactor(FloatPointer odometry, int poseId);
-        public native void addOdometryFactor(FloatBuffer odometry, int poseId);
-        public native void addOdometryFactor(float[] odometry, int poseId);
-
-        // Expects 4x4 homogenous transform matrix as 16-float array
-        public native void addOdometryFactorExtended(FloatPointer odometry, int poseId);
-        public native void addOdometryFactorExtended(FloatBuffer odometry, int poseId);
-        public native void addOdometryFactorExtended(float[] odometry, int poseId);
+        public native void addOdometryFactor(int poseId, FloatPointer odometry);
+        public native void addOdometryFactor(int poseId, FloatBuffer odometry);
+        public native void addOdometryFactor(int poseId, float[] odometry);
 
         // Expects packed Vector4
-        public native void addOrientedPlaneFactor(FloatPointer lmMean, int lmId, int poseIndex);
-        public native void addOrientedPlaneFactor(FloatBuffer lmMean, int lmId, int poseIndex);
-        public native void addOrientedPlaneFactor(float[] lmMean, int lmId, int poseIndex);
+        public native void addOrientedPlaneFactor(int lmId, int poseIndex, FloatPointer lmMean);
+        public native void addOrientedPlaneFactor(int lmId, int poseIndex, FloatBuffer lmMean);
+        public native void addOrientedPlaneFactor(int lmId, int poseIndex, float[] lmMean);
 
         public native void optimize();
 
@@ -62,11 +57,6 @@ public static class FactorGraphExternal extends Pointer {
         public native void setPoseInitialValue(int index, FloatPointer value);
         public native void setPoseInitialValue(int index, FloatBuffer value);
         public native void setPoseInitialValue(int index, float[] value);
-
-        // Expects 4x4 homogenous transform as 16-float array
-        public native void setPoseInitialValueExtended(int index, FloatPointer value);
-        public native void setPoseInitialValueExtended(int index, FloatBuffer value);
-        public native void setPoseInitialValueExtended(int index, float[] value);
 
         // Expects packed OrientedPlane3
         public native void setOrientedPlaneInitialValue(int landmarkId, FloatPointer value);
@@ -82,6 +72,29 @@ public static class FactorGraphExternal extends Pointer {
         public native void createOrientedPlaneNoiseModel(FloatPointer lmVariances);
         public native void createOrientedPlaneNoiseModel(FloatBuffer lmVariances);
         public native void createOrientedPlaneNoiseModel(float[] lmVariances);
+
+        // Expects 4x4 homogenous transform matrix as 16-double array
+        public native void addOdometryFactorSE3(int poseId, DoublePointer odometry);
+        public native void addOdometryFactorSE3(int poseId, DoubleBuffer odometry);
+        public native void addOdometryFactorSE3(int poseId, double[] odometry);
+
+        // Expects 4x4 homogenous transform as 16-double array
+        public native void setPoseInitialValueSE3(int index, DoublePointer value);
+        public native void setPoseInitialValueSE3(int index, DoubleBuffer value);
+        public native void setPoseInitialValueSE3(int index, double[] value);
+
+        // Add Prior Pose Factor with full 4x4 homogenous SE3 matrix
+        public native void addPriorPoseFactorSE3(int poseId, DoublePointer pose);
+        public native void addPriorPoseFactorSE3(int poseId, DoubleBuffer pose);
+        public native void addPriorPoseFactorSE3(int poseId, double[] pose);
+
+        public native @Cast("bool") boolean getPoseById(int poseId, DoublePointer pose);
+        public native @Cast("bool") boolean getPoseById(int poseId, DoubleBuffer pose);
+        public native @Cast("bool") boolean getPoseById(int poseId, double[] pose);
+
+        public native @Cast("bool") boolean getPlanarLandmarkById(int poseId, DoublePointer plane);
+        public native @Cast("bool") boolean getPlanarLandmarkById(int poseId, DoubleBuffer plane);
+        public native @Cast("bool") boolean getPlanarLandmarkById(int poseId, double[] plane);
 
         public native void printResults();
 

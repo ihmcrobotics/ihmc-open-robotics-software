@@ -27,10 +27,12 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.UnitVector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -38,6 +40,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
+import us.ihmc.log.LogTools;
 
 public class GeometryTools
 {
@@ -1246,8 +1251,9 @@ public class GeometryTools
 
    public static double computeBoundingBoxVolume3D(BoundingBox3DReadOnly boundingBox)
    {
-      return Math.abs(boundingBox.getMaxX() - boundingBox.getMinX()) * Math.abs(boundingBox.getMaxY() - boundingBox.getMinY())
-            * Math.abs(boundingBox.getMaxZ() - boundingBox.getMinZ());
+      return Math.abs(boundingBox.getMaxX() - boundingBox.getMinX())
+           * Math.abs(boundingBox.getMaxY() - boundingBox.getMinY())
+           * Math.abs(boundingBox.getMaxZ() - boundingBox.getMinZ());
    }
 
    /**
@@ -1257,7 +1263,7 @@ public class GeometryTools
    {
       BoundingBox3D intersection = getIntersectionOfTwoBoundingBoxes(a, b);
 
-      if(intersection == null)
+      if (intersection == null)
          return 0.0;
 
       double intersectionVolume = GeometryTools.computeBoundingBoxVolume3D(intersection);
@@ -1275,7 +1281,7 @@ public class GeometryTools
    {
       BoundingBox3D intersection = getIntersectionOfTwoBoundingBoxes(a, b);
 
-      if(intersection == null)
+      if (intersection == null)
          return 0.0;
 
       double intersectionVolume = GeometryTools.computeBoundingBoxVolume3D(intersection);
@@ -1407,5 +1413,26 @@ public class GeometryTools
                                                                                          planeNormalZ,
                                                                                          true);
       return isFirstQueryAbovePlane == isSecondQueryAbovePlane;
+   }
+
+   /**
+    * Finds the projection of a 3D point onto a 3D plane given in general form.
+    * Uses: projectedPoint = point - (normal.dot(point) + planeScalar) * (normal)
+    *
+    * @param plane Coefficients of the general form of plane equation (ax + by + cz + d = 0) as Vector4D
+    * @param point Point to be projected onto the plane as Point3D
+    * @return Projected point onto the plane as Point3D
+    */
+   public static Point3D projectPointOntoPlane(Vector4DReadOnly plane, Point3DReadOnly point)
+   {
+      UnitVector3D planeNormal = new UnitVector3D(plane.getX(), plane.getY(), plane.getZ());
+
+      Vector3D scaledNormal = new Vector3D(planeNormal);
+      scaledNormal.scale(planeNormal.dot(point) + plane.getS());
+
+      Point3D projectedPoint = new Point3D();
+      projectedPoint.sub(point, scaledNormal);
+
+      return projectedPoint;
    }
 }

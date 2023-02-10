@@ -33,9 +33,11 @@ import java.util.function.Consumer;
  * To test, use the GNU netcat command:
  * netcat -ul 7502
  *
+ * <p>
  * Lidar incoming data format:
+ * </p>
  *
- * <img src="https://i.imgur.com/tB4dI3H.png" width="800" alt="description of MyImage">
+ * <img src="https://www.ihmc.us/wp-content/uploads/2023/02/OusterLidarDataFormat.png" width="800">
  *
  */
 public class NettyOuster
@@ -160,8 +162,13 @@ public class NettyOuster
          }
       });
 
-      // Ouster OS0-128 uses about 1.5 MB for the buffer, so let's set the allocator to 2 MB to leave a little wiggle room
-      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(Conversions.megabytesToBytes(2)));
+      // Ouster OS0-128 at 2048x10 sends 3,186,688 bytes per revolution, at 10 Hz, is ~31.9 MB/s (~255 Mb/s)
+      // We tried lots of options, including lower and higher sizes, 4 MB seemed to be a sweet spot.
+      // Lower values resulted in the beginning part of the image being cut off.
+      // Higher values resulted in intermitent dropouts of parts of the scan lines throughout the entire image.
+      // We tried the AdaptiveRecvByteBufAllocator, but depending on the initial values, we see the same behavior.
+      // The AdaptiveRecvByteBufAllocator never seemed to adapt at all. 
+      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(Conversions.megabytesToBytes(4)));
    }
 
    private void configureTCP()

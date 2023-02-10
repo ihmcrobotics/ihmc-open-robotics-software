@@ -6,7 +6,7 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -27,8 +27,8 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -41,7 +41,17 @@ import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
 /**
- * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
+ * StructuralPerceptionProcessWithDriver is a headless process that runs the perception frontend for structure-specific measurements such as planar regions.
+ * color, depth, and point cloud data using the depth data obtained from the structure sensor on the robot. (usually a large FOV sensor, Ouster currently).
+ * Structure refers to the surrounding geometric structures such as walls, pillars, ceilings, and other large objects. It may also assist the
+ * TerrainPerceptionProcess by publishing additional signals measured over the terrain. This class may be extended in the future to support height map
+ * extraction, iterative-closest point based registration, LidarScanMessage publisher, and more.
+ *
+ * Primary responsibilities include (but are not limited to):
+ * 1. Reads depth data from the sensor.
+ * 2. Extracts planar regions from the depth data.
+ * 3. Publishes compressed depth images on the depth topic
+ * 4. Publishes planar regions on the planar regions topic
  */
 public class StructuralPerceptionProcessWithDriver
 {
@@ -67,19 +77,19 @@ public class StructuralPerceptionProcessWithDriver
    private final ROS2Helper ros2Helper;
    private ROS2Topic<ImageMessage> depthTopic;
    private ROS2Topic<PlanarRegionsListMessage> regionsTopic;
-   private ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic;
+   private ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
    private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
 
    public StructuralPerceptionProcessWithDriver(ROS2Topic<ImageMessage> depthTopic,
                                                 ROS2Topic<PlanarRegionsListMessage> regionsTopic,
-                                                ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic,
+                                                ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
                                                 Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.depthTopic = depthTopic;
       this.regionsTopic = regionsTopic;
-      this.regionsWithPoseTopic = regionsWithPoseTopic;
+      this.frameRegionsTopic = frameRegionsTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
@@ -110,8 +120,7 @@ public class StructuralPerceptionProcessWithDriver
                                                       }, getClass().getSimpleName() + "Shutdown"));
    }
 
-   // If we aren't doing anything, copy the data and publish it.
-   private synchronized void onFrameReceived()
+   private void onFrameReceived()
    {
       if (nativesLoadedActivator.poll())
       {
@@ -153,11 +162,7 @@ public class StructuralPerceptionProcessWithDriver
       }
    }
 
-   /**
-    * Synchronized to make sure it's only running ever once at a time.
-    * This should also be guaranteed by the ResettableExceptionHandlingExecutorService.
-    */
-   private synchronized void extractCompressAndPublish()
+   private void extractCompressAndPublish()
    {
       // Important not to store as a field, as update() needs to be called each frame
       ReferenceFrame cameraFrame = sensorFrameUpdater.get();
@@ -185,18 +190,18 @@ public class StructuralPerceptionProcessWithDriver
 
       BytedecoImage depthImage = depthExtractionKernel.getExtractedDepthImage();
 
-      PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
-      extractPlanarRegionsListWithPose(depthImage, ReferenceFrame.getWorldFrame(), planarRegionsListWithPose);
-      PlanarRegionsList planarRegionsList = planarRegionsListWithPose.getPlanarRegionsList();
+      FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
+      extractFramePlanarRegionsList(depthImage, ReferenceFrame.getWorldFrame(), framePlanarRegionsList);
+      PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
 
       LogTools.info("Extracted {} planar regions", planarRegionsList.getNumberOfPlanarRegions());
 
       PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
    }
 
-   private void extractPlanarRegionsListWithPose(BytedecoImage depthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose planarRegionsListWithPose)
+   private void extractFramePlanarRegionsList(BytedecoImage depthImage, ReferenceFrame cameraFrame, FramePlanarRegionsList framePlanarRegionsList)
    {
-      rapidRegionsExtractor.update(depthImage, cameraFrame, planarRegionsListWithPose);
+      rapidRegionsExtractor.update(depthImage, cameraFrame, framePlanarRegionsList);
    }
 
    public static void main(String[] args)

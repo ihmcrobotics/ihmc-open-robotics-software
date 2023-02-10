@@ -17,7 +17,7 @@ public class SlamWrapperTest
       float[] odometry = new float[] {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
 
       factorGraphExternal.addPriorPoseFactor(1, poseInitial);
-      factorGraphExternal.addOdometryFactor(odometry, 2);
+      factorGraphExternal.addOdometryFactor(2, odometry);
 
       factorGraphExternal.setPoseInitialValue(1, poseInitial);
       factorGraphExternal.setPoseInitialValue(2, odometry);
