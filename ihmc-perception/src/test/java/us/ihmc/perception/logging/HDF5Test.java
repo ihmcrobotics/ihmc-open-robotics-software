@@ -26,6 +26,18 @@ public class HDF5Test
       LogTools.info("Native byte order: {}", ByteOrder.nativeOrder());
    }
 
+   /**
+    * Make sure we can successively close and reopen an HDF5 file
+    */
+   @Test
+   public void testCloseReopenInts()
+   {
+      for (int i = 0; i < 5; i++)
+      {
+         testInts();
+      }
+   }
+
    @Test
    public void testInts()
    {
