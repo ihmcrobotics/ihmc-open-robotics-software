@@ -8,7 +8,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXCVImagePanel;
+import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
@@ -24,7 +24,7 @@ public class RDXFFMPEGVP9LoggingDemo
    public static final int NICE_COLOR = 0xFFAA6600;
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
    private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
-   private RDXCVImagePanel imagePanel;
+   private RDXBytedecoImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private BytedecoImage image;
    private final boolean lossless = true;
@@ -64,9 +64,9 @@ public class RDXFFMPEGVP9LoggingDemo
                   ffmpegLoggerDemoHelper.create(WIDTH, HEIGHT, this::prepareSourceImage);
 
                   image = new BytedecoImage(WIDTH, HEIGHT, opencv_core.CV_8UC4);
-                  imagePanel = new RDXCVImagePanel("Sample Image", image);
+                  imagePanel = new RDXBytedecoImagePanel("Sample Image", image);
 
-                  baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
                }
 

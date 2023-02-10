@@ -14,7 +14,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXCVImagePanel;
+import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.ui.tools.ImGuiDirectory;
 import us.ihmc.tools.IHMCCommonPaths;
 
@@ -28,7 +28,7 @@ public class RDXHDF5ImageBrowser
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiDirectory logDirectory;
    private final ImGuiPanel panel = new ImGuiPanel("HDF5 Browsing", this::renderImGuiWidgets);
-   private final RDXCVImagePanel imagePanel;
+   private final RDXBytedecoImagePanel imagePanel;
    private H5File h5File = null;
    private String selectedFileName = "";
    private String openFile = "";
@@ -45,7 +45,7 @@ public class RDXHDF5ImageBrowser
 
    public RDXHDF5ImageBrowser()
    {
-      imagePanel = new RDXCVImagePanel("HDF5 Image Browser", 100, 100);
+      imagePanel = new RDXBytedecoImagePanel("HDF5 Image Browser", 100, 100);
 
       logDirectory = new ImGuiDirectory(IHMCCommonPaths.LOGS_DIRECTORY.toString(),
                                         fileName -> h5File != null && selectedFileName.equals(fileName),
@@ -177,7 +177,7 @@ public class RDXHDF5ImageBrowser
          closeHDF5File();
    }
 
-   public RDXCVImagePanel getImagePanel()
+   public RDXBytedecoImagePanel getImagePanel()
    {
       return imagePanel;
    }

@@ -10,7 +10,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.tools.thread.Activator;
@@ -36,7 +36,7 @@ public class RDXOpenCVWebcamReader
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
    private boolean imageWasRead = false;
    private long numberOfImagesRead = 0;
-   private Consumer<RDXOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor = null;
+   private Consumer<RDXImagePanelTexture> monitorPanelUIThreadPreprocessor = null;
 
    public RDXOpenCVWebcamReader(Activator nativesLoadedActivator)
    {
@@ -87,7 +87,7 @@ public class RDXOpenCVWebcamReader
     * on the UI update thread. It's not ideal to do too much processing here,
     * just quick and easy stuff.
     */
-   public void setMonitorPanelUIThreadPreprocessor(Consumer<RDXOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor)
+   public void setMonitorPanelUIThreadPreprocessor(Consumer<RDXImagePanelTexture> monitorPanelUIThreadPreprocessor)
    {
       this.monitorPanelUIThreadPreprocessor = monitorPanelUIThreadPreprocessor;
    }
@@ -106,10 +106,10 @@ public class RDXOpenCVWebcamReader
       readFrequencyPlot.ping();
    }
 
-   private void monitorPanelUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
+   private void monitorPanelUpdateOnAsynchronousThread(RDXImagePanelTexture texture)
    {
       imageWasRead = videoCapture.read(bgrImage);
-      opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+      opencv_imgproc.cvtColor(bgrImage, texture.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
    }
 
    /**
@@ -121,17 +121,17 @@ public class RDXOpenCVWebcamReader
       swapCVPanel.updateOnUIThread();
    }
 
-   private void monitorPanelUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
+   private void monitorPanelUpdateOnUIThread(RDXImagePanelTexture texture)
    {
       if (imageWasRead)
       {
          imageWasRead = false;
          ++numberOfImagesRead;
 
-         if (monitorPanelUIThreadPreprocessor != null && data.getRGBA8Image() != null)
-            monitorPanelUIThreadPreprocessor.accept(data);
+         if (monitorPanelUIThreadPreprocessor != null && texture.getRGBA8Image() != null)
+            monitorPanelUIThreadPreprocessor.accept(texture);
 
-         data.updateTextureAndDraw(swapCVPanel.getVideoPanel());
+         texture.updateTextureAndDraw(swapCVPanel.getImagePanel());
       }
    }
 

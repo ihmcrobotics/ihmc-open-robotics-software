@@ -19,7 +19,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
@@ -47,7 +47,7 @@ public class RDXCameraCalibrationDemo
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
    private RDXOpenCVGuidedSwapVideoPanel swapCVPanel;
-   private final Consumer<RDXOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::generateNewCameraMatrixOnUIThread;
+   private final Consumer<RDXImagePanelTexture> accessOnHighPriorityThread = this::generateNewCameraMatrixOnUIThread;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read Duration");
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode Duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read Frequency");
@@ -83,8 +83,8 @@ public class RDXCameraCalibrationDemo
    private final Mat matOfCorners = new Mat();
    private final Point2fVector tempPoint2fVector = new Point2fVector();
    private final Mat tempMat = new Mat();
-   private RDXCVImagePanel undistortedVideoPanel;
-   private RDXCVImagePanel testImagePanel;
+   private RDXBytedecoImagePanel undistortedVideoPanel;
+   private RDXBytedecoImagePanel testImagePanel;
    private Mat imageAtIndex = null;
    private final MatVector images = new MatVector();
    private Mat newCameraMatrix = new Mat();
@@ -150,11 +150,11 @@ public class RDXCameraCalibrationDemo
                   jpegImageBytePointer = new BytePointer();
 
                   swapCVPanel = new RDXOpenCVGuidedSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
-                  undistortedVideoPanel = new RDXCVImagePanel("Undistorted Video", imageWidth, imageHeight);
-                  testImagePanel = new RDXCVImagePanel("Test Image 1", imageWidth, imageHeight);
-                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
-                  baseUI.getImGuiPanelManager().addPanel(undistortedVideoPanel.getVideoPanel());
-                  baseUI.getImGuiPanelManager().addPanel(testImagePanel.getVideoPanel());
+                  undistortedVideoPanel = new RDXBytedecoImagePanel("Undistorted Video", imageWidth, imageHeight);
+                  testImagePanel = new RDXBytedecoImagePanel("Test Image 1", imageWidth, imageHeight);
+                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getImagePanel());
+                  baseUI.getImGuiPanelManager().addPanel(undistortedVideoPanel.getImagePanel());
+                  baseUI.getImGuiPanelManager().addPanel(testImagePanel.getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
@@ -233,24 +233,24 @@ public class RDXCameraCalibrationDemo
             baseUI.renderEnd();
          }
 
-         private void videoUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
+         private void videoUpdateOnAsynchronousThread(RDXImagePanelTexture texture)
          {
-            data.ensureTextureDimensions(imageWidth, imageHeight);
-            opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+            texture.ensureTextureDimensions(imageWidth, imageHeight);
+            opencv_imgproc.cvtColor(bgrImage, texture.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
          }
 
-         private void videoUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
+         private void videoUpdateOnUIThread(RDXImagePanelTexture texture)
          {
             if (generateCameraMatrixNotification.poll())
             {
-               generateNewCameraMatrixOnUIThread(data);
+               generateNewCameraMatrixOnUIThread(texture);
             }
 
             if (cameraMatrix != null)
             {
                newCameraMatrix = opencv_calib3d.getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1.0);
 
-               data.getRGBA8Image().getBytedecoOpenCVMat().copyTo(tempMat);
+               texture.getRGBA8Image().getBytedecoOpenCVMat().copyTo(tempMat);
                opencv_calib3d.undistort(tempMat,
                                         undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat(),
                                         cameraMatrix,
@@ -261,13 +261,13 @@ public class RDXCameraCalibrationDemo
             if (takingPhotosIsActive.get() && throttler.run(0.5))
             {
 
-               opencv_imgproc.cvtColor(data.getRGBA8Image().getBytedecoOpenCVMat(), tempMat, opencv_imgproc.COLOR_BGR2RGB);
+               opencv_imgproc.cvtColor(texture.getRGBA8Image().getBytedecoOpenCVMat(), tempMat, opencv_imgproc.COLOR_BGR2RGB);
                opencv_imgcodecs.imwrite(calibrationPhotoDirectory + "CameraCalibrationPhoto" + (currentNumberOfImagesInDirectory /*+1*/) + ".jpg",
                                         tempMat);
                currentNumberOfImagesInDirectory++;
             }
 
-            data.updateTextureAndDraw(swapCVPanel.getVideoPanel());
+            texture.updateTextureAndDraw(swapCVPanel.getImagePanel());
          }
       });
    }
@@ -297,7 +297,7 @@ public class RDXCameraCalibrationDemo
       }
    }
 
-   private void generateNewCameraMatrixOnUIThread(RDXOpenCVSwapVideoPanelData data)
+   private void generateNewCameraMatrixOnUIThread(RDXImagePanelTexture texture)
    {
       LogTools.info("PATH {}", dir.getAbsolutePath());
       File[] directoryListing = dir.listFiles();
@@ -317,9 +317,9 @@ public class RDXCameraCalibrationDemo
       LogTools.info("There are {} many photos", images.size());
       //numOfImagesInDirectory = (int) images.size();
 
-      if (data != null && data.getRGBA8Image() != null && data.getRGBA8Image().getBytedecoOpenCVMat() != null)
+      if (texture != null && texture.getRGBA8Image() != null && texture.getRGBA8Image().getBytedecoOpenCVMat() != null)
       {
-         data.getRGBA8Image().getBytedecoOpenCVMat().copyTo(undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat());
+         texture.getRGBA8Image().getBytedecoOpenCVMat().copyTo(undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat());
          undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat().copyTo(tempMat);
          gridWidth = (float) squareSize * (boardSize.width() - 1);
 
