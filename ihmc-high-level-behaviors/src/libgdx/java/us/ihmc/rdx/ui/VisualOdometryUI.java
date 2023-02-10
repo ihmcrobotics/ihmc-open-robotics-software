@@ -11,7 +11,7 @@ public class VisualOdometryUI
 
    public VisualOdometryUI()
    {
-      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Visual Odometry UI");
+      baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Visual Odometry UI");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
