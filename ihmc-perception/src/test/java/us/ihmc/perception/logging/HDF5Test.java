@@ -30,7 +30,7 @@ public class HDF5Test
     * Make sure we can successively close and reopen an HDF5 file
     */
    @Test
-   public void testCloseReopenInts()
+   public void testCloseAndReopenInts()
    {
       for (int i = 0; i < 5; i++)
       {
