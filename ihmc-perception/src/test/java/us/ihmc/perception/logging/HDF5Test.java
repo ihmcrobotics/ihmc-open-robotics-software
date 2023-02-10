@@ -26,18 +26,6 @@ public class HDF5Test
       LogTools.info("Native byte order: {}", ByteOrder.nativeOrder());
    }
 
-   /**
-    * Make sure we can successively close and reopen an HDF5 file
-    */
-   @Test
-   public void testCloseAndReopenInts()
-   {
-      for (int i = 0; i < 5; i++)
-      {
-         testInts();
-      }
-   }
-
    @Test
    public void testInts()
    {
@@ -337,6 +325,18 @@ public class HDF5Test
       h5File._close();
 
       Assertions.assertArrayEquals(writeData, readData);
+   }
+
+   /**
+    * Make sure we can successively close and reopen an HDF5 file
+    */
+   @Test
+   public void testCloseAndReopenInts()
+   {
+      for (int i = 0; i < 5; i++)
+      {
+         testInts();
+      }
    }
 
    private static WorkspaceFile getFile(String name)
