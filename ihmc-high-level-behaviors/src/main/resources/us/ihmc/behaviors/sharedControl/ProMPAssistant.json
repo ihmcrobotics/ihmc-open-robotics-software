@@ -1,5 +1,5 @@
 {
-  "testNumberUseOnlyForTesting": 1,
+  "testNumberUseOnlyForTesting": 2,
   "logging" : true,
   "numberBasisFunctions": 20,
   "numberObservations": 15,
