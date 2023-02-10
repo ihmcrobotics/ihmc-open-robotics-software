@@ -106,7 +106,7 @@ namespace promp
             // compute promp trajectory given a certain alpha
             Eigen::MatrixXd mod_traj = this->modulate(ratio * this->timesteps(), true).matrix();
             std::ofstream myfile;
-            myfile.open("/home/lpenco/repository-group/ihmc-open-robotics-software/promp/etc/my_promp"+std::to_string(i)+".csv");
+            myfile.open("C:/Users/lpenco/repository-group/ihmc-open-robotics-software/promp/etc/my_promp"+std::to_string(i)+".csv");
             myfile << mod_traj.format(CSVFormat);
             myfile.close();
 
