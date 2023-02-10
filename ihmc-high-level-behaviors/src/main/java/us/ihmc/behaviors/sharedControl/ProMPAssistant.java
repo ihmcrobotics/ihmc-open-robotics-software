@@ -382,8 +382,8 @@ public class ProMPAssistant
             else
             { // pack the frame using the trajectory generated from prediction
                FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter);
-
-
+               if (objectFrame != null) // change back to world frame if before it was changed to object frame
+                  generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.getPosition().set(generatedFramePose.getPosition());
                framePose.getOrientation().set(generatedFramePose.getOrientation());
             }

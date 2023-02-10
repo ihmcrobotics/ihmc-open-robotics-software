@@ -17,9 +17,9 @@
 
 #include <iostream>
 #include <stdexcept>
-//#include <fstream>
-//using namespace Eigen;
-//const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
+#include <fstream>
+using namespace Eigen;
+const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
 
 namespace promp 
 {
@@ -105,10 +105,10 @@ namespace promp
             double ratio = this->speed() / alphas[i];
             // compute promp trajectory given a certain alpha
             Eigen::MatrixXd mod_traj = this->modulate(ratio * this->timesteps(), true).matrix();
-//            std::ofstream myfile;
-//            myfile.open("/home/luigi/repository-group/ihmc-open-robotics-software/promp/etc/my_promp"+std::to_string(i)+".csv");
-//            myfile << mod_traj.format(CSVFormat);
-//            myfile.close();
+            std::ofstream myfile;
+            myfile.open("/home/luigi/repository-group/ihmc-open-robotics-software/promp/etc/my_promp"+std::to_string(i)+".csv");
+            myfile << mod_traj.format(CSVFormat);
+            myfile.close();
 
             // compute derivate mean traj of promp
             int min_size = std::min(obs_traj.rows(), mod_traj.rows());
