@@ -150,13 +150,13 @@ public class PlanarRegionRegistrationTools
       RigidBodyTransform transform;
 
       HashMap<Integer, Integer> matches = new HashMap<>();
-      PlanarRegionSLAMTools.findBestPlanarRegionMatches(previousRegions.getPlanarRegionsList(), currentRegions.getPlanarRegionsList(),
+      PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions.getPlanarRegionsList(), previousRegions.getPlanarRegionsList(),
                                                         matches, 0.5f, 0.7f, 0.4f, 0.2f);
 
       for (int i = 0; i < maxIterations; i++)
       {
          transform = PlanarRegionRegistrationTools.computeTransformFromRegions(previousRegions.getPlanarRegionsList(), currentRegions.getPlanarRegionsList(), matches);
-         transform.invert();
+//         transform.invert();
          currentRegions.getPlanarRegionsList().applyTransform(transform);
          transformToReturn.multiply(transform);
       }
@@ -181,6 +181,8 @@ public class PlanarRegionRegistrationTools
       constructLeastSquaresProblem(previousRegions, currentRegions, matches, A, b);
       DMatrixRMaj solutionQR = solveUsingQRDecomposition(A, b);
       DMatrixRMaj solutionSVD = solveUsingSVDDecomposition(A, b);
+
+      CommonOps_DDRM.scale(0.1, solutionSVD);
 
       //LogTools.info("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
       //
