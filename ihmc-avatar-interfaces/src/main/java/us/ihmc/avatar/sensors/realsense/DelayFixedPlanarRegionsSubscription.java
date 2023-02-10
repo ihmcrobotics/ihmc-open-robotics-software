@@ -6,7 +6,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanRegionFilter;
+import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Callback;
