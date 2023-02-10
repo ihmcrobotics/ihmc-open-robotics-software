@@ -55,15 +55,15 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
    private ImGuiPlot planarRegionCustomizationDurationPlot;
 
    private ImGuiPanel imguiPanel;
-   private RDXCVImagePanel blurredDepthPanel;
-   private RDXCVImagePanel filteredDepthPanel;
-   private RDXCVImagePanel nxImagePanel;
-   private RDXCVImagePanel nyImagePanel;
-   private RDXCVImagePanel nzImagePanel;
-   private RDXCVImagePanel gxImagePanel;
-   private RDXCVImagePanel gyImagePanel;
-   private RDXCVImagePanel gzImagePanel;
-   private RDXRapidRegionsDebugImagePanel debugExtractionPanel;
+   private RDXBytedecoImagePanel blurredDepthPanel;
+   private RDXBytedecoImagePanel filteredDepthPanel;
+   private RDXBytedecoImagePanel nxImagePanel;
+   private RDXBytedecoImagePanel nyImagePanel;
+   private RDXBytedecoImagePanel nzImagePanel;
+   private RDXBytedecoImagePanel gxImagePanel;
+   private RDXBytedecoImagePanel gyImagePanel;
+   private RDXBytedecoImagePanel gzImagePanel;
+   private RDXMatImagePanel debugExtractionPanel;
 
    private int patchImageWidth = 0;
    private int patchImageHeight = 0;
@@ -91,16 +91,16 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
       concaveHullParametersTuner.create(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters(), true);
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
-      blurredDepthPanel = new RDXCVImagePanel("Blurred Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
-      filteredDepthPanel = new RDXCVImagePanel("Filtered Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
+      blurredDepthPanel = new RDXBytedecoImagePanel("Blurred Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
+      filteredDepthPanel = new RDXBytedecoImagePanel("Filtered Depth", imageWidth, imageHeight, RDXImagePanel.FLIP_Y);
 
-      nxImagePanel = new RDXCVImagePanel("Nx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      nyImagePanel = new RDXCVImagePanel("Ny Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      nzImagePanel = new RDXCVImagePanel("Nz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      gxImagePanel = new RDXCVImagePanel("Gx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      gyImagePanel = new RDXCVImagePanel("Gy Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      gzImagePanel = new RDXCVImagePanel("Gz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
-      debugExtractionPanel = new RDXRapidRegionsDebugImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      nxImagePanel = new RDXBytedecoImagePanel("Nx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      nyImagePanel = new RDXBytedecoImagePanel("Ny Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      nzImagePanel = new RDXBytedecoImagePanel("Nz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      gxImagePanel = new RDXBytedecoImagePanel("Gx Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      gyImagePanel = new RDXBytedecoImagePanel("Gy Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      gzImagePanel = new RDXBytedecoImagePanel("Gz Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
+      debugExtractionPanel = new RDXMatImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight, RDXImagePanel.FLIP_Y);
 
       imguiPanel.addChild(blurredDepthPanel.getImagePanel());
       imguiPanel.addChild(filteredDepthPanel.getImagePanel());

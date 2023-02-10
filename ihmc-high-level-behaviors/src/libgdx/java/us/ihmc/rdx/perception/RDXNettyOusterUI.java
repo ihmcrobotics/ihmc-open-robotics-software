@@ -28,7 +28,7 @@ public class RDXNettyOusterUI
    private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
    private NettyOuster ouster;
-   private RDXCVImagePanel imagePanel;
+   private RDXBytedecoImagePanel imagePanel;
    private final FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private int numberOfDepthPoints;
@@ -107,7 +107,7 @@ public class RDXNettyOusterUI
                   {
                      depthWidth = ouster.getImageWidth();
                      depthHeight = ouster.getImageHeight();
-                     imagePanel = new RDXCVImagePanel("Ouster Depth Image", depthWidth, depthHeight);
+                     imagePanel = new RDXBytedecoImagePanel("Ouster Depth Image", depthWidth, depthHeight);
 
                      baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
                      baseUI.getLayoutManager().reloadLayout();

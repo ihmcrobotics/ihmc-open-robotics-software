@@ -60,7 +60,7 @@ public class RDXBlackflyCalibrationSuite
    private RDXHDF5ImageLoggingUI hdf5ImageLoggingUI;
    private RDXHDF5ImageBrowser hdf5ImageBrowser;
    private RDXOpenCVSwapVideoPanel undistortedFisheyePanel;
-   private RDXCVImagePanel calibrationSourceImagesPanel;
+   private RDXBytedecoImagePanel calibrationSourceImagesPanel;
    private final RecyclingArrayList<Mat> calibrationSourceImages = new RecyclingArrayList<>(Mat::new);
    private final ImInt calibrationSourceImageIndex = new ImInt();
    private volatile boolean running = true;
@@ -148,7 +148,7 @@ public class RDXBlackflyCalibrationSuite
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getControlPanel());
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getImagePanel());
 
-                  calibrationSourceImagesPanel = new RDXCVImagePanel("Calibration Source Image", 100, 100);
+                  calibrationSourceImagesPanel = new RDXBytedecoImagePanel("Calibration Source Image", 100, 100);
                   baseUI.getImGuiPanelManager().addPanel(calibrationSourceImagesPanel.getImagePanel());
 
                   undistortedFisheyePanel = new RDXOpenCVSwapVideoPanel("Undistorted Fisheye Monitor",
