@@ -12,6 +12,8 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.List;
 
@@ -21,14 +23,16 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    private FootstepPlan referenceFootstepPlan;
    private DirectedGraph<FootstepGraphNode> footstepGraph;
    private DiscreteFootstep nominalIdealStep;
+   private final YoBoolean stepSideIncorrect;
 
    // TODO add to footstep planner parameters
    /* Weight factor for using reference vs nominal ideal steps. Alpha = 0 means use nominal ideal step, alpha = 1 means use reference value */
    private double referenceAlpha = 0.5;
 
-   public ReferenceBasedIdealStepCalculator(IdealStepCalculator nominalIdealStepCalculator)
+   public ReferenceBasedIdealStepCalculator(IdealStepCalculator nominalIdealStepCalculator, YoRegistry registry)
    {
       this.nominalIdealStepCalculator = nominalIdealStepCalculator;
+      stepSideIncorrect = new YoBoolean("stepSideIncorrect", registry);
    }
 
    @Override
@@ -55,54 +59,11 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
 
       // TODO: Indexing should match so that referencedStep's side is equal to stance Node's opposite side.
       //  In case this is not true, we will try to find the closest step from either previous or next step in the reference plan.
-      if (referenceFootstep.getRobotSide() != stanceNode.getRobotSide().getOppositeSide())
+
+      stepSideIncorrect.set(referenceFootstep.getRobotSide() != stanceNode.getRobotSide().getOppositeSide());
+      if (stepSideIncorrect.getBooleanValue())
       {
-//         throw new RuntimeException("Wrong side from referencePlan");
-         LogTools.warn("Wrong side from reference plan . . .\n Trying to fetch from one step previous or after this within the reference plan . . .");
-         int index_a = stepIndexInPlan + 1;
-         PlannedFootstep candidate_a = null;
-         int index_b = stepIndexInPlan - 1;
-         PlannedFootstep candidate_b = null;
-         if (index_a < referenceFootstepPlan.getNumberOfSteps())
-         {
-            candidate_a = referenceFootstepPlan.getFootstep(index_a);
-         }
-         if (index_b >= 0)
-         {
-            candidate_b = referenceFootstepPlan.getFootstep(index_b);
-         }
-
-         // Only previous step available to fetch.
-         if (candidate_a == null && candidate_b != null)
-         {
-            referenceFootstep = candidate_b;
-         }
-         // Only next step available to fetch.
-         else if (candidate_a != null && candidate_b == null)
-         {
-            referenceFootstep = candidate_a;
-         }
-         else if (candidate_a != null)
-         {
-            double distance_a = referenceFootstep.getFootstepPose().getPositionDistance(candidate_a.getFootstepPose());
-            double distance_b = referenceFootstep.getFootstepPose().getPositionDistance(candidate_b.getFootstepPose());
-
-            if (distance_a <= distance_b)
-            {
-               referenceFootstep = candidate_a;
-               LogTools.warn("Fetching Next step as reference . . .");
-            }
-            else
-            {
-               referenceFootstep = candidate_b;
-               LogTools.warn("Fetching Previous step as reference . . .");
-            }
-         }
-         else
-         {
-            LogTools.warn("No previous or next step to fetch from reference plan. Using nominalIdealStep . . .");
-            return nominalIdealStep;
-         }
+         throw new RuntimeException("Wrong side from reference plan, this should not happen ! ! !");
       }
       FramePose3D referenceFootstepPose = referenceFootstep.getFootstepPose();
       LogTools.warn("~~~~~~~~~~~~~~~~~~~~ USING REFERENCE STEP IN THE REFERENCE_BASED_IDEAL_STEP_CALCULATOR ~~~~~~~~~~~~~~~~~~~~");
@@ -117,6 +78,11 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    public void setReferenceFootstepPlan(FootstepPlan referenceFootstepPlan)
    {
       this.referenceFootstepPlan = referenceFootstepPlan;
+   }
+
+   public void clearReferencePlan()
+   {
+      referenceFootstepPlan = null;
    }
 
    public void setFootstepGraph(DirectedGraph<FootstepGraphNode> footstepGraph)

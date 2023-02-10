@@ -100,7 +100,7 @@ public class AStarFootstepPlanner
 
       this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, registry);
-      this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(idealStepCalculator);
+      this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(idealStepCalculator, registry);
       this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, referenceBasedIdealStepCalculator, footPolygons);
 
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
@@ -197,10 +197,15 @@ public class AStarFootstepPlanner
       }
 
       // Start planning loop
-      if (request.getReferencePlan()!=null)
+      if (request.getReferencePlan() == null)
+      {
+         referenceBasedIdealStepCalculator.clearReferencePlan();
+      }
+      else
       {
          referenceBasedIdealStepCalculator.setReferenceFootstepPlan(request.getReferencePlan());
       }
+
       while (true)
       {
          iterations++;
