@@ -47,8 +47,9 @@ public class OpenCLManager
       if (!initialized)
       {
          /* Get platform/device information */
-         checkReturnCode(clGetPlatformIDs(maxNumberOfEntries, platforms, numberOfPlatforms));
-         checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, maxNumberOfEntries, devices, numberOfDevices));
+         final int platformCount = 1; // We're just interested in the primary platform (most likely "NVIDIA CUDA")
+         checkReturnCode(clGetPlatformIDs(platformCount, platforms, numberOfPlatforms));
+         checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, platformCount, devices, numberOfDevices));
 
          int numberOfPlatforms = OpenCLManager.numberOfPlatforms.get();
          LogTools.info("Number of platforms: {}", numberOfPlatforms);
