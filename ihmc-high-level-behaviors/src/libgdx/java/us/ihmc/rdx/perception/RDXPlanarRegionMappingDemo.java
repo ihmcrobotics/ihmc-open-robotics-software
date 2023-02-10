@@ -72,6 +72,8 @@ public class RDXPlanarRegionMappingDemo
 
             planarRegionMappingUI = new RDXPlanarRegionMappingUIPanel("Filtered Map", mappingManager);
             baseUI.getImGuiPanelManager().addPanel(planarRegionMappingUI.getImGuiPanel());
+
+            baseUI.getPrimaryScene().addRenderableProvider(planarRegionMappingUI, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(mapPlanarRegionsGraphic::getRenderables, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer::getRenderables, RDXSceneLevel.VIRTUAL);
 

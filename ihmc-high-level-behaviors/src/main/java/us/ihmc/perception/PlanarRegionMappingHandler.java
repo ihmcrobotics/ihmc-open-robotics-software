@@ -49,7 +49,7 @@ public class PlanarRegionMappingHandler
    private final DataSource source;
 
    private final static long PUBLISH_MILLISECONDS = 100;
-   private final static int ICP_MAX_ITERATIONS = 5;
+   private final static int ICP_MAX_ITERATIONS = 1;
 
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
@@ -361,6 +361,7 @@ public class PlanarRegionMappingHandler
 
       previousRegions = new FramePlanarRegionsList();
       rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, previousRegions);
+      rapidRegionsExtractor.setProcessing(false);
       LogTools.info("[Previous] Regions Found: {}", previousRegions.getPlanarRegionsList().getNumberOfPlanarRegions());
    }
 
@@ -371,6 +372,7 @@ public class PlanarRegionMappingHandler
 
       currentRegions = new FramePlanarRegionsList();
       rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, currentRegions);
+      rapidRegionsExtractor.setProcessing(false);
       LogTools.info("[Current] Regions Found: {}", currentRegions.getPlanarRegionsList().getNumberOfPlanarRegions());
    }
 
@@ -435,5 +437,15 @@ public class PlanarRegionMappingHandler
          updateMapFuture.cancel(true);
       executorService.shutdownNow();
       planarRegionMap.destroy();
+   }
+
+   public FramePlanarRegionsList getPreviousRegions()
+   {
+      return previousRegions;
+   }
+
+   public FramePlanarRegionsList getCurrentRegions()
+   {
+      return currentRegions;
    }
 }

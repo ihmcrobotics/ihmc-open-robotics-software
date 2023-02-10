@@ -1,13 +1,18 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
-public class RDXPlanarRegionMappingUIPanel
+public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
 {
    private ImGuiStoredPropertySetTuner mappingParametersTuner;
    private PlanarRegionMappingHandler mappingManager;
@@ -15,6 +20,9 @@ public class RDXPlanarRegionMappingUIPanel
    private final ImBoolean liveModeEnabled = new ImBoolean();
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private boolean captured = false;
+
+   private RDXPlanarRegionsGraphic previousRegionsGraphic = new RDXPlanarRegionsGraphic();
+   private RDXPlanarRegionsGraphic currentRegionsGraphic = new RDXPlanarRegionsGraphic();
 
    private ImInt icpPreviousIndex = new ImInt(0);
    private ImInt icpCurrentIndex = new ImInt(1);
@@ -48,11 +56,13 @@ public class RDXPlanarRegionMappingUIPanel
             ImGui.endTabItem();
          }
 
-         if(ImGui.beginTabItem("ICP"))
+         if(ImGui.beginTabItem("Registration"))
          {
             if(ImGui.button("Load Previous"))
             {
                mappingManager.loadRegionsFromLogIntoPrevious(icpPreviousIndex.get());
+               previousRegionsGraphic.generateMeshes(mappingManager.getPreviousRegions().getPlanarRegionsList());
+               previousRegionsGraphic.update();
             }
             ImGui.sameLine();
             ImGui.sliderInt("Previous", icpPreviousIndex.getData(), 0, mappingManager.getSensorPositionBuffer().size() - 1);
@@ -63,12 +73,16 @@ public class RDXPlanarRegionMappingUIPanel
             if(ImGui.button("Load Curernt"))
             {
                mappingManager.loadRegionsFromLogIntoCurrent(icpCurrentIndex.get());
+               currentRegionsGraphic.generateMeshes(mappingManager.getCurrentRegions().getPlanarRegionsList());
+               currentRegionsGraphic.update();
             }
             ImGui.sameLine();
             ImGui.sliderInt("Current", icpCurrentIndex.getData(), 0, mappingManager.getSensorPositionBuffer().size() - 1);
             if(ImGui.button("Optimize Transform"))
             {
                mappingManager.computeICP();
+               currentRegionsGraphic.generateMeshes(mappingManager.getCurrentRegions().getPlanarRegionsList());
+               currentRegionsGraphic.update();
             }
             ImGui.endTabItem();
          }
@@ -76,16 +90,10 @@ public class RDXPlanarRegionMappingUIPanel
          ImGui.endTabBar();
       }
 
-
       if (ImGui.button("Capture"))
       {
          mappingManager.setCaptured(true);
       }
-
-
-
-
-
 
       ImGui.checkbox("Show Parameter Tuners", mappingParametersTuner.getIsShowing());
    }
@@ -103,5 +111,12 @@ public class RDXPlanarRegionMappingUIPanel
    public ImGuiPanel getImGuiPanel()
    {
       return imGuiPanel;
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      previousRegionsGraphic.getRenderables(renderables, pool);
+      currentRegionsGraphic.getRenderables(renderables, pool);
    }
 }
