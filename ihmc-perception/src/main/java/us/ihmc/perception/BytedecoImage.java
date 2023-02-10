@@ -140,6 +140,11 @@ public class BytedecoImage
 
    public void createOpenCLImage(OpenCLManager openCLManager, int flags)
    {
+      if (openCLChannelOrder == OpenCL.CL_RGB)
+      {
+         throw new RuntimeException("OpenCL will throw CL_OUT_OF_RESOURCES unless you use RGBA and CV_8UC4."
+                                    + "It's probably something about memory alignment on hardware. Just include the alpha channel.");
+      }
       openCLImageObjectFlags = flags;
       openCLImageObject = openCLManager.createImage(flags, openCLChannelOrder, openCLChannelDataType, imageWidth, imageHeight, bytedecoByteBufferPointer);
    }
@@ -193,9 +198,17 @@ public class BytedecoImage
     */
    public void ensureDimensionsMatch(BytedecoImage other)
    {
+      ensureDimensionsMatch(other, null);
+   }
+
+   /**
+    * Resizes this image to match the dimensions of other if necessary.
+    */
+   public void ensureDimensionsMatch(BytedecoImage other, OpenCLManager openCLManager)
+   {
       if (!BytedecoOpenCVTools.dimensionsMatch(this, other))
       {
-         resize(other.getImageWidth(), other.getImageHeight(), null, backingDirectByteBuffer);
+         resize(other.getImageWidth(), other.getImageHeight(), openCLManager, backingDirectByteBuffer);
       }
    }
 

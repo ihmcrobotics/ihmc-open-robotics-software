@@ -105,6 +105,11 @@ public class RDXBlackflyCalibrationSuite
    private final ImDouble calibratedFy = new ImDouble(fyGuess.get());
    private final ImDouble calibratedCx = new ImDouble(cxGuess.get());
    private final ImDouble calibratedCy = new ImDouble(cyGuess.get());
+   private final ImDouble coloringFx = new ImDouble(448.07332); // We are initializing with calibrated results from previous method
+   private final ImDouble coloringFy = new ImDouble(448.03141);
+   private final ImDouble coloringCx = new ImDouble(969.35663);
+   private final ImDouble coloringCy = new ImDouble(613.54671);
+   private final ImString coloringCameraMatrixAsText = new ImString(512);
    private final ImString cameraMatrixAsText = new ImString(512);
    private final ImString newCameraMatrixAsText = new ImString(512);
    private final ImDouble distortionCoefficientK1 = new ImDouble(0.01758);
@@ -117,6 +122,7 @@ public class RDXBlackflyCalibrationSuite
    private final ImDouble fovScaleFocalLengthDivisor = new ImDouble(1.0);
    private Mat distortionCoefficients;
    private Mat cameraMatrix;
+   private Mat coloringCameraMatrix;
    private SwapReference<Mat> imageForUndistortion;
    private SwapReference<Mat> cameraMatrixForUndistortion;
    private SwapReference<Mat> distortionCoefficientsForUndistortion;
@@ -131,6 +137,7 @@ public class RDXBlackflyCalibrationSuite
    private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
    private final RDXNettyOusterUI nettyOusterUI = new RDXNettyOusterUI();
    private RDXInteractableBlackflyFujinon interactableBlackflyFujinon;
+   private ReferenceFrame blackflySensorFrame;
 
    public RDXBlackflyCalibrationSuite()
    {
@@ -160,7 +167,7 @@ public class RDXBlackflyCalibrationSuite
                {
                   blackflyReader.create();
                   blackflyReader.setMonitorPanelUIThreadPreprocessor(this::blackflyReaderUIThreadPreprocessor);
-                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getImagePanel());
+                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapImagePanel().getImagePanel());
 
                   calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
@@ -178,7 +185,7 @@ public class RDXBlackflyCalibrationSuite
                   interactableBlackflyFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel());
 
                   openCVArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  ReferenceFrame blackflySensorFrame = interactableBlackflyFujinon.getInteractableFrameModel().getReferenceFrame();
+                  blackflySensorFrame = interactableBlackflyFujinon.getInteractableFrameModel().getReferenceFrame();
                   openCVArUcoMarkerDetection.create(blackflySensorFrame);
                   arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();
                   ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
@@ -234,6 +241,12 @@ public class RDXBlackflyCalibrationSuite
                   cameraMatrix.ptr(1, 1).putDouble(calibratedFy.get());
                   cameraMatrix.ptr(0, 2).putDouble(calibratedCx.get());
                   cameraMatrix.ptr(1, 2).putDouble(calibratedCy.get());
+                  coloringCameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
+                  opencv_core.setIdentity(coloringCameraMatrix);
+                  coloringCameraMatrix.ptr(0, 0).putDouble(coloringFx.get());
+                  coloringCameraMatrix.ptr(1, 1).putDouble(coloringFy.get());
+                  coloringCameraMatrix.ptr(0, 2).putDouble(coloringCx.get());
+                  coloringCameraMatrix.ptr(1, 2).putDouble(coloringCy.get());
                   cameraMatrixForUndistortion = new SwapReference<>(Mat::new);
                   cameraMatrixForUndistortion.initializeBoth(cameraMatrix::copyTo);
                   rectificationTransformation = new Mat(3, 3, opencv_core.CV_64F);
@@ -354,6 +367,14 @@ public class RDXBlackflyCalibrationSuite
             synchronized (imageForUndistortion)
             {
                texture.getRGBA8Mat().copyTo(imageForUndistortion.getForThreadOne());
+            }
+
+            if (nettyOusterUI.getIsReady())
+            {
+               nettyOusterUI.getDepthImageToPointCloudKernel()
+                            .setFisheyeImageToColorPoints(texture.getRGBA8Image(), coloringFx.get(), coloringFy.get(), coloringCx.get(), coloringCy.get());
+               blackflySensorFrame.getTransformToDesiredFrame(nettyOusterUI.getDepthImageToPointCloudKernel().getFisheyeCameraTransformToWorldToPack(),
+                                                              ReferenceFrame.getWorldFrame());
             }
 
             calibrationPatternDetectionUI.drawCornersOrCenters(texture.getRGBA8Mat());
@@ -502,6 +523,32 @@ public class RDXBlackflyCalibrationSuite
       ImGuiTools.volatileInputInt(labels.get("Undistorted image width"), undistortedImageWidth);
       ImGuiTools.volatileInputInt(labels.get("Undistorted image height"), undistortedImageHeight);
 
+      boolean userChangedColoringMatrixParameters = false;
+      userChangedColoringMatrixParameters |= ImGuiTools.volatileInputDouble(labels.get("Coloring Fx (px)"), coloringFx, 100.0, 500.0, "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.volatileInputDouble(labels.get("Coloring Fy (px)"), coloringFy, 100.0, 500.0, "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.volatileInputDouble(labels.get("Coloring Cx (px)"), coloringCx, 100.0, 500.0, "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.volatileInputDouble(labels.get("Coloring Cy (px)"), coloringCy, 100.0, 500.0, "%.5f");
+      if (userChangedColoringMatrixParameters)
+      {
+         coloringCameraMatrix.ptr(0, 0).putDouble(coloringFx.get());
+         coloringCameraMatrix.ptr(1, 1).putDouble(coloringFy.get());
+         coloringCameraMatrix.ptr(0, 2).putDouble(coloringCx.get());
+         coloringCameraMatrix.ptr(1, 2).putDouble(coloringCy.get());
+      }
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("Fisheye camera matrix for point coloring:\n");
+      for (int row = 0; row < 3; row++)
+      {
+         for (int col = 0; col < 3; col++)
+         {
+            stringBuilder.append("%.5f".formatted(coloringCameraMatrix.ptr(row, col).getDouble()) + " ");
+         }
+         stringBuilder.append("\n");
+      }
+      coloringCameraMatrixAsText.set(stringBuilder.toString());
+
+      ImGui.text("Fisheye matrix:");
+      ImGui.inputTextMultiline(labels.getHidden("fisheyeCameraMatrix"), coloringCameraMatrixAsText, 0, 60, ImGuiInputTextFlags.ReadOnly);
       ImGui.text("Camera matrix:");
       ImGui.inputTextMultiline(labels.getHidden("cameraMatrix"), cameraMatrixAsText, 0, 60, ImGuiInputTextFlags.ReadOnly);
       ImGui.text("New camera matrix:");

@@ -179,4 +179,14 @@ public class RDXNettyOusterUI
    {
       return ousterInteractable;
    }
+
+   public RDXOusterDepthImageToPointCloudKernel getDepthImageToPointCloudKernel()
+   {
+      return depthImageToPointCloudKernel;
+   }
+
+   public boolean getIsReady()
+   {
+      return isReady;
+   }
 }
