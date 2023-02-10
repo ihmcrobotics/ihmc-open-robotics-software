@@ -83,8 +83,8 @@ public class RDXCameraCalibrationDemo
    private final Mat matOfCorners = new Mat();
    private final Point2fVector tempPoint2fVector = new Point2fVector();
    private final Mat tempMat = new Mat();
-   private RDXCVImagePanel undistortedVideoPanel;
-   private RDXCVImagePanel testImagePanel;
+   private RDXBytedecoImagePanel undistortedVideoPanel;
+   private RDXBytedecoImagePanel testImagePanel;
    private Mat imageAtIndex = null;
    private final MatVector images = new MatVector();
    private Mat newCameraMatrix = new Mat();
@@ -150,8 +150,8 @@ public class RDXCameraCalibrationDemo
                   jpegImageBytePointer = new BytePointer();
 
                   swapCVPanel = new RDXOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
-                  undistortedVideoPanel = new RDXCVImagePanel("Undistorted Video", imageWidth, imageHeight);
-                  testImagePanel = new RDXCVImagePanel("Test Image 1", imageWidth, imageHeight);
+                  undistortedVideoPanel = new RDXBytedecoImagePanel("Undistorted Video", imageWidth, imageHeight);
+                  testImagePanel = new RDXBytedecoImagePanel("Test Image 1", imageWidth, imageHeight);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getImagePanel());
                   baseUI.getImGuiPanelManager().addPanel(undistortedVideoPanel.getImagePanel());
                   baseUI.getImGuiPanelManager().addPanel(testImagePanel.getImagePanel());

@@ -14,7 +14,7 @@ import us.ihmc.perception.OpenCLManager;
 /**
  * Possible to render grayscale images directly? Pixmap format Alpha texture?
  */
-public class RDXCVImagePanel
+public class RDXBytedecoImagePanel
 {
    private Pixmap pixmap;
    private final BytedecoImage bytedecoImage;
@@ -23,7 +23,7 @@ public class RDXCVImagePanel
 
    private BytedecoImage normalizedScaledImage;
 
-   public RDXCVImagePanel(String name, BytedecoImage bytedecoImage)
+   public RDXBytedecoImagePanel(String name, BytedecoImage bytedecoImage)
    {
       int imageWidth = bytedecoImage.getImageWidth();
       int imageHeight = bytedecoImage.getImageHeight();
@@ -31,16 +31,15 @@ public class RDXCVImagePanel
       this.bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, bytedecoImage.getBackingDirectByteBuffer());
       createPixmapFromBytedecoImage(imageWidth, imageHeight);
 
-      boolean flipY = false;
-      setup(name, imageWidth, imageHeight, flipY);
+      setup(name, imageWidth, imageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
    }
 
-   public RDXCVImagePanel(String name, int imageWidth, int imageHeight)
+   public RDXBytedecoImagePanel(String name, int imageWidth, int imageHeight)
    {
-      this(name, imageWidth, imageHeight, false);
+      this(name, imageWidth, imageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
    }
 
-   public RDXCVImagePanel(String name, int imageWidth, int imageHeight, boolean flipY)
+   public RDXBytedecoImagePanel(String name, int imageWidth, int imageHeight, boolean flipY)
    {
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());

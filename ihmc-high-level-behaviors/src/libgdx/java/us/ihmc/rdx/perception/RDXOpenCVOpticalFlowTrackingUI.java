@@ -16,7 +16,7 @@ public class RDXOpenCVOpticalFlowTrackingUI
    private int imageWidth;
    private int imageHeight;
    private BytedecoImage sourceImage;
-   private RDXCVImagePanel trackingImagePanel;
+   private RDXBytedecoImagePanel trackingImagePanel;
    private final ImGuiPanel mainPanel;
 
    private final Point2f previousPoint2f = new Point2f(0, 0);
@@ -49,7 +49,7 @@ public class RDXOpenCVOpticalFlowTrackingUI
       imageWidth = sourceImage.getImageWidth();
       imageHeight = sourceImage.getImageHeight();
       boolean flipY = false;
-      trackingImagePanel = new RDXCVImagePanel("Door Handle Detection Image", imageWidth, imageHeight, flipY);
+      trackingImagePanel = new RDXBytedecoImagePanel("Door Handle Detection Image", imageWidth, imageHeight, flipY);
       trackingImagePanel.getImagePanel().setUserImGuiImageInteraction(this::videoPanelImGuiImageInteraction);
       mainPanel.addChild(trackingImagePanel.getImagePanel());
    }

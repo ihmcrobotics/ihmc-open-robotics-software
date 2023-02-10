@@ -22,7 +22,7 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXImagePanel;
-import us.ihmc.rdx.perception.RDXCVImagePanel;
+import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
@@ -77,7 +77,7 @@ public class RDXLowLevelDepthSensorSimulator
    private boolean depthEnabled = true;
    private final ImBoolean renderFrustum = new ImBoolean(false);
 
-   private RDXCVImagePanel depthPanel;
+   private RDXBytedecoImagePanel depthPanel;
    private RDXImagePanel colorPanel;
    private RDXFrustumVisualizer frustumVisualizer;
 
@@ -169,8 +169,8 @@ public class RDXLowLevelDepthSensorSimulator
       parametersBuffer = new OpenCLFloatBuffer(29);
 
       // TODO these panels should be removable to a separate class
-      depthPanel = new RDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
-      colorPanel = new RDXImagePanel(colorWindowName, true);
+      depthPanel = new RDXBytedecoImagePanel(depthWindowName, imageWidth, imageHeight);
+      colorPanel = new RDXImagePanel(colorWindowName, RDXImagePanel.FLIP_Y);
       colorPanel.setTexture(frameBuffer.getColorTexture());
 
       frustumVisualizer = new RDXFrustumVisualizer();
