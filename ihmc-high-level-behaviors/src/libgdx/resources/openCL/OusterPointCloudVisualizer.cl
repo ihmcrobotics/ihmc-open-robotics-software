@@ -1,5 +1,6 @@
 kernel void imageToPointCloud(global float* parameters,
                               read_only image2d_t discretizedDepthImage,
+                              read_only image2d_t fThetaFisheyeRGB8Image,
                               global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
@@ -22,6 +23,25 @@ kernel void imageToPointCloud(global float* parameters,
    int depthImageWidth = parameters[14];
    int depthImageHeight = parameters[15];
    float pointSize = parameters[16];
+   bool useFisheyeColorImage = parameters[17];
+   int fisheyeImageWidth = parameters[18];
+   int fisheyeImageHeight = parameters[19];
+   float colorCameraTranslationX = parameters[20];
+   float colorCameraTranslationY = parameters[21];
+   float colorCameraTranslationZ = parameters[22];
+   float colorCameraRotationMatrixM00 = parameters[23];
+   float colorCameraRotationMatrixM01 = parameters[24];
+   float colorCameraRotationMatrixM02 = parameters[25];
+   float colorCameraRotationMatrixM10 = parameters[26];
+   float colorCameraRotationMatrixM11 = parameters[27];
+   float colorCameraRotationMatrixM12 = parameters[28];
+   float colorCameraRotationMatrixM20 = parameters[29];
+   float colorCameraRotationMatrixM21 = parameters[30];
+   float colorCameraRotationMatrixM22 = parameters[31];
+   float fisheyeFocalLengthPixelsX = parameters[33];
+   float fisheyeFocalLengthPixelsY = parameters[34];
+   float fisheyePrincipalPointPixelsX = parameters[35];
+   float fisheyePrincipalPointPixelsY = parameters[36];
 
    float discreteResolution = 0.001f;
    float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, y)).x * discreteResolution;

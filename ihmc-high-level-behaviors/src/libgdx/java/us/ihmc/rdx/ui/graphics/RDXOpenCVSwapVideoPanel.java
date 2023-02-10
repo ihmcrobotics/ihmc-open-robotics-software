@@ -40,11 +40,21 @@ public class RDXOpenCVSwapVideoPanel
    }
 
    /**
-    * Synchronize on this object around accessing this data.
+    * Synchronize on getSyncObject() around accessing this data.
     */
    public RDXImagePanelTexture getUIThreadData()
    {
       return dataSwapReference.getForThreadOne();
+   }
+
+   /**
+    * Used for synchronized over access of the UI thread data.
+    * We intentionally erase the type because we don't want the user
+    * calling methods directly on dataSwapReference. It would be confusing.
+    */
+   public Object getSyncObject()
+   {
+      return dataSwapReference;
    }
 
    /**
