@@ -29,7 +29,10 @@ import java.util.function.Consumer;
  *
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
  * Software User Manual: https://data.ouster.io/downloads/software-user-manual/software-user-manual-v2p0.pdf
- * 
+ *
+ * To connect to the Ouster, type in os-122221003063.local into the browser, finding the serial number
+ * from the Confluence page: https://confluence.ihmc.us/display/PER/In-House+Perception+Sensors+Tracker
+ *
  * To test, use the GNU netcat command:
  * netcat -ul 7502
  *
