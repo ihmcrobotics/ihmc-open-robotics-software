@@ -29,6 +29,7 @@ public class HandWrenchCalculator
    private SideDependentList<SpatialVector> rawWrenches = new SideDependentList<>(new SpatialVector(), new SpatialVector());
    private final SideDependentList<InverseDynamicsCalculator> inverseDynamicsCalculators = new SideDependentList<>();
    private final SideDependentList<double[]> jointTorquesForGravity = new SideDependentList<>();
+   private SideDependentList<double[]> jointTorques = new SideDependentList<>();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -71,6 +72,7 @@ public class HandWrenchCalculator
                                                                            () -> alpha,
                                                                            spatialVectorForSetup.getAngularPart(),
                                                                            spatialVectorForSetup.getLinearPart()));
+         jointTorques.set(side, new double[armJoints.get(side).size()]);
       }
    }
 
@@ -94,10 +96,10 @@ public class HandWrenchCalculator
          {
             double[] jointTorquesForGravity = getGravityCompensationTorques(side);
             List<OneDoFJointBasics> oneSideArmJoints = armJoints.get(side);
-            double[] jointTorques = new double[oneSideArmJoints.size()];
+
             for (int i = 0; i < oneSideArmJoints.size(); ++i)
             {
-               jointTorques[i] = oneSideArmJoints.get(i).getTau() - jointTorquesForGravity[i];
+               jointTorques.get(side)[i] = oneSideArmJoints.get(i).getTau() - jointTorquesForGravity[i];
             }
 
             // getJacobianMatrix updates the matrix and outputs in the form of DMatrixRMaj
@@ -112,6 +114,11 @@ public class HandWrenchCalculator
             alphaFilteredYoSpatialVectors.get(side).update(rawWrenches.get(side).getAngularPart(), rawWrenches.get(side).getLinearPart());
          }
       }
+   }
+
+   public SideDependentList<double[]> getJointTorques()
+   {
+      return jointTorques;
    }
 
    // Wrench expressed in world-aligned frame
