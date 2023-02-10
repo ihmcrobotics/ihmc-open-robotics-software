@@ -106,7 +106,7 @@ public class HandWrenchCalculator
             DMatrixRMaj armJacobian = jacobianCalculators.get(side).getJacobianMatrix();
             DMatrixRMaj armJacobianTransposed = CommonOps_DDRM.transpose(armJacobian, null);
             DMatrixRMaj armJacobianTransposedDagger = leftPseudoInverse(armJacobianTransposed);
-            DMatrixRMaj jointTorqueVector = new DMatrixRMaj(jointTorques);
+            DMatrixRMaj jointTorqueVector = new DMatrixRMaj(jointTorques.get(side));
             DMatrixRMaj wrenchVector = new DMatrixRMaj(6,1);
             CommonOps_DDRM.mult(armJacobianTransposedDagger, jointTorqueVector, wrenchVector);
 
