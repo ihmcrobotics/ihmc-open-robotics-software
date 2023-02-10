@@ -1,6 +1,6 @@
 /*
  * Rapid Planar Patches Based Iterative Closest Point Kernel
- * */
+ */
 void kernel icpKernel(global float* previous, global float* current, global float* params)
 {
     int cIndex = get_global_id(0);
@@ -16,8 +16,7 @@ void kernel icpKernel(global float* previous, global float* current, global floa
     float cy = previous[(rIndex * 10 + cIndex) * 6 + 4];
     float cz = previous[(rIndex * 10 + cIndex) * 6 + 5];
 
-    //if(cIndex == 0 && rIndex == 0)
+    // if(cIndex == 0 && rIndex == 0)
     printf("ICP Kernel: %d %d, Value: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f\n", cIndex, rIndex, nx, ny, nz, cx, cy, cz);
-
 }
 

@@ -4,11 +4,8 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
-
-import java.nio.FloatBuffer;
 
 public class PatchFeatureGrid
 {
@@ -83,22 +80,22 @@ public class PatchFeatureGrid
 
    public void getNormal(int i, Vector3D vectorToPack)
    {
-      getNormal(i/columns, i%columns, vectorToPack);
+      getNormal(i / columns, i % columns, vectorToPack);
    }
 
    public void getCentroid(int i, Point3D pointToPack)
    {
-      getCentroid(i/columns, i%columns, pointToPack);
+      getCentroid(i / columns, i % columns, pointToPack);
    }
 
    public void getNormal(int row, int col, Vector3D vectorToPack)
    {
-      vectorToPack.set(nxImage.getFloatDirect(row, col), nyImage.getFloatDirect(row, col), nzImage.getFloatDirect(row, col));
+      vectorToPack.set(nxImage.getFloat(row, col), nyImage.getFloat(row, col), nzImage.getFloat(row, col));
    }
 
    public void getCentroid(int row, int col, Point3D pointToPack)
    {
-      pointToPack.set(cxImage.getFloatDirect(row, col), cyImage.getFloatDirect(row, col), czImage.getFloatDirect(row, col));
+      pointToPack.set(cxImage.getFloat(row, col), cyImage.getFloat(row, col), czImage.getFloat(row, col));
    }
 
    public int getRows()

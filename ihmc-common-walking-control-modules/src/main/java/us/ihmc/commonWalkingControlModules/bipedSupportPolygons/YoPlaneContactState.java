@@ -7,9 +7,13 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
@@ -200,7 +204,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return contactPoints;
    }
 
-   public void setContactPoints(List<Point2D> contactPointLocations)
+   public void setContactPoints(List<? extends Point2DReadOnly> contactPointLocations)
    {
       int contactPointLocationsSize = contactPointLocations.size();
 
@@ -209,7 +213,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       for (int i = 0; i < contactPointLocationsSize; i++)
       {
-         Point2D contactPointLocation = contactPointLocations.get(i);
+         Point2DReadOnly contactPointLocation = contactPointLocations.get(i);
          YoContactPoint yoContactPoint = contactPoints.get(i);
 
          yoContactPoint.set(contactPointLocation);

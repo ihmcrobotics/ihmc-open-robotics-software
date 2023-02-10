@@ -28,7 +28,7 @@ public class RDXImagePanel
 
       this.image = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, image.data());
       normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
-      createPixMap(imageWidth, imageHeight);
+      createPixmap(imageWidth, imageHeight);
 
       boolean flipY = false;
       setup(name, imageWidth, imageHeight, flipY);
@@ -89,7 +89,7 @@ public class RDXImagePanel
          panelTexture.draw(pixmap, 0, 0);
    }
 
-   private void createPixMap(int imageWidth, int imageHeight)
+   private void createPixmap(int imageWidth, int imageHeight)
    {
       long[] nativeData = new long[4];
       nativeData[0] = image.getPointer().address();
@@ -104,7 +104,7 @@ public class RDXImagePanel
       int imageWidth = image.cols();
       int imageHeight = image.rows();
       this.image = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, image.data());
-      createPixMap(imageWidth, imageHeight);
+      createPixmap(imageWidth, imageHeight);
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       videoPanel.setTexture(panelTexture);
 

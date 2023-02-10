@@ -30,6 +30,7 @@ public class RDXTeleoperationParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey shuffleStepWidth = keys.addDoubleKey("Shuffle step width");
    public static final DoubleStoredPropertyKey turningStepWidth = keys.addDoubleKey("Turning step width");
    public static final DoubleStoredPropertyKey footstepLengthMultiplier = keys.addDoubleKey("Footstep length multiplier");
+   public static final BooleanStoredPropertyKey planWidthBodyPath = keys.addBooleanKey("Plan with body path");
    public static final BooleanStoredPropertyKey isPSIAdjustable = keys.addBooleanKey("Is PSI adjustable");
 
    public RDXTeleoperationParameters(String robotRepoName, String robotSubsequentPathToResourceFolder, String robotName)
@@ -130,6 +131,11 @@ public class RDXTeleoperationParameters extends StoredPropertySet
    public double getTurningStepWidth()
    {
       return get(turningStepWidth);
+   }
+
+   public boolean getPlanWithBodyPath()
+   {
+      return get(planWidthBodyPath);
    }
 
    public double getFootstepLengthMultiplier()
