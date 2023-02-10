@@ -31,7 +31,7 @@ import us.ihmc.rdx.logging.RDXHDF5ImageLoggingUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.tools.UnitConversions;
@@ -72,7 +72,7 @@ public class RDXBlackflyCalibrationSuite
    private RDXHDF5ImageLoggingUI hdf5ImageLoggingUI;
    private RDXHDF5ImageBrowser hdf5ImageBrowser;
    private RDXOpenCVSwapVideoPanel undistortedFisheyePanel;
-   private RDXCVImagePanel calibrationSourceImagesPanel;
+   private RDXBytedecoImagePanel calibrationSourceImagesPanel;
    private final RecyclingArrayList<Mat> calibrationSourceImages = new RecyclingArrayList<>(Mat::new);
    private final ImInt calibrationSourceImageIndex = new ImInt();
    private volatile boolean running = true;
@@ -160,20 +160,20 @@ public class RDXBlackflyCalibrationSuite
                {
                   blackflyReader.create();
                   blackflyReader.setMonitorPanelUIThreadPreprocessor(this::blackflyReaderUIThreadPreprocessor);
-                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getImagePanel());
 
                   calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
 
                   hdf5ImageBrowser = new RDXHDF5ImageBrowser();
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getControlPanel());
-                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getImagePanel());
 
-                  calibrationSourceImagesPanel = new RDXCVImagePanel("Calibration Source Image", 100, 100);
-                  baseUI.getImGuiPanelManager().addPanel(calibrationSourceImagesPanel.getVideoPanel());
+                  calibrationSourceImagesPanel = new RDXBytedecoImagePanel("Calibration Source Image", 100, 100);
+                  baseUI.getImGuiPanelManager().addPanel(calibrationSourceImagesPanel.getImagePanel());
 
                   undistortedFisheyePanel = new RDXOpenCVSwapVideoPanel("Undistorted Fisheye Monitor");
-                  baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getImagePanel());
 
                   interactableBlackflyFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel());
 
@@ -327,7 +327,7 @@ public class RDXBlackflyCalibrationSuite
                      nettyOusterUI.createAfterOusterInitialized();
 
                      baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI.getPointCloudRenderer(), RDXSceneLevel.MODEL);
-                     baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getVideoPanel());
+                     baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
                      baseUI.getLayoutManager().reloadLayout();
                   }
 
@@ -339,7 +339,7 @@ public class RDXBlackflyCalibrationSuite
             baseUI.renderEnd();
          }
 
-         private void blackflyReaderUIThreadPreprocessor(RDXOpenCVSwapVideoPanelData data)
+         private void blackflyReaderUIThreadPreprocessor(RDXImagePanelTexture texture)
          {
             if (hdf5ImageLoggingUI == null)
             {
@@ -353,19 +353,19 @@ public class RDXBlackflyCalibrationSuite
             // Access the image before it gets drawn on; copy for the other thread
             synchronized (imageForUndistortion)
             {
-               data.getRGBA8Mat().copyTo(imageForUndistortion.getForThreadOne());
+               texture.getRGBA8Mat().copyTo(imageForUndistortion.getForThreadOne());
             }
 
-            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
+            calibrationPatternDetectionUI.drawCornersOrCenters(texture.getRGBA8Mat());
          }
 
-         private void undistortedImageUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
+         private void undistortedImageUpdateOnAsynchronousThread(RDXImagePanelTexture texture)
          {
             int width = undistortedImageWidth.get();
             int height = undistortedImageHeight.get();
             undistortedImageSize.width(width);
             undistortedImageSize.height(height);
-            data.ensureTextureDimensions(width, height);
+            texture.ensureTextureDimensions(width, height);
 
             opencv_calib3d.estimateNewCameraMatrixForUndistortRectify(cameraMatrixForUndistortion.getForThreadTwo(),
                                                                       distortionCoefficientsForUndistortion.getForThreadTwo(),
@@ -391,7 +391,7 @@ public class RDXBlackflyCalibrationSuite
             // Fisheye undistortion
             // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
             opencv_calib3d.undistortImage(imageForUndistortion.getForThreadTwo(),
-                                          data.getRGBA8Mat(),
+                                          texture.getRGBA8Mat(),
                                           cameraMatrixForUndistortion.getForThreadTwo(),
                                           distortionCoefficientsForUndistortion.getForThreadTwo(),
                                           newCameraMatrixEstimate,
@@ -401,12 +401,12 @@ public class RDXBlackflyCalibrationSuite
 //            opencv_calib3d.remap();
 
             newCameraMatrixEstimate.copyTo(openCVArUcoMarkerDetection.getCameraMatrix());
-            openCVArUcoMarkerDetection.update(data.getRGBA8Image());
+            openCVArUcoMarkerDetection.update(texture.getRGBA8Image());
 
-            opencv_imgproc.cvtColor(data.getRGBA8Mat(), spareRGBMatForArUcoDrawing, opencv_imgproc.COLOR_RGBA2RGB);
+            opencv_imgproc.cvtColor(texture.getRGBA8Mat(), spareRGBMatForArUcoDrawing, opencv_imgproc.COLOR_RGBA2RGB);
             openCVArUcoMarkerDetection.drawDetectedMarkers(spareRGBMatForArUcoDrawing);
             openCVArUcoMarkerDetection.drawRejectedPoints(spareRGBMatForArUcoDrawing);
-            opencv_imgproc.cvtColor(spareRGBMatForArUcoDrawing, data.getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA);
+            opencv_imgproc.cvtColor(spareRGBMatForArUcoDrawing, texture.getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA);
 
             cameraMatrixForUndistortion.swap();
             distortionCoefficientsForUndistortion.swap();

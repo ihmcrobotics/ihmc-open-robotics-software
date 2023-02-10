@@ -1,7 +1,9 @@
 package us.ihmc.rdx.ui.graphics;
 
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.tools.thread.SwapReference;
+
+import java.util.function.Consumer;
 
 /**
  * This class is designed to (at most) double the display frame rate of images which
@@ -14,13 +16,13 @@ import us.ihmc.tools.thread.SwapReference;
  */
 public class RDXOpenCVSwapVideoPanel
 {
-   private final ImGuiVideoPanel videoPanel;
-   private final SwapReference<RDXOpenCVSwapVideoPanelData> dataSwapReference;
+   private final RDXImagePanel imagePanel;
+   private final SwapReference<RDXImagePanelTexture> dataSwapReference;
 
    public RDXOpenCVSwapVideoPanel(String panelName)
    {
-      this.videoPanel = new ImGuiVideoPanel(panelName, false);
-      dataSwapReference = new SwapReference<>(RDXOpenCVSwapVideoPanelData::new);
+      this.imagePanel = new RDXImagePanel(panelName, RDXImagePanel.DO_NOT_FLIP_Y);
+      dataSwapReference = new SwapReference<>(RDXImagePanelTexture::new);
    }
 
    /**
@@ -32,15 +34,15 @@ public class RDXOpenCVSwapVideoPanel
       dataSwapReference.initializeBoth(data -> data.ensureTextureDimensions(imageWidth, imageHeight));
    }
 
-   public ImGuiVideoPanel getVideoPanel()
+   public RDXImagePanel getImagePanel()
    {
-      return videoPanel;
+      return imagePanel;
    }
 
    /**
     * Synchronize on this object around accessing this data.
     */
-   public RDXOpenCVSwapVideoPanelData getUIThreadData()
+   public RDXImagePanelTexture getUIThreadData()
    {
       return dataSwapReference.getForThreadOne();
    }
@@ -55,10 +57,10 @@ public class RDXOpenCVSwapVideoPanel
    {
       synchronized (dataSwapReference)
       {
-         RDXOpenCVSwapVideoPanelData data = getUIThreadData();
-         if (data.getRGBA8Image() != null)
+         RDXImagePanelTexture texture = getUIThreadData();
+         if (texture.getRGBA8Image() != null)
          {
-            data.updateTextureAndDraw(videoPanel);
+            texture.updateTextureAndDraw(imagePanel);
          }
       }
    }
@@ -67,7 +69,7 @@ public class RDXOpenCVSwapVideoPanel
     * Access this data at any time on the asynchronous thread, no synchronization
     * required, just call swap() when you're done.
     */
-   public RDXOpenCVSwapVideoPanelData getAsynchronousThreadData()
+   public RDXImagePanelTexture getAsynchronousThreadData()
    {
       return dataSwapReference.getForThreadTwo();
    }

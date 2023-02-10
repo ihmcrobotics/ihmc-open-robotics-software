@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.graphics;
 
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.tools.thread.GuidedSwapReference;
 
 import java.util.function.Consumer;
@@ -16,28 +16,28 @@ import java.util.function.Consumer;
  */
 public class RDXOpenCVGuidedSwapVideoPanel
 {
-   private final ImGuiVideoPanel videoPanel;
-   private final GuidedSwapReference<RDXOpenCVSwapVideoPanelData> dataSwapReferenceManager;
+   private final RDXImagePanel imagePanel;
+   private final GuidedSwapReference<RDXImagePanelTexture> dataSwapReferenceManager;
 
-   public RDXOpenCVGuidedSwapVideoPanel(String panelName, Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread)
+   public RDXOpenCVGuidedSwapVideoPanel(String panelName, Consumer<RDXImagePanelTexture> updateOnAsynchronousThread)
    {
       this(panelName, updateOnAsynchronousThread, null);
    }
 
    public RDXOpenCVGuidedSwapVideoPanel(String panelName,
-                                        Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
-                                        Consumer<RDXOpenCVSwapVideoPanelData> updateOnUIThread)
+                                        Consumer<RDXImagePanelTexture> updateOnAsynchronousThread,
+                                        Consumer<RDXImagePanelTexture> updateOnUIThread)
    {
       this(panelName, false, updateOnAsynchronousThread, updateOnUIThread);
    }
 
    public RDXOpenCVGuidedSwapVideoPanel(String panelName,
                                         boolean flipY,
-                                        Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
-                                        Consumer<RDXOpenCVSwapVideoPanelData> updateOnUIThread)
+                                        Consumer<RDXImagePanelTexture> updateOnAsynchronousThread,
+                                        Consumer<RDXImagePanelTexture> updateOnUIThread)
    {
-      this.videoPanel = new ImGuiVideoPanel(panelName, flipY);
-      dataSwapReferenceManager = new GuidedSwapReference<>(RDXOpenCVSwapVideoPanelData::new,
+      this.imagePanel = new RDXImagePanel(panelName, flipY);
+      dataSwapReferenceManager = new GuidedSwapReference<>(RDXImagePanelTexture::new,
                                                            updateOnAsynchronousThread,
                                                            updateOnUIThread == null ? this::defaultUpdateOnUIThread : updateOnUIThread);
    }
@@ -61,16 +61,16 @@ public class RDXOpenCVGuidedSwapVideoPanel
       dataSwapReferenceManager.accessOnHighPriorityThread();
    }
 
-   private void defaultUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
+   private void defaultUpdateOnUIThread(RDXImagePanelTexture data)
    {
       if (data.getRGBA8Image() != null)
       {
-         data.updateTextureAndDraw(videoPanel);
+         data.updateTextureAndDraw(imagePanel);
       }
    }
 
-   public ImGuiVideoPanel getVideoPanel()
+   public RDXImagePanel getImagePanel()
    {
-      return videoPanel;
+      return imagePanel;
    }
 }

@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
@@ -14,16 +14,16 @@ import us.ihmc.perception.OpenCLManager;
 /**
  * Possible to render grayscale images directly? Pixmap format Alpha texture?
  */
-public class RDXCVImagePanel
+public class RDXBytedecoImagePanel
 {
    private Pixmap pixmap;
    private final BytedecoImage bytedecoImage;
-   private ImGuiVideoPanel videoPanel;
+   private RDXImagePanel imagePanel;
    private Texture panelTexture;
 
    private BytedecoImage normalizedScaledImage;
 
-   public RDXCVImagePanel(String name, BytedecoImage bytedecoImage)
+   public RDXBytedecoImagePanel(String name, BytedecoImage bytedecoImage)
    {
       int imageWidth = bytedecoImage.getImageWidth();
       int imageHeight = bytedecoImage.getImageHeight();
@@ -31,16 +31,15 @@ public class RDXCVImagePanel
       this.bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, bytedecoImage.getBackingDirectByteBuffer());
       createPixmapFromBytedecoImage(imageWidth, imageHeight);
 
-      boolean flipY = false;
-      setup(name, imageWidth, imageHeight, flipY);
+      setup(name, imageWidth, imageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
    }
 
-   public RDXCVImagePanel(String name, int imageWidth, int imageHeight)
+   public RDXBytedecoImagePanel(String name, int imageWidth, int imageHeight)
    {
-      this(name, imageWidth, imageHeight, false);
+      this(name, imageWidth, imageHeight, RDXImagePanel.DO_NOT_FLIP_Y);
    }
 
-   public RDXCVImagePanel(String name, int imageWidth, int imageHeight, boolean flipY)
+   public RDXBytedecoImagePanel(String name, int imageWidth, int imageHeight, boolean flipY)
    {
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       bytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
@@ -50,10 +49,10 @@ public class RDXCVImagePanel
 
    private void setup(String name, int imageWidth, int imageHeight, boolean flipY)
    {
-      videoPanel = new ImGuiVideoPanel(name, flipY);
+      imagePanel = new RDXImagePanel(name, flipY);
 
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-      videoPanel.setTexture(panelTexture);
+      imagePanel.setTexture(panelTexture);
 
       normalizedScaledImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
 
@@ -65,7 +64,7 @@ public class RDXCVImagePanel
     */
    public void drawDepthImage(Mat singleChannelImage)
    {
-      if (videoPanel.getIsShowing().get())
+      if (imagePanel.getIsShowing().get())
       {
          BytedecoOpenCVTools.clampTo8BitUnsignedChar(singleChannelImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
          BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
@@ -91,7 +90,7 @@ public class RDXCVImagePanel
    {
       bytedecoImage.rewind();
 
-      if (videoPanel.getIsShowing().get())
+      if (imagePanel.getIsShowing().get())
          panelTexture.draw(pixmap, 0, 0);
    }
 
@@ -114,7 +113,7 @@ public class RDXCVImagePanel
          this.bytedecoImage.resize(imageWidth, imageHeight, null, bytedecoImage.getBackingDirectByteBuffer());
          createPixmapFromBytedecoImage(imageWidth, imageHeight);
          panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-         videoPanel.setTexture(panelTexture);
+         imagePanel.setTexture(panelTexture);
 
          normalizedScaledImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
 
@@ -129,7 +128,7 @@ public class RDXCVImagePanel
 
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-      videoPanel.setTexture(panelTexture);
+      imagePanel.setTexture(panelTexture);
 
       bytedecoImage.resize(imageWidth, imageHeight, openCLManager, pixmap.getPixels());
       normalizedScaledImage.resize(imageWidth, imageHeight, openCLManager, null);
@@ -144,9 +143,9 @@ public class RDXCVImagePanel
       createPixmapFromBytedecoImage(bytedecoImage.getImageWidth(), bytedecoImage.getImageHeight());
    }
 
-   public ImGuiVideoPanel getVideoPanel()
+   public RDXImagePanel getImagePanel()
    {
-      return videoPanel;
+      return imagePanel;
    }
 
    public BytedecoImage getBytedecoImage()
