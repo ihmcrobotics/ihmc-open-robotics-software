@@ -383,7 +383,8 @@ public class PlanarRegionMap
          {
             PlanarRegion regionB = mapRegions.get(idB);
 
-            boolean wasMatched = PlanarRegionSLAMTools.checkRegionsForOverlap(regionA, regionB, normalThreshold, normalDistanceThreshold, distanceThreshold, minBoxSize);
+            boolean wasMatched = PlanarRegionSLAMTools.checkRegionsForOverlap(regionA, regionB, normalThreshold, normalDistanceThreshold, distanceThreshold,
+                                                                              minBoxSize, false);
 
             if (wasMatched)
             {
@@ -430,7 +431,8 @@ public class PlanarRegionMap
                                                                    (float) parameters.getSimilarityThresholdBetweenNormals(),
                                                                    (float) parameters.getOrthogonalDistanceThreshold(),
                                                                    (float) parameters.getMinimumOverlapThreshold(),
-                                                                   (float) parameters.getMinimumBoundingBoxSize()))
+                                                                   (float) parameters.getMinimumBoundingBoxSize(),
+                                                                   false))
                   {
                      // Request a merge for parent and child regions. If they don't merge, pick the parent if it belongs to the map (based on sign of ID)
                      if (PlanarRegionSLAMTools.mergeRegionIntoParentUsingFilter(parentRegion, childRegion, parameters.getUpdateAlphaTowardsMatch()))

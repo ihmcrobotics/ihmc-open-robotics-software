@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
@@ -7,10 +8,17 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
 {
@@ -21,11 +29,12 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    private final ImBoolean renderEnabled = new ImBoolean(true);
    private boolean captured = false;
 
+   private RDXLineMeshModel lineMeshModel = new RDXLineMeshModel(0.02f, Color.WHITE);
    private RDXPlanarRegionsGraphic previousRegionsGraphic = new RDXPlanarRegionsGraphic();
    private RDXPlanarRegionsGraphic currentRegionsGraphic = new RDXPlanarRegionsGraphic();
 
-   private ImInt icpPreviousIndex = new ImInt(0);
-   private ImInt icpCurrentIndex = new ImInt(1);
+   private ImInt icpPreviousIndex = new ImInt(10);
+   private ImInt icpCurrentIndex = new ImInt(14);
   
    public RDXPlanarRegionMappingUIPanel(String name, PlanarRegionMappingHandler mappingManager)
    {
@@ -75,14 +84,16 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
                mappingManager.loadRegionsFromLogIntoCurrent(icpCurrentIndex.get());
                currentRegionsGraphic.generateMeshes(mappingManager.getCurrentRegions().getPlanarRegionsList());
                currentRegionsGraphic.update();
+               drawMatches();
             }
             ImGui.sameLine();
             ImGui.sliderInt("Current", icpCurrentIndex.getData(), 0, mappingManager.getSensorPositionBuffer().size() - 1);
             if(ImGui.button("Optimize Transform"))
             {
                mappingManager.computeICP();
-               currentRegionsGraphic.generateMeshes(mappingManager.getCurrentRegions().getPlanarRegionsList());
-               currentRegionsGraphic.update();
+               previousRegionsGraphic.generateMeshes(mappingManager.getPreviousRegions().getPlanarRegionsList());
+               previousRegionsGraphic.update();
+               drawMatches();
             }
             ImGui.endTabItem();
          }
@@ -96,6 +107,24 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
       }
 
       ImGui.checkbox("Show Parameter Tuners", mappingParametersTuner.getIsShowing());
+   }
+
+   public void drawMatches()
+   {
+      lineMeshModel.clear();
+      HashMap<Integer, Integer> matches = new HashMap<>();
+      PlanarRegionSLAMTools.findBestPlanarRegionMatches(mappingManager.getCurrentRegions().getPlanarRegionsList(),
+                                                        mappingManager.getPreviousRegions().getPlanarRegionsList(), matches,
+                                                        0.5f, 0.8f, 0.4f, 0.3f);
+
+      ArrayList<Point3DReadOnly> matchEndPoints = new ArrayList<>();
+      for(Integer match : matches.keySet())
+      {
+         matchEndPoints.add(mappingManager.getPreviousRegions().getPlanarRegionsList().getPlanarRegion(match).getPoint());
+         matchEndPoints.add(mappingManager.getCurrentRegions().getPlanarRegionsList().getPlanarRegion(matches.get(match)).getPoint());
+      }
+      lineMeshModel.generateMeshForMatchLines(matchEndPoints);
+      lineMeshModel.update();
    }
 
    public void setCaptured(boolean captured)
@@ -118,5 +147,6 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    {
       previousRegionsGraphic.getRenderables(renderables, pool);
       currentRegionsGraphic.getRenderables(renderables, pool);
+      lineMeshModel.getRenderables(renderables, pool);
    }
 }

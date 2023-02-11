@@ -551,7 +551,7 @@ public class PlanarRegionSLAMTools
          {
             PlanarRegion mapRegion = mapRegions.get(j);
 
-            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold, minBoxSize))
+            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold, minBoxSize, false))
             {
                matches.get(i).add(j);
             }
@@ -579,7 +579,7 @@ public class PlanarRegionSLAMTools
          {
             PlanarRegion mapRegion = mapRegions.get(j);
 
-            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold, minBoxSize))
+            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold, minBoxSize, true))
             {
                matches.put(i, j);
             }
@@ -599,12 +599,20 @@ public class PlanarRegionSLAMTools
       return collisionResult.areShapesColliding();
    }
 
-   public static double computeBoundingBoxOverlapScore(PlanarRegion a, PlanarRegion b, double minSize)
+   public static double computeBoundingBoxOverlapScore(PlanarRegion a, PlanarRegion b, double minSize, boolean useIntersectionOverUnion)
    {
       BoundingBox3D boxA = PlanarRegionTools.getWorldBoundingBox3DWithMargin(a, minSize);
       BoundingBox3D boxB = PlanarRegionTools.getWorldBoundingBox3DWithMargin(b, minSize);
 
-      return GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boxA, boxB);
+      if(useIntersectionOverUnion)
+      {
+         return GeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boxA, boxB);
+      }
+      else
+      {
+         return GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boxA, boxB);
+      }
+
    }
 
    public static boolean boundingBoxesIntersect(PlanarRegion a, PlanarRegion b)
@@ -725,7 +733,8 @@ public class PlanarRegionSLAMTools
                                                 float normalThreshold,
                                                 float normalDistanceThreshold,
                                                 float overlapThreshold,
-                                                float minBoxSize)
+                                                float minBoxSize,
+                                                boolean useIntersectionOverUnion)
    {
       Point3D newOrigin = new Point3D();
       regionA.getOrigin(newOrigin);
@@ -759,7 +768,7 @@ public class PlanarRegionSLAMTools
          // Check to make sure there is sufficient overlap in planar region world frame bounding boxes by computing Intersection-over-Smaller (IoS) score
          if (wasMatched)
          {
-            overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, minBoxSize);
+            overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, minBoxSize, useIntersectionOverUnion);
             intersects = overlapScore > overlapThreshold;
             wasMatched &= intersects;
          }
