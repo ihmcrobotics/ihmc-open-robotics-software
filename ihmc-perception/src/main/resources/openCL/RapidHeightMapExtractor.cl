@@ -91,24 +91,24 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
     float3 cellCenter = compute_grid_cell_center(rIndex, cIndex, params);
     int2 projectedPoint = spherical_projection(cellCenter, params);
 
-    int2 pos = (int2)(projectedPoint.x, projectedPoint.y);
+    int2 pos = (int2)(projectedPoint.y, projectedPoint.x);
 
-    printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
-         cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y);
+//    printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
+//         cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y);
 
-    int WINDOW_LENGTH = 10;
+    int WINDOW_LENGTH = 40;
     int WINDOW_WIDTH = 10;
 
     int count = 0;
 
-    for(int i = -WINDOW_LENGTH / 2; i < WINDOW_LENGTH / 2 + 1; i++)
+    for(int i = -WINDOW_LENGTH / 2; i < WINDOW_LENGTH / 2; i++)
     {
         for(int j = -WINDOW_WIDTH / 2; j < WINDOW_WIDTH / 2 + 1; j++)
         {
-            pos = (int2)(projectedPoint.x + i, projectedPoint.y + j);
+            pos = (int2)(projectedPoint.y + j, projectedPoint.x + i);
 
 //            printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
-//                 cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y);
+//                              cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, projectedPoint.x, projectedPoint.y);
 
             if(pos.x >= 0 && pos.x < (int) params[INPUT_WIDTH] && pos.y >= 0 && pos.y < (int) params[INPUT_HEIGHT])
             {
@@ -116,15 +116,25 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
 
                 float3 point = back_project_spherical(pos, radius, params);
 
-//                printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf)\n", rIndex, (int) params[GRID_LENGTH],
-//                 cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, projectedPoint.x, projectedPoint.y, point.x, point.y, point.z);
 
-                if ( (int) point.x == rIndex && (int) point.y == cIndex)
+//               printf("[%d,%d] : [%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf) -> GridCell: (%.2f,%.2f)\n", i, j, rIndex, (int) params[GRID_LENGTH],
+//                        cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, projectedPoint.x, projectedPoint.y, point.x, point.y, point.z,
+//                        (point.x / 0.1), point.y / 0.1);
+
+                if ( (point.x) > rIndex * CELL_SIZE_XY_METERS
+                     && (point.x) < (rIndex + 1) * (CELL_SIZE_XY_METERS)
+                     && (point.y) > cIndex * CELL_SIZE_XY_METERS
+                     && (point.y) < (cIndex + 1) * (CELL_SIZE_XY_METERS))
                 {
                     count++;
                     averageHeightZ += point.z;
 
+                     printf("[%d,%d] : [%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf) -> GridCell: (%.2f,%.2f)\n", i, j, rIndex, (int) params[GRID_LENGTH],
+                              cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, projectedPoint.x, projectedPoint.y, point.x, point.y, point.z,
+                              (point.x / 0.1), point.y / 0.1);
+
                     printf("_________________________________++++++++++++++++++++++++ FOUND +++++++++++++++++++++++++++++++____________________________________\n");
+
 
                 }
             }
@@ -133,6 +143,6 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
 
     averageHeightZ = averageHeightZ / (float)(count);
 
-    write_imageui(out, (int2)(cIndex,rIndex), (uint4)(averageHeightZ * 10000, 0, 0, 0));
+    write_imageui(out, (int2)(cIndex,rIndex), (uint4)((2.0 + averageHeightZ) * 10000, 0, 0, 0));
 
 }
