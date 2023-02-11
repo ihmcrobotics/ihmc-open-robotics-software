@@ -25,7 +25,7 @@ import java.nio.ByteOrder;
 public class RDXNettyOusterUI
 {
    private NettyOuster ouster;
-   private RDXCVImagePanel imagePanel;
+   private RDXBytedecoImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private int numberOfDepthPoints;
    private OpenCLManager openCLManager;
@@ -82,7 +82,7 @@ public class RDXNettyOusterUI
    {
       depthWidth = ouster.getImageWidth();
       depthHeight = ouster.getImageHeight();
-      imagePanel = new RDXCVImagePanel("Ouster Depth Image", depthWidth, depthHeight);
+      imagePanel = new RDXBytedecoImagePanel("Ouster Depth Image", depthWidth, depthHeight);
 
       numberOfDepthPoints = ouster.getImageWidth() * ouster.getImageHeight();
 
@@ -160,7 +160,7 @@ public class RDXNettyOusterUI
       ouster.destroy();
    }
 
-   public RDXCVImagePanel getImagePanel()
+   public RDXBytedecoImagePanel getImagePanel()
    {
       return imagePanel;
    }

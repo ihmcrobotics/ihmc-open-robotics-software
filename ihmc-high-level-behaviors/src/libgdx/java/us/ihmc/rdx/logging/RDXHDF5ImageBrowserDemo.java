@@ -32,7 +32,7 @@ public class RDXHDF5ImageBrowserDemo
                {
                   hdf5ImageBrowser = new RDXHDF5ImageBrowser();
                   baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getControlPanel());
-                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(hdf5ImageBrowser.getImagePanel().getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
                }
 

@@ -21,8 +21,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
-import us.ihmc.rdx.perception.RDXCVImagePanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
@@ -77,8 +77,8 @@ public class RDXLowLevelDepthSensorSimulator
    private boolean depthEnabled = true;
    private final ImBoolean renderFrustum = new ImBoolean(false);
 
-   private RDXCVImagePanel depthPanel;
-   private ImGuiVideoPanel colorPanel;
+   private RDXBytedecoImagePanel depthPanel;
+   private RDXImagePanel colorPanel;
    private RDXFrustumVisualizer frustumVisualizer;
 
    private OpenCLManager openCLManager;
@@ -169,8 +169,8 @@ public class RDXLowLevelDepthSensorSimulator
       parametersBuffer = new OpenCLFloatBuffer(29);
 
       // TODO these panels should be removable to a separate class
-      depthPanel = new RDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
-      colorPanel = new ImGuiVideoPanel(colorWindowName, true);
+      depthPanel = new RDXBytedecoImagePanel(depthWindowName, imageWidth, imageHeight);
+      colorPanel = new RDXImagePanel(colorWindowName, RDXImagePanel.FLIP_Y);
       colorPanel.setTexture(frameBuffer.getColorTexture());
 
       frustumVisualizer = new RDXFrustumVisualizer();
@@ -304,7 +304,7 @@ public class RDXLowLevelDepthSensorSimulator
       pointCloudRenderingBuffer.readOpenCLBufferObject(openCLManager);
       openCLManager.finish();
 
-      if (depthPanel.getVideoPanel().getIsShowing().get())
+      if (depthPanel.getImagePanel().getIsShowing().get())
          depthPanel.drawDepthImage(metersDepthImage.getBytedecoOpenCVMat());
    }
 
@@ -390,12 +390,12 @@ public class RDXLowLevelDepthSensorSimulator
       return farPlaneDistance.get();
    }
 
-   public ImGuiVideoPanel getDepthPanel()
+   public RDXImagePanel getDepthPanel()
    {
-      return depthPanel.getVideoPanel();
+      return depthPanel.getImagePanel();
    }
 
-   public ImGuiVideoPanel getColorPanel()
+   public RDXImagePanel getColorPanel()
    {
       return colorPanel;
    }
