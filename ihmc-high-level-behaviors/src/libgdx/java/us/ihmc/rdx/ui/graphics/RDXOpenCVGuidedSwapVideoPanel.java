@@ -61,11 +61,11 @@ public class RDXOpenCVGuidedSwapVideoPanel
       dataSwapReferenceManager.accessOnHighPriorityThread();
    }
 
-   private void defaultUpdateOnUIThread(RDXImagePanelTexture data)
+   private void defaultUpdateOnUIThread(RDXImagePanelTexture texture)
    {
-      if (data.getRGBA8Image() != null)
+      if (texture.getRGBA8Image() != null)
       {
-         data.updateTextureAndDraw(imagePanel);
+         texture.updateTextureAndDraw(imagePanel);
       }
    }
 
