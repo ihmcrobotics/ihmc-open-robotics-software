@@ -14,7 +14,7 @@ public class RapidHeightMapExtractor
 
    private float gridLengthInMeters = 8.0f;
    private float gridWidthInMeters = 6.0f;
-   private float cellSizeXYInMeters = 0.1f;
+   private float cellSizeXYInMeters = 0.05f;
 
    private int gridLength = (int) (gridLengthInMeters / cellSizeXYInMeters);
    private int gridWidth = (int) (gridWidthInMeters / cellSizeXYInMeters);
@@ -94,6 +94,11 @@ public class RapidHeightMapExtractor
    public void setModified(boolean modified)
    {
       this.modified = modified;
+   }
+
+   public float getCellSizeXYInMeters()
+   {
+      return cellSizeXYInMeters;
    }
 
    public BytedecoImage getOutputHeightMapImage()

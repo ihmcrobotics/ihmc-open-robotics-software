@@ -91,26 +91,25 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
     float3 cellCenter = compute_grid_cell_center(rIndex, cIndex, params);
     int2 projectedPoint = spherical_projection(cellCenter, params);
 
-    int2 pos = (int2)(projectedPoint.y, projectedPoint.x);
+    int2 pos = (int2)(0,0);
 
 //    printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
 //         cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y);
 
-    int WINDOW_LENGTH = 40;
-    int WINDOW_WIDTH = 10;
+    int WINDOW_WIDTH = 200;
 
     int count = 0;
 
-    for(int i = -WINDOW_LENGTH / 2; i < WINDOW_LENGTH / 2; i++)
+    for(int i = 0; i < (int) params[INPUT_HEIGHT]; i++)
     {
         for(int j = -WINDOW_WIDTH / 2; j < WINDOW_WIDTH / 2 + 1; j++)
         {
-            pos = (int2)(projectedPoint.y + j, projectedPoint.x + i);
+            pos = (int2)(projectedPoint.y + j, i);
 
 //            printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
 //                              cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, projectedPoint.x, projectedPoint.y);
 
-            if(pos.x >= 0 && pos.x < (int) params[INPUT_WIDTH] && pos.y >= 0 && pos.y < (int) params[INPUT_HEIGHT])
+            if( (pos.x >= 0) && (pos.x < (int) params[INPUT_WIDTH]) && (pos.y >= 0) && (pos.y < (int) params[INPUT_HEIGHT]))
             {
                 float radius = ((float)read_imageui(in, pos).x)/(float)1000;
 
@@ -121,19 +120,25 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
 //                        cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, projectedPoint.x, projectedPoint.y, point.x, point.y, point.z,
 //                        (point.x / 0.1), point.y / 0.1);
 
-                if ( (point.x) > rIndex * CELL_SIZE_XY_METERS
-                     && (point.x) < (rIndex + 1) * (CELL_SIZE_XY_METERS)
-                     && (point.y) > cIndex * CELL_SIZE_XY_METERS
-                     && (point.y) < (cIndex + 1) * (CELL_SIZE_XY_METERS))
+                float minX = cellCenter.x - params[CELL_SIZE_XY_METERS] / 2;
+                float maxX = cellCenter.x + params[CELL_SIZE_XY_METERS] / 2;
+                float minY = cellCenter.y - params[CELL_SIZE_XY_METERS] / 2;
+                float maxY = cellCenter.y + params[CELL_SIZE_XY_METERS] / 2;
+
+//                printf("[%d,%d] : [%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf) -> GridCell: (%.2f,%.2f) -> Bounds(X): (%.2f, %.2f),  -> Bounds(Y): (%.2f, %.2f)\n", i, j, rIndex, (int) params[GRID_LENGTH],
+//                              cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, projectedPoint.x, projectedPoint.y, point.x, point.y, point.z,
+//                              (cIndex * params[CELL_SIZE_XY_METERS]), (rIndex * params[CELL_SIZE_XY_METERS]), minX, maxX, minY, maxY);
+
+                if ( point.x > minX && point.x < maxX && point.y > minY && point.y < maxY)
                 {
                     count++;
                     averageHeightZ += point.z;
 
-                     printf("[%d,%d] : [%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf) -> GridCell: (%.2f,%.2f)\n", i, j, rIndex, (int) params[GRID_LENGTH],
-                              cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, projectedPoint.x, projectedPoint.y, point.x, point.y, point.z,
-                              (point.x / 0.1), point.y / 0.1);
-
-                    printf("_________________________________++++++++++++++++++++++++ FOUND +++++++++++++++++++++++++++++++____________________________________\n");
+//                     printf("[%d,%d] : [%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf) -> GridCell: (%.2f,%.2f) -> Bounds(X): (%.2f, %.2f),  -> Bounds(Y): (%.2f, %.2f)\n", i, j, rIndex, (int) params[GRID_LENGTH],
+//                              cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, projectedPoint.x, projectedPoint.y, point.x, point.y, point.z,
+//                              (cIndex * params[CELL_SIZE_XY_METERS]), (rIndex * params[CELL_SIZE_XY_METERS]), minX, maxX, minY, maxY);
+//
+//                    printf("_________________________________++++++++++++++++++++++++ FOUND +++++++++++++++++++++++++++++++____________________________________\n");
 
 
                 }
@@ -141,8 +146,13 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
         }
     }
 
-    averageHeightZ = averageHeightZ / (float)(count);
-
-    write_imageui(out, (int2)(cIndex,rIndex), (uint4)((2.0 + averageHeightZ) * 10000, 0, 0, 0));
-
+    if(count > 0)
+    {
+        averageHeightZ = averageHeightZ / (float)(count);
+        write_imageui(out, (int2)(cIndex,rIndex), (uint4)((int)( (2.0f + averageHeightZ) * 20000.0f), 0, 0, 0));
+    }
+    else
+    {
+        write_imageui(out, (int2)(cIndex,rIndex), (uint4)(0, 0, 0, 0));
+    }
 }

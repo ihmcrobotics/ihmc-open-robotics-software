@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
@@ -30,7 +31,6 @@ public class RDXHeightMapRenderer implements RenderableProvider
                                                                                               GL41.GL_FLOAT,
                                                                                               false,
                                                                                               "a_size"));
-   private final int floatsPerCell = vertexAttributes.vertexSize / Float.BYTES;
    private final RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
    {
       shader.set(inputID, shader.camera.viewportWidth);
@@ -40,6 +40,8 @@ public class RDXHeightMapRenderer implements RenderableProvider
    {
       shader.set(inputID, multiColor);
    });
+
+   private float[] intermediateVertexBuffer;
 
    private int totalCells;
 
@@ -67,13 +69,36 @@ public class RDXHeightMapRenderer implements RenderableProvider
       shader.registerUniform(multiColorUniform);
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
+
+      intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update()
+   public void update(BytePointer heightMapPointer, int height, int width, float cellSizeXYInMeters)
    {
-      FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
-      floatBuffer.position(0);
-      floatBuffer.limit(totalCells * floatsPerCell);
+      for(int i = 0; i<height; i++)
+      {
+         for(int j = 0; j<width; j++)
+         {
+            int index = i * width + j;
+
+            // Position
+            intermediateVertexBuffer[0] = ( (float) height / 2 - i) * cellSizeXYInMeters;
+            intermediateVertexBuffer[1] = ( (float) width / 2 - j) * cellSizeXYInMeters;
+            //intermediateVertexBuffer[2] = heightMapPointer.getFloat(index);
+            intermediateVertexBuffer[2] = 1.0f;
+
+            // Color (0.0 to 1.0)
+            intermediateVertexBuffer[3] = 0.0f;
+            intermediateVertexBuffer[4] = 0.4f;
+            intermediateVertexBuffer[5] = 0.9f;
+            intermediateVertexBuffer[6] = 1.0f;
+
+            // Size
+            intermediateVertexBuffer[7] = 0.01f;
+         }
+      }
+
+      renderable.meshPart.mesh.setVertices(intermediateVertexBuffer, 0, totalCells * FLOATS_PER_CELL);
       renderable.meshPart.size = totalCells;
    }
 
