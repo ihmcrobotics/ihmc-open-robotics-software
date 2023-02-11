@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -151,12 +152,11 @@ public class PlanarRegionRegistrationTools
 
       HashMap<Integer, Integer> matches = new HashMap<>();
       PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions.getPlanarRegionsList(), previousRegions.getPlanarRegionsList(),
-                                                        matches, 0.5f, 0.7f, 0.4f, 0.2f);
+                                                        matches, 0.5f, 0.8f, 0.4f, 0.3f);
 
       for (int i = 0; i < maxIterations; i++)
       {
          transform = PlanarRegionRegistrationTools.computeTransformFromRegions(previousRegions.getPlanarRegionsList(), currentRegions.getPlanarRegionsList(), matches);
-//         transform.invert();
          currentRegions.getPlanarRegionsList().applyTransform(transform);
          transformToReturn.multiply(transform);
       }
@@ -179,21 +179,23 @@ public class PlanarRegionRegistrationTools
       DMatrixRMaj b = new DMatrixRMaj(totalNumOfBoundaryPoints, 1);
 
       constructLeastSquaresProblem(previousRegions, currentRegions, matches, A, b);
-      DMatrixRMaj solutionQR = solveUsingQRDecomposition(A, b);
-      DMatrixRMaj solutionSVD = solveUsingSVDDecomposition(A, b);
+      //DMatrixRMaj solution = solveUsingQRDecomposition(A, b);
+      DMatrixRMaj solution = solveUsingSVDDecomposition(A, b);
+      //DMatrixRMaj solution = solveUsingDampedLeastSquares(A, b);
 
-      CommonOps_DDRM.scale(0.1, solutionSVD);
+      // TODO: Remove this
+      //CommonOps_DDRM.scale(0.1, solution);
 
       //LogTools.info("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
       //
-      LogTools.info("[SVD] Rotation({}, {}, {})", solutionSVD.get(0), solutionSVD.get(1), solutionSVD.get(2));
-      LogTools.info("[SVD] Translation({}, {}, {})", solutionSVD.get(3), solutionSVD.get(4), solutionSVD.get(5));
+      LogTools.info("[SVD] Rotation({}, {}, {})", solution.get(0), solution.get(1), solution.get(2));
+      LogTools.info("[SVD] Translation({}, {}, {})", solution.get(3), solution.get(4), solution.get(5));
       //
       //LogTools.info("[QR] Rotation({}, {}, {})", solutionQR.get(0), solutionQR.get(1), solutionQR.get(2));
       //LogTools.info("[QR] Translation({}, {}, {})", solutionQR.get(3), solutionQR.get(4), solutionQR.get(5));
 
-      RotationMatrix rotation = new RotationMatrix(solutionSVD.get(2), solutionSVD.get(1), solutionSVD.get(0));
-      Point3D translation = new Point3D(solutionSVD.get(3), solutionSVD.get(4), solutionSVD.get(5));
+      RotationMatrix rotation = new RotationMatrix(solution.get(2), solution.get(1), solution.get(0));
+      Point3D translation = new Point3D(solution.get(3), solution.get(4), solution.get(5));
       transformToReturn.set(rotation, translation);
 
       return transformToReturn;
@@ -296,6 +298,29 @@ public class PlanarRegionRegistrationTools
 
       //DMatrixRMaj pInverse = new DMatrixRMaj(3, 3);
       //CommonOps_DDRM.pinv(A, pInverse);
+
+      return solution;
+   }
+
+   public static DMatrixRMaj solveUsingDampedLeastSquares(DMatrixRMaj A, DMatrixRMaj b)
+   {
+      SolvePseudoInverseSvd_DDRM solver = new SolvePseudoInverseSvd_DDRM();
+      DMatrixRMaj solution = new DMatrixRMaj(6, 1);
+
+      DMatrixRMaj ATransposeTimesA = new DMatrixRMaj(6, 6);
+      CommonOps_DDRM.multInner(A, ATransposeTimesA);
+
+      DMatrixRMaj ATransposeB = new DMatrixRMaj(6, 1);
+      CommonOps_DDRM.multTransA(A, b, ATransposeB);
+
+      DMatrixRMaj lambdaI = CommonOps_DDRM.identity(6);
+      CommonOps_DDRM.scale(10, lambdaI);
+
+      DMatrixRMaj ATransposeTimesAPlusLambdaI = new DMatrixRMaj(6, 6);
+      CommonOps_DDRM.add(ATransposeTimesA, lambdaI, ATransposeTimesAPlusLambdaI);
+
+      solver.setA(ATransposeTimesAPlusLambdaI);
+      solver.solve(ATransposeB, solution);
 
       return solution;
    }

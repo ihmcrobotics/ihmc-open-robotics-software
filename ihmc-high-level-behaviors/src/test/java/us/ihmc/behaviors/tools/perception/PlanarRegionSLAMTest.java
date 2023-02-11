@@ -1142,7 +1142,7 @@ class PlanarRegionSLAMTest
    @Test
    public void testPointToPlaneICP()
    {
-      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.4, -0.5, 0.2), new Vector3D(0.15, 0.2, -0.2));
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(new Quaternion(0.2, -0.5, 0.1), new Vector3D(0.1, 0.05, -0.1));
       RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
       worldToSensorTransform.setAndInvert(sensorToWorldTransform);
 
@@ -1151,7 +1151,7 @@ class PlanarRegionSLAMTest
 
       HashMap<Integer, Integer> matches = new HashMap<>();
 
-      PlanarRegionSLAMTools.findBestPlanarRegionMatches(listOne, listTwo, matches, 0.5f, 0.7f, 0.4f, 0.2f);
+      PlanarRegionSLAMTools.findBestPlanarRegionMatches(listOne, listTwo, matches, 0.4f, 0.6f, 0.4f, 0.5f);
 
       for(Integer key : matches.keySet())
       {
