@@ -22,8 +22,8 @@ public class RDXOusterDepthImageToPointCloudKernel
    private final OpenCLFloatParameters parametersOpenCLFloatBuffer = new OpenCLFloatParameters();
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
-   private final RigidBodyTransform fisheyeCameraTransformToWorld = new RigidBodyTransform();
    private BytedecoImage fisheyeImage;
+   private final RigidBodyTransform ousterToFisheyeTransform = new RigidBodyTransform();
    private double fisheyeFocalLengthPixelsX;
    private double fisheyeFocalLengthPixelsY;
    private double fisheyePrincipalPointPixelsX;
@@ -79,9 +79,9 @@ public class RDXOusterDepthImageToPointCloudKernel
       fThetaFisheyeRGBA8Image.getBytedecoOpenCVMat().copyTo(fisheyeImage.getBytedecoOpenCVMat());
    }
 
-   public RigidBodyTransform getFisheyeCameraTransformToWorldToPack()
+   public RigidBodyTransform getOusterToFisheyeTransformToPack()
    {
-      return fisheyeCameraTransformToWorld;
+      return ousterToFisheyeTransform;
    }
 
    public void runKernel(float horizontalFieldOfView, float verticalFieldOfView, float pointSize)
@@ -97,11 +97,11 @@ public class RDXOusterDepthImageToPointCloudKernel
       parametersOpenCLFloatBuffer.setParameter(useFisheyeColorImage);
       parametersOpenCLFloatBuffer.setParameter(fisheyeImage.getImageWidth());
       parametersOpenCLFloatBuffer.setParameter(fisheyeImage.getImageHeight());
-      parametersOpenCLFloatBuffer.setParameter(fisheyeCameraTransformToWorld);
       parametersOpenCLFloatBuffer.setParameter((float) fisheyeFocalLengthPixelsX);
       parametersOpenCLFloatBuffer.setParameter((float) fisheyeFocalLengthPixelsY);
       parametersOpenCLFloatBuffer.setParameter((float) fisheyePrincipalPointPixelsX);
       parametersOpenCLFloatBuffer.setParameter((float) fisheyePrincipalPointPixelsY);
+      parametersOpenCLFloatBuffer.setParameter(ousterToFisheyeTransform);
 
       parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
       depthImage.writeOpenCLImage(openCLManager);

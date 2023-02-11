@@ -1,6 +1,6 @@
 kernel void imageToPointCloud(global float* parameters,
                               read_only image2d_t discretizedDepthImage,
-                              read_only image2d_t fThetaFisheyeRGB8Image,
+                              read_only image2d_t fThetaFisheyeRGBA8Image,
                               global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
@@ -26,22 +26,22 @@ kernel void imageToPointCloud(global float* parameters,
    bool useFisheyeColorImage = parameters[17];
    int fisheyeImageWidth = parameters[18];
    int fisheyeImageHeight = parameters[19];
-   float colorCameraTranslationX = parameters[20];
-   float colorCameraTranslationY = parameters[21];
-   float colorCameraTranslationZ = parameters[22];
-   float colorCameraRotationMatrixM00 = parameters[23];
-   float colorCameraRotationMatrixM01 = parameters[24];
-   float colorCameraRotationMatrixM02 = parameters[25];
-   float colorCameraRotationMatrixM10 = parameters[26];
-   float colorCameraRotationMatrixM11 = parameters[27];
-   float colorCameraRotationMatrixM12 = parameters[28];
-   float colorCameraRotationMatrixM20 = parameters[29];
-   float colorCameraRotationMatrixM21 = parameters[30];
-   float colorCameraRotationMatrixM22 = parameters[31];
-   float fisheyeFocalLengthPixelsX = parameters[33];
-   float fisheyeFocalLengthPixelsY = parameters[34];
-   float fisheyePrincipalPointPixelsX = parameters[35];
-   float fisheyePrincipalPointPixelsY = parameters[36];
+   float fisheyeFocalLengthPixelsX = parameters[20];
+   float fisheyeFocalLengthPixelsY = parameters[21];
+   float fisheyePrincipalPointPixelsX = parameters[22];
+   float fisheyePrincipalPointPixelsY = parameters[23];
+   float fisheyeTranslationX = parameters[24];
+   float fisheyeTranslationY = parameters[25];
+   float fisheyeTranslationZ = parameters[26];
+   float fisheyeRotationMatrixM00 = parameters[27];
+   float fisheyeRotationMatrixM01 = parameters[28];
+   float fisheyeRotationMatrixM02 = parameters[29];
+   float fisheyeRotationMatrixM10 = parameters[30];
+   float fisheyeRotationMatrixM11 = parameters[31];
+   float fisheyeRotationMatrixM12 = parameters[32];
+   float fisheyeRotationMatrixM20 = parameters[33];
+   float fisheyeRotationMatrixM21 = parameters[34];
+   float fisheyeRotationMatrixM22 = parameters[35];
 
    float discreteResolution = 0.001f;
    float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, y)).x * discreteResolution;
@@ -108,11 +108,62 @@ kernel void imageToPointCloud(global float* parameters,
       pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }
 
-   float4 rgba8888Color = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
-   float pointColorR = (rgba8888Color.x);
-   float pointColorG = (rgba8888Color.y);
-   float pointColorB = (rgba8888Color.z);
-   float pointColorA = (rgba8888Color.w);
+
+   float pointColorR;
+   float pointColorG;
+   float pointColorB;
+   float pointColorA;
+   if (useFisheyeColorImage)
+   {
+      float4 fisheyeFramePoint = transform(sensorFramePoint.x,
+                                           sensorFramePoint.y,
+                                           sensorFramePoint.z,
+                                           fisheyeTranslationX,
+                                           fisheyeTranslationY,
+                                           fisheyeTranslationZ,
+                                           fisheyeRotationMatrixM00,
+                                           fisheyeRotationMatrixM01,
+                                           fisheyeRotationMatrixM02,
+                                           fisheyeRotationMatrixM10,
+                                           fisheyeRotationMatrixM11,
+                                           fisheyeRotationMatrixM12,
+                                           fisheyeRotationMatrixM20,
+                                           fisheyeRotationMatrixM21,
+                                           fisheyeRotationMatrixM22);
+
+      float fisheyeAngleX = -angle(1.0f, 0.0f, fisheyeFramePoint.x,  fisheyeFramePoint.y);
+      float fisheyeAngleY = angle(1.0f, 0.0f, fisheyeFramePoint.x, -fisheyeFramePoint.z);
+
+      if (fabs(fisheyeAngleX) < radians(92.5f) && fabs(fisheyeAngleY) < radians(92.5f))
+      {
+         int fisheyeX = fisheyePrincipalPointPixelsX + fisheyeFocalLengthPixelsX * fisheyeAngleX;
+         int fisheyeY = fisheyePrincipalPointPixelsY + fisheyeFocalLengthPixelsY * fisheyeAngleY;
+         if (fisheyeX >= 0 && fisheyeX < fisheyeImageWidth && fisheyeY >= 0 && fisheyeY < fisheyeImageHeight)
+         {
+            uint4 fisheyeColor = read_imageui(fThetaFisheyeRGBA8Image, (int2) (fisheyeX, fisheyeY));
+            pointColorR = (fisheyeColor.x / 255.0f);
+            pointColorG = (fisheyeColor.y / 255.0f);
+            pointColorB = (fisheyeColor.z / 255.0f);
+            pointColorA = (fisheyeColor.w / 255.0f);
+         }
+      }
+      else
+      {
+         float4 rgba8888Color = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
+         pointColorR = rgba8888Color.x;
+         pointColorG = rgba8888Color.y;
+         pointColorB = rgba8888Color.z;
+         pointColorA = rgba8888Color.w;
+      }
+   }
+   else
+   {
+      float4 rgba8888Color = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
+      pointColorR = (rgba8888Color.x);
+      pointColorG = (rgba8888Color.y);
+      pointColorB = (rgba8888Color.z);
+      pointColorA = (rgba8888Color.w);
+   }
 
    pointCloudVertexBuffer[pointStartIndex + 3] = pointColorR;
    pointCloudVertexBuffer[pointStartIndex + 4] = pointColorG;

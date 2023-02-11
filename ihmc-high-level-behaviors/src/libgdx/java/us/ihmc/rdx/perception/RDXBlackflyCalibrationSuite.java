@@ -189,7 +189,7 @@ public class RDXBlackflyCalibrationSuite
                   openCVArUcoMarkerDetection.create(blackflySensorFrame);
                   arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();
                   ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
-                  double sideLength = 0.1421;
+                  double sideLength = 0.1982;
                   markersToTrack.add(new OpenCVArUcoMarker(0, sideLength));
                   // TODO: Use frame from openCVArUcoMarkerDetection? i.e. remove redudant parameter
                   arUcoMarkerDetectionUI.create(openCVArUcoMarkerDetection, markersToTrack, blackflySensorFrame);
@@ -371,10 +371,14 @@ public class RDXBlackflyCalibrationSuite
 
             if (nettyOusterUI.getIsReady())
             {
-               nettyOusterUI.getDepthImageToPointCloudKernel()
-                            .setFisheyeImageToColorPoints(texture.getRGBA8Image(), coloringFx.get(), coloringFy.get(), coloringCx.get(), coloringCy.get());
-               blackflySensorFrame.getTransformToDesiredFrame(nettyOusterUI.getDepthImageToPointCloudKernel().getFisheyeCameraTransformToWorldToPack(),
-                                                              ReferenceFrame.getWorldFrame());
+               nettyOusterUI.getDepthImageToPointCloudKernel().setFisheyeImageToColorPoints(texture.getRGBA8Image(),
+                                                                                            coloringFx.get(),
+                                                                                            coloringFy.get(),
+                                                                                            coloringCx.get(),
+                                                                                            coloringCy.get());
+               nettyOusterUI.getSensorFrame().getReferenceFrame()
+                            .getTransformToDesiredFrame(nettyOusterUI.getDepthImageToPointCloudKernel().getOusterToFisheyeTransformToPack(),
+                                                        blackflySensorFrame);
             }
 
             calibrationPatternDetectionUI.drawCornersOrCenters(texture.getRGBA8Mat());
