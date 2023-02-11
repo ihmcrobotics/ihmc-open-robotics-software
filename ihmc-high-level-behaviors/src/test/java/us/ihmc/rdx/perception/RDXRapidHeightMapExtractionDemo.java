@@ -36,7 +36,7 @@ public class RDXRapidHeightMapExtractionDemo
    String PERCEPTION_LOG_FILE = "20230117_162825_PerceptionLog.hdf5";
    String PERCEPTION_LOG_DIRECTORY = System.getProperty("user.home") + "/.ihmc/logs/perception/";
 
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private ImGuiPanel navigationPanel;
 
    private String sensorTopicName;
@@ -82,7 +82,7 @@ public class RDXRapidHeightMapExtractionDemo
 
             updateHeightMap();
 
-            testProjection(loadedDepthImage.getBytedecoOpenCVMat());
+//            testProjection(loadedDepthImage.getBytedecoOpenCVMat());
          }
 
          private void createForOuster(int depthHeight, int depthWidth)
@@ -222,7 +222,7 @@ public class RDXRapidHeightMapExtractionDemo
       proj.setX(pitchCount);
       proj.setY(yawCount);
 
-      //    printf("Projection: [%.2f,%.2f] (Yc:%d,Pc:%d, Z:%.2lf,R:%.2lf)\n", yaw, pitch, yawCount, pitchCount, z, radius);
+      LogTools.info(String.format("Projection: [%.2f,%.2f] (Yc:%d,Pc:%d, Z:%.2f,R:%.2f)\n", yaw, pitch, yawCount, pitchCount, z, radius));
 
       return proj;
    }
@@ -242,8 +242,6 @@ public class RDXRapidHeightMapExtractionDemo
 
          LogTools.info("[" + i + "] Point : " + String.format("%.2f, %.2f, %.2f", point.getX(), point.getY(), point.getZ()) + " Projection : " + String.format("%d, %d", (int)projection.getX(), (int)projection.getY()));
       }
-
-
    }
 
 
