@@ -120,10 +120,11 @@ public class RDXSteppableRegionCalculatorDemo
                   baseUI.getPrimaryScene().addRenderableProvider(ouster::getRenderables);
 
                   steppableRegionsCalculatorModule = new RDXSteppableRegionsCalculatorUI();
-                  steppableRegionsCalculatorModule.create(heightMap::getLatestHeightMap);
+                  steppableRegionsCalculatorModule.create();
                   steppableRegionsCalculatorModule.getEnabled().set(true);
-                  baseUI.getImGuiPanelManager().addPanel(steppableRegionsCalculatorModule.getPanel());
+                  heightMap.attachHeightMapConsumer(steppableRegionsCalculatorModule::submitHeightMapMessage);
 
+                  baseUI.getImGuiPanelManager().addPanel(steppableRegionsCalculatorModule.getPanel());
 
                   baseUI.getPrimaryScene().addRenderableProvider(steppableRegionsCalculatorModule::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 

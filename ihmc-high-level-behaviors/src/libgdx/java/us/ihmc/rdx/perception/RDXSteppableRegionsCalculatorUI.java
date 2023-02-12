@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
@@ -23,11 +24,13 @@ import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.rdx.visualizers.RDXSteppableRegionGraphic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public class RDXSteppableRegionsCalculatorUI
@@ -35,7 +38,7 @@ public class RDXSteppableRegionsCalculatorUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private final SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
-   private Supplier<HeightMapData> heightMapDataSupplier;
+   private final AtomicReference<HeightMapMessage> heightMapMessageReference = new AtomicReference<>();
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
 
    private final ImBoolean drawPatches = new ImBoolean(true);
@@ -54,15 +57,13 @@ public class RDXSteppableRegionsCalculatorUI
    private int cellsPerSide;
    private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
 
-   public void create(Supplier<HeightMapData> heightMapDataSupplier)
+   public void create()
    {
-      this.heightMapDataSupplier = heightMapDataSupplier;
-
       imguiPanel = new ImGuiPanel("Steppable Region Extraction", this::renderImGuiWidgets);
       parameterTuner = new ImGuiStoredPropertySetTuner("Steppable Region Parameters");
       parameterTuner.create(parameters);
 
-      cellsPerSide = heightMapDataSupplier.get().getCellsPerAxis();
+      cellsPerSide = 100;
       for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
       {
          RDXCVImagePanel steppabilityPanel = new RDXCVImagePanel("Raw Steppability " + i, cellsPerSide, cellsPerSide);
@@ -93,11 +94,14 @@ public class RDXSteppableRegionsCalculatorUI
       {
          if (!processing)
          {
-            HeightMapData heightMapData = heightMapDataSupplier.get();
-            resize(heightMapData.getCellsPerAxis());
-            processing = true;
-            wholeAlgorithmDurationStopwatch.start();
-            ThreadTools.startAsDaemon(() -> processingThread(runWhenFinished, heightMapData), getClass().getSimpleName() + "Processing");
+            HeightMapMessage heightMapMessage = heightMapMessageReference.getAndSet(null);
+            if (heightMapMessage != null)
+            {
+               HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+               resize(heightMapData.getCellsPerAxis());
+               processing = true;
+               ThreadTools.startAsDaemon(() -> processingThread(runWhenFinished, heightMapData), getClass().getSimpleName() + "Processing");
+            }
          }
 
          if (needToDraw)
@@ -115,6 +119,7 @@ public class RDXSteppableRegionsCalculatorUI
 
    private void processingThread(Runnable runWhenFinished, HeightMapData heightMapData)
    {
+      wholeAlgorithmDurationStopwatch.start();
       steppableRegionsCalculationModule.setSteppableRegionsCalculatorParameters(parameters);
       steppableRegionsCalculationModule.compute(heightMapData);
       drawRegions();
@@ -250,6 +255,11 @@ public class RDXSteppableRegionsCalculatorUI
       steppableRegionGraphic.getRenderables(renderables, pool);
 //      if (render3DPlanarRegions.get())
 //         planarRegionsGraphic.getRenderables(renderables, pool);
+   }
+
+   public void submitHeightMapMessage(HeightMapMessage heightMapMessage)
+   {
+      heightMapMessageReference.set(heightMapMessage);
    }
 
    public void destroy()

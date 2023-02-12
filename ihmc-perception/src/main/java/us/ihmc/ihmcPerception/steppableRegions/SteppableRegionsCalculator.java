@@ -101,24 +101,28 @@ public class SteppableRegionsCalculator
                                                               SteppableRegionDataHolder regionDataHolder,
                                                               HeightMapData heightMapData)
    {
+      if (regionDataHolder.getMemberCells().size() < 4)
+         return new ArrayList<>();
+
       List<Point3D> pointsInWorld = new ArrayList<>();
       List<Point3D> outerRing = getOuterRingPoints(regionDataHolder, heightMapData, 0.75);
       if (outerRing != null)
          pointsInWorld.addAll(outerRing);
-      List<Point3D> interiorPoints = getInteriorPoints(regionDataHolder, heightMapData, 1000, new Random());
-      if (interiorPoints != null)
-         pointsInWorld.addAll(interiorPoints);
+//      if (pointsInWorld.size() > 300)
+//      {
+         List<Point3D> interiorPoints = getInteriorPoints(regionDataHolder, heightMapData, 1000, new Random());
+         if (interiorPoints != null)
+            pointsInWorld.addAll(interiorPoints);
+//      }
 
       Point3DReadOnly centroid = regionDataHolder.getCentroidInWorld();
       Vector3DReadOnly normal = regionDataHolder.getNormalInWorld();
       AxisAngle orientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normal);
 
-      List<Point2D> pointCloudInRegion = pointsInWorld.parallelStream().map(pointInWorld ->
-                                                                                {
-                                                                                   return PolygonizerTools.toPointInPlane(pointInWorld, centroid, orientation);
-                                                                                }).toList();
+      List<Point2D> pointCloudInRegion = pointsInWorld.parallelStream()
+                                                      .map(pointInWorld -> PolygonizerTools.toPointInPlane(pointInWorld, centroid, orientation))
+                                                      .toList();
 
-      long startTime = System.nanoTime();
       ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInRegion, concaveHullFactoryParameters);
 
       // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
@@ -173,8 +177,6 @@ public class SteppableRegionsCalculator
       return points;
    }
 
-   private final Random random = new Random();
-
    private static List<Point3D> getInteriorPoints(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData, int cellsToSample, Random random)
    {
       if (regionDataHolder.getMemberCells().size() == 0)
@@ -182,7 +184,6 @@ public class SteppableRegionsCalculator
 
       List<SteppableCell> memberCells = new ArrayList<>(regionDataHolder.getMemberCells());
       List<Point3D> points = new ArrayList<>();
-      cellsToSample = memberCells.size();
       for (int i = 0; i < Math.min(memberCells.size(), cellsToSample); i++)
       {
          SteppableCell cell = memberCells.remove(RandomNumbers.nextInt(random, 0, memberCells.size() - 1));
@@ -261,6 +262,8 @@ public class SteppableRegionsCalculator
             if (steppability.getInt(column, row) == 0)
             {
                boolean isBorderCell = connections.getInt(column, row) != 255;
+//               debugCell(column, row, steppability, connections);
+
                double z = snappedHeight.getFloat(column, row);
                Vector3D normal = new Vector3D(snappedNormalX.getFloat(column, row),
                                               snappedNormalY.getFloat(column, row),
@@ -272,6 +275,48 @@ public class SteppableRegionsCalculator
       }
 
       return steppableRegionsToConvert;
+   }
+
+   private static void debugCell(int column, int row, BytedecoImage steppability, BytedecoImage connections)
+   {
+      boolean isBorderCell = connections.getInt(column, row) != 255;
+      int cellsPerSide = steppability.getImageHeight();
+
+      boolean hasBadNeighbor = false;
+      outerLoop:
+      for (int xOffset = -1; xOffset <= 1; xOffset++)
+      {
+         int offsetColumn = xOffset + column;
+         for (int yOffset = -1; yOffset <= 1; yOffset++)
+         {
+            int offsetRow = yOffset + row;
+            if (xOffset == 0 && yOffset == 0)
+               continue;
+
+            if (offsetColumn < 0 || offsetRow < 0 || offsetColumn >= cellsPerSide || offsetRow >= cellsPerSide)
+            {
+               hasBadNeighbor = true;
+               break outerLoop;
+            }
+
+            if (steppability.getInt(offsetColumn, offsetRow) != 0)
+            {
+               hasBadNeighbor = true;
+               break outerLoop;
+            }
+         }
+      }
+
+      if (isBorderCell)
+      {
+         if (!hasBadNeighbor)
+            throw new RuntimeException("We have a cell marked as a border cell, but it looks like all the neighbors are good!");
+      }
+      else
+      {
+         if (hasBadNeighbor)
+            throw new RuntimeException("We have a cell marked as an interior cell, but it looks like it has a bad neighbor!");
+      }
    }
 
    private static void recursivelyAddNeighbors(SteppableCell cellToExpand,

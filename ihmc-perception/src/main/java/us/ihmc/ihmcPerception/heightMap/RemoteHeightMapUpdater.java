@@ -25,6 +25,7 @@ import us.ihmc.tools.thread.ExecutorServiceTools;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class RemoteHeightMapUpdater
@@ -124,6 +125,11 @@ public class RemoteHeightMapUpdater
    public HeightMapData getLatestHeightMap()
    {
       return heightMapUpdater.getLatestHeightMap();
+   }
+
+   public void attachHeightMapConsumer(Consumer<HeightMapMessage> heightMapMessageConsumer)
+   {
+      heightMapUpdater.attachHeightMapConsumer(heightMapMessageConsumer);
    }
 
    public void consumeStateRequestMessage(HeightMapStateRequestMessage message)
