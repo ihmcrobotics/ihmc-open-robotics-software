@@ -14,7 +14,7 @@ uniform int u_multiColor;
 
 void main()
 {
-	vec4 pointInCameraFrame = u_viewTrans * vec4(a_position, 1);
+	vec4 pointInCameraFrame = u_viewTrans * vec4(a_position.x, a_position.y, max(0.0, a_position.z), 1);
 	vec4 projectedSpriteCornerZero = u_projTrans * vec4(0.0, 0.0, pointInCameraFrame.z, pointInCameraFrame.w);
 
 	vec4 projectedSpriteCorner = u_projTrans * vec4(a_size, a_size, pointInCameraFrame.z, pointInCameraFrame.w);
