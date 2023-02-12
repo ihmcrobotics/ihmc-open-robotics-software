@@ -96,7 +96,7 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
 //    printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
 //         cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y);
 
-    int WINDOW_WIDTH = 200;
+    int WINDOW_WIDTH = 100;
 
     int count = 0;
 
@@ -149,7 +149,7 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
     if(count > 0)
     {
         averageHeightZ = averageHeightZ / (float)(count);
-        write_imageui(out, (int2)(cIndex,rIndex), (uint4)((int)( (2.0f + averageHeightZ) * 20000.0f), 0, 0, 0));
+        write_imageui(out, (int2)(cIndex,rIndex), (uint4)((int)( (2.0f + averageHeightZ) * 10000.0f), 0, 0, 0));
     }
     else
     {

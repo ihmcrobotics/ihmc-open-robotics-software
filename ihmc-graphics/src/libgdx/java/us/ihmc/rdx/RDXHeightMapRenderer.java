@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
@@ -75,31 +76,33 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
    public void update(BytePointer heightMapPointer, int height, int width, float cellSizeXYInMeters)
    {
+      LogTools.info("Rendering Height Map: {} {} {}", height, width, cellSizeXYInMeters);
+
       for(int i = 0; i<height; i++)
       {
          for(int j = 0; j<width; j++)
          {
-            int index = i * width + j;
+            int heightIndex = i * width + j;
+            int vertexIndex = heightIndex * FLOATS_PER_CELL;
 
             // Position
-            intermediateVertexBuffer[0] = ( (float) height / 2 - i) * cellSizeXYInMeters;
-            intermediateVertexBuffer[1] = ( (float) width / 2 - j) * cellSizeXYInMeters;
-            //intermediateVertexBuffer[2] = heightMapPointer.getFloat(index);
-            intermediateVertexBuffer[2] = 1.0f;
+            intermediateVertexBuffer[vertexIndex] = ( (float) height / 2 - i) * cellSizeXYInMeters;
+            intermediateVertexBuffer[vertexIndex + 1] = ( (float) width / 2 - j) * cellSizeXYInMeters;
+            intermediateVertexBuffer[vertexIndex + 2] = heightMapPointer.getShort(heightIndex) / 10000.0f;
 
             // Color (0.0 to 1.0)
-            intermediateVertexBuffer[3] = 0.0f;
-            intermediateVertexBuffer[4] = 0.4f;
-            intermediateVertexBuffer[5] = 0.9f;
-            intermediateVertexBuffer[6] = 1.0f;
+            intermediateVertexBuffer[vertexIndex + 3] = 1.0f;
+            intermediateVertexBuffer[vertexIndex + 4] = 1.0f;
+            intermediateVertexBuffer[vertexIndex + 5] = 1.0f;
+            intermediateVertexBuffer[vertexIndex + 6] = 1.0f;
 
             // Size
-            intermediateVertexBuffer[7] = 0.01f;
+            intermediateVertexBuffer[vertexIndex + 7] = 0.03f;
          }
       }
 
-      renderable.meshPart.mesh.setVertices(intermediateVertexBuffer, 0, totalCells * FLOATS_PER_CELL);
       renderable.meshPart.size = totalCells;
+      renderable.meshPart.mesh.setVertices(intermediateVertexBuffer, 0, totalCells * FLOATS_PER_CELL);
    }
 
    public FloatBuffer getVertexBuffer()
