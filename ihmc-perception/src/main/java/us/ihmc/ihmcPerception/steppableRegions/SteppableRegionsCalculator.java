@@ -1,5 +1,6 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -100,14 +101,19 @@ public class SteppableRegionsCalculator
                                                               SteppableRegionDataHolder regionDataHolder,
                                                               HeightMapData heightMapData)
    {
+      List<Point3D> pointsInWorld = new ArrayList<>();
       List<Point3D> outerRing = getOuterRingPoints(regionDataHolder, heightMapData, 0.75);
-      if (outerRing == null)
-         return new ArrayList<>();
+      if (outerRing != null)
+         pointsInWorld.addAll(outerRing);
+      List<Point3D> interiorPoints = getInteriorPoints(regionDataHolder, heightMapData, 1000, new Random());
+      if (interiorPoints != null)
+         pointsInWorld.addAll(interiorPoints);
+
       Point3DReadOnly centroid = regionDataHolder.getCentroidInWorld();
       Vector3DReadOnly normal = regionDataHolder.getNormalInWorld();
       AxisAngle orientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normal);
 
-      List<Point2D> pointCloudInRegion = outerRing.parallelStream().map(pointInWorld ->
+      List<Point2D> pointCloudInRegion = pointsInWorld.parallelStream().map(pointInWorld ->
                                                                                 {
                                                                                    return PolygonizerTools.toPointInPlane(pointInWorld, centroid, orientation);
                                                                                 }).toList();
@@ -163,6 +169,34 @@ public class SteppableRegionsCalculator
             points.add(new Point3D(x - inflationSize, y - inflationSize, height));
             points.add(new Point3D(x - inflationSize, y + inflationSize, height));
          }
+      }
+      return points;
+   }
+
+   private final Random random = new Random();
+
+   private static List<Point3D> getInteriorPoints(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData, int cellsToSample, Random random)
+   {
+      if (regionDataHolder.getMemberCells().size() == 0)
+         return null;
+
+      List<SteppableCell> memberCells = new ArrayList<>(regionDataHolder.getMemberCells());
+      List<Point3D> points = new ArrayList<>();
+      cellsToSample = memberCells.size();
+      for (int i = 0; i < Math.min(memberCells.size(), cellsToSample); i++)
+      {
+         SteppableCell cell = memberCells.remove(RandomNumbers.nextInt(random, 0, memberCells.size() - 1));
+         double x = HeightMapTools.indexToCoordinate(cell.x,
+                                                     heightMapData.getGridCenter().getX(),
+                                                     heightMapData.getGridResolutionXY(),
+                                                     heightMapData.getCenterIndex());
+         double y = HeightMapTools.indexToCoordinate(cell.y,
+                                                     heightMapData.getGridCenter().getY(),
+                                                     heightMapData.getGridResolutionXY(),
+                                                     heightMapData.getCenterIndex());
+         double height = heightMapData.getHeightAt(cell.x, cell.y);
+
+         points.add(new Point3D(x, y, height));
       }
       return points;
    }
@@ -631,6 +665,11 @@ public class SteppableRegionsCalculator
       public int getMaxY()
       {
          return maxY;
+      }
+
+      public List<SteppableCell> getMemberCells()
+      {
+         return memberCells;
       }
    }
 
