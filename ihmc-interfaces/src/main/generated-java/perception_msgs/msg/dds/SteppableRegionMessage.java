@@ -19,7 +19,14 @@ public class SteppableRegionMessage extends Packet<SteppableRegionMessage> imple
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * Approximate last update time
+            */
+   public ihmc_common_msgs.msg.dds.InstantMessage last_updated_;
    public int region_id_ = -1;
+   public double foot_yaw_;
+   public double foot_length_;
+   public double foot_width_;
    public us.ihmc.euclid.tuple3D.Point3D region_origin_;
    public us.ihmc.euclid.tuple4D.Quaternion region_orientation_;
    public us.ihmc.euclid.tuple3D.Vector3D region_normal_;
@@ -29,6 +36,7 @@ public class SteppableRegionMessage extends Packet<SteppableRegionMessage> imple
 
    public SteppableRegionMessage()
    {
+      last_updated_ = new ihmc_common_msgs.msg.dds.InstantMessage();
       region_origin_ = new us.ihmc.euclid.tuple3D.Point3D();
       region_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
@@ -47,7 +55,14 @@ public class SteppableRegionMessage extends Packet<SteppableRegionMessage> imple
    {
       sequence_id_ = other.sequence_id_;
 
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.last_updated_, last_updated_);
       region_id_ = other.region_id_;
+
+      foot_yaw_ = other.foot_yaw_;
+
+      foot_length_ = other.foot_length_;
+
+      foot_width_ = other.foot_width_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.region_origin_, region_origin_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.region_orientation_, region_orientation_);
@@ -73,6 +88,15 @@ public class SteppableRegionMessage extends Packet<SteppableRegionMessage> imple
       return sequence_id_;
    }
 
+
+   /**
+            * Approximate last update time
+            */
+   public ihmc_common_msgs.msg.dds.InstantMessage getLastUpdated()
+   {
+      return last_updated_;
+   }
+
    public void setRegionId(int region_id)
    {
       region_id_ = region_id;
@@ -80,6 +104,33 @@ public class SteppableRegionMessage extends Packet<SteppableRegionMessage> imple
    public int getRegionId()
    {
       return region_id_;
+   }
+
+   public void setFootYaw(double foot_yaw)
+   {
+      foot_yaw_ = foot_yaw;
+   }
+   public double getFootYaw()
+   {
+      return foot_yaw_;
+   }
+
+   public void setFootLength(double foot_length)
+   {
+      foot_length_ = foot_length;
+   }
+   public double getFootLength()
+   {
+      return foot_length_;
+   }
+
+   public void setFootWidth(double foot_width)
+   {
+      foot_width_ = foot_width;
+   }
+   public double getFootWidth()
+   {
+      return foot_width_;
    }
 
 
@@ -141,7 +192,14 @@ public class SteppableRegionMessage extends Packet<SteppableRegionMessage> imple
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!this.last_updated_.epsilonEquals(other.last_updated_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.region_id_, other.region_id_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foot_yaw_, other.foot_yaw_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foot_length_, other.foot_length_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foot_width_, other.foot_width_, epsilon)) return false;
 
       if (!this.region_origin_.epsilonEquals(other.region_origin_, epsilon)) return false;
       if (!this.region_orientation_.epsilonEquals(other.region_orientation_, epsilon)) return false;
@@ -171,7 +229,14 @@ public class SteppableRegionMessage extends Packet<SteppableRegionMessage> imple
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if (!this.last_updated_.equals(otherMyClass.last_updated_)) return false;
       if(this.region_id_ != otherMyClass.region_id_) return false;
+
+      if(this.foot_yaw_ != otherMyClass.foot_yaw_) return false;
+
+      if(this.foot_length_ != otherMyClass.foot_length_) return false;
+
+      if(this.foot_width_ != otherMyClass.foot_width_) return false;
 
       if (!this.region_origin_.equals(otherMyClass.region_origin_)) return false;
       if (!this.region_orientation_.equals(otherMyClass.region_orientation_)) return false;
@@ -192,8 +257,16 @@ public class SteppableRegionMessage extends Packet<SteppableRegionMessage> imple
       builder.append("SteppableRegionMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("last_updated=");
+      builder.append(this.last_updated_);      builder.append(", ");
       builder.append("region_id=");
       builder.append(this.region_id_);      builder.append(", ");
+      builder.append("foot_yaw=");
+      builder.append(this.foot_yaw_);      builder.append(", ");
+      builder.append("foot_length=");
+      builder.append(this.foot_length_);      builder.append(", ");
+      builder.append("foot_width=");
+      builder.append(this.foot_width_);      builder.append(", ");
       builder.append("region_origin=");
       builder.append(this.region_origin_);      builder.append(", ");
       builder.append("region_orientation=");

@@ -1,15 +1,12 @@
 package us.ihmc.rdx.perception;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.ihmcPerception.heightMap.RemoteHeightMapUpdater;
-import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculationModule;
 import us.ihmc.perception.BytedecoTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -19,7 +16,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.live.RDXHeightMapVisualizer;
-import us.ihmc.rdx.ui.graphics.live.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.Activator;
@@ -81,10 +77,16 @@ public class RDXSteppableRegionCalculatorDemo
 //            baseUI.getImGuiPanelManager().addPanel(heightMapVisualizer.getPanel());
             globalVisualizersUI.addVisualizer(heightMapVisualizer);
 
+            steppableRegionsCalculatorModule = new RDXSteppableRegionsCalculatorUI();
+            steppableRegionsCalculatorModule.create();
+            steppableRegionsCalculatorModule.getEnabled().set(true);
+
             new IHMCROS2Callback<>(realtimeRos2Node, ROS2Tools.HEIGHT_MAP_OUTPUT, message ->
                                    {
                                       heightMapVisualizer.acceptHeightMapMessage(message);
                                       heightMapUI.acceptHeightMapMessage(message);
+
+                                      steppableRegionsCalculatorModule.acceptHeightMapMessage(message);
                                    });
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
@@ -118,11 +120,6 @@ public class RDXSteppableRegionCalculatorDemo
 
                   baseUI.getImGuiPanelManager().addPanel(ouster);
                   baseUI.getPrimaryScene().addRenderableProvider(ouster::getRenderables);
-
-                  steppableRegionsCalculatorModule = new RDXSteppableRegionsCalculatorUI();
-                  steppableRegionsCalculatorModule.create();
-                  steppableRegionsCalculatorModule.getEnabled().set(true);
-                  heightMap.attachHeightMapConsumer(steppableRegionsCalculatorModule::submitHeightMapMessage);
 
                   baseUI.getImGuiPanelManager().addPanel(steppableRegionsCalculatorModule.getPanel());
 

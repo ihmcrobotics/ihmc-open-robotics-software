@@ -8,8 +8,17 @@ int32 NO_REGION_ID=-1
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# Approximate last update time
+ihmc_common_msgs/InstantMessage last_updated
+
 # Field default value -1
 int32 region_id
+
+float64 foot_yaw
+
+float64 foot_length
+
+float64 foot_width
 
 geometry_msgs/Point region_origin
 

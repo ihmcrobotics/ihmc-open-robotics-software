@@ -19,9 +19,7 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.rdx.visualizers.RDXSteppableRegionGraphic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
@@ -31,7 +29,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 public class RDXSteppableRegionsCalculatorUI
 {
@@ -257,7 +254,7 @@ public class RDXSteppableRegionsCalculatorUI
 //         planarRegionsGraphic.getRenderables(renderables, pool);
    }
 
-   public void submitHeightMapMessage(HeightMapMessage heightMapMessage)
+   public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
    {
       heightMapMessageReference.set(heightMapMessage);
    }
