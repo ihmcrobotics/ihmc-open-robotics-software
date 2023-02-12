@@ -1,10 +1,8 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
 import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.PlanarRegionMessage;
 import perception_msgs.msg.dds.SteppableRegionMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -12,7 +10,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 

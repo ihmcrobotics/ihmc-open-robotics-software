@@ -4,6 +4,7 @@
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
 #include "perception_msgs/msg/./HeightMapMessage_.idl"
 module perception_msgs
 {
@@ -28,8 +29,15 @@ module perception_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        /**
+         * Approximate last update time
+         */
+        ihmc_common_msgs::msg::dds::InstantMessage last_updated;
         @defaultValue(value=-1)
         long region_id;
+        double foot_yaw;
+        double foot_length;
+        double foot_width;
         geometry_msgs::msg::dds::Point region_origin;
         geometry_msgs::msg::dds::Quaternion region_orientation;
         geometry_msgs::msg::dds::Vector3 region_normal;

@@ -6,22 +6,25 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.SteppableRegionMessage;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
+import us.ihmc.rdx.visualizers.RDXSteppableRegionGraphic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-public class RDXHeightMapVisualizer extends RDXVisualizer
+public class RDXSteppableRegionsVisualizer extends RDXVisualizer
 {
-   private final RDXGridMapGraphic gridMapGraphic = new RDXGridMapGraphic();
+   private final RDXSteppableRegionGraphic steppableRegionGraphic = new RDXSteppableRegionGraphic();
+
    private final ResettableExceptionHandlingExecutorService executorService;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImBoolean inPaintHeight = new ImBoolean(false);
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
 
-   public RDXHeightMapVisualizer(String title)
+   public RDXSteppableRegionsVisualizer(String title)
    {
       super(title);
 
@@ -38,17 +41,17 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       setActive(true);
    }
 
-   public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
+   public void acceptHeightMapMessage(SteppableRegionMessage heightMapMessage)
    {
       frequencyPlot.recordEvent();
       if (isActive())
       {
          executorService.clearQueueAndExecute(() ->
                                               {
-                                                 gridMapGraphic.setInPaintHeight(inPaintHeight.get());
-                                                 gridMapGraphic.setRenderGroundPlane(renderGroundPlane.get());
-                                                 gridMapGraphic.setRenderGroundCells(renderGroundCells.get());
-                                                 gridMapGraphic.generateMeshesAsync(heightMapMessage);
+//                                                 gridMapGraphic.setInPaintHeight(inPaintHeight.get());
+//                                                 gridMapGraphic.setRenderGroundPlane(renderGroundPlane.get());
+//                                                 gridMapGraphic.setRenderGroundCells(renderGroundCells.get());
+//                                                 gridMapGraphic.generateMeshesAsync(heightMapMessage);
                                               });
       }
    }
@@ -86,7 +89,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
       if (isActive())
       {
-         gridMapGraphic.update();
+//         gridMapGraphic.update();
       }
    }
 
@@ -95,12 +98,12 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    {
       if (isActive())
       {
-         gridMapGraphic.getRenderables(renderables, pool);
+//         gridMapGraphic.getRenderables(renderables, pool);
       }
    }
 
    public void destroy()
    {
-      gridMapGraphic.destroy();
+//      gridMapGraphic.destroy();
    }
 }
