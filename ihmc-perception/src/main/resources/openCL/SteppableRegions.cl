@@ -272,7 +272,10 @@ void kernel computeSteppabilityConnections(global float* params,
                 if (x_query < 0 || x_query >= cells_per_side || y_query < 0 || y_query >= cells_per_side)
                     continue;
 
-                boundaryConnectionsEncodedAsOnes = (1 << counter) | boundaryConnectionsEncodedAsOnes;
+                int2 query_key = (int2) (x_query, y_query);
+                if (read_imageui(steppable_map, query_key).x == VALID)
+                    boundaryConnectionsEncodedAsOnes = (1 << counter) | boundaryConnectionsEncodedAsOnes;
+
                 counter++;
             }
         }
