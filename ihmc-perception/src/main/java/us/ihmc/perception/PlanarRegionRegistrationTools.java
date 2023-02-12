@@ -9,8 +9,11 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
@@ -18,7 +21,9 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.RotationTools;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -156,7 +161,7 @@ public class PlanarRegionRegistrationTools
 
       for (int i = 0; i < maxIterations; i++)
       {
-         transform = PlanarRegionRegistrationTools.computeTransformFromRegions(previousRegions.getPlanarRegionsList(), currentRegions.getPlanarRegionsList(), matches);
+         transform = PlanarRegionRegistrationTools.computeQuaternionAveragingTransform(previousRegions.getPlanarRegionsList(), currentRegions.getPlanarRegionsList(), matches);
          currentRegions.getPlanarRegionsList().applyTransform(transform);
          transformToReturn.multiply(transform);
       }
@@ -199,6 +204,49 @@ public class PlanarRegionRegistrationTools
       transformToReturn.set(rotation, translation);
 
       return transformToReturn;
+   }
+
+   public static RigidBodyTransform computeQuaternionAveragingTransform(PlanarRegionsList previousRegions,
+                                                                         PlanarRegionsList currentRegions,
+                                                                         HashMap<Integer, Integer> matches)
+   {
+      RigidBodyTransform transformToReturn = new RigidBodyTransform();
+
+      ArrayList<QuaternionReadOnly> quaternions = estimateQuaternionEstimates(previousRegions, currentRegions, matches);
+      Quaternion averageQuaternion = RotationTools.computeAverageQuaternion(quaternions);
+
+
+      RotationMatrix rotation = new RotationMatrix(averageQuaternion);
+      Point3D translation = new Point3D();
+      transformToReturn.set(rotation, translation);
+
+      return transformToReturn;
+   }
+
+   public static ArrayList<QuaternionReadOnly> estimateQuaternionEstimates(PlanarRegionsList previousRegions,
+                                                                  PlanarRegionsList currentRegions,
+                                                                  HashMap<Integer, Integer> matches)
+   {
+      ArrayList<QuaternionReadOnly> quaternions = new ArrayList<>();
+
+      for(Integer i : matches.keySet())
+      {
+         PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(i));
+         PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(i);
+
+         UnitVector3DReadOnly currentNormal = currentRegion.getNormal();
+         UnitVector3DReadOnly previousNormal = previousRegion.getNormal();
+
+         Quaternion quaternion = new Quaternion();
+         Vector3D rotationAxis = new Vector3D();
+         rotationAxis.cross(currentNormal, previousNormal);
+         double rotationAngle = Math.acos(currentNormal.dot(previousNormal));
+
+         quaternion.setAxisAngle(rotationAxis.getX(), rotationAxis.getY(), rotationAxis.getZ(), rotationAngle);
+         quaternions.add(quaternion);
+      }
+
+      return quaternions;
    }
 
    public static void constructLeastSquaresProblem(PlanarRegionsList previousRegions,

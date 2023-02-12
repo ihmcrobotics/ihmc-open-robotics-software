@@ -520,8 +520,8 @@ public class RotationToolsTest
       Point3D averageEulerAngles = new Point3D();
       for(int i = 0; i<totalQuaternions; i++)
       {
-         averageEulerAngles.add(0.1 * i, i*i*0.01, i*i*i*0.001);
-         Quaternion quaternion = new Quaternion(0.1 * i, i*i*0.01, i*i*i*0.001);
+         averageEulerAngles.add(0.1 * i, i*0.02, i*0.03);
+         Quaternion quaternion = new Quaternion(0.1 * i, i*0.02, i*0.03);
          quaternions.add(quaternion);
       }
 
