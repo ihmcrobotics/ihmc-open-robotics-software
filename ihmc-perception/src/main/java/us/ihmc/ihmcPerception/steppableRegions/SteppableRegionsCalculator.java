@@ -226,7 +226,7 @@ public class SteppableRegionsCalculator
             // this cell is steppable. Also remember the image x-y is switched
             if (steppability.getInt(column, row) == 0)
             {
-               boolean isBorderCell = connections.getInt(column, row) == 255;
+               boolean isBorderCell = connections.getInt(column, row) != 255;
                double z = snappedHeight.getFloat(column, row);
                Vector3D normal = new Vector3D(snappedNormalX.getFloat(column, row),
                                               snappedNormalY.getFloat(column, row),
