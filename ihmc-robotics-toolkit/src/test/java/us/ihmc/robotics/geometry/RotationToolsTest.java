@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.jupiter.api.Disabled;
@@ -13,10 +14,13 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -504,6 +508,36 @@ public class RotationToolsTest
          assertEquals(pitchRate, actualYawPitchRollRates[1], EPSILON);
          assertEquals(rollRate, actualYawPitchRollRates[2], EPSILON);
       }
+   }
+
+   @Test
+   public void testQuaternionAveraging() throws Exception
+   {
+      ArrayList<QuaternionReadOnly> quaternions = new ArrayList<>();
+
+      int totalQuaternions = 10;
+
+      Point3D averageEulerAngles = new Point3D();
+      for(int i = 0; i<totalQuaternions; i++)
+      {
+         averageEulerAngles.add(0.1 * i, i*i*0.01, i*i*i*0.001);
+         Quaternion quaternion = new Quaternion(0.1 * i, i*i*0.01, i*i*i*0.001);
+         quaternions.add(quaternion);
+      }
+
+      averageEulerAngles.scale(1.0 / (float) totalQuaternions);
+
+      Point3D averageQuaternionEulerAngles = new Point3D();
+      Quaternion averageQuaternion = RotationTools.computeAverageQuaternion(quaternions);
+      averageQuaternion.getEuler(averageQuaternionEulerAngles);
+
+      LogTools.info("Average Euler angles: " + averageEulerAngles);
+      LogTools.info("Average quaternion: " + averageQuaternion);
+      LogTools.info("Average Quaternion Euler Angles: " + averageQuaternionEulerAngles);
+
+      assertEquals(averageEulerAngles.getX(), averageQuaternionEulerAngles.getZ(), 1e-1);
+      assertEquals(averageEulerAngles.getY(), averageQuaternionEulerAngles.getY(), 1e-1);
+      assertEquals(averageEulerAngles.getZ(), averageQuaternionEulerAngles.getX(), 1e-1);
    }
 
    /**
