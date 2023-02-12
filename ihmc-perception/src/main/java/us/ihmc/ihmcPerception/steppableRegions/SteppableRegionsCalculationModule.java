@@ -50,7 +50,7 @@ public class SteppableRegionsCalculationModule
    private final List<BytedecoImage> snapNormalZImages = new ArrayList<>();
    private final List<BytedecoImage> steppabilityConnections = new ArrayList<>();
 
-   private final List<List<SteppableRegion>> regions = new ArrayList<>();
+   private final List<SteppableRegionsList> regions = new ArrayList<>();
    private final List<SteppableRegionsCalculator.SteppableRegionsEnvironmentModel> regionEnvironments = new ArrayList<>();
 
    private int cellsPerSide;
@@ -88,7 +88,7 @@ public class SteppableRegionsCalculationModule
       }
    }
 
-   public List<List<SteppableRegion>> getSteppableRegions()
+   public List<SteppableRegionsList> getSteppableRegions()
    {
       return regions;
    }
@@ -181,6 +181,8 @@ public class SteppableRegionsCalculationModule
 
          timer.start();
 
+         double yawAngle = ((double) yawValue) / (yawDiscretizations - 1) * Math.PI;
+
          SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.mergeCellsIntoSteppableRegionEnvironment(
                steppabilityImages.get(yawValue),
                snapHeightImages.get(yawValue),
@@ -189,10 +191,13 @@ public class SteppableRegionsCalculationModule
                snapNormalZImages.get(yawValue),
                steppabilityConnections.get(yawValue));
          polygonizerParameters.setLengthThreshold(0.4 * heightMapData.getGridResolutionXY()); // this is critical to prevent it from filtering small regions
-         List<SteppableRegion> regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
-                                                                                           polygonizerParameters,
-                                                                                           environment,
-                                                                                           heightMapData);
+         SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
+                                                                                          polygonizerParameters,
+                                                                                          environment,
+                                                                                          heightMapData,
+                                                                                          yawAngle,
+                                                                                          footLength,
+                                                                                          footWidth);
 
          this.regionEnvironments.add(environment);
          this.regions.add(regions);

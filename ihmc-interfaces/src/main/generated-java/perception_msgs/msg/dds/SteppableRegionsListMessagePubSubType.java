@@ -48,6 +48,8 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
@@ -84,6 +86,9 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
 
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getLastUpdated(), current_alignment);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -137,6 +142,8 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
 
       cdr.write_type_6(data.getFootWidth());
 
+      cdr.write_type_6(data.getFootYaw());
+
       if(data.getRegionId().size() <= 3000)
       cdr.write_type_e(data.getRegionId());else
           throw new RuntimeException("region_id field exceeds the maximum length");
@@ -176,6 +183,8 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
       	
       data.setFootWidth(cdr.read_type_6());
       	
+      data.setFootYaw(cdr.read_type_6());
+      	
       cdr.read_type_e(data.getRegionId());	
       cdr.read_type_e(data.getRegionOrigin());	
       cdr.read_type_e(data.getRegionOrientation());	
@@ -194,6 +203,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
 
       ser.write_type_6("foot_length", data.getFootLength());
       ser.write_type_6("foot_width", data.getFootWidth());
+      ser.write_type_6("foot_yaw", data.getFootYaw());
       ser.write_type_e("region_id", data.getRegionId());
       ser.write_type_e("region_origin", data.getRegionOrigin());
       ser.write_type_e("region_orientation", data.getRegionOrientation());
@@ -211,6 +221,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
 
       data.setFootLength(ser.read_type_6("foot_length"));
       data.setFootWidth(ser.read_type_6("foot_width"));
+      data.setFootYaw(ser.read_type_6("foot_yaw"));
       ser.read_type_e("region_id", data.getRegionId());
       ser.read_type_e("region_origin", data.getRegionOrigin());
       ser.read_type_e("region_orientation", data.getRegionOrientation());

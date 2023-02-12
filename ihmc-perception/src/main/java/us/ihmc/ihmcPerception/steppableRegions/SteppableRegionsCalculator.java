@@ -80,26 +80,32 @@ public class SteppableRegionsCalculator
       return environmentModel;
    }
 
-   public static List<SteppableRegion> createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
+   public static SteppableRegionsList createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
                                                               PolygonizerParameters polygonizerParameters,
                                                               SteppableRegionsEnvironmentModel environmentModel,
-                                                              HeightMapData heightMapData)
+                                                              HeightMapData heightMapData,
+                                                             double footYaw,
+                                                             double footLength,
+                                                             double footWidth)
    {
       List<SteppableRegion> listToReturn = new ArrayList<>();
       environmentModel.getRegions()
                       .stream()
-                      .map(region -> createSteppableRegions(concaveHullFactoryParameters, polygonizerParameters, region, heightMapData))
+                      .map(region -> createSteppableRegions(concaveHullFactoryParameters, polygonizerParameters, region, heightMapData, footYaw, footLength, footWidth))
                       .forEach(listToReturn::addAll);
       for (int i = 0; i < listToReturn.size(); i++)
          listToReturn.get(i).setRegionId(i);
 
-      return listToReturn;
+      return new SteppableRegionsList(footYaw, footLength, footWidth, listToReturn);
    }
 
    public static List<SteppableRegion> createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
                                                               PolygonizerParameters polygonizerParameters,
                                                               SteppableRegionDataHolder regionDataHolder,
-                                                              HeightMapData heightMapData)
+                                                              HeightMapData heightMapData,
+                                                              double footYaw,
+                                                              double footLength,
+                                                              double footWidth)
    {
       if (regionDataHolder.getMemberCells().size() < 4)
          return new ArrayList<>();
@@ -135,7 +141,7 @@ public class SteppableRegionsCalculator
       if (polygonizerParameters.getCutNarrowPassage())
          concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
 
-      return createSteppableRegions(centroid, orientation, concaveHullCollection, heightMapData, regionDataHolder);
+      return createSteppableRegions(centroid, orientation, concaveHullCollection, heightMapData, regionDataHolder, footYaw, footLength, footWidth);
    }
 
    private static List<Point3D> getOuterRingPoints(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData, double inflationFraction)
@@ -207,20 +213,28 @@ public class SteppableRegionsCalculator
                                                               Orientation3DReadOnly orientation,
                                                               ConcaveHullCollection concaveHullCollection,
                                                               HeightMapData heightMapData,
-                                                              SteppableRegionDataHolder regionDataHolder)
+                                                              SteppableRegionDataHolder regionDataHolder,
+                                                              double footYaw,
+                                                              double footLength,
+                                                              double footWidth)
    {
       List<SteppableRegion> regions = concaveHullCollection.getConcaveHulls()
                                                            .parallelStream()
-                                                           .map(hull -> createSteppableRegion(origin, orientation, hull))
+                                                           .map(hull -> createSteppableRegion(origin, orientation, hull, footYaw, footLength, footWidth))
                                                            .toList();
       HeightMapData regionHeightMap = createHeightMapForRegion(regionDataHolder, heightMapData);
       regions.forEach(region -> region.setLocalHeightMap(regionHeightMap));
       return regions;
    }
 
-   public static SteppableRegion createSteppableRegion(Point3DReadOnly origin, Orientation3DReadOnly orientation, ConcaveHull concaveHull)
+   public static SteppableRegion createSteppableRegion(Point3DReadOnly origin,
+                                                       Orientation3DReadOnly orientation,
+                                                       ConcaveHull concaveHull,
+                                                       double footYaw,
+                                                       double footLength,
+                                                       double footWidth)
    {
-      return new SteppableRegion(origin, orientation, concaveHull.getConcaveHullVertices());
+      return new SteppableRegion(origin, orientation, concaveHull.getConcaveHullVertices(), footYaw, footLength, footWidth);
    }
 
    public static HeightMapData createHeightMapForRegion(SteppableRegionDataHolder regionDataHolder,

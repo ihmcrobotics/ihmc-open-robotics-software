@@ -30,6 +30,10 @@ public class SteppableRegionsListMessage extends Packet<SteppableRegionsListMess
             */
    public double foot_width_;
    /**
+            * Foot yaw for the corresponding regions
+            */
+   public double foot_yaw_;
+   /**
             * ID number referring to each steppable region, it should be unique.
             */
    public us.ihmc.idl.IDLSequence.Integer  region_id_;
@@ -87,6 +91,8 @@ public class SteppableRegionsListMessage extends Packet<SteppableRegionsListMess
       foot_length_ = other.foot_length_;
 
       foot_width_ = other.foot_width_;
+
+      foot_yaw_ = other.foot_yaw_;
 
       region_id_.set(other.region_id_);
       region_origin_.set(other.region_origin_);
@@ -149,6 +155,21 @@ public class SteppableRegionsListMessage extends Packet<SteppableRegionsListMess
    public double getFootWidth()
    {
       return foot_width_;
+   }
+
+   /**
+            * Foot yaw for the corresponding regions
+            */
+   public void setFootYaw(double foot_yaw)
+   {
+      foot_yaw_ = foot_yaw;
+   }
+   /**
+            * Foot yaw for the corresponding regions
+            */
+   public double getFootYaw()
+   {
+      return foot_yaw_;
    }
 
 
@@ -239,6 +260,8 @@ public class SteppableRegionsListMessage extends Packet<SteppableRegionsListMess
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foot_width_, other.foot_width_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foot_yaw_, other.foot_yaw_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.region_id_, other.region_id_, epsilon)) return false;
 
       if (this.region_origin_.size() != other.region_origin_.size()) { return false; }
@@ -298,6 +321,8 @@ public class SteppableRegionsListMessage extends Packet<SteppableRegionsListMess
 
       if(this.foot_width_ != otherMyClass.foot_width_) return false;
 
+      if(this.foot_yaw_ != otherMyClass.foot_yaw_) return false;
+
       if (!this.region_id_.equals(otherMyClass.region_id_)) return false;
       if (!this.region_origin_.equals(otherMyClass.region_origin_)) return false;
       if (!this.region_orientation_.equals(otherMyClass.region_orientation_)) return false;
@@ -323,6 +348,8 @@ public class SteppableRegionsListMessage extends Packet<SteppableRegionsListMess
       builder.append(this.foot_length_);      builder.append(", ");
       builder.append("foot_width=");
       builder.append(this.foot_width_);      builder.append(", ");
+      builder.append("foot_yaw=");
+      builder.append(this.foot_yaw_);      builder.append(", ");
       builder.append("region_id=");
       builder.append(this.region_id_);      builder.append(", ");
       builder.append("region_origin=");

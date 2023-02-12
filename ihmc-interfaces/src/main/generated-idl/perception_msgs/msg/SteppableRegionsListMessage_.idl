@@ -38,6 +38,10 @@ module perception_msgs
          */
         double foot_width;
         /**
+         * Foot yaw for the corresponding regions
+         */
+        double foot_yaw;
+        /**
          * ID number referring to each steppable region, it should be unique.
          */
         sequence<long, 3000> region_id;
