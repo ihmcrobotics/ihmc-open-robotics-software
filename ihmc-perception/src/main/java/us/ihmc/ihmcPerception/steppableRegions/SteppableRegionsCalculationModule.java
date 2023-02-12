@@ -35,8 +35,8 @@ public class SteppableRegionsCalculationModule
    private _cl_kernel computeSteppabilityKernel;
    private _cl_kernel computeSteppabilityConnectionsKernel;
 
-   ConcaveHullFactoryParameters concaveHullParameters = new ConcaveHullFactoryParameters();
-   PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+   private final ConcaveHullFactoryParameters concaveHullParameters = new ConcaveHullFactoryParameters();
+   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
 
    private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
    private final OpenCLFloatParameters steppableParameters = new OpenCLFloatParameters();
@@ -62,6 +62,8 @@ public class SteppableRegionsCalculationModule
       boolean doneLoading = false;
 
       openCLManager = new OpenCLManager();
+      concaveHullParameters.setTriangulationTolerance(5e-3);
+      concaveHullParameters.setMaxNumberOfIterations(1000);
 
       for (int i = 0; i < yawDiscretizations; i++)
       {
