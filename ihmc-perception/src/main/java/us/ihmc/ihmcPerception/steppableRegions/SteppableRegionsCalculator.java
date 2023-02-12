@@ -404,8 +404,8 @@ public class SteppableRegionsCalculator
    {
       int planarRegionIslandIndex = 0;
 
-      private final Stack<SteppableCell> unexpandedInteriorCellsInTheEnvironment = new Stack<>();
-      private final Stack<SteppableCell> unexpandedBorderCellsInTheEnvironment = new Stack<>();
+      private final HashSet<SteppableCell> unexpandedInteriorCellsInTheEnvironment = new HashSet<>();
+      private final HashSet<SteppableCell> unexpandedBorderCellsInTheEnvironment = new HashSet<>();
       private final SteppableCell[][] steppableCellsGrid;
 
       private final List<SteppableRegionDataHolder> steppableRegions = new ArrayList<>();
@@ -449,14 +449,14 @@ public class SteppableRegionsCalculator
 
       public SteppableCell getNextUnexpandedInteriorCell()
       {
-         SteppableCell cell = unexpandedInteriorCellsInTheEnvironment.remove(0);
+         SteppableCell cell = unexpandedInteriorCellsInTheEnvironment.stream().findFirst().get();
          cell.setCellHasBeenExpanded(true);
          return cell;
       }
 
       public SteppableCell getNextUnexpandedBorderCell()
       {
-         SteppableCell cell = unexpandedBorderCellsInTheEnvironment.remove(0);
+         SteppableCell cell = unexpandedBorderCellsInTheEnvironment.stream().findFirst().get();
          cell.setCellHasBeenExpanded(true);
          return cell;
       }
