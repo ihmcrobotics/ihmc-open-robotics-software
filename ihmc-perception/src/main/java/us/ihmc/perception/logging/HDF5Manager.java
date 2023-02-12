@@ -210,9 +210,9 @@ public class HDF5Manager
    {
       for (Group group : groups.values())
       {
-         group.close();
+         group._close();
       }
-      file.close();
+      file._close();
    }
 
    public H5File getFile()

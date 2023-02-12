@@ -101,9 +101,9 @@ public class RDXHDF5ImageBrowser
 
    private void closeHDF5File()
    {
-      imageGroup.close();
+      imageGroup._close();
       imageGroup = null;
-      h5File.close();
+      h5File._close();
       h5File = null;
       selectedFileName = "";
       openFile = "";
