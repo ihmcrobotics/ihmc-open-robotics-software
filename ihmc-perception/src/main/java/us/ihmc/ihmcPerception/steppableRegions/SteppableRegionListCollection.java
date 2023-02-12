@@ -5,24 +5,24 @@ import java.util.List;
 
 public class SteppableRegionListCollection
 {
-   private final List<SteppableRegionList> steppableRegions;
+   private final List<SteppableRegionsList> steppableRegions;
 
    public SteppableRegionListCollection()
    {
       steppableRegions = new ArrayList<>();
    }
 
-   public SteppableRegionListCollection(SteppableRegionList... steppableRegions)
+   public SteppableRegionListCollection(SteppableRegionsList... steppableRegions)
    {
       // TODO check the different yaws
       this.steppableRegions = new ArrayList<>();
-      for (SteppableRegionList steppableRegion : steppableRegions)
+      for (SteppableRegionsList steppableRegion : steppableRegions)
       {
          this.steppableRegions.add(steppableRegion);
       }
    }
 
-   public SteppableRegionListCollection(List<SteppableRegionList> steppableRegions)
+   public SteppableRegionListCollection(List<SteppableRegionsList> steppableRegions)
    {
       // TODO check the different yaws
       this.steppableRegions = new ArrayList<>(steppableRegions);
@@ -33,7 +33,7 @@ public class SteppableRegionListCollection
       this(other.getSteppableRegions());
    }
 
-   public List<SteppableRegionList> getSteppableRegions()
+   public List<SteppableRegionsList> getSteppableRegions()
    {
       return steppableRegions;
    }

@@ -22,6 +22,10 @@ public class SteppableRegion
 {
    private int regionId = -1;
 
+   private final double footYaw;
+   private final double footLength;
+   private final double footWidth;
+
    private final ConcavePolygon2D concaveHullInRegionFrame = new ConcavePolygon2D();
    private final ConvexPolygon2D convexHullInRegionFrame = new ConvexPolygon2D();
 
@@ -36,8 +40,15 @@ public class SteppableRegion
 
    public SteppableRegion(Tuple3DReadOnly origin,
                           Orientation3DReadOnly orientation,
-                          List<? extends Point2DReadOnly> concaveHullVertices)
+                          List<? extends Point2DReadOnly> concaveHullVertices,
+                          double footYaw,
+                          double footLength,
+                          double footWidth)
    {
+      this.footYaw = footYaw;
+      this.footLength = footLength;
+      this.footWidth = footWidth;
+
       transformFromWorldToRegion.set(orientation, origin);
       transformFromRegionToWorld.setAndInvert(transformFromWorldToRegion);
 
@@ -97,6 +108,21 @@ public class SteppableRegion
    public int getRegionId()
    {
       return regionId;
+   }
+
+   public double getFootYaw()
+   {
+      return footYaw;
+   }
+
+   public double getFootLength()
+   {
+      return footLength;
+   }
+
+   public double getFootWidth()
+   {
+      return footWidth;
    }
 }
 

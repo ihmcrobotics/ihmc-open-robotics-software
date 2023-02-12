@@ -12,6 +12,8 @@ ihmc_common_msgs/InstantMessage last_updated
 float64 foot_length
 # Foot width for the corresponding regions
 float64 foot_width
+# Foot yaw for the corresponding regions
+float64 foot_yaw
 
 # ID number referring to each steppable region, it should be unique.
 int32[<=3000] region_id
