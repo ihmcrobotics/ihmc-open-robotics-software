@@ -120,8 +120,8 @@ public class RDXSteppableRegionsCalculatorUI
       steppableRegionsCalculationModule.setSteppableRegionsCalculatorParameters(parameters);
       steppableRegionsCalculationModule.compute(heightMapData);
       drawRegions();
-      steppableRegionGraphic.generateMeshesAsync(steppableRegionsCalculationModule.getSteppableRegions().get(0));
-      LogTools.info("Found " + steppableRegionsCalculationModule.getSteppableRegions().get(0).size() + " regions");
+      steppableRegionGraphic.generateMeshesAsync(steppableRegionsCalculationModule.getSteppableRegions().get(0).getSteppableRegionsAsList());
+      LogTools.info("Found " + steppableRegionsCalculationModule.getSteppableRegions().get(0).getSteppableRegionsAsList().size() + " regions");
 
       wholeAlgorithmDurationStopwatch.suspend();
       wholeAlgorithmDuration.set(wholeAlgorithmDurationStopwatch.lapElapsed());
