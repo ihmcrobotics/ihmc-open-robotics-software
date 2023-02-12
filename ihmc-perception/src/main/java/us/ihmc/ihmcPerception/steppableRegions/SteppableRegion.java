@@ -8,6 +8,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.geometry.PlanarRegionNormal;
+import us.ihmc.robotics.geometry.PlanarRegionOrigin;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -22,16 +26,20 @@ public class SteppableRegion
    private final ConvexPolygon2D convexHullInRegionFrame = new ConvexPolygon2D();
 
    private final RigidBodyTransform transformFromWorldToRegion = new RigidBodyTransform();
+   private final RigidBodyTransform transformFromRegionToWorld = new RigidBodyTransform();
+   private final PlanarRegionOrigin origin = new PlanarRegionOrigin(transformFromRegionToWorld);
+   private final PlanarRegionNormal normal = new PlanarRegionNormal(transformFromRegionToWorld);
 
    private final Point2D centroidInWorld = new Point2D();
 
    private HeightMapData localHeightMap;
 
-   public SteppableRegion(Point3DReadOnly origin,
+   public SteppableRegion(Tuple3DReadOnly origin,
                           Orientation3DReadOnly orientation,
                           List<? extends Point2DReadOnly> concaveHullVertices)
    {
       transformFromWorldToRegion.set(orientation, origin);
+      transformFromRegionToWorld.setAndInvert(transformFromWorldToRegion);
 
       concaveHullInRegionFrame.addVertices(Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices));
       convexHullInRegionFrame.addVertices(Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices));
@@ -64,6 +72,21 @@ public class SteppableRegion
    public HeightMapData getLocalHeightMap()
    {
       return localHeightMap;
+   }
+
+   public Point3DReadOnly getRegionOrigin()
+   {
+      return origin;
+   }
+
+   public Vector3DReadOnly getRegionNormal()
+   {
+      return normal;
+   }
+
+   public Orientation3DReadOnly getRegionOrientation()
+   {
+      return transformFromWorldToRegion.getRotation();
    }
 
    public void setRegionId(int regionId)

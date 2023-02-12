@@ -11,9 +11,9 @@ int32 NO_REGION_ID = -1
 int32 region_id -1
 geometry_msgs/Point region_origin
 geometry_msgs/Quaternion region_orientation
+geometry_msgs/Vector3 region_normal
 
 geometry_msgs/Point[<=1000] vertex_buffer
 int32 concave_hull_size
-int32 convex_hull_size
 
 HeightMapMessage local_height_map

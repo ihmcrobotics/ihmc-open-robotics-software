@@ -48,11 +48,11 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -80,13 +80,12 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRegionOrientation(), current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRegionNormal(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getVertexBuffer().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getVertexBuffer().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -105,13 +104,12 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRegionOrigin(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRegionOrientation(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
       if(data.getVertexBuffer().size() <= 1000)
       cdr.write_type_e(data.getVertexBuffer());else
           throw new RuntimeException("vertex_buffer field exceeds the maximum length");
 
       cdr.write_type_2(data.getConcaveHullSize());
-
-      cdr.write_type_2(data.getConvexHullSize());
 
       perception_msgs.msg.dds.HeightMapMessagePubSubType.write(data.getLocalHeightMap(), cdr);
    }
@@ -124,10 +122,9 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getRegionOrigin(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRegionOrientation(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRegionNormal(), cdr);	
       cdr.read_type_e(data.getVertexBuffer());	
       data.setConcaveHullSize(cdr.read_type_2());
-      	
-      data.setConvexHullSize(cdr.read_type_2());
       	
       perception_msgs.msg.dds.HeightMapMessagePubSubType.read(data.getLocalHeightMap(), cdr);	
 
@@ -142,9 +139,10 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.write_type_a("region_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRegionOrientation());
 
+      ser.write_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
+
       ser.write_type_e("vertex_buffer", data.getVertexBuffer());
       ser.write_type_2("concave_hull_size", data.getConcaveHullSize());
-      ser.write_type_2("convex_hull_size", data.getConvexHullSize());
       ser.write_type_a("local_height_map", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getLocalHeightMap());
 
    }
@@ -158,9 +156,10 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.read_type_a("region_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRegionOrientation());
 
+      ser.read_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
+
       ser.read_type_e("vertex_buffer", data.getVertexBuffer());
       data.setConcaveHullSize(ser.read_type_2("concave_hull_size"));
-      data.setConvexHullSize(ser.read_type_2("convex_hull_size"));
       ser.read_type_a("local_height_map", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getLocalHeightMap());
 
    }
