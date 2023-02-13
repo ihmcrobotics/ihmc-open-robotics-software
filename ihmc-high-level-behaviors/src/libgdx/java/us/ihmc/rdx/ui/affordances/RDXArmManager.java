@@ -48,6 +48,7 @@ public class RDXArmManager
    private final HandWrenchCalculator handWrenchCalculator;
    private ImBoolean printWrench = new ImBoolean(false);
    private ImWrenchPlot wrenchPlot;
+   private ImArmTorquePlot armTorquePlot;
 
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -83,6 +84,7 @@ public class RDXArmManager
    {
       create();
       wrenchPlot = new ImWrenchPlot(baseUI);
+      armTorquePlot = new ImArmTorquePlot(baseUI, "arm joints torque", handWrenchCalculator.getArmJoints());
    }
 
    public void create()
@@ -105,6 +107,7 @@ public class RDXArmManager
       {
          armManagers.get(side).update(interactableHands.get(side), desiredRobot);
          wrenchPlot.update(side, handWrenchCalculator.getFilteredWrench().get(side));
+         armTorquePlot.update(side, handWrenchCalculator.getJointTorques().get(side));
 
          // wrench expressed in wrist pitch body fixed-frame
          interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getFilteredWrench().get(side));
