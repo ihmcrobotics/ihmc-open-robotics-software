@@ -10,6 +10,8 @@ import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.ihmcPerception.steppableRegions.SteppableRegion;
+import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsList;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculationModule;
@@ -120,8 +122,9 @@ public class RDXSteppableRegionsCalculatorUI
       steppableRegionsCalculationModule.setSteppableRegionsCalculatorParameters(parameters);
       steppableRegionsCalculationModule.compute(heightMapData);
       drawRegions();
-      steppableRegionGraphic.generateMeshesAsync(steppableRegionsCalculationModule.getSteppableRegions().get(0).getSteppableRegionsAsList());
-      LogTools.info("Found " + steppableRegionsCalculationModule.getSteppableRegions().get(0).getSteppableRegionsAsList().size() + " regions");
+      List<SteppableRegion> regionsToView = steppableRegionsCalculationModule.getSteppableRegionsListCollection().getSteppableRegions(0).getSteppableRegionsAsList();
+      steppableRegionGraphic.generateMeshesAsync(regionsToView);
+      LogTools.info("Found " + regionsToView.size() + " regions");
 
       wholeAlgorithmDurationStopwatch.suspend();
       wholeAlgorithmDuration.set(wholeAlgorithmDurationStopwatch.lapElapsed());

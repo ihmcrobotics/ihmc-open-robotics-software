@@ -1,0 +1,8 @@
+
+perception_msgs/SteppableRegionDebugImageMessage height_map_image
+
+perception_msgs/SteppableRegionDebugImageMessage[] steppability_images
+
+perception_msgs/SteppableRegionDebugImageMessage[] region_images
+
+

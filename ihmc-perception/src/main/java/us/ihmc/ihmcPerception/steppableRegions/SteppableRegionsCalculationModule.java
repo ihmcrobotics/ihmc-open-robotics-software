@@ -1,14 +1,23 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
+import javafx.scene.paint.Color;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
+import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.OpenCVImageFormat;
+import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
@@ -18,6 +27,8 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class SteppableRegionsCalculationModule
 {
@@ -50,10 +61,15 @@ public class SteppableRegionsCalculationModule
    private final List<BytedecoImage> snapNormalZImages = new ArrayList<>();
    private final List<BytedecoImage> steppabilityConnections = new ArrayList<>();
 
-   private final List<SteppableRegionsList> regions = new ArrayList<>();
+   private final SteppableRegionsListCollection regionCollection = new SteppableRegionsListCollection(yawDiscretizations);
    private final List<SteppableRegionsCalculator.SteppableRegionsEnvironmentModel> regionEnvironments = new ArrayList<>();
 
    private int cellsPerSide;
+
+   private final IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
+
+   private final List<Consumer<SteppableRegionsListCollection>> steppableRegionListOutputConsumers = new ArrayList<>();
+   private final List<Consumer<SteppableRegionDebugImagesMessage>> steppableRegionDebugConsumers = new ArrayList<>();
 
    public SteppableRegionsCalculationModule()
    {
@@ -88,9 +104,14 @@ public class SteppableRegionsCalculationModule
       }
    }
 
-   public List<SteppableRegionsList> getSteppableRegions()
+   public SteppableRegionsListCollection getSteppableRegionsListCollection()
    {
-      return regions;
+      return regionCollection;
+   }
+
+   public void addSteppableRegionListCollectionOutputConsumer(Consumer<SteppableRegionsListCollection> outputConsumer)
+   {
+      this.steppableRegionListOutputConsumers.add(outputConsumer);
    }
 
    public void setSteppableRegionsCalculatorParameters(SteppableRegionCalculatorParametersReadOnly parameters)
@@ -146,8 +167,9 @@ public class SteppableRegionsCalculationModule
       populateHeightMapImage(heightMapData);
 
       Stopwatch timer = new Stopwatch();
+      timer.start();
 
-      regions.clear();
+      regionCollection.clear();
       regionEnvironments.clear();
       for (int yawValue = 0; yawValue < yawDiscretizations; yawValue++)
       {
@@ -179,8 +201,6 @@ public class SteppableRegionsCalculationModule
 
          openCLManager.finish();
 
-         timer.start();
-
          double yawAngle = ((double) yawValue) / (yawDiscretizations - 1) * Math.PI;
 
          SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.mergeCellsIntoSteppableRegionEnvironment(
@@ -200,11 +220,23 @@ public class SteppableRegionsCalculationModule
                                                                                           footWidth);
 
          this.regionEnvironments.add(environment);
-         this.regions.add(regions);
-
-         LogTools.info("time = " + timer.lapElapsed());
-         timer.lap();
+         this.regionCollection.setSteppableRegions(yawValue, regions);
       }
+
+      LogTools.info("time = " + timer.lapElapsed());
+      timer.suspend();
+
+      SteppableRegionDebugImagesMessage debugImagesMessage = new SteppableRegionDebugImagesMessage();
+      generateHeightMapDebugImage(debugImagesMessage.getHeightMapImage());
+      for (int i = 0; i < yawDiscretizations; i++)
+      {
+         generateSteppableRegionDebugImage(i, debugImagesMessage.getRegionImages().add());
+         generateSteppabilityDebugImage(i, debugImagesMessage.getSteppabilityImages().add());
+      }
+
+
+      for (Consumer<SteppableRegionsListCollection> outputConsumer : steppableRegionListOutputConsumers)
+         outputConsumer.accept(regionCollection);
    }
 
    public void destroy()
@@ -262,6 +294,113 @@ public class SteppableRegionsCalculationModule
          }
       }
       heightMapImage.writeOpenCLImage(openCLManager);
+   }
+
+   private void generateSteppabilityDebugImage(int yawIndex, SteppableRegionDebugImageMessage messageToPack)
+   {
+      Mat uncompressedRegion = new Mat(cellsPerSide, cellsPerSide, opencv_core.CV_32FC1);
+
+      for (int x = 0; x < cellsPerSide; x++)
+      {
+         for (int y = 0; y < cellsPerSide; y++)
+         {
+            Color color;
+            int status = steppabilityImages.get(yawIndex).getInt(x, y);
+            if (status == 0)
+               color = Color.WHITE; // valid
+            else if (status == 1)
+               color = Color.BLACK; // cliff top
+            else if (status == 3)
+               color = Color.BLUE; // bad snap
+            else
+               color = Color.GRAY; // cliff bottom
+
+            BytePointer pixel = uncompressedRegion.ptr(x, y);
+            pixel.put(0, (byte) (color.getRed() * 255));
+            pixel.put(1, (byte) (color.getGreen() * 255));
+            pixel.put(2, (byte) (color.getBlue() * 255));
+         }
+      }
+
+      BytePointer compressedBuffer = new BytePointer(NativeMemoryTools.allocate(2 * cellsPerSide * cellsPerSide));
+
+      opencv_imgcodecs.imencode(".png", uncompressedRegion, compressedBuffer, compressionParameters);
+
+      messageToPack.getData().resetQuick();
+      for (int i = 0; i < compressedBuffer.limit(); i++)
+      {
+         messageToPack.getData().add(compressedBuffer.get(i));
+      }
+      messageToPack.setFormat(OpenCVImageFormat.PNG.ordinal());
+      messageToPack.setImageHeight(cellsPerSide);
+      messageToPack.setImageWidth(cellsPerSide);
+   }
+
+   private void generateSteppableRegionDebugImage(int yawIndex, SteppableRegionDebugImageMessage messageToPack)
+   {
+      SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environmentModel = regionEnvironments.get(yawIndex);
+      int size = cellsPerSide;
+      Mat uncompressedRegion = new Mat(cellsPerSide, cellsPerSide, opencv_core.CV_32FC1);
+      // fill with black
+      for (int x = 0; x < cellsPerSide; x++)
+      {
+         for (int y = 0; y < cellsPerSide; y++)
+         {
+            BytePointer pixel = uncompressedRegion.ptr(x, y);
+            pixel.put(0, (byte) 0);
+            pixel.put(1, (byte) 0);
+            pixel.put(2, (byte) 0);
+         }
+      }
+      for (SteppableRegionsCalculator.SteppableRegionDataHolder region : environmentModel.getRegions())
+      {
+         for (SteppableRegionsCalculator.SteppableCell cell : region.getCells())
+         {
+            int x = cell.getX();
+            int y = cell.getY();
+
+            int row = size - x - 1;
+            int column = size - y - 1;
+
+            int r = (region.regionNumber + 1) * 312 % 255;
+            int g = (region.regionNumber + 1) * 123 % 255;
+            int b = (region.regionNumber + 1) * 231 % 255;
+            BytePointer pixel = uncompressedRegion.ptr(row, column);
+            pixel.put(0, (byte) r);
+            pixel.put(1, (byte) g);
+            pixel.put(2, (byte) b);
+         }
+      }
+
+
+      BytePointer compressedBuffer = new BytePointer(NativeMemoryTools.allocate(2 * cellsPerSide * cellsPerSide));
+
+      opencv_imgcodecs.imencode(".png", uncompressedRegion, compressedBuffer, compressionParameters);
+
+      messageToPack.getData().resetQuick();
+      for (int i = 0; i < compressedBuffer.limit(); i++)
+      {
+         messageToPack.getData().add(compressedBuffer.get(i));
+      }
+      messageToPack.setFormat(OpenCVImageFormat.PNG.ordinal());
+      messageToPack.setImageHeight(cellsPerSide);
+      messageToPack.setImageWidth(cellsPerSide);
+   }
+
+   private void generateHeightMapDebugImage(SteppableRegionDebugImageMessage messageToPack)
+   {
+      BytePointer compressedBuffer = new BytePointer(NativeMemoryTools.allocate(2 * cellsPerSide * cellsPerSide));
+
+      opencv_imgcodecs.imencode(".png", heightMapImage.getBytedecoOpenCVMat(), compressedBuffer, compressionParameters);
+
+      messageToPack.getData().resetQuick();
+      for (int i = 0; i < compressedBuffer.limit(); i++)
+      {
+         messageToPack.getData().add(compressedBuffer.get(i));
+      }
+      messageToPack.setFormat(OpenCVImageFormat.PNG.ordinal());
+      messageToPack.setImageHeight(cellsPerSide);
+      messageToPack.setImageWidth(cellsPerSide);
    }
 
    public static void main(String[] args)
