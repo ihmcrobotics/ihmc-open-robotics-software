@@ -105,7 +105,7 @@ public class HDF5Tools
       dataset.read(intPointer, new DataType(PredType.NATIVE_INT()));
       intPointer.get(intArray, 0, intArray.length);
 
-      dataset.close();
+      dataset._close();
 
       return intArray;
    }
@@ -148,8 +148,8 @@ public class HDF5Tools
 
       dataset.write(new IntPointer(data), new DataType(PredType.NATIVE_INT()));
 
-      dataSpace.close();
-      dataset.close();
+      dataSpace._close();
+      dataset._close();
    }
 
    /**
@@ -190,7 +190,7 @@ public class HDF5Tools
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_LONG()), new DataSpace(2, dimensions));
       long[] array = data.toArray();
       dataset.write(new LongPointer(array), new DataType(PredType.NATIVE_LONG()));
-      dataset.close();
+      dataset._close();
    }
 
    /**
@@ -209,7 +209,7 @@ public class HDF5Tools
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dimensions));
       float[] dataObject = data.toArray();
       dataset.write(new FloatPointer(dataObject), new DataType(PredType.NATIVE_FLOAT()));
-      dataset.close();
+      dataset._close();
    }
 
    /**
@@ -231,7 +231,7 @@ public class HDF5Tools
       dataset.read(floatPointer, new DataType(PredType.NATIVE_FLOAT()));
       floatPointer.get(floatArray, 0, floatArray.length);
 
-      dataset.close();
+      dataset._close();
 
       return floatArray;
    }
@@ -250,7 +250,7 @@ public class HDF5Tools
       dataset.read(floatPointer, new DataType(PredType.NATIVE_FLOAT()));
       floatPointer.get(arrayToPack, 0, arrayToPack.length);
 
-      dataset.close();
+      dataset._close();
    }
 
    /**
@@ -271,7 +271,7 @@ public class HDF5Tools
             String partialTopicName = "/" + objnameByIdx.getString();
             Group group = file.openGroup(objnameByIdx);
             recursivelyFindTopicNames(group, names, partialTopicName);
-            group.close();
+            group._close();
          }
       }
 
@@ -291,7 +291,7 @@ public class HDF5Tools
             String topicNamePart = objnameByIdx.getString();
             Group groupHandle = group.openGroup(objnameByIdx);
             numberOfGroups += recursivelyFindTopicNames(groupHandle, names, topicNameInProgress + "/" + topicNamePart);
-            groupHandle.close();
+            groupHandle._close();
          }
 
          // TODO: Handle the case where the type of the object is a dataset.
@@ -321,12 +321,12 @@ public class HDF5Tools
       {
          DataSet dataset = group.openDataSet(String.valueOf(0));
          dataset.write(new DoublePointer(data), new DataType(PredType.NATIVE_DOUBLE()));
-         dataset.close();
+         dataset._close();
       }
       else
       {
          DataSet dataset = group.createDataSet(String.valueOf(0), new DataType(PredType.NATIVE_DOUBLE()), new DataSpace(2, dimensions));
-         dataset.close();
+         dataset._close();
       }
    }
 
@@ -342,8 +342,8 @@ public class HDF5Tools
 
       dataset.write(new BytePointer(data), new DataType(PredType.NATIVE_UCHAR()));
 
-      dataSpace.close();
-      dataset.close();
+      dataSpace._close();
+      dataset._close();
    }
 
    public static void storeBytesFromPointer(Group group, long index, BytePointer bytes, long size)
@@ -356,8 +356,8 @@ public class HDF5Tools
 
       dataset.write((Pointer) bytes, new DataType(PredType.NATIVE_B8()));
 
-      ds.close();
-      dataset.close();
+      ds._close();
+      dataset._close();
    }
 
    /* TODO: Does not work yet. Needs to be fixed. */

@@ -12,7 +12,7 @@ import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.tools.thread.Activator;
@@ -40,7 +40,7 @@ public class RDXBlackflyReader
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
    private boolean imageWasRead = false;
    private long numberOfImagesRead = 0;
-   private Consumer<RDXOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor = null;
+   private Consumer<RDXImagePanelTexture> monitorPanelUIThreadPreprocessor = null;
 
    public RDXBlackflyReader(Activator nativesLoadedActivator, String serialNumber)
    {
@@ -67,7 +67,7 @@ public class RDXBlackflyReader
     * on the UI update thread. It's not ideal to do too much processing here,
     * just quick and easy stuff.
     */
-   public void setMonitorPanelUIThreadPreprocessor(Consumer<RDXOpenCVSwapVideoPanelData> monitorPanelUIThreadPreprocessor)
+   public void setMonitorPanelUIThreadPreprocessor(Consumer<RDXImagePanelTexture> monitorPanelUIThreadPreprocessor)
    {
       this.monitorPanelUIThreadPreprocessor = monitorPanelUIThreadPreprocessor;
    }
@@ -86,7 +86,7 @@ public class RDXBlackflyReader
       readFrequencyPlot.ping();
    }
 
-   private void monitorUpdateOnAsynchronousThread(RDXOpenCVSwapVideoPanelData data)
+   private void monitorUpdateOnAsynchronousThread(RDXImagePanelTexture texture)
    {
       imageWasRead = blackfly.getNextImage(spinImage);
 
@@ -104,7 +104,7 @@ public class RDXBlackflyReader
          Spinnaker_C.spinImageGetData(spinImage, spinImageDataPointer);
          blackflySourceMat.data(spinImageDataPointer);
 
-         opencv_imgproc.cvtColor(blackflySourceMat, data.getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA, 0);
+         opencv_imgproc.cvtColor(blackflySourceMat, texture.getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA, 0);
 
          Spinnaker_C.spinImageRelease(spinImage);
       }
@@ -119,17 +119,17 @@ public class RDXBlackflyReader
       swapCVPanel.updateOnUIThread();
    }
 
-   private void monitorPanelUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
+   private void monitorPanelUpdateOnUIThread(RDXImagePanelTexture texture)
    {
       if (imageWasRead)
       {
          imageWasRead = false;
          ++numberOfImagesRead;
 
-         if (monitorPanelUIThreadPreprocessor != null && data.getRGBA8Image() != null)
-            monitorPanelUIThreadPreprocessor.accept(data);
+         if (monitorPanelUIThreadPreprocessor != null && texture.getRGBA8Image() != null)
+            monitorPanelUIThreadPreprocessor.accept(texture);
 
-         data.updateOnUIThread(swapCVPanel.getVideoPanel());
+         texture.updateOnUIThread(swapCVPanel.getImagePanel());
       }
    }
 
