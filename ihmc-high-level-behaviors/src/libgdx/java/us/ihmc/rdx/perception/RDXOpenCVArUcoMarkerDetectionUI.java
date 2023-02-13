@@ -17,6 +17,7 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
 import us.ihmc.perception.BytedecoImage;
@@ -31,7 +32,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
    private ReferenceFrame cameraFrame;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private BytedecoImage imageForDrawing;
-   private RDXBytedecoImagePanel markerImagePanel;
+   private RDXMatImagePanel markerImagePanel;
    private final ImGuiPanel mainPanel;
    private Scalar idColor;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -81,7 +82,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
 
       imageForDrawing = new BytedecoImage(100, 100, opencv_core.CV_8UC3);
       boolean flipY = false;
-      markerImagePanel = new RDXBytedecoImagePanel("ArUco Marker Detection Image" + namePostfix, 100, 100, flipY);
+      markerImagePanel = new RDXMatImagePanel("ArUco Marker Detection Image" + namePostfix, 100, 100, flipY);
       mainPanel.addChild(markerImagePanel.getImagePanel());
 
       adaptiveThresholdWindowSizeMin.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMin());
@@ -128,12 +129,12 @@ public class RDXOpenCVArUcoMarkerDetectionUI
             arUcoMarkerDetection.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
             arUcoMarkerDetection.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());
 
-            markerImagePanel.getBytedecoImage().ensureDimensionsMatch(imageForDrawing);
+            markerImagePanel.resize(imageForDrawing.getImageWidth(), imageForDrawing.getImageHeight());
             opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(),
-                                    markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),
+                                    markerImagePanel.getImage(),
                                     opencv_imgproc.COLOR_RGB2RGBA);
 
-            markerImagePanel.draw();
+            markerImagePanel.display();
          }
 
          if (showGraphics.get())
@@ -264,8 +265,8 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       return mainPanel;
    }
 
-   public RDXBytedecoImagePanel getMarkerImagePanel()
+   public RDXImagePanel getMarkerImagePanel()
    {
-      return markerImagePanel;
+      return markerImagePanel.getImagePanel();
    }
 }
