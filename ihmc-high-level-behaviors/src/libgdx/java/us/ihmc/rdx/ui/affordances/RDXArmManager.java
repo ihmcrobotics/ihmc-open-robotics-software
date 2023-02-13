@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.affordances;
 
+import boofcv.alg.sfm.DepthSparse3D;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import imgui.ImGui;
@@ -15,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -45,6 +47,7 @@ public class RDXArmManager
 
    private final HandWrenchCalculator handWrenchCalculator;
    private ImBoolean printWrench = new ImBoolean(false);
+   private ImWrenchPlot wrenchPlot;
 
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -76,6 +79,12 @@ public class RDXArmManager
       handWrenchCalculator = new HandWrenchCalculator(syncedRobot);
    }
 
+   public void create(RDXBaseUI baseUI)
+   {
+      create();
+      wrenchPlot = new ImWrenchPlot(baseUI);
+   }
+
    public void create()
    {
       workingRobot = robotModel.createFullRobotModel();
@@ -95,6 +104,7 @@ public class RDXArmManager
       for (RobotSide side : interactableHands.sides())
       {
          armManagers.get(side).update(interactableHands.get(side), desiredRobot);
+         wrenchPlot.update(side, handWrenchCalculator.getFilteredWrench().get(side));
 
          // wrench expressed in wrist pitch body fixed-frame
          interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getFilteredWrench().get(side));
