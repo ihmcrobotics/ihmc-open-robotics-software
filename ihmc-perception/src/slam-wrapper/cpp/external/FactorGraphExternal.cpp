@@ -101,7 +101,7 @@ bool FactorGraphExternal::getPoseById(int poseId, double* pose)
 
    auto matrix = factorGraphHandler.getResults().at<gtsam::Pose3>(gtsam::Symbol('x', poseId)).matrix();
 
-   matrix.transposeInPlace();
+   // matrix.transposeInPlace();
 
    std::copy(matrix.data(), matrix.data() + 16, pose);
 

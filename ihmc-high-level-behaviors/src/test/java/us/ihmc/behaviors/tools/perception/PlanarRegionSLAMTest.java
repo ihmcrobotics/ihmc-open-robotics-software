@@ -32,7 +32,7 @@ import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
 import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.PlanarRegionRegistrationTools;
+import us.ihmc.perception.PlaneRegistrationTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
 import us.ihmc.perception.tools.PerceptionPrintTools;
@@ -1167,7 +1167,7 @@ class PlanarRegionSLAMTest
 
       for(int i = 0; i<numIterations; i++)
       {
-         transform = PlanarRegionRegistrationTools.computeTransformFromRegions(listOne, listTwo, matches);
+         transform = PlaneRegistrationTools.computeTransformFromRegions(listOne, listTwo, matches);
          transform.invert();
          listTwo.applyTransform(transform);
          totalTransform.multiply(transform);

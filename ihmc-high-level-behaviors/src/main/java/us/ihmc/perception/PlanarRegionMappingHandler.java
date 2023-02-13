@@ -320,9 +320,12 @@ public class PlanarRegionMappingHandler
    public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
       LogTools.info("Adding Regions to Map.");
-      planarRegionMap.submitRegionsUsingIterativeReduction(regions);
-      latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
-      latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
+
+      planarRegionMap.registerRegions(regions.getPlanarRegionsList());
+
+      //planarRegionMap.submitRegionsUsingIterativeReduction(regions);
+      //latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
+      //latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
    }
 
    public boolean isCaptured()
@@ -378,9 +381,9 @@ public class PlanarRegionMappingHandler
 
    public void computeICP()
    {
-      RigidBodyTransform currentToPreviousTransform = PlanarRegionRegistrationTools.computeIterativeClosestPlane(previousRegions,
-                                                                                                                 currentRegions,
-                                                                                                                 ICP_MAX_ITERATIONS);
+      RigidBodyTransform currentToPreviousTransform = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions.getPlanarRegionsList(),
+                                                                                                          currentRegions.getPlanarRegionsList(),
+                                                                                                          ICP_MAX_ITERATIONS);
 
       LogTools.info("Current to Previous Transform: \n{}", currentToPreviousTransform);
    }
