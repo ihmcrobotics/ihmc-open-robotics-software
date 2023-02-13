@@ -88,13 +88,13 @@ public class RDXHeightMapRenderer implements RenderableProvider
             // Position
             intermediateVertexBuffer[vertexIndex] = ( (float) height / 2 - i) * cellSizeXYInMeters;
             intermediateVertexBuffer[vertexIndex + 1] = ( (float) width / 2 - j) * cellSizeXYInMeters;
-            intermediateVertexBuffer[vertexIndex + 2] = heightMapPointer.getShort(heightIndex) / 10000.0f;
+            intermediateVertexBuffer[vertexIndex + 2] = (float) (heightMapPointer.getShort(heightIndex * 2)) / 10000.0f;
 
             // Color (0.0 to 1.0)
             intermediateVertexBuffer[vertexIndex + 3] = 1.0f;
             intermediateVertexBuffer[vertexIndex + 4] = 1.0f;
             intermediateVertexBuffer[vertexIndex + 5] = 1.0f;
-            intermediateVertexBuffer[vertexIndex + 6] = 1.0f;
+            intermediateVertexBuffer[vertexIndex + 6] = 0.5f;
 
             // Size
             intermediateVertexBuffer[vertexIndex + 7] = 0.03f;

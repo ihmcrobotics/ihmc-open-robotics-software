@@ -155,4 +155,7 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
     {
         write_imageui(out, (int2)(cIndex,rIndex), (uint4)(0, 0, 0, 0));
     }
+
+//    averageHeightZ = cellCenter.x * cellCenter.x + cellCenter.y * cellCenter.y;
+//    write_imageui(out, (int2)(cIndex,rIndex), (uint4)((int)( (2.0f + averageHeightZ) * 10000.0f), 0, 0, 0));
 }
