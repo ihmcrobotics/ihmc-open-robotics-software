@@ -22,7 +22,6 @@ import static org.bytedeco.opencl.global.OpenCL.*;
  */
 public class OpenCLManager
 {
-   private static final int maxNumberOfEntries = 2; // More than 2 results in native crash TODO: Why?
    private static _cl_platform_id platforms = new _cl_platform_id();
    private static _cl_device_id devices = new _cl_device_id();
    private static _cl_context context = null;
