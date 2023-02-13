@@ -18,6 +18,7 @@ public class ImPlotPlot
    private Consumer<String> dragAndDropPayloadConsumer;
    private Runnable popupContextWindowImGuiRenderer;
    private final ArrayList<ImPlotPlotLine> plotLines = new ArrayList<>();
+   private final ArrayList<ImPlotDoublePlotLine> doublePlotLines = new ArrayList<>();
    private final String xLabel;
    private final String yLabel;
    private float graphHeight;
