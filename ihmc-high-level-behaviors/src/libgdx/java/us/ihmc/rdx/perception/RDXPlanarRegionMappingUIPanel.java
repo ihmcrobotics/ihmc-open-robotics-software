@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -27,6 +26,7 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    private ImGuiPanel imGuiPanel;
    private final ImBoolean liveModeEnabled = new ImBoolean();
    private final ImBoolean renderEnabled = new ImBoolean(true);
+   private final ImBoolean renderBoundingBoxEnabled = new ImBoolean(false);
    private boolean captured = false;
 
    private RDXLineMeshModel lineMeshModel = new RDXLineMeshModel(0.02f, Color.WHITE);
@@ -91,10 +91,25 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
             if(ImGui.button("Optimize Transform"))
             {
                mappingManager.computeICP();
-               previousRegionsGraphic.generateMeshes(mappingManager.getPreviousRegions().getPlanarRegionsList());
-               previousRegionsGraphic.update();
+               currentRegionsGraphic.generateMeshes(mappingManager.getCurrentRegions().getPlanarRegionsList());
+               currentRegionsGraphic.update();
                drawMatches();
             }
+
+            if(ImGui.checkbox("Render Bounding Boxes [Previous]", renderBoundingBoxEnabled))
+            {
+               previousRegionsGraphic.setDrawBoundingBox(renderBoundingBoxEnabled.get());
+               previousRegionsGraphic.generateMeshes(mappingManager.getPreviousRegions().getPlanarRegionsList());
+               previousRegionsGraphic.update();
+
+            }
+            if(ImGui.checkbox("Render Bounding Boxes [Current]", renderBoundingBoxEnabled))
+            {
+               currentRegionsGraphic.setDrawBoundingBox(renderBoundingBoxEnabled.get());
+               currentRegionsGraphic.generateMeshes(mappingManager.getCurrentRegions().getPlanarRegionsList());
+               currentRegionsGraphic.update();
+            }
+
             ImGui.endTabItem();
          }
 

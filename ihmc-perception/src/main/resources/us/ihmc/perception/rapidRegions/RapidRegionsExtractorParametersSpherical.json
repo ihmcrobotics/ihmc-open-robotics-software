@@ -16,17 +16,17 @@
     "upperBound" : 10
   },
   "Merge orthogonal threshold" : {
-    "value" : 0.07732,
+    "value" : 0.149485,
     "lowerBound" : 0.0,
     "upperBound" : 1.5
   },
   "Merge distance threshold" : {
-    "value" : 1.163934,
+    "value" : 1.360656,
     "lowerBound" : 0.0,
     "upperBound" : 5.0
   },
   "Merge angular threshold" : {
-    "value" : 0.899676,
+    "value" : 0.925566,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -75,7 +75,7 @@
     "upperBound" : 15000
   },
   "Region min patches" : {
-    "value" : 28,
+    "value" : 45,
     "lowerBound" : 1,
     "upperBound" : 3000
   },

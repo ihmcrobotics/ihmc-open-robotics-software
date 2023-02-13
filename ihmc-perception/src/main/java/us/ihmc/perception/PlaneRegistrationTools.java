@@ -9,8 +9,8 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -18,7 +18,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -27,7 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-public class PlanarRegionRegistrationTools
+public class PlaneRegistrationTools
 {
    public static void findPatchMatches(PatchFeatureGrid previousGrid, PatchFeatureGrid currentGrid, HashMap<Integer, Integer> matches)
    {
@@ -141,7 +140,7 @@ public class PlanarRegionRegistrationTools
    /**
     * Computes the transform from the previous to the current planar regions list.
     * Uses approach described in the paper: https://www.comp.nus.edu.sg/~lowkl/publications/lowk_point-to-plane_icp_techrep.pdf
-    *
+    * <p>
     * Use Iterative Linear Least Squares on SE3 tranform parameterized using the exponential map, as a tangent space vector. Every iteration
     * moves the current planar regions closer to the previous planar regions. Usually 4-5 iterations are enough for convergence. Minizes a similarity metric
     * between the corresponding planar regions (point-to-plane).
@@ -150,19 +149,19 @@ public class PlanarRegionRegistrationTools
     * @param currentRegions
     * @param maxIterations
     */
-   public static RigidBodyTransform computeIterativeClosestPlane(FramePlanarRegionsList previousRegions, FramePlanarRegionsList currentRegions, int maxIterations)
+   public static RigidBodyTransform computeIterativeClosestPlane(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, int maxIterations)
    {
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
       RigidBodyTransform transform;
 
       HashMap<Integer, Integer> matches = new HashMap<>();
-      PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions.getPlanarRegionsList(), previousRegions.getPlanarRegionsList(),
-                                                        matches, 0.5f, 0.8f, 0.4f, 0.3f);
 
       for (int i = 0; i < maxIterations; i++)
       {
-         transform = PlanarRegionRegistrationTools.computeQuaternionAveragingTransform(previousRegions.getPlanarRegionsList(), currentRegions.getPlanarRegionsList(), matches);
-         currentRegions.getPlanarRegionsList().applyTransform(transform);
+         matches.clear();
+         PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, 0.5f, 0.8f, 0.4f, 0.3f);
+         transform = PlaneRegistrationTools.computeQuaternionAveragingTransform(previousRegions, currentRegions, matches);
+         currentRegions.applyTransform(transform);
          transformToReturn.multiply(transform);
       }
 
@@ -207,29 +206,57 @@ public class PlanarRegionRegistrationTools
    }
 
    public static RigidBodyTransform computeQuaternionAveragingTransform(PlanarRegionsList previousRegions,
-                                                                         PlanarRegionsList currentRegions,
-                                                                         HashMap<Integer, Integer> matches)
+                                                                        PlanarRegionsList currentRegions,
+                                                                        HashMap<Integer, Integer> matches)
    {
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
-      ArrayList<QuaternionReadOnly> quaternions = estimateQuaternionEstimates(previousRegions, currentRegions, matches);
+      ArrayList<QuaternionReadOnly> quaternions = findRotationEstimates(previousRegions, currentRegions, matches);
       Quaternion averageQuaternion = RotationTools.computeAverageQuaternion(quaternions);
 
+      Point3D averageTranslation = new Point3D();
+      ArrayList<Point3DReadOnly> translations = findTranslationEstimates(previousRegions, currentRegions, matches);
+      averageTranslation.set(computeAverageTranslation(translations));
+      averageTranslation.negate();
 
-      RotationMatrix rotation = new RotationMatrix(averageQuaternion);
-      Point3D translation = new Point3D();
-      transformToReturn.set(rotation, translation);
+      RotationMatrix averageRotation = new RotationMatrix(averageQuaternion);
+      transformToReturn.set(averageRotation, averageTranslation);
 
       return transformToReturn;
    }
 
-   public static ArrayList<QuaternionReadOnly> estimateQuaternionEstimates(PlanarRegionsList previousRegions,
+   public static ArrayList<Point3DReadOnly> findTranslationEstimates(PlanarRegionsList previousRegions,
                                                                   PlanarRegionsList currentRegions,
                                                                   HashMap<Integer, Integer> matches)
    {
+      ArrayList<Point3DReadOnly> translations = new ArrayList<>();
+
+      for (Integer i : matches.keySet())
+      {
+         PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(i));
+         PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(i);
+
+         Point3DReadOnly currentOrigin = currentRegion.getPoint();
+         Point3DReadOnly previousOrigin = previousRegion.getPoint();
+
+         Point3D translation = new Point3D();
+         translation.sub(currentOrigin, previousOrigin);
+         double cosineTheta = Math.abs(translation.dot(previousRegion.getNormal()) / translation.norm());
+         translation.scale(cosineTheta);
+
+         translations.add(translation);
+      }
+
+      return translations;
+   }
+
+   public static ArrayList<QuaternionReadOnly> findRotationEstimates(PlanarRegionsList previousRegions,
+                                                                     PlanarRegionsList currentRegions,
+                                                                     HashMap<Integer, Integer> matches)
+   {
       ArrayList<QuaternionReadOnly> quaternions = new ArrayList<>();
 
-      for(Integer i : matches.keySet())
+      for (Integer i : matches.keySet())
       {
          PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(i));
          PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(i);
@@ -247,6 +274,20 @@ public class PlanarRegionRegistrationTools
       }
 
       return quaternions;
+   }
+
+   public static Point3D computeAverageTranslation(ArrayList<Point3DReadOnly> translations)
+   {
+      Point3D averageTranslation = new Point3D();
+
+      for (Point3DReadOnly translation : translations)
+      {
+         averageTranslation.add(translation);
+      }
+
+      averageTranslation.scale(1.0 / translations.size());
+
+      return averageTranslation;
    }
 
    public static void constructLeastSquaresProblem(PlanarRegionsList previousRegions,

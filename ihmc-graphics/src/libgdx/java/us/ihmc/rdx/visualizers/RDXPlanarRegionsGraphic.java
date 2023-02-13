@@ -45,7 +45,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
    // visualization options
    private Function<Integer, Color> colorFunction = new RDXIDMappedColorFunction();
    private boolean drawAreaText = false;
-   private boolean drawBoundingBox = true;
+   private boolean drawBoundingBox = false;
    private boolean drawNormal;
    boolean mouseHovering = false;
 
