@@ -46,9 +46,9 @@ public class HDF5Test
 
       dataSet.write(dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -59,8 +59,8 @@ public class HDF5Test
       int[] readData = new int[writeData.length];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -88,9 +88,9 @@ public class HDF5Test
 
       dataSet.write(dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -101,8 +101,8 @@ public class HDF5Test
       float[] readData = new float[writeData.length];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -130,9 +130,9 @@ public class HDF5Test
 
       dataSet.write(dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -143,8 +143,8 @@ public class HDF5Test
       double[] readData = new double[writeData.length];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -172,9 +172,9 @@ public class HDF5Test
 
       dataSet.write(dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -185,8 +185,8 @@ public class HDF5Test
       char[] readData = new char[writeData.length];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -213,9 +213,9 @@ public class HDF5Test
 
       dataSet.write(dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -226,8 +226,8 @@ public class HDF5Test
       short[] readData = new short[writeData.length];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -255,9 +255,9 @@ public class HDF5Test
 
       dataSet.write((Pointer) dataPointer, dataType);
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -268,8 +268,8 @@ public class HDF5Test
       byte[] readData = new byte[(int) dataPointer.limit()];
       dataPointer.get(readData);
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       LogTools.info("Wrote: {}", Arrays.toString(writeData));
       LogTools.info("Read:  {}", Arrays.toString(readData));
@@ -304,9 +304,9 @@ public class HDF5Test
       dataSet.write((Pointer) dataPointer, dataType);
       LogTools.info("Wrote:  {}", Arrays.toString(writeData));
 
-      dataSet.close();
-      fileSpace.close();
-      h5File.close();
+      dataSet._close();
+      fileSpace._close();
+      h5File._close();
 
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
@@ -321,10 +321,22 @@ public class HDF5Test
       dataPointer.get(readData);
       LogTools.info("Read:   {}", Arrays.toString(readData));
 
-      dataSet.close();
-      h5File.close();
+      dataSet._close();
+      h5File._close();
 
       Assertions.assertArrayEquals(writeData, readData);
+   }
+
+   /**
+    * Make sure we can successively close and reopen an HDF5 file
+    */
+   @Test
+   public void testCloseAndReopenInts()
+   {
+      for (int i = 0; i < 5; i++)
+      {
+         testInts();
+      }
    }
 
    private static WorkspaceFile getFile(String name)
