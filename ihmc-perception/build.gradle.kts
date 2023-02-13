@@ -91,6 +91,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, ver
 {
    if (name == "spinnaker")
    {
+      // We couldn't figure out how to sign a JAR to publish without the "-SNAPSHOT" yet
       apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT")
       apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT:linux-x86_64")
       apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT:windows-x86_64")
