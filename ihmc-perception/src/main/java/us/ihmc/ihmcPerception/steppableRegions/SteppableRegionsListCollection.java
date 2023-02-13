@@ -1,40 +1,52 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class SteppableRegionListCollection
+public class SteppableRegionsListCollection
 {
-   private final List<SteppableRegionsList> steppableRegions;
+   private int discretizations;
+   private SteppableRegionsList[] steppableRegions;
 
-   public SteppableRegionListCollection()
+   public SteppableRegionsListCollection(int discretizations)
    {
-      steppableRegions = new ArrayList<>();
+      this.discretizations = discretizations;
+      steppableRegions = new SteppableRegionsList[discretizations];
    }
 
-   public SteppableRegionListCollection(SteppableRegionsList... steppableRegions)
+
+   public SteppableRegionsListCollection(SteppableRegionsList[] steppableRegions)
    {
-      // TODO check the different yaws
-      this.steppableRegions = new ArrayList<>();
-      for (SteppableRegionsList steppableRegion : steppableRegions)
-      {
-         this.steppableRegions.add(steppableRegion);
-      }
+      this.discretizations = steppableRegions.length;
+      this.steppableRegions = steppableRegions;
    }
 
-   public SteppableRegionListCollection(List<SteppableRegionsList> steppableRegions)
+   public void resizeCollection(int discretizations)
    {
-      // TODO check the different yaws
-      this.steppableRegions = new ArrayList<>(steppableRegions);
+      this.discretizations = discretizations;
+      steppableRegions = new SteppableRegionsList[discretizations];
    }
 
-   public SteppableRegionListCollection(SteppableRegionListCollection other)
+   public void clear()
    {
-      this(other.getSteppableRegions());
+      for (int i = 0; i < discretizations; i++)
+         steppableRegions[i] = null;
    }
 
-   public List<SteppableRegionsList> getSteppableRegions()
+   public int getDiscretizations()
+   {
+      return discretizations;
+   }
+
+   public SteppableRegionsList[] getSteppableRegions()
    {
       return steppableRegions;
+   }
+
+   public void setSteppableRegions(int yawIndex, SteppableRegionsList steppableRegionsList)
+   {
+      this.steppableRegions[yawIndex] = steppableRegionsList;
+   }
+
+   public SteppableRegionsList getSteppableRegions(int yawIndex)
+   {
+      return steppableRegions[yawIndex];
    }
 }

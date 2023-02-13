@@ -3,7 +3,6 @@ package us.ihmc.ihmcPerception.steppableRegions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class SteppableRegionsCalculationModuleTest
 
       SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
       steppableRegionsCalculationModule.compute(heightMap);
-      List<List<SteppableRegion>> regions = steppableRegionsCalculationModule.getSteppableRegions();
+      List<List<SteppableRegion>> regions = steppableRegionsCalculationModule.getSteppableRegionsListCollection();
 
       assertEquals(SteppableRegionsCalculationModule.yawDiscretizations, regions.size());
       for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
