@@ -22,7 +22,6 @@ import static org.bytedeco.opencl.global.OpenCL.*;
  */
 public class OpenCLManager
 {
-   private final int maxNumberOfEntries = 2; // More than 2 results in native crash TODO: Why?
    private _cl_platform_id platforms = new _cl_platform_id();
    private _cl_device_id devices = new _cl_device_id();
    private _cl_context context = null;
@@ -42,9 +41,10 @@ public class OpenCLManager
 
    public void create()
    {
+      final int platformCount = 1; // We're just interested in the primary platform (most likely "NVIDIA CUDA")
       /* Get platform/device information */
-      checkReturnCode(clGetPlatformIDs(maxNumberOfEntries, platforms, numberOfPlatforms));
-      checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, maxNumberOfEntries, devices, numberOfDevices));
+      checkReturnCode(clGetPlatformIDs(platformCount, platforms, numberOfPlatforms));
+      checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, platformCount, devices, numberOfDevices));
 
       int numberOfPlatforms = this.numberOfPlatforms.get();
       LogTools.info("Number of platforms: {}", numberOfPlatforms);
