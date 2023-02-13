@@ -161,4 +161,9 @@ public class HandWrenchCalculator
    {
       return alphaFilteredYoSpatialVectors;
    }
+
+   public SideDependentList<List<OneDoFJointBasics>> getArmJoints()
+   {
+      return armJoints;
+   }
 }
