@@ -53,7 +53,7 @@ public class RDXNettyOusterDemo
                      nettyOusterUI.createAfterOusterInitialized();
 
                      baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI.getPointCloudRenderer(), RDXSceneLevel.MODEL);
-                     baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getVideoPanel());
+                     baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
                      baseUI.getLayoutManager().reloadLayout();
                   }
 
