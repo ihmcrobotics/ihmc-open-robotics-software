@@ -131,8 +131,8 @@ public class RDXHDF5ImageLoggingUI
             DataType dataType = new DataType(PredType.NATIVE_CHAR());
             DataSet dataSet = h5File.createDataSet(ENCODING_NAME, dataType, dataSpace);
             dataSet.write(encodingNameBytes, dataType); // intentionally writes a string
-            dataSet.close();
-            dataSpace.close();
+            dataSet._close();
+            dataSpace._close();
 
             imageGroup = h5File.createGroup(IMAGE_GROUP_NAME);
             imageIndex = 0;
@@ -170,8 +170,8 @@ public class RDXHDF5ImageLoggingUI
             DataSpace dataSpace = new DataSpace(rank, dimensions);
             DataSet dataSet = imageGroup.createDataSet(String.valueOf(imageIndex), nativeByteType, dataSpace);
             dataSet.write((Pointer) compressedImageBuffer, nativeByteType);
-            dataSet.close();
-            dataSpace.close();
+            dataSet._close();
+            dataSpace._close();
 
             ++imageIndex;
          }
@@ -180,9 +180,9 @@ public class RDXHDF5ImageLoggingUI
 
    private void closeHDF5File()
    {
-      imageGroup.close();
+      imageGroup._close();
       imageGroup = null;
-      h5File.close();
+      h5File._close();
       h5File = null;
    }
 
