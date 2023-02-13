@@ -96,7 +96,7 @@ public class RDXArUcoCodeDetectionDemo
                   testImageArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" Test");
                   testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection, new ArrayList<>(), sensorPoseGizmo.getGizmoFrame());
                   ImGuiPanel testUIPanel = new ImGuiPanel("Test image detection", this::renderTestUIImGuiWidgets);
-                  testUIPanel.addChild(testImageArUcoMarkerDetectionUI.getMarkerImagePanel().getImagePanel());
+                  testUIPanel.addChild(testImageArUcoMarkerDetectionUI.getMarkerImagePanel());
                   baseUI.getImGuiPanelManager().addPanel(testUIPanel);
 
 

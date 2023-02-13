@@ -173,6 +173,11 @@ public class BytedecoImage
       if (isBackedByExternalByteBuffer)
       {
          backingDirectByteBuffer = externalByteBuffer;
+         if (backingDirectByteBuffer.capacity() < imageWidth * imageHeight * bytesPerPixel)
+         {
+            throw new RuntimeException("Externally managed byte buffer large enough."
+                                       + "Resize it before calling this resize method.");
+         }
       }
       else
       {
@@ -203,6 +208,8 @@ public class BytedecoImage
 
    /**
     * Resizes this image to match the dimensions of other if necessary.
+    *
+    * // FIXME: Broken for external byte buffers
     */
    public void ensureDimensionsMatch(BytedecoImage other, OpenCLManager openCLManager)
    {
