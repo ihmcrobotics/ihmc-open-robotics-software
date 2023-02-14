@@ -83,7 +83,6 @@ public class OusterDriverAndDepthPublisher
          if (nativesLoadedActivator.isNewlyActivated())
          {
             openCLManager = new OpenCLManager();
-            openCLManager.create();
          }
 
          if (depthExtractionKernel == null)

@@ -23,7 +23,6 @@ public class OpenCLManagerTest
    public void testLoadingAndPrintingParameters()
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLManager.destroy();
    }
 
@@ -32,7 +31,6 @@ public class OpenCLManagerTest
    public void testOpenCLContext()
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       _cl_kernel kernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("VectorAddition");
       long numberOfFloats = 128;
       long sizeInBytes = numberOfFloats * Float.BYTES;
@@ -61,7 +59,6 @@ public class OpenCLManagerTest
    public void testOpenCLImageManipulation()
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       _cl_kernel kernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("ManipulateImage");
       int imageWidth = 6;
       int imageHeight = 4;

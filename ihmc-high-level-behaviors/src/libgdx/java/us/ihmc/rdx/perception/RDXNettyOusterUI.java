@@ -70,7 +70,6 @@ public class RDXNettyOusterUI
    public void createAfterNativesLoaded()
    {
       openCLManager = new OpenCLManager();
-      openCLManager.create();
    }
 
    public boolean isOusterInitialized()

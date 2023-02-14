@@ -151,7 +151,6 @@ public class RDXLowLevelDepthSensorSimulator
       frameBuffer = frameBufferBuilder.build();
 
       openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLKernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("LowLevelDepthSensorSimulator", "PerceptionCommon.cl");
 
       normalizedDeviceCoordinateDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
