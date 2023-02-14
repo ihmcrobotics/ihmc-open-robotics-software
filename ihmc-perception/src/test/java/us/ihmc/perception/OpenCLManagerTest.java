@@ -23,7 +23,6 @@ public class OpenCLManagerTest
    public void testLoadingAndPrintingParameters()
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLManager.destroy();
    }
 
@@ -32,7 +31,6 @@ public class OpenCLManagerTest
    public void testOpenCLContext()
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       _cl_kernel kernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("VectorAddition");
       long numberOfFloats = 128;
       long sizeInBytes = numberOfFloats * Float.BYTES;
@@ -61,7 +59,6 @@ public class OpenCLManagerTest
    public void testOpenCLImageManipulation()
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       _cl_kernel kernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("ManipulateImage");
       int imageWidth = 6;
       int imageHeight = 4;
@@ -106,15 +103,15 @@ public class OpenCLManagerTest
    @Test
    public void testOpenCLImageManipulation2()
    {
-      final int maxNumberOfEntries = 2; // More than 2 results in native crash TODO: Why?
       _cl_platform_id platforms = new _cl_platform_id();
       _cl_device_id devices = new _cl_device_id();
       _cl_context context;
       IntPointer numberOfDevices = new IntPointer(1);
       IntPointer numberOfPlatforms = new IntPointer(3);
       IntPointer returnCode = new IntPointer(1);
-      clGetPlatformIDs(maxNumberOfEntries, platforms, numberOfPlatforms);
-      clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, maxNumberOfEntries, devices, numberOfDevices);
+      final int platformCount = 1; // We're just interested in the primary platform (most likely "NVIDIA CUDA")
+      clGetPlatformIDs(platformCount, platforms, numberOfPlatforms);
+      clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, platformCount, devices, numberOfDevices);
       context = clCreateContext(null, 1, devices, null, null, returnCode);
       int imageWidth = 6;
       int imageHeight = 4;

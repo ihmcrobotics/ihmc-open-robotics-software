@@ -1,21 +1,11 @@
 package us.ihmc.perception.ouster;
 
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.LidarPointCloudCompression;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
-import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -25,7 +15,6 @@ import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -71,13 +60,13 @@ public class OusterDriverAndDepthPublisher
       ouster.setOnFrameReceived(this::onFrameReceived);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
-                                                      {
-                                                         ouster.setOnFrameReceived(null);
-                                                         ouster.destroy();
-                                                         realtimeROS2Node.destroy();
-                                                         ThreadTools.sleepSeconds(0.5);
-                                                         extractCompressAndPublishThread.destroy();
-                                                      }, getClass().getSimpleName() + "Shutdown"));
+      {
+         ouster.setOnFrameReceived(null);
+         ouster.destroy();
+         realtimeROS2Node.destroy();
+         ThreadTools.sleepSeconds(0.5);
+         extractCompressAndPublishThread.destroy();
+      }, getClass().getSimpleName() + "Shutdown"));
    }
 
    public void start()
@@ -94,7 +83,6 @@ public class OusterDriverAndDepthPublisher
          if (nativesLoadedActivator.isNewlyActivated())
          {
             openCLManager = new OpenCLManager();
-            openCLManager.create();
          }
 
          if (depthExtractionKernel == null)

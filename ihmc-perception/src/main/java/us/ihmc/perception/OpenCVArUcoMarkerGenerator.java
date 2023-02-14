@@ -8,6 +8,15 @@ import org.bytedeco.opencv.opencv_core.Mat;
 public class OpenCVArUcoMarkerGenerator
 {
    /**
+    *
+    * Updated method:
+    *
+    * You can also use this site to generate markers as SVG: https://chev.me/arucogen/
+    * Use Inkscape to size them and place them onto a canvas for printing.
+    * Save as PDF in Inkscape.
+    *
+    * ---
+    *
     * Save a ArUco marker image of id to file.
     *
     * To print a marker:
@@ -38,12 +47,14 @@ public class OpenCVArUcoMarkerGenerator
    {
       Mat markerToSave = new Mat();
       Dictionary dictionary = opencv_aruco.getPredefinedDictionary(OpenCVArUcoMarkerDetection.DEFAULT_DICTIONARY);
-      int markerID = 0;
+      int startingMarkerID = 0;
+      int numberOfSequentialMarkersToGenerate = 4;
+      int endIndex = startingMarkerID + numberOfSequentialMarkersToGenerate;
       int totalImageSizePixels = 2000;
-      for (; markerID < 1; markerID++)
+      for (; startingMarkerID < endIndex; startingMarkerID++)
       {
-         opencv_aruco.drawMarker(dictionary, markerID, totalImageSizePixels, markerToSave, 2);
-         opencv_imgcodecs.imwrite("marker" + markerID + ".png", markerToSave);
+         opencv_aruco.drawMarker(dictionary, startingMarkerID, totalImageSizePixels, markerToSave, 2);
+         opencv_imgcodecs.imwrite("marker" + startingMarkerID + ".png", markerToSave);
       }
    }
 }

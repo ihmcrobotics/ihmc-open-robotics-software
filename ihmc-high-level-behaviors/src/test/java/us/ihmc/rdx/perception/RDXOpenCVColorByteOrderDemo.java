@@ -18,14 +18,13 @@ import java.nio.ByteOrder;
 
 public class RDXOpenCVColorByteOrderDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources");
 
    private RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
-   private RDXCVImagePanel openCVImagePanel;
+   private RDXBytedecoImagePanel openCVImagePanel;
    private final float[] imColor = new float[] {0.8f, 0.0f, 0.0f, 1.0f};
    private final Color gdxColor = new Color();
 
@@ -59,8 +58,8 @@ public class RDXOpenCVColorByteOrderDemo
             ImGuiPanel panel = new ImGuiPanel("Color Byte Order Debugging", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
-            openCVImagePanel = new RDXCVImagePanel("OpenCV Image Panel", highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage());
-            baseUI.getImGuiPanelManager().addPanel(openCVImagePanel.getVideoPanel());
+            openCVImagePanel = new RDXBytedecoImagePanel("OpenCV Image Panel", highLevelDepthSensorSimulator.getLowLevelSimulator().getRGBA8888ColorImage());
+            baseUI.getImGuiPanelManager().addPanel(openCVImagePanel.getImagePanel());
          }
 
          private void renderImGuiWidgets()
