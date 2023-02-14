@@ -151,13 +151,17 @@ public class PlaneRegistrationTools
     * @param currentRegions
     * @param maxIterations
     */
-   public static RigidBodyTransform computeIterativeClosestPlane(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, int maxIterations)
+   public static boolean computeIterativeClosestPlane(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, int maxIterations,
+                                                                 RigidBodyTransform transformToPack)
    {
-      RigidBodyTransform transformToReturn = new RigidBodyTransform();
       RigidBodyTransform transform;
+      RigidBodyTransform finalTransform = new RigidBodyTransform();
 
       HashMap<Integer, Integer> matches = new HashMap<>();
 
+      PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, 0.5f,
+                                                        0.7f, 0.4f, 0.3f);
+      double previousError = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
       for (int i = 0; i < maxIterations; i++)
       {
          matches.clear();
@@ -165,10 +169,31 @@ public class PlaneRegistrationTools
                                                             0.7f, 0.4f, 0.3f);
          transform = PlaneRegistrationTools.computeQuaternionAveragingTransform(previousRegions, currentRegions, matches);
          currentRegions.applyTransform(transform);
-         transformToReturn.multiply(transform);
+
+         double error = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
+
+         LogTools.info(String.format("Iteration: %d, Matches: %d, Previous Error: %.5f, Error: %.5f", i, matches.size(), previousError, error));
+         if ( ((previousError - error) / previousError < 0.01) || (matches.size() < 5))
+         {
+            break;
+         }
+
+         finalTransform.multiply(transform);
+         previousError = error;
       }
 
-      return transformToReturn;
+      LogTools.info("Size: {}", (int) ( (float)previousError / 0.0002f));
+
+      LogTools.info("[{}]", ">".repeat(Math.abs((int) ((float) previousError / 0.0002f))) + ".".repeat(Math.max((int) ((0.02f - (float) previousError) / 0.0002f), 0)));
+
+      if(previousError > 0.02)
+      {
+         LogTools.warn("ICP failed to converge, error: {}", previousError);
+         return false;
+      }
+
+      transformToPack.set(finalTransform);
+      return true;
    }
 
    public static RigidBodyTransform computeTransformFromRegions(PlanarRegionsList previousRegions,
@@ -434,5 +459,27 @@ public class PlaneRegistrationTools
       solver.solve(b, solution);
 
       return solution;
+   }
+
+   public static double computeRegistrationError(PlanarRegionsList referenceRegions, PlanarRegionsList transformedRegions, HashMap<Integer, Integer> matches)
+   {
+      double error = 0.0;
+      for(Integer key : matches.keySet())
+      {
+         PlanarRegion referenceRegion = referenceRegions.getPlanarRegion(key);
+         PlanarRegion transformedRegion = transformedRegions.getPlanarRegion(matches.get(key));
+
+         double cosineSimilarity = referenceRegion.getNormal().dot(transformedRegion.getNormal());
+
+         Point3D translation = new Point3D();
+         translation.sub(transformedRegion.getPoint(), referenceRegion.getPoint());
+         double cosineTheta = Math.abs(translation.dot(referenceRegion.getNormal()) / translation.norm());
+         translation.scale(cosineTheta);
+
+         error += (1.0 - cosineSimilarity);
+         error += Math.min((translation.norm()) * 0.5, 1.0);
+      }
+      error /= matches.size();
+      return error;
    }
 }

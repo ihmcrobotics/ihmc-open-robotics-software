@@ -88,7 +88,6 @@ public class RDXPlanarRegionMappingDemo
          {
             if (mappingManager.pollIsModified() && mappingManager.hasPlanarRegionsToRender())
             {
-               LogTools.info("Calling Update on Graphic ------------------------------------------------------------+++++++++++++++++++++++++++++++++++++++++++++++++++");
                mapPlanarRegionsGraphic.clear();
                mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
                mapPlanarRegionsGraphic.update();

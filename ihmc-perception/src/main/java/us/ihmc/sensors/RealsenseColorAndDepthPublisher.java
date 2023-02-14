@@ -182,7 +182,7 @@ public class RealsenseColorAndDepthPublisher
          Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
       */
 
-      // Tripod: F1121365, F0245563
+      // L515: [F1121365, F0245563], D455: [215122254074]
       String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
       new RealsenseColorAndDepthPublisher(l515SerialNumber,
                                           1024,
