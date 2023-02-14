@@ -22,6 +22,8 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersRe
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -62,10 +64,10 @@ public class SteppableRegionsCalculationModule
 
    private int cellsPerSide;
 
-   private final IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
-
    private final List<Consumer<SteppableRegionsListCollection>> steppableRegionListOutputConsumers = new ArrayList<>();
    private final List<Consumer<SteppableRegionDebugImagesMessage>> steppableRegionDebugConsumers = new ArrayList<>();
+
+   private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
    public SteppableRegionsCalculationModule()
    {
@@ -160,6 +162,11 @@ public class SteppableRegionsCalculationModule
       }
    }
 
+   public void computeASynch(HeightMapData heightMapData)
+   {
+      executorService.clearQueueAndExecute(() -> compute(heightMapData));
+   }
+
    public void compute(HeightMapData heightMapData)
    {
       resize(heightMapData.getCellsPerAxis());
@@ -242,6 +249,21 @@ public class SteppableRegionsCalculationModule
 
    public void destroy()
    {
+      steppableRegionsProgram.releaseReference();
+      computeSteppabilityKernel.releaseReference();
+      computeSteppabilityConnectionsKernel.releaseReference();
+
+      heightMapImage.destroy(openCLManager);
+      for (int i = 0; i < yawDiscretizations; i++)
+      {
+         steppabilityImages.get(i).destroy(openCLManager);
+         snapHeightImages.get(i).destroy(openCLManager);
+         snapNormalXImages.get(i).destroy(openCLManager);
+         snapNormalYImages.get(i).destroy(openCLManager);
+         snapNormalZImages.get(i).destroy(openCLManager);
+         steppabilityConnections.get(i).destroy(openCLManager);
+      }
+
       openCLManager.destroy();
    }
 
