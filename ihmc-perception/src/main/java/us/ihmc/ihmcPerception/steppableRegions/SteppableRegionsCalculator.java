@@ -24,12 +24,12 @@ import java.util.*;
 
 public class SteppableRegionsCalculator
 {
-   public static SteppableRegionsEnvironmentModel mergeCellsIntoSteppableRegionEnvironment(BytedecoImage steppability,
-                                                                                           BytedecoImage snappedHeight,
-                                                                                           BytedecoImage snappedNormalX,
-                                                                                           BytedecoImage snappedNormalY,
-                                                                                           BytedecoImage snappedNormalZ,
-                                                                                           BytedecoImage connections)
+   public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(BytedecoImage steppability,
+                                                                                             BytedecoImage snappedHeight,
+                                                                                             BytedecoImage snappedNormalX,
+                                                                                             BytedecoImage snappedNormalY,
+                                                                                             BytedecoImage snappedNormalZ,
+                                                                                             BytedecoImage connections)
    {
       SteppableRegionsEnvironmentModel environmentModel = createUnsortedSteppableRegionEnvironment(steppability,
                                                                                                    snappedHeight,
@@ -41,7 +41,7 @@ public class SteppableRegionsCalculator
       if (steppability.getImageHeight() != steppability.getImageWidth())
          throw new RuntimeException("Should be square");
 
-      int maxDepth = 1000;
+      int maxDepth = 500;
       while (environmentModel.hasUnexpandedBorderCells())
       {
          // Start assuming we're expanding in a new region
@@ -59,10 +59,8 @@ public class SteppableRegionsCalculator
             throw new RuntimeException("Should never reach this place");
          }
 
-         recursivelyAddBorderNeighbors(unexpandedCell, steppability, connections, environmentModel, maxDepth, 0);
+         recursivelyAddBorderNeighbors(unexpandedCell, connections, environmentModel, maxDepth, 0);
       }
-      // FIXME this should be an unnecssary sanity check
-      environmentModel.getRegions().forEach(region -> checkBorderRings(region, environmentModel));
 
       while (environmentModel.hasUnexpandedInteriorCells())
       {
@@ -74,16 +72,16 @@ public class SteppableRegionsCalculator
             region.addCell(unexpandedCell);
          }
 
-         recursivelyAddNeighbors(unexpandedCell, steppability, connections, environmentModel, maxDepth, 0);
+         recursivelyAddNeighbors(unexpandedCell, connections, environmentModel, maxDepth, 0);
       }
 
       return environmentModel;
    }
 
    public static SteppableRegionsList createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
-                                                              PolygonizerParameters polygonizerParameters,
-                                                              SteppableRegionsEnvironmentModel environmentModel,
-                                                              HeightMapData heightMapData,
+                                                             PolygonizerParameters polygonizerParameters,
+                                                             SteppableRegionsEnvironmentModel environmentModel,
+                                                             HeightMapData heightMapData,
                                                              double footYaw,
                                                              double footLength,
                                                              double footWidth)
@@ -91,7 +89,13 @@ public class SteppableRegionsCalculator
       List<SteppableRegion> listToReturn = new ArrayList<>();
       environmentModel.getRegions()
                       .stream()
-                      .map(region -> createSteppableRegions(concaveHullFactoryParameters, polygonizerParameters, region, heightMapData, footYaw, footLength, footWidth))
+                      .map(region -> createSteppableRegions(concaveHullFactoryParameters,
+                                                            polygonizerParameters,
+                                                            region,
+                                                            heightMapData,
+                                                            footYaw,
+                                                            footLength,
+                                                            footWidth))
                       .forEach(listToReturn::addAll);
       for (int i = 0; i < listToReturn.size(); i++)
          listToReturn.get(i).setRegionId(i);
@@ -114,12 +118,10 @@ public class SteppableRegionsCalculator
       List<Point3D> outerRing = getOuterRingPoints(regionDataHolder, heightMapData, 0.75);
       if (outerRing != null)
          pointsInWorld.addAll(outerRing);
-//      if (pointsInWorld.size() > 300)
-//      {
-         List<Point3D> interiorPoints = getInteriorPoints(regionDataHolder, heightMapData, 1000, new Random());
-         if (interiorPoints != null)
-            pointsInWorld.addAll(interiorPoints);
-//      }
+
+      List<Point3D> interiorPoints = getInteriorPoints(regionDataHolder, heightMapData, 1000, new Random());
+      if (interiorPoints != null)
+         pointsInWorld.addAll(interiorPoints);
 
       Point3DReadOnly centroid = regionDataHolder.getCentroidInWorld();
       Vector3DReadOnly normal = regionDataHolder.getNormalInWorld();
@@ -142,30 +144,6 @@ public class SteppableRegionsCalculator
          concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
 
       return createSteppableRegions(centroid, orientation, concaveHullCollection, heightMapData, regionDataHolder, footYaw, footLength, footWidth);
-   }
-
-   private static void checkBorderRings(SteppableRegionDataHolder regionDataHolder, SteppableRegionsEnvironmentModel environmentModel)
-   {
-      for (SteppableBorderRing borderRing : regionDataHolder.getBorderRings())
-      {
-         for (SteppableCell borderCell : borderRing)
-         {
-            if (!borderCell.cellHasBeenAssigned())
-               throw new RuntimeException("Cell isn't assigned somehow.");
-            if (!borderCell.cellHasBeenExpanded())
-               throw new RuntimeException("cell isn't expanded somehow.");
-            if (borderCell.getBorderRing() != borderRing)
-               throw new RuntimeException("have the wrong ring.");
-
-
-            List<NeighborCell> neighbors = collectCellNeighbors(borderCell, environmentModel);
-            for (NeighborCell neighbor : neighbors)
-            {
-               if (neighbor.cell.isBorderCell() && neighbor.cell.getBorderRing() != borderRing)
-                  throw new RuntimeException("Neighboring cell is on a different ring.");
-            }
-         }
-      }
    }
 
    private static List<Point3D> getOuterRingPoints(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData, double inflationFraction)
@@ -214,7 +192,6 @@ public class SteppableRegionsCalculator
       return points;
    }
 
-
    public static List<SteppableRegion> createSteppableRegions(Point3DReadOnly origin,
                                                               Orientation3DReadOnly orientation,
                                                               ConcaveHullCollection concaveHullCollection,
@@ -243,12 +220,14 @@ public class SteppableRegionsCalculator
       return new SteppableRegion(origin, orientation, concaveHull.getConcaveHullVertices(), footYaw, footLength, footWidth);
    }
 
-   public static HeightMapData createHeightMapForRegion(SteppableRegionDataHolder regionDataHolder,
-                                                        HeightMapData heightMapData)
+   public static HeightMapData createHeightMapForRegion(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData)
    {
       double resolution = heightMapData.getGridResolutionXY();
 
-      HeightMapData regionHeightMap = new HeightMapData(resolution, heightMapData.getGridSizeXY(), heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY());
+      HeightMapData regionHeightMap = new HeightMapData(resolution,
+                                                        heightMapData.getGridSizeXY(),
+                                                        heightMapData.getGridCenter().getX(),
+                                                        heightMapData.getGridCenter().getY());
 
       for (SteppableCell cell : regionDataHolder.getCells())
       {
@@ -284,9 +263,7 @@ public class SteppableRegionsCalculator
                boolean isBorderCell = connections.getInt(column, row) != 255;
 
                double z = snappedHeight.getFloat(column, row);
-               Vector3D normal = new Vector3D(snappedNormalX.getFloat(column, row),
-                                              snappedNormalY.getFloat(column, row),
-                                              snappedNormalZ.getFloat(column, row));
+               Vector3D normal = new Vector3D(snappedNormalX.getFloat(column, row), snappedNormalY.getFloat(column, row), snappedNormalZ.getFloat(column, row));
                SteppableCell cell = new SteppableCell(x, y, z, normal, cellsPerSide, isBorderCell);
                steppableRegionsToConvert.addUnexpandedSteppableCell(cell);
             }
@@ -297,7 +274,6 @@ public class SteppableRegionsCalculator
    }
 
    private static void recursivelyAddNeighbors(SteppableCell cellToExpand,
-                                               BytedecoImage steppability,
                                                BytedecoImage connections,
                                                SteppableRegionsEnvironmentModel environmentModel,
                                                int maxDepth,
@@ -308,39 +284,83 @@ public class SteppableRegionsCalculator
 
       environmentModel.markCellAsExpanded(cellToExpand);
 
-      int cellsPerSide = steppability.getImageHeight();
-      int row = cellsPerSide - cellToExpand.getX() - 1;
-      int col = cellsPerSide - cellToExpand.getY() - 1;
-
-      int boundaryConnectionsEncodedAsOnes = connections.getInt(row, col);
-      List<NeighborCell> candidateNeighbors = collectCellNeighbors(cellToExpand, environmentModel);
-
-
-      for (NeighborCell neighborCell : candidateNeighbors)
+      for (SteppableCell neighbor : collectConnectedCellNeighbors(cellToExpand, environmentModel, connections))
       {
-         SteppableCell neighbor = neighborCell.getCell();
-         int counter = neighborCell.getNeighborIndex();
 
-            if (isConnected(counter, boundaryConnectionsEncodedAsOnes))
+         if (neighbor.cellHasBeenAssigned())
+         {
+            SteppableRegionDataHolder neighborRegion = neighbor.getRegion();
+            if (cellToExpand.getRegion().mergeRegion(neighborRegion))
+               environmentModel.getRegions().remove(neighborRegion);
+         }
+         else
+         {
+            // the cell has not been assigned
+            cellToExpand.getRegion().addCell(neighbor);
+         }
+
+         if (!neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
+            recursivelyAddNeighbors(neighbor, connections, environmentModel, maxDepth, currentDepth + 1);
+      }
+   }
+
+   private static void recursivelyAddBorderNeighbors(SteppableCell cellToExpand,
+                                                     BytedecoImage connections,
+                                                     SteppableRegionsEnvironmentModel environmentModel,
+                                                     int maxDepth,
+                                                     int currentDepth)
+   {
+      if (!cellToExpand.cellHasBeenAssigned())
+         throw new RuntimeException("Should only be expanding assigned cells.");
+
+      environmentModel.markCellAsExpanded(cellToExpand);
+
+      for (SteppableCell neighbor : collectConnectedCellNeighbors(cellToExpand, environmentModel, connections))
+      {
+         if (neighbor.cellHasBeenAssigned())
+         {
+            SteppableRegionDataHolder neighborRegion = neighbor.getRegion();
+            if (neighbor.isBorderCell())
             {
-
-               if (neighbor.cellHasBeenAssigned())
-               {
-                  SteppableRegionDataHolder neighborRegion = neighbor.getRegion();
-                  if (cellToExpand.getRegion().mergeRegion(neighborRegion))
-                     environmentModel.getRegions().remove(neighborRegion);
-               }
-               else
-               {
-                  // the cell has not been assigned
-                  cellToExpand.getRegion().addCell(neighbor);
-               }
-
-               if (!neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
-                  recursivelyAddNeighbors(neighbor, steppability, connections, environmentModel, maxDepth, currentDepth + 1);
+               SteppableBorderRing neighborRing = neighbor.getBorderRing();
+               if (cellToExpand.getBorderRing().mergeRing(neighborRing))
+                  neighborRegion.removeBorderRing(neighborRing);
             }
 
+            if (cellToExpand.getRegion().mergeRegion(neighborRegion))
+               environmentModel.removeRegion(neighborRegion);
+         }
+         else
+         {
+            // the cell has not been assigned
+            cellToExpand.getRegion().addCell(neighbor);
+            if (neighbor.isBorderCell())
+            {
+               cellToExpand.getBorderRing().addCell(neighbor);
+               neighbor.setBorderRing(cellToExpand.getBorderRing());
+            }
+         }
+
+         if (neighbor.isBorderCell() && !neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
+            recursivelyAddBorderNeighbors(neighbor, connections, environmentModel, maxDepth, currentDepth + 1);
       }
+   }
+
+   private static List<SteppableCell> collectConnectedCellNeighbors(SteppableCell cell,
+                                                                    SteppableRegionsEnvironmentModel environmentModel,
+                                                                    BytedecoImage connections)
+   {
+      int cellsPerSide = environmentModel.getCellsPerSide();
+      int row = cellsPerSide - cell.getX() - 1;
+      int col = cellsPerSide - cell.getY() - 1;
+
+      int boundaryConnectionsEncodedAsOnes = connections.getInt(row, col);
+      List<NeighborCell> neighbors = collectCellNeighbors(cell, environmentModel);
+
+      return neighbors.stream()
+                      .filter(neighbor -> isConnected(neighbor.getNeighborIndex(), boundaryConnectionsEncodedAsOnes))
+                      .map(NeighborCell::getCell)
+                      .toList();
    }
 
    private static List<NeighborCell> collectCellNeighbors(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel)
@@ -380,79 +400,6 @@ public class SteppableRegionsCalculator
       }
 
       return cellNeighbors;
-   }
-
-   private static void recursivelyAddBorderNeighbors(SteppableCell cellToExpand,
-                                                     BytedecoImage steppability,
-                                                     BytedecoImage connections,
-                                                     SteppableRegionsEnvironmentModel environmentModel,
-                                                     int maxDepth,
-                                                     int currentDepth)
-   {
-      if (!cellToExpand.cellHasBeenAssigned())
-         throw new RuntimeException("Should only be expanding assigned cells.");
-
-      environmentModel.markCellAsExpanded(cellToExpand);
-
-      int cellsPerSide = steppability.getImageHeight();
-      int row = cellsPerSide - cellToExpand.getX() - 1;
-      int col = cellsPerSide - cellToExpand.getY() - 1;
-
-      int boundaryConnectionsEncodedAsOnes = connections.getInt(row, col);
-
-      int counter = 0;
-      for (int x_offset = -1; x_offset <= 1; x_offset++)
-      {
-         for (int y_offset = -1; y_offset <= 1; y_offset++)
-         {
-            if (x_offset == 0 && y_offset == 0)
-               continue;
-
-            // These are switched because of the difference between coordinates in the height map and image frame
-            int neighborX = cellToExpand.getX() - y_offset;
-            int neighborY = cellToExpand.getY() - x_offset;
-
-            if (neighborX < 0 || neighborY < 0 || neighborX >= cellsPerSide || neighborY >= cellsPerSide)
-               continue;
-
-            SteppableCell neighbor = environmentModel.getCellAt(neighborX, neighborY);
-            if (neighbor == null)
-               continue;
-            //            throw new? RuntimeException("This should have never happened.");
-
-            if (isConnected(counter, boundaryConnectionsEncodedAsOnes))
-            {
-               if (neighbor.cellHasBeenAssigned())
-               {
-                  SteppableRegionDataHolder neighborRegion = neighbor.getRegion();
-                  if (neighbor.isBorderCell())
-                  {
-                     SteppableBorderRing neighborRing = neighbor.getBorderRing();
-                     if (cellToExpand.getBorderRing().mergeRing(neighborRing))
-                        neighborRegion.removeBorderRing(neighborRing);
-                  }
-
-                  if (cellToExpand.getRegion().mergeRegion(neighborRegion))
-                     environmentModel.removeRegion(neighborRegion);
-               }
-               else
-               {
-                  // the cell has not been assigned
-                  cellToExpand.getRegion().addCell(neighbor);
-                  if (neighbor.isBorderCell())
-                  {
-                     cellToExpand.getBorderRing().addCell(neighbor);
-                     neighbor.setBorderRing(cellToExpand.getBorderRing());
-                  }
-               }
-
-               if (neighbor.isBorderCell() && !neighbor.cellHasBeenExpanded() && currentDepth < maxDepth && cellToExpand.cellHasBeenAssigned())
-                  recursivelyAddBorderNeighbors(neighbor, steppability, connections, environmentModel, maxDepth, currentDepth + 1);
-            }
-
-            counter++;
-         }
-      }
    }
 
    public static Point3D convertCellToPoint(SteppableCell cell, HeightMapData heightMapData)
