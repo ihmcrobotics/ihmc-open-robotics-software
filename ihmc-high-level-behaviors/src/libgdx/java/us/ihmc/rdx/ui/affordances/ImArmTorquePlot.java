@@ -21,19 +21,23 @@ public class ImArmTorquePlot
 
    public ImArmTorquePlot(RDXBaseUI baseUI, String title, SideDependentList<List<OneDoFJointBasics>> armJoints)
    {
+      this(baseUI, title, "", armJoints);
+   }
+
+   public ImArmTorquePlot(RDXBaseUI baseUI, String title, String prefix, SideDependentList<List<OneDoFJointBasics>> armJoints)
+   {
       for (RobotSide side : RobotSide.values)
       {
          torquePlotPanels.set(side, new ImPlotPlotPanel(side + ": " + title));
          torquePlots.set(side, new ImPlotPlot());
          List<OneDoFJointBasics> oneArmJoints = armJoints.get(side);
-         for (OneDoFJointBasics joint : oneArmJoints)
+         for (int i = 0; i < oneArmJoints.size(); ++i)
          {
-            ImPlotDoublePlotLine doublePlotLine = new ImPlotDoublePlotLine(joint.getName() + " torque");
+            ImPlotDoublePlotLine doublePlotLine = new ImPlotDoublePlotLine(oneArmJoints.get(i).getName() + " " + prefix + "torque");
             plot_lines.get(side).add(doublePlotLine);
             torquePlots.get(side).getPlotLines().add(doublePlotLine);
          }
          torquePlotPanels.get(side).getPlots().add(torquePlots.get(side));
-
          baseUI.getImGuiPanelManager().addPanel(torquePlotPanels.get(side));
       }
    }
