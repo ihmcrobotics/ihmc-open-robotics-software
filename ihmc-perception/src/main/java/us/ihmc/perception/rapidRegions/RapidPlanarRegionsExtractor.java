@@ -95,6 +95,11 @@ public class RapidPlanarRegionsExtractor
    private final RapidPlanarRegionIsland tempIsland = new RapidPlanarRegionIsland();
    private boolean firstRun = true;
 
+   public void create(OpenCLManager openCLManager, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
+   {
+      create(openCLManager, openCLManager.loadProgram("RapidRegionsExtractor"), imageHeight, imageWidth, fx, fy, cx, cy);
+   }
+
    /**
     * Creates buffers and kernels for the OpenCL program.
     *

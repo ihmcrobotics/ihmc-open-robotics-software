@@ -4,7 +4,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.tools.thread.Activator;
 
 /**
@@ -45,7 +45,7 @@ public class RDXBlackflyCalibrationPatternDemo
                {
                   blackflyReader.create();
                   blackflyReader.setMonitorPanelUIThreadPreprocessor(this::monitorUIThreadPreprocessor);
-                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getImagePanel());
 
                   calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
@@ -70,9 +70,9 @@ public class RDXBlackflyCalibrationPatternDemo
             baseUI.renderEnd();
          }
 
-         private void monitorUIThreadPreprocessor(RDXOpenCVSwapVideoPanelData data)
+         private void monitorUIThreadPreprocessor(RDXImagePanelTexture texture)
          {
-            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
+            calibrationPatternDetectionUI.drawCornersOrCenters(texture.getRGBA8Mat());
          }
 
          @Override

@@ -1,9 +1,10 @@
-package us.ihmc.rdx.imgui;
+package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.graphics.Texture;
 import imgui.internal.ImGui;
+import us.ihmc.rdx.imgui.ImGuiPanel;
 
-public class ImGuiVideoPanel extends ImGuiPanel
+public class RDXImagePanel extends ImGuiPanel
 {
    public static final boolean FLIP_Y = true;
    public static final boolean DO_NOT_FLIP_Y = false;
@@ -14,7 +15,7 @@ public class ImGuiVideoPanel extends ImGuiPanel
    private float mouseYDownFromTop;
    private Runnable userImGuiImageInteraction;
 
-   public ImGuiVideoPanel(String name, boolean flipY)
+   public RDXImagePanel(String name, boolean flipY)
    {
       super(name);
       setRenderMethod(this::renderImGuiWidgets);
