@@ -127,7 +127,6 @@ public class StructuralPerceptionProcessWithDriver
          if (nativesLoadedActivator.isNewlyActivated())
          {
             openCLManager = new OpenCLManager();
-            openCLManager.create();
          }
 
          if (depthExtractionKernel == null)

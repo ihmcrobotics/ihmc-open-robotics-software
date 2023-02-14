@@ -258,7 +258,6 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       else if (pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
       {
          openCLManager = new OpenCLManager();
-         openCLManager.create();
          openCLProgram = openCLManager.loadProgram("HighLevelDepthSensorSimulator", "PerceptionCommon.cl");
          discretizePointsKernel = openCLManager.createKernel(openCLProgram, "discretizePoints");
          parametersBuffer = new OpenCLFloatBuffer(5);
