@@ -249,8 +249,6 @@ public class GPUAStarBodyPathPlanner
       this.nodesPerSide = numberOfNodes;
       this.nodeCenterIndex = (nodesPerSide - 1) / 2;
 
-      openCLManager.create();
-
       pathPlannerProgram = openCLManager.loadProgram("BodyPathPlanning", "HeightMapUtils.cl");
       computeNormalsWithLeastSquaresKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithLeastSquares");
       computeNormalsWithRansacKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithRANSAC");

@@ -140,7 +140,6 @@ public class GPUPlanarRegionExtraction
       graphImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
       gaussianKernelSize = new Size();
 
-      openCLManager.create();
       planarRegionExtractionProgram = openCLManager.loadProgram("PlanarRegionExtraction");
       filterKernel = openCLManager.createKernel(planarRegionExtractionProgram, "filterKernel");
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
