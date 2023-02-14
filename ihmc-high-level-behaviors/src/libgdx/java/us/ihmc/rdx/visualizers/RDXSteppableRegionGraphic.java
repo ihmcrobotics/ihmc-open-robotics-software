@@ -79,6 +79,8 @@ public class RDXSteppableRegionGraphic implements RenderableProvider
 
    private void generateMeshes(List<SteppableRegion> steppableRegions)
    {
+      for (int i = 0; i < gridMapGraphics.size(); i++)
+         gridMapGraphics.get(i).clear();
       gridMapGraphics.clear();
       steppableRegions.forEach(this::generateMeshes);
    }

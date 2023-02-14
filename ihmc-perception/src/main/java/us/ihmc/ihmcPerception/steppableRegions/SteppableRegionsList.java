@@ -70,4 +70,10 @@ public class SteppableRegionsList
    {
       return footWidth;
    }
+
+   @Override
+   public String toString()
+   {
+      return "List with " + regions.size() + " regions.";
+   }
 }
