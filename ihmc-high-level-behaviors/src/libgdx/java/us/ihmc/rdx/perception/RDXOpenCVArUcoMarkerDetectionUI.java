@@ -33,7 +33,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
    private ReferenceFrame cameraFrame;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private BytedecoImage imageForDrawing;
-   private RDXCVImagePanel markerImagePanel;
+   private RDXBytedecoImagePanel markerImagePanel;
    private final ImGuiPanel mainPanel;
    private Scalar idColor;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -80,8 +80,8 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       imageHeight = arUcoMarkerDetection.getImageHeight();
       imageForDrawing = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
       boolean flipY = false;
-      markerImagePanel = new RDXCVImagePanel("ArUco Marker Detection Image " + namePostfix, imageWidth, imageHeight, flipY);
-      mainPanel.addChild(markerImagePanel.getVideoPanel());
+      markerImagePanel = new RDXBytedecoImagePanel("ArUco Marker Detection Image " + namePostfix, imageWidth, imageHeight, flipY);
+      mainPanel.addChild(markerImagePanel.getImagePanel());
 
       adaptiveThresholdWindowSizeMin.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMin());
       adaptiveThresholdWindowSizeMax.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMax());
@@ -120,9 +120,9 @@ public class RDXOpenCVArUcoMarkerDetectionUI
          stopwatch.lap();
          detectionDurationPlotLine.addValue(arUcoMarkerDetection.getTimeTakenToDetect());
 
-         if (markerImagePanel.getVideoPanel().getIsShowing().get())
+         if (markerImagePanel.getImagePanel().getIsShowing().get())
          {
-            arUcoMarkerDetection.getImageOfDetection(imageForDrawing.getBytedecoOpenCVMat());
+            arUcoMarkerDetection.getCopyOfSourceRGBImage(imageForDrawing.getBytedecoOpenCVMat());
 
             arUcoMarkerDetection.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
             arUcoMarkerDetection.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());
@@ -260,7 +260,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       return mainPanel;
    }
 
-   public RDXCVImagePanel getMarkerImagePanel()
+   public RDXBytedecoImagePanel getMarkerImagePanel()
    {
       return markerImagePanel;
    }

@@ -10,19 +10,17 @@ import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
+import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,15 +52,12 @@ public class OusterDepthExtractionKernel
 
    private final List<Class<?>> outputTopicsTypes;
 
-   public OusterDepthExtractionKernel(NettyOuster nettyOuster,
-                                      OpenCLManager openCLManager)
+   public OusterDepthExtractionKernel(NettyOuster nettyOuster, OpenCLManager openCLManager)
    {
       this(nettyOuster, openCLManager, Arrays.asList(ImageMessage.class));
    }
 
-   public OusterDepthExtractionKernel(NettyOuster nettyOuster,
-                                      OpenCLManager openCLManager,
-                                      List<Class<?>> outputTopicsTypes)
+   public OusterDepthExtractionKernel(NettyOuster nettyOuster, OpenCLManager openCLManager, List<Class<?>> outputTopicsTypes)
    {
       this.nettyOuster = nettyOuster;
       this.openCLManager = openCLManager;

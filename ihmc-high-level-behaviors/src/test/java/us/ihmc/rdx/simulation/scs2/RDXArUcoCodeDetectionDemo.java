@@ -24,8 +24,7 @@ import java.util.ArrayList;
 
 public class RDXArUcoCodeDetectionDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources");
    private final Activator nativesLoadedActivator;
    private RDXEnvironmentBuilder environmentBuilder;
@@ -97,7 +96,7 @@ public class RDXArUcoCodeDetectionDemo
                   testImageArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("Test");
                   testImageArUcoMarkerDetectionUI.create(testImageArUcoMarkerDetection, new ArrayList<>(), sensorPoseGizmo.getGizmoFrame());
                   ImGuiPanel testUIPanel = new ImGuiPanel("Test image detection", this::renderTestUIImGuiWidgets);
-                  testUIPanel.addChild(testImageArUcoMarkerDetectionUI.getMarkerImagePanel().getVideoPanel());
+                  testUIPanel.addChild(testImageArUcoMarkerDetectionUI.getMarkerImagePanel().getImagePanel());
                   baseUI.getImGuiPanelManager().addPanel(testUIPanel);
 
 

@@ -22,14 +22,14 @@ import static org.bytedeco.opencl.global.OpenCL.*;
  */
 public class OpenCLManager
 {
-   private final int maxNumberOfEntries = 2; // More than 2 results in native crash TODO: Why?
-   private _cl_platform_id platforms = new _cl_platform_id();
-   private _cl_device_id devices = new _cl_device_id();
-   private _cl_context context = null;
-   private _cl_command_queue commandQueue = null;
-   private final IntPointer numberOfDevices = new IntPointer(1);
-   private final IntPointer numberOfPlatforms = new IntPointer(3);
-   private final IntPointer returnCode = new IntPointer(1);
+   private static _cl_platform_id platforms = new _cl_platform_id();
+   private static _cl_device_id devices = new _cl_device_id();
+   private static _cl_context context = null;
+   private static _cl_command_queue commandQueue = null;
+   private static final IntPointer numberOfDevices = new IntPointer(1);
+   private static final IntPointer numberOfPlatforms = new IntPointer(3);
+   private static volatile boolean initialized = false;
+
    private final ArrayList<_cl_program> programs = new ArrayList<>();
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
    private final TreeSet<_cl_mem> bufferObjects = new TreeSet<>(Comparator.comparing(Pointer::address));
@@ -38,45 +38,61 @@ public class OpenCLManager
    private long pointerPointerSize = Pointer.sizeof(PointerPointer.class);
    private SizeTPointer origin = new SizeTPointer(3);
    private final SizeTPointer region = new SizeTPointer(3);
+   private final IntPointer returnCode = new IntPointer(1);
    //   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Rethink this
 
-   public void create()
+   public OpenCLManager()
    {
-      /* Get platform/device information */
-      checkReturnCode(clGetPlatformIDs(maxNumberOfEntries, platforms, numberOfPlatforms));
-      checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, maxNumberOfEntries, devices, numberOfDevices));
-
-      int numberOfPlatforms = this.numberOfPlatforms.get();
-      LogTools.info("Number of platforms: {}", numberOfPlatforms);
-      int numberOfDevices = this.numberOfDevices.get();
-      LogTools.info("Number of devices: {}", numberOfDevices);
-
-      for (int i = 0; i < numberOfPlatforms; i++)
+      if (!initialized)
       {
-         String message = "OpenCL Platform:";
-         message += " Name: " + readPlatformInfoParameter(i, CL_PLATFORM_NAME);
-         message += " Vendor: " + readPlatformInfoParameter(i, CL_PLATFORM_VENDOR);
-         message += " Version: " + readPlatformInfoParameter(i, CL_PLATFORM_VERSION);
-         LogTools.info(message);
+         /* Get platform/device information */
+         final int platformCount = 1; // We're just interested in the primary platform (most likely "NVIDIA CUDA")
+         checkReturnCode(clGetPlatformIDs(platformCount, platforms, numberOfPlatforms));
+         checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, platformCount, devices, numberOfDevices));
+
+         int numberOfPlatforms = OpenCLManager.numberOfPlatforms.get();
+         LogTools.info("Number of platforms: {}", numberOfPlatforms);
+         int numberOfDevices = OpenCLManager.numberOfDevices.get();
+         LogTools.info("Number of devices: {}", numberOfDevices);
+
+         for (int i = 0; i < numberOfPlatforms; i++)
+         {
+            String message = "OpenCL Platform:";
+            message += " Name: " + readPlatformInfoParameter(i, CL_PLATFORM_NAME);
+            message += " Vendor: " + readPlatformInfoParameter(i, CL_PLATFORM_VENDOR);
+            message += " Version: " + readPlatformInfoParameter(i, CL_PLATFORM_VERSION);
+            LogTools.info(message);
+         }
+
+         for (int i = 0; i < numberOfDevices; i++)
+         {
+            String message = "OpenCL Device:";
+            message += " Name: " + readDeviceInfoParameter(i, CL_DEVICE_NAME);
+            message += " Vendor: " + readDeviceInfoParameter(i, CL_DEVICE_VENDOR);
+            message += " Driver Version: " + readDeviceInfoParameter(i, CL_DRIVER_VERSION);
+            LogTools.info(message);
+         }
+
+         /* Create OpenCL Context */
+         context = clCreateContext(null, 1, devices, null, null, returnCode);
+         checkReturnCode();
+
+         /* Create Command Queue */
+         LongPointer properties = null;
+         commandQueue = clCreateCommandQueueWithProperties(context, devices, properties, returnCode);
+         checkReturnCode();
+
+         initialized = true;
+
+         Thread shutdownHook = new Thread(() ->
+         {
+            checkReturnCode(clFlush(commandQueue));
+            checkReturnCode(clFinish(commandQueue));
+            checkReturnCode(clReleaseCommandQueue(commandQueue));
+            checkReturnCode(clReleaseContext(context));
+         }, "OpenCLManager-Shutdown-Hook");
+         Runtime.getRuntime().addShutdownHook(shutdownHook);
       }
-
-      for (int i = 0; i < numberOfDevices; i++)
-      {
-         String message = "OpenCL Device:";
-         message += " Name: " + readDeviceInfoParameter(i, CL_DEVICE_NAME);
-         message += " Vendor: " + readDeviceInfoParameter(i, CL_DEVICE_VENDOR);
-         message += " Driver Version: " + readDeviceInfoParameter(i, CL_DRIVER_VERSION);
-         LogTools.info(message);
-      }
-
-      /* Create OpenCL Context */
-      context = clCreateContext(null, 1, devices, null, null, returnCode);
-      checkReturnCode();
-
-      /* Create Command Queue */
-      LongPointer properties = null;
-      commandQueue = clCreateCommandQueueWithProperties(context, devices, properties, returnCode);
-      checkReturnCode();
    }
 
    private String readPlatformInfoParameter(int i, int parameterName)
@@ -393,8 +409,6 @@ public class OpenCLManager
 
    public void destroy()
    {
-      checkReturnCode(clFlush(commandQueue));
-      checkReturnCode(clFinish(commandQueue));
       for (_cl_program program : programs)
          checkReturnCode(clReleaseProgram(program));
       programs.clear();
@@ -404,10 +418,6 @@ public class OpenCLManager
       for (_cl_mem bufferObject : bufferObjects)
          checkReturnCode(clReleaseMemObject(bufferObject));
       bufferObjects.clear();
-      checkReturnCode(clReleaseCommandQueue(commandQueue));
-      commandQueue = null;
-      checkReturnCode(clReleaseContext(context));
-      context = null;
    }
 
    public int getReturnCode()

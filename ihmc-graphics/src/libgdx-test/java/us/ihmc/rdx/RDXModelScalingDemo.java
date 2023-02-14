@@ -13,8 +13,7 @@ import us.ihmc.log.LogTools;
 
 public class RDXModelScalingDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
+   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-graphics/src/libgdx-test/resources",
                                                   "Scaling Demo");
    private final ImFloat scale = new ImFloat(1.0f);

@@ -146,17 +146,17 @@ public class L515OnRobotProcess
             cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
             // TODO: Put in OpenCL
-            for (int x = 0; x < depthWidth; x++)
+            for (int column = 0; column < depthWidth; column++)
             {
-               for (int y = 0; y < depthHeight; y++)
+               for (int row = 0; row < depthHeight; row++)
                {
-                  float eyeDepth = depth32FC1Image.getFloat(x, y);
+                  float eyeDepth = depth32FC1Image.getFloat(row, column);
                   framePoint.setToZero(cameraFrame);
                   framePoint.setX(eyeDepth);
-                  framePoint.setY(-(x - depthCameraIntrinsics.getCx()) / l515.getDepthFocalLengthPixelsX() * eyeDepth);
-                  framePoint.setZ(-(y - depthCameraIntrinsics.getCy()) / l515.getDepthFocalLengthPixelsY() * eyeDepth);
+                  framePoint.setY(-(column - depthCameraIntrinsics.getCx()) / l515.getDepthFocalLengthPixelsX() * eyeDepth);
+                  framePoint.setZ(-(row - depthCameraIntrinsics.getCy()) / l515.getDepthFocalLengthPixelsY() * eyeDepth);
                   framePoint.changeFrame(ReferenceFrame.getWorldFrame());
-                  Point3D point = points[y * depthWidth + x];
+                  Point3D point = points[row * depthWidth + column];
                   point.set(framePoint);
                }
             }
