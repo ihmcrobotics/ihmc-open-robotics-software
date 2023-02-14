@@ -46,6 +46,16 @@ public class SteppableRegionsList
       return regions;
    }
 
+   public int getNumberOfSteppableRegions()
+   {
+      return regions.size();
+   }
+
+   public SteppableRegion getSteppableRegion(int i)
+   {
+      return regions.get(i);
+   }
+
    public double getFootYaw()
    {
       return footYaw;

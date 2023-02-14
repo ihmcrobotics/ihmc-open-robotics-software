@@ -1,35 +1,28 @@
 package us.ihmc.rdx.perception;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegion;
-import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsList;
+import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsListCollection;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculationModule;
-import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXSteppableRegionGraphic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,16 +32,16 @@ public class RDXSteppableRegionsCalculatorUI
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
+
    private final SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
+
+   private final AtomicReference<SteppableRegionsListCollection> latestSteppableRegionsToRender = new AtomicReference<>();
+   private final AtomicReference<SteppableRegionDebugImagesMessage> latestSteppableRegionDebugImagesToRender = new AtomicReference<>();
+
    private final AtomicReference<HeightMapMessage> heightMapMessageReference = new AtomicReference<>();
-   private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
 
    private final ImBoolean drawPatches = new ImBoolean(true);
-   private ImGuiPlot numberOfSteppableRegionsPlot;
-   private ImGuiPlot wholeAlgorithmDurationPlot;
 
-   private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
-   private final YoDouble wholeAlgorithmDuration = new YoDouble("wholeAlgorithmDuration", yoRegistry);
 
    private ImGuiPanel imguiPanel;
    private final List<RDXCVImagePanel> steppabilityPanels = new ArrayList<>();
@@ -76,19 +69,10 @@ public class RDXSteppableRegionsCalculatorUI
          imguiPanel.addChild(panel.getVideoPanel());
       }
 
-      numberOfSteppableRegionsPlot = new ImGuiPlot(labels.get("Number of steppable regions"), 1000, 300, 50);
-      wholeAlgorithmDurationPlot = new ImGuiPlot(labels.get("Whole algorithm duration"), 1000, 300, 50);
-
       steppableRegionGraphic = new RDXSteppableRegionGraphic();
 
-      steppableRegionsCalculationModule.addSteppableRegionListCollectionOutputConsumer(regions ->
-                                                                                       {
-                                                                                          List<SteppableRegion> regionsToView = regions.getSteppableRegions(0)
-                                                                                                                                       .getSteppableRegionsAsList();
-                                                                                          steppableRegionGraphic.generateMeshesAsync(regionsToView);
-                                                                                          LogTools.info("Found " + regionsToView.size() + " regions");
-                                                                                       });
-      steppableRegionsCalculationModule.addSteppableRegionDebugConsumer(this::drawRegions);
+      steppableRegionsCalculationModule.addSteppableRegionListCollectionOutputConsumer(latestSteppableRegionsToRender::set);
+      steppableRegionsCalculationModule.addSteppableRegionDebugConsumer(latestSteppableRegionDebugImagesToRender::set);
    }
 
    volatile boolean processing = false;
@@ -103,17 +87,10 @@ public class RDXSteppableRegionsCalculatorUI
    {
       if (enabled.get())
       {
-         if (!processing)
-         {
-            HeightMapMessage heightMapMessage = heightMapMessageReference.getAndSet(null);
-            if (heightMapMessage != null)
-            {
-               HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-               resize(heightMapData.getCellsPerAxis());
-               processing = true;
-               ThreadTools.startAsDaemon(() -> processingThread(runWhenFinished, heightMapData), getClass().getSimpleName() + "Processing");
-            }
-         }
+         updateSteppableRegions(runWhenFinished);
+
+         generateSteppableRegionsMesh();
+         drawDebugRegions();
 
          if (needToDraw)
          {
@@ -128,19 +105,21 @@ public class RDXSteppableRegionsCalculatorUI
       }
    }
 
-   private void processingThread(Runnable runWhenFinished, HeightMapData heightMapData)
-   {
-      wholeAlgorithmDurationStopwatch.start();
-      steppableRegionsCalculationModule.setSteppableRegionsCalculatorParameters(parameters);
-      steppableRegionsCalculationModule.compute(heightMapData);
 
-      wholeAlgorithmDurationStopwatch.suspend();
-      wholeAlgorithmDuration.set(wholeAlgorithmDurationStopwatch.lapElapsed());
+   private void updateSteppableRegions(Runnable runWhenFinished)
+   {
+      HeightMapMessage heightMapMessage = heightMapMessageReference.getAndSet(null);
+      if (heightMapMessage == null)
+         return;
+
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      resize(heightMapData.getCellsPerAxis());
+
+      steppableRegionsCalculationModule.setSteppableRegionsCalculatorParameters(parameters);
+      steppableRegionsCalculationModule.computeASynch(heightMapData);
 
       if (runWhenFinished != null)
          runWhenFinished.run();
-
-      needToDraw = true;
    }
 
    private void resize(int newSize)
@@ -157,8 +136,25 @@ public class RDXSteppableRegionsCalculatorUI
       }
    }
 
-   private void drawRegions(SteppableRegionDebugImagesMessage debugImagesMessage)
+   public void generateSteppableRegionsMesh()
    {
+      SteppableRegionsListCollection steppableRegionsListCollection = latestSteppableRegionsToRender.getAndSet(null);
+      if (steppableRegionsListCollection == null)
+         return;
+
+      List<SteppableRegion> regionsToView = steppableRegionsListCollection.getSteppableRegions(0)
+                                                   .getSteppableRegionsAsList();
+      steppableRegionGraphic.generateMeshesAsync(regionsToView);
+      LogTools.info("Found " + regionsToView.size() + " regions");
+      needToDraw = true;
+   }
+
+   public void drawDebugRegions()
+   {
+      SteppableRegionDebugImagesMessage debugImagesMessage = latestSteppableRegionDebugImagesToRender.getAndSet(null);
+      if (debugImagesMessage == null)
+         return;
+
       for (int yaw = 0; yaw < SteppableRegionsCalculationModule.yawDiscretizations; yaw++)
       {
          RDXCVImagePanel panel = steppableRegionsPanels.get(yaw);
@@ -207,6 +203,8 @@ public class RDXSteppableRegionsCalculatorUI
             }
          }
       }
+
+      needToDraw = true;
    }
 
    private void render2DPanels()
@@ -234,7 +232,6 @@ public class RDXSteppableRegionsCalculatorUI
 
       ImGui.text("Input height map dimensions: " + cellsPerSide + " x " + cellsPerSide);
       ImGui.checkbox(labels.get("Enabled"), enabled);
-      wholeAlgorithmDurationPlot.render(wholeAlgorithmDurationStopwatch.totalElapsed());
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

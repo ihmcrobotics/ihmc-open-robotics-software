@@ -32,17 +32,18 @@ public class SteppableRegionsCalculationModuleTest
 
       SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
       steppableRegionsCalculationModule.compute(heightMap);
-      List<List<SteppableRegion>> regions = steppableRegionsCalculationModule.getSteppableRegionsListCollection();
+      SteppableRegionsListCollection regions = steppableRegionsCalculationModule.getSteppableRegionsListCollection();
 
-      assertEquals(SteppableRegionsCalculationModule.yawDiscretizations, regions.size());
+      assertEquals(SteppableRegionsCalculationModule.yawDiscretizations, regions.getDiscretizations());
+
       for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
       {
-         assertTrue(regions.get(i).get(0).getConvexHullInRegionFrame().isPointInside(extremumValue, extremumValue));
-         assertTrue(regions.get(i).get(0).getConvexHullInRegionFrame().isPointInside(extremumValue, -extremumValue));
-         assertTrue(regions.get(i).get(0).getConvexHullInRegionFrame().isPointInside(-extremumValue, -extremumValue));
-         assertTrue(regions.get(i).get(0).getConvexHullInRegionFrame().isPointInside(-extremumValue, extremumValue));
+         assertTrue(regions.getSteppableRegions(i).getSteppableRegion(0).getConvexHullInRegionFrame().isPointInside(extremumValue, extremumValue));
+         assertTrue(regions.getSteppableRegions(i).getSteppableRegion(0).getConvexHullInRegionFrame().isPointInside(extremumValue, -extremumValue));
+         assertTrue(regions.getSteppableRegions(i).getSteppableRegion(0).getConvexHullInRegionFrame().isPointInside(-extremumValue, -extremumValue));
+         assertTrue(regions.getSteppableRegions(i).getSteppableRegion(0).getConvexHullInRegionFrame().isPointInside(-extremumValue, extremumValue));
 
-         assertEquals(1, regions.get(i).size());
+         assertEquals(1, regions.getSteppableRegions(i).getSteppableRegionsAsList());
       }
 
       LogTools.info("Tests passed!");

@@ -31,6 +31,7 @@ public class RDXSteppableRegionCalculatorDemo
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXPose3DGizmo ousterPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
+
    private RDXSteppableRegionsCalculatorUI steppableRegionsCalculatorUI;
 
    private final RemoteHeightMapUpdater heightMap;
