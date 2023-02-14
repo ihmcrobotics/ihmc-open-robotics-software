@@ -166,4 +166,9 @@ public class HandWrenchCalculator
    {
       return armJoints;
    }
+
+   public SideDependentList<double[]> getJointTorquesForGravity()
+   {
+      return jointTorquesForGravity;
+   }
 }
