@@ -3,6 +3,6 @@ uint16 image_width
 # Image height in pixels
 uint16 image_height
 # The raw data for the image
-byte[<=25000000] data
+byte[<=250000] data
 # The image format. Ordinal of OpenCVImageFormat
 uint16 format
