@@ -26,6 +26,7 @@ import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.odometry.RapidPatchesBasedICP;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.perception.tools.PerceptionPrintTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
@@ -66,7 +67,6 @@ public class PlanarRegionMappingHandler
 
    private boolean enableCapture = false;
    private boolean enableLiveMode = false;
-   private boolean modified = false;
 
    private static final File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
@@ -282,7 +282,7 @@ public class PlanarRegionMappingHandler
 
             if (framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
             {
-               modified = true;
+               planarRegionMap.setModified(true);
                updateMapWithNewRegions(framePlanarRegionsList);
             }
          }
@@ -324,8 +324,9 @@ public class PlanarRegionMappingHandler
       planarRegionMap.registerRegions(regions.getPlanarRegionsList());
 
       //planarRegionMap.submitRegionsUsingIterativeReduction(regions);
-      //latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
-      //latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
+
+      latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
+      latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
    }
 
    public boolean isCaptured()
@@ -385,7 +386,7 @@ public class PlanarRegionMappingHandler
                                                                                                           currentRegions.getPlanarRegionsList(),
                                                                                                           ICP_MAX_ITERATIONS);
 
-      LogTools.info("Current to Previous Transform: \n{}", currentToPreviousTransform);
+      PerceptionPrintTools.printTransform("ComputeICP", currentToPreviousTransform);
    }
 
    public void hardResetTheMap()

@@ -679,10 +679,10 @@ public class RotationTools
                maxIndex = i;
          }
 
-         LogTools.info("Max index: " + maxIndex);
-         LogTools.info("U = " + U);
-         LogTools.info("D = " + D);
-         LogTools.info("Vt = " + Vt);
+         //LogTools.info("Max index: " + maxIndex);
+         //LogTools.info("U = " + U);
+         //LogTools.info("D = " + D);
+         //LogTools.info("Vt = " + Vt);
 
          return new Quaternion(U.get(0, maxIndex), U.get(1, maxIndex), U.get(2, maxIndex), U.get(3, maxIndex));
       }

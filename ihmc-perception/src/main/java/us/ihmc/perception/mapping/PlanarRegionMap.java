@@ -4,6 +4,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
@@ -65,6 +66,7 @@ public class PlanarRegionMap
    private int uniqueIDtracker = 1;
 
    private final ArrayList<PlanarRegionKeyframe> keyframes = new ArrayList<>();
+   private PlanarRegionsList previousRegions = new PlanarRegionsList();
 
    private final TIntArrayList mapIDs = new TIntArrayList();
    private final TIntArrayList incomingIDs = new TIntArrayList();
@@ -651,17 +653,53 @@ public class PlanarRegionMap
 
    public void registerRegions(PlanarRegionsList regions)
    {
+      boolean isKeyframe = false;
+      RigidBodyTransform transformToPrevious = new RigidBodyTransform();
+
+      LogTools.info("Registering regions: " + regions.getNumberOfPlanarRegions() + " regions");
+
       if(!initialized)
       {
-         keyframes.add(new PlanarRegionKeyframe(regions, new RigidBodyTransform()));
+         keyframes.add(new PlanarRegionKeyframe(new RigidBodyTransform(), new RigidBodyTransform()));
+         finalMap.addPlanarRegionsList(regions);
+         previousRegions.addPlanarRegionsList(regions);
          initialized = true;
       }
       else
       {
-         PlanarRegionsList previousRegions = keyframes.get(keyframes.size() - 1).getPlanarRegionsList();
-         PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions, regions, 1);
+         transformToPrevious.set(PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions, regions.copy(), 6));
+
+         // Add a keyframe if either the translation or rotation is large enough in separate if blocks
+         Point3D euler = new Point3D();
+         Vector3DBasics translation = transformToPrevious.getTranslation();
+         transformToPrevious.getRotation().getEuler(euler);
+
+         PerceptionPrintTools.printTransform("ICP", transformToPrevious);
+
+         isKeyframe = (translation.norm() > 0.05f) || (euler.norm() > 0.05f);
+
+         if(translation.norm() > 0.1f)
+            LogTools.warn("[Keyframe] High Translation: " + translation.norm());
+
+         if(euler.norm() > 0.1f)
+            LogTools.warn("[Keyframe] High Rotation: " + euler.norm());
       }
 
+      if(isKeyframe)
+      {
+         previousRegions.clear();
+         previousRegions.addPlanarRegionsList(regions.copy());
+
+         regions.applyTransform(transformToPrevious);
+         regions.applyTransform(keyframes.get(keyframes.size() - 1).getTransformToWorld());
+
+         finalMap = crossReduceRegionsIteratively(finalMap, regions);
+
+         keyframes.add(new PlanarRegionKeyframe(transformToPrevious, keyframes.get(keyframes.size() - 1).getTransformToWorld()));
+
+         LogTools.info("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
+
+      }
    }
 
    private void processUniqueRegions(PlanarRegionsList map)
