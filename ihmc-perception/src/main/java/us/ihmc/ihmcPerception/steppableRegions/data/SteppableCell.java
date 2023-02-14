@@ -78,11 +78,6 @@ public class SteppableCell
       this.region = region;
    }
 
-   public boolean hasBorderRing()
-   {
-      return borderRing != null;
-   }
-
    public void setBorderRing(SteppableBorderRing borderRing)
    {
       this.borderRing = borderRing;

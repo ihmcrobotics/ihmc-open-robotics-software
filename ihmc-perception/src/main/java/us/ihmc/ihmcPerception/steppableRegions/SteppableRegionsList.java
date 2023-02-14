@@ -6,21 +6,17 @@ import java.util.List;
 public class SteppableRegionsList
 {
    private final double footYaw;
-   private final double footLength;
-   private final double footWidth;
 
    private final List<SteppableRegion> regions;
 
-   public SteppableRegionsList(double footYaw, double footLength, double footWidth)
+   public SteppableRegionsList(double footYaw)
    {
-      this(footYaw, footLength, footWidth, new ArrayList<>());
+      this(footYaw, new ArrayList<>());
    }
 
-   public SteppableRegionsList(double footYaw, double footLength, double footWidth, SteppableRegion... steppableRegions)
+   public SteppableRegionsList(double footYaw, SteppableRegion... steppableRegions)
    {
       this.footYaw = footYaw;
-      this.footLength = footLength;
-      this.footWidth = footWidth;
       regions = new ArrayList<>();
       for (SteppableRegion steppableRegion : steppableRegions)
       {
@@ -28,17 +24,15 @@ public class SteppableRegionsList
       }
    }
 
-   public SteppableRegionsList(double footYaw, double footLength, double footWidth, List<SteppableRegion> steppableRegions)
+   public SteppableRegionsList(double footYaw,  List<SteppableRegion> steppableRegions)
    {
       this.footYaw = footYaw;
-      this.footLength = footLength;
-      this.footWidth = footWidth;
       regions = new ArrayList<>(steppableRegions);
    }
 
    public SteppableRegionsList(SteppableRegionsList other)
    {
-      this(other.getFootYaw(), other.getFootLength(), other.getFootWidth(), other.getSteppableRegionsAsList());
+      this(other.getFootYaw(), other.getSteppableRegionsAsList());
    }
 
    public List<SteppableRegion> getSteppableRegionsAsList()
@@ -59,16 +53,6 @@ public class SteppableRegionsList
    public double getFootYaw()
    {
       return footYaw;
-   }
-
-   public double getFootLength()
-   {
-      return footLength;
-   }
-
-   public double getFootWidth()
-   {
-      return footWidth;
    }
 
    @Override

@@ -13,8 +13,7 @@ int32 NO_REGION_ID = -1
 
 int32 region_id -1
 float64 foot_yaw
-float64 foot_length
-float64 foot_width
+
 geometry_msgs/Point region_origin
 geometry_msgs/Quaternion region_orientation
 geometry_msgs/Vector3 region_normal

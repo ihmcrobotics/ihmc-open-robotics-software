@@ -1,21 +1,16 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.SteppableRegionMessage;
-import perception_msgs.msg.dds.SteppableRegionsListMessage;
+import perception_msgs.msg.dds.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
@@ -29,8 +24,6 @@ public class SteppableRegionMessageConverter
       SteppableRegionMessage message = new SteppableRegionMessage();
 
       message.setFootYaw(steppableRegion.getFootYaw());
-      message.setFootLength(steppableRegion.getFootLength());
-      message.setFootWidth(steppableRegion.getFootWidth());
       message.setRegionId(steppableRegion.getRegionId());
       message.getRegionOrigin().set(steppableRegion.getRegionOrigin());
       message.getRegionNormal().set(steppableRegion.getRegionNormal());
@@ -46,8 +39,7 @@ public class SteppableRegionMessageConverter
          vertexBuffer.add().set(steppableRegion.getConcaveHullInRegionFrame().getVertex(vertexIndex), 0.0);
       }
 
-      HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(steppableRegion.getLocalHeightMap());
-      message.getLocalHeightMap().set(heightMapMessage);
+      HeightMapMessageTools.toMessage(steppableRegion.getLocalHeightMap(), message.getLocalHeightMap());
 
       return message;
    }
@@ -79,14 +71,10 @@ public class SteppableRegionMessageConverter
       }
 
       double footYaw = message.getFootYaw();
-      double footLength = message.getFootLength();
-      double footWidth = message.getFootWidth();
       SteppableRegion steppableRegion = new SteppableRegion(transformToWorld.getTranslation(),
                                                             transformToWorld.getRotation(),
                                                             concaveHullVertices,
-                                                            footYaw,
-                                                            footLength,
-                                                            footWidth);
+                                                            footYaw);
       steppableRegion.setRegionId(message.getRegionId());
 
       if (message.getLocalHeightMap().getHeights().size() > 0)
@@ -103,44 +91,53 @@ public class SteppableRegionMessageConverter
       SteppableRegionsListMessage message = new SteppableRegionsListMessage();
 
       IDLSequence.Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      IDLSequence.Object<Point3D> originBuffer = message.getRegionOrigin();
+      IDLSequence.Object<Vector3D> normalBuffer = message.getRegionNormal();
+      IDLSequence.Object<Quaternion> orientationBuffer = message.getRegionOrientation();
       vertexBuffer.clear();
+      originBuffer.clear();
+      normalBuffer.clear();
+      orientationBuffer.clear();
 
-      double footYaw = steppableRegionsList.getSteppableRegionsAsList().get(0).getFootYaw();
-      double footLength = steppableRegionsList.getSteppableRegionsAsList().get(0).getFootLength();
-      double footWidth = steppableRegionsList.getSteppableRegionsAsList().get(0).getFootWidth();
+      IDLSequence.Integer regionIdBuffer = message.getRegionId();
+      IDLSequence.Integer hullSizeBuffer = message.getConcaveHullsSize();
+      regionIdBuffer.clear();
+      hullSizeBuffer.clear();
+
+      IDLSequence.Object<HeightMapMessage> heightMapBuffer = message.getLocalHeightMap();
+      heightMapBuffer.clear();
+
+      double footYaw = steppableRegionsList.getFootYaw();
 
       for (SteppableRegion steppableRegion : steppableRegionsList.getSteppableRegionsAsList())
       {
-         message.getRegionId().add(steppableRegion.getRegionId());
-         message.getRegionOrigin().add().set(steppableRegion.getRegionOrigin());
-         message.getRegionNormal().add().set(steppableRegion.getRegionNormal());
-         message.getRegionOrientation().add().set(steppableRegion.getRegionOrientation());
+         regionIdBuffer.add(steppableRegion.getRegionId());
+         originBuffer.add().set(steppableRegion.getRegionOrigin());
+         normalBuffer.add().set(steppableRegion.getRegionNormal());
+         orientationBuffer.add().set(steppableRegion.getRegionOrientation());
 
-         message.getConcaveHullsSize().add(steppableRegion.getConcaveHullInRegionFrame().getNumberOfVertices());
+         hullSizeBuffer.add(steppableRegion.getConcaveHullInRegionFrame().getNumberOfVertices());
 
          for (int vertexIndex = 0; vertexIndex < steppableRegion.getConcaveHullInRegionFrame().getNumberOfVertices(); vertexIndex++)
          {
             vertexBuffer.add().set(steppableRegion.getConcaveHullInRegionFrame().getVertex(vertexIndex), 0.0);
          }
 
-         if (MathTools.epsilonEquals(steppableRegion.getFootYaw(), footYaw, 1e-5))
+         if (!MathTools.epsilonEquals(steppableRegion.getFootYaw(), footYaw, 1e-5))
             throw new RuntimeException("Yaws are not equal.");
-         if (MathTools.epsilonEquals(steppableRegion.getFootLength(), footLength, 1e-5))
-            throw new RuntimeException("Lengths are not equal.");
-         if (MathTools.epsilonEquals(steppableRegion.getFootWidth(), footWidth, 1e-5))
-            throw new RuntimeException("Widths are not equal.");
 
-         HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(steppableRegion.getLocalHeightMap());
-         message.getLocalHeightMap().add().set(heightMapMessage);
+         HeightMapMessage heightMapMessage = heightMapBuffer.add();
+         if (steppableRegion.getLocalHeightMap() != null)
+            HeightMapMessageTools.toMessage(steppableRegion.getLocalHeightMap(), heightMapMessage);
+         else
+            HeightMapMessageTools.clear(heightMapMessage);
       }
-      message.setFootLength(footLength);
-      message.setFootLength(footWidth);
       message.setFootYaw(footYaw);
 
       return message;
    }
 
-   public static SteppableRegionsList convertToPlanarRegionsList(SteppableRegionsListMessage message)
+   public static SteppableRegionsList convertToSteppableRegionsList(SteppableRegionsListMessage message)
    {
       if (message == null)
          return null;
@@ -155,8 +152,6 @@ public class SteppableRegionMessageConverter
 
       int upperBound = 0;
       double footYaw = message.getFootYaw();
-      double footLength = message.getFootLength();
-      double footWidth = message.getFootWidth();
 
       for (int regionIndex = 0; regionIndex < message.getConcaveHullsSize().size(); regionIndex++)
       {
@@ -183,13 +178,149 @@ public class SteppableRegionMessageConverter
          SteppableRegion steppableRegion = new SteppableRegion(transformToWorld.getTranslation(),
                                                                     transformToWorld.getRotation(),
                                                                     concaveHullVertices,
-                                                                    footYaw,
-                                                                    footLength,
-                                                                    footWidth);
+                                                                    footYaw);
          steppableRegion.setRegionId(message.getRegionId().get(regionIndex));
          steppableRegions.add(steppableRegion);
+
+         if (message.getLocalHeightMap().get(regionIndex).getHeights().size() > 0)
+         {
+            HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(message.getLocalHeightMap().get(regionIndex));
+            steppableRegion.setLocalHeightMap(heightMapData);
+         }
       }
 
-      return new SteppableRegionsList(footYaw, footLength, footWidth, steppableRegions);
+      return new SteppableRegionsList(footYaw, steppableRegions);
+   }
+
+   public static SteppableRegionsListCollectionMessage convertToSteppableRegionsListCollectionMessage(SteppableRegionsListCollection steppableRegionListCollection)
+   {
+      SteppableRegionsListCollectionMessage message = new SteppableRegionsListCollectionMessage();
+      convertToSteppableRegionsListCollectionMessage(steppableRegionListCollection, message);
+
+      return message;
+   }
+
+   public static void convertToSteppableRegionsListCollectionMessage(SteppableRegionsListCollection steppableRegionListCollection,
+                                                                     SteppableRegionsListCollectionMessage messageToPack)
+   {
+      IDLSequence.Object<Point3D> vertexBuffer = messageToPack.getVertexBuffer();
+      IDLSequence.Object<Point3D> originBuffer = messageToPack.getRegionOrigin();
+      IDLSequence.Object<Vector3D> normalBuffer = messageToPack.getRegionNormal();
+      IDLSequence.Object<Quaternion> orientationBuffer = messageToPack.getRegionOrientation();
+      vertexBuffer.clear();
+      originBuffer.clear();
+      normalBuffer.clear();
+      orientationBuffer.clear();
+
+      IDLSequence.Integer regionIdBuffer = messageToPack.getRegionId();
+      IDLSequence.Integer numberOfRegionsBuffer = messageToPack.getRegionsPerYaw();
+      IDLSequence.Integer concaveHullSizeBuffer = messageToPack.getConcaveHullsSize();
+      IDLSequence.Double footYawBuffer = messageToPack.getFootYaw();
+      regionIdBuffer.clear();
+      numberOfRegionsBuffer.clear();
+      concaveHullSizeBuffer.clear();
+      footYawBuffer.clear();
+
+      IDLSequence.Object<HeightMapMessage> heightMapBuffer = messageToPack.getLocalHeightMap();
+      heightMapBuffer.clear();
+
+      for (int yawIndex = 0; yawIndex < steppableRegionListCollection.getDiscretizations(); yawIndex++)
+      {
+         SteppableRegionsList steppableRegionsList = steppableRegionListCollection.getSteppableRegions(yawIndex);
+         double footYaw = steppableRegionsList.getFootYaw();
+
+         numberOfRegionsBuffer.add(steppableRegionsList.getNumberOfSteppableRegions());
+         footYawBuffer.add(footYaw);
+
+         for (SteppableRegion steppableRegion : steppableRegionsList.getSteppableRegionsAsList())
+         {
+            regionIdBuffer.add(steppableRegion.getRegionId());
+            originBuffer.add().set(steppableRegion.getRegionOrigin());
+            normalBuffer.add().set(steppableRegion.getRegionNormal());
+            orientationBuffer.add().set(steppableRegion.getRegionOrientation());
+
+            concaveHullSizeBuffer.add(steppableRegion.getConcaveHullInRegionFrame().getNumberOfVertices());
+
+            for (int vertexIndex = 0; vertexIndex < steppableRegion.getConcaveHullInRegionFrame().getNumberOfVertices(); vertexIndex++)
+            {
+               vertexBuffer.add().set(steppableRegion.getConcaveHullInRegionFrame().getVertex(vertexIndex), 0.0);
+            }
+
+            if (!MathTools.epsilonEquals(steppableRegion.getFootYaw(), footYaw, 1e-5))
+               throw new RuntimeException("Yaws are not equal.");
+
+            HeightMapMessage heightMapMessage = heightMapBuffer.add();
+            if (steppableRegion.getLocalHeightMap() != null)
+               HeightMapMessageTools.toMessage(steppableRegion.getLocalHeightMap(), heightMapMessage);
+            else
+               HeightMapMessageTools.clear(heightMapMessage);
+         }
+      }
+   }
+
+   public static SteppableRegionsListCollection convertToSteppableRegionsListCollection(SteppableRegionsListCollectionMessage message)
+   {
+      int yaws = message.getFootYaw().size();
+
+      SteppableRegionsListCollection collection = new SteppableRegionsListCollection(yaws);
+
+      IDLSequence.Object<Point3D> vertexBuffer = message.getVertexBuffer();
+      IDLSequence.Object<Vector3D> normals = message.getRegionNormal();
+      IDLSequence.Object<Point3D> origins = message.getRegionOrigin();
+
+      int vertexIndex = 0;
+      int vertexUpperBound = 0;
+
+      int regionIndex = 0;
+      int regionUpperBound = 0;
+
+      for (int yawIndex = 0; yawIndex < yaws; yawIndex++)
+      {
+         regionUpperBound += message.getRegionsPerYaw().get(yawIndex);
+         double footYaw = message.getFootYaw().get(yawIndex);
+
+         List<SteppableRegion> steppableRegions = new ArrayList<>();
+
+         for (; regionIndex < regionUpperBound; regionIndex++)
+         {
+            RigidBodyTransform transformToWorld = new RigidBodyTransform();
+            if (message.getRegionOrientation().isEmpty()
+                || Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getAngle())) < 1.0e-3)
+            {
+               AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normals.get(regionIndex));
+               transformToWorld.set(regionOrientation, origins.get(regionIndex));
+            }
+            else
+            {
+               transformToWorld.set(message.getRegionOrientation().get(regionIndex), message.getRegionOrigin().get(regionIndex));
+            }
+
+            vertexUpperBound += message.getConcaveHullsSize().get(regionIndex);
+            List<Point2D> concaveHullVertices = new ArrayList<>();
+
+            for (; vertexIndex < vertexUpperBound; vertexIndex++)
+            {
+               concaveHullVertices.add(new Point2D(vertexBuffer.get(vertexIndex)));
+            }
+
+            SteppableRegion steppableRegion = new SteppableRegion(transformToWorld.getTranslation(),
+                                                                  transformToWorld.getRotation(),
+                                                                  concaveHullVertices,
+                                                                  footYaw);
+            steppableRegion.setRegionId(message.getRegionId().get(regionIndex));
+            steppableRegions.add(steppableRegion);
+
+            if (message.getLocalHeightMap().get(regionIndex).getHeights().size() > 0)
+            {
+               HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(message.getLocalHeightMap().get(regionIndex));
+               steppableRegion.setLocalHeightMap(heightMapData);
+            }
+         }
+
+         SteppableRegionsList steppableRegionsList = new SteppableRegionsList(footYaw, steppableRegions);
+         collection.setSteppableRegions(yawIndex, steppableRegionsList);
+      }
+
+      return collection;
    }
 }

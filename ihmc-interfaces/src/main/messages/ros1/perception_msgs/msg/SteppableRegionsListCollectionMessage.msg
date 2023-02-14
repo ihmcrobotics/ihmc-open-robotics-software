@@ -8,12 +8,6 @@ uint32 sequence_id
 # Approximate last update time
 ihmc_common_msgs/InstantMessage last_updated
 
-# Foot length for the corresponding regions
-float64 foot_length
-
-# Foot width for the corresponding regions
-float64 foot_width
-
 # foot yaw for the corresponding regions
 float64[] foot_yaw
 

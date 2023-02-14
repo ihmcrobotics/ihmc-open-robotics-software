@@ -8,26 +8,22 @@ uint32 sequence_id
 # Approximate last update time
 ihmc_common_msgs/InstantMessage last_updated
 
-# Foot length for the corresponding regions
-float64 foot_length
-# Foot width for the corresponding regions
-float64 foot_width
 # Foot yaw for the corresponding regions
 float64 foot_yaw
 
 # ID number referring to each steppable region, it should be unique.
-int32[<=3000] region_id
+int32[<=1000] region_id
 # The coordinates in world of the origin of each steppable region
-geometry_msgs/Point[<=3000] region_origin
+geometry_msgs/Point[<=1000] region_origin
 # The orientation with respect to world of each steppable region.
-geometry_msgs/Quaternion[<=3000] region_orientation
+geometry_msgs/Quaternion[<=1000] region_orientation
 # The normal expressed in world of each steppable region.
-geometry_msgs/Vector3[<=3000] region_normal
+geometry_msgs/Vector3[<=1000] region_normal
 
 # Indicates for each planar region the number of vertices for the concave hull.
-int32[<=3000] concave_hulls_size
+int32[<=100] concave_hulls_size
 # Single buffer used to store for each planar the vertices of the concave hull and the convex polygons.
-geometry_msgs/Point[<=1000] vertex_buffer
+geometry_msgs/Point[<=3000] vertex_buffer
 
 # Height map message used for each of the concave hulls
-HeightMapMessage[<=3000] local_height_map
+HeightMapMessage[<=100] local_height_map

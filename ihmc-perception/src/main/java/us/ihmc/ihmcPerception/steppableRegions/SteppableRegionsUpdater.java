@@ -2,6 +2,7 @@ package us.ihmc.ihmcPerception.steppableRegions;
 
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
+import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -34,7 +35,7 @@ public class SteppableRegionsUpdater
       this.latestParameters.set(latestParameters);
    }
 
-   public void addSteppableRegionListCollectionOutputConsumer(Consumer<SteppableRegionsListCollection> outputConsumer)
+   public void addSteppableRegionListCollectionOutputConsumer(Consumer<SteppableRegionsListCollectionMessage> outputConsumer)
    {
       steppableRegionsCalculationModule.addSteppableRegionListCollectionOutputConsumer(outputConsumer);
    }

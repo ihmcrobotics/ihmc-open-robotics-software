@@ -8,6 +8,7 @@ import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
+import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegion;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsListCollection;
 import us.ihmc.log.LogTools;
@@ -32,7 +33,7 @@ public class RDXSteppableRegionsCalculatorUI
 
    private final OpenCLManager openCLManager = new OpenCLManager();
 
-   private final AtomicReference<SteppableRegionsListCollection> latestSteppableRegionsToRender = new AtomicReference<>();
+   private final AtomicReference<SteppableRegionsListCollectionMessage> latestSteppableRegionsToRender = new AtomicReference<>();
    private final AtomicReference<SteppableRegionDebugImagesMessage> latestSteppableRegionDebugImagesToRender = new AtomicReference<>();
 
    private final ImBoolean drawPatches = new ImBoolean(true);
@@ -70,7 +71,7 @@ public class RDXSteppableRegionsCalculatorUI
    volatile boolean processing = false;
    volatile boolean needToDraw = false;
 
-   public void setLatestSteppableRegionsToRender(SteppableRegionsListCollection steppableRegionsListCollection)
+   public void setLatestSteppableRegionsToRender(SteppableRegionsListCollectionMessage steppableRegionsListCollection)
    {
       latestSteppableRegionsToRender.set(steppableRegionsListCollection);
    }
@@ -120,14 +121,11 @@ public class RDXSteppableRegionsCalculatorUI
 
    public void generateSteppableRegionsMesh()
    {
-      SteppableRegionsListCollection steppableRegionsListCollection = latestSteppableRegionsToRender.getAndSet(null);
-      if (steppableRegionsListCollection == null)
+      SteppableRegionsListCollectionMessage message = latestSteppableRegionsToRender.getAndSet(null);
+      if (message == null)
          return;
 
-      List<SteppableRegion> regionsToView = steppableRegionsListCollection.getSteppableRegions(0)
-                                                   .getSteppableRegionsAsList();
-      steppableRegionGraphic.generateMeshesAsync(regionsToView);
-      LogTools.info("Found " + regionsToView.size() + " regions");
+      steppableRegionGraphic.generateMeshesAsync(message);
       needToDraw = true;
    }
 

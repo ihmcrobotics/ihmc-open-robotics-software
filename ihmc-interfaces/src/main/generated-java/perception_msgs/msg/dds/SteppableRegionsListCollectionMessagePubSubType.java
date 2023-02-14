@@ -44,31 +44,27 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -88,12 +84,6 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
 
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getLastUpdated(), current_alignment);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getFootYaw().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -145,43 +135,39 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
       cdr.write_type_4(data.getSequenceId());
 
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastUpdated(), cdr);
-      cdr.write_type_6(data.getFootLength());
-
-      cdr.write_type_6(data.getFootWidth());
-
-      if(data.getFootYaw().size() <= 3000)
+      if(data.getFootYaw().size() <= 100)
       cdr.write_type_e(data.getFootYaw());else
           throw new RuntimeException("foot_yaw field exceeds the maximum length");
 
-      if(data.getRegionsPerYaw().size() <= 3000)
+      if(data.getRegionsPerYaw().size() <= 100)
       cdr.write_type_e(data.getRegionsPerYaw());else
           throw new RuntimeException("regions_per_yaw field exceeds the maximum length");
 
-      if(data.getRegionId().size() <= 3000)
+      if(data.getRegionId().size() <= 1000)
       cdr.write_type_e(data.getRegionId());else
           throw new RuntimeException("region_id field exceeds the maximum length");
 
-      if(data.getRegionOrigin().size() <= 3000)
+      if(data.getRegionOrigin().size() <= 1000)
       cdr.write_type_e(data.getRegionOrigin());else
           throw new RuntimeException("region_origin field exceeds the maximum length");
 
-      if(data.getRegionOrientation().size() <= 3000)
+      if(data.getRegionOrientation().size() <= 1000)
       cdr.write_type_e(data.getRegionOrientation());else
           throw new RuntimeException("region_orientation field exceeds the maximum length");
 
-      if(data.getRegionNormal().size() <= 3000)
+      if(data.getRegionNormal().size() <= 1000)
       cdr.write_type_e(data.getRegionNormal());else
           throw new RuntimeException("region_normal field exceeds the maximum length");
 
-      if(data.getConcaveHullsSize().size() <= 3000)
+      if(data.getConcaveHullsSize().size() <= 100)
       cdr.write_type_e(data.getConcaveHullsSize());else
           throw new RuntimeException("concave_hulls_size field exceeds the maximum length");
 
-      if(data.getVertexBuffer().size() <= 1000)
+      if(data.getVertexBuffer().size() <= 3000)
       cdr.write_type_e(data.getVertexBuffer());else
           throw new RuntimeException("vertex_buffer field exceeds the maximum length");
 
-      if(data.getLocalHeightMap().size() <= 3000)
+      if(data.getLocalHeightMap().size() <= 100)
       cdr.write_type_e(data.getLocalHeightMap());else
           throw new RuntimeException("local_height_map field exceeds the maximum length");
 
@@ -192,10 +178,6 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
       data.setSequenceId(cdr.read_type_4());
       	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getLastUpdated(), cdr);	
-      data.setFootLength(cdr.read_type_6());
-      	
-      data.setFootWidth(cdr.read_type_6());
-      	
       cdr.read_type_e(data.getFootYaw());	
       cdr.read_type_e(data.getRegionsPerYaw());	
       cdr.read_type_e(data.getRegionId());	
@@ -214,8 +196,6 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("last_updated", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastUpdated());
 
-      ser.write_type_6("foot_length", data.getFootLength());
-      ser.write_type_6("foot_width", data.getFootWidth());
       ser.write_type_e("foot_yaw", data.getFootYaw());
       ser.write_type_e("regions_per_yaw", data.getRegionsPerYaw());
       ser.write_type_e("region_id", data.getRegionId());
@@ -233,8 +213,6 @@ public class SteppableRegionsListCollectionMessagePubSubType implements us.ihmc.
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("last_updated", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastUpdated());
 
-      data.setFootLength(ser.read_type_6("foot_length"));
-      data.setFootWidth(ser.read_type_6("foot_width"));
       ser.read_type_e("foot_yaw", data.getFootYaw());
       ser.read_type_e("regions_per_yaw", data.getRegionsPerYaw());
       ser.read_type_e("region_id", data.getRegionId());
