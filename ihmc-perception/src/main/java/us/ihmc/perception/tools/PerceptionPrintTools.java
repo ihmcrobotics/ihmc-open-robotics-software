@@ -1,6 +1,8 @@
 package us.ihmc.perception.tools;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -42,5 +44,13 @@ public class PerceptionPrintTools
                                   region.getNormal().getY(),
                                   region.getNormal().getZ(),
                                   region.getNormal().dot(region.getPoint())));
+   }
+
+   public static void printTransform(String tag, RigidBodyTransform transform)
+   {
+      Point3D euler = new Point3D();
+      transform.getRotation().getEuler(euler);
+
+      LogTools.info("[{}] Translation: {}, Rotation: {}", tag, transform.getTranslation(), euler);
    }
 }

@@ -8,6 +8,7 @@ import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -19,6 +20,7 @@ import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RotationTools;
 
@@ -159,7 +161,8 @@ public class PlaneRegistrationTools
       for (int i = 0; i < maxIterations; i++)
       {
          matches.clear();
-         PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, 0.5f, 0.8f, 0.4f, 0.3f);
+         PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, 0.5f,
+                                                            0.7f, 0.4f, 0.3f);
          transform = PlaneRegistrationTools.computeQuaternionAveragingTransform(previousRegions, currentRegions, matches);
          currentRegions.applyTransform(transform);
          transformToReturn.multiply(transform);
@@ -226,8 +229,8 @@ public class PlaneRegistrationTools
    }
 
    public static ArrayList<Point3DReadOnly> findTranslationEstimates(PlanarRegionsList previousRegions,
-                                                                  PlanarRegionsList currentRegions,
-                                                                  HashMap<Integer, Integer> matches)
+                                                                     PlanarRegionsList currentRegions,
+                                                                     HashMap<Integer, Integer> matches)
    {
       ArrayList<Point3DReadOnly> translations = new ArrayList<>();
 

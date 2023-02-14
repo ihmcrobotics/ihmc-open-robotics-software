@@ -28,7 +28,7 @@ public class RDXPlanarRegionMappingDemo
    private static final File regionLogDirectory = new File(IHMCCommonPaths.LOGS_DIRECTORY + "/");
 
    private PlanarRegionMappingHandler mappingManager;
-   private RDXPlanarRegionMappingUIPanel planarRegionMappingUI;
+   private RDXPlanarRegionMappingUIPanel mappingPanel;
 
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
@@ -70,10 +70,10 @@ public class RDXPlanarRegionMappingDemo
             mapPlanarRegionsGraphic.update();
             mapPlanarRegionsGraphic.setupTooltip(baseUI.getPrimary3DPanel(), "");
 
-            planarRegionMappingUI = new RDXPlanarRegionMappingUIPanel("Filtered Map", mappingManager);
-            baseUI.getImGuiPanelManager().addPanel(planarRegionMappingUI.getImGuiPanel());
+            mappingPanel = new RDXPlanarRegionMappingUIPanel("Filtered Map", mappingManager);
+            baseUI.getImGuiPanelManager().addPanel(mappingPanel.getImGuiPanel());
 
-            baseUI.getPrimaryScene().addRenderableProvider(planarRegionMappingUI, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(mappingPanel, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(mapPlanarRegionsGraphic::getRenderables, RDXSceneLevel.VIRTUAL);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer::getRenderables, RDXSceneLevel.VIRTUAL);
 
@@ -93,8 +93,11 @@ public class RDXPlanarRegionMappingDemo
                mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
                mapPlanarRegionsGraphic.update();
 
-               pointCloudRenderer.setPointsToRender(mappingManager.getRapidRegionsExtractor().getDebugger().getDebugPoints(), Color.GRAY);
-               pointCloudRenderer.updateMesh();
+               if(mappingPanel.getPointCloudRenderEnabled())
+               {
+                  pointCloudRenderer.setPointsToRender(mappingManager.getRapidRegionsExtractor().getDebugger().getDebugPoints(), Color.GRAY);
+                  pointCloudRenderer.updateMesh();
+               }
             }
          }
 
@@ -127,11 +130,11 @@ public class RDXPlanarRegionMappingDemo
 
                graphicsInitialized = true;
 
-               if (planarRegionMappingUI.isCaptured())
+               if (mappingPanel.isCaptured())
                {
-                  LogTools.info("Filtered Map Panel Captured: {}", planarRegionMappingUI.isCaptured());
+                  LogTools.info("Filtered Map Panel Captured: {}", mappingPanel.isCaptured());
                   mappingManager.setCaptured(true);
-                  planarRegionMappingUI.setCaptured(false);
+                  mappingPanel.setCaptured(false);
                }
 
                //rapidRegionsUIPanel.renderImGuiWidgets();

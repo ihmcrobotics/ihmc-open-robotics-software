@@ -33,6 +33,7 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    private RDXPlanarRegionsGraphic previousRegionsGraphic = new RDXPlanarRegionsGraphic();
    private RDXPlanarRegionsGraphic currentRegionsGraphic = new RDXPlanarRegionsGraphic();
 
+   private ImBoolean renderPointCloud = new ImBoolean(false);
    private ImInt icpPreviousIndex = new ImInt(10);
    private ImInt icpCurrentIndex = new ImInt(14);
   
@@ -62,6 +63,9 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
                mappingManager.resetMap();
             if (ImGui.button("Hard reset map"))
                mappingManager.hardResetTheMap();
+
+            ImGui.checkbox("Render Bounding Box", renderBoundingBoxEnabled);
+
             ImGui.endTabItem();
          }
 
@@ -155,6 +159,11 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    public ImGuiPanel getImGuiPanel()
    {
       return imGuiPanel;
+   }
+
+   public boolean getPointCloudRenderEnabled()
+   {
+      return renderPointCloud.get();
    }
 
    @Override

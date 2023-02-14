@@ -5,22 +5,24 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionKeyframe
 {
-   private PlanarRegionsList planarRegionsList;
-   private RigidBodyTransform transformToWorld;
+   private RigidBodyTransform transformToWorld = new RigidBodyTransform();
+   private RigidBodyTransform transformToPrevious = new RigidBodyTransform();
 
-   public PlanarRegionKeyframe(PlanarRegionsList planarRegionsList, RigidBodyTransform transformToWorld)
+   public PlanarRegionKeyframe(RigidBodyTransform transformToPrevious, RigidBodyTransform previousToWorldTransform)
    {
-      this.planarRegionsList = planarRegionsList;
-      this.transformToWorld = transformToWorld;
-   }
+      this.transformToPrevious.set(transformToPrevious);
 
-   public PlanarRegionsList getPlanarRegionsList()
-   {
-      return planarRegionsList;
+      this.transformToWorld.set(transformToPrevious);
+      this.transformToWorld.multiply(previousToWorldTransform);
    }
 
    public RigidBodyTransform getTransformToWorld()
    {
       return transformToWorld;
+   }
+
+   public RigidBodyTransform getTransformToPrevious()
+   {
+      return transformToPrevious;
    }
 }
