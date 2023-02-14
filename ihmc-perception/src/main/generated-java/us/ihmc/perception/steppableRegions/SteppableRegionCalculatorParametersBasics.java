@@ -42,4 +42,24 @@ public interface SteppableRegionCalculatorParametersBasics extends SteppableRegi
    {
       set(SteppableRegionCalculatorParameters.cliffEndHeightToAvoid, cliffEndHeightToAvoid);
    }
+
+   default void setMaxSearchDepthForRegions(int maxSearchDepthForRegions)
+   {
+      set(SteppableRegionCalculatorParameters.maxSearchDepthForRegions, maxSearchDepthForRegions);
+   }
+
+   default void setFractionOfCellToExpandSmallRegions(double fractionOfCellToExpandSmallRegions)
+   {
+      set(SteppableRegionCalculatorParameters.fractionOfCellToExpandSmallRegions, fractionOfCellToExpandSmallRegions);
+   }
+
+   default void setMaxInteriorPointsToInclude(int maxInteriorPointsToInclude)
+   {
+      set(SteppableRegionCalculatorParameters.maxInteriorPointsToInclude, maxInteriorPointsToInclude);
+   }
+
+   default void setMinCellsInARegion(int minCellsInARegion)
+   {
+      set(SteppableRegionCalculatorParameters.minCellsInARegion, minCellsInARegion);
+   }
 }

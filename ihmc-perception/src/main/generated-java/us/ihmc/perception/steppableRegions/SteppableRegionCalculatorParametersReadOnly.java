@@ -44,4 +44,24 @@ public interface SteppableRegionCalculatorParametersReadOnly extends StoredPrope
    {
       return get(cliffEndHeightToAvoid);
    }
+
+   default int getMaxSearchDepthForRegions()
+   {
+      return get(maxSearchDepthForRegions);
+   }
+
+   default double getFractionOfCellToExpandSmallRegions()
+   {
+      return get(fractionOfCellToExpandSmallRegions);
+   }
+
+   default int getMaxInteriorPointsToInclude()
+   {
+      return get(maxInteriorPointsToInclude);
+   }
+
+   default int getMinCellsInARegion()
+   {
+      return get(minCellsInARegion);
+   }
 }

@@ -206,15 +206,15 @@ public class SteppableRegionsCalculationModule
                snapNormalXImages.get(yawValue),
                snapNormalYImages.get(yawValue),
                snapNormalZImages.get(yawValue),
-               steppabilityConnections.get(yawValue));
+               steppabilityConnections.get(yawValue),
+               parameters);
          polygonizerParameters.setLengthThreshold(0.4 * heightMapData.getGridResolutionXY()); // this is critical to prevent it from filtering small regions
          SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
                                                                                           polygonizerParameters,
+                                                                                          parameters,
                                                                                           environment,
                                                                                           heightMapData,
-                                                                                          yawAngle,
-                                                                                          footLength,
-                                                                                          footWidth);
+                                                                                          yawAngle);
 
          this.regionEnvironments.add(environment);
          this.regionCollection.setSteppableRegions(yawValue, regions);
