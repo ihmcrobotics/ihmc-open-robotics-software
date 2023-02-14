@@ -87,7 +87,7 @@ public class PlanarRegionMappingHandler
    private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
 
    private int planarRegionListIndex = 0;
-   private int perceptionLogIndex = 140;
+   private int perceptionLogIndex = 40;
 
    private String sensorLogChannelName;
    private BytedecoImage depth16UC1Image;
@@ -385,7 +385,7 @@ public class PlanarRegionMappingHandler
       RigidBodyTransform currentToPreviousTransform = new RigidBodyTransform();
       boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions.getPlanarRegionsList(),
                                                                          currentRegions.getPlanarRegionsList(),
-                                                                         ICP_MAX_ITERATIONS, currentToPreviousTransform);
+                                                                         ICP_MAX_ITERATIONS, currentToPreviousTransform, getParameters());
 
       PerceptionPrintTools.printTransform("ComputeICP", currentToPreviousTransform);
    }

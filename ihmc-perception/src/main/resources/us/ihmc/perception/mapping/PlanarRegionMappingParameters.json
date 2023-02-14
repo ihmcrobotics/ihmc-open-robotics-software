@@ -8,5 +8,12 @@
   "Minimum planar region area" : 0.8,
   "Minimum bounding box size" : 0.1,
   "Plane noise variance" : 0.001,
-  "Odometry noise variance" : 0.0001
+  "Odometry noise variance" : 0.0001,
+  "Termination ratio" : 0.001,
+  "ICP max iterations" : 10,
+  "Max registration error" : 0.1,
+  "Best match angular threshold": 0.7,
+  "Best match distance threshold": 0.4,
+  "Best minimum overlap threshold" : 0.5,
+  "ICP min matches" : 4
 }

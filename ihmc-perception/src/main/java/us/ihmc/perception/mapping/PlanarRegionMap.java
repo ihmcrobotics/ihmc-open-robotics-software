@@ -146,7 +146,7 @@ public class PlanarRegionMap
       if (initialized)
       {
          currentToPreviousSensorTransform.setIdentity();
-         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, frameRegions.getPlanarRegionsList(), 1, currentToPreviousSensorTransform);
+         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, frameRegions.getPlanarRegionsList(), 1, currentToPreviousSensorTransform, parameters);
 
          //currentToPreviousSensorTransform.set(frameRegions.getSensorToWorldFrameTransform());
          //currentToPreviousSensorTransform.multiply(worldToPreviousSensorFrameTransform);
@@ -671,7 +671,7 @@ public class PlanarRegionMap
       {
          transformToPrevious.setIdentity();
          LogTools.info("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
-         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions, regions.copy(), 6, transformToPrevious);
+         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions, regions.copy(), 6, transformToPrevious, parameters);
 
          if(!valid)
          {
