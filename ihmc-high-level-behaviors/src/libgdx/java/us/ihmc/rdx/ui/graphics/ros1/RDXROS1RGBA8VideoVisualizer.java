@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.graphics.ros1;
 import imgui.internal.ImGui;
 import sensor_msgs.Image;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXROS1VisualizerInterface;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
@@ -22,7 +22,7 @@ public class RDXROS1RGBA8VideoVisualizer extends RDXVisualizer implements RDXROS
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ResettableExceptionHandlingExecutorService threadQueue;
    private final Runnable doReceiveMessageOnThread = this::doReceiveMessageOnThread;
-   private final ImGuiVideoPanel videoPanel;
+   private final RDXImagePanel imagePanel;
    private final GuidedSwapReference<RDXROS1RGBA8VideoVisualizerData> dataSwapReferenceManager
                                               = new GuidedSwapReference<>(RDXROS1RGBA8VideoVisualizerData::new,
                                                                           this::processOnLowPriorityThread,
@@ -35,7 +35,7 @@ public class RDXROS1RGBA8VideoVisualizer extends RDXVisualizer implements RDXROS
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       boolean flipY = false;
-      videoPanel = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic), flipY);
+      imagePanel = new RDXImagePanel(ImGuiTools.uniqueLabel(this, topic), flipY);
    }
 
    @Override
@@ -79,7 +79,7 @@ public class RDXROS1RGBA8VideoVisualizer extends RDXVisualizer implements RDXROS
 
    private void updateImagePanelOnUIThread(RDXROS1RGBA8VideoVisualizerData data)
    {
-      data.updateOnUIThread(videoPanel);
+      data.updateOnUIThread(imagePanel);
    }
 
    @Override
@@ -97,9 +97,9 @@ public class RDXROS1RGBA8VideoVisualizer extends RDXVisualizer implements RDXROS
    }
 
    @Override
-   public ImGuiVideoPanel getPanel()
+   public RDXImagePanel getPanel()
    {
-      return videoPanel;
+      return imagePanel;
    }
 
    @Override

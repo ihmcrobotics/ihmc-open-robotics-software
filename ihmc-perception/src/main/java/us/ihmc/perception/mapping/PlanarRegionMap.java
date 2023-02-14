@@ -696,7 +696,10 @@ public class PlanarRegionMap
 
    public void destroy()
    {
-      factorGraph.clearISAM2();
+      if (factorGraph != null)
+      {
+         factorGraph.clearISAM2();
+      }
    }
 
    public RigidBodyTransform getOptimalSensorToWorldTransform()

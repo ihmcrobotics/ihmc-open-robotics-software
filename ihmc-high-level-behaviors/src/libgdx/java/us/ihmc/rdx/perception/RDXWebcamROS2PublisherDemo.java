@@ -83,7 +83,7 @@ public class RDXWebcamROS2PublisherDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   webcamReader.create();
-                  baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   yuv420Image = new Mat();

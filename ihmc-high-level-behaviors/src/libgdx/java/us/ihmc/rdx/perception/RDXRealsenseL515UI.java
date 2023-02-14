@@ -41,8 +41,8 @@ public class RDXRealsenseL515UI
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense l515;
-   private RDXCVImagePanel depthImagePanel;
-   private RDXCVImagePanel colorImagePanel;
+   private RDXBytedecoImagePanel depthImagePanel;
+   private RDXBytedecoImagePanel colorImagePanel;
    private Mat depthU16C1Image;
    private Mat colorRGBImageMat;
    private BytedecoImage colorRGBImage;
@@ -111,13 +111,13 @@ public class RDXRealsenseL515UI
                      depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
 
                      depth32FC1Image = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_32FC1);
-                     depthImagePanel = new RDXCVImagePanel("L515 Depth", l515.getDepthWidth(), l515.getDepthHeight());
-                     baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getVideoPanel());
+                     depthImagePanel = new RDXBytedecoImagePanel("L515 Depth", l515.getDepthWidth(), l515.getDepthHeight());
+                     baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getImagePanel());
 
 //                     colorRGBImageMat = new Mat(l515.getColorHeight(), l515.getColorWidth(), opencv_core.CV_8UC3, l515.getColorFrameData());
                      colorRGBImage = new BytedecoImage(l515.getColorWidth(), l515.getColorHeight(), opencv_core.CV_8UC3);
-                     colorImagePanel = new RDXCVImagePanel("L515 Color", l515.getColorWidth(), l515.getColorHeight());
-                     baseUI.getImGuiPanelManager().addPanel(colorImagePanel.getVideoPanel());
+                     colorImagePanel = new RDXBytedecoImagePanel("L515 Color", l515.getColorWidth(), l515.getColorHeight());
+                     baseUI.getImGuiPanelManager().addPanel(colorImagePanel.getImagePanel());
 
                      baseUI.getLayoutManager().reloadLayout();
 
