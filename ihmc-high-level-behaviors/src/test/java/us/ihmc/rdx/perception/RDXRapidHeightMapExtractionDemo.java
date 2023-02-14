@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
+import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
@@ -10,6 +11,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -29,6 +31,8 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.thread.Activator;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 
@@ -48,8 +52,14 @@ public class RDXRapidHeightMapExtractionDemo
 
    private final RapidHeightMapExtractor rapidHeightMapUpdater = new RapidHeightMapExtractor();
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
-   ;
+
+   private final Notification userChangedIndex = new Notification();
+   private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor
+         = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress", true, 1);
+
    private ImInt frameIndex = new ImInt(0);
+   private ImFloat pitchAngle = new ImFloat(0.0f);
+
    private final Pose3D cameraPose = new Pose3D();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
 
@@ -119,10 +129,13 @@ public class RDXRapidHeightMapExtractionDemo
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
                }
 
-               if (initialized)
+               if(userChangedIndex.poll())
                {
-                  // For real-time update
-                  //                  updateHeightMap();
+                  loadAndDecompressThreadExecutor.clearQueueAndExecute(() ->
+                  {
+                     perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), loadedDepthImage.getBytedecoOpenCVMat());
+                  });
+                  updateHeightMap();
                }
             }
 
@@ -137,6 +150,8 @@ public class RDXRapidHeightMapExtractionDemo
                                               0,
                                               (int) (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1));
 
+            changed |= ImGui.sliderFloat("Pitch Angle", pitchAngle.getData(),0.0f, 1.0f);
+
             if (ImGui.button("Load Previous"))
             {
                frameIndex.set(Math.max(0, frameIndex.get() - 1));
@@ -149,19 +164,9 @@ public class RDXRapidHeightMapExtractionDemo
                changed = true;
             }
 
-            if (changed || !initialized)
+            if(changed)
             {
-               if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
-               {
-                  LogTools.info("Loading sensor data: " + frameIndex.get());
-                  perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), loadedDepthImage.getBytedecoOpenCVMat());
-                  updateHeightMap();
-               }
-
-               if (!initialized)
-               {
-                  initialized = true;
-               }
+               userChangedIndex.set();
             }
          }
 
@@ -182,22 +187,30 @@ public class RDXRapidHeightMapExtractionDemo
       {
          if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
          {
-            LogTools.info("Update Height Map: " + frameIndex.get());
             ThreadTools.startAsDaemon(() ->
-                                      {
-                                         Point3D position = sensorPositionBuffer.get(frameIndex.get());
-                                         Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
-                                         cameraPose.set(position, orientation);
-                                         cameraFrame.setPoseAndUpdate(cameraPose);
+              {
+                 LogTools.info("Update Height Map: " + frameIndex.get());
+                 Point3D position = sensorPositionBuffer.get(frameIndex.get());
+                 Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
+                 cameraPose.set(position, orientation);
+                 cameraFrame.setPoseAndUpdate(cameraPose);
 
-                                         long begin = System.nanoTime();
+                 long begin = System.nanoTime();
 
-                                         rapidHeightMapUpdater.update();
-                                         heightMapUpdateNotification.set();
+//                 RigidBodyTransform transform = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()), sensorPositionBuffer.get(frameIndex.get()));
 
-                                         long end = System.nanoTime();
-                                         LogTools.info("Update Height Map: {} ms", (end - begin) / 1e6);
-                                      }, getClass().getSimpleName() + "RapidRegions");
+                 Point3D euler = new Point3D();
+                 sensorOrientationBuffer.get(frameIndex.get()).getEuler(euler);
+                 RigidBodyTransform transform = new RigidBodyTransform(new Quaternion(0.0, pitchAngle.get(), 0.0), new Point3D(0.0,0.0,1.0));
+
+                 LogTools.info("Rotation: " + euler);
+
+                 rapidHeightMapUpdater.update(transform);
+                 heightMapUpdateNotification.set();
+
+                 long end = System.nanoTime();
+                 LogTools.info("Update Height Map: {} ms", (end - begin) / 1e6);
+              }, getClass().getSimpleName() + "RapidHeightMap");
          }
       }
 
@@ -211,7 +224,7 @@ public class RDXRapidHeightMapExtractionDemo
          rapidHeightMapUpdater.setModified(false);
          rapidHeightMapUpdater.setProcessing(false);
 
-         BytedecoOpenCVTools.displayDepth("Output Height Map", rapidHeightMapUpdater.getOutputHeightMapImage().getBytedecoOpenCVMat(), 1);
+         BytedecoOpenCVTools.displayDepth("Output Height Map", rapidHeightMapUpdater.getOutputHeightMapImage().getBytedecoOpenCVMat(), 1, 1/ (5.0f * rapidHeightMapUpdater.getCellSizeXYInMeters()));
       }
 
    }

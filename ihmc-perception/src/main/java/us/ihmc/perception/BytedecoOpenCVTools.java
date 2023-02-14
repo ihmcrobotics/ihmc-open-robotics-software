@@ -332,13 +332,18 @@ public class BytedecoOpenCVTools
 
    public static void displayDepth(String tag, Mat image, int delay)
    {
+      displayDepth(tag, image, delay, 1.0f);
+   }
+
+   public static void displayDepth(String tag, Mat image, int delay, float scale)
+   {
       Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
       Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
 
       BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 255.0);
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
-      opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size(image.cols() * 10, image.rows() * 10));
+      opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
 
       display(tag, finalDisplayDepth, delay);
    }

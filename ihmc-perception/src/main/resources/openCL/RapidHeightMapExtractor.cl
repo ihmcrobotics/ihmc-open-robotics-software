@@ -32,11 +32,6 @@ float3 back_project_spherical(int2 pos, float depth, global float* params)
     return X;
 }
 
-float4 transform4(float4 point, float4 r1, float4 r2, float4 r3, float4 t)
-{
-   return (float4)(dot(r1, point) + t.x, dot(r2, point) + t.y, dot(r3, point) + t.z, 0);
-}
-
 float3 compute_grid_cell_center(int rIndex, int cIndex, global float* params)
 {
    float3 cellCenter = (float3)(0, 0, 0);
@@ -77,7 +72,7 @@ int2 spherical_projection(float3 cellCenter, global float* params)
     return proj;
 }
 
-void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t out, global float* params)
+void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t out, global float* params, global float* transformToWorld)
 {
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
@@ -96,7 +91,7 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
 //    printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
 //         cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y);
 
-    int WINDOW_WIDTH = 100;
+    int WINDOW_WIDTH = 20;
 
     int count = 0;
 
@@ -114,6 +109,11 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
                 float radius = ((float)read_imageui(in, pos).x)/(float)1000;
 
                 float3 point = back_project_spherical(pos, radius, params);
+                point = transform3(point,
+                        (float3)(transformToWorld[0], transformToWorld[1], transformToWorld[2]),
+                        (float3)(transformToWorld[4], transformToWorld[5], transformToWorld[6]),
+                        (float3)(transformToWorld[8], transformToWorld[9], transformToWorld[10]),
+                        (float3)(transformToWorld[3], transformToWorld[7], transformToWorld[11]));
 
 
 //               printf("[%d,%d] : [%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf) -> GridCell: (%.2f,%.2f)\n", i, j, rIndex, (int) params[GRID_LENGTH],
