@@ -6,10 +6,8 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
-import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegion;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsListCollection;
 import us.ihmc.log.LogTools;
@@ -17,12 +15,11 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculationModule;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXSteppableRegionGraphic;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,15 +30,12 @@ public class RDXSteppableRegionsCalculatorUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
 
-   private final SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
+   private final OpenCLManager openCLManager = new OpenCLManager();
 
    private final AtomicReference<SteppableRegionsListCollection> latestSteppableRegionsToRender = new AtomicReference<>();
    private final AtomicReference<SteppableRegionDebugImagesMessage> latestSteppableRegionDebugImagesToRender = new AtomicReference<>();
 
-   private final AtomicReference<HeightMapMessage> heightMapMessageReference = new AtomicReference<>();
-
    private final ImBoolean drawPatches = new ImBoolean(true);
-
 
    private ImGuiPanel imguiPanel;
    private final List<RDXCVImagePanel> steppabilityPanels = new ArrayList<>();
@@ -54,6 +48,7 @@ public class RDXSteppableRegionsCalculatorUI
 
    public void create()
    {
+      openCLManager.create();
       imguiPanel = new ImGuiPanel("Steppable Region Extraction", this::renderImGuiWidgets);
       parameterTuner = new ImGuiStoredPropertySetTuner("Steppable Region Parameters");
       parameterTuner.create(parameters);
@@ -70,25 +65,30 @@ public class RDXSteppableRegionsCalculatorUI
       }
 
       steppableRegionGraphic = new RDXSteppableRegionGraphic();
-
-      steppableRegionsCalculationModule.addSteppableRegionListCollectionOutputConsumer(latestSteppableRegionsToRender::set);
-      steppableRegionsCalculationModule.addSteppableRegionDebugConsumer(latestSteppableRegionDebugImagesToRender::set);
    }
 
    volatile boolean processing = false;
    volatile boolean needToDraw = false;
 
-   public void extractSteppableRegions()
+   public void setLatestSteppableRegionsToRender(SteppableRegionsListCollection steppableRegionsListCollection)
    {
-      extractSteppableRegions(null);
+      latestSteppableRegionsToRender.set(steppableRegionsListCollection);
    }
 
-   public void extractSteppableRegions(Runnable runWhenFinished)
+   public void setLatestSteppableRegionDebugImagesToRender(SteppableRegionDebugImagesMessage steppableRegionDebugImagesToRender)
+   {
+      this.latestSteppableRegionDebugImagesToRender.set(steppableRegionDebugImagesToRender);
+   }
+
+   public SteppableRegionCalculatorParametersReadOnly getSteppableParameters()
+   {
+      return parameters;
+   }
+
+   public void update()
    {
       if (enabled.get())
       {
-         updateSteppableRegions(runWhenFinished);
-
          generateSteppableRegionsMesh();
          drawDebugRegions();
 
@@ -105,29 +105,11 @@ public class RDXSteppableRegionsCalculatorUI
       }
    }
 
-
-   private void updateSteppableRegions(Runnable runWhenFinished)
-   {
-      HeightMapMessage heightMapMessage = heightMapMessageReference.getAndSet(null);
-      if (heightMapMessage == null)
-         return;
-
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-      resize(heightMapData.getCellsPerAxis());
-
-      steppableRegionsCalculationModule.setSteppableRegionsCalculatorParameters(parameters);
-      steppableRegionsCalculationModule.computeASynch(heightMapData);
-
-      if (runWhenFinished != null)
-         runWhenFinished.run();
-   }
-
    private void resize(int newSize)
    {
       if (newSize != cellsPerSide)
       {
          cellsPerSide = newSize;
-         OpenCLManager openCLManager = steppableRegionsCalculationModule.getOpenCLManager();
          for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
          {
             steppableRegionsPanels.get(i).resize(newSize, newSize, openCLManager);
@@ -154,6 +136,8 @@ public class RDXSteppableRegionsCalculatorUI
       SteppableRegionDebugImagesMessage debugImagesMessage = latestSteppableRegionDebugImagesToRender.getAndSet(null);
       if (debugImagesMessage == null)
          return;
+
+      resize(debugImagesMessage.getRegionImages().get(0).getImageWidth());
 
       for (int yaw = 0; yaw < SteppableRegionsCalculationModule.yawDiscretizations; yaw++)
       {
@@ -242,14 +226,9 @@ public class RDXSteppableRegionsCalculatorUI
       //         planarRegionsGraphic.getRenderables(renderables, pool);
    }
 
-   public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
-   {
-      heightMapMessageReference.set(heightMapMessage);
-   }
-
    public void destroy()
    {
-      steppableRegionsCalculationModule.destroy();
+      openCLManager.destroy();
    }
 
    public ImGuiPanel getPanel()

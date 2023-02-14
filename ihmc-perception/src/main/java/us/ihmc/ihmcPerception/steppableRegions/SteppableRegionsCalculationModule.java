@@ -67,7 +67,6 @@ public class SteppableRegionsCalculationModule
    private final List<Consumer<SteppableRegionsListCollection>> steppableRegionListOutputConsumers = new ArrayList<>();
    private final List<Consumer<SteppableRegionDebugImagesMessage>> steppableRegionDebugConsumers = new ArrayList<>();
 
-   private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
    public SteppableRegionsCalculationModule()
    {
@@ -160,11 +159,6 @@ public class SteppableRegionsCalculationModule
          snapNormalZImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          steppabilityConnections.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
       }
-   }
-
-   public void computeASynch(HeightMapData heightMapData)
-   {
-      executorService.clearQueueAndExecute(() -> compute(heightMapData));
    }
 
    public void compute(HeightMapData heightMapData)
