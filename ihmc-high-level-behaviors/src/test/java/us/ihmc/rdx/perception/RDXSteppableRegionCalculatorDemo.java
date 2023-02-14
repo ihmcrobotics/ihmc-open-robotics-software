@@ -162,6 +162,8 @@ public class RDXSteppableRegionCalculatorDemo
             steppableRegionsUpdater.destroy();
             steppableRegionsCalculatorUI.destroy();
             ouster.dispose();
+
+            super.dispose();
          }
       });
 
