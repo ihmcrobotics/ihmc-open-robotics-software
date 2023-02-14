@@ -1,18 +1,16 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
-import io.netty.buffer.ByteBuf;
 import javafx.scene.paint.Color;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.ihmcPerception.steppableRegions.data.SteppableCell;
+import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionDataHolder;
+import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionsEnvironmentModel;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.memory.NativeMemoryTools;
@@ -22,15 +20,12 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersRe
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class SteppableRegionsCalculationModule
 {
@@ -60,7 +55,7 @@ public class SteppableRegionsCalculationModule
    private final List<BytedecoImage> steppabilityConnections = new ArrayList<>();
 
    private final SteppableRegionsListCollection regionCollection = new SteppableRegionsListCollection(yawDiscretizations);
-   private final List<SteppableRegionsCalculator.SteppableRegionsEnvironmentModel> regionEnvironments = new ArrayList<>();
+   private final List<SteppableRegionsEnvironmentModel> regionEnvironments = new ArrayList<>();
 
    private int cellsPerSide;
 
@@ -121,7 +116,7 @@ public class SteppableRegionsCalculationModule
       this.parameters.set(parameters);
    }
 
-   public List<SteppableRegionsCalculator.SteppableRegionsEnvironmentModel> getRegionEnvironments()
+   public List<SteppableRegionsEnvironmentModel> getRegionEnvironments()
    {
       return regionEnvironments;
    }
@@ -205,7 +200,7 @@ public class SteppableRegionsCalculationModule
 
          double yawAngle = ((double) yawValue) / (yawDiscretizations - 1) * Math.PI;
 
-         SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.mergeCellsIntoSteppableRegionEnvironment(
+         SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.mergeCellsIntoSteppableRegionEnvironment(
                steppabilityImages.get(yawValue),
                snapHeightImages.get(yawValue),
                snapNormalXImages.get(yawValue),
@@ -350,7 +345,7 @@ public class SteppableRegionsCalculationModule
 
    private void generateSteppableRegionDebugImage(int yawIndex, SteppableRegionDebugImageMessage messageToPack)
    {
-      SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environmentModel = regionEnvironments.get(yawIndex);
+      SteppableRegionsEnvironmentModel environmentModel = regionEnvironments.get(yawIndex);
       int totalSize = 3 * cellsPerSide * cellsPerSide;
       ByteBuffer uncompressedByteBuffer = NativeMemoryTools.allocate(totalSize);
       uncompressedByteBuffer.order(ByteOrder.nativeOrder());
@@ -367,9 +362,9 @@ public class SteppableRegionsCalculationModule
          }
       }
 
-      for (SteppableRegionsCalculator.SteppableRegionDataHolder region : environmentModel.getRegions())
+      for (SteppableRegionDataHolder region : environmentModel.getRegions())
       {
-         for (SteppableRegionsCalculator.SteppableCell cell : region.getCells())
+         for (SteppableCell cell : region.getCells())
          {
             int x = cell.getX();
             int y = cell.getY();
