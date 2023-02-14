@@ -27,7 +27,7 @@ public class SteppableRegionDebugImageMessage extends Packet<SteppableRegionDebu
 
    public SteppableRegionDebugImageMessage()
    {
-      data_ = new us.ihmc.idl.IDLSequence.Byte (25000000, "type_9");
+      data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
 
    }
 

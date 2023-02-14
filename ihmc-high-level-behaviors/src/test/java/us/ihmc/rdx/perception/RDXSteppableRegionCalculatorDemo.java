@@ -6,6 +6,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.ihmcPerception.heightMap.RemoteHeightMapUpdater;
+import us.ihmc.ihmcPerception.steppableRegions.RemoteSteppableRegionsUpdater;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsUpdater;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -33,7 +34,7 @@ public class RDXSteppableRegionCalculatorDemo
    private RDXSteppableRegionsCalculatorUI steppableRegionsCalculatorUI;
 
    private final RemoteHeightMapUpdater heightMap;
-   private final SteppableRegionsUpdater steppableRegionsUpdater;
+   private final RemoteSteppableRegionsUpdater steppableRegionsUpdater;
    private final RDXRemoteHeightMapPanel heightMapUI;
    private final RDXGlobalVisualizersPanel globalVisualizersUI;
 
@@ -42,11 +43,13 @@ public class RDXSteppableRegionCalculatorDemo
       CommunicationMode ros2CommunicationMode = CommunicationMode.INTERPROCESS;
 
       RealtimeROS2Node realtimeRos2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(), "simulation_ui_realtime");
+      ROS2Helper ros2Helper = new ROS2Helper(realtimeRos2Node);
       heightMap = new RemoteHeightMapUpdater(ReferenceFrame::getWorldFrame, realtimeRos2Node);
       heightMap.getParameters().setMaxZ(1.5);
-      heightMapUI = new RDXRemoteHeightMapPanel(new ROS2Helper(realtimeRos2Node));
 
-      steppableRegionsUpdater = new SteppableRegionsUpdater();
+      heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
+
+      steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(realtimeRos2Node);
 
       baseUI.getImGuiPanelManager().addPanel(heightMapUI.getPanel());
 
@@ -80,12 +83,10 @@ public class RDXSteppableRegionCalculatorDemo
             //            baseUI.getImGuiPanelManager().addPanel(heightMapVisualizer.getPanel());
             globalVisualizersUI.addVisualizer(heightMapVisualizer);
 
-            steppableRegionsCalculatorUI = new RDXSteppableRegionsCalculatorUI("Steppable regions");
+            steppableRegionsCalculatorUI = new RDXSteppableRegionsCalculatorUI(ros2Helper);
             steppableRegionsCalculatorUI.create();
             steppableRegionsCalculatorUI.getEnabled().set(true);
 
-            steppableRegionsUpdater.addSteppableRegionListCollectionOutputConsumer(steppableRegionsCalculatorUI::setLatestSteppableRegionsToRender);
-            steppableRegionsUpdater.addSteppableRegionDebugConsumer(steppableRegionsCalculatorUI::setLatestSteppableRegionDebugImagesToRender);
 
             new IHMCROS2Callback<>(realtimeRos2Node, ROS2Tools.HEIGHT_MAP_OUTPUT, message ->
             {
@@ -94,6 +95,9 @@ public class RDXSteppableRegionCalculatorDemo
 
                steppableRegionsUpdater.submitLatestHeightMapMessage(message);
             });
+
+            new IHMCROS2Callback<>(realtimeRos2Node, ROS2Tools.STEPPABLE_REGIONS_OUTPUT, steppableRegionsCalculatorUI::setLatestSteppableRegionsToRender);
+            new IHMCROS2Callback<>(realtimeRos2Node, ROS2Tools.STEPPABLE_REGIONS_DEBUG_OUTPUT, steppableRegionsCalculatorUI::setLatestSteppableRegionDebugImagesToRender);
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
@@ -137,12 +141,10 @@ public class RDXSteppableRegionCalculatorDemo
 
                ouster.render(baseUI.getPrimaryScene());
 
-               steppableRegionsUpdater.submitLatestSteppableRegionCalculatorParameters(steppableRegionsCalculatorUI.getSteppableParameters());
-
                heightMap.update();
                heightMapVisualizer.update();
                globalVisualizersUI.update();
-               steppableRegionsUpdater.computeASynch();
+               steppableRegionsUpdater.compute();
                steppableRegionsCalculatorUI.update();
 
                heightMapUI.update();

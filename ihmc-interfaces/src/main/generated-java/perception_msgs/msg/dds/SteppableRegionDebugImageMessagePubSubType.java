@@ -44,7 +44,7 @@ public class SteppableRegionDebugImageMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (25000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
@@ -84,7 +84,7 @@ public class SteppableRegionDebugImageMessagePubSubType implements us.ihmc.pubsu
 
       cdr.write_type_3(data.getImageHeight());
 
-      if(data.getData().size() <= 25000000)
+      if(data.getData().size() <= 250000)
       cdr.write_type_e(data.getData());else
           throw new RuntimeException("data field exceeds the maximum length");
 
