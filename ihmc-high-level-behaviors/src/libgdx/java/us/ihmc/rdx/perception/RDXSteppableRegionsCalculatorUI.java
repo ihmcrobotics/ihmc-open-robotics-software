@@ -5,13 +5,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
-import us.ihmc.ihmcPerception.steppableRegions.SteppableRegion;
-import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsListCollection;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculationModule;
 import us.ihmc.perception.BytedecoImage;
@@ -20,6 +18,8 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersRe
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXSteppableRegionGraphic;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RDXSteppableRegionsCalculatorUI
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean enabled = new ImBoolean(false);
+   private final ImBoolean renderRegions = new ImBoolean(false);
 
    private final OpenCLManager openCLManager = new OpenCLManager();
 
@@ -47,10 +47,18 @@ public class RDXSteppableRegionsCalculatorUI
    private int cellsPerSide;
    private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
 
+   private int receivedRegions = -1;
+   private final ImInt yawToShow = new ImInt(0);
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+
+   public RDXSteppableRegionsCalculatorUI(String title)
+   {
+   }
+
    public void create()
    {
       openCLManager.create();
-      imguiPanel = new ImGuiPanel("Steppable Region Extraction", this::renderImGuiWidgets);
+      imguiPanel = new ImGuiPanel("Steppable Region Extraction", this::renderImGuiWidgetsPanel);
       parameterTuner = new ImGuiStoredPropertySetTuner("Steppable Region Parameters");
       parameterTuner.create(parameters);
 
@@ -68,12 +76,12 @@ public class RDXSteppableRegionsCalculatorUI
       steppableRegionGraphic = new RDXSteppableRegionGraphic();
    }
 
-   volatile boolean processing = false;
    volatile boolean needToDraw = false;
 
    public void setLatestSteppableRegionsToRender(SteppableRegionsListCollectionMessage steppableRegionsListCollection)
    {
       latestSteppableRegionsToRender.set(steppableRegionsListCollection);
+      frequencyPlot.recordEvent();
    }
 
    public void setLatestSteppableRegionDebugImagesToRender(SteppableRegionDebugImagesMessage steppableRegionDebugImagesToRender)
@@ -88,19 +96,16 @@ public class RDXSteppableRegionsCalculatorUI
 
    public void update()
    {
-      if (enabled.get())
+      if (renderRegions.get())
       {
          generateSteppableRegionsMesh();
          drawDebugRegions();
 
          if (needToDraw)
          {
+            draw2DPanels();
+
             needToDraw = false;
-
-            render2DPanels();
-            renderSteppableRegions();
-
-            processing = false;
          }
          steppableRegionGraphic.update();
       }
@@ -125,11 +130,12 @@ public class RDXSteppableRegionsCalculatorUI
       if (message == null)
          return;
 
-      steppableRegionGraphic.generateMeshesAsync(message);
+      receivedRegions = message.getRegionsPerYaw().get(yawToShow.get());
+      steppableRegionGraphic.generateMeshesAsync(message, yawToShow.get());
       needToDraw = true;
    }
 
-   public void drawDebugRegions()
+   private void drawDebugRegions()
    {
       SteppableRegionDebugImagesMessage debugImagesMessage = latestSteppableRegionDebugImagesToRender.getAndSet(null);
       if (debugImagesMessage == null)
@@ -140,7 +146,8 @@ public class RDXSteppableRegionsCalculatorUI
       for (int yaw = 0; yaw < SteppableRegionsCalculationModule.yawDiscretizations; yaw++)
       {
          RDXCVImagePanel panel = steppableRegionsPanels.get(yaw);
-         if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
+//         if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
+         if (drawPatches.get())
          {
             BytedecoImage image = panel.getBytedecoImage();
 
@@ -165,7 +172,8 @@ public class RDXSteppableRegionsCalculatorUI
          }
 
          panel = steppabilityPanels.get(yaw);
-         if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
+//         if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
+         if (drawPatches.get())
          {
             BytedecoImage image = panel.getBytedecoImage();
             SteppableRegionDebugImageMessage steppabilityImage = debugImagesMessage.getSteppabilityImages().get(yaw);
@@ -189,31 +197,30 @@ public class RDXSteppableRegionsCalculatorUI
       needToDraw = true;
    }
 
-   private void render2DPanels()
+   private void draw2DPanels()
    {
       steppableRegionsPanels.forEach(RDXCVImagePanel::draw);
       steppabilityPanels.forEach(RDXCVImagePanel::draw);
    }
 
-   /**
-    * FIXME: This method filled with allocations.
-    */
-   private void renderSteppableRegions()
-   {
-      //      if (!render3DPlanarRegions.get())
-      //         return;
-
-      //      planarRegionsGraphic.generateMeshes(gpuPlanarRegionExtraction.getPlanarRegionsList());
-      //      planarRegionsGraphic.update();
-   }
-
-   public void renderImGuiWidgets()
+   private void renderImGuiWidgetsPanel()
    {
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       parameterTuner.renderImGuiWidgets();
 
       ImGui.text("Input height map dimensions: " + cellsPerSide + " x " + cellsPerSide);
-      ImGui.checkbox(labels.get("Enabled"), enabled);
+
+      ImGui.checkbox(labels.get("Render regions"), renderRegions);
+
+      ImGui.text("Regions rendered: " + receivedRegions);
+      ImGui.sliderInt("Yaw to show", yawToShow.getData(), 0, parameters.getYawDiscretizations() - 1);
+
+      frequencyPlot.renderImGuiWidgets();
+   }
+
+   public void renderImGuiWidgets()
+   {
+
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -229,13 +236,13 @@ public class RDXSteppableRegionsCalculatorUI
       openCLManager.destroy();
    }
 
-   public ImGuiPanel getPanel()
+   public ImGuiPanel getBasePanel()
    {
       return imguiPanel;
    }
 
    public ImBoolean getEnabled()
    {
-      return enabled;
+      return renderRegions;
    }
 }
