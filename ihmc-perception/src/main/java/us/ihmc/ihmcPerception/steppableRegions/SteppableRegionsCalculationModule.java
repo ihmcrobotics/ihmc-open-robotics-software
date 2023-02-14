@@ -7,6 +7,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
+import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableCell;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionDataHolder;
@@ -39,6 +40,7 @@ public class SteppableRegionsCalculationModule
    private _cl_kernel computeSteppabilityKernel;
    private _cl_kernel computeSteppabilityConnectionsKernel;
 
+   private final SteppableRegionsListCollectionMessage message = new SteppableRegionsListCollectionMessage();
    private final ConcaveHullFactoryParameters concaveHullParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
 
@@ -59,7 +61,7 @@ public class SteppableRegionsCalculationModule
 
    private int cellsPerSide;
 
-   private final List<Consumer<SteppableRegionsListCollection>> steppableRegionListOutputConsumers = new ArrayList<>();
+   private final List<Consumer<SteppableRegionsListCollectionMessage>> steppableRegionListOutputConsumers = new ArrayList<>();
    private final List<Consumer<SteppableRegionDebugImagesMessage>> steppableRegionDebugConsumers = new ArrayList<>();
 
 
@@ -70,8 +72,7 @@ public class SteppableRegionsCalculationModule
       boolean doneLoading = false;
 
       openCLManager = new OpenCLManager();
-      concaveHullParameters.setTriangulationTolerance(5e-3);
-      concaveHullParameters.setMaxNumberOfIterations(1000);
+      concaveHullParameters.setEdgeLengthThreshold(1.0);
 
       for (int i = 0; i < yawDiscretizations; i++)
       {
@@ -101,7 +102,7 @@ public class SteppableRegionsCalculationModule
       return regionCollection;
    }
 
-   public void addSteppableRegionListCollectionOutputConsumer(Consumer<SteppableRegionsListCollection> outputConsumer)
+   public void addSteppableRegionListCollectionOutputConsumer(Consumer<SteppableRegionsListCollectionMessage> outputConsumer)
    {
       this.steppableRegionListOutputConsumers.add(outputConsumer);
    }
@@ -114,16 +115,6 @@ public class SteppableRegionsCalculationModule
    public void setSteppableRegionsCalculatorParameters(SteppableRegionCalculatorParametersReadOnly parameters)
    {
       this.parameters.set(parameters);
-   }
-
-   public List<SteppableRegionsEnvironmentModel> getRegionEnvironments()
-   {
-      return regionEnvironments;
-   }
-
-   public List<BytedecoImage> getSteppableImage()
-   {
-      return steppabilityImages;
    }
 
    public OpenCLManager getOpenCLManager()
@@ -208,7 +199,10 @@ public class SteppableRegionsCalculationModule
                snapNormalZImages.get(yawValue),
                steppabilityConnections.get(yawValue),
                parameters);
-         polygonizerParameters.setLengthThreshold(0.4 * heightMapData.getGridResolutionXY()); // this is critical to prevent it from filtering small regions
+         // it's highly likely we have a region that's the ground, so we need to set the length limit to that size.
+         concaveHullParameters.setEdgeLengthThreshold(heightMapData.getGridSizeXY());
+         // this is critical to prevent it from filtering small regions
+         polygonizerParameters.setLengthThreshold(0.4 * heightMapData.getGridResolutionXY());
          SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
                                                                                           polygonizerParameters,
                                                                                           parameters,
@@ -230,8 +224,10 @@ public class SteppableRegionsCalculationModule
          generateSteppabilityDebugImage(i, debugImagesMessage.getSteppabilityImages().add());
       }
 
-      for (Consumer<SteppableRegionsListCollection> outputConsumer : steppableRegionListOutputConsumers)
-         outputConsumer.accept(regionCollection);
+      SteppableRegionMessageConverter.convertToSteppableRegionsListCollectionMessage(regionCollection, message);
+
+      for (Consumer<SteppableRegionsListCollectionMessage> outputConsumer : steppableRegionListOutputConsumers)
+         outputConsumer.accept(message);
       for (Consumer<SteppableRegionDebugImagesMessage> debugConsumer : steppableRegionDebugConsumers)
          debugConsumer.accept(debugImagesMessage);
    }

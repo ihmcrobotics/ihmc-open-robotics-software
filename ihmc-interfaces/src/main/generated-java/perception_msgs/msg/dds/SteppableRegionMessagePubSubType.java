@@ -48,10 +48,6 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -89,12 +85,6 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRegionOrigin(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRegionOrientation(), current_alignment);
@@ -124,10 +114,6 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       cdr.write_type_6(data.getFootYaw());
 
-      cdr.write_type_6(data.getFootLength());
-
-      cdr.write_type_6(data.getFootWidth());
-
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRegionOrigin(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRegionOrientation(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
@@ -149,10 +135,6 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
       	
       data.setFootYaw(cdr.read_type_6());
       	
-      data.setFootLength(cdr.read_type_6());
-      	
-      data.setFootWidth(cdr.read_type_6());
-      	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getRegionOrigin(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRegionOrientation(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRegionNormal(), cdr);	
@@ -171,8 +153,6 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.write_type_2("region_id", data.getRegionId());
       ser.write_type_6("foot_yaw", data.getFootYaw());
-      ser.write_type_6("foot_length", data.getFootLength());
-      ser.write_type_6("foot_width", data.getFootWidth());
       ser.write_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
 
       ser.write_type_a("region_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRegionOrientation());
@@ -193,8 +173,6 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       data.setRegionId(ser.read_type_2("region_id"));
       data.setFootYaw(ser.read_type_6("foot_yaw"));
-      data.setFootLength(ser.read_type_6("foot_length"));
-      data.setFootWidth(ser.read_type_6("foot_width"));
       ser.read_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
 
       ser.read_type_a("region_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRegionOrientation());

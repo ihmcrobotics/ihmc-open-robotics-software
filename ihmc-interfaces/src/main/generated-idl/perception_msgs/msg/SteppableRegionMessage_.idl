@@ -36,8 +36,6 @@ module perception_msgs
         @defaultValue(value=-1)
         long region_id;
         double foot_yaw;
-        double foot_length;
-        double foot_width;
         geometry_msgs::msg::dds::Point region_origin;
         geometry_msgs::msg::dds::Quaternion region_orientation;
         geometry_msgs::msg::dds::Vector3 region_normal;

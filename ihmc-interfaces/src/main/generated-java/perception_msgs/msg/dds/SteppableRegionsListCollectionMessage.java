@@ -22,14 +22,6 @@ public class SteppableRegionsListCollectionMessage extends Packet<SteppableRegio
             */
    public ihmc_common_msgs.msg.dds.InstantMessage last_updated_;
    /**
-            * Foot length for the corresponding regions
-            */
-   public double foot_length_;
-   /**
-            * Foot width for the corresponding regions
-            */
-   public double foot_width_;
-   /**
             * foot yaw for the corresponding regions
             */
    public us.ihmc.idl.IDLSequence.Double  foot_yaw_;
@@ -69,19 +61,19 @@ public class SteppableRegionsListCollectionMessage extends Packet<SteppableRegio
    public SteppableRegionsListCollectionMessage()
    {
       last_updated_ = new ihmc_common_msgs.msg.dds.InstantMessage();
-      foot_yaw_ = new us.ihmc.idl.IDLSequence.Double (3000, "type_6");
+      foot_yaw_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
 
-      regions_per_yaw_ = new us.ihmc.idl.IDLSequence.Integer (3000, "type_2");
+      regions_per_yaw_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
-      region_id_ = new us.ihmc.idl.IDLSequence.Integer (3000, "type_2");
+      region_id_ = new us.ihmc.idl.IDLSequence.Integer (1000, "type_2");
 
-      region_origin_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (3000, new geometry_msgs.msg.dds.PointPubSubType());
-      region_orientation_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion> (3000, new geometry_msgs.msg.dds.QuaternionPubSubType());
-      region_normal_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (3000, new geometry_msgs.msg.dds.Vector3PubSubType());
-      concave_hulls_size_ = new us.ihmc.idl.IDLSequence.Integer (3000, "type_2");
+      region_origin_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1000, new geometry_msgs.msg.dds.PointPubSubType());
+      region_orientation_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion> (1000, new geometry_msgs.msg.dds.QuaternionPubSubType());
+      region_normal_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (1000, new geometry_msgs.msg.dds.Vector3PubSubType());
+      concave_hulls_size_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
-      vertex_buffer_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (1000, new geometry_msgs.msg.dds.PointPubSubType());
-      local_height_map_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.HeightMapMessage> (3000, new perception_msgs.msg.dds.HeightMapMessagePubSubType());
+      vertex_buffer_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (3000, new geometry_msgs.msg.dds.PointPubSubType());
+      local_height_map_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.HeightMapMessage> (100, new perception_msgs.msg.dds.HeightMapMessagePubSubType());
 
    }
 
@@ -96,10 +88,6 @@ public class SteppableRegionsListCollectionMessage extends Packet<SteppableRegio
       sequence_id_ = other.sequence_id_;
 
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.last_updated_, last_updated_);
-      foot_length_ = other.foot_length_;
-
-      foot_width_ = other.foot_width_;
-
       foot_yaw_.set(other.foot_yaw_);
       regions_per_yaw_.set(other.regions_per_yaw_);
       region_id_.set(other.region_id_);
@@ -133,36 +121,6 @@ public class SteppableRegionsListCollectionMessage extends Packet<SteppableRegio
    public ihmc_common_msgs.msg.dds.InstantMessage getLastUpdated()
    {
       return last_updated_;
-   }
-
-   /**
-            * Foot length for the corresponding regions
-            */
-   public void setFootLength(double foot_length)
-   {
-      foot_length_ = foot_length;
-   }
-   /**
-            * Foot length for the corresponding regions
-            */
-   public double getFootLength()
-   {
-      return foot_length_;
-   }
-
-   /**
-            * Foot width for the corresponding regions
-            */
-   public void setFootWidth(double foot_width)
-   {
-      foot_width_ = foot_width;
-   }
-   /**
-            * Foot width for the corresponding regions
-            */
-   public double getFootWidth()
-   {
-      return foot_width_;
    }
 
 
@@ -267,10 +225,6 @@ public class SteppableRegionsListCollectionMessage extends Packet<SteppableRegio
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       if (!this.last_updated_.epsilonEquals(other.last_updated_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foot_length_, other.foot_length_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.foot_width_, other.foot_width_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.foot_yaw_, other.foot_yaw_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.regions_per_yaw_, other.regions_per_yaw_, epsilon)) return false;
@@ -330,10 +284,6 @@ public class SteppableRegionsListCollectionMessage extends Packet<SteppableRegio
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if (!this.last_updated_.equals(otherMyClass.last_updated_)) return false;
-      if(this.foot_length_ != otherMyClass.foot_length_) return false;
-
-      if(this.foot_width_ != otherMyClass.foot_width_) return false;
-
       if (!this.foot_yaw_.equals(otherMyClass.foot_yaw_)) return false;
       if (!this.regions_per_yaw_.equals(otherMyClass.regions_per_yaw_)) return false;
       if (!this.region_id_.equals(otherMyClass.region_id_)) return false;
@@ -357,10 +307,6 @@ public class SteppableRegionsListCollectionMessage extends Packet<SteppableRegio
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("last_updated=");
       builder.append(this.last_updated_);      builder.append(", ");
-      builder.append("foot_length=");
-      builder.append(this.foot_length_);      builder.append(", ");
-      builder.append("foot_width=");
-      builder.append(this.foot_width_);      builder.append(", ");
       builder.append("foot_yaw=");
       builder.append(this.foot_yaw_);      builder.append(", ");
       builder.append("regions_per_yaw=");

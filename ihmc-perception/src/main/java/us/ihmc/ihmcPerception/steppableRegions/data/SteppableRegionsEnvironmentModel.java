@@ -29,11 +29,6 @@ public class SteppableRegionsEnvironmentModel
       return cellsPerSide;
    }
 
-   public SteppableCell[][] getSteppableCellsGrid()
-   {
-      return steppableCellsGrid;
-   }
-
    public SteppableCell getCellAt(int x, int y)
    {
       return steppableCellsGrid[x][y];
