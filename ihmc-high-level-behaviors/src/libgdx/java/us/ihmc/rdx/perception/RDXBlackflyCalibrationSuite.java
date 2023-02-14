@@ -422,8 +422,12 @@ public class RDXBlackflyCalibrationSuite
                                           newCameraMatrixEstimate,
                                           undistortedImageSize);
 
-//            opencv_calib3d.initUndistortRectifyMap();
-//            opencv_calib3d.remap();
+            // TODO: We need to switch to using these. You only need to do
+            //   initUndistortRectifyMap once, then remap is fast
+            //   opencv_calib3d.initUndistortRectifyMap();
+            //   opencv_calib3d.remap();
+            //   Also, we need to finish https://github.com/bytedeco/javacpp-presets/issues/1185
+            //   in order to do this.
 
             newCameraMatrixEstimate.copyTo(openCVArUcoMarkerDetection.getCameraMatrix());
             openCVArUcoMarkerDetection.update(texture.getRGBA8Image());
