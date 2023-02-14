@@ -48,6 +48,19 @@ float4 transform(float x,
    return ret;
 }
 
+float4 transform2(float3 point, global float* transformToApply)
+{
+   return transform(point.x, point.y, point.z, transformToApply[3], transformToApply[7], transformToApply[11],
+            transformToApply[0], transformToApply[1], transformToApply[2],
+            transformToApply[4], transformToApply[5], transformToApply[6],
+            transformToApply[8], transformToApply[9], transformToApply[10]);
+}
+
+float3 transform3(float3 point, float3 r1, float3 r2, float3 r3, float3 t)
+{
+   return (float3)(dot(r1, point) + t.x, dot(r2, point) + t.y, dot(r3, point) + t.z);
+}
+
 float16 prependYawRotation(float yaw, float16 matrixOriginal)
 {
    double cYaw = cos(yaw);
