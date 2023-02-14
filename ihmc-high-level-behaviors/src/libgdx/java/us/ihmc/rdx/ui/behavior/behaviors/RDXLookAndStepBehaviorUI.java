@@ -91,9 +91,9 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private volatile int numberOfPlannedSteps = 0;
 
    private ImBooleanWrapper useReferencePlan;
-   private ImDouble ball_x = new ImDouble(7.0);
-   private ImDouble ball_y = new ImDouble(0.3);
-   private ImDouble ball_yaw = new ImDouble(0.1);
+   private ImDouble ballAndArrowX = new ImDouble(7.0);
+   private ImDouble ballAndArrowY = new ImDouble(0.3);
+   private ImDouble ballAndArrowYaw = new ImDouble(0.1);
 
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -281,9 +281,9 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          }
       });
 
-      ImGuiTools.volatileInputDouble("ball_x", ball_x);
-      ImGuiTools.volatileInputDouble("ball_y", ball_y);
-      ImGuiTools.volatileInputDouble("ball_yaw", ball_yaw);
+      ImGuiTools.volatileInputDouble("ball_x", ballAndArrowX);
+      ImGuiTools.volatileInputDouble("ball_y", ballAndArrowY);
+      ImGuiTools.volatileInputDouble("ball_yaw", ballAndArrowYaw);
 
       if (ImGui.button(labels.get("send ball to (x,y,yaw), z,roll, pitch are zeros")))
       {
@@ -338,7 +338,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    private void sendBallToXYYaw()
    {
-      setGoal(new Pose3D(ball_x.get(), ball_y.get(), 0, ball_yaw.get(), 0, 0));
+      setGoal(new Pose3D(ballAndArrowX.get(), ballAndArrowY.get(), 0, ballAndArrowYaw.get(), 0, 0));
    }
 
    @Override
