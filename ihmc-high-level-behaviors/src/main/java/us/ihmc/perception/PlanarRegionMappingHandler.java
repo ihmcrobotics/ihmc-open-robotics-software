@@ -50,7 +50,7 @@ public class PlanarRegionMappingHandler
    private final DataSource source;
 
    private final static long PUBLISH_MILLISECONDS = 100;
-   private final static int ICP_MAX_ITERATIONS = 1;
+   private final static int ICP_MAX_ITERATIONS = 10;
 
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
@@ -87,7 +87,7 @@ public class PlanarRegionMappingHandler
    private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
 
    private int planarRegionListIndex = 0;
-   private int perceptionLogIndex = 0;
+   private int perceptionLogIndex = 140;
 
    private String sensorLogChannelName;
    private BytedecoImage depth16UC1Image;
@@ -382,9 +382,10 @@ public class PlanarRegionMappingHandler
 
    public void computeICP()
    {
-      RigidBodyTransform currentToPreviousTransform = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions.getPlanarRegionsList(),
-                                                                                                          currentRegions.getPlanarRegionsList(),
-                                                                                                          ICP_MAX_ITERATIONS);
+      RigidBodyTransform currentToPreviousTransform = new RigidBodyTransform();
+      boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions.getPlanarRegionsList(),
+                                                                         currentRegions.getPlanarRegionsList(),
+                                                                         ICP_MAX_ITERATIONS, currentToPreviousTransform);
 
       PerceptionPrintTools.printTransform("ComputeICP", currentToPreviousTransform);
    }

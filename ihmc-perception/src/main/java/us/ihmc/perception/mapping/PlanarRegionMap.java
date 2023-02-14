@@ -145,7 +145,8 @@ public class PlanarRegionMap
       // Compute relative (t) to (t-1) transform
       if (initialized)
       {
-         currentToPreviousSensorTransform.set(PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, frameRegions.getPlanarRegionsList(), 1));
+         currentToPreviousSensorTransform.setIdentity();
+         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, frameRegions.getPlanarRegionsList(), 1, currentToPreviousSensorTransform);
 
          //currentToPreviousSensorTransform.set(frameRegions.getSensorToWorldFrameTransform());
          //currentToPreviousSensorTransform.multiply(worldToPreviousSensorFrameTransform);
@@ -653,6 +654,7 @@ public class PlanarRegionMap
 
    public void registerRegions(PlanarRegionsList regions)
    {
+      currentTimeIndex++;
       boolean isKeyframe = false;
       RigidBodyTransform transformToPrevious = new RigidBodyTransform();
 
@@ -660,14 +662,22 @@ public class PlanarRegionMap
 
       if(!initialized)
       {
-         keyframes.add(new PlanarRegionKeyframe(new RigidBodyTransform(), new RigidBodyTransform()));
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, new RigidBodyTransform(), new RigidBodyTransform(), regions.copy()));
          finalMap.addPlanarRegionsList(regions);
          previousRegions.addPlanarRegionsList(regions);
          initialized = true;
       }
       else
       {
-         transformToPrevious.set(PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions, regions.copy(), 6));
+         transformToPrevious.setIdentity();
+         LogTools.info("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
+         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions, regions.copy(), 6, transformToPrevious);
+
+         if(!valid)
+         {
+            LogTools.warn("[FAILED] Last Index: {}, Current Index: {}", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
+            return;
+         }
 
          // Add a keyframe if either the translation or rotation is large enough in separate if blocks
          Point3D euler = new Point3D();
@@ -695,10 +705,9 @@ public class PlanarRegionMap
 
          finalMap = crossReduceRegionsIteratively(finalMap, regions);
 
-         keyframes.add(new PlanarRegionKeyframe(transformToPrevious, keyframes.get(keyframes.size() - 1).getTransformToWorld()));
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToPrevious, keyframes.get(keyframes.size() - 1).getTransformToWorld(), previousRegions));
 
          LogTools.info("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
-
       }
    }
 
