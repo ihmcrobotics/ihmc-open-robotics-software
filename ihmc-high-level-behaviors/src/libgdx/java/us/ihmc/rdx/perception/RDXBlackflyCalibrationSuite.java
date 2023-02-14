@@ -105,10 +105,10 @@ public class RDXBlackflyCalibrationSuite
    private final ImDouble calibratedFy = new ImDouble(fyGuess.get());
    private final ImDouble calibratedCx = new ImDouble(cxGuess.get());
    private final ImDouble calibratedCy = new ImDouble(cyGuess.get());
-   private final ImDouble coloringFx = new ImDouble(448.07332); // We are initializing with calibrated results from previous method
-   private final ImDouble coloringFy = new ImDouble(448.03141);
-   private final ImDouble coloringCx = new ImDouble(969.35663);
-   private final ImDouble coloringCy = new ImDouble(613.54671);
+   private final ImDouble coloringFx = new ImDouble(472.44896); // We are initializing with calibrated results from previous method
+   private final ImDouble coloringFy = new ImDouble(475.51022);
+   private final ImDouble coloringCx = new ImDouble(970.06801);
+   private final ImDouble coloringCy = new ImDouble(608.84360);
    private final ImString coloringCameraMatrixAsText = new ImString(512);
    private final ImString cameraMatrixAsText = new ImString(512);
    private final ImString newCameraMatrixAsText = new ImString(512);
@@ -528,10 +528,10 @@ public class RDXBlackflyCalibrationSuite
       ImGuiTools.volatileInputInt(labels.get("Undistorted image height"), undistortedImageHeight);
 
       boolean userChangedColoringMatrixParameters = false;
-      userChangedColoringMatrixParameters |= ImGuiTools.volatileInputDouble(labels.get("Coloring Fx (px)"), coloringFx, 100.0, 500.0, "%.5f");
-      userChangedColoringMatrixParameters |= ImGuiTools.volatileInputDouble(labels.get("Coloring Fy (px)"), coloringFy, 100.0, 500.0, "%.5f");
-      userChangedColoringMatrixParameters |= ImGuiTools.volatileInputDouble(labels.get("Coloring Cx (px)"), coloringCx, 100.0, 500.0, "%.5f");
-      userChangedColoringMatrixParameters |= ImGuiTools.volatileInputDouble(labels.get("Coloring Cy (px)"), coloringCy, 100.0, 500.0, "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Fx (px)"), coloringFx, -100.0,  800.0 , "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Fy (px)"), coloringFy, -100.0,  800.0 , "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Cx (px)"), coloringCx, -100.0, 1200.0, "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Cy (px)"), coloringCy, -1000.0, 1200.0, "%.5f");
       if (userChangedColoringMatrixParameters)
       {
          coloringCameraMatrix.ptr(0, 0).putDouble(coloringFx.get());

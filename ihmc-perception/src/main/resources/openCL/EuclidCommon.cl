@@ -120,11 +120,61 @@ float16 newRotationMatrix()
                      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0); // unused values
 }
 
+float normSquared2D(float x, float y)
+{
+   return x * x + y * y;
+}
+
+float norm2D(float x, float y)
+{
+   return sqrt(normSquared2D(x, y));
+}
+
+
+float normSquared(float x, float y, float z)
+{
+   return x * x + y * y + z * z;
+}
+
+float norm(float x, float y, float z)
+{
+   return sqrt(normSquared(x, y, z));
+}
+
 float angle(float x1, float y1, float x2, float y2)
 {
    float cosTheta = x1 * x2 + y1 * y2;
    float sinTheta = x1 * y2 - y1 * x2;
    return atan2(sinTheta, cosTheta);
+}
+
+float angle3D(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+   float crossX = y1 * z2 - z1 * y2;
+   float crossY = z1 * x2 - x1 * z2;
+   float crossZ = x1 * y2 - y1 * x2;
+
+   float cosTheta = x1 * x2 + y1 * y2 + z1 * z2;
+   float sinTheta = norm(crossX, crossY, crossZ);
+   return atan2(sinTheta, cosTheta);
+}
+
+float distanceSquaredBetweenPoint3Ds(float firstPointX,
+                                     float firstPointY,
+                                     float firstPointZ,
+                                     float secondPointX,
+                                     float secondPointY,
+                                     float secondPointZ)
+{
+   float deltaX = secondPointX - firstPointX;
+   float deltaY = secondPointY - firstPointY;
+   float deltaZ = secondPointZ - firstPointZ;
+   return normSquared(deltaX, deltaY, deltaZ);
+}
+
+float distance(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+   return sqrt(distanceSquaredBetweenPoint3Ds(x1, y1, z1, x2, y2, z2));
 }
 
 bool intervalContains(float value, float lowerEndpoint, float upperEndpoint)

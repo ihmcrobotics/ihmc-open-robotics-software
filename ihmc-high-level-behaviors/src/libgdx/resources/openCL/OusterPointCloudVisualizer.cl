@@ -131,16 +131,16 @@ kernel void imageToPointCloud(global float* parameters,
                                            fisheyeRotationMatrixM21,
                                            fisheyeRotationMatrixM22);
 
-      float fisheyeAngleX = -angle(1.0f, 0.0f, fisheyeFramePoint.x,  fisheyeFramePoint.y);
-      float fisheyeAngleY = angle(1.0f, 0.0f, fisheyeFramePoint.x, -fisheyeFramePoint.z);
-
-      if (fabs(fisheyeAngleX) < radians(92.5f) && fabs(fisheyeAngleY) < radians(92.5f))
+      float angleOfIncidence = angle3D(1.0f, 0.0f, 0.0f, fisheyeFramePoint.x, fisheyeFramePoint.y, fisheyeFramePoint.z);
+      if (fabs(angleOfIncidence) < radians(92.5f))
       {
-         int fisheyeX = fisheyePrincipalPointPixelsX + fisheyeFocalLengthPixelsX * fisheyeAngleX;
-         int fisheyeY = fisheyePrincipalPointPixelsY + fisheyeFocalLengthPixelsY * fisheyeAngleY;
-         if (fisheyeX >= 0 && fisheyeX < fisheyeImageWidth && fisheyeY >= 0 && fisheyeY < fisheyeImageHeight)
+         float azimuthalAngle = atan2(-fisheyeFramePoint.z, -fisheyeFramePoint.y);
+         int fisheyeCol = fisheyePrincipalPointPixelsX + fisheyeFocalLengthPixelsX * angleOfIncidence * cos(azimuthalAngle);
+         int fisheyeRow = fisheyePrincipalPointPixelsY + fisheyeFocalLengthPixelsY * angleOfIncidence * sin(azimuthalAngle);
+
+         if (fisheyeCol >= 0 && fisheyeCol < fisheyeImageWidth && fisheyeRow >= 0 && fisheyeRow < fisheyeImageHeight)
          {
-            uint4 fisheyeColor = read_imageui(fThetaFisheyeRGBA8Image, (int2) (fisheyeX, fisheyeY));
+            uint4 fisheyeColor = read_imageui(fThetaFisheyeRGBA8Image, (int2) (fisheyeCol, fisheyeRow));
             pointColorR = (fisheyeColor.x / 255.0f);
             pointColorG = (fisheyeColor.y / 255.0f);
             pointColorB = (fisheyeColor.z / 255.0f);
@@ -164,6 +164,8 @@ kernel void imageToPointCloud(global float* parameters,
       pointColorB = (rgba8888Color.z);
       pointColorA = (rgba8888Color.w);
    }
+
+   pointSize = pointSize * eyeDepthInMeters;
 
    pointCloudVertexBuffer[pointStartIndex + 3] = pointColorR;
    pointCloudVertexBuffer[pointStartIndex + 4] = pointColorG;
