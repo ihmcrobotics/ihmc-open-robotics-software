@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
@@ -152,15 +153,17 @@ public class PlaneRegistrationTools
     * @param maxIterations
     */
    public static boolean computeIterativeClosestPlane(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, int maxIterations,
-                                                                 RigidBodyTransform transformToPack)
+                                                      RigidBodyTransform transformToPack, PlanarRegionMappingParameters parameters)
    {
       RigidBodyTransform transform;
       RigidBodyTransform finalTransform = new RigidBodyTransform();
 
       HashMap<Integer, Integer> matches = new HashMap<>();
 
-      PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, 0.5f,
-                                                        0.7f, 0.4f, 0.3f);
+      PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
+                                                        (float) parameters.getBestMatchAngularThreshold(),
+                                                        (float) parameters.getBestMatchDistanceThreshold(),
+                                                        0.3f);
       double previousError = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
       for (int i = 0; i < maxIterations; i++)
       {
@@ -173,7 +176,8 @@ public class PlaneRegistrationTools
          double error = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
 
          LogTools.info(String.format("Iteration: %d, Matches: %d, Previous Error: %.5f, Error: %.5f", i, matches.size(), previousError, error));
-         if ( ((previousError - error) / previousError < 0.01) || (matches.size() < 5))
+
+         if ( ((previousError - error) / previousError < parameters.getMaxRegistrationError()) || (matches.size() < 5))
          {
             break;
          }
@@ -184,9 +188,9 @@ public class PlaneRegistrationTools
 
       LogTools.info("Size: {}", (int) ( (float)previousError / 0.0002f));
 
-      LogTools.info("[{}]", ">".repeat(Math.abs((int) ((float) previousError / 0.0002f))) + ".".repeat(Math.max((int) ((0.02f - (float) previousError) / 0.0002f), 0)));
+      LogTools.info("[{}]", ">".repeat(Math.abs((int) ((float) previousError / 0.0002f))) + ".".repeat(Math.max((int) ((0.03f - (float) previousError) / 0.0002f), 0)));
 
-      if(previousError > 0.02)
+      if(previousError > 0.03)
       {
          LogTools.warn("ICP failed to converge, error: {}", previousError);
          return false;

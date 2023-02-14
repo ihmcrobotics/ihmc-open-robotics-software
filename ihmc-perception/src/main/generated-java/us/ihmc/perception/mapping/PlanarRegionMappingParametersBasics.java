@@ -52,4 +52,39 @@ public interface PlanarRegionMappingParametersBasics extends PlanarRegionMapping
    {
       set(PlanarRegionMappingParameters.odometryNoiseVariance, odometryNoiseVariance);
    }
+
+   default void setTerminationRatio(double terminationRatio)
+   {
+      set(PlanarRegionMappingParameters.terminationRatio, terminationRatio);
+   }
+
+   default void setICPMaxIterations(int icpMaxIterations)
+   {
+      set(PlanarRegionMappingParameters.icpMaxIterations, icpMaxIterations);
+   }
+
+   default void setMaxRegistrationError(double maxRegistrationError)
+   {
+      set(PlanarRegionMappingParameters.maxRegistrationError, maxRegistrationError);
+   }
+
+   default void setBestMatchAngularThreshold(double bestMatchAngularThreshold)
+   {
+      set(PlanarRegionMappingParameters.bestMatchAngularThreshold, bestMatchAngularThreshold);
+   }
+
+   default void setBestMatchDistanceThreshold(double bestMatchDistanceThreshold)
+   {
+      set(PlanarRegionMappingParameters.bestMatchDistanceThreshold, bestMatchDistanceThreshold);
+   }
+
+   default void setBestMinimumOverlapThreshold(double bestMinimumOverlapThreshold)
+   {
+      set(PlanarRegionMappingParameters.bestMinimumOverlapThreshold, bestMinimumOverlapThreshold);
+   }
+
+   default void setICPMinMatches(int icpMinMatches)
+   {
+      set(PlanarRegionMappingParameters.icpMinMatches, icpMinMatches);
+   }
 }

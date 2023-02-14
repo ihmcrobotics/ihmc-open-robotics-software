@@ -31,6 +31,13 @@ public class PlanarRegionMappingParameters extends StoredPropertySet implements 
    public static final DoubleStoredPropertyKey minimumBoundingBoxSize = keys.addDoubleKey("Minimum bounding box size");
    public static final DoubleStoredPropertyKey planeNoiseVariance = keys.addDoubleKey("Plane noise variance");
    public static final DoubleStoredPropertyKey odometryNoiseVariance = keys.addDoubleKey("Odometry noise variance");
+   public static final DoubleStoredPropertyKey terminationRatio = keys.addDoubleKey("Termination ratio");
+   public static final IntegerStoredPropertyKey icpMaxIterations = keys.addIntegerKey("ICP max iterations");
+   public static final DoubleStoredPropertyKey maxRegistrationError = keys.addDoubleKey("Max registration error");
+   public static final DoubleStoredPropertyKey bestMatchAngularThreshold = keys.addDoubleKey("Best match angular threshold");
+   public static final DoubleStoredPropertyKey bestMatchDistanceThreshold = keys.addDoubleKey("Best match distance threshold");
+   public static final DoubleStoredPropertyKey bestMinimumOverlapThreshold = keys.addDoubleKey("Best minimum overlap threshold");
+   public static final IntegerStoredPropertyKey icpMinMatches = keys.addIntegerKey("ICP min matches");
 
    /**
     * Loads this property set.
