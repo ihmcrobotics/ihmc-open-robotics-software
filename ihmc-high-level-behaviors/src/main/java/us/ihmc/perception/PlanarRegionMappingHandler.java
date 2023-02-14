@@ -87,7 +87,7 @@ public class PlanarRegionMappingHandler
    private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
 
    private int planarRegionListIndex = 0;
-   private int perceptionLogIndex = 40;
+   private int perceptionLogIndex = 400;
 
    private String sensorLogChannelName;
    private BytedecoImage depth16UC1Image;
@@ -153,8 +153,8 @@ public class PlanarRegionMappingHandler
       //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
       //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
-      createOuster(128, 1024, smoothing);
-      //createL515(768, 1024, smoothing);
+//      createOuster(128, 1024, smoothing);
+      createL515(768, 1024, smoothing);
    }
 
    private void createL515(int depthHeight, int depthWidth, boolean smoothing)
