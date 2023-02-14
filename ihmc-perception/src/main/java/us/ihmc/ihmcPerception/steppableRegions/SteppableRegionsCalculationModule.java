@@ -40,7 +40,6 @@ public class SteppableRegionsCalculationModule
    private _cl_kernel computeSteppabilityKernel;
    private _cl_kernel computeSteppabilityConnectionsKernel;
 
-   private final SteppableRegionsListCollectionMessage message = new SteppableRegionsListCollectionMessage();
    private final ConcaveHullFactoryParameters concaveHullParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
 
@@ -63,7 +62,6 @@ public class SteppableRegionsCalculationModule
 
    private final List<Consumer<SteppableRegionsListCollectionMessage>> steppableRegionListOutputConsumers = new ArrayList<>();
    private final List<Consumer<SteppableRegionDebugImagesMessage>> steppableRegionDebugConsumers = new ArrayList<>();
-
 
    public SteppableRegionsCalculationModule()
    {
@@ -157,6 +155,11 @@ public class SteppableRegionsCalculationModule
       Stopwatch timer = new Stopwatch();
       timer.start();
 
+      // it's highly likely we have a region that's the ground, so we need to set the length limit to that size.
+      concaveHullParameters.setEdgeLengthThreshold(parameters.getEdgeLengthThreshold());
+      // this is critical to prevent it from filtering small regions
+      polygonizerParameters.setLengthThreshold(0.4 * heightMapData.getGridResolutionXY());
+
       regionCollection.clear();
       regionEnvironments.clear();
       for (int yawValue = 0; yawValue < yawDiscretizations; yawValue++)
@@ -199,10 +202,7 @@ public class SteppableRegionsCalculationModule
                snapNormalZImages.get(yawValue),
                steppabilityConnections.get(yawValue),
                parameters);
-         // it's highly likely we have a region that's the ground, so we need to set the length limit to that size.
-         concaveHullParameters.setEdgeLengthThreshold(heightMapData.getGridSizeXY());
-         // this is critical to prevent it from filtering small regions
-         polygonizerParameters.setLengthThreshold(0.4 * heightMapData.getGridResolutionXY());
+
          SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
                                                                                           polygonizerParameters,
                                                                                           parameters,
@@ -224,7 +224,7 @@ public class SteppableRegionsCalculationModule
          generateSteppabilityDebugImage(i, debugImagesMessage.getSteppabilityImages().add());
       }
 
-      SteppableRegionMessageConverter.convertToSteppableRegionsListCollectionMessage(regionCollection, message);
+      SteppableRegionsListCollectionMessage message = SteppableRegionMessageConverter.convertToSteppableRegionsListCollectionMessage(regionCollection);
 
       for (Consumer<SteppableRegionsListCollectionMessage> outputConsumer : steppableRegionListOutputConsumers)
          outputConsumer.accept(message);

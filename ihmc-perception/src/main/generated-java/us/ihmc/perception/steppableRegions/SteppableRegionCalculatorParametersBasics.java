@@ -62,4 +62,9 @@ public interface SteppableRegionCalculatorParametersBasics extends SteppableRegi
    {
       set(SteppableRegionCalculatorParameters.minCellsInARegion, minCellsInARegion);
    }
+
+   default void setEdgeLengthThreshold(double edgeLengthThreshold)
+   {
+      set(SteppableRegionCalculatorParameters.edgeLengthThreshold, edgeLengthThreshold);
+   }
 }

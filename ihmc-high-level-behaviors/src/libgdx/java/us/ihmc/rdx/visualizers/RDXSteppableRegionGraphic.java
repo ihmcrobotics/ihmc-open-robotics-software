@@ -52,15 +52,15 @@ public class RDXSteppableRegionGraphic implements RenderableProvider
       this.renderGroundCells = renderGroundCells;
    }
 
-   public void generateMeshesAsync(SteppableRegionsListCollectionMessage steppableRegions)
+   public void generateMeshesAsync(SteppableRegionsListCollectionMessage steppableRegions, int yawToShow)
    {
-      executorService.clearQueueAndExecute(() -> generateMeshes(steppableRegions));
+      executorService.clearQueueAndExecute(() -> generateMeshes(steppableRegions, yawToShow));
    }
 
-   private void generateMeshes(SteppableRegionsListCollectionMessage message)
+   private void generateMeshes(SteppableRegionsListCollectionMessage message, int yawToShow)
    {
       SteppableRegionsListCollection steppableRegionsCollection = SteppableRegionMessageConverter.convertToSteppableRegionsListCollection(message);
-      List<SteppableRegion> steppableRegionsToView = steppableRegionsCollection.getSteppableRegions(0).getSteppableRegionsAsList();
+      List<SteppableRegion> steppableRegionsToView = steppableRegionsCollection.getSteppableRegions(yawToShow).getSteppableRegionsAsList();
 
       for (int i = 0; i < gridMapGraphics.size(); i++)
          gridMapGraphics.get(i).clear();

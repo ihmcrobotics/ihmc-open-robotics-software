@@ -10,5 +10,6 @@
   "Max search depth for regions": 500,
   "Fraction of cell to expand small regions": 0.75,
   "Max interior points to include": 1000,
-  "Min cells in a region": 4
+  "Min cells in a region": 4,
+  "Edge length threshold": 0.3
 }

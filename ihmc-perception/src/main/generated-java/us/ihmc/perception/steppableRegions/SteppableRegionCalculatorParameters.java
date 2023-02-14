@@ -33,6 +33,7 @@ public class SteppableRegionCalculatorParameters extends StoredPropertySet imple
    public static final DoubleStoredPropertyKey fractionOfCellToExpandSmallRegions = keys.addDoubleKey("Fraction of cell to expand small regions");
    public static final IntegerStoredPropertyKey maxInteriorPointsToInclude = keys.addIntegerKey("Max interior points to include");
    public static final IntegerStoredPropertyKey minCellsInARegion = keys.addIntegerKey("Min cells in a region");
+   public static final DoubleStoredPropertyKey edgeLengthThreshold = keys.addDoubleKey("Edge length threshold");
 
    /**
     * Loads this property set.

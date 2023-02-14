@@ -64,4 +64,9 @@ public interface SteppableRegionCalculatorParametersReadOnly extends StoredPrope
    {
       return get(minCellsInARegion);
    }
+
+   default double getEdgeLengthThreshold()
+   {
+      return get(edgeLengthThreshold);
+   }
 }
