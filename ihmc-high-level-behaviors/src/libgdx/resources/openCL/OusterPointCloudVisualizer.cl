@@ -108,7 +108,6 @@ kernel void imageToPointCloud(global float* parameters,
       pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }
 
-
    float pointColorR;
    float pointColorG;
    float pointColorB;
