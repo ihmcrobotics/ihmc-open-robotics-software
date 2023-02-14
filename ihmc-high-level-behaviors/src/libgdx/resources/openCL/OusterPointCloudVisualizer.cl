@@ -8,18 +8,18 @@ kernel void imageToPointCloud(global float* parameters,
 
    float horizontalFieldOfView = parameters[0];
    float verticalFieldOfView = parameters[1];
-   float translationX = parameters[2];
-   float translationY = parameters[3];
-   float translationZ = parameters[4];
-   float rotationMatrixM00 = parameters[5];
-   float rotationMatrixM01 = parameters[6];
-   float rotationMatrixM02 = parameters[7];
-   float rotationMatrixM10 = parameters[8];
-   float rotationMatrixM11 = parameters[9];
-   float rotationMatrixM12 = parameters[10];
-   float rotationMatrixM20 = parameters[11];
-   float rotationMatrixM21 = parameters[12];
-   float rotationMatrixM22 = parameters[13];
+   float ousterToWorldTranslationX = parameters[2];
+   float ousterToWorldTranslationY = parameters[3];
+   float ousterToWorldTranslationZ = parameters[4];
+   float ousterToWorldRotationMatrixM00 = parameters[5];
+   float ousterToWorldRotationMatrixM01 = parameters[6];
+   float ousterToWorldRotationMatrixM02 = parameters[7];
+   float ousterToWorldRotationMatrixM10 = parameters[8];
+   float ousterToWorldRotationMatrixM11 = parameters[9];
+   float ousterToWorldRotationMatrixM12 = parameters[10];
+   float ousterToWorldRotationMatrixM20 = parameters[11];
+   float ousterToWorldRotationMatrixM21 = parameters[12];
+   float ousterToWorldRotationMatrixM22 = parameters[13];
    int depthImageWidth = parameters[14];
    int depthImageHeight = parameters[15];
    float pointSize = parameters[16];
@@ -30,18 +30,18 @@ kernel void imageToPointCloud(global float* parameters,
    float fisheyeFocalLengthPixelsY = parameters[21];
    float fisheyePrincipalPointPixelsX = parameters[22];
    float fisheyePrincipalPointPixelsY = parameters[23];
-   float fisheyeTranslationX = parameters[24];
-   float fisheyeTranslationY = parameters[25];
-   float fisheyeTranslationZ = parameters[26];
-   float fisheyeRotationMatrixM00 = parameters[27];
-   float fisheyeRotationMatrixM01 = parameters[28];
-   float fisheyeRotationMatrixM02 = parameters[29];
-   float fisheyeRotationMatrixM10 = parameters[30];
-   float fisheyeRotationMatrixM11 = parameters[31];
-   float fisheyeRotationMatrixM12 = parameters[32];
-   float fisheyeRotationMatrixM20 = parameters[33];
-   float fisheyeRotationMatrixM21 = parameters[34];
-   float fisheyeRotationMatrixM22 = parameters[35];
+   float fisheyeToOusterTranslationX = parameters[24];
+   float fisheyeToOusterTranslationY = parameters[25];
+   float fisheyeToOusterTranslationZ = parameters[26];
+   float fisheyeToOusterRotationMatrixM00 = parameters[27];
+   float fisheyeToOusterRotationMatrixM01 = parameters[28];
+   float fisheyeToOusterRotationMatrixM02 = parameters[29];
+   float fisheyeToOusterRotationMatrixM10 = parameters[30];
+   float fisheyeToOusterRotationMatrixM11 = parameters[31];
+   float fisheyeToOusterRotationMatrixM12 = parameters[32];
+   float fisheyeToOusterRotationMatrixM20 = parameters[33];
+   float fisheyeToOusterRotationMatrixM21 = parameters[34];
+   float fisheyeToOusterRotationMatrixM22 = parameters[35];
 
    float discreteResolution = 0.001f;
    float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, y)).x * discreteResolution;
@@ -61,7 +61,7 @@ kernel void imageToPointCloud(global float* parameters,
    float beamFramePointY = 0.0;
    float beamFramePointZ = 0.0;
 
-   float4 sensorFramePoint = transform(beamFramePointX,
+   float4 ousterFramePoint = transform(beamFramePointX,
                                        beamFramePointY,
                                        beamFramePointZ,
                                        0.0,
@@ -77,21 +77,21 @@ kernel void imageToPointCloud(global float* parameters,
                                        angledRotationMatrix.s7,
                                        angledRotationMatrix.s8);
 
-   float4 worldFramePoint = transform(sensorFramePoint.x,
-                                      sensorFramePoint.y,
-                                      sensorFramePoint.z,
-                                      translationX,
-                                      translationY,
-                                      translationZ,
-                                      rotationMatrixM00,
-                                      rotationMatrixM01,
-                                      rotationMatrixM02,
-                                      rotationMatrixM10,
-                                      rotationMatrixM11,
-                                      rotationMatrixM12,
-                                      rotationMatrixM20,
-                                      rotationMatrixM21,
-                                      rotationMatrixM22);
+   float4 worldFramePoint = transform(ousterFramePoint.x,
+                                      ousterFramePoint.y,
+                                      ousterFramePoint.z,
+                                      ousterToWorldTranslationX,
+                                      ousterToWorldTranslationY,
+                                      ousterToWorldTranslationZ,
+                                      ousterToWorldRotationMatrixM00,
+                                      ousterToWorldRotationMatrixM01,
+                                      ousterToWorldRotationMatrixM02,
+                                      ousterToWorldRotationMatrixM10,
+                                      ousterToWorldRotationMatrixM11,
+                                      ousterToWorldRotationMatrixM12,
+                                      ousterToWorldRotationMatrixM20,
+                                      ousterToWorldRotationMatrixM21,
+                                      ousterToWorldRotationMatrixM22);
 
    int pointStartIndex = (depthImageWidth * y + x) * 8;
 
@@ -114,25 +114,36 @@ kernel void imageToPointCloud(global float* parameters,
    float pointColorA;
    if (useFisheyeColorImage)
    {
-      float4 fisheyeFramePoint = transform(sensorFramePoint.x,
-                                           sensorFramePoint.y,
-                                           sensorFramePoint.z,
-                                           fisheyeTranslationX,
-                                           fisheyeTranslationY,
-                                           fisheyeTranslationZ,
-                                           fisheyeRotationMatrixM00,
-                                           fisheyeRotationMatrixM01,
-                                           fisheyeRotationMatrixM02,
-                                           fisheyeRotationMatrixM10,
-                                           fisheyeRotationMatrixM11,
-                                           fisheyeRotationMatrixM12,
-                                           fisheyeRotationMatrixM20,
-                                           fisheyeRotationMatrixM21,
-                                           fisheyeRotationMatrixM22);
+      float4 fisheyeFramePoint = transform(ousterFramePoint.x,
+                                           ousterFramePoint.y,
+                                           ousterFramePoint.z,
+                                           fisheyeToOusterTranslationX,
+                                           fisheyeToOusterTranslationY,
+                                           fisheyeToOusterTranslationZ,
+                                           fisheyeToOusterRotationMatrixM00,
+                                           fisheyeToOusterRotationMatrixM01,
+                                           fisheyeToOusterRotationMatrixM02,
+                                           fisheyeToOusterRotationMatrixM10,
+                                           fisheyeToOusterRotationMatrixM11,
+                                           fisheyeToOusterRotationMatrixM12,
+                                           fisheyeToOusterRotationMatrixM20,
+                                           fisheyeToOusterRotationMatrixM21,
+                                           fisheyeToOusterRotationMatrixM22);
 
       float angleOfIncidence = angle3D(1.0f, 0.0f, 0.0f, fisheyeFramePoint.x, fisheyeFramePoint.y, fisheyeFramePoint.z);
       if (fabs(angleOfIncidence) < radians(92.5f))
       {
+         // Equidistant fisheye camera model:
+         // r = f * theta
+         // theta is the azimuthal angle, i.e. the angle swept on the image plane to the image point cooresponding to the fisheye frame point.
+         // We use atan2(-z, -y) with negative z and y to convert from right handed Y left, Z up to image X right, Y down.
+         // f is a 2D vector of focal length in pixels decomposed into X and Y so that we can tune each separately, which is useful.
+         // To get the components or r, we use sin and cos of theta (i.e. the azimuthal angle).
+         // r is a 2D vector of pixels from the principle point on the image to the point cooresponding to the fisheye frame point.
+         // We offset r by the principle point offsets to find the pixel row and column.
+         // https://www.fujifilm.com/us/en/business/optical-devices/machine-vision-lens/fe185-series
+         // https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function
+         // https://www.ihmc.us/wp-content/uploads/2023/02/equidistant_fisheye_model-1024x957.jpeg
          float azimuthalAngle = atan2(-fisheyeFramePoint.z, -fisheyeFramePoint.y);
          int fisheyeCol = fisheyePrincipalPointPixelsX + fisheyeFocalLengthPixelsX * angleOfIncidence * cos(azimuthalAngle);
          int fisheyeRow = fisheyePrincipalPointPixelsY + fisheyeFocalLengthPixelsY * angleOfIncidence * sin(azimuthalAngle);
