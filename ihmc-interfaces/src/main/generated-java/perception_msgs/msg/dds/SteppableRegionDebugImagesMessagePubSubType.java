@@ -40,8 +40,6 @@ public class SteppableRegionDebugImagesMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += perception_msgs.msg.dds.SteppableRegionDebugImageMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.SteppableRegionDebugImageMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -61,8 +59,6 @@ public class SteppableRegionDebugImagesMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += perception_msgs.msg.dds.SteppableRegionDebugImageMessagePubSubType.getCdrSerializedSize(data.getHeightMapImage(), current_alignment);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getSteppabilityImages().size(); ++i0)
       {
@@ -79,7 +75,6 @@ public class SteppableRegionDebugImagesMessagePubSubType implements us.ihmc.pubs
 
    public static void write(perception_msgs.msg.dds.SteppableRegionDebugImagesMessage data, us.ihmc.idl.CDR cdr)
    {
-      perception_msgs.msg.dds.SteppableRegionDebugImageMessagePubSubType.write(data.getHeightMapImage(), cdr);
       if(data.getSteppabilityImages().size() <= 10)
       cdr.write_type_e(data.getSteppabilityImages());else
           throw new RuntimeException("steppability_images field exceeds the maximum length");
@@ -92,7 +87,6 @@ public class SteppableRegionDebugImagesMessagePubSubType implements us.ihmc.pubs
 
    public static void read(perception_msgs.msg.dds.SteppableRegionDebugImagesMessage data, us.ihmc.idl.CDR cdr)
    {
-      perception_msgs.msg.dds.SteppableRegionDebugImageMessagePubSubType.read(data.getHeightMapImage(), cdr);	
       cdr.read_type_e(data.getSteppabilityImages());	
       cdr.read_type_e(data.getRegionImages());	
 
@@ -101,8 +95,6 @@ public class SteppableRegionDebugImagesMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(perception_msgs.msg.dds.SteppableRegionDebugImagesMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("height_map_image", new perception_msgs.msg.dds.SteppableRegionDebugImageMessagePubSubType(), data.getHeightMapImage());
-
       ser.write_type_e("steppability_images", data.getSteppabilityImages());
       ser.write_type_e("region_images", data.getRegionImages());
    }
@@ -110,8 +102,6 @@ public class SteppableRegionDebugImagesMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SteppableRegionDebugImagesMessage data)
    {
-      ser.read_type_a("height_map_image", new perception_msgs.msg.dds.SteppableRegionDebugImageMessagePubSubType(), data.getHeightMapImage());
-
       ser.read_type_e("steppability_images", data.getSteppabilityImages());
       ser.read_type_e("region_images", data.getRegionImages());
    }

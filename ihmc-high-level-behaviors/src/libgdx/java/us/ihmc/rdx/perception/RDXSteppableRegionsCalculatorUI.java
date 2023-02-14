@@ -7,7 +7,10 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
+import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegion;
@@ -77,6 +80,15 @@ public class RDXSteppableRegionsCalculatorUI
       wholeAlgorithmDurationPlot = new ImGuiPlot(labels.get("Whole algorithm duration"), 1000, 300, 50);
 
       steppableRegionGraphic = new RDXSteppableRegionGraphic();
+
+      steppableRegionsCalculationModule.addSteppableRegionListCollectionOutputConsumer(regions ->
+                                                                                       {
+                                                                                          List<SteppableRegion> regionsToView = regions.getSteppableRegions(0)
+                                                                                                                                       .getSteppableRegionsAsList();
+                                                                                          steppableRegionGraphic.generateMeshesAsync(regionsToView);
+                                                                                          LogTools.info("Found " + regionsToView.size() + " regions");
+                                                                                       });
+      steppableRegionsCalculationModule.addSteppableRegionDebugConsumer(this::drawRegions);
    }
 
    volatile boolean processing = false;
@@ -121,10 +133,6 @@ public class RDXSteppableRegionsCalculatorUI
       wholeAlgorithmDurationStopwatch.start();
       steppableRegionsCalculationModule.setSteppableRegionsCalculatorParameters(parameters);
       steppableRegionsCalculationModule.compute(heightMapData);
-      drawRegions();
-      List<SteppableRegion> regionsToView = steppableRegionsCalculationModule.getSteppableRegionsListCollection().getSteppableRegions(0).getSteppableRegionsAsList();
-      steppableRegionGraphic.generateMeshesAsync(regionsToView);
-      LogTools.info("Found " + regionsToView.size() + " regions");
 
       wholeAlgorithmDurationStopwatch.suspend();
       wholeAlgorithmDuration.set(wholeAlgorithmDurationStopwatch.lapElapsed());
@@ -149,72 +157,52 @@ public class RDXSteppableRegionsCalculatorUI
       }
    }
 
-   private void drawRegions()
+   private void drawRegions(SteppableRegionDebugImagesMessage debugImagesMessage)
    {
-      for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
+      for (int yaw = 0; yaw < SteppableRegionsCalculationModule.yawDiscretizations; yaw++)
       {
-         RDXCVImagePanel panel = steppableRegionsPanels.get(i);
-         SteppableRegionsCalculator.SteppableRegionsEnvironmentModel environmentModel = steppableRegionsCalculationModule.getRegionEnvironments().get(i);
+         RDXCVImagePanel panel = steppableRegionsPanels.get(yaw);
          if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
          {
             BytedecoImage image = panel.getBytedecoImage();
-            int size = image.getImageHeight();
-            // fill with black
-            for (int x = 0; x < image.getImageWidth(); x++)
-            {
-               for (int y = 0; y < image.getImageHeight(); y++)
-               {
-                  BytePointer pixel = image.getBytedecoOpenCVMat().ptr(x, y);
-                  pixel.put(0, (byte) 0);
-                  pixel.put(1, (byte) 0);
-                  pixel.put(2, (byte) 0);
-               }
-            }
-            for (SteppableRegionsCalculator.SteppableRegionDataHolder region : environmentModel.getRegions())
-            {
-               for (SteppableRegionsCalculator.SteppableCell cell : region.getCells())
-               {
-                  int x = cell.getX();
-                  int y = cell.getY();
 
-                  int row =  size - x - 1;
-                  int column = size - y - 1;
+            SteppableRegionDebugImageMessage regionImage = debugImagesMessage.getRegionImages().get(yaw);
 
-                  int r = (region.regionNumber + 1) * 312 % 255;
-                  int g = (region.regionNumber + 1) * 123 % 255;
-                  int b = (region.regionNumber + 1) * 231 % 255;
-                  BytePointer pixel = image.getBytedecoOpenCVMat().ptr(row, column);
-                  pixel.put(0, (byte) r);
-                  pixel.put(1, (byte) g);
-                  pixel.put(2, (byte) b);
+            if (image.getImageHeight() != regionImage.getImageHeight() || image.getImageWidth() != regionImage.getImageWidth())
+               throw new RuntimeException("Sizes don't match");
+
+            for (int row = 0; row < regionImage.getImageHeight(); row++)
+            {
+               for (int col = 0; col < regionImage.getImageWidth(); col++)
+               {
+                  BytePointer pointer = image.getBytedecoOpenCVMat().ptr(row, col);
+                  for (int j = 0; j < 3; j++)
+                  {
+                     int index = row * regionImage.getImageWidth() + col;
+                     int start = 3 * index;
+                     pointer.put(j, regionImage.getData().get(start + j));
+                  }
                }
             }
          }
 
-         panel = steppabilityPanels.get(i);
+         panel = steppabilityPanels.get(yaw);
          if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
          {
-            BytedecoImage image = steppableRegionsCalculationModule.getSteppableImage().get(i);
+            BytedecoImage image = panel.getBytedecoImage();
+            SteppableRegionDebugImageMessage steppabilityImage = debugImagesMessage.getSteppabilityImages().get(yaw);
 
-            for (int x = 0; x < image.getImageWidth(); x++)
+            for (int row = 0; row < steppabilityImage.getImageHeight(); row++)
             {
-               for (int y = 0; y < image.getImageHeight(); y++)
+               for (int col = 0; col < steppabilityImage.getImageWidth(); col++)
                {
-                  Color color;
-                  int status = image.getInt(x, y);
-                  if (status == 0)
-                     color = Color.WHITE; // valid
-                  else if (status == 1)
-                     color = Color.BLACK; // cliff top
-                  else if (status == 3)
-                     color = Color.BLUE; // bad snap
-                  else
-                     color = Color.GRAY; // cliff bottom
-
-                  BytePointer pixel = panel.getBytedecoImage().getBytedecoOpenCVMat().ptr(x, y);
-                  pixel.put(0, (byte) (color.r * 255));
-                  pixel.put(1, (byte) (color.g * 255));
-                  pixel.put(2, (byte) (color.b * 255));
+                  BytePointer pointer = image.getBytedecoOpenCVMat().ptr(row, col);
+                  for (int j = 0; j < 3; j++)
+                  {
+                     int index = row * steppabilityImage.getImageWidth() + col;
+                     int start = 3 * index;
+                     pointer.put(j, steppabilityImage.getData().get(start + j));
+                  }
                }
             }
          }
@@ -227,16 +215,17 @@ public class RDXSteppableRegionsCalculatorUI
       steppabilityPanels.forEach(RDXCVImagePanel::draw);
    }
 
-   /** FIXME: This method filled with allocations. */
+   /**
+    * FIXME: This method filled with allocations.
+    */
    private void renderSteppableRegions()
    {
-//      if (!render3DPlanarRegions.get())
-//         return;
+      //      if (!render3DPlanarRegions.get())
+      //         return;
 
-//      planarRegionsGraphic.generateMeshes(gpuPlanarRegionExtraction.getPlanarRegionsList());
-//      planarRegionsGraphic.update();
+      //      planarRegionsGraphic.generateMeshes(gpuPlanarRegionExtraction.getPlanarRegionsList());
+      //      planarRegionsGraphic.update();
    }
-
 
    public void renderImGuiWidgets()
    {
@@ -246,15 +235,14 @@ public class RDXSteppableRegionsCalculatorUI
       ImGui.text("Input height map dimensions: " + cellsPerSide + " x " + cellsPerSide);
       ImGui.checkbox(labels.get("Enabled"), enabled);
       wholeAlgorithmDurationPlot.render(wholeAlgorithmDurationStopwatch.totalElapsed());
-//      numberOfSteppableRegionsPlot.render((float) steppableRegionsCalculationModule.getSteppableRegions().get(0).size());
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       // TODO
       steppableRegionGraphic.getRenderables(renderables, pool);
-//      if (render3DPlanarRegions.get())
-//         planarRegionsGraphic.getRenderables(renderables, pool);
+      //      if (render3DPlanarRegions.get())
+      //         planarRegionsGraphic.getRenderables(renderables, pool);
    }
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)

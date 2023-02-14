@@ -12,7 +12,6 @@ module perception_msgs
       @TypeCode(type="perception_msgs::msg::dds_::SteppableRegionDebugImagesMessage_")
       struct SteppableRegionDebugImagesMessage
       {
-        perception_msgs::msg::dds::SteppableRegionDebugImageMessage height_map_image;
         sequence<perception_msgs::msg::dds::SteppableRegionDebugImageMessage, 10> steppability_images;
         sequence<perception_msgs::msg::dds::SteppableRegionDebugImageMessage, 10> region_images;
       };

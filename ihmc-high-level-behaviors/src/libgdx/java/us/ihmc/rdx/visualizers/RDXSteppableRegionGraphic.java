@@ -100,7 +100,12 @@ public class RDXSteppableRegionGraphic implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       for (RDXGridMapGraphic gridMapGraphic : gridMapGraphics)
+      {
+         if (gridMapGraphic == null)
+            continue;
+
          gridMapGraphic.getRenderables(renderables, pool);
+      }
    }
 
    public void destroy()
