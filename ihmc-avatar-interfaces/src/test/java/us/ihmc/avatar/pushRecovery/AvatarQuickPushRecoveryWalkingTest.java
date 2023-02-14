@@ -59,6 +59,8 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
    private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
    private PushRobotControllerSCS2 pushRobotController;
 
+   private boolean usePerfectSensors = false;
+
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
@@ -162,19 +164,22 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       // setup all parameters
       Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
       RobotSide side = RobotSide.LEFT;
-
+      
       walkForward(16);
 
       StateTransitionCondition condition = time -> swingStartConditions.get(side).testCondition(time) && footstepsCompletedPerSide.get(side).get() > 0;
 
       // apply the push at mid swing
       testPush(forceDirection, pushChangeInVelocity, 0.45, condition, swingTime, 4);
-
+      simulationTestHelper.simulateNow(1.0);
+      
       // apply the push at early swing
       testPush(forceDirection, pushChangeInVelocity, 0.2, condition, swingTime, 4);
+      simulationTestHelper.simulateNow(1.0);
 
       // apply the push at late swing
       testPush(forceDirection, pushChangeInVelocity, 0.7, condition, swingTime, 4);
+      simulationTestHelper.simulateNow(1.0);
    }
 
    @Test
@@ -279,7 +284,10 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, flatGround, simulationTestingParameters);
+      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel, flatGround, simulationTestingParameters);
+      factory.setUsePerfectSensors(usePerfectSensors);
+      simulationTestHelper = factory.createAvatarTestingSimulation();
+      
       simulationTestHelper.start();
       ((YoBoolean) simulationTestHelper.findVariable("speedUpTransferDynamicsFromError")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("controllerAllowStepAdjustment")).set(true);
@@ -289,6 +297,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       ((YoBoolean) simulationTestHelper.findVariable("controllerAllowCrossOverSteps")).set(true);
       ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.25);
       ((YoDouble) simulationTestHelper.findVariable("controllerminimumTimeForStepAdjustment")).set(-3.0);
+      
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
@@ -322,12 +331,17 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       assertTrue(simulationTestHelper.simulateNow(1.0));
    }
 
+   public void setUsePerfectSensors(boolean usePerfectSensors)
+   {
+      this.usePerfectSensors = usePerfectSensors;
+   }
+
    public void enableSpeedUp()
    {
       ((YoBoolean) simulationTestHelper.findVariable("speedUpTransferDynamicsFromError")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("speedUpSwingDynamicsFromError")).set(true);
    }
-
+   
    private void walkForward()
    {
       walkForward(10);
@@ -351,10 +365,12 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
          location.setZ(0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
+         footstepData.setShouldCheckForReachability(true);
          footsteps.getFootstepDataList().add().set(footstepData);
       }
 
       footsteps.setAreFootstepsAdjustable(true);
+      footsteps.setOffsetFootstepsWithExecutionError(true);
       simulationTestHelper.publishToController(footsteps);
    }
 
