@@ -1,36 +1,25 @@
 package us.ihmc.rdx.perception;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
-import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsAPI;
-import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculationModule;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
+import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
-import us.ihmc.rdx.visualizers.RDXSteppableRegionGraphic;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXSteppableRegionsCalculatorUI
+public class RDXSteppableRegionsPanel
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean renderRegions = new ImBoolean(false);
@@ -49,7 +38,7 @@ public class RDXSteppableRegionsCalculatorUI
    private int cellsPerSide;
    private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
 
-   public RDXSteppableRegionsCalculatorUI(ROS2Helper ros2Helper)
+   public RDXSteppableRegionsPanel(ROS2Helper ros2Helper)
    {
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
       remotePropertySets.registerRemotePropertySet(parameters, SteppableRegionsAPI.PARAMETERS);
@@ -74,18 +63,9 @@ public class RDXSteppableRegionsCalculatorUI
 
    volatile boolean needToDraw = false;
 
-   public void setLatestSteppableRegionsToRender(SteppableRegionsListCollectionMessage steppableRegionsListCollection)
-   {
-   }
-
    public void setLatestSteppableRegionDebugImagesToRender(SteppableRegionDebugImagesMessage steppableRegionDebugImagesToRender)
    {
       this.latestSteppableRegionDebugImagesToRender.set(steppableRegionDebugImagesToRender);
-   }
-
-   public SteppableRegionCalculatorParametersReadOnly getSteppableParameters()
-   {
-      return parameters;
    }
 
    public void update()
