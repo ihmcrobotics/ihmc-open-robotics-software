@@ -86,7 +86,6 @@ public class RDXRapidHeightMapExtractionDemo
             baseUI.create();
 
             openCLManager = new OpenCLManager();
-            openCLManager.create();
             openCLProgram = openCLManager.loadProgram("RapidHeightMapExtractor");
 
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
