@@ -97,7 +97,6 @@ public class RDXRemoteHeightMapPanel
             pixel.put(2, (byte) b);
          }
       }
-      //      }
       heightMapPanel.draw();
    }
 
