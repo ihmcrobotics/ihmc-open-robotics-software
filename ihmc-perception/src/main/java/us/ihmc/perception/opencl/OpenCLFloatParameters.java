@@ -52,6 +52,11 @@ public class OpenCLFloatParameters
       setParameter((float) rigidBodyTransform.getRotation().getM22());
    }
 
+   public void setParameter(boolean booleanAsFloat)
+   {
+      setParameter(booleanAsFloat ? 1.0f : 0.0f);
+   }
+
    public void writeOpenCLBufferObject(OpenCLManager openCLManager)
    {
       if (!bufferCreated)

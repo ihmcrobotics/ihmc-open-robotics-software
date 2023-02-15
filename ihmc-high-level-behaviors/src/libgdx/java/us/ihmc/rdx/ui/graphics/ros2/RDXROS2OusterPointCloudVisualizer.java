@@ -157,7 +157,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
          // TODO: Create tuners for these
          double verticalFieldOfView = Math.PI / 2.0;
          double horizontalFieldOfView = 2.0 * Math.PI;
-         depthImageToPointCloudKernel.getSensorTransformToWorld().set(imageMessage.getOrientation(), imageMessage.getPosition());
+         depthImageToPointCloudKernel.getOusterToWorldTransform().set(imageMessage.getOrientation(), imageMessage.getPosition());
          depthImageToPointCloudKernel.runKernel((float) horizontalFieldOfView, (float) verticalFieldOfView, pointSize.get());
 
          delayPlot.addValue(TimeTools.calculateDelay(acquisitionTimeSecondsSinceEpoch, acquisitionTimeAdditionalNanos));
