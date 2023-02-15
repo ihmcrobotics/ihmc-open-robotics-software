@@ -30,7 +30,7 @@ public class ImWrenchPlot
    {
       for (RobotSide side : RobotSide.values)
       {
-         wrenchPlotPanels.set(side, new ImPlotPlotPanel(side + " wrench / torques"));
+         wrenchPlotPanels.set(side, new ImPlotPlotPanel(side + " wrench"));
          linear_x_plot_lines.set(side, new ImPlotDoublePlotLine(side + " wrench LINEAR: x"));
          linear_y_plot_lines.set(side, new ImPlotDoublePlotLine(side + " wrench LINEAR: y"));
          linear_z_plot_lines.set(side, new ImPlotDoublePlotLine(side + " wrench LINEAR: z"));

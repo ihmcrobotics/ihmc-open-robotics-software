@@ -33,7 +33,7 @@ public class ImArmTorquePlot
          List<OneDoFJointBasics> oneArmJoints = armJoints.get(side);
          for (int i = 0; i < oneArmJoints.size(); ++i)
          {
-            ImPlotDoublePlotLine doublePlotLine = new ImPlotDoublePlotLine(oneArmJoints.get(i).getName() + " " + prefix + "torque");
+            ImPlotDoublePlotLine doublePlotLine = new ImPlotDoublePlotLine(oneArmJoints.get(i).getName() + " " + prefix + " torque");
             plot_lines.get(side).add(doublePlotLine);
             torquePlots.get(side).getPlotLines().add(doublePlotLine);
          }
