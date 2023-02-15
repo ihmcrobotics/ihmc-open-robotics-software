@@ -19,7 +19,7 @@ import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 
 import java.util.ArrayList;
 
-public class RDXPerceptionManager
+public class RDXBehaviorSequencePerceptionManagerUI
 {
    private final ImGuiPanel panel = new ImGuiPanel("Perception Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
