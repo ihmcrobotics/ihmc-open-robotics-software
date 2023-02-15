@@ -126,7 +126,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       super.create();
 
       openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLProgram = openCLManager.loadProgram("FusedSensorPointCloudSubscriberVisualizer");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "unpackPointCloud");
 
