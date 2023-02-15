@@ -19,7 +19,7 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 
 import java.util.ArrayList;
 
-public class RDXObjectDetector
+public class RDXDoorExperimentsObjectDetectorUI
 {
    private final ImGuiPanel panel = new ImGuiPanel("Object Detector", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
