@@ -25,7 +25,10 @@ public class RapidHeightMapExtractor
 
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer parametersBuffer;
-   private OpenCLFloatBuffer sensorTransformBuffer;
+
+   private OpenCLFloatBuffer worldToSensorTransformBuffer;
+   private OpenCLFloatBuffer sensorToWorldTransformBuffer;
+
    private OpenCLFloatBuffer groundPlaneBuffer;
    private _cl_program rapidHeightMapUpdaterProgram;
    private _cl_kernel heightMapUpdateKernel;
@@ -46,8 +49,11 @@ public class RapidHeightMapExtractor
       parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
       parametersBuffer.createOpenCLBufferObject(openCLManager);
 
-      sensorTransformBuffer = new OpenCLFloatBuffer(16);
-      sensorTransformBuffer.createOpenCLBufferObject(openCLManager);
+      worldToSensorTransformBuffer = new OpenCLFloatBuffer(16);
+      worldToSensorTransformBuffer.createOpenCLBufferObject(openCLManager);
+
+      sensorToWorldTransformBuffer = new OpenCLFloatBuffer(16);
+      sensorToWorldTransformBuffer.createOpenCLBufferObject(openCLManager);
 
       groundPlaneBuffer = new OpenCLFloatBuffer(4);
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
@@ -75,13 +81,18 @@ public class RapidHeightMapExtractor
          parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) gridWidth);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
-         //// Fill sensor transform buffer
-         sensorTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(PerceptionEuclidTools.toFloatArray(sensorToWorldTransform));
-         sensorTransformBuffer.writeOpenCLBufferObject(openCLManager);
 
          // Fill ground plane buffer
          RigidBodyTransform worldToSensorTransform = new RigidBodyTransform(sensorToWorldTransform);
          worldToSensorTransform.invert();
+
+         // Fill world-to-sensor transform buffer
+         worldToSensorTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(PerceptionEuclidTools.toFloatArray(worldToSensorTransform));
+         worldToSensorTransformBuffer.writeOpenCLBufferObject(openCLManager);
+
+         // Fill sensor-to-world transform buffer
+         sensorToWorldTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(PerceptionEuclidTools.toFloatArray(sensorToWorldTransform));
+         sensorToWorldTransformBuffer.writeOpenCLBufferObject(openCLManager);
 
          // Generate a +Z vector in world frame
          Vector3D groundNormalSensorFrame = new Vector3D(0.0, 0.0, 1.0);
@@ -98,8 +109,9 @@ public class RapidHeightMapExtractor
          openCLManager.setKernelArgument(heightMapUpdateKernel, 0, inputDepthImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 1, outputHeightMapImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 2, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 3, sensorTransformBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 4, groundPlaneBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 3, sensorToWorldTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 4, worldToSensorTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 5, groundPlaneBuffer.getOpenCLBufferObject());
 
          // Execute kernel with length and width parameters
          openCLManager.execute2D(heightMapUpdateKernel, gridWidth, gridLength);
