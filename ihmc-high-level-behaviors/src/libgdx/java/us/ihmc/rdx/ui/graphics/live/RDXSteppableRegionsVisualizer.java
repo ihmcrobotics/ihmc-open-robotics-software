@@ -5,11 +5,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.SteppableRegionMessage;
+import imgui.type.ImInt;
+import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
-import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
 import us.ihmc.rdx.visualizers.RDXSteppableRegionGraphic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -20,9 +19,11 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
 
    private final ResettableExceptionHandlingExecutorService executorService;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final ImInt yawToShow = new ImInt(0);
    private final ImBoolean inPaintHeight = new ImBoolean(false);
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
+   private int receivedRegions = -1;
 
    public RDXSteppableRegionsVisualizer(String title)
    {
@@ -41,17 +42,21 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
       setActive(true);
    }
 
-   public void acceptHeightMapMessage(SteppableRegionMessage heightMapMessage)
+   public void acceptSteppableRegionsCollection(SteppableRegionsListCollectionMessage steppableRegionsListCollection)
    {
       frequencyPlot.recordEvent();
       if (isActive())
       {
+         if (steppableRegionsListCollection == null)
+            return;
+
+         receivedRegions = steppableRegionsListCollection.getRegionsPerYaw().get(yawToShow.get());
          executorService.clearQueueAndExecute(() ->
                                               {
-//                                                 gridMapGraphic.setInPaintHeight(inPaintHeight.get());
-//                                                 gridMapGraphic.setRenderGroundPlane(renderGroundPlane.get());
-//                                                 gridMapGraphic.setRenderGroundCells(renderGroundCells.get());
-//                                                 gridMapGraphic.generateMeshesAsync(heightMapMessage);
+                                                 steppableRegionGraphic.setInPaintHeight(inPaintHeight.get());
+                                                 steppableRegionGraphic.setRenderGroundPlane(renderGroundPlane.get());
+                                                 steppableRegionGraphic.setRenderGroundCells(renderGroundCells.get());
+                                                 steppableRegionGraphic.generateMeshesAsync(steppableRegionsListCollection, yawToShow.get());
                                               });
       }
    }
@@ -79,6 +84,9 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
       {
          executorService.interruptAndReset();
       }
+      imgui.internal.ImGui.text("Regions rendered: " + receivedRegions);
+      imgui.internal.ImGui.sliderInt("Yaw to show", yawToShow.getData(), 0, 4);
+
       frequencyPlot.renderImGuiWidgets();
    }
 
@@ -89,7 +97,7 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
 
       if (isActive())
       {
-//         gridMapGraphic.update();
+         steppableRegionGraphic.update();
       }
    }
 
@@ -98,12 +106,12 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
    {
       if (isActive())
       {
-//         gridMapGraphic.getRenderables(renderables, pool);
+         steppableRegionGraphic.getRenderables(renderables, pool);
       }
    }
 
    public void destroy()
    {
-//      gridMapGraphic.destroy();
+      steppableRegionGraphic.destroy();
    }
 }

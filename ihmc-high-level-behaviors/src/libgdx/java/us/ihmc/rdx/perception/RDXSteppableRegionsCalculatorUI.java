@@ -37,7 +37,6 @@ public class RDXSteppableRegionsCalculatorUI
 
    private final OpenCLManager openCLManager = new OpenCLManager();
 
-   private final AtomicReference<SteppableRegionsListCollectionMessage> latestSteppableRegionsToRender = new AtomicReference<>();
    private final AtomicReference<SteppableRegionDebugImagesMessage> latestSteppableRegionDebugImagesToRender = new AtomicReference<>();
 
    private final ImBoolean drawPatches = new ImBoolean(true);
@@ -47,13 +46,8 @@ public class RDXSteppableRegionsCalculatorUI
    private final List<RDXCVImagePanel> steppableRegionsPanels = new ArrayList<>();
 
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
-   private RDXSteppableRegionGraphic steppableRegionGraphic;
    private int cellsPerSide;
    private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
-
-   private int receivedRegions = -1;
-   private final ImInt yawToShow = new ImInt(0);
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
 
    public RDXSteppableRegionsCalculatorUI(ROS2Helper ros2Helper)
    {
@@ -76,16 +70,12 @@ public class RDXSteppableRegionsCalculatorUI
          imguiPanel.addChild(steppabilityPanel.getVideoPanel());
          imguiPanel.addChild(panel.getVideoPanel());
       }
-
-      steppableRegionGraphic = new RDXSteppableRegionGraphic();
    }
 
    volatile boolean needToDraw = false;
 
    public void setLatestSteppableRegionsToRender(SteppableRegionsListCollectionMessage steppableRegionsListCollection)
    {
-      latestSteppableRegionsToRender.set(steppableRegionsListCollection);
-      frequencyPlot.recordEvent();
    }
 
    public void setLatestSteppableRegionDebugImagesToRender(SteppableRegionDebugImagesMessage steppableRegionDebugImagesToRender)
@@ -102,7 +92,6 @@ public class RDXSteppableRegionsCalculatorUI
    {
       if (renderRegions.get())
       {
-         generateSteppableRegionsMesh();
          drawDebugRegions();
 
          if (needToDraw)
@@ -111,7 +100,6 @@ public class RDXSteppableRegionsCalculatorUI
 
             needToDraw = false;
          }
-         steppableRegionGraphic.update();
       }
    }
 
@@ -128,17 +116,6 @@ public class RDXSteppableRegionsCalculatorUI
       }
    }
 
-   public void generateSteppableRegionsMesh()
-   {
-      SteppableRegionsListCollectionMessage message = latestSteppableRegionsToRender.getAndSet(null);
-      if (message == null)
-         return;
-
-      receivedRegions = message.getRegionsPerYaw().get(yawToShow.get());
-      steppableRegionGraphic.generateMeshesAsync(message, yawToShow.get());
-      needToDraw = true;
-   }
-
    private void drawDebugRegions()
    {
       SteppableRegionDebugImagesMessage debugImagesMessage = latestSteppableRegionDebugImagesToRender.getAndSet(null);
@@ -150,8 +127,7 @@ public class RDXSteppableRegionsCalculatorUI
       for (int yaw = 0; yaw < SteppableRegionsCalculationModule.yawDiscretizations; yaw++)
       {
          RDXCVImagePanel panel = steppableRegionsPanels.get(yaw);
-//         if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
-         if (drawPatches.get())
+         if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
          {
             BytedecoImage image = panel.getBytedecoImage();
 
@@ -176,8 +152,7 @@ public class RDXSteppableRegionsCalculatorUI
          }
 
          panel = steppabilityPanels.get(yaw);
-//         if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
-         if (drawPatches.get())
+         if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
          {
             BytedecoImage image = panel.getBytedecoImage();
             SteppableRegionDebugImageMessage steppabilityImage = debugImagesMessage.getSteppabilityImages().get(yaw);
@@ -215,24 +190,10 @@ public class RDXSteppableRegionsCalculatorUI
       ImGui.text("Input height map dimensions: " + cellsPerSide + " x " + cellsPerSide);
 
       ImGui.checkbox(labels.get("Render regions"), renderRegions);
-
-      ImGui.text("Regions rendered: " + receivedRegions);
-      ImGui.sliderInt("Yaw to show", yawToShow.getData(), 0, parameters.getYawDiscretizations() - 1);
-
-      frequencyPlot.renderImGuiWidgets();
    }
 
    public void renderImGuiWidgets()
    {
-
-   }
-
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      // TODO
-      steppableRegionGraphic.getRenderables(renderables, pool);
-      //      if (render3DPlanarRegions.get())
-      //         planarRegionsGraphic.getRenderables(renderables, pool);
    }
 
    public void destroy()
