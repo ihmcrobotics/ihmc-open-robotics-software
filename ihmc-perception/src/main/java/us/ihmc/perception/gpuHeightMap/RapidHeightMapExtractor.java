@@ -5,6 +5,8 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
@@ -16,7 +18,7 @@ public class RapidHeightMapExtractor
 
    private float gridLengthInMeters = 8.0f;
    private float gridWidthInMeters = 6.0f;
-   private float cellSizeXYInMeters = 0.04f;
+   private float cellSizeXYInMeters = 0.02f;
 
    private int gridLength = (int) (gridLengthInMeters / cellSizeXYInMeters);
    private int gridWidth = (int) (gridWidthInMeters / cellSizeXYInMeters);
@@ -24,6 +26,7 @@ public class RapidHeightMapExtractor
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer parametersBuffer;
    private OpenCLFloatBuffer sensorTransformBuffer;
+   private OpenCLFloatBuffer groundPlaneBuffer;
    private _cl_program rapidHeightMapUpdaterProgram;
    private _cl_kernel heightMapUpdateKernel;
    private BytedecoImage inputDepthImage;
@@ -46,13 +49,16 @@ public class RapidHeightMapExtractor
       sensorTransformBuffer = new OpenCLFloatBuffer(16);
       sensorTransformBuffer.createOpenCLBufferObject(openCLManager);
 
+      groundPlaneBuffer = new OpenCLFloatBuffer(4);
+      groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
+
       outputHeightMapImage = new BytedecoImage(gridWidth, gridLength, opencv_core.CV_16UC1);
       outputHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
    }
 
-   public void update(RigidBodyTransform sensorToWorldTransform)
+   public void update(RigidBodyTransform sensorToWorldTransform, float planeHeight)
    {
       if (!processing)
       {
@@ -73,11 +79,27 @@ public class RapidHeightMapExtractor
          sensorTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(PerceptionEuclidTools.toFloatArray(sensorToWorldTransform));
          sensorTransformBuffer.writeOpenCLBufferObject(openCLManager);
 
+         // Fill ground plane buffer
+         RigidBodyTransform worldToSensorTransform = new RigidBodyTransform(sensorToWorldTransform);
+         worldToSensorTransform.invert();
+
+         // Generate a +Z vector in world frame
+         Vector3D groundNormalSensorFrame = new Vector3D(0.0, 0.0, 1.0);
+         worldToSensorTransform.transform(groundNormalSensorFrame);
+
+         LogTools.info("Ground normal in sensor frame: " + groundNormalSensorFrame);
+
+         groundPlaneBuffer.getBytedecoFloatBufferPointer().asBuffer().put(new float[] {groundNormalSensorFrame.getX32(), groundNormalSensorFrame.getY32(),
+                                                                                       groundNormalSensorFrame.getZ32(),
+                                                                                       (float) (planeHeight - sensorToWorldTransform.getTranslationZ())});
+         groundPlaneBuffer.writeOpenCLBufferObject(openCLManager);
+
          // Set kernel arguments for the height map kernel
          openCLManager.setKernelArgument(heightMapUpdateKernel, 0, inputDepthImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 1, outputHeightMapImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 2, parametersBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 3, sensorTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 4, groundPlaneBuffer.getOpenCLBufferObject());
 
          // Execute kernel with length and width parameters
          openCLManager.execute2D(heightMapUpdateKernel, gridWidth, gridLength);
