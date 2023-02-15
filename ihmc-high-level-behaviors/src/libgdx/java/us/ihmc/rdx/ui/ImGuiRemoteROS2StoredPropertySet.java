@@ -39,6 +39,7 @@ public class ImGuiRemoteROS2StoredPropertySet
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.storedPropertySet = storedPropertySet;
       this.topicPair = topicPair;
+      ros2PublishSubscribeAPI.createPublisher(topicPair.getCommandTopic());
 
       storedPropertySetROS2Input = new StoredPropertySetROS2Input(ros2PublishSubscribeAPI, topicPair.getStatusTopic(), storedPropertySet);
       imGuiStoredPropertySetTuner = new ImGuiStoredPropertySetTuner(storedPropertySet.getTitle());
