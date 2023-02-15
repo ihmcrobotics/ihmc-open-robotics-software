@@ -72,7 +72,13 @@ int2 spherical_projection(float3 cellCenter, global float* params)
     return proj;
 }
 
-void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t out, global float* params, global float* transformToWorld)
+float get_height_on_plane(float x, float y, global float* plane)
+{
+    float height = (plane[3] - (plane[0] * x + plane[1] * y)) / plane[2];
+    return height;
+}
+
+void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t out, global float* params, global float* transformToWorld, global float* plane)
 {
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
@@ -91,7 +97,7 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
 //    printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
 //         cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y);
 
-    int WINDOW_WIDTH = 20;
+    int WINDOW_WIDTH = 30;
 
     int count = 0;
 
@@ -109,11 +115,11 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
                 float radius = ((float)read_imageui(in, pos).x)/(float)1000;
 
                 float3 point = back_project_spherical(pos, radius, params);
-                point = transform3(point,
-                        (float3)(transformToWorld[0], transformToWorld[1], transformToWorld[2]),
-                        (float3)(transformToWorld[4], transformToWorld[5], transformToWorld[6]),
-                        (float3)(transformToWorld[8], transformToWorld[9], transformToWorld[10]),
-                        (float3)(transformToWorld[3], transformToWorld[7], transformToWorld[11]));
+                //point = transform3(point,
+                //        (float3)(transformToWorld[0], transformToWorld[1], transformToWorld[2]),
+                //        (float3)(transformToWorld[4], transformToWorld[5], transformToWorld[6]),
+                //        (float3)(transformToWorld[8], transformToWorld[9], transformToWorld[10]),
+                //        (float3)(transformToWorld[3], transformToWorld[7], transformToWorld[11]));
 
 
 //               printf("[%d,%d] : [%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf) -> GridCell: (%.2f,%.2f)\n", i, j, rIndex, (int) params[GRID_LENGTH],
@@ -148,7 +154,7 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
 
     if(count > 0)
     {
-        averageHeightZ = averageHeightZ / (float)(count);
+        averageHeightZ = max(-20.0f, min(1.5f, averageHeightZ / (float)(count) - get_height_on_plane(cellCenter.x, cellCenter.y, plane)));
         write_imageui(out, (int2)(cIndex,rIndex), (uint4)((int)( (2.0f + averageHeightZ) * 10000.0f), 0, 0, 0));
     }
     else

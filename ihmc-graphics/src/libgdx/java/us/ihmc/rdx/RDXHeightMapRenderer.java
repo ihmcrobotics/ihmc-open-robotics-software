@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
@@ -74,27 +75,35 @@ public class RDXHeightMapRenderer implements RenderableProvider
       intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update(BytePointer heightMapPointer, int height, int width, float cellSizeXYInMeters)
+   public void update(BytePointer heightMapPointer, int gridLength, int gridWidth, float cellSizeXYInMeters)
    {
-      LogTools.info("Rendering Height Map: {} {} {}", height, width, cellSizeXYInMeters);
+      LogTools.info("Rendering Height Map: {} {} {}", gridLength, gridWidth, cellSizeXYInMeters);
 
-      for(int i = 0; i<height; i++)
+      float maxHeight = 0.7f;
+      float minHeight = 0.0f;
+
+      for(int i = 0; i<gridLength; i++)
       {
-         for(int j = 0; j<width; j++)
+         for(int j = 0; j<gridWidth; j++)
          {
-            int heightIndex = i * width + j;
+            int heightIndex = i * gridWidth + j;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
+            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2)) / 10000.0f;
+            cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
+            if(cellHeight > maxHeight - 0.01f)
+               cellHeight = 0.0f;
 
             // Position
-            intermediateVertexBuffer[vertexIndex] = ( (float) height / 2 - i) * cellSizeXYInMeters;
-            intermediateVertexBuffer[vertexIndex + 1] = ( (float) width / 2 - j) * cellSizeXYInMeters;
-            intermediateVertexBuffer[vertexIndex + 2] = (float) (heightMapPointer.getShort(heightIndex * 2)) / 10000.0f;
+            intermediateVertexBuffer[vertexIndex] = ( (float) gridLength / 2 - i) * cellSizeXYInMeters;
+            intermediateVertexBuffer[vertexIndex + 1] = ( (float) gridWidth / 2 - j) * cellSizeXYInMeters;
+            intermediateVertexBuffer[vertexIndex + 2] = cellHeight;
 
             // Color (0.0 to 1.0)
-            intermediateVertexBuffer[vertexIndex + 3] = 1.0f;
-            intermediateVertexBuffer[vertexIndex + 4] = 1.0f;
-            intermediateVertexBuffer[vertexIndex + 5] = 1.0f;
-            intermediateVertexBuffer[vertexIndex + 6] = 0.5f;
+            float heightRatio = (cellHeight / maxHeight);
+            intermediateVertexBuffer[vertexIndex + 3] = Math.abs(1.0f - heightRatio);
+            intermediateVertexBuffer[vertexIndex + 4] = Math.abs(1.0f - heightRatio * 0.123f);
+            intermediateVertexBuffer[vertexIndex + 5] = Math.abs(1.0f - heightRatio);
+            intermediateVertexBuffer[vertexIndex + 6] = Math.abs(0.3f + 0.5f * heightRatio);
 
             // Size
             intermediateVertexBuffer[vertexIndex + 7] = 0.03f;
