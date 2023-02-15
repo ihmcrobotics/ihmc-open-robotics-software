@@ -144,7 +144,6 @@ public class PlanarRegionMappingHandler
       rapidRegionsExtractor.getDebugger().setEnabled(true);
 
       openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
       perceptionDataLoader = new PerceptionDataLoader();
