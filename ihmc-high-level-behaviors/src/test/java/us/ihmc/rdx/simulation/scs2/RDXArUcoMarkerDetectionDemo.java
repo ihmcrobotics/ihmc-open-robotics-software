@@ -22,7 +22,7 @@ import us.ihmc.tools.thread.Activator;
 
 import java.util.ArrayList;
 
-public class RDXArUcoCodeDetectionDemo
+public class RDXArUcoMarkerDetectionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources");
@@ -36,7 +36,7 @@ public class RDXArUcoCodeDetectionDemo
    private OpenCVArUcoMarkerDetection testImageArUcoMarkerDetection;
    private RDXOpenCVArUcoMarkerDetectionUI testImageArUcoMarkerDetectionUI;
 
-   public RDXArUcoCodeDetectionDemo()
+   public RDXArUcoMarkerDetectionDemo()
    {
       nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
 
@@ -145,6 +145,6 @@ public class RDXArUcoCodeDetectionDemo
 
    public static void main(String[] args)
    {
-      new RDXArUcoCodeDetectionDemo();
+      new RDXArUcoMarkerDetectionDemo();
    }
 }
