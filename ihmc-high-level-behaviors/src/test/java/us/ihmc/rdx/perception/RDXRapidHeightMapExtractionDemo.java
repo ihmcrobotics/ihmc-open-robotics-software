@@ -98,7 +98,7 @@ public class RDXRapidHeightMapExtractionDemo
 
             updateHeightMap();
 
-            //            testProjection(loadedDepthImage.getBytedecoOpenCVMat());
+            // testProjection(loadedDepthImage.getBytedecoOpenCVMat());
          }
 
          private void createForOuster(int depthHeight, int depthWidth)
@@ -129,7 +129,7 @@ public class RDXRapidHeightMapExtractionDemo
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
                }
 
-               if(userChangedIndex.poll())
+               if (userChangedIndex.poll())
                {
                   loadAndDecompressThreadExecutor.clearQueueAndExecute(() ->
                   {
@@ -164,7 +164,7 @@ public class RDXRapidHeightMapExtractionDemo
                changed = true;
             }
 
-            if(changed)
+            if (changed)
             {
                userChangedIndex.set();
             }
@@ -199,11 +199,11 @@ public class RDXRapidHeightMapExtractionDemo
 
                  RigidBodyTransform transform = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()), sensorPositionBuffer.get(frameIndex.get()));
 
-                 //Point3D euler = new Point3D();
-                 //sensorOrientationBuffer.get(frameIndex.get()).getEuler(euler);
-                 //RigidBodyTransform transform = new RigidBodyTransform(new Quaternion(0.0, pitchAngle.get(), 0.0), new Point3D(0.0,0.0,1.0));
+                 // Point3D euler = new Point3D();
+                 // sensorOrientationBuffer.get(frameIndex.get()).getEuler(euler);
+                 // RigidBodyTransform transform = new RigidBodyTransform(new Quaternion(0.0, pitchAngle.get(), 0.0), new Point3D(0.0,0.0,1.0));
 
-                 //LogTools.info("Rotation: " + euler);
+                 // LogTools.info("Rotation: " + euler);
 
                  rapidHeightMapUpdater.update(transform, planeHeight.get());
                  heightMapUpdateNotification.set();
@@ -214,7 +214,7 @@ public class RDXRapidHeightMapExtractionDemo
          }
       }
 
-      if(heightMapUpdateNotification.poll())
+      if (heightMapUpdateNotification.poll())
       {
          heightMapRenderer.update(rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
                                   rapidHeightMapUpdater.getGridLength(),
