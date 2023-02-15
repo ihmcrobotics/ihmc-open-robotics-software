@@ -82,9 +82,9 @@ public class RDXHeightMapRenderer implements RenderableProvider
       float maxHeight = 0.7f;
       float minHeight = 0.0f;
 
-      for(int i = 0; i<gridLength; i++)
+      for (int i = 0; i<gridLength; i++)
       {
-         for(int j = 0; j<gridWidth; j++)
+         for (int j = 0; j<gridWidth; j++)
          {
             int heightIndex = i * gridWidth + j;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
