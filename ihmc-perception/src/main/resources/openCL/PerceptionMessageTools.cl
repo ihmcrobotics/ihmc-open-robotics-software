@@ -28,15 +28,21 @@ float4 createRGB(double input)
    }
    else if (alpha <= gradientSize * 3)
    {
-      r = interpolate(greenR, yellowR, (alpha - gradientSize * 2) / gradientSize);
-      g = interpolate(greenG, yellowG, (alpha - gradientSize * 2) / gradientSize);
-      b = interpolate(greenB, yellowB, (alpha - gradientSize * 2) / gradientSize);
+      r = interpolate(greenR, yellowR,
+                      (alpha - gradientSize * 2) / gradientSize);
+      g = interpolate(greenG, yellowG,
+                      (alpha - gradientSize * 2) / gradientSize);
+      b = interpolate(greenB, yellowB,
+                      (alpha - gradientSize * 2) / gradientSize);
    }
    else if (alpha <= gradientSize * 4)
    {
-      r = interpolate(yellowR, orangeR, (alpha - gradientSize * 3) / gradientSize);
-      g = interpolate(yellowG, orangeG, (alpha - gradientSize * 3) / gradientSize);
-      b = interpolate(yellowB, orangeB, (alpha - gradientSize * 3) / gradientSize);
+      r = interpolate(yellowR, orangeR,
+                      (alpha - gradientSize * 3) / gradientSize);
+      g = interpolate(yellowG, orangeG,
+                      (alpha - gradientSize * 3) / gradientSize);
+      b = interpolate(yellowB, orangeB,
+                      (alpha - gradientSize * 3) / gradientSize);
    }
    else if (alpha <= gradientSize * 5)
    {
@@ -45,12 +51,12 @@ float4 createRGB(double input)
       b = interpolate(orangeB, redB, (alpha - gradientSize * 4) / gradientSize);
    }
 
-   return (float4) (r, g, b, 1.0);
+   return (float4)(r, g, b, 1.0);
 }
 
-kernel void imageToPointCloud(global float* parameters,
+kernel void imageToPointCloud(global float *parameters,
                               read_only image2d_t discretizedDepthImage,
-                              global float* pointCloudVertexBuffer)
+                              global float *pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -73,66 +79,54 @@ kernel void imageToPointCloud(global float* parameters,
    int depthImageHeight = parameters[15];
 
    float discreteResolution = 0.001f;
-   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, y)).x * discreteResolution;
+   float eyeDepthInMeters =
+       read_imageui(discretizedDepthImage, (int2)(x, y)).x * discreteResolution;
 
    int xFromCenter = -x - (depthImageWidth / 2); // flip
    int yFromCenter = y - (depthImageHeight / 2);
 
-   float angleXFromCenter = xFromCenter / (float) depthImageWidth * horizontalFieldOfView;
-   float angleYFromCenter = yFromCenter / (float) depthImageHeight * verticalFieldOfView;
+   float angleXFromCenter =
+       xFromCenter / (float)depthImageWidth * horizontalFieldOfView;
+   float angleYFromCenter =
+       yFromCenter / (float)depthImageHeight * verticalFieldOfView;
 
    // Create additional rotation only transform
    float16 angledRotationMatrix = newRotationMatrix();
-   angledRotationMatrix = setToPitchOrientation(angleYFromCenter, angledRotationMatrix);
-   angledRotationMatrix = prependYawRotation(angleXFromCenter, angledRotationMatrix);
+   angledRotationMatrix =
+       setToPitchOrientation(angleYFromCenter, angledRotationMatrix);
+   angledRotationMatrix =
+       prependYawRotation(angleXFromCenter, angledRotationMatrix);
 
    float beamFramePointX = eyeDepthInMeters;
    float beamFramePointY = 0.0;
    float beamFramePointZ = 0.0;
 
-   float4 sensorFramePoint = transform(beamFramePointX,
-                                       beamFramePointY,
-                                       beamFramePointZ,
-                                       0.0,
-                                       0.0,
-                                       0.0,
-                                       angledRotationMatrix.s0,
-                                       angledRotationMatrix.s1,
-                                       angledRotationMatrix.s2,
-                                       angledRotationMatrix.s3,
-                                       angledRotationMatrix.s4,
-                                       angledRotationMatrix.s5,
-                                       angledRotationMatrix.s6,
-                                       angledRotationMatrix.s7,
-                                       angledRotationMatrix.s8);
+   float4 sensorFramePoint =
+       transform(beamFramePointX, beamFramePointY, beamFramePointZ, 0.0, 0.0,
+                 0.0, angledRotationMatrix.s0, angledRotationMatrix.s1,
+                 angledRotationMatrix.s2, angledRotationMatrix.s3,
+                 angledRotationMatrix.s4, angledRotationMatrix.s5,
+                 angledRotationMatrix.s6, angledRotationMatrix.s7,
+                 angledRotationMatrix.s8);
 
-   float4 worldFramePoint = transform(sensorFramePoint.x,
-                                      sensorFramePoint.y,
-                                      sensorFramePoint.z,
-                                      translationX,
-                                      translationY,
-                                      translationZ,
-                                      rotationMatrixM00,
-                                      rotationMatrixM01,
-                                      rotationMatrixM02,
-                                      rotationMatrixM10,
-                                      rotationMatrixM11,
-                                      rotationMatrixM12,
-                                      rotationMatrixM20,
-                                      rotationMatrixM21,
-                                      rotationMatrixM22);
+   float4 worldFramePoint =
+       transform(sensorFramePoint.x, sensorFramePoint.y, sensorFramePoint.z,
+                 translationX, translationY, translationZ, rotationMatrixM00,
+                 rotationMatrixM01, rotationMatrixM02, rotationMatrixM10,
+                 rotationMatrixM11, rotationMatrixM12, rotationMatrixM20,
+                 rotationMatrixM21, rotationMatrixM22);
 
    int pointStartIndex = (depthImageWidth * y + x) * 3;
 
    if (eyeDepthInMeters == 0.0f)
    {
-      pointCloudVertexBuffer[pointStartIndex]     = nan((uint) 0);
-      pointCloudVertexBuffer[pointStartIndex + 1] = nan((uint) 0);
-      pointCloudVertexBuffer[pointStartIndex + 2] = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex] = nan((uint)0);
+      pointCloudVertexBuffer[pointStartIndex + 1] = nan((uint)0);
+      pointCloudVertexBuffer[pointStartIndex + 2] = nan((uint)0);
    }
    else
    {
-      pointCloudVertexBuffer[pointStartIndex]     = worldFramePoint.x;
+      pointCloudVertexBuffer[pointStartIndex] = worldFramePoint.x;
       pointCloudVertexBuffer[pointStartIndex + 1] = worldFramePoint.y;
       pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }

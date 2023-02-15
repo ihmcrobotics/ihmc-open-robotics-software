@@ -1,11 +1,13 @@
 // ouster in is
 // fusedOut is 10 floats: X,Y,Z,R,G,B,A,0.01,1.0,0.0
-__kernel void convertOusterSteamToPointCloudShaderFormat(__global unsigned char* ousterIn, __global float* fusedOut)
+__kernel void
+convertOusterSteamToPointCloudShaderFormat(__global unsigned char *ousterIn,
+                                           __global float *fusedOut)
 {
    int gid = get_global_id(0); // index of point
 
    int ousterInIndex = gid * 48;
-   float* ousterFloats = &ousterIn[ousterInIndex];
+   float *ousterFloats = &ousterIn[ousterInIndex];
    float ousterX = ousterFloats[0];
    float ousterY = ousterFloats[1];
    float ousterZ = ousterFloats[2];

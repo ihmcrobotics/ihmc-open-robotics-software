@@ -1,9 +1,8 @@
-kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoordinateDepthImage,
-                                         read_only image2d_t noiseImage,
-                                         read_only image2d_t rgba8888ColorImage,
-                                         write_only image2d_t metersDepthImage,
-                                         global float* pointCloudRenderingBuffer,
-                                         global float* parameters)
+kernel void lowLevelDepthSensorSimulator(
+    read_only image2d_t normalizedDeviceCoordinateDepthImage,
+    read_only image2d_t noiseImage, read_only image2d_t rgba8888ColorImage,
+    write_only image2d_t metersDepthImage,
+    global float *pointCloudRenderingBuffer, global float *parameters)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -13,28 +12,31 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
    float principalOffsetXPixels = parameters[2];
    float principalOffsetYPixels = parameters[3];
    float focalLengthPixels = parameters[4];
-   bool calculatePointCloud = (bool) parameters[5];
+   bool calculatePointCloud = (bool)parameters[5];
    float noiseAmplitudeAtMinRange = parameters[26];
    float noiseAmplitudeAtMaxRange = parameters[27];
-   float noiseAmplitudeRange = noiseAmplitudeAtMaxRange - noiseAmplitudeAtMinRange;
-   bool simulateL515Noise = (bool) parameters[28];
-   float randomNegativeOneToOne = read_imagef(noiseImage, (int2) (x, y)).x;
-   float normalizedDeviceCoordinateZ = read_imagef(normalizedDeviceCoordinateDepthImage, (int2) (x,y)).x;
+   float noiseAmplitudeRange =
+       noiseAmplitudeAtMaxRange - noiseAmplitudeAtMinRange;
+   bool simulateL515Noise = (bool)parameters[28];
+   float randomNegativeOneToOne = read_imagef(noiseImage, (int2)(x, y)).x;
+   float normalizedDeviceCoordinateZ =
+       read_imagef(normalizedDeviceCoordinateDepthImage, (int2)(x, y)).x;
 
    bool depthIsZero = normalizedDeviceCoordinateZ == 0.0f;
    float eyeDepth;
    if (depthIsZero)
    {
-      eyeDepth = nan((uint) 0);
+      eyeDepth = nan((uint)0);
    }
    else
    {
-      // From "How to render depth linearly in modern OpenGL with gl_FragCoord.z in fragment shader?"
-      // https://stackoverflow.com/a/45710371/1070333
+      // From "How to render depth linearly in modern OpenGL with gl_FragCoord.z
+      // in fragment shader?" https://stackoverflow.com/a/45710371/1070333
       float twoXCameraFarNear = 2.0f * cameraNear * cameraFar;
       float farPlusNear = cameraFar + cameraNear;
       float farMinusNear = cameraFar - cameraNear;
-      eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear));
+      eyeDepth = (twoXCameraFarNear /
+                  (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear));
 
       if (simulateL515Noise)
       {
@@ -51,8 +53,10 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
             float yFromCenterFloat = y - imageHalfHeightFloat;
             if (yFromCenterFloat < 0.0)
                yFromCenterFloat = -yFromCenterFloat;
-            float maxDistance = imageHalfWidthFloat * imageHalfWidthFloat + imageHalfHeightFloat * imageHalfHeightFloat;
-            float pixelDistance = xFromCenterFloat * xFromCenterFloat + yFromCenterFloat * yFromCenterFloat;
+            float maxDistance = imageHalfWidthFloat * imageHalfWidthFloat +
+                                imageHalfHeightFloat * imageHalfHeightFloat;
+            float pixelDistance = xFromCenterFloat * xFromCenterFloat +
+                                  yFromCenterFloat * yFromCenterFloat;
             float percentToEdge = pixelDistance / maxDistance;
             if (randomNegativeOneToOne - 0.5 + percentToEdge > 1.0)
             {
@@ -62,18 +66,19 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
       }
 
       float nearToFarInterpolation = (eyeDepth - cameraNear) / farMinusNear;
-      float noiseAmplitude = noiseAmplitudeAtMinRange + (nearToFarInterpolation * noiseAmplitudeRange);
+      float noiseAmplitude = noiseAmplitudeAtMinRange +
+                             (nearToFarInterpolation * noiseAmplitudeRange);
       eyeDepth += randomNegativeOneToOne * noiseAmplitude;
    }
 
-   write_imagef(metersDepthImage, (int2) (x, y), eyeDepth);
+   write_imagef(metersDepthImage, (int2)(x, y), eyeDepth);
 
    if (calculatePointCloud)
    {
       int imageWidth = parameters[6];
       int imageHeight = parameters[7];
       float pointSize = parameters[8];
-      bool colorBasedOnWorldZ = (bool) parameters[9];
+      bool colorBasedOnWorldZ = (bool)parameters[9];
       float pointColorR = parameters[10];
       float pointColorG = parameters[11];
       float pointColorB = parameters[12];
@@ -82,9 +87,9 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
 
       if (depthIsZero)
       {
-         pointCloudRenderingBuffer[pointStartIndex]     = nan((uint) 0);
-         pointCloudRenderingBuffer[pointStartIndex + 1] = nan((uint) 0);
-         pointCloudRenderingBuffer[pointStartIndex + 2] = nan((uint) 0);
+         pointCloudRenderingBuffer[pointStartIndex] = nan((uint)0);
+         pointCloudRenderingBuffer[pointStartIndex + 1] = nan((uint)0);
+         pointCloudRenderingBuffer[pointStartIndex + 2] = nan((uint)0);
       }
       else
       {
@@ -102,27 +107,20 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
          float rotationMatrixM22 = parameters[25];
 
          float zUp3DX = eyeDepth;
-         float zUp3DY = -(x - principalOffsetXPixels) / focalLengthPixels * eyeDepth;
-         float zUp3DZ = -(y - principalOffsetYPixels) / focalLengthPixels * eyeDepth;
-         float4 worldFramePoint = transform(zUp3DX,
-                                            zUp3DY,
-                                            zUp3DZ,
-                                            translationX,
-                                            translationY,
-                                            translationZ,
-                                            rotationMatrixM00,
-                                            rotationMatrixM01,
-                                            rotationMatrixM02,
-                                            rotationMatrixM10,
-                                            rotationMatrixM11,
-                                            rotationMatrixM12,
-                                            rotationMatrixM20,
-                                            rotationMatrixM21,
-                                            rotationMatrixM22);
+         float zUp3DY =
+             -(x - principalOffsetXPixels) / focalLengthPixels * eyeDepth;
+         float zUp3DZ =
+             -(y - principalOffsetYPixels) / focalLengthPixels * eyeDepth;
+         float4 worldFramePoint = transform(
+             zUp3DX, zUp3DY, zUp3DZ, translationX, translationY, translationZ,
+             rotationMatrixM00, rotationMatrixM01, rotationMatrixM02,
+             rotationMatrixM10, rotationMatrixM11, rotationMatrixM12,
+             rotationMatrixM20, rotationMatrixM21, rotationMatrixM22);
 
          if (pointColorR < 0.0f)
          {
-            uint4 rgba8888Color = read_imageui(rgba8888ColorImage, (int2) (x, y));
+            uint4 rgba8888Color =
+                read_imageui(rgba8888ColorImage, (int2)(x, y));
             pointColorR = (rgba8888Color.x / 255.0f);
             pointColorG = (rgba8888Color.y / 255.0f);
             pointColorB = (rgba8888Color.z / 255.0f);
@@ -130,14 +128,15 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
          }
          else if (colorBasedOnWorldZ)
          {
-            float4 rgba8888Color = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
+            float4 rgba8888Color =
+                calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
             pointColorR = (rgba8888Color.x);
             pointColorG = (rgba8888Color.y);
             pointColorB = (rgba8888Color.z);
             pointColorA = (rgba8888Color.w);
          }
 
-         pointCloudRenderingBuffer[pointStartIndex]     = worldFramePoint.x;
+         pointCloudRenderingBuffer[pointStartIndex] = worldFramePoint.x;
          pointCloudRenderingBuffer[pointStartIndex + 1] = worldFramePoint.y;
          pointCloudRenderingBuffer[pointStartIndex + 2] = worldFramePoint.z;
       }
