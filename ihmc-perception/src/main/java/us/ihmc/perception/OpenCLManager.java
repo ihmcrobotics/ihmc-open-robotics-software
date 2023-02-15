@@ -267,9 +267,9 @@ public class OpenCLManager
       setKernelArgument(kernel, argumentIndex, pointerPointerSize, bufferObject);
    }
 
-   public void setKernelArgument(_cl_kernel kernel, int argumentIndex, IntPointer booleanPointer)
+   public void setKernelArgument(_cl_kernel kernel, int argumentIndex, IntPointer intPointer)
    {
-      setKernelArgument(kernel, argumentIndex, intPointerSize, booleanPointer);
+      setKernelArgument(kernel, argumentIndex, intPointerSize, intPointer);
    }
 
    /**
