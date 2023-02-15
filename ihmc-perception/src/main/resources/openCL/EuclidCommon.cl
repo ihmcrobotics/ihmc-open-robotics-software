@@ -1,3 +1,16 @@
+#define TRANSLATION_X 0
+#define TRANSLATION_Y 1
+#define TRANSLATION_Z 2
+#define ROTATION_MATRIX_M00 3
+#define ROTATION_MATRIX_M01 4
+#define ROTATION_MATRIX_M02 5
+#define ROTATION_MATRIX_M10 6
+#define ROTATION_MATRIX_M11 7
+#define ROTATION_MATRIX_M12 8
+#define ROTATION_MATRIX_M20 9
+#define ROTATION_MATRIX_M21 10
+#define ROTATION_MATRIX_M22 11
+
 float2 apply2DRotationToVector2D(float2 vector, float cosH, float sinH)
 {
     float dxLocal = cosH * vector.x - sinH * vector.y;
@@ -46,6 +59,21 @@ float4 transform(float x,
    ret.y += translationY;
    ret.z += translationZ;
    return ret;
+}
+
+float3 transformPoint3D32(float3 point, float* transform)
+{
+   return (float3)
+   (dot((float3) (transform[ROTATION_MATRIX_M00], transform[ROTATION_MATRIX_M01], transform[ROTATION_MATRIX_M02]), point) + transform[TRANSLATION_X],
+    dot((float3) (transform[ROTATION_MATRIX_M10], transform[ROTATION_MATRIX_M11], transform[ROTATION_MATRIX_M12]), point) + transform[TRANSLATION_Y],
+    dot((float3) (transform[ROTATION_MATRIX_M20], transform[ROTATION_MATRIX_M21], transform[ROTATION_MATRIX_M22]), point) + transform[TRANSLATION_Z]);
+}
+
+float3 transformPoint3D32_2(float3 point, float3 rotationMatrixRow0, float3 rotationMatrixRow1, float3 rotationMatrixRow2, float3 translation)
+{
+   return (float3) (dot(rotationMatrixRow0, point) + translation.x,
+                    dot(rotationMatrixRow1, point) + translation.y,
+                    dot(rotationMatrixRow2, point) + translation.z);
 }
 
 float16 prependYawRotation(float yaw, float16 matrixOriginal)
