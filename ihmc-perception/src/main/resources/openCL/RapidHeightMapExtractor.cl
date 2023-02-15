@@ -78,7 +78,8 @@ float get_height_on_plane(float x, float y, global float* plane)
     return height;
 }
 
-void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t out, global float* params, global float* transformToWorld, global float* plane)
+void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t out, global float* params, global float* sensorToWorldTf,
+                                    global float* worldToSensorTf, global float* plane)
 {
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
@@ -90,6 +91,13 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
 
     float averageHeightZ = 0;
     float3 cellCenter = compute_grid_cell_center(rIndex, cIndex, params);
+
+    cellCenter = transform3(cellCenter,
+            (float3)(worldToSensorTf[0], worldToSensorTf[1], worldToSensorTf[2]),
+            (float3)(worldToSensorTf[4], worldToSensorTf[5], worldToSensorTf[6]),
+            (float3)(worldToSensorTf[8], worldToSensorTf[9], worldToSensorTf[10]),
+            (float3)(worldToSensorTf[3], worldToSensorTf[7], worldToSensorTf[11]));
+
     int2 projectedPoint = spherical_projection(cellCenter, params);
 
     int2 pos = (int2)(0,0);
@@ -97,7 +105,7 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
 //    printf("[%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d)\n", rIndex, (int) params[GRID_LENGTH],
 //         cIndex, (int) params[GRID_WIDTH], cellCenter.x, cellCenter.y, cellCenter.z, pos.x, pos.y);
 
-    int WINDOW_WIDTH = 30;
+    int WINDOW_WIDTH = 20;
 
     int count = 0;
 
@@ -115,11 +123,11 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
                 float radius = ((float)read_imageui(in, pos).x)/(float)1000;
 
                 float3 point = back_project_spherical(pos, radius, params);
-                //point = transform3(point,
-                //        (float3)(transformToWorld[0], transformToWorld[1], transformToWorld[2]),
-                //        (float3)(transformToWorld[4], transformToWorld[5], transformToWorld[6]),
-                //        (float3)(transformToWorld[8], transformToWorld[9], transformToWorld[10]),
-                //        (float3)(transformToWorld[3], transformToWorld[7], transformToWorld[11]));
+//                point = transform3(point,
+//                        (float3)(sensorToWorldTf[0], sensorToWorldTf[1], sensorToWorldTf[2]),
+//                        (float3)(sensorToWorldTf[4], sensorToWorldTf[5], sensorToWorldTf[6]),
+//                        (float3)(sensorToWorldTf[8], sensorToWorldTf[9], sensorToWorldTf[10]),
+//                        (float3)(sensorToWorldTf[3], sensorToWorldTf[7], sensorToWorldTf[11]));
 
 
 //               printf("[%d,%d] : [%d/%d, %d/%d] -> Cell: (%.2f, %.2f, %.2f) -> Proj: (%d,%d) -> BackProj: (%.2lf,%.2lf,%.2lf) -> GridCell: (%.2f,%.2f)\n", i, j, rIndex, (int) params[GRID_LENGTH],
