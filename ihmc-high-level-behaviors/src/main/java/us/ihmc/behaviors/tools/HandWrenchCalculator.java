@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
@@ -37,6 +38,7 @@ public class HandWrenchCalculator
    // RobotConfigurationData is published at 120Hz -> break freq.: 5Hz - 20Hz
    private static final double ALPHA_FILTER = 0.5;
    private final Notification receivedRCDNotification = new Notification();
+   private SideDependentList<List<JointReadOnly>> jointsFromBaseToEndEffector = new SideDependentList<>();
 
    public HandWrenchCalculator(ROS2SyncedRobotModel syncedRobot)
    {
@@ -50,7 +52,8 @@ public class HandWrenchCalculator
          geometricJacobianCalculator.setKinematicChain(fullRobotModel.getChest(), fullRobotModel.getHand(side));
          geometricJacobianCalculator.setJacobianFrame(fullRobotModel.getHandControlFrame(side));
          jacobianCalculators.set(side, geometricJacobianCalculator);
-         List<OneDoFJointBasics> oneDoFJoints = MultiBodySystemTools.filterJoints(geometricJacobianCalculator.getJointsFromBaseToEndEffector(),
+         jointsFromBaseToEndEffector.set(side, geometricJacobianCalculator.getJointsFromBaseToEndEffector());
+         List<OneDoFJointBasics> oneDoFJoints = MultiBodySystemTools.filterJoints(jointsFromBaseToEndEffector.get(side),
                                                                                   OneDoFJointBasics.class);
          armJoints.set(side, oneDoFJoints);
          MultiBodySystemReadOnly system = MultiBodySystemReadOnly.toMultiBodySystemInput(armJoints.get(side));
@@ -90,7 +93,7 @@ public class HandWrenchCalculator
       // TODO: only compute / update when new RCD received. (try to match the frequency or maybe update at lower frequency)
       //  Check this
 
-      if (receivedRCDNotification.poll())
+      if (receivedRCDNotification.poll() || ! receivedRCDNotification.poll())
       {
          for (RobotSide side : RobotSide.values)
          {
@@ -170,5 +173,10 @@ public class HandWrenchCalculator
    public SideDependentList<double[]> getJointTorquesForGravity()
    {
       return jointTorquesForGravity;
+   }
+
+   public SideDependentList<List<JointReadOnly>> getJointsFromBaseToEndEffector()
+   {
+      return jointsFromBaseToEndEffector;
    }
 }
