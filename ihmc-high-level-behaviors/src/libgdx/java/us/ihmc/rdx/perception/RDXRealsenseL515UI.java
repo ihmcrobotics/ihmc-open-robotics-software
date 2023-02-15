@@ -97,7 +97,6 @@ public class RDXRealsenseL515UI
                   l515.initialize();
 
                   openCLManager = new OpenCLManager();
-                  openCLManager.create();
                   pointCloudRenderer = new RDXPointCloudRenderer();
                }
 

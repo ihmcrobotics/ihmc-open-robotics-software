@@ -107,7 +107,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             baseUI.create();
 
             openCLManager = new OpenCLManager();
-            openCLManager.create();
             openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
