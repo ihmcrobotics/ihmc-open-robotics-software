@@ -22,6 +22,7 @@ public class RDXImagePanelTexture
 
    /**
     * Ensure the texture is allocated and is the correct dimensions.
+    * Does not require active OpenGL context.
     */
    public void ensureTextureDimensions(int imageWidth, int imageHeight)
    {
@@ -43,7 +44,7 @@ public class RDXImagePanelTexture
     * OpenGL context. This does what we can't do asynchronously:
     * creating textures and copying textures to the GPU.
     */
-   public void updateOnUIThread(RDXImagePanel imagePanel)
+   public void updateTextureAndDraw(RDXImagePanel imagePanel)
    {
       if (pixmap != null)
       {
