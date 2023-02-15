@@ -7,6 +7,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.ihmcPerception.heightMap.RemoteHeightMapUpdater;
 import us.ihmc.ihmcPerception.steppableRegions.RemoteSteppableRegionsUpdater;
+import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -30,7 +31,6 @@ public class RDXSteppableRegionCalculatorDemo
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXPose3DGizmo ousterPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
-
 
    private final RemoteHeightMapUpdater heightMap;
    private final RemoteSteppableRegionsUpdater steppableRegionsUpdater;
@@ -99,9 +99,9 @@ public class RDXSteppableRegionCalculatorDemo
                steppableRegionsUpdater.submitLatestHeightMapMessage(message);
             });
 
-            new IHMCROS2Callback<>(realtimeRos2Node, ROS2Tools.STEPPABLE_REGIONS_OUTPUT, steppableRegionsVisualizer::acceptSteppableRegionsCollection);
+            new IHMCROS2Callback<>(realtimeRos2Node, SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT, steppableRegionsVisualizer::acceptSteppableRegionsCollection);
             new IHMCROS2Callback<>(realtimeRos2Node,
-                                   ROS2Tools.STEPPABLE_REGIONS_DEBUG_OUTPUT,
+                                   SteppableRegionsAPI.STEPPABLE_REGIONS_DEBUG_OUTPUT,
                                    steppableRegionsUI::setLatestSteppableRegionDebugImagesToRender);
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();

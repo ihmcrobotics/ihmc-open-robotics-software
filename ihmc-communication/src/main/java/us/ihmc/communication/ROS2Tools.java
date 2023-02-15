@@ -64,7 +64,6 @@ public class ROS2Tools
    public static final String REALSENSE_SLAM_MODULE_NAME = "slam";
    public static final String MAPSENSE_MODULE_NAME = "mapsense";
    public static final String HEIGHT_MAP_MODULE_NAME = "height_map";
-   public static final String STEPPABLE_REGIONS_MODULE_NAME = "steppable_regions";
 
    public static final String REA_CUSTOM_REGION_NAME = "custom_region";
    public static final String D435_NAME = "d435";
@@ -109,7 +108,6 @@ public class ROS2Tools
    public static final ROS2Topic<?> REALSENSE_SLAM_MODULE = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
    public static final ROS2Topic<?> MAPSENSE_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
    public static final ROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule(HEIGHT_MAP_MODULE_NAME);
-   public static final ROS2Topic<?> STEPPABLE_REGIONS_MODULE = IHMC_ROOT.withModule(STEPPABLE_REGIONS_MODULE_NAME);
 
    public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
 
@@ -185,9 +183,6 @@ public class ROS2Tools
    public static final ROS2Topic<Float64> MAPSENSE_REGIONS_DELAY_OFFSET = MAPSENSE_MODULE.withType(Float64.class).withSuffix("delay_offset");
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_OUTPUT = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
    public static final ROS2Topic<HeightMapStateRequestMessage> HEIGHT_MAP_STATE_REQUEST = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapStateRequestMessage.class);
-
-   public static final ROS2Topic<SteppableRegionsListCollectionMessage> STEPPABLE_REGIONS_OUTPUT = STEPPABLE_REGIONS_MODULE.withOutput().withTypeName(SteppableRegionsListCollectionMessage.class);
-   public static final ROS2Topic<SteppableRegionDebugImagesMessage> STEPPABLE_REGIONS_DEBUG_OUTPUT = STEPPABLE_REGIONS_MODULE.withOutput().withTypeName(SteppableRegionDebugImagesMessage.class);
 
    public static final ROS2Topic<?> BEHAVIOR_MODULE_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput();
    public static final ROS2Topic<?> BEHAVIOR_MODULE_OUTPUT = ROS2Tools.BEHAVIOR_MODULE.withOutput();
