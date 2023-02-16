@@ -33,6 +33,10 @@ import java.util.Date;
  */
 public class RealsenseColorAndDepthLogger
 {
+   /*
+    *  TODO: Add shutdown hook
+   * */
+
    private final Activator nativesLoadedActivator;
    private final FramePose3D cameraPose = new FramePose3D();
    private final String colorChannelName;
