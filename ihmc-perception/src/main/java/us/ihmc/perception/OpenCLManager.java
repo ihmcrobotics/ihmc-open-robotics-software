@@ -382,19 +382,6 @@ public class OpenCLManager
                                          event));
    }
 
-   public int flush()
-   {
-      checkReturnCode(clFlush(commandQueue));
-      return returnCode.get();
-   }
-
-   public int finish()
-   {
-      checkReturnCode(clFlush(commandQueue));
-      checkReturnCode(clFinish(commandQueue));
-      return returnCode.get();
-   }
-
    private void checkReturnCode(int returnCode)
    {
       this.returnCode.put(returnCode);

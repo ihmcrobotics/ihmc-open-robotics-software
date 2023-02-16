@@ -206,7 +206,6 @@ public class RDXRealsenseL515UI
                   openCLManager.setKernelArgument(createPointCloudKernel, 3, parametersBuffer.getOpenCLBufferObject());
                   openCLManager.execute2D(createPointCloudKernel, l515.getDepthWidth(), l515.getDepthHeight());
                   pointCloudRenderingBuffer.readOpenCLBufferObject(openCLManager);
-                  openCLManager.finish();
 
                   pointCloudRenderer.updateMeshFastest(numberOfDepthPoints);
                }
