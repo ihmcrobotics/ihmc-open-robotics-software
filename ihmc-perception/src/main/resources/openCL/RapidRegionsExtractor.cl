@@ -421,8 +421,13 @@ void kernel filterKernel(read_write image2d_t inputImage, write_only image2d_t f
  * patches on a sub-sampled grid of the depth map. The following intrinsic parameters are used to convert to Point Cloud.
  * K: [459.97265625, 0.0, 341.83984375, 0.0, 459.8046875, 249.173828125, 0.0, 0.0, 1.0]
  * */
-void kernel packKernel(read_write image2d_t in, write_only image2d_t out0, write_only image2d_t out1, write_only image2d_t out2, /* float3 maps for normal*/
-                       write_only image2d_t out3, write_only image2d_t out4, write_only image2d_t out5,                          /* float3 maps for centroids */
+void kernel packKernel(read_write image2d_t in,
+                       write_only image2d_t out0,
+                       write_only image2d_t out1,
+                       write_only image2d_t out2, /* float3 maps for normal*/
+                       write_only image2d_t out3,
+                       write_only image2d_t out4,
+                       write_only image2d_t out5, /* float3 maps for centroids */
                        global float *params
                        // write_only image2d_t debug
 
@@ -473,10 +478,15 @@ void kernel packKernel(read_write image2d_t in, write_only image2d_t out0, write
 /* Merge Kernel: Creates the graph-based structure by adding connections between the neighboring
  * patches based on similarity.
  */
-void kernel mergeKernel(read_write image2d_t in, read_only image2d_t out0, read_only image2d_t out1, read_only image2d_t out2, /* float3 maps for normal*/
-                        read_only image2d_t out3, read_only image2d_t out4, read_only image2d_t out5,                          /* float3 maps for centroids */
-                        write_only image2d_t out6,                                                                             /* uint8 map for patch metadata*/
-                        global float *params                                                                                   /* All parameters */
+void kernel mergeKernel(read_write image2d_t in,
+                        read_only image2d_t out0,
+                        read_only image2d_t out1,
+                        read_only image2d_t out2, /* float3 maps for normal*/
+                        read_only image2d_t out3,
+                        read_only image2d_t out4,
+                        read_only image2d_t out5,  /* float3 maps for centroids */
+                        write_only image2d_t out6, /* uint8 map for patch metadata*/
+                        global float *params       /* All parameters */
 )
 {
    int cIndex = get_global_id(0);
@@ -605,9 +615,19 @@ void kernel sphericalBackProjectionKernel(read_write image2d_t in, global float 
 /*
  * Copy kernel to move feature grid map into cache buffer
  */
-void kernel copyKernel(read_only image2d_t in0, read_only image2d_t in1, read_only image2d_t in2, read_only image2d_t in3, read_only image2d_t in4,
-                       read_only image2d_t in5, write_only image2d_t out0, write_only image2d_t out1, write_only image2d_t out2, write_only image2d_t out3,
-                       write_only image2d_t out4, write_only image2d_t out5, global float *params)
+void kernel copyKernel(read_only image2d_t in0,
+                       read_only image2d_t in1,
+                       read_only image2d_t in2,
+                       read_only image2d_t in3,
+                       read_only image2d_t in4,
+                       read_only image2d_t in5,
+                       write_only image2d_t out0,
+                       write_only image2d_t out1,
+                       write_only image2d_t out2,
+                       write_only image2d_t out3,
+                       write_only image2d_t out4,
+                       write_only image2d_t out5,
+                       global float *params)
 {
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
@@ -632,10 +652,21 @@ void kernel copyKernel(read_only image2d_t in0, read_only image2d_t in1, read_on
 /*
  * Correspondence Kernel for Iterative Closest Point
  */
-void kernel correspondenceKernel(read_only image2d_t one0, read_only image2d_t one1, read_only image2d_t one2, read_only image2d_t one3,
-                                 read_only image2d_t one4, read_only image2d_t one5, read_only image2d_t two0, read_only image2d_t two1,
-                                 read_only image2d_t two2, read_only image2d_t two3, read_only image2d_t two4, read_only image2d_t two5,
-                                 write_only image2d_t matchRow, write_only image2d_t matchColumn, global float *params)
+void kernel correspondenceKernel(read_only image2d_t one0,
+                                 read_only image2d_t one1,
+                                 read_only image2d_t one2,
+                                 read_only image2d_t one3,
+                                 read_only image2d_t one4,
+                                 read_only image2d_t one5,
+                                 read_only image2d_t two0,
+                                 read_only image2d_t two1,
+                                 read_only image2d_t two2,
+                                 read_only image2d_t two3,
+                                 read_only image2d_t two4,
+                                 read_only image2d_t two5,
+                                 write_only image2d_t matchRow,
+                                 write_only image2d_t matchColumn,
+                                 global float *params)
 {
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
@@ -737,10 +768,22 @@ void kernel correspondenceKernel(read_only image2d_t one0, read_only image2d_t o
 /*
  * Centroid Calculation Kernel for Iterative Closest Point
  * */
-void kernel centroidReduceKernel(read_write image2d_t one0, read_write image2d_t one1, read_write image2d_t one2, read_write image2d_t one3,
-                                 read_write image2d_t one4, read_write image2d_t one5, read_write image2d_t two0, read_write image2d_t two1,
-                                 read_write image2d_t two2, read_write image2d_t two3, read_write image2d_t two4, read_write image2d_t two5,
-                                 read_write image2d_t matchRowImage, read_write image2d_t matchColumnImage, global float *mean, global float *params)
+void kernel centroidReduceKernel(read_write image2d_t one0,
+                                 read_write image2d_t one1,
+                                 read_write image2d_t one2,
+                                 read_write image2d_t one3,
+                                 read_write image2d_t one4,
+                                 read_write image2d_t one5,
+                                 read_write image2d_t two0,
+                                 read_write image2d_t two1,
+                                 read_write image2d_t two2,
+                                 read_write image2d_t two3,
+                                 read_write image2d_t two4,
+                                 read_write image2d_t two5,
+                                 read_write image2d_t matchRowImage,
+                                 read_write image2d_t matchColumnImage,
+                                 global float *mean,
+                                 global float *params)
 {
    int cIndex = get_global_id(0);
 
@@ -803,10 +846,22 @@ void kernel centroidReduceKernel(read_write image2d_t one0, read_write image2d_t
 /*
  * ICP Kernel for Iterative Closest Point
  * */
-void kernel correlReduceKernel(read_write image2d_t one0, read_write image2d_t one1, read_write image2d_t one2, read_write image2d_t one3,
-                               read_write image2d_t one4, read_write image2d_t one5, read_write image2d_t two0, read_write image2d_t two1,
-                               read_write image2d_t two2, read_write image2d_t two3, read_write image2d_t two4, read_write image2d_t two5,
-                               read_write image2d_t matchRowImage, read_write image2d_t matchColumnImage, global float *correlation, global float *params)
+void kernel correlReduceKernel(read_write image2d_t one0,
+                               read_write image2d_t one1,
+                               read_write image2d_t one2,
+                               read_write image2d_t one3,
+                               read_write image2d_t one4,
+                               read_write image2d_t one5,
+                               read_write image2d_t two0,
+                               read_write image2d_t two1,
+                               read_write image2d_t two2,
+                               read_write image2d_t two3,
+                               read_write image2d_t two4,
+                               read_write image2d_t two5,
+                               read_write image2d_t matchRowImage,
+                               read_write image2d_t matchColumnImage,
+                               global float *correlation,
+                               global float *params)
 {
    int cIndex = get_global_id(0);
 

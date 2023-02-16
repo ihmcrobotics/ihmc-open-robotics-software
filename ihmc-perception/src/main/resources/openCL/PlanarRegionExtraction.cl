@@ -278,8 +278,13 @@ void kernel filterKernel(read_only image2d_t inputImage, write_only image2d_t fi
  * patches on a sub-sampled grid of the depth map. The following intrinsic parameters are used to convert to Point Cloud.
  * K: [459.97265625, 0.0, 341.83984375, 0.0, 459.8046875, 249.173828125, 0.0, 0.0, 1.0]
  * */
-void kernel packKernel(read_only image2d_t in, write_only image2d_t out0, write_only image2d_t out1, write_only image2d_t out2, /* float3 maps for normal*/
-                       write_only image2d_t out3, write_only image2d_t out4, write_only image2d_t out5,                         /* float3 maps for centroids */
+void kernel packKernel(read_only image2d_t in,
+                       write_only image2d_t out0,
+                       write_only image2d_t out1,
+                       write_only image2d_t out2, /* float3 maps for normal*/
+                       write_only image2d_t out3,
+                       write_only image2d_t out4,
+                       write_only image2d_t out5, /* float3 maps for centroids */
                        global float *params
                        // write_only image2d_t debug
 
@@ -318,11 +323,15 @@ void kernel packKernel(read_only image2d_t in, write_only image2d_t out0, write_
 /* Merge Kernel: Creates the graph-based structure by adding connections between the neighboring
  * patches based on similarity.
  */
-void kernel mergeKernel(read_only image2d_t out0, read_only image2d_t out1, read_only image2d_t out2, /* float3 maps for normal*/
-                        read_only image2d_t out3, read_only image2d_t out4, read_only image2d_t out5, /* float3 maps for centroids */
-                        write_only image2d_t out6,                                                    /* uint8 map for patch metadata*/
-                        global float *params                                                          /* All parameters */
-                                                                                                      // write_only image2d_t debug
+void kernel mergeKernel(read_only image2d_t out0,
+                        read_only image2d_t out1,
+                        read_only image2d_t out2, /* float3 maps for normal*/
+                        read_only image2d_t out3,
+                        read_only image2d_t out4,
+                        read_only image2d_t out5,  /* float3 maps for centroids */
+                        write_only image2d_t out6, /* uint8 map for patch metadata*/
+                        global float *params       /* All parameters */
+                                                   // write_only image2d_t debug
 )
 {
    int y = get_global_id(0);

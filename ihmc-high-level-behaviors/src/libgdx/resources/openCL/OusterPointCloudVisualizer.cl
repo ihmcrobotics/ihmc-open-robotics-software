@@ -11,9 +11,14 @@
 #define FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X 4
 #define FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y 5
 
-kernel void imageToPointCloud(global float *parameters, global float *ousterToWorldTransform, read_only image2d_t discretizedDepthImage,
-                              int useFisheyeColorImage, global float *fisheyeParameters, read_only image2d_t fThetaFisheyeRGBA8Image,
-                              global float *ousterToFisheyeTransform, global float *pointCloudVertexBuffer)
+kernel void imageToPointCloud(global float *parameters,
+                              global float *ousterToWorldTransform,
+                              read_only image2d_t discretizedDepthImage,
+                              int useFisheyeColorImage,
+                              global float *fisheyeParameters,
+                              read_only image2d_t fThetaFisheyeRGBA8Image,
+                              global float *ousterToFisheyeTransform,
+                              global float *pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);

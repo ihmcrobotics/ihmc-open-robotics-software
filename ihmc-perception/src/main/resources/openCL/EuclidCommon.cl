@@ -35,9 +35,21 @@ float2 applyInverseYawRotationToVector2D(float2 vector, float yaw)
    return apply2DRotationToVector2D(vector, cY, sY);
 }
 
-float4 transform(float x, float y, float z, float translationX, float translationY, float translationZ, float rotationMatrixM00, float rotationMatrixM01,
-                 float rotationMatrixM02, float rotationMatrixM10, float rotationMatrixM11, float rotationMatrixM12, float rotationMatrixM20,
-                 float rotationMatrixM21, float rotationMatrixM22)
+float4 transform(float x,
+                 float y,
+                 float z,
+                 float translationX,
+                 float translationY,
+                 float translationZ,
+                 float rotationMatrixM00,
+                 float rotationMatrixM01,
+                 float rotationMatrixM02,
+                 float rotationMatrixM10,
+                 float rotationMatrixM11,
+                 float rotationMatrixM12,
+                 float rotationMatrixM20,
+                 float rotationMatrixM21,
+                 float rotationMatrixM22)
 {
    float4 ret =
        (float4) (rotationMatrixM00 * x + rotationMatrixM01 * y + rotationMatrixM02 * z, rotationMatrixM10 * x + rotationMatrixM11 * y + rotationMatrixM12 * z,
