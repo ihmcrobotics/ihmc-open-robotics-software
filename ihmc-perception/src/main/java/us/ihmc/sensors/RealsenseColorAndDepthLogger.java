@@ -7,6 +7,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -96,6 +97,12 @@ public class RealsenseColorAndDepthLogger
       FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       perceptionDataLogger.openLogFile(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME, logFileName).toString());
 
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+      {
+         ThreadTools.sleepSeconds(0.5);
+         destroy();
+      }, getClass().getSimpleName() + "Shutdown"));
+
       while (running)
       {
          update();
@@ -173,6 +180,7 @@ public class RealsenseColorAndDepthLogger
       running = false;
       sensor.deleteDevice();
       realSenseHardwareManager.deleteContext();
+      perceptionDataLogger.closeLogFile();
    }
 
    public static void main(String[] args)
@@ -183,7 +191,7 @@ public class RealsenseColorAndDepthLogger
       */
 
       // L515: [F1121365, F0245563], D455: [215122254074]
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
+      String l515SerialNumber = System.getProperty("l515.serial.number", "F0245563");
       new RealsenseColorAndDepthLogger(l515SerialNumber,
                                           1024,
                                           768,
