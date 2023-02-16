@@ -14,7 +14,7 @@ public class RDXMatImagePanel
 {
    private Mat image;
    private Pixmap pixmap;
-   private RDXImagePanel imagePanel;
+   private final RDXImagePanel imagePanel;
    private Texture panelTexture;
 
    public RDXMatImagePanel(String name, int imageWidth, int imageHeight, boolean flipY)
@@ -88,5 +88,10 @@ public class RDXMatImagePanel
    public RDXImagePanel getImagePanel()
    {
       return imagePanel;
+   }
+
+   public Mat getImage()
+   {
+      return image;
    }
 }

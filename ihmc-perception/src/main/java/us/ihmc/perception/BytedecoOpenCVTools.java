@@ -418,4 +418,9 @@ public class BytedecoOpenCVTools
    {
       metricDepth.convertTo(shortDepthToPack, opencv_core.CV_16UC1, scale, delta);
    }
+
+   public static boolean dimensionsMatch(BytedecoImage a, BytedecoImage b)
+   {
+      return a.getImageWidth() == b.getImageWidth() && a.getImageHeight() == b.getImageHeight();
+   }
 }

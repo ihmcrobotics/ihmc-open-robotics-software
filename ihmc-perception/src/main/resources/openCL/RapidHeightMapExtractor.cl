@@ -92,7 +92,7 @@ void kernel heightMapUpdateKernel(  read_only image2d_t in, read_write image2d_t
     float averageHeightZ = 0;
     float3 cellCenter = compute_grid_cell_center(rIndex, cIndex, params);
 
-    cellCenter = transform3(cellCenter,
+    cellCenter = transformPoint3D32_2(cellCenter,
             (float3)(worldToSensorTf[0], worldToSensorTf[1], worldToSensorTf[2]),
             (float3)(worldToSensorTf[4], worldToSensorTf[5], worldToSensorTf[6]),
             (float3)(worldToSensorTf[8], worldToSensorTf[9], worldToSensorTf[10]),
