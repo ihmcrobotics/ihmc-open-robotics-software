@@ -149,6 +149,12 @@ public class PlanarRegionsListTest
 
    }
 
+   @Test
+   public void testPlanarRegionsListCutter()
+   {
+
+   }
+
    public static void main(String[] args)
    {
       MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionsList.class, PlanarRegionsListTest.class);
