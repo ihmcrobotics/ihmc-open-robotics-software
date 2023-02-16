@@ -95,7 +95,10 @@ public class RealsenseColorAndDepthLogger
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
       FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      perceptionDataLogger.openLogFile(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME, logFileName).toString());
+
+      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+      perceptionDataLogger.addChannel(depthChannelName);
+      perceptionDataLogger.setChannelEnabled(depthChannelName, true);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
@@ -169,8 +172,8 @@ public class RealsenseColorAndDepthLogger
             BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthBytePointer);
             perceptionDataLogger.storeBytesFromPointer(depthChannelName, compressedDepthBytePointer);
 
-            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorBytePointer);
-            perceptionDataLogger.storeBytesFromPointer(colorChannelName, compressedDepthBytePointer);
+            //BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorBytePointer);
+            //perceptionDataLogger.storeBytesFromPointer(colorChannelName, compressedDepthBytePointer);
          }
       }
    }
@@ -191,7 +194,7 @@ public class RealsenseColorAndDepthLogger
       */
 
       // L515: [F1121365, F0245563], D455: [215122254074]
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F0245563");
+      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
       new RealsenseColorAndDepthLogger(l515SerialNumber,
                                           1024,
                                           768,
