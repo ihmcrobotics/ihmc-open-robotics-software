@@ -97,14 +97,19 @@ public class RDXNettyOusterFisheyeColorDemo
 
                   blackflyReader.setMonitorPanelUIThreadPreprocessor(texture ->
                   {
-                     nettyOusterUI.getDepthImageToPointCloudKernel().setFisheyeImageToColorPoints(texture.getRGBA8Image(),
-                                                                                                  coloringFx.get(),
-                                                                                                  coloringFy.get(),
-                                                                                                  coloringCx.get(),
-                                                                                                  coloringCy.get());
-                     nettyOusterUI.getSensorFrame().getReferenceFrame()
-                                  .getTransformToDesiredFrame(nettyOusterUI.getDepthImageToPointCloudKernel().getOusterToFisheyeTransformToPack(),
-                                                              interactableBlackflyFujinon.getInteractableFrameModel().getReferenceFrame());
+                     if (nettyOusterUI.getIsReady())
+                     {
+                        nettyOusterUI.getDepthImageToPointCloudKernel()
+                                     .setFisheyeImageToColorPoints(texture.getRGBA8Image(),
+                                                                   coloringFx.get(),
+                                                                   coloringFy.get(),
+                                                                   coloringCx.get(),
+                                                                   coloringCy.get());
+                        nettyOusterUI.getSensorFrame()
+                                     .getReferenceFrame()
+                                     .getTransformToDesiredFrame(nettyOusterUI.getDepthImageToPointCloudKernel().getOusterToFisheyeTransformToPack(),
+                                                                 interactableBlackflyFujinon.getInteractableFrameModel().getReferenceFrame());
+                     }
                   });
 
                   ThreadTools.startAsDaemon(() ->
@@ -125,7 +130,7 @@ public class RDXNettyOusterFisheyeColorDemo
                   {
                      nettyOusterUI.createAfterOusterInitialized();
 
-                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI.getPointCloudRenderer(), RDXSceneLevel.MODEL);
+                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI::getRenderables);
                      baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
                      baseUI.getLayoutManager().reloadLayout();
                   }
