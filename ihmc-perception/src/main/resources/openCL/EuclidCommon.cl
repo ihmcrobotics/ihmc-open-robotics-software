@@ -200,11 +200,6 @@ float distanceSquaredBetweenPoint3Ds(float firstPointX,
    return normSquared(deltaX, deltaY, deltaZ);
 }
 
-float distance(float x1, float y1, float z1, float x2, float y2, float z2)
-{
-   return sqrt(distanceSquaredBetweenPoint3Ds(x1, y1, z1, x2, y2, z2));
-}
-
 bool intervalContains(float value, float lowerEndpoint, float upperEndpoint)
 {
    return value >= lowerEndpoint && value <= upperEndpoint;
