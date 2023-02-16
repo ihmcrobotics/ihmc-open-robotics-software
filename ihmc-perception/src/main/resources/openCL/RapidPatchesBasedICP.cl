@@ -1,7 +1,7 @@
 /*
  * Rapid Planar Patches Based Iterative Closest Point Kernel
  */
-void kernel icpKernel(global float *previous, global float *current, global float *params)
+void kernel icpKernel(global float* previous, global float* current, global float* params)
 {
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);

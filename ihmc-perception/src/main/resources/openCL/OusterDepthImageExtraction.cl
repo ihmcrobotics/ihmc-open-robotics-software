@@ -1,4 +1,4 @@
-kernel void extractDepthImage(global float *parameters, global int *pixelShifts, global unsigned char *lidarFrameBuffer, read_write image2d_t depthImage16UC1)
+kernel void extractDepthImage(global float* parameters, global int* pixelShifts, global unsigned char* lidarFrameBuffer, read_write image2d_t depthImage16UC1)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -28,7 +28,7 @@ kernel void extractDepthImage(global float *parameters, global int *pixelShifts,
    write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
 }
 
-kernel void imageToPointCloud(global float *parameters, read_only image2d_t discretizedDepthImage, global float *pointCloudVertexBuffer)
+kernel void imageToPointCloud(global float* parameters, read_only image2d_t discretizedDepthImage, global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);

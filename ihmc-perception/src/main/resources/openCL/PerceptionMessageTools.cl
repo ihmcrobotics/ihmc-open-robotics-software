@@ -48,7 +48,7 @@ float4 createRGB(double input)
    return (float4) (r, g, b, 1.0);
 }
 
-kernel void imageToPointCloud(global float *parameters, read_only image2d_t discretizedDepthImage, global float *pointCloudVertexBuffer)
+kernel void imageToPointCloud(global float* parameters, read_only image2d_t discretizedDepthImage, global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);

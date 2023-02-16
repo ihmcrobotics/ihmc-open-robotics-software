@@ -15,7 +15,7 @@
 #define INPUT_HEIGHT 14
 #define INPUT_WIDTH 15
 
-float4 back_project(int2 pos, float Z, global float *params)
+float4 back_project(int2 pos, float Z, global float* params)
 {
    float px = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
    float py = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
@@ -23,7 +23,7 @@ float4 back_project(int2 pos, float Z, global float *params)
    return X;
 }
 
-float3 estimate_normal(read_only image2d_t in, int x, int y, global float *params)
+float3 estimate_normal(read_only image2d_t in, int x, int y, global float* params)
 {
    float residual = 0;
    float Z = 0;
@@ -67,7 +67,7 @@ float3 estimate_normal(read_only image2d_t in, int x, int y, global float *param
    return (1 / (float) (count)) * normal.xyz;
 }
 
-float3 estimate_centroid(read_only image2d_t in, int x, int y, global float *params)
+float3 estimate_centroid(read_only image2d_t in, int x, int y, global float* params)
 {
    float Z = 0;
    int count = 0;
@@ -94,7 +94,7 @@ float3 estimate_centroid(read_only image2d_t in, int x, int y, global float *par
    return (1 / (float) (count)) * centroid;
 }
 
-bool isConnected(float3 ag, float3 an, float3 bg, float3 bn, global float *params)
+bool isConnected(float3 ag, float3 an, float3 bg, float3 bn, global float* params)
 {
    float3 vec = ag - bg;
    float dist = length(vec);
@@ -114,7 +114,7 @@ bool isConnected(float3 ag, float3 an, float3 bg, float3 bn, global float *param
  * Replace non-reading (0s) pixels with an approximate nearby value, so they don't
  * upset the rest of the algorithm.
  */
-void fillDeadPixels(read_only image2d_t inputImage, int x, int y, write_only image2d_t out0, global float *params)
+void fillDeadPixels(read_only image2d_t inputImage, int x, int y, write_only image2d_t out0, global float* params)
 {
    uint Z = 0;
    int count = 0;
@@ -208,7 +208,7 @@ void fillDeadPixels(read_only image2d_t inputImage, int x, int y, write_only ima
    }
 }
 
-void smooth_non_boundary(read_only image2d_t in, int x, int y, write_only image2d_t out0, global float *params)
+void smooth_non_boundary(read_only image2d_t in, int x, int y, write_only image2d_t out0, global float* params)
 {
    uint Z = 0;
    int m = 5;
@@ -259,7 +259,7 @@ float3 calculateNormal(float3 p1, float3 p2, float3 p3)
  * Filters all pixels within a patch on depth map. Removes outliers, flying points, dead pixels and measurement
  * noise.
  */
-void kernel filterKernel(read_only image2d_t inputImage, write_only image2d_t filteredImage, write_only image2d_t nxImage, global float *parameters)
+void kernel filterKernel(read_only image2d_t inputImage, write_only image2d_t filteredImage, write_only image2d_t nxImage, global float* parameters)
 {
    int y = get_global_id(0);
    int x = get_global_id(1);
@@ -285,7 +285,7 @@ void kernel packKernel(read_only image2d_t in,
                        write_only image2d_t out3,
                        write_only image2d_t out4,
                        write_only image2d_t out5, /* float3 maps for centroids */
-                       global float *params
+                       global float* params
                        // write_only image2d_t debug
 
 )
@@ -330,7 +330,7 @@ void kernel mergeKernel(read_only image2d_t out0,
                         read_only image2d_t out4,
                         read_only image2d_t out5,  /* float3 maps for centroids */
                         write_only image2d_t out6, /* uint8 map for patch metadata*/
-                        global float *params       /* All parameters */
+                        global float* params       /* All parameters */
                                                    // write_only image2d_t debug
 )
 {

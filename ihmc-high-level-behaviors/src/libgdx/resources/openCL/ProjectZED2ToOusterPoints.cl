@@ -2,13 +2,13 @@
 // zed2 in is bytes B, G, R
 // TODO: We'll need a camera transform to set those colors to the right ouster points
 // fusedOut is 10 floats: X,Y,Z,R,G,B,A,0.01,1.0,0.0
-__kernel void projectZED2ToOusterPoints(__global unsigned char *ousterIn, __global unsigned char *zed2In, __global float *fusedOut)
+__kernel void projectZED2ToOusterPoints(__global unsigned char* ousterIn, __global unsigned char* zed2In, __global float* fusedOut)
 {
    int gid = get_global_id(0); // index of point
 
    int ousterInIndex = gid * 48;
    // TODO: This does not compile. Convert the chars to float in a different way
-   float *ousterFloats = &ousterIn[ousterInIndex];
+   float* ousterFloats = &ousterIn[ousterInIndex];
    float ousterX = ousterFloats[0];
    float ousterY = ousterFloats[1];
    float ousterZ = ousterFloats[2];

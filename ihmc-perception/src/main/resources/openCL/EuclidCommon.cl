@@ -60,7 +60,7 @@ float4 transform(float x,
    return ret;
 }
 
-float3 transformPoint3D32(float3 point, float *transform)
+float3 transformPoint3D32(float3 point, float* transform)
 {
    return (float3) (dot((float3) (transform[ROTATION_MATRIX_M00], transform[ROTATION_MATRIX_M01], transform[ROTATION_MATRIX_M02]), point) +
                         transform[TRANSLATION_X],
@@ -188,7 +188,7 @@ double interpolate(double a, double b, double alpha) { return (1.0 - alpha) * a 
 /**
  * Returns the determinant of a 3x3 matrix that is represented as a 9 element row major matrix.
  **/
-float determinant3x3Matrix(float *matrix)
+float determinant3x3Matrix(float* matrix)
 {
    float pos = matrix[0] * matrix[4] * matrix[8] + matrix[1] * matrix[5] * matrix[6] + matrix[2] * matrix[3] * matrix[7];
    float neg = matrix[2] * matrix[4] * matrix[6] + matrix[1] * matrix[3] * matrix[8] + matrix[0] * matrix[5] * matrix[7];
@@ -200,7 +200,7 @@ float determinant3x3Matrix(float *matrix)
  * Returns a 9 element array that is the inverse of a 9 element argument. The data is expected to be row major,
  * or [row1, row2, row3];
  **/
-float *invert3x3Matrix(float *matrix)
+float* invert3x3Matrix(float* matrix)
 {
    float det = determinant3x3Matrix(matrix);
    float ret[9];

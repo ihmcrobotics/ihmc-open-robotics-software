@@ -62,15 +62,15 @@ int coordinate_to_index(float coordinate, float center, float resolution, int ce
    return clamp_val(index, 0, 2 * centerIndex + 1);
 }
 
-int get_x_idx(float x, float center, float *params) { return coordinate_to_index(x, center, params[RESOLUTION], params[CENTER_INDEX]); }
+int get_x_idx(float x, float center, float* params) { return coordinate_to_index(x, center, params[RESOLUTION], params[CENTER_INDEX]); }
 
-int get_y_idx(float y, float center, float *params) { return coordinate_to_index(y, center, params[RESOLUTION], params[CENTER_INDEX]); }
+int get_y_idx(float y, float center, float* params) { return coordinate_to_index(y, center, params[RESOLUTION], params[CENTER_INDEX]); }
 
 int indices_to_key(int x_index, int y_index, int centerIndex) { return x_index + y_index * (2 * centerIndex + 1); }
 
-int get_idx_in_layer(int idx_x, int idx_y, float *params) { return indices_to_key(idx_x, idx_y, params[CENTER_INDEX]); }
+int get_idx_in_layer(int idx_x, int idx_y, float* params) { return indices_to_key(idx_x, idx_y, params[CENTER_INDEX]); }
 
-bool is_valid(float3 point, float3 sensor, float *params)
+bool is_valid(float3 point, float3 sensor, float* params)
 {
    float d = point_sensor_distance(point, sensor);
    float min = 0.0;
@@ -91,7 +91,7 @@ bool is_valid(float3 point, float3 sensor, float *params)
    //}
 }
 
-float3 back_project_to_image_frame(int2 pos, float Z, global float *params)
+float3 back_project_to_image_frame(int2 pos, float Z, global float* params)
 {
    float px = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
    float py = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
@@ -103,7 +103,7 @@ float3 project_from_image_frame_to_camera_frame(float3 point_in_image_frame)
    return (float3) (point_in_image_frame.z, -point_in_image_frame.x, -point_in_image_frame.y);
 }
 
-float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, global float *params)
+float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, global float* params)
 {
    int2 key = (int2) (x, y);
    //    float Z = ((float)read_imageui(depth_image, key).x)/(float) 1000;
@@ -121,7 +121,7 @@ float3 get_point_from_image(read_only image2d_t depth_image, int x, int y, globa
    }
 }
 
-void kernel zeroValuesKernel(global float *params, global int *centroid_data, global int *variance_data, global int *counter_data)
+void kernel zeroValuesKernel(global float* params, global int* centroid_data, global int* variance_data, global int* counter_data)
 {
    int idx_x = get_global_id(0);
    int idx_y = get_global_id(1);
@@ -136,12 +136,12 @@ void kernel zeroValuesKernel(global float *params, global int *centroid_data, gl
 }
 
 void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
-                                     global float *localization,
-                                     global float *params,
-                                     global float *intrinsics,
-                                     global int *centroid_data,
-                                     global int *variance_data,
-                                     global int *counter_data)
+                                     global float* localization,
+                                     global float* params,
+                                     global float* intrinsics,
+                                     global int* centroid_data,
+                                     global int* variance_data,
+                                     global int* counter_data)
 {
    // recall that the pixels are bottom left, and go width to height
    int image_x = get_global_id(0);
@@ -183,10 +183,10 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
    }
 }
 
-void kernel averageMapImagesKernel(global int *centroid_buffer,
-                                   global int *variance_buffer,
-                                   global int *counter_buffer,
-                                   global float *params,
+void kernel averageMapImagesKernel(global int* centroid_buffer,
+                                   global int* variance_buffer,
+                                   global int* counter_buffer,
+                                   global float* params,
                                    write_only image2d_t centroid_x,
                                    write_only image2d_t centroid_y,
                                    write_only image2d_t centroid_z,
@@ -228,7 +228,7 @@ void kernel computeNormalsKernel(read_only image2d_t centroid_x,
                                  read_only image2d_t centroid_y,
                                  read_only image2d_t centroid_z,
                                  read_only image2d_t counter,
-                                 global float *params,
+                                 global float* params,
                                  write_only image2d_t normal_x_mat,
                                  write_only image2d_t normal_y_mat,
                                  write_only image2d_t normal_z_mat)
