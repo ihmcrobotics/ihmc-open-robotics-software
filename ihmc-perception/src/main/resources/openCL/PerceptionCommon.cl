@@ -27,21 +27,15 @@ float4 calculateInterpolatedGradientColorFloat4(double input)
    }
    else if (alpha <= gradientSize * 3)
    {
-      r = interpolate(greenR, yellowR,
-                      (alpha - gradientSize * 2) / gradientSize);
-      g = interpolate(greenG, yellowG,
-                      (alpha - gradientSize * 2) / gradientSize);
-      b = interpolate(greenB, yellowB,
-                      (alpha - gradientSize * 2) / gradientSize);
+      r = interpolate(greenR, yellowR, (alpha - gradientSize * 2) / gradientSize);
+      g = interpolate(greenG, yellowG, (alpha - gradientSize * 2) / gradientSize);
+      b = interpolate(greenB, yellowB, (alpha - gradientSize * 2) / gradientSize);
    }
    else if (alpha <= gradientSize * 4)
    {
-      r = interpolate(yellowR, orangeR,
-                      (alpha - gradientSize * 3) / gradientSize);
-      g = interpolate(yellowG, orangeG,
-                      (alpha - gradientSize * 3) / gradientSize);
-      b = interpolate(yellowB, orangeB,
-                      (alpha - gradientSize * 3) / gradientSize);
+      r = interpolate(yellowR, orangeR, (alpha - gradientSize * 3) / gradientSize);
+      g = interpolate(yellowG, orangeG, (alpha - gradientSize * 3) / gradientSize);
+      b = interpolate(yellowB, orangeB, (alpha - gradientSize * 3) / gradientSize);
    }
    else if (alpha <= gradientSize * 5)
    {
@@ -50,15 +44,13 @@ float4 calculateInterpolatedGradientColorFloat4(double input)
       b = interpolate(orangeB, redB, (alpha - gradientSize * 4) / gradientSize);
    }
 
-   return (float4)(r, g, b, 1.0);
+   return (float4) (r, g, b, 1.0);
 }
 
 int calculateInterpolatedGradientColorInt(double input)
 {
    float4 gradientColor = calculateInterpolatedGradientColorFloat4(input);
-   int color = ((int)round(gradientColor.x) << 24) |
-               ((int)round(gradientColor.y) << 16) |
-               ((int)round(gradientColor.z) << 8) | 255;
+   int color = ((int) round(gradientColor.x) << 24) | ((int) round(gradientColor.y) << 16) | ((int) round(gradientColor.z) << 8) | 255;
    return color;
 }
 
@@ -75,14 +67,14 @@ int calculateGradientColor(double input, bool sinusoidal)
 
       if (r < 0)
          r = 0;
-      else if (r > 255)
+      else if(r > 255)
          r = 255;
       //    r=max(0,min(255,r));
       float g = sin(a - 2 * PI / 3) * 192 + 128;
       if (g < 0)
          g = 0;
       else if (g > 255)
-         g = 255;
+         g =255;
       //    g=max(0,min(255,g));
       float b = sin(a - 4 * PI / 3) * 192 + 128;
       if (b < 0)
@@ -90,12 +82,11 @@ int calculateGradientColor(double input, bool sinusoidal)
       else if (b > 255)
          b = 255;
       //    b=max(0,min(255,b));
-      int color = ((int)round(r) << 24) | ((int)round(g) << 16) |
-                  ((int)round(b) << 8) | 255;
+      int color = ((int)round(r) << 24) | ((int)round(g) << 16) | ((int)round(b) << 8) | 255;
       return color;
    }
    else
    {
-      return calculateInterpolatedGradientColorInt(input);
+       return calculateInterpolatedGradientColorInt(input);
    }
 }

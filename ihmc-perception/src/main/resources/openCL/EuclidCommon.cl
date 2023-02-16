@@ -1,42 +1,47 @@
 float2 apply2DRotationToVector2D(float2 vector, float cosH, float sinH)
 {
-   float dxLocal = cosH * vector.x - sinH * vector.y;
-   float dyLocal = sinH * vector.x + cosH * vector.y;
+    float dxLocal = cosH * vector.x - sinH * vector.y;
+    float dyLocal = sinH * vector.x + cosH * vector.y;
 
-   return (float2)(dxLocal, dyLocal);
+    return (float2) (dxLocal, dyLocal);
 }
 
 float2 applyYawRotationToVector2D(float2 vector, float yaw)
 {
-   float cY = cos(yaw);
-   float sY = sin(yaw);
+    float cY = cos(yaw);
+    float sY = sin(yaw);
 
-   return apply2DRotationToVector2D(vector, cY, sY);
+    return apply2DRotationToVector2D(vector, cY, sY);
 }
 
 float2 applyInverseYawRotationToVector2D(float2 vector, float yaw)
 {
-   float cY = cos(-yaw);
-   float sY = sin(-yaw);
+    float cY = cos(-yaw);
+    float sY = sin(-yaw);
 
-   return apply2DRotationToVector2D(vector, cY, sY);
+    return apply2DRotationToVector2D(vector, cY, sY);
 }
 
-float4 transform(float x, float y, float z, float translationX,
-                 float translationY, float translationZ,
-                 float rotationMatrixM00, float rotationMatrixM01,
-                 float rotationMatrixM02, float rotationMatrixM10,
-                 float rotationMatrixM11, float rotationMatrixM12,
-                 float rotationMatrixM20, float rotationMatrixM21,
+float4 transform(float x,
+                 float y,
+                 float z,
+                 float translationX,
+                 float translationY,
+                 float translationZ,
+                 float rotationMatrixM00,
+                 float rotationMatrixM01,
+                 float rotationMatrixM02,
+                 float rotationMatrixM10,
+                 float rotationMatrixM11,
+                 float rotationMatrixM12,
+                 float rotationMatrixM20,
+                 float rotationMatrixM21,
                  float rotationMatrixM22)
 {
-   float4 ret = (float4)(rotationMatrixM00 * x + rotationMatrixM01 * y +
-                             rotationMatrixM02 * z,
-                         rotationMatrixM10 * x + rotationMatrixM11 * y +
-                             rotationMatrixM12 * z,
-                         rotationMatrixM20 * x + rotationMatrixM21 * y +
-                             rotationMatrixM22 * z,
-                         0.0f);
+   float4 ret = (float4) (rotationMatrixM00 * x + rotationMatrixM01 * y + rotationMatrixM02 * z,
+                          rotationMatrixM10 * x + rotationMatrixM11 * y + rotationMatrixM12 * z,
+                          rotationMatrixM20 * x + rotationMatrixM21 * y + rotationMatrixM22 * z,
+                          0.0f);
    ret.x += translationX;
    ret.y += translationY;
    ret.z += translationZ;
@@ -111,8 +116,8 @@ float16 setToPitchOrientation(float pitch, float16 rotationMatrix)
 
 float16 newRotationMatrix()
 {
-   return (float16)(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0, 0.0); // unused values
+   return (float16) (1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0,
+                     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0); // unused values
 }
 
 float angle(float x1, float y1, float x2, float y2)
@@ -133,148 +138,137 @@ double interpolate(double a, double b, double alpha)
 }
 
 /**
- * Returns the determinant of a 3x3 matrix that is represented as a 9 element
- *row major matrix.
- **/
-float determinant3x3Matrix(float *matrix)
+* Returns the determinant of a 3x3 matrix that is represented as a 9 element row major matrix.
+**/
+float determinant3x3Matrix(float* matrix)
 {
-   float pos = matrix[0] * matrix[4] * matrix[8] +
-               matrix[1] * matrix[5] * matrix[6] +
-               matrix[2] * matrix[3] * matrix[7];
-   float neg = matrix[2] * matrix[4] * matrix[6] +
-               matrix[1] * matrix[3] * matrix[8] +
-               matrix[0] * matrix[5] * matrix[7];
+    float pos = matrix[0] * matrix[4] * matrix[8] + matrix[1] * matrix[5] * matrix[6] + matrix[2] * matrix[3] * matrix[7];
+    float neg = matrix[2] * matrix[4] * matrix[6] + matrix[1] * matrix[3] * matrix[8] + matrix[0] * matrix[5] * matrix[7];
 
-   return pos - neg;
+    return pos - neg;
 }
 
 /**
- * Returns a 9 element array that is the inverse of a 9 element argument. The
- *data is expected to be row major, or [row1, row2, row3];
- **/
-float *invert3x3Matrix(float *matrix)
+* Returns a 9 element array that is the inverse of a 9 element argument. The data is expected to be row major,
+* or [row1, row2, row3];
+**/
+float* invert3x3Matrix(float* matrix)
 {
-   float det = determinant3x3Matrix(matrix);
-   float ret[9];
+    float det = determinant3x3Matrix(matrix);
+    float ret[9];
 
-   float detMinor00 = matrix[4] * matrix[8] - matrix[5] * matrix[7];
-   float detMinor01 = matrix[3] * matrix[8] - matrix[5] * matrix[6];
-   float detMinor02 = matrix[3] * matrix[7] - matrix[4] * matrix[6];
+    float detMinor00 = matrix[4] * matrix[8] - matrix[5] * matrix[7];
+    float detMinor01 = matrix[3] * matrix[8] - matrix[5] * matrix[6];
+    float detMinor02 = matrix[3] * matrix[7] - matrix[4] * matrix[6];
 
-   float detMinor10 = matrix[1] * matrix[8] - matrix[2] * matrix[7];
-   float detMinor11 = matrix[0] * matrix[8] - matrix[2] * matrix[6];
-   float detMinor12 = matrix[0] * matrix[7] - matrix[1] * matrix[6];
+    float detMinor10 = matrix[1] * matrix[8] - matrix[2] * matrix[7];
+    float detMinor11 = matrix[0] * matrix[8] - matrix[2] * matrix[6];
+    float detMinor12 = matrix[0] * matrix[7] - matrix[1] * matrix[6];
 
-   float detMinor20 = matrix[1] * matrix[5] - matrix[2] * matrix[4];
-   float detMinor21 = matrix[0] * matrix[5] - matrix[2] * matrix[3];
-   float detMinor22 = matrix[0] * matrix[4] - matrix[1] * matrix[3];
+    float detMinor20 = matrix[1] * matrix[5] - matrix[2] * matrix[4];
+    float detMinor21 = matrix[0] * matrix[5] - matrix[2] * matrix[3];
+    float detMinor22 = matrix[0] * matrix[4] - matrix[1] * matrix[3];
 
-   ret[0] = detMinor00 / det;
-   ret[1] = -detMinor10 / det;
-   ret[2] = detMinor20 / det;
+    ret[0] = detMinor00 / det;
+    ret[1] = -detMinor10 / det;
+    ret[2] = detMinor20 / det;
 
-   ret[3] = -detMinor01 / det;
-   ret[4] = detMinor11 / det;
-   ret[5] = -detMinor21 / det;
+    ret[3] = -detMinor01 / det;
+    ret[4] = detMinor11 / det;
+    ret[5] = -detMinor21 / det;
 
-   ret[6] = detMinor02 / det;
-   ret[7] = -detMinor12 / det;
-   ret[8] = detMinor22 / det;
+    ret[6] = detMinor02 / det;
+    ret[7] = -detMinor12 / det;
+    ret[8] = detMinor22 / det;
 
-   return ret;
+    return ret;
 }
 
 /**
- * Taking in a random number seed and a bits mask, returns a random integer and
- *the modified seed.
- **/
+* Taking in a random number seed and a bits mask, returns a random integer and the modified seed.
+**/
 uint2 nextRandom(uint seed, uint bits)
 {
-   long multiplier = 0x5DEECE66DL;
-   long addend = 0xBL;
-   long mask = (1L << 48) - 1;
-   seed = (seed * multiplier + addend) & (mask);
-   uint result = seed >> (48 - bits);
+    long multiplier = 0x5DEECE66DL;
+    long addend = 0xBL;
+    long mask = (1L << 48) - 1;
+    seed = (seed * multiplier + addend) & (mask);
+    uint result = seed >> (48 - bits);
 
-   return (uint2)(result, seed);
+    return (uint2) (result, seed);
 }
 
 /**
- * Taking in a random number seed, returns the random number and the modified
- *seed, and forces this result to be within the provided upper bound.
- **/
+* Taking in a random number seed, returns the random number and the modified seed, and forces this result
+* to be within the provided upper bound.
+**/
 uint2 nextRandomInt(uint seed, uint bound)
 {
-   uint bits = 31;
-   uint2 result = nextRandom(seed, bits);
-   uint r = result.s0;
-   seed = result.s1;
+    uint bits = 31;
+    uint2 result = nextRandom(seed, bits);
+    uint r = result.s0;
+    seed = result.s1;
 
-   uint m = bound - 1;
-   if ((bound & m) == 0)
-      r = (uint)((bound * (long)r) >> bits);
-   else
-   {
-      uint u = r;
-      r = u % bound;
-      while (u - r + m < 0)
-      {
-         result = nextRandom(seed, bits);
-         u = result.s0;
-         seed = result.s1;
-         r = u % bound;
-      }
-   }
+    uint m = bound - 1;
+    if ((bound & m) == 0)
+        r = (uint)((bound * (long) r) >> bits);
+    else
+    {
+        uint u = r;
+        r = u % bound;
+        while (u - r + m < 0)
+        {
+            result = nextRandom(seed, bits);
+            u = result.s0;
+            seed = result.s1;
+            r = u % bound;
+        }
+    }
 
-   return result;
+    return result;
 }
 
 /**
- * Checks whether variable a is within the value of variable b by some epsilon.
- *Returns true if it is.
- **/
+* Checks whether variable a is within the value of variable b by some epsilon. Returns true if it is.
+**/
 bool epsilonEquals(float a, float b, float epsilon)
 {
-   return fabs(a - b) < epsilon;
+    return fabs(a - b) < epsilon;
 }
 
 /**
- * Returns the signed distane of a point 3D to a plane 3D that's defined by the
- *point on the plane and the plane normal. If the distance is positive, the
- *point is "above" the plane, where above is defined as the positive Z of the
- *plane normal. If the distance is negative, the point is below the plane.
- **/
-float signedDistanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane,
-                                         float3 planeNormal)
+* Returns the signed distane of a point 3D to a plane 3D that's defined by the point on the plane and the plane normal.
+* If the distance is positive, the point is "above" the plane, where above is defined as the positive Z of the plane normal.
+* If the distance is negative, the point is below the plane.
+**/
+float signedDistanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane, float3 planeNormal)
 {
-   float3 delta = pointQuery - pointOnPlane;
+    float3 delta = pointQuery - pointOnPlane;
 
-   return dot(delta, planeNormal);
+    return dot(delta, planeNormal);
 }
 
 /**
- * Returns the distane of a point 3D to a plane 3D that's defined by the point
- *on the plane and the plane normal.
- **/
-float distanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane,
-                                   float3 planeNormal)
+* Returns the distane of a point 3D to a plane 3D that's defined by the point on the plane and the plane normal.
+**/
+float distanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane, float3 planeNormal)
 {
-   float3 delta = pointQuery - pointOnPlane;
+    float3 delta = pointQuery - pointOnPlane;
 
-   return fabs(dot(delta, planeNormal));
+    return fabs(dot(delta, planeNormal));
 }
 
 /**
- * Computes the 3D normal vector to the plane defined by three points.
- **/
+* Computes the 3D normal vector to the plane defined by three points.
+**/
 float3 computeNormal3DFromThreePoint3Ds(float3 firstPointOnPlane,
                                         float3 secondPointOnPlane,
                                         float3 thirdPointOnPlane)
 {
-   float3 v1 = secondPointOnPlane - firstPointOnPlane;
-   float3 v2 = thirdPointOnPlane - firstPointOnPlane;
+    float3 v1 = secondPointOnPlane - firstPointOnPlane;
+    float3 v2 = thirdPointOnPlane - firstPointOnPlane;
 
-   float3 normal = cross(v1, v2);
+    float3 normal = cross(v1, v2);
 
-   return normalize(normal);
+    return normalize(normal);
 }
