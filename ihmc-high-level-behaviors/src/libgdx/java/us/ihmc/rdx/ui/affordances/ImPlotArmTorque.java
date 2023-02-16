@@ -4,7 +4,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
-import us.ihmc.rdx.ui.yo.ImPlotPlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlotPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -12,19 +11,19 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImArmTorquePlot
+public class ImPlotArmTorque
 {
    // actuator torques: arm has 7 joint torques
    private SideDependentList<ImPlotPlotPanel> torquePlotPanels = new SideDependentList<>();
    private SideDependentList<ImPlotPlot> torquePlots = new SideDependentList<>();
-   private final SideDependentList<ArrayList<ImPlotDoublePlotLine>> plot_lines = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private final SideDependentList<ArrayList<ImPlotDoublePlotLine>> plotLines = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
-   public ImArmTorquePlot(RDXBaseUI baseUI, String title, SideDependentList<List<OneDoFJointBasics>> armJoints)
+   public ImPlotArmTorque(RDXBaseUI baseUI, String title, SideDependentList<List<OneDoFJointBasics>> armJoints)
    {
       this(baseUI, title, "", armJoints);
    }
 
-   public ImArmTorquePlot(RDXBaseUI baseUI, String title, String prefix, SideDependentList<List<OneDoFJointBasics>> armJoints)
+   public ImPlotArmTorque(RDXBaseUI baseUI, String title, String prefix, SideDependentList<List<OneDoFJointBasics>> armJoints)
    {
       for (RobotSide side : RobotSide.values)
       {
@@ -34,7 +33,7 @@ public class ImArmTorquePlot
          for (int i = 0; i < oneArmJoints.size(); ++i)
          {
             ImPlotDoublePlotLine doublePlotLine = new ImPlotDoublePlotLine(oneArmJoints.get(i).getName() + " " + prefix + " torque");
-            plot_lines.get(side).add(doublePlotLine);
+            plotLines.get(side).add(doublePlotLine);
             torquePlots.get(side).getPlotLines().add(doublePlotLine);
          }
          torquePlotPanels.get(side).getPlots().add(torquePlots.get(side));
@@ -46,7 +45,7 @@ public class ImArmTorquePlot
    {
       for (int i = 0; i < jointTorques.length; ++i)
       {
-         plot_lines.get(side).get(i).addValue(jointTorques[i]);
+         plotLines.get(side).get(i).addValue(jointTorques[i]);
       }
    }
 }

@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.affordances;
 
-import boofcv.alg.sfm.DepthSparse3D;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import imgui.ImGui;
@@ -47,9 +46,9 @@ public class RDXArmManager
 
    private final HandWrenchCalculator handWrenchCalculator;
    private ImBoolean printWrench = new ImBoolean(false);
-   private ImWrenchPlot wrenchPlot;
-   private ImArmTorquePlot armTorquePlot;
-   private ImArmTorquePlot armGravityTorquePlot;
+   private ImPlotWrench wrenchPlot;
+   private ImPlotArmTorque armTorquePlot;
+   private ImPlotArmTorque armGravityTorquePlot;
 
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -84,9 +83,9 @@ public class RDXArmManager
    public void create(RDXBaseUI baseUI)
    {
       create();
-      wrenchPlot = new ImWrenchPlot(baseUI);
-      armTorquePlot = new ImArmTorquePlot(baseUI, "arm joints torque", handWrenchCalculator.getArmJoints());
-      armGravityTorquePlot = new ImArmTorquePlot(baseUI, "arm joints GRAVITY torque", "gravity compensation", handWrenchCalculator.getArmJoints());
+      wrenchPlot = new ImPlotWrench(baseUI);
+      armTorquePlot = new ImPlotArmTorque(baseUI, "Arm joints torque", handWrenchCalculator.getArmJoints());
+      armGravityTorquePlot = new ImPlotArmTorque(baseUI, "Arm joints gravity compensation torque", "gravity compensation", handWrenchCalculator.getArmJoints());
    }
 
    public void create()
@@ -114,11 +113,6 @@ public class RDXArmManager
 
          // wrench expressed in wrist pitch body fixed-frame
          interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getFilteredWrench().get(side));
-         if (printWrench.get())
-         {
-            LogTools.info("Estimated wrench Linear: {}", handWrenchCalculator.getFilteredWrench().get(side).getLinearPart());
-            LogTools.info("Estimated wrench Angular: {}", handWrenchCalculator.getFilteredWrench().get(side).getAngularPart());
-         }
 
          // We only want to evaluate this when we are going to take action on it
          // Otherwise, we will not notice the desired changed while the solver was still solving
@@ -216,9 +210,6 @@ public class RDXArmManager
          armControlModeChanged = true;
          armControlMode = RDXArmControlMode.POSE_CHEST;
       }
-
-      ImGui.checkbox(labels.get("Print hand wrench for debug: "), printWrench);
-
    }
 
    public Runnable getSubmitDesiredArmSetpointsCallback(RobotSide robotSide)
