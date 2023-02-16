@@ -60,6 +60,7 @@ public class HandWrenchCalculator
          GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
          geometricJacobianCalculator.setKinematicChain(fullRobotModel.getChest(), fullRobotModel.getHand(side));
          geometricJacobianCalculator.setJacobianFrame(fullRobotModel.getHandControlFrame(side));
+//         geometricJacobianCalculator.setJacobianFrame(ReferenceFrame.getWorldFrame());
          jacobianCalculators.set(side, geometricJacobianCalculator);
          jointsFromBaseToEndEffector.set(side, geometricJacobianCalculator.getJointsFromBaseToEndEffector());
          List<OneDoFJointBasics> oneDoFJoints = MultiBodySystemTools.filterJoints(jointsFromBaseToEndEffector.get(side),
