@@ -154,8 +154,6 @@ public class PerceptionMessageTools
 
       pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
 
-      openCLManager.finish();
-
       Point3D[] pointCloud = new Point3D[totalNumberOfPoints];
       FloatBuffer pointElementBuffer = pointCloudVertexBuffer.getBackingDirectFloatBuffer();
       pointElementBuffer.rewind();
