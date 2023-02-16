@@ -8,20 +8,20 @@ import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
-import us.ihmc.perception.OpenCVArUcoMarker;
-import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXArUcoVirtualBox;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXArUcoVirtualDoorFrame;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXArUcoVirtualDoorPanel;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
+import us.ihmc.perception.OpenCVArUcoMarker;
+import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 
 import java.util.ArrayList;
 
-public class RDXObjectDetector
+public class RDXBehaviorSequencePerceptionManagerUI
 {
-   private final ImGuiPanel panel = new ImGuiPanel("Object Detector", this::renderImGuiWidgets);
+   private final ImGuiPanel panel = new ImGuiPanel("Perception Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(true);
    private final ImBoolean showGraphics = new ImBoolean(true);
@@ -46,10 +46,10 @@ public class RDXObjectDetector
       box = new RDXArUcoVirtualBox(2);
 
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-      arUcoMarkerDetection.create(objectDetectionBlackflySimulator.getLowLevelSimulator().getRGBA8888ColorImage(),
-                                  objectDetectionBlackflySimulator.getDepthCameraIntrinsics(),
-                                  objectDetectionBlackflySimulator.getSensorFrame());
-      arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("from Blackfly Right");
+      arUcoMarkerDetection.create(objectDetectionBlackflySimulator.getSensorFrame());
+      arUcoMarkerDetection.setSourceImageForDetection(objectDetectionBlackflySimulator.getLowLevelSimulator().getRGBA8888ColorImage());
+      arUcoMarkerDetection.setCameraInstrinsics(objectDetectionBlackflySimulator.getDepthCameraIntrinsics());
+      arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" from Blackfly Right");
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       markersToTrack.add(pullDoorPanel.getArUcoMarker());
       markersToTrack.add(box.getArUcoMarker());

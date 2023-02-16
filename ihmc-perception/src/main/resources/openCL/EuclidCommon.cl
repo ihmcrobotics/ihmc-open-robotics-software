@@ -1,3 +1,16 @@
+#define TRANSLATION_X 0
+#define TRANSLATION_Y 1
+#define TRANSLATION_Z 2
+#define ROTATION_MATRIX_M00 3
+#define ROTATION_MATRIX_M01 4
+#define ROTATION_MATRIX_M02 5
+#define ROTATION_MATRIX_M10 6
+#define ROTATION_MATRIX_M11 7
+#define ROTATION_MATRIX_M12 8
+#define ROTATION_MATRIX_M20 9
+#define ROTATION_MATRIX_M21 10
+#define ROTATION_MATRIX_M22 11
+
 float2 apply2DRotationToVector2D(float2 vector, float cosH, float sinH)
 {
     float dxLocal = cosH * vector.x - sinH * vector.y;
@@ -48,17 +61,19 @@ float4 transform(float x,
    return ret;
 }
 
-float4 transform2(float3 point, global float* transformToApply)
+float3 transformPoint3D32(float3 point, float* transform)
 {
-   return transform(point.x, point.y, point.z, transformToApply[3], transformToApply[7], transformToApply[11],
-            transformToApply[0], transformToApply[1], transformToApply[2],
-            transformToApply[4], transformToApply[5], transformToApply[6],
-            transformToApply[8], transformToApply[9], transformToApply[10]);
+   return (float3)
+   (dot((float3) (transform[ROTATION_MATRIX_M00], transform[ROTATION_MATRIX_M01], transform[ROTATION_MATRIX_M02]), point) + transform[TRANSLATION_X],
+    dot((float3) (transform[ROTATION_MATRIX_M10], transform[ROTATION_MATRIX_M11], transform[ROTATION_MATRIX_M12]), point) + transform[TRANSLATION_Y],
+    dot((float3) (transform[ROTATION_MATRIX_M20], transform[ROTATION_MATRIX_M21], transform[ROTATION_MATRIX_M22]), point) + transform[TRANSLATION_Z]);
 }
 
-float3 transform3(float3 point, float3 r1, float3 r2, float3 r3, float3 t)
+float3 transformPoint3D32_2(float3 point, float3 rotationMatrixRow0, float3 rotationMatrixRow1, float3 rotationMatrixRow2, float3 translation)
 {
-   return (float3)(dot(r1, point) + t.x, dot(r2, point) + t.y, dot(r3, point) + t.z);
+   return (float3) (dot(rotationMatrixRow0, point) + translation.x,
+                    dot(rotationMatrixRow1, point) + translation.y,
+                    dot(rotationMatrixRow2, point) + translation.z);
 }
 
 float16 prependYawRotation(float yaw, float16 matrixOriginal)
@@ -133,11 +148,56 @@ float16 newRotationMatrix()
                      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0); // unused values
 }
 
+float normSquared2D(float x, float y)
+{
+   return x * x + y * y;
+}
+
+float norm2D(float x, float y)
+{
+   return sqrt(normSquared2D(x, y));
+}
+
+
+float normSquared(float x, float y, float z)
+{
+   return x * x + y * y + z * z;
+}
+
+float norm(float x, float y, float z)
+{
+   return sqrt(normSquared(x, y, z));
+}
+
 float angle(float x1, float y1, float x2, float y2)
 {
    float cosTheta = x1 * x2 + y1 * y2;
    float sinTheta = x1 * y2 - y1 * x2;
    return atan2(sinTheta, cosTheta);
+}
+
+float angle3D(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+   float crossX = y1 * z2 - z1 * y2;
+   float crossY = z1 * x2 - x1 * z2;
+   float crossZ = x1 * y2 - y1 * x2;
+
+   float cosTheta = x1 * x2 + y1 * y2 + z1 * z2;
+   float sinTheta = norm(crossX, crossY, crossZ);
+   return atan2(sinTheta, cosTheta);
+}
+
+float distanceSquaredBetweenPoint3Ds(float firstPointX,
+                                     float firstPointY,
+                                     float firstPointZ,
+                                     float secondPointX,
+                                     float secondPointY,
+                                     float secondPointZ)
+{
+   float deltaX = secondPointX - firstPointX;
+   float deltaY = secondPointY - firstPointY;
+   float deltaZ = secondPointZ - firstPointZ;
+   return normSquared(deltaX, deltaY, deltaZ);
 }
 
 bool intervalContains(float value, float lowerEndpoint, float upperEndpoint)
