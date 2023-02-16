@@ -51,13 +51,13 @@ kernel void imageToPointCloud(global float* parameters,
 
    if (eyeDepthInMeters == 0.0f)
    {
-      pointCloudVertexBuffer[pointStartIndex] = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex]     = nan((uint) 0);
       pointCloudVertexBuffer[pointStartIndex + 1] = nan((uint) 0);
       pointCloudVertexBuffer[pointStartIndex + 2] = nan((uint) 0);
    }
    else
    {
-      pointCloudVertexBuffer[pointStartIndex] = worldFramePoint.x;
+      pointCloudVertexBuffer[pointStartIndex]     = worldFramePoint.x;
       pointCloudVertexBuffer[pointStartIndex + 1] = worldFramePoint.y;
       pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }
@@ -85,10 +85,10 @@ kernel void imageToPointCloud(global float* parameters,
          // https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function
          // https://www.ihmc.us/wp-content/uploads/2023/02/equidistant_fisheye_model-1024x957.jpeg
          float azimuthalAngle = atan2(-fisheyeFramePoint.z, -fisheyeFramePoint.y);
-         int fisheyeCol = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X] +
-                          fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_X] * angleOfIncidence * cos(azimuthalAngle);
-         int fisheyeRow = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y] +
-                          fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y] * angleOfIncidence * sin(azimuthalAngle);
+         int fisheyeCol = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X]
+                        + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_X] * angleOfIncidence * cos(azimuthalAngle);
+         int fisheyeRow = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y]
+                        + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y] * angleOfIncidence * sin(azimuthalAngle);
 
          if (fisheyeCol >= 0 && fisheyeCol < fisheyeParameters[FISHEYE_IMAGE_WIDTH] && fisheyeRow >= 0 && fisheyeRow < fisheyeParameters[FISHEYE_IMAGE_HEIGHT])
          {
