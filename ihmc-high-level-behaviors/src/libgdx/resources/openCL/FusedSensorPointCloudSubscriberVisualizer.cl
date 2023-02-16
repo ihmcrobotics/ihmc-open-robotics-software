@@ -1,6 +1,6 @@
-kernel void unpackPointCloud(global float *parameters,
-                             global int *decompressedPointBuffer,
-                             global float *pointCloudVertexBuffer)
+kernel void unpackPointCloud(global float* parameters,
+                             global int* decompressedPointBuffer,
+                             global float* pointCloudVertexBuffer)
 {
    int n = get_global_id(0);
 
@@ -13,16 +13,12 @@ kernel void unpackPointCloud(global float *parameters,
    int inputStartIndex = n * inputIntsPerPoint;
 
    int floatsPerVertex = 8;
-   int currentSegmentStart =
-       latestSegmentIndex * pointsPerSegment * floatsPerVertex;
+   int currentSegmentStart = latestSegmentIndex * pointsPerSegment * floatsPerVertex;
    int pointCloudStartIndex = currentSegmentStart + n * floatsPerVertex;
 
-   pointCloudVertexBuffer[pointCloudStartIndex] =
-       decompressedPointBuffer[inputStartIndex] * discretization;
-   pointCloudVertexBuffer[pointCloudStartIndex + 1] =
-       decompressedPointBuffer[inputStartIndex + 1] * discretization;
-   pointCloudVertexBuffer[pointCloudStartIndex + 2] =
-       decompressedPointBuffer[inputStartIndex + 2] * discretization;
+   pointCloudVertexBuffer[pointCloudStartIndex] = decompressedPointBuffer[inputStartIndex] * discretization;
+   pointCloudVertexBuffer[pointCloudStartIndex + 1] = decompressedPointBuffer[inputStartIndex + 1] * discretization;
+   pointCloudVertexBuffer[pointCloudStartIndex + 2] = decompressedPointBuffer[inputStartIndex + 2] * discretization;
 
    int colorRGBA8888 = decompressedPointBuffer[inputStartIndex + 3];
 
