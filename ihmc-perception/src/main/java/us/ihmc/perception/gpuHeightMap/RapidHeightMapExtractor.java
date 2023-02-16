@@ -27,7 +27,10 @@ public class RapidHeightMapExtractor
    private OpenCLFloatBuffer parametersBuffer;
 
    private OpenCLFloatBuffer worldToSensorTransformBuffer;
+   private float[] worldToSensorTransformArray = new float[16];
+
    private OpenCLFloatBuffer sensorToWorldTransformBuffer;
+   private float[] sensorToWorldTransformArray = new float[16];
 
    private OpenCLFloatBuffer groundPlaneBuffer;
    private _cl_program rapidHeightMapUpdaterProgram;
@@ -87,11 +90,13 @@ public class RapidHeightMapExtractor
          worldToSensorTransform.invert();
 
          // Fill world-to-sensor transform buffer
-         worldToSensorTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(PerceptionEuclidTools.toFloatArray(worldToSensorTransform));
+         worldToSensorTransform.get(worldToSensorTransformArray);
+         worldToSensorTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(worldToSensorTransformArray);
          worldToSensorTransformBuffer.writeOpenCLBufferObject(openCLManager);
 
          // Fill sensor-to-world transform buffer
-         sensorToWorldTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(PerceptionEuclidTools.toFloatArray(sensorToWorldTransform));
+         sensorToWorldTransform.get(sensorToWorldTransformArray);
+         sensorToWorldTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(sensorToWorldTransformArray);
          sensorToWorldTransformBuffer.writeOpenCLBufferObject(openCLManager);
 
          // Generate a +Z vector in world frame
