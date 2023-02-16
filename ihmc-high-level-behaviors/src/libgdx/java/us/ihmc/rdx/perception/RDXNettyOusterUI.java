@@ -46,6 +46,9 @@ public class RDXNettyOusterUI
    private final ImPlotStopwatchPlot drawDepthImageStopwatchPlot = new ImPlotStopwatchPlot("Draw depth image");
    private final ImPlotStopwatchPlot depthImageToPointCloudStopwatchPlot = new ImPlotStopwatchPlot("Image to point cloud kernel");
    private final Notification newFrameAvailable = new Notification();
+   private final int pointsToAddAboveAndBelowForColorDetail = 2;
+   private final int totalVerticalPointsForColorDetail = 1 + 2 * pointsToAddAboveAndBelowForColorDetail;
+   private int heightWithVerticalPointsForColorDetail;
 
    public void create(RDXBaseUI baseUI)
    {
@@ -84,7 +87,8 @@ public class RDXNettyOusterUI
       depthHeight = ouster.getImageHeight();
       imagePanel = new RDXBytedecoImagePanel("Ouster Depth Image", depthWidth, depthHeight);
 
-      numberOfDepthPoints = ouster.getImageWidth() * ouster.getImageHeight();
+      heightWithVerticalPointsForColorDetail = ouster.getImageHeight() * totalVerticalPointsForColorDetail;
+      numberOfDepthPoints = ouster.getImageWidth() * heightWithVerticalPointsForColorDetail;
 
       depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager);
 
@@ -93,7 +97,9 @@ public class RDXNettyOusterUI
 
       depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(pointCloudRenderer,
                                                                                openCLManager,
-                                                                               depthExtractionKernel.getExtractedDepthImage());
+                                                                               depthExtractionKernel.getExtractedDepthImage(),
+                                                                               pointsToAddAboveAndBelowForColorDetail,
+                                                                               heightWithVerticalPointsForColorDetail);
       isReady = true;
    }
 
