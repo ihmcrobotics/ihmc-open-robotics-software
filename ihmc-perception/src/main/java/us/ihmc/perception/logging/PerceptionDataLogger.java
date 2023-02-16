@@ -6,6 +6,7 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
+import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.CommunicationMode;
@@ -119,7 +120,11 @@ public class PerceptionDataLogger
 
    public void closeLogFile()
    {
-      hdf5Manager.closeFile();
+      if (hdf5Manager != null)
+      {
+         hdf5Manager.closeFile();
+         LogTools.info("HDF5 File Saved: {}", filePath);
+      }
    }
 
    public void startLogging(String logFileName, String simpleRobotName)
@@ -280,11 +285,7 @@ public class PerceptionDataLogger
          }
       }
 
-      if (hdf5Manager != null)
-      {
-         hdf5Manager.closeFile();
-         LogTools.info("HDF5 File Saved: {}", filePath);
-      }
+      closeLogFile();
    }
 
    public void collectStatistics()
@@ -494,9 +495,9 @@ public class PerceptionDataLogger
             Group group = hdf5Manager.getGroup(namespace);
 
             byte[] heapArray = byteBuffers.get(namespace);
-            int imageCount = counts.get(namespace);
             IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
 
+            int imageCount = counts.get(namespace);
             counts.put(namespace, imageCount + 1);
 
             imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
@@ -509,6 +510,22 @@ public class PerceptionDataLogger
          }
       });
       long end_store = System.nanoTime();
+   }
+
+   public void storeBytesFromPointer(String namespace, BytePointer bytePointer)
+   {
+      executorService.submit(() ->
+     {
+        synchronized (hdf5Manager)
+        {
+           Group group = hdf5Manager.getGroup(namespace);
+
+           int imageCount = counts.get(namespace);
+           counts.put(namespace, imageCount + 1);
+
+           HDF5Tools.storeBytesFromPointer(group, imageCount, bytePointer, bytePointer.limit());
+        }
+     });
    }
 
    public void storePointCloud(String namespace, LidarScanMessage message)

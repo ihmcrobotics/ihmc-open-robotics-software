@@ -1,4 +1,4 @@
-package us.ihmc.pathPlanning.visibilityGraphs.tools;
+package us.ihmc.perception.tools;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlanarRegionsListCutter
+public class PlanarRegionCuttingTools
 {
    /**
     * Cut a planar region map by a plane in 3D world; keeping the pert "above" the plane. (i.e. In the direction the normal points)
