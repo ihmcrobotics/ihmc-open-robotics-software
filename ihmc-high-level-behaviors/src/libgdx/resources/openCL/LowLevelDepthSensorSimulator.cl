@@ -104,9 +104,21 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
          float zUp3DX = eyeDepth;
          float zUp3DY = -(x - principalOffsetXPixels) / focalLengthPixels * eyeDepth;
          float zUp3DZ = -(y - principalOffsetYPixels) / focalLengthPixels * eyeDepth;
-         float4 worldFramePoint =
-             transform(zUp3DX, zUp3DY, zUp3DZ, translationX, translationY, translationZ, rotationMatrixM00, rotationMatrixM01, rotationMatrixM02,
-                       rotationMatrixM10, rotationMatrixM11, rotationMatrixM12, rotationMatrixM20, rotationMatrixM21, rotationMatrixM22);
+         float4 worldFramePoint = transform(zUp3DX,
+                                            zUp3DY,
+                                            zUp3DZ,
+                                            translationX,
+                                            translationY,
+                                            translationZ,
+                                            rotationMatrixM00,
+                                            rotationMatrixM01,
+                                            rotationMatrixM02,
+                                            rotationMatrixM10,
+                                            rotationMatrixM11,
+                                            rotationMatrixM12,
+                                            rotationMatrixM20,
+                                            rotationMatrixM21,
+                                            rotationMatrixM22);
 
          if (pointColorR < 0.0f)
          {
@@ -125,7 +137,7 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
             pointColorA = (rgba8888Color.w);
          }
 
-         pointCloudRenderingBuffer[pointStartIndex] = worldFramePoint.x;
+         pointCloudRenderingBuffer[pointStartIndex]     = worldFramePoint.x;
          pointCloudRenderingBuffer[pointStartIndex + 1] = worldFramePoint.y;
          pointCloudRenderingBuffer[pointStartIndex + 2] = worldFramePoint.z;
       }

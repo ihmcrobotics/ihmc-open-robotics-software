@@ -1,5 +1,7 @@
-kernel void
-createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t colorRGBImage, global float* pointCloudRenderingBuffer, global float* parameters)
+kernel void createPointCloud(read_only image2d_t depthImageMeters,
+                             read_only image2d_t colorRGBImage,
+                             global float* pointCloudRenderingBuffer,
+                             global float* parameters)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -67,11 +69,24 @@ createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t color
       b = rgba8888Color.z / 255.0;
    }
 
-   float4 worldFramePoint = transform(zUp3DX, zUp3DY, zUp3DZ, translationX, translationY, translationZ, rotationMatrixM00, rotationMatrixM01, rotationMatrixM02,
-                                      rotationMatrixM10, rotationMatrixM11, rotationMatrixM12, rotationMatrixM20, rotationMatrixM21, rotationMatrixM22);
+   float4 worldFramePoint = transform(zUp3DX,
+                                      zUp3DY,
+                                      zUp3DZ,
+                                      translationX,
+                                      translationY,
+                                      translationZ,
+                                      rotationMatrixM00,
+                                      rotationMatrixM01,
+                                      rotationMatrixM02,
+                                      rotationMatrixM10,
+                                      rotationMatrixM11,
+                                      rotationMatrixM12,
+                                      rotationMatrixM20,
+                                      rotationMatrixM21,
+                                      rotationMatrixM22);
 
    int pointStartIndex = (depthImageWidth * y + x) * 8;
-   pointCloudRenderingBuffer[pointStartIndex] = worldFramePoint.x;
+   pointCloudRenderingBuffer[pointStartIndex]     = worldFramePoint.x;
    pointCloudRenderingBuffer[pointStartIndex + 1] = worldFramePoint.y;
    pointCloudRenderingBuffer[pointStartIndex + 2] = worldFramePoint.z;
 
