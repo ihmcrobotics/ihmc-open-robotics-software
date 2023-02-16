@@ -30,6 +30,7 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -38,9 +39,7 @@ import java.util.ArrayList;
 
 public class RDXRapidHeightMapExtractionDemo
 {
-
-   String PERCEPTION_LOG_FILE = "20230117_161540_PerceptionLog.hdf5";
-   String PERCEPTION_LOG_DIRECTORY = System.getProperty("user.home") + "/.ihmc/logs/perception/";
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_PerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private ImGuiPanel navigationPanel;
@@ -103,7 +102,7 @@ public class RDXRapidHeightMapExtractionDemo
          private void createForOuster(int depthHeight, int depthWidth)
          {
             sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
-            perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
+            perceptionDataLoader.openLogFile(perceptionLogFile);
 
             loadedDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
@@ -175,6 +174,7 @@ public class RDXRapidHeightMapExtractionDemo
             rapidHeightMapUpdater.setProcessing(false);
             perceptionDataLoader.destroy();
             openCLManager.destroy();
+            heightMapRenderer.dispose();
             baseUI.dispose();
          }
       });
