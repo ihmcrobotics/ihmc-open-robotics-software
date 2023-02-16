@@ -170,7 +170,9 @@ public class DualBlackflyCamera
                   undistortedImage = new BytedecoImage(postDistortionMat);
 
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  arUcoMarkerDetection.create(undistortedImage, cameraPinholeBrown, cameraFrame);
+                  arUcoMarkerDetection.create(cameraFrame);
+                  arUcoMarkerDetection.setSourceImageForDetection(undistortedImage);
+                  arUcoMarkerDetection.setCameraInstrinsics(cameraPinholeBrown);
                }
 
                syncedRobot.update();
