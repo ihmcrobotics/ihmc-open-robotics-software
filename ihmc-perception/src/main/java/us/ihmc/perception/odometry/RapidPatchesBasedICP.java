@@ -149,8 +149,6 @@ public class RapidPatchesBasedICP
 
          LogTools.debug("Correlation Matrix: " + correl);
 
-         openCLManager.finish();
-
          computeTransform(centroidPrevious, centroidCurrent, correl, transformToPrevious);
          LogTools.debug("Transform: \n" + transformToPrevious);
       }
