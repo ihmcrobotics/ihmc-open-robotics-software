@@ -5,28 +5,33 @@ import us.ihmc.scs2.session.SessionDataExportRequest;
 import us.ihmc.scs2.sharedMemory.tools.SharedMemoryIOTools;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class BasicYovariableExport
 {
-   private final SimulationConstructionSet2 scs2;
-
-   // SCS object to call
+   private SimulationConstructionSet2 scs2;
+   private final ArrayList<String> variableNamesToExport = new ArrayList<>();
 
    // assume scs2 has been cropped already
-   public BasicYovariableExport(SimulationConstructionSet2 scs2) // and list of yovariables
+   public BasicYovariableExport() // and list of yovariables
+   {
+
+   }
+
+   public void setSCSToExport(SimulationConstructionSet2 scs2)
    {
       this.scs2 = scs2;
    }
 
    public void addYoVariableNameToExport(String name)
    {
-      scs2.addSessionDataFilterParameters("Joint torques", v -> v.getName().startsWith("raw_tau_"));
+      variableNamesToExport.add(name);
    }
 
-   // and list of yovariables to export
    public void export(File file)
    {
       SessionDataExportRequest request = new SessionDataExportRequest();
+      request.setVariableFilter(v -> variableNamesToExport.contains(v.getName()));
       request.setFile(file);
       request.setExportRobotDefinitions(false);
       request.setExportTerrainObjectDefinitions(false);
