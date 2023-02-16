@@ -2,11 +2,13 @@ package us.ihmc.perception.opencl;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_mem;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 public class OpenCLRigidBodyTransformParameter
@@ -15,27 +17,49 @@ public class OpenCLRigidBodyTransformParameter
    private final ByteBuffer backingDirectByteBuffer;
    private final FloatBuffer backingDirectFloatBuffer;
    private final FloatPointer bytedecoFloatBufferPointer;
-   private final float[] heapArray = new float[NUMBER_OF_ELEMENTS];
    private _cl_mem openCLBufferObject;
 
    public OpenCLRigidBodyTransformParameter()
    {
-      backingDirectByteBuffer = ByteBuffer.allocateDirect(NUMBER_OF_ELEMENTS * Float.BYTES);
-      backingDirectByteBuffer.order(ByteOrder.nativeOrder());
+      backingDirectByteBuffer = NativeMemoryTools.allocate(NUMBER_OF_ELEMENTS * Float.BYTES);
       backingDirectFloatBuffer = backingDirectByteBuffer.asFloatBuffer();
-      bytedecoFloatBufferPointer = new FloatPointer(this.backingDirectFloatBuffer);
+      bytedecoFloatBufferPointer = new FloatPointer(backingDirectFloatBuffer);
    }
 
-   public void set(RigidBodyTransform rigidBodyTransform)
+   public void setParameter(RigidBodyTransform rigidBodyTransform)
    {
-      rigidBodyTransform.get(heapArray);
-      backingDirectFloatBuffer.put(heapArray);
+      backingDirectFloatBuffer.rewind();
+      Vector3DBasics translation = rigidBodyTransform.getTranslation();
+      backingDirectFloatBuffer.put(translation.getX32());
+      backingDirectFloatBuffer.put(translation.getY32());
+      backingDirectFloatBuffer.put(translation.getZ32());
+      RotationMatrixBasics rotation = rigidBodyTransform.getRotation();
+      backingDirectFloatBuffer.put((float) rotation.getM00());
+      backingDirectFloatBuffer.put((float) rotation.getM01());
+      backingDirectFloatBuffer.put((float) rotation.getM02());
+      backingDirectFloatBuffer.put((float) rotation.getM10());
+      backingDirectFloatBuffer.put((float) rotation.getM11());
+      backingDirectFloatBuffer.put((float) rotation.getM12());
+      backingDirectFloatBuffer.put((float) rotation.getM20());
+      backingDirectFloatBuffer.put((float) rotation.getM21());
+      backingDirectFloatBuffer.put((float) rotation.getM22());
    }
 
-   public void get(RigidBodyTransform rigidBodyTransformToPack)
+   public void getResult(RigidBodyTransform rigidBodyTransformToPack)
    {
-      backingDirectFloatBuffer.get(heapArray);
-      rigidBodyTransformToPack.set(heapArray);
+      backingDirectFloatBuffer.rewind();
+      rigidBodyTransformToPack.getTranslation().set(backingDirectFloatBuffer.get(),
+                                                    backingDirectFloatBuffer.get(),
+                                                    backingDirectFloatBuffer.get());
+      rigidBodyTransformToPack.getRotation().set(backingDirectFloatBuffer.get(),
+                                                 backingDirectFloatBuffer.get(),
+                                                 backingDirectFloatBuffer.get(),
+                                                 backingDirectFloatBuffer.get(),
+                                                 backingDirectFloatBuffer.get(),
+                                                 backingDirectFloatBuffer.get(),
+                                                 backingDirectFloatBuffer.get(),
+                                                 backingDirectFloatBuffer.get(),
+                                                 backingDirectFloatBuffer.get());
    }
 
    public void writeOpenCLBufferObject(OpenCLManager openCLManager)
