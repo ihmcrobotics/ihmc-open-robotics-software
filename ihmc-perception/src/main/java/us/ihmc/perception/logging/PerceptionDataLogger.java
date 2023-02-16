@@ -101,6 +101,12 @@ public class PerceptionDataLogger
       communicationMode = CommunicationMode.INTERPROCESS;
    }
 
+   public void addChannel(String channelName)
+   {
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0));
+      counts.put(channelName, 0);
+   }
+
    public void openLogFile(String logFileName)
    {
       this.filePath = logFileName;
