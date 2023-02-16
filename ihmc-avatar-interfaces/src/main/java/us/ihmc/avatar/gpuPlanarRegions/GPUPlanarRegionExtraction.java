@@ -312,8 +312,6 @@ public class GPUPlanarRegionExtraction
       openCLManager.enqueueReadImage(cyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, cyImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(czImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, czImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, graphImage.getBytedecoByteBufferPointer());
-
-      openCLManager.finish();
    }
 
    public void findRegions(Consumer<RapidPlanarRegionIsland> forDrawingDebugPanel)
