@@ -11,14 +11,9 @@
 #define FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X 4
 #define FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y 5
 
-kernel void imageToPointCloud(global float* parameters,
-                              global float* ousterToWorldTransform,
-                              read_only image2d_t discretizedDepthImage,
-                              int useFisheyeColorImage,
-                              global float* fisheyeParameters,
-                              read_only image2d_t fThetaFisheyeRGBA8Image,
-                              global float* ousterToFisheyeTransform,
-                              global float* pointCloudVertexBuffer)
+kernel void imageToPointCloud(global float *parameters, global float *ousterToWorldTransform, read_only image2d_t discretizedDepthImage,
+                              int useFisheyeColorImage, global float *fisheyeParameters, read_only image2d_t fThetaFisheyeRGBA8Image,
+                              global float *ousterToFisheyeTransform, global float *pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -43,11 +38,7 @@ kernel void imageToPointCloud(global float* parameters,
    float3 rotationMatrixRow1 = (float3) (angledRotationMatrix.s3, angledRotationMatrix.s4, angledRotationMatrix.s5);
    float3 rotationMatrixRow2 = (float3) (angledRotationMatrix.s6, angledRotationMatrix.s7, angledRotationMatrix.s8);
 
-   float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint,
-                                                  rotationMatrixRow0,
-                                                  rotationMatrixRow1,
-                                                  rotationMatrixRow2,
-                                                  origin);
+   float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint, rotationMatrixRow0, rotationMatrixRow1, rotationMatrixRow2, origin);
 
    float3 worldFramePoint = transformPoint3D32(ousterFramePoint, ousterToWorldTransform);
 
@@ -55,13 +46,13 @@ kernel void imageToPointCloud(global float* parameters,
 
    if (eyeDepthInMeters == 0.0f)
    {
-      pointCloudVertexBuffer[pointStartIndex]     = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex] = nan((uint) 0);
       pointCloudVertexBuffer[pointStartIndex + 1] = nan((uint) 0);
       pointCloudVertexBuffer[pointStartIndex + 2] = nan((uint) 0);
    }
    else
    {
-      pointCloudVertexBuffer[pointStartIndex]     = worldFramePoint.x;
+      pointCloudVertexBuffer[pointStartIndex] = worldFramePoint.x;
       pointCloudVertexBuffer[pointStartIndex + 1] = worldFramePoint.y;
       pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }
@@ -89,13 +80,12 @@ kernel void imageToPointCloud(global float* parameters,
          // https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function
          // https://www.ihmc.us/wp-content/uploads/2023/02/equidistant_fisheye_model-1024x957.jpeg
          float azimuthalAngle = atan2(-fisheyeFramePoint.z, -fisheyeFramePoint.y);
-         int fisheyeCol = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X]
-                        + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_X] * angleOfIncidence * cos(azimuthalAngle);
-         int fisheyeRow = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y]
-                        + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y] * angleOfIncidence * sin(azimuthalAngle);
+         int fisheyeCol = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X] +
+                          fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_X] * angleOfIncidence * cos(azimuthalAngle);
+         int fisheyeRow = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y] +
+                          fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y] * angleOfIncidence * sin(azimuthalAngle);
 
-         if (fisheyeCol >= 0 && fisheyeCol < fisheyeParameters[FISHEYE_IMAGE_WIDTH]
-          && fisheyeRow >= 0 && fisheyeRow < fisheyeParameters[FISHEYE_IMAGE_HEIGHT])
+         if (fisheyeCol >= 0 && fisheyeCol < fisheyeParameters[FISHEYE_IMAGE_WIDTH] && fisheyeRow >= 0 && fisheyeRow < fisheyeParameters[FISHEYE_IMAGE_HEIGHT])
          {
             uint4 fisheyeColor = read_imageui(fThetaFisheyeRGBA8Image, (int2) (fisheyeCol, fisheyeRow));
             pointColorR = (fisheyeColor.x / 255.0f);

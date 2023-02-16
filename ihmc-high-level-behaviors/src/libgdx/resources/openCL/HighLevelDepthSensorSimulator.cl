@@ -1,6 +1,4 @@
-kernel void discretizePoints(global float* pointCloudBuffer,
-                             global int* discretizedIntBuffer,
-                             global float* parameters)
+kernel void discretizePoints(global float *pointCloudBuffer, global int *discretizedIntBuffer, global float *parameters)
 {
    int n = get_global_id(0);
 
@@ -23,7 +21,7 @@ kernel void discretizePoints(global float* pointCloudBuffer,
    int discreteZ = (int) round(worldFramePoint.z / discreteResolution);
 
    int pointStartIndex = n * intsPerPoint;
-   discretizedIntBuffer[pointStartIndex]     = discreteX;
+   discretizedIntBuffer[pointStartIndex] = discreteX;
    discretizedIntBuffer[pointStartIndex + 1] = discreteY;
    discretizedIntBuffer[pointStartIndex + 2] = discreteZ;
    discretizedIntBuffer[pointStartIndex + 3] = color;
