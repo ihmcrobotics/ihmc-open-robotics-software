@@ -1,5 +1,5 @@
-kernel void createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t colorRGBImage, global float *pointCloudRenderingBuffer,
-                             global float *parameters)
+kernel void
+createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t colorRGBImage, global float *pointCloudRenderingBuffer, global float *parameters)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);

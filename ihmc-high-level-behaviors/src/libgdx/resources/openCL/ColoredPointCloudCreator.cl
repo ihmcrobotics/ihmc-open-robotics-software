@@ -1,6 +1,6 @@
 // TODO: float vs double in here? pick one, probably double for all the parameters
-kernel void createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t colorRGBAImage, global float *finalPointFloatBuffer,
-                             global float *parameters)
+kernel void
+createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t colorRGBAImage, global float *finalPointFloatBuffer, global float *parameters)
 {
    // for 3 modes of coloring
    enum VIEWMODE

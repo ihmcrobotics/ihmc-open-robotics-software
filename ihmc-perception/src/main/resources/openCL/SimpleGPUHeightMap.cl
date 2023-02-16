@@ -135,8 +135,13 @@ void kernel zeroValuesKernel(global float *params, global int *centroid_data, gl
    counter_data[idx] = 0;
 }
 
-void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global float *localization, global float *params, global float *intrinsics,
-                                     global int *centroid_data, global int *variance_data, global int *counter_data)
+void kernel addPointsFromImageKernel(read_only image2d_t depth_image,
+                                     global float *localization,
+                                     global float *params,
+                                     global float *intrinsics,
+                                     global int *centroid_data,
+                                     global int *variance_data,
+                                     global int *counter_data)
 {
    // recall that the pixels are bottom left, and go width to height
    int image_x = get_global_id(0);
@@ -178,9 +183,15 @@ void kernel addPointsFromImageKernel(read_only image2d_t depth_image, global flo
    }
 }
 
-void kernel averageMapImagesKernel(global int *centroid_buffer, global int *variance_buffer, global int *counter_buffer, global float *params,
-                                   write_only image2d_t centroid_x, write_only image2d_t centroid_y, write_only image2d_t centroid_z,
-                                   write_only image2d_t variance_z, write_only image2d_t counter)
+void kernel averageMapImagesKernel(global int *centroid_buffer,
+                                   global int *variance_buffer,
+                                   global int *counter_buffer,
+                                   global float *params,
+                                   write_only image2d_t centroid_x,
+                                   write_only image2d_t centroid_y,
+                                   write_only image2d_t centroid_z,
+                                   write_only image2d_t variance_z,
+                                   write_only image2d_t counter)
 {
    int idx_x = get_global_id(0);
    int idx_y = get_global_id(1);
@@ -213,8 +224,14 @@ void kernel averageMapImagesKernel(global int *centroid_buffer, global int *vari
    }
 }
 
-void kernel computeNormalsKernel(read_only image2d_t centroid_x, read_only image2d_t centroid_y, read_only image2d_t centroid_z, read_only image2d_t counter,
-                                 global float *params, write_only image2d_t normal_x_mat, write_only image2d_t normal_y_mat, write_only image2d_t normal_z_mat)
+void kernel computeNormalsKernel(read_only image2d_t centroid_x,
+                                 read_only image2d_t centroid_y,
+                                 read_only image2d_t centroid_z,
+                                 read_only image2d_t counter,
+                                 global float *params,
+                                 write_only image2d_t normal_x_mat,
+                                 write_only image2d_t normal_y_mat,
+                                 write_only image2d_t normal_z_mat)
 {
    int idx_x = get_global_id(0);
    int idx_y = get_global_id(1);
