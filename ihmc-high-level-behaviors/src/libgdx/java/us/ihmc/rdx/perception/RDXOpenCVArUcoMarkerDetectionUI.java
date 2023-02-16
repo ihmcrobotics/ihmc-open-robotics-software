@@ -17,6 +17,7 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
 import us.ihmc.perception.BytedecoImage;
@@ -28,12 +29,10 @@ import java.util.ArrayList;
 public class RDXOpenCVArUcoMarkerDetectionUI
 {
    private final String namePostfix;
-   private int imageWidth;
-   private int imageHeight;
    private ReferenceFrame cameraFrame;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private BytedecoImage imageForDrawing;
-   private RDXBytedecoImagePanel markerImagePanel;
+   private RDXMatImagePanel markerImagePanel;
    private final ImGuiPanel mainPanel;
    private Scalar idColor;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -64,10 +63,15 @@ public class RDXOpenCVArUcoMarkerDetectionUI
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImPlotDoublePlotLine restOfStuffPlotLine = new ImPlotDoublePlotLine("Other stuff");
 
+   public RDXOpenCVArUcoMarkerDetectionUI()
+   {
+      this("");
+   }
+
    public RDXOpenCVArUcoMarkerDetectionUI(String namePostfix)
    {
       this.namePostfix = namePostfix;
-      mainPanel = new ImGuiPanel("ArUco Marker Detection " + namePostfix, this::renderImGuiWidgets);
+      mainPanel = new ImGuiPanel("ArUco Marker Detection" + namePostfix, this::renderImGuiWidgets);
    }
 
    public void create(OpenCVArUcoMarkerDetection arUcoMarkerDetection, ArrayList<OpenCVArUcoMarker> markersToTrack, ReferenceFrame cameraFrame)
@@ -76,11 +80,9 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       this.markersToTrack = markersToTrack;
       this.cameraFrame = cameraFrame;
 
-      imageWidth = arUcoMarkerDetection.getImageWidth();
-      imageHeight = arUcoMarkerDetection.getImageHeight();
-      imageForDrawing = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+      imageForDrawing = new BytedecoImage(100, 100, opencv_core.CV_8UC3);
       boolean flipY = false;
-      markerImagePanel = new RDXBytedecoImagePanel("ArUco Marker Detection Image " + namePostfix, imageWidth, imageHeight, flipY);
+      markerImagePanel = new RDXMatImagePanel("ArUco Marker Detection Image" + namePostfix, 100, 100, flipY);
       mainPanel.addChild(markerImagePanel.getImagePanel());
 
       adaptiveThresholdWindowSizeMin.set(arUcoMarkerDetection.getDetectorParameters().adaptiveThreshWinSizeMin());
@@ -122,14 +124,17 @@ public class RDXOpenCVArUcoMarkerDetectionUI
 
          if (markerImagePanel.getImagePanel().getIsShowing().get())
          {
-            arUcoMarkerDetection.getCopyOfSourceRGBImage(imageForDrawing.getBytedecoOpenCVMat());
+            arUcoMarkerDetection.getCopyOfSourceRGBImage(imageForDrawing);
 
             arUcoMarkerDetection.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
             arUcoMarkerDetection.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());
 
-            opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(), markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+            markerImagePanel.resize(imageForDrawing.getImageWidth(), imageForDrawing.getImageHeight());
+            opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(),
+                                    markerImagePanel.getImage(),
+                                    opencv_imgproc.COLOR_RGB2RGBA);
 
-            markerImagePanel.draw();
+            markerImagePanel.display();
          }
 
          if (showGraphics.get())
@@ -156,7 +161,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
          arUcoMarkerDetection.setEnabled(detectionEnabled.get());
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
-      ImGui.text("Image width: " + imageWidth + " height: " + imageHeight);
+      ImGui.text("Image width: " + imageForDrawing.getImageWidth() + " height: " + imageForDrawing.getImageHeight());
       detectionDurationPlot.render();
       ImGui.text("Detected ArUco Markers:");
       arUcoMarkerDetection.forEachDetectedID(id -> ImGui.text("ID: " + id));
@@ -260,8 +265,8 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       return mainPanel;
    }
 
-   public RDXBytedecoImagePanel getMarkerImagePanel()
+   public RDXImagePanel getMarkerImagePanel()
    {
-      return markerImagePanel;
+      return markerImagePanel.getImagePanel();
    }
 }
