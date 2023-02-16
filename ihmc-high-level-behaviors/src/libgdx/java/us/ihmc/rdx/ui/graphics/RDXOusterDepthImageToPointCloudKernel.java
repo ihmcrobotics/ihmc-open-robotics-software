@@ -99,7 +99,7 @@ public class RDXOusterDepthImageToPointCloudKernel
       floatParameters.setParameter(depthImage.getImageWidth());
       floatParameters.setParameter(depthImage.getImageHeight());
       floatParameters.setParameter(pointSize);
-      ousterToWorldTransformParameter.set(ousterToWorldTransform);
+      ousterToWorldTransformParameter.setParameter(ousterToWorldTransform);
 
       useFisheyeColorImageParameter.setParameter(useFisheyeColorImage);
 
@@ -109,7 +109,7 @@ public class RDXOusterDepthImageToPointCloudKernel
       fisheyeFloatParameters.setParameter((float) fisheyeFocalLengthPixelsY);
       fisheyeFloatParameters.setParameter((float) fisheyePrincipalPointPixelsX);
       fisheyeFloatParameters.setParameter((float) fisheyePrincipalPointPixelsY);
-      ousterToFisheyeTransformParameter.set(ousterToFisheyeTransform);
+      ousterToFisheyeTransformParameter.setParameter(ousterToFisheyeTransform);
 
       floatParameters.writeOpenCLBufferObject(openCLManager);
       ousterToWorldTransformParameter.writeOpenCLBufferObject(openCLManager);
