@@ -115,6 +115,8 @@ public class HandWrenchCalculator
                jointTorques.get(side)[i] = oneSideArmJoints.get(i).getTau() - jointTorquesForGravity[i];
             }
 
+            // need to call rest to update the joint configurations in the jacobian calculator.
+            jacobianCalculators.get(side).reset();
             // getJacobianMatrix updates the matrix and outputs in the form of DMatrixRMaj
             DMatrixRMaj armJacobian = jacobianCalculators.get(side).getJacobianMatrix();
             DMatrixRMaj armJacobianTransposed = CommonOps_DDRM.transpose(armJacobian, null);
