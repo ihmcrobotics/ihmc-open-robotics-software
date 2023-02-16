@@ -37,13 +37,22 @@ public class HandWrenchCalculator
    private SideDependentList<AlphaFilteredYoSpatialVector> alphaFilteredYoSpatialVectors = new SideDependentList<>();
    // RobotConfigurationData is published at 120Hz -> break freq.: 5Hz - 20Hz
    private static final double ALPHA_FILTER = 0.5;
-   private final Notification receivedRCDNotification = new Notification();
+   private final Notification receivedRCDNotification;
    private SideDependentList<List<JointReadOnly>> jointsFromBaseToEndEffector = new SideDependentList<>();
 
+   public HandWrenchCalculator(FullHumanoidRobotModel fullRobotModel)
+   {
+      this(fullRobotModel, null);
+   }
    public HandWrenchCalculator(ROS2SyncedRobotModel syncedRobot)
    {
-      FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
+      this(syncedRobot.getFullRobotModel(), new Notification());
+
       syncedRobot.addRobotConfigurationDataReceivedCallback(receivedRCDNotification::set);
+   }
+   private HandWrenchCalculator(FullHumanoidRobotModel fullRobotModel, Notification receivedRCDNotification)
+   {
+      this.receivedRCDNotification = receivedRCDNotification;
 
       for (RobotSide side : RobotSide.values)
       {
@@ -93,7 +102,7 @@ public class HandWrenchCalculator
       // TODO: only compute / update when new RCD received. (try to match the frequency or maybe update at lower frequency)
       //  Check this
 
-      if (receivedRCDNotification.poll() || ! receivedRCDNotification.poll())
+      if (receivedRCDNotification == null || receivedRCDNotification.poll() )
       {
          for (RobotSide side : RobotSide.values)
          {
