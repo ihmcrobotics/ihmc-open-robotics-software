@@ -11,6 +11,7 @@ import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLBooleanParameter;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
+import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 
 public class RDXOusterDepthImageToPointCloudKernel
@@ -23,8 +24,8 @@ public class RDXOusterDepthImageToPointCloudKernel
    private final OpenCLFloatParameters floatParameters = new OpenCLFloatParameters();
    private final OpenCLFloatParameters fisheyeFloatParameters = new OpenCLFloatParameters();
    private final OpenCLBooleanParameter useFisheyeColorImageParameter = new OpenCLBooleanParameter();
-   private final OpenCLFloatParameters ousterToWorldTransformParameter = new OpenCLFloatParameters();
-   private final OpenCLFloatParameters ousterToFisheyeTransformParameter = new OpenCLFloatParameters();
+   private final OpenCLRigidBodyTransformParameter ousterToWorldTransformParameter = new OpenCLRigidBodyTransformParameter();
+   private final OpenCLRigidBodyTransformParameter ousterToFisheyeTransformParameter = new OpenCLRigidBodyTransformParameter();
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private final RigidBodyTransform ousterToWorldTransform = new RigidBodyTransform();
    private BytedecoImage fisheyeImage;
