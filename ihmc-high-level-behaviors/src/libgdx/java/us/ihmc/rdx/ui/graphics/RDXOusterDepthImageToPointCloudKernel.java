@@ -28,6 +28,8 @@ public class RDXOusterDepthImageToPointCloudKernel
    private final OpenCLRigidBodyTransformParameter ousterToFisheyeTransformParameter = new OpenCLRigidBodyTransformParameter();
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private final RigidBodyTransform ousterToWorldTransform = new RigidBodyTransform();
+   private int pointsToAddAboveAndBelowForColorDetail;
+   private int heightWithVerticalPointsForColorDetail;
    private BytedecoImage fisheyeImage;
    private final RigidBodyTransform ousterToFisheyeTransform = new RigidBodyTransform();
    private double fisheyeFocalLengthPixelsX;
@@ -39,25 +41,39 @@ public class RDXOusterDepthImageToPointCloudKernel
    {
       depthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
       depthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      initialize(pointCloudRenderer, openCLManager);
+      initialize(pointCloudRenderer, openCLManager, 0, depthHeight);
    }
 
    public RDXOusterDepthImageToPointCloudKernel(RDXPointCloudRenderer pointCloudRenderer, OpenCLManager openCLManager, BytedecoImage depthImage)
    {
       this.depthImage = depthImage;
-      initialize(pointCloudRenderer, openCLManager);
+      initialize(pointCloudRenderer, openCLManager, 0, depthImage.getImageHeight());
    }
 
-   private void initialize(RDXPointCloudRenderer pointCloudRenderer, OpenCLManager openCLManager)
+   public RDXOusterDepthImageToPointCloudKernel(RDXPointCloudRenderer pointCloudRenderer,
+                                                OpenCLManager openCLManager,
+                                                BytedecoImage depthImage,
+                                                int pointsToAddAboveAndBelowForColorDetail,
+                                                int heightWithVerticalPointsForColorDetail)
+   {
+      this.depthImage = depthImage;
+      initialize(pointCloudRenderer, openCLManager, pointsToAddAboveAndBelowForColorDetail, heightWithVerticalPointsForColorDetail);
+   }
+
+   private void initialize(RDXPointCloudRenderer pointCloudRenderer,
+                           OpenCLManager openCLManager,
+                           int pointsToAddAboveAndBelowForColorDetail,
+                           int heightWithVerticalPointsForColorDetail)
    {
       this.pointCloudRenderer = pointCloudRenderer;
       this.openCLManager = openCLManager;
+      this.pointsToAddAboveAndBelowForColorDetail = pointsToAddAboveAndBelowForColorDetail;
+      this.heightWithVerticalPointsForColorDetail = heightWithVerticalPointsForColorDetail;
 
       openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer", "PerceptionCommon.cl");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
 
-      int totalNumberOfPoints = depthImage.getImageWidth() * depthImage.getImageHeight();
-      pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
+      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointCloudRenderer.getMaxPoints() * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
                                                      pointCloudRenderer.getVertexBuffer());
       pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
 
@@ -99,6 +115,7 @@ public class RDXOusterDepthImageToPointCloudKernel
       floatParameters.setParameter(depthImage.getImageWidth());
       floatParameters.setParameter(depthImage.getImageHeight());
       floatParameters.setParameter(pointSize);
+      floatParameters.setParameter((float) pointsToAddAboveAndBelowForColorDetail);
       ousterToWorldTransformParameter.setParameter(ousterToWorldTransform);
 
       useFisheyeColorImageParameter.setParameter(useFisheyeColorImage);
@@ -129,7 +146,7 @@ public class RDXOusterDepthImageToPointCloudKernel
       openCLManager.setKernelArgument(unpackPointCloudKernel, 5, fisheyeImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(unpackPointCloudKernel, 6, ousterToFisheyeTransformParameter.getOpenCLBufferObject());
       openCLManager.setKernelArgument(unpackPointCloudKernel, 7, pointCloudVertexBuffer.getOpenCLBufferObject());
-      openCLManager.execute2D(unpackPointCloudKernel, depthImage.getImageWidth(), depthImage.getImageHeight());
+      openCLManager.execute2D(unpackPointCloudKernel, depthImage.getImageWidth(), heightWithVerticalPointsForColorDetail);
       pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
 
       pointCloudRenderer.updateMeshFastestAfterKernel();

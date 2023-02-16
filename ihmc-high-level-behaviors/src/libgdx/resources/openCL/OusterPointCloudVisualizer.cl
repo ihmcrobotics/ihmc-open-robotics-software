@@ -3,6 +3,7 @@
 #define DEPTH_IMAGE_WIDTH 2
 #define DEPTH_IMAGE_HEIGHT 3
 #define POINT_SIZE 4
+#define POINTS_TO_ADD_ABOVE_AND_BELOW_FOR_COLOR_DETAIL 5
 
 #define FISHEYE_IMAGE_WIDTH 0
 #define FISHEYE_IMAGE_HEIGHT 1
@@ -23,11 +24,15 @@ kernel void imageToPointCloud(global float* parameters,
    int x = get_global_id(0);
    int y = get_global_id(1);
 
+   int pointsToAddAboveAndBelowForColorDetail = parameters[POINTS_TO_ADD_ABOVE_AND_BELOW_FOR_COLOR_DETAIL];
+   int totalVerticalPointsForColorDetail = 1 + 2 * pointsToAddAboveAndBelowForColorDetail;
+   int ousterY = y / totalVerticalPointsForColorDetail;
+
    float discreteResolution = 0.001f;
-   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, y)).x * discreteResolution;
+   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, ousterY)).x * discreteResolution;
 
    int xFromCenter = -x - (parameters[DEPTH_IMAGE_WIDTH] / 2); // flip
-   int yFromCenter = y - (parameters[DEPTH_IMAGE_HEIGHT] / 2);
+   int yFromCenter = ousterY - (parameters[DEPTH_IMAGE_HEIGHT] / 2);
 
    float angleXFromCenter = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * parameters[HORIZONTAL_FIELD_OF_VIEW];
    float angleYFromCenter = yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * parameters[VERTICAL_FIELD_OF_VIEW];
@@ -48,6 +53,17 @@ kernel void imageToPointCloud(global float* parameters,
                                                   rotationMatrixRow1,
                                                   rotationMatrixRow2,
                                                   origin);
+
+   float pointSize = parameters[POINT_SIZE] * eyeDepthInMeters;
+   int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - pointsToAddAboveAndBelowForColorDetail;
+   float verticalPointOffsetLocalZ = verticalColorDetailOffsetIndex * pointSize / 2.0f;
+   float3 colorDetailPointOffsetLocalFrame = (float3) (0.0, 0.0, verticalPointOffsetLocalZ);
+   float3 colorDetailPointOffset = transformPoint3D32_2(colorDetailPointOffsetLocalFrame,
+                                                        rotationMatrixRow0,
+                                                        rotationMatrixRow1,
+                                                        rotationMatrixRow2,
+                                                        origin);
+   ousterFramePoint += colorDetailPointOffset;
 
    float3 worldFramePoint = transformPoint3D32(ousterFramePoint, ousterToWorldTransform);
 
@@ -121,8 +137,6 @@ kernel void imageToPointCloud(global float* parameters,
       pointColorB = (rgba8888Color.z);
       pointColorA = (rgba8888Color.w);
    }
-
-   float pointSize = parameters[POINT_SIZE] * eyeDepthInMeters;
 
    pointCloudVertexBuffer[pointStartIndex + 3] = pointColorR;
    pointCloudVertexBuffer[pointStartIndex + 4] = pointColorG;
