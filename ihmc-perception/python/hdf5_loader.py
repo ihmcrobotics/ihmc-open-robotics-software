@@ -29,10 +29,12 @@ def get_data(data, namespace):
 
 if __name__ == '__main__':
 
-    path = '/home/bmishra/Workspace/Data/Sensor_Logs/Depth/Good/'
+    path = '/home/quantum/.ihmc/logs/perception/'
 
-    files = os.listdir(path)
-    files = sorted(files)
+#     files = os.listdir(path)
+#     files = sorted(files)
+
+    files = ['20230216_140029_PerceptionLog.hdf5']
 
     # good_files = [files[i] for i in [7, 8, 9, 14, 20, 22]]
 
@@ -42,15 +44,15 @@ if __name__ == '__main__':
     # Good logs
     # [7, 8, 9, 14, 20, 22]
 
-    data = h5py.File(path + files[1], 'r')
+    data = h5py.File(path + files[0], 'r')
 
-    position_data = get_data(data, '/l515/sensor/position/')
-
-
-
-    print(position_data.shape)
-
-    print(position_data)
+    # position_data = get_data(data, '/l515/sensor/position/')
+    #
+    #
+    #
+    # print(position_data.shape)
+    #
+    # print(position_data)
 
 
     for i in range(len(data['/l515/depth/'].keys())):

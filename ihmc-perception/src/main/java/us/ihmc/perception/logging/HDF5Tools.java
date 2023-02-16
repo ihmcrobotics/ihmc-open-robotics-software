@@ -371,7 +371,7 @@ public class HDF5Tools
       byte[] byteArray = new byte[size];
 
       BytePointer bytePointer = new BytePointer(byteArray);
-      dataset.read(bytePointer, new DataType(PredType.NATIVE_UCHAR()));
+      dataset.read(bytePointer, new DataType(PredType.NATIVE_B8()));
       bytePointer.get(byteArray, 0, byteArray.length);
 
       return byteArray;
