@@ -1,5 +1,6 @@
 package us.ihmc.perception.tools;
 
+import boofcv.struct.calib.CameraPinhole;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
@@ -8,7 +9,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -165,22 +165,36 @@ public class PerceptionMessageTools
       return pointCloud;
    }
 
-   public static void setDepthExtrinsicsFromRealsense(BytedecoRealsense sensor, IntrinsicParametersMessage intrinsicParametersMessage)
+   public static void setDepthExtrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessage)
    {
-      intrinsicParametersMessage.setFx(sensor.getDepthFocalLengthPixelsX());
-      intrinsicParametersMessage.setFy(sensor.getDepthFocalLengthPixelsY());
-      intrinsicParametersMessage.setSkew(0.0);
-      intrinsicParametersMessage.setCx(sensor.getDepthPrincipalOffsetXPixels());
-      intrinsicParametersMessage.setCy(sensor.getDepthPrincipalOffsetYPixels());
+      imageMessage.setFocalLengthXPixels((float) sensor.getDepthFocalLengthPixelsX());
+      imageMessage.setFocalLengthYPixels((float) sensor.getDepthFocalLengthPixelsY());
+      imageMessage.setPrincipalPointXPixels((float) sensor.getDepthPrincipalOffsetXPixels());
+      imageMessage.setPrincipalPointYPixels((float) sensor.getDepthPrincipalOffsetYPixels());
    }
 
-   public static void setColorExtrinsicsFromRealsense(BytedecoRealsense sensor, IntrinsicParametersMessage intrinsicParametersMessage)
+   public static void setColorExtrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessage)
    {
-      intrinsicParametersMessage.setFx(sensor.getColorFocalLengthPixelsX());
-      intrinsicParametersMessage.setFy(sensor.getColorFocalLengthPixelsY());
-      intrinsicParametersMessage.setSkew(0.0);
-      intrinsicParametersMessage.setCx(sensor.getColorPrincipalOffsetXPixels());
-      intrinsicParametersMessage.setCy(sensor.getColorPrincipalOffsetYPixels());
+      imageMessage.setFocalLengthXPixels((float) sensor.getColorFocalLengthPixelsX());
+      imageMessage.setFocalLengthYPixels((float) sensor.getColorFocalLengthPixelsY());
+      imageMessage.setPrincipalPointXPixels((float) sensor.getColorPrincipalOffsetXPixels());
+      imageMessage.setPrincipalPointYPixels((float) sensor.getColorPrincipalOffsetYPixels());
+   }
+
+   public static void toMessage(CameraPinhole cameraPinhole, ImageMessage imageMessage)
+   {
+      imageMessage.setFocalLengthXPixels((float) cameraPinhole.getFx());
+      imageMessage.setFocalLengthYPixels((float) cameraPinhole.getFy());
+      imageMessage.setPrincipalPointXPixels((float) cameraPinhole.getCx());
+      imageMessage.setPrincipalPointYPixels((float) cameraPinhole.getCy());
+   }
+
+   public static void toBoofCV(ImageMessage imageMessage, CameraPinhole cameraPinhole)
+   {
+      cameraPinhole.setFx(imageMessage.getFocalLengthXPixels());
+      cameraPinhole.setFy(imageMessage.getFocalLengthYPixels());
+      cameraPinhole.setCx(imageMessage.getPrincipalPointXPixels());
+      cameraPinhole.setCy(imageMessage.getPrincipalPointYPixels());
    }
 
    public static void publishPNGCompressedDepthImage(Mat depth16UC1Image,

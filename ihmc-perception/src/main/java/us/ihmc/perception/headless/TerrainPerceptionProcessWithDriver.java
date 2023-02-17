@@ -169,8 +169,8 @@ public class TerrainPerceptionProcessWithDriver
                depthBytedecoImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
                color8UC3Image = new Mat(colorHeight, colorWidth, opencv_core.CV_8UC3, colorFrameData);
 
-               PerceptionMessageTools.setDepthExtrinsicsFromRealsense(sensor, depthImageMessage.getIntrinsicParameters());
-               PerceptionMessageTools.setColorExtrinsicsFromRealsense(sensor, colorImageMessage.getIntrinsicParameters());
+               PerceptionMessageTools.setDepthExtrinsicsFromRealsense(sensor, depthImageMessage);
+               PerceptionMessageTools.setColorExtrinsicsFromRealsense(sensor, colorImageMessage);
 
                // Important not to store as a field, as update() needs to be called each frame
                ReferenceFrame cameraFrame = sensorFrameUpdater.get();

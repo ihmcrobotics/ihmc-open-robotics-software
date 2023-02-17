@@ -17,10 +17,13 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
+import us.ihmc.perception.opencl.OpenCLFloatParameters;
+import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 import us.ihmc.perception.tools.NativeMemoryTools;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -41,11 +44,6 @@ import java.nio.ByteBuffer;
 
 public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements RenderableProvider
 {
-   private final static int TOTAL_NUMBER_OF_PARAMETERS = 24;
-
-   private final static int FLOATS_PER_POINT = 8;
-   private final static int BYTES_PER_POINT = FLOATS_PER_POINT * 4;
-
    private final float FOCAL_LENGTH_COLOR = 0.00254f;
    private final float CMOS_WIDTH_COLOR = 0.0036894f;
    private final float CMOS_HEIGHT_COLOR = 0.0020753f;
@@ -91,13 +89,14 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private float depthToMetersScalar = 2.500000118743628E-4f;
    private int totalNumberOfPoints = 0;
 
-   private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer finalColoredDepthBuffer;
    private _cl_program openCLProgram;
    private _cl_kernel createPointCloudKernel;
 
-   private OpenCLFloatBuffer parametersBuffer;
+   private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
+   private final OpenCLRigidBodyTransformParameter sensorTransformToWorldParameter = new OpenCLRigidBodyTransformParameter();
+   private final RotationMatrix sensorRotationMatrixToWorld = new RotationMatrix();
    private Mat yuv1420Image;
    private BytedecoImage color8UC3Image;
    private BytedecoImage color8UC4Image;
@@ -112,7 +111,6 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private int depthHeight;
    private int colorWidth;
    private int colorHeight;
-   private int totalColorPixels;
 
    public RDXROS2ColoredDepthVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic)
    {
@@ -161,9 +159,6 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
       openCLManager = new OpenCLManager();
       openCLProgram = openCLManager.loadProgram("ColoredPointCloudCreator", "PerceptionCommon.cl");
       createPointCloudKernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
-
-      parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUMBER_OF_PARAMETERS);
-      parametersBuffer.createOpenCLBufferObject(openCLManager);
    }
 
    @Override
@@ -186,10 +181,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
                depthDecompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
 
                // Set the depth camera intrinsics
-               depthCameraInstrinsics.setCx(depthImageMessage.getIntrinsicParameters().getCx());
-               depthCameraInstrinsics.setCy(depthImageMessage.getIntrinsicParameters().getCy());
-               depthCameraInstrinsics.setFx(depthImageMessage.getIntrinsicParameters().getFx());
-               depthCameraInstrinsics.setFy(depthImageMessage.getIntrinsicParameters().getFy());
+               PerceptionMessageTools.toBoofCV(depthImageMessage, depthCameraInstrinsics);
 
                // Create OpenCV mat for depth image
                depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
@@ -202,7 +194,8 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
                {
                   finalColoredDepthBuffer.destroy(openCLManager);
                }
-               finalColoredDepthBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * FLOATS_PER_POINT, pointCloudRenderer.getVertexBuffer());
+               finalColoredDepthBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
+                                                               pointCloudRenderer.getVertexBuffer());
                finalColoredDepthBuffer.createOpenCLBufferObject(openCLManager);
 
                // Create OpenCV mat for depth image in meters. This is an OpenCL-mapped buffer which is uploaded to the OpenCL kernel.
@@ -242,7 +235,6 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
             {
                colorWidth = colorImageMessage.getImageWidth();
                colorHeight = colorImageMessage.getImageHeight();
-               totalColorPixels = colorHeight * colorWidth;
 
                colorDecompressionInputBuffer = NativeMemoryTools.allocate(colorWidth * colorHeight * 3);
                colorDecompressionInputBytePointer = new BytePointer(colorDecompressionInputBuffer);
@@ -253,10 +245,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
                color8UC4Image = new BytedecoImage(colorWidth, colorHeight, opencv_core.CV_8UC4);
                color8UC4Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
-               colorCameraInstrinsics.setCx(colorImageMessage.getIntrinsicParameters().getCx());
-               colorCameraInstrinsics.setCy(colorImageMessage.getIntrinsicParameters().getCy());
-               colorCameraInstrinsics.setFx(colorImageMessage.getIntrinsicParameters().getFx());
-               colorCameraInstrinsics.setFy(colorImageMessage.getIntrinsicParameters().getFy());
+               PerceptionMessageTools.toBoofCV(colorImageMessage, colorCameraInstrinsics);
 
                colorInitialized = true;
             }
@@ -283,8 +272,9 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
             // Put the depth image into OpenCL buffer
             opencv_imgproc.cvtColor(color8UC3Image.getBytedecoOpenCVMat(), color8UC4Image.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
 
-            sensorTransformToWorld.getTranslation().set(colorImageMessage.getPosition());
-            sensorTransformToWorld.getRotation().set(colorImageMessage.getOrientation());
+            sensorRotationMatrixToWorld.set(colorImageMessage.getOrientation());
+            sensorTransformToWorldParameter.setTranslation(colorImageMessage.getPosition());
+            sensorTransformToWorldParameter.setRotationMatrix(sensorRotationMatrixToWorld);
 
             depthMessageSizeReadout.update(depthImageMessage.getData().size());
             colorMessageSizeReadout.update(colorImageMessage.getData().size());
@@ -300,31 +290,30 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
          }
 
          // If both depth and color images are available, configure the OpenCL kernel and run it, to generate the point cloud float buffer.
-         parametersBuffer.getBytedecoFloatBufferPointer().put(0, FOCAL_LENGTH_COLOR);
-         parametersBuffer.getBytedecoFloatBufferPointer().put(1, CMOS_WIDTH_COLOR);
-         parametersBuffer.getBytedecoFloatBufferPointer().put(2, CMOS_HEIGHT_COLOR);
-         parametersBuffer.getBytedecoFloatBufferPointer().put(3, sensorTransformToWorld.getTranslation().getX32());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(4, sensorTransformToWorld.getTranslation().getY32());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(5, sensorTransformToWorld.getTranslation().getZ32());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) sensorTransformToWorld.getRotation().getM00());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) sensorTransformToWorld.getRotation().getM01());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(8, (float) sensorTransformToWorld.getRotation().getM02());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(9, (float) sensorTransformToWorld.getRotation().getM10());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(10, (float) sensorTransformToWorld.getRotation().getM11());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(11, (float) sensorTransformToWorld.getRotation().getM12());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(12, (float) sensorTransformToWorld.getRotation().getM20());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(13, (float) sensorTransformToWorld.getRotation().getM21());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(14, (float) sensorTransformToWorld.getRotation().getM22());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(15, (float) depthCameraInstrinsics.getCx());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(16, (float) depthCameraInstrinsics.getCy());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(17, (float) depthCameraInstrinsics.getFx());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(18, (float) depthCameraInstrinsics.getFy());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(19, (float) depth32FC1Image.getImageWidth());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(20, (float) depth32FC1Image.getImageHeight());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(21, (float) color8UC4Image.getImageWidth());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(22, (float) color8UC4Image.getImageHeight());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(23, (float) (sinusoidalPatternEnabled ? 1.0f : 0.0f));
-         // Update TOTAL_NUMBER_OF_POINTS in the static constants if adding more parameters here.
+         parametersBuffer.setParameter(FOCAL_LENGTH_COLOR);
+         parametersBuffer.setParameter(CMOS_WIDTH_COLOR);
+         parametersBuffer.setParameter(CMOS_HEIGHT_COLOR);
+         parametersBuffer.setParameter(sensorTransformToWorld.getTranslation().getX32());
+         parametersBuffer.setParameter(sensorTransformToWorld.getTranslation().getY32());
+         parametersBuffer.setParameter(sensorTransformToWorld.getTranslation().getZ32());
+         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM00());
+         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM01());
+         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM02());
+         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM10());
+         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM11());
+         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM12());
+         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM20());
+         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM21());
+         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM22());
+         parametersBuffer.setParameter((float) depthCameraInstrinsics.getCx());
+         parametersBuffer.setParameter((float) depthCameraInstrinsics.getCy());
+         parametersBuffer.setParameter((float) depthCameraInstrinsics.getFx());
+         parametersBuffer.setParameter((float) depthCameraInstrinsics.getFy());
+         parametersBuffer.setParameter((float) depth32FC1Image.getImageWidth());
+         parametersBuffer.setParameter((float) depth32FC1Image.getImageHeight());
+         parametersBuffer.setParameter((float) color8UC4Image.getImageWidth());
+         parametersBuffer.setParameter((float) color8UC4Image.getImageHeight());
+         parametersBuffer.setParameter(sinusoidalPatternEnabled ? 1.0f : 0.0f);
 
          // Upload the buffers to the OpenCL device (GPU)
          depth32FC1Image.writeOpenCLImage(openCLManager);

@@ -23,5 +23,20 @@ geometry_msgs/Point position
 # Orientation of the focal point at sensor data aquisition
 geometry_msgs/Quaternion orientation
 
-# Intrinsic parameters for frustum camera models
-IntrinsicParametersMessage intrinsic_parameters
+# Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
+bool is_pinhole_camera_model
+
+# Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
+bool is_equidistant_fisheye_camera_model
+
+# Horizontal focal length in units of pixels (Fx)
+float32 focal_length_x_pixels
+
+# Vertical focal length in units of pixels (Fx)
+float32 focal_length_y_pixels
+
+# Principal point X in units of pixels (Cx)
+float32 principal_point_x_pixels
+
+# Principal point Y in units of pixels (Cy)
+float32 principal_point_y_pixels

@@ -45,9 +45,29 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    /**
-            * Intrinsic parameters for frustum camera models
+            * Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
             */
-   public perception_msgs.msg.dds.IntrinsicParametersMessage intrinsic_parameters_;
+   public boolean is_pinhole_camera_model_;
+   /**
+            * Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
+            */
+   public boolean is_equidistant_fisheye_camera_model_;
+   /**
+            * Horizontal focal length in units of pixels (Fx)
+            */
+   public float focal_length_x_pixels_;
+   /**
+            * Vertical focal length in units of pixels (Fx)
+            */
+   public float focal_length_y_pixels_;
+   /**
+            * Principal point X in units of pixels (Cx)
+            */
+   public float principal_point_x_pixels_;
+   /**
+            * Principal point Y in units of pixels (Cy)
+            */
+   public float principal_point_y_pixels_;
 
    public ImageMessage()
    {
@@ -56,7 +76,6 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      intrinsic_parameters_ = new perception_msgs.msg.dds.IntrinsicParametersMessage();
    }
 
    public ImageMessage(ImageMessage other)
@@ -79,7 +98,18 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
-      perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.staticCopy(other.intrinsic_parameters_, intrinsic_parameters_);
+      is_pinhole_camera_model_ = other.is_pinhole_camera_model_;
+
+      is_equidistant_fisheye_camera_model_ = other.is_equidistant_fisheye_camera_model_;
+
+      focal_length_x_pixels_ = other.focal_length_x_pixels_;
+
+      focal_length_y_pixels_ = other.focal_length_y_pixels_;
+
+      principal_point_x_pixels_ = other.principal_point_x_pixels_;
+
+      principal_point_y_pixels_ = other.principal_point_y_pixels_;
+
    }
 
    /**
@@ -178,13 +208,94 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       return orientation_;
    }
 
+   /**
+            * Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
+            */
+   public void setIsPinholeCameraModel(boolean is_pinhole_camera_model)
+   {
+      is_pinhole_camera_model_ = is_pinhole_camera_model;
+   }
+   /**
+            * Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
+            */
+   public boolean getIsPinholeCameraModel()
+   {
+      return is_pinhole_camera_model_;
+   }
 
    /**
-            * Intrinsic parameters for frustum camera models
+            * Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
             */
-   public perception_msgs.msg.dds.IntrinsicParametersMessage getIntrinsicParameters()
+   public void setIsEquidistantFisheyeCameraModel(boolean is_equidistant_fisheye_camera_model)
    {
-      return intrinsic_parameters_;
+      is_equidistant_fisheye_camera_model_ = is_equidistant_fisheye_camera_model;
+   }
+   /**
+            * Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
+            */
+   public boolean getIsEquidistantFisheyeCameraModel()
+   {
+      return is_equidistant_fisheye_camera_model_;
+   }
+
+   /**
+            * Horizontal focal length in units of pixels (Fx)
+            */
+   public void setFocalLengthXPixels(float focal_length_x_pixels)
+   {
+      focal_length_x_pixels_ = focal_length_x_pixels;
+   }
+   /**
+            * Horizontal focal length in units of pixels (Fx)
+            */
+   public float getFocalLengthXPixels()
+   {
+      return focal_length_x_pixels_;
+   }
+
+   /**
+            * Vertical focal length in units of pixels (Fx)
+            */
+   public void setFocalLengthYPixels(float focal_length_y_pixels)
+   {
+      focal_length_y_pixels_ = focal_length_y_pixels;
+   }
+   /**
+            * Vertical focal length in units of pixels (Fx)
+            */
+   public float getFocalLengthYPixels()
+   {
+      return focal_length_y_pixels_;
+   }
+
+   /**
+            * Principal point X in units of pixels (Cx)
+            */
+   public void setPrincipalPointXPixels(float principal_point_x_pixels)
+   {
+      principal_point_x_pixels_ = principal_point_x_pixels;
+   }
+   /**
+            * Principal point X in units of pixels (Cx)
+            */
+   public float getPrincipalPointXPixels()
+   {
+      return principal_point_x_pixels_;
+   }
+
+   /**
+            * Principal point Y in units of pixels (Cy)
+            */
+   public void setPrincipalPointYPixels(float principal_point_y_pixels)
+   {
+      principal_point_y_pixels_ = principal_point_y_pixels;
+   }
+   /**
+            * Principal point Y in units of pixels (Cy)
+            */
+   public float getPrincipalPointYPixels()
+   {
+      return principal_point_y_pixels_;
    }
 
 
@@ -218,7 +329,18 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
-      if (!this.intrinsic_parameters_.epsilonEquals(other.intrinsic_parameters_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_pinhole_camera_model_, other.is_pinhole_camera_model_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_equidistant_fisheye_camera_model_, other.is_equidistant_fisheye_camera_model_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.focal_length_x_pixels_, other.focal_length_x_pixels_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.focal_length_y_pixels_, other.focal_length_y_pixels_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.principal_point_x_pixels_, other.principal_point_x_pixels_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.principal_point_y_pixels_, other.principal_point_y_pixels_, epsilon)) return false;
+
 
       return true;
    }
@@ -244,7 +366,18 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!this.position_.equals(otherMyClass.position_)) return false;
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
-      if (!this.intrinsic_parameters_.equals(otherMyClass.intrinsic_parameters_)) return false;
+      if(this.is_pinhole_camera_model_ != otherMyClass.is_pinhole_camera_model_) return false;
+
+      if(this.is_equidistant_fisheye_camera_model_ != otherMyClass.is_equidistant_fisheye_camera_model_) return false;
+
+      if(this.focal_length_x_pixels_ != otherMyClass.focal_length_x_pixels_) return false;
+
+      if(this.focal_length_y_pixels_ != otherMyClass.focal_length_y_pixels_) return false;
+
+      if(this.principal_point_x_pixels_ != otherMyClass.principal_point_x_pixels_) return false;
+
+      if(this.principal_point_y_pixels_ != otherMyClass.principal_point_y_pixels_) return false;
+
 
       return true;
    }
@@ -271,8 +404,18 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       builder.append(this.position_);      builder.append(", ");
       builder.append("orientation=");
       builder.append(this.orientation_);      builder.append(", ");
-      builder.append("intrinsic_parameters=");
-      builder.append(this.intrinsic_parameters_);
+      builder.append("is_pinhole_camera_model=");
+      builder.append(this.is_pinhole_camera_model_);      builder.append(", ");
+      builder.append("is_equidistant_fisheye_camera_model=");
+      builder.append(this.is_equidistant_fisheye_camera_model_);      builder.append(", ");
+      builder.append("focal_length_x_pixels=");
+      builder.append(this.focal_length_x_pixels_);      builder.append(", ");
+      builder.append("focal_length_y_pixels=");
+      builder.append(this.focal_length_y_pixels_);      builder.append(", ");
+      builder.append("principal_point_x_pixels=");
+      builder.append(this.principal_point_x_pixels_);      builder.append(", ");
+      builder.append("principal_point_y_pixels=");
+      builder.append(this.principal_point_y_pixels_);
       builder.append("}");
       return builder.toString();
    }
