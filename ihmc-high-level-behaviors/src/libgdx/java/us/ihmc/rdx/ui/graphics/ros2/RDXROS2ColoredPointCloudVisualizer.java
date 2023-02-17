@@ -20,7 +20,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.graphics.RDXColoredPointCloudMode;
+import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -38,7 +38,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(false);
    private final ImBoolean useSensorColor = new ImBoolean(true);
-   private RDXColoredPointCloudMode coloringMode = RDXColoredPointCloudMode.WORLD_Z;
+   private RDXColorGradientMode gradientMode = RDXColorGradientMode.WORLD_Z;
    private final ImBoolean useSinusoidalGradientPattern = new ImBoolean(false);
 
    private final String titleBeforeAdditions;
@@ -125,7 +125,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
          parametersBuffer.setParameter((float) colorChannel.getImageHeight());
          parametersBuffer.setParameter(BytedecoRealsense.L515_DEPTH_DISCRETIZATION);
          parametersBuffer.setParameter(useSensorColor.get());
-         parametersBuffer.setParameter(coloringMode.ordinal());
+         parametersBuffer.setParameter(gradientMode.ordinal());
          parametersBuffer.setParameter(useSinusoidalGradientPattern.get());
 
          // Upload the buffers to the OpenCL device (GPU)
@@ -189,11 +189,11 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
       ImGui.checkbox(labels.get("Use sensor color"), useSensorColor);
       ImGui.text("Gradient mode:");
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("World Z"), coloringMode == RDXColoredPointCloudMode.WORLD_Z))
-         coloringMode = RDXColoredPointCloudMode.WORLD_Z;
+      if (ImGui.radioButton(labels.get("World Z"), gradientMode == RDXColorGradientMode.WORLD_Z))
+         gradientMode = RDXColorGradientMode.WORLD_Z;
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Sensor X"), coloringMode == RDXColoredPointCloudMode.SENSOR_X))
-         coloringMode = RDXColoredPointCloudMode.SENSOR_X;
+      if (ImGui.radioButton(labels.get("Sensor X"), gradientMode == RDXColorGradientMode.SENSOR_X))
+         gradientMode = RDXColorGradientMode.SENSOR_X;
       ImGui.checkbox(labels.get("Sinusoidal gradient"), useSinusoidalGradientPattern);
    }
 
