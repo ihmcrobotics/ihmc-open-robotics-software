@@ -165,8 +165,8 @@ public class RealsenseColorAndDepthLogger
             cameraPose.setToZero(cameraFrame);
             cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-//            BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthBytePointer);
-//            perceptionDataLogger.storeBytesFromPointer(depthChannelName, compressedDepthBytePointer);
+            BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthBytePointer);
+            perceptionDataLogger.storeBytesFromPointer(depthChannelName, compressedDepthBytePointer);
 
             BytedecoOpenCVTools.displayDepth("Depth", depth16UC1Image, 1);
 
