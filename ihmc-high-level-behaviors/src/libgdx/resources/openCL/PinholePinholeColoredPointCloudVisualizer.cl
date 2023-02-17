@@ -1,6 +1,7 @@
-// TODO: float vs double in here? pick one, probably double for all the parameters
-kernel void
-createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t colorRGBAImage, global float* finalPointFloatBuffer, global float* parameters)
+kernel void createPointCloud(read_only image2d_t depthImageMeters, 
+                             read_only image2d_t colorRGBAImage,
+                             global float* finalPointFloatBuffer,
+                             global float* parameters)
 {
    // for 3 modes of coloring
    enum VIEWMODE
@@ -15,8 +16,8 @@ createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t color
    float focalLength = parameters[0];
    float cmosWidth = parameters[1];
    float cmosHeight = parameters[2];
-   float halfCMOSWidth = cmosWidth / 2.0;
-   float halfCMOSHeight = cmosHeight / 2.0;
+   float halfCMOSWidth = cmosWidth / 2.0f;
+   float halfCMOSHeight = cmosHeight / 2.0f;
 
    float translationX = parameters[3];
    float translationY = parameters[4];
@@ -40,7 +41,7 @@ createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t color
    int colorImageWidth = parameters[21];
    int colorImageHeight = parameters[22];
 
-   bool sinusoidal = parameters[23] > 0.5; // TODO: Create a boolean OpenCL buffer for these binary parameters
+   bool sinusoidal = parameters[23] > 0.5f; // TODO: Create a boolean OpenCL buffer for these binary parameters
 
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -57,15 +58,15 @@ createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t color
    float cmosToPixelsY = colorImageHeight / cmosHeight;
 
    // Flip because positive yaw is to the left, but image coordinates go to the right
-   float yaw = -angle(1.0, 0.0, zUp3DX, zUp3DY);
-   double distanceFromSensorCenterX = focalLength * tan(yaw);
-   double distanceFromSensorLeftX = distanceFromSensorCenterX + halfCMOSWidth;
+   float yaw = -angle(1.0f, 0.0f, zUp3DX, zUp3DY);
+   float distanceFromSensorCenterX = focalLength * tan(yaw);
+   float distanceFromSensorLeftX = distanceFromSensorCenterX + halfCMOSWidth;
    int pixelIndexX = (int) round(distanceFromSensorLeftX * cmosToPixelsX);
    bool pixelInBounds = intervalContains(pixelIndexX, 0, colorImageWidth);
 
-   double pitch = -angle(1.0, 0.0, zUp3DX, zUp3DZ);
-   double distanceFromSensorCenterY = focalLength * tan(pitch);
-   double distanceFromSensorTopX = distanceFromSensorCenterY + halfCMOSHeight;
+   float pitch = -angle(1.0f, 0.0f, zUp3DX, zUp3DZ);
+   float distanceFromSensorCenterY = focalLength * tan(pitch);
+   float distanceFromSensorTopX = distanceFromSensorCenterY + halfCMOSHeight;
    int pixelIndexY = (int) round(distanceFromSensorTopX * cmosToPixelsY);
    pixelInBounds &= intervalContains(pixelIndexY, 0, colorImageHeight);
 
@@ -82,7 +83,7 @@ createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t color
       }
       else
       {
-         color = calculateGradientColor((double) worldFramePoint.z, sinusoidal);
+         color = calculateGradientColor((float) worldFramePoint.z, sinusoidal);
          //          color = (255 << 24) | (255 << 16) | (255 << 8) | 255; // white is default
       }
    }
@@ -90,7 +91,7 @@ createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t color
    {
       //              float4 rgb = calculateGradientColorFromDepth(eyeDepthInMeters);
       //              color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
-      color = calculateGradientColor((double) eyeDepthInMeters, sinusoidal);
+      color = calculateGradientColor((float) eyeDepthInMeters, sinusoidal);
       //              printf("%f, %f, %f\n", rgb.x,rgb.y,rgb.z);
    }
    else
@@ -98,7 +99,7 @@ createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t color
       //               float4 rgb = calculateGradientColorFromZDepth(zUp3DZ);
       //               color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
       //               printf("r: %f, g: %f, b: %f\n", rgb.x,rgb.y,rgb.z);
-      color = calculateGradientColor((double) worldFramePoint.z, sinusoidal);
+      color = calculateGradientColor((float) worldFramePoint.z, sinusoidal);
    }
 
    int pointStartIndex = (depthImageWidth * y + x) * 8;
@@ -113,10 +114,10 @@ createPointCloud(read_only image2d_t depthImageMeters, read_only image2d_t color
    int bInt = (color >> 8) & 0xFF;
    int aInt = color & 0xFF;
 
-   float r = rInt / 255.0;
-   float g = gInt / 255.0;
-   float b = bInt / 255.0;
-   float a = aInt / 255.0;
+   float r = rInt / 255.0f;
+   float g = gInt / 255.0f;
+   float b = bInt / 255.0f;
+   float a = aInt / 255.0f;
 
    finalPointFloatBuffer[pointStartIndex + 3] = r;
    finalPointFloatBuffer[pointStartIndex + 4] = g;
