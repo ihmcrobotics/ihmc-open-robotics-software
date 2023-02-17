@@ -11,6 +11,7 @@ import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -45,7 +46,6 @@ public class RDXArmManager
    private volatile boolean readyToCopySolution = false;
 
    private final HandWrenchCalculator handWrenchCalculator;
-   private ImBoolean printWrench = new ImBoolean(false);
    private ImPlotWrench wrenchPlot;
    private ImPlotArmTorque armTorquePlot;
    private ImPlotArmTorque armGravityTorquePlot;
@@ -104,8 +104,10 @@ public class RDXArmManager
       boolean desiredHandsChanged = false;
 
       handWrenchCalculator.compute();
+
       for (RobotSide side : interactableHands.sides())
       {
+         FrameVector3D test =  handWrenchCalculator.getEquiPollentWrenchVectors().get(side).getForceVector();
          armManagers.get(side).update(interactableHands.get(side), desiredRobot);
          wrenchPlot.update(side, handWrenchCalculator.getFilteredWrench().get(side));
          armTorquePlot.update(side, handWrenchCalculator.getJointTorques().get(side));
