@@ -107,7 +107,6 @@ public class RDXArmManager
 
       for (RobotSide side : interactableHands.sides())
       {
-         FrameVector3D test =  handWrenchCalculator.getEquiPollentWrenchVectors().get(side).getForceVector();
          armManagers.get(side).update(interactableHands.get(side), desiredRobot);
          wrenchPlot.update(side, handWrenchCalculator.getFilteredWrench().get(side));
          armTorquePlot.update(side, handWrenchCalculator.getJointTorques().get(side));
