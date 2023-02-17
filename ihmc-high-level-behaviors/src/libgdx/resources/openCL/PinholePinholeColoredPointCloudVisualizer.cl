@@ -5,7 +5,7 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
                              read_only image2d_t colorRGBAImage,
                              global float* finalPointFloatBuffer,
                              global float* parameters,
-                             global float* sensorTransformToWorld)
+                             global float* depthTransformToWorld)
 {
    float focalLength = parameters[0];
    float cmosWidth = parameters[1];
@@ -23,7 +23,7 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
    int colorImageHeight = parameters[10];
    float discreteResolution = parameters[11];
    bool useSensorColor = parameters[12];
-   int coloringMode = parameters[13];
+   int gradientMode = parameters[13];
    bool sinusoidal = parameters[14];
 
    int x = get_global_id(0);
@@ -31,27 +31,27 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
 
    float eyeDepthInMeters = read_imageui(depthImageDiscretized, (int2) (x, y)).x * discreteResolution;
 
-   float zUp3DX = eyeDepthInMeters;
-   float zUp3DY = -(x - principalOffsetXPixels) / focalLengthPixelsX * eyeDepthInMeters;
-   float zUp3DZ = -(y - principalOffsetYPixels) / focalLengthPixelsY * eyeDepthInMeters;
+   float3 depthFramePoint = (float3) (eyeDepthInMeters,
+                            -(x - principalOffsetXPixels) / focalLengthPixelsX * eyeDepthInMeters,
+                            -(y - principalOffsetYPixels) / focalLengthPixelsY * eyeDepthInMeters);
 
    float cmosToPixelsX = colorImageWidth / cmosWidth;
    float cmosToPixelsY = colorImageHeight / cmosHeight;
 
    // Flip because positive yaw is to the left, but image coordinates go to the right
-   float yaw = -angle(1.0f, 0.0f, zUp3DX, zUp3DY);
+   float yaw = -angle(1.0f, 0.0f, depthFramePoint.x, depthFramePoint.y);
    float distanceFromSensorCenterX = focalLength * tan(yaw);
    float distanceFromSensorLeftX = distanceFromSensorCenterX + halfCMOSWidth;
    int pixelIndexX = (int) round(distanceFromSensorLeftX * cmosToPixelsX);
    bool pixelInBounds = intervalContains(pixelIndexX, 0, colorImageWidth);
 
-   float pitch = -angle(1.0f, 0.0f, zUp3DX, zUp3DZ);
+   float pitch = -angle(1.0f, 0.0f, depthFramePoint.x, depthFramePoint.z);
    float distanceFromSensorCenterY = focalLength * tan(pitch);
    float distanceFromSensorTopX = distanceFromSensorCenterY + halfCMOSHeight;
    int pixelIndexY = (int) round(distanceFromSensorTopX * cmosToPixelsY);
    pixelInBounds &= intervalContains(pixelIndexY, 0, colorImageHeight);
 
-   float3 worldFramePoint = transform(zUp3DX, zUp3DY, zUp3DZ, sensorTransformToWorld);
+   float3 worldFramePoint = transformPoint3D32(depthFramePoint, depthTransformToWorld);
 
    int color;
    if (useSensorColor && pixelInBounds)

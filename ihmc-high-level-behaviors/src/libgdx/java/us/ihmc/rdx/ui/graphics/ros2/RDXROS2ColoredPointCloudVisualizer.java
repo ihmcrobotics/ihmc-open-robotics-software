@@ -108,8 +108,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
                finalColoredDepthBuffer.createOpenCLBufferObject(openCLManager);
             }
 
-            sensorTransformToWorldParameter.setTranslation(depthChannel.getTranslationToWorld());
-            sensorTransformToWorldParameter.setRotationMatrix(depthChannel.getRotationMatrixToWorld());
+            sensorTransformToWorldParameter.setParameter(depthChannel.getTranslationToWorld(), depthChannel.getRotationMatrixToWorld());
          }
 
          // If both depth and color images are available, configure the OpenCL kernel and run it, to generate the point cloud float buffer.
