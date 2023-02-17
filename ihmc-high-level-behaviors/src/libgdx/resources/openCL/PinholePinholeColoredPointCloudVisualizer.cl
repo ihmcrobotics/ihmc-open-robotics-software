@@ -13,8 +13,8 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
    float halfCMOSWidth = cmosWidth / 2.0f;
    float halfCMOSHeight = cmosHeight / 2.0f;
 
-   float principalOffsetXPixels = parameters[3];
-   float principalOffsetYPixels = parameters[4];
+   float dephtPrincipalPointXPixels = parameters[3];
+   float dephtPrincipalPointYPixels = parameters[4];
    float focalLengthPixelsX = parameters[5];
    float focalLengthPixelsY = parameters[6];
    int depthImageWidth = parameters[7];
@@ -32,8 +32,8 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
    float eyeDepthInMeters = read_imageui(depthImageDiscretized, (int2) (x, y)).x * discreteResolution;
 
    float3 depthFramePoint = (float3) (eyeDepthInMeters,
-                            -(x - principalOffsetXPixels) / focalLengthPixelsX * eyeDepthInMeters,
-                            -(y - principalOffsetYPixels) / focalLengthPixelsY * eyeDepthInMeters);
+                            -(x - dephtPrincipalPointXPixels) / focalLengthPixelsX * eyeDepthInMeters,
+                            -(y - dephtPrincipalPointYPixels) / focalLengthPixelsY * eyeDepthInMeters);
 
    float cmosToPixelsX = colorImageWidth / cmosWidth;
    float cmosToPixelsY = colorImageHeight / cmosHeight;
