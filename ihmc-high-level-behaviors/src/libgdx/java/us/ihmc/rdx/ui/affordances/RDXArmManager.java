@@ -11,11 +11,12 @@ import us.ihmc.behaviors.tools.HandWrenchCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.RDX3DPanelHandWrenchIndicator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -47,8 +48,11 @@ public class RDXArmManager
 
    private final HandWrenchCalculator handWrenchCalculator;
    private ImPlotWrench wrenchPlot;
-   private ImPlotArmTorque armTorquePlot;
-   private ImPlotArmTorque armGravityTorquePlot;
+   private ImPlotArmJointTorques armTorquePlot;
+   private ImPlotArmJointTorques armGravityTorquePlot;
+   private RDXBaseUI baseUI = null;
+   private ImBoolean indicateWrenchOnScreen = new ImBoolean(true);
+
 
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -83,9 +87,10 @@ public class RDXArmManager
    public void create(RDXBaseUI baseUI)
    {
       create();
+      this.baseUI = baseUI;
       wrenchPlot = new ImPlotWrench(baseUI);
-      armTorquePlot = new ImPlotArmTorque(baseUI, "Arm joints torque", handWrenchCalculator.getArmJoints());
-      armGravityTorquePlot = new ImPlotArmTorque(baseUI, "Arm joints gravity compensation torque", "gravity compensation", handWrenchCalculator.getArmJoints());
+      armTorquePlot = new ImPlotArmJointTorques(baseUI, "Arm joints torque", handWrenchCalculator.getArmJoints());
+      armGravityTorquePlot = new ImPlotArmJointTorques(baseUI, "Arm joints gravity compensation torque", "gravity compensation", handWrenchCalculator.getArmJoints());
    }
 
    public void create()
@@ -111,6 +116,9 @@ public class RDXArmManager
          wrenchPlot.update(side, handWrenchCalculator.getFilteredWrench().get(side));
          armTorquePlot.update(side, handWrenchCalculator.getJointTorques().get(side));
          armGravityTorquePlot.update(side, handWrenchCalculator.getJointTorquesForGravity().get(side));
+         baseUI.getPrimary3DPanel().getPanelHandWrenchIndicator().update(side,
+                                         handWrenchCalculator.getLinearWrenchMagnitude(side, true),
+                                         handWrenchCalculator.getAngularWrenchMagnitude(side, true));
 
          // wrench expressed in wrist pitch body fixed-frame
          interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getFilteredWrench().get(side));
@@ -210,6 +218,11 @@ public class RDXArmManager
       {
          armControlModeChanged = true;
          armControlMode = RDXArmControlMode.POSE_CHEST;
+      }
+
+      if (ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen))
+      {
+         baseUI.getPrimary3DPanel().getPanelHandWrenchIndicator().setShow(indicateWrenchOnScreen.get());
       }
    }
 

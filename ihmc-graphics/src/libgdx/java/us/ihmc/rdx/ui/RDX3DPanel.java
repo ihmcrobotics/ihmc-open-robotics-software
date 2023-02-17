@@ -68,6 +68,7 @@ public class RDX3DPanel
    private float windowDrawMinY;
    private float windowDrawMaxX;
    private float windowDrawMaxY;
+   private final RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator();
 
   public RDX3DPanel(String panelName)
    {
@@ -225,6 +226,7 @@ public class RDX3DPanel
          ImGui.end();
 
          toolbar.render(windowSizeX, windowPositionX, windowPositionY);
+         panelHandWrenchIndicator.render(windowSizeX, windowSizeY, windowPositionX, windowPositionY);
       }
    }
 
@@ -426,5 +428,10 @@ public class RDX3DPanel
    public void setModelSceneMouseCollisionEnabled(boolean modelSceneMouseCollisionEnabled)
    {
       this.modelSceneMouseCollisionEnabled = modelSceneMouseCollisionEnabled;
+   }
+
+   public RDX3DPanelHandWrenchIndicator getPanelHandWrenchIndicator()
+   {
+      return panelHandWrenchIndicator;
    }
 }

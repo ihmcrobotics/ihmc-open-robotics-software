@@ -36,6 +36,9 @@ public class RDXSpatialVectorArrows
    private final Vector3D tempVector = new Vector3D();
    private boolean drawAngularPart = true;
 
+   private double linearPartScale = 0.005;
+   private double angularPartScale = 0.02;
+
    public RDXSpatialVectorArrows(ReferenceFrame originFrame, YoVariableClientHelper yoVariableClientHelper, String variablePrefix)
    {
       this.originFrame = originFrame;
@@ -69,8 +72,8 @@ public class RDXSpatialVectorArrows
       origin.setToZero(originFrame);
       origin.changeFrame(ReferenceFrame.getWorldFrame());
 
-      transform(linearPartArrow, linearPart, 0.005);
-      transform(angularPartArrow, angularPart, 0.02);
+      transform(linearPartArrow, linearPart, linearPartScale);
+      transform(angularPartArrow, angularPart, angularPartScale);
    }
 
    public void updateFromYoVariables()
@@ -117,5 +120,15 @@ public class RDXSpatialVectorArrows
    public void setDrawAngularPart(boolean drawAngularPart)
    {
       this.drawAngularPart = drawAngularPart;
+   }
+
+   public void setLinearPartScale(double linearPartScale)
+   {
+      this.linearPartScale = linearPartScale;
+   }
+
+   public void setAngularPartScale(double angularPartScale)
+   {
+      this.angularPartScale = angularPartScale;
    }
 }
