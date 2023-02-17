@@ -2,11 +2,11 @@ package us.ihmc.perception.logging;
 
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -113,22 +113,21 @@ public class PerceptionDataLoader
       HDF5Tools.loadFloatArray(group, index, array);
    }
 
-   public void loadCompressedImage(String namespace, int index, Mat mat)
+   public void loadCompressedColor(String namespace, int index, Mat mat)
    {
       Group group = hdf5Manager.getGroup(namespace);
-      byte[] compressedByteArray = HDF5Tools.loadRawByteArray(group, index);
-      mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(compressedByteArray));
+      BytePointer bytePointer = new BytePointer(10);
+      HDF5Tools.loadBytes(group, index, bytePointer);
+      mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(bytePointer));
    }
 
    public void loadCompressedDepth(String namespace, int index, Mat mat)
    {
-      byte[] compressedByteArray;
       Group group = hdf5Manager.getGroup(namespace);
-      compressedByteArray = HDF5Tools.loadByteArray(group, index);
-      synchronized (mat)
-      {
-         BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
-      }
+      BytePointer bytePointer = new BytePointer(10);
+      HDF5Tools.loadBytes(group, index, bytePointer);
+
+      BytedecoOpenCVTools.decompressDepthPNG(bytePointer, mat);
    }
 
    public String getFilePath()
@@ -155,7 +154,7 @@ public class PerceptionDataLoader
    {
       String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
       String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20230216_140029_PerceptionLog.hdf5";
+      String logFileName = "20230216_185255_PerceptionLog.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(Paths.get(logDirectory, logFileName).toString());
@@ -235,7 +234,7 @@ public class PerceptionDataLoader
 
                LogTools.info("Loading Index: {}/{}", i, 10);
 
-               loader.loadCompressedImage(PerceptionLoggerConstants.L515_DEPTH_NAME, i, depthImage);
+               loader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, i, depthImage);
 
                long begin_load = System.nanoTime();
 //               loader.loadCompressedImage("/image/", i, colorImage);

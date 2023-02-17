@@ -529,7 +529,7 @@ public class PerceptionDataLogger
            int imageCount = counts.get(namespace);
            counts.put(namespace, imageCount + 1);
 
-           HDF5Tools.storeBytesFromPointer(group, imageCount, bytePointer, bytePointer.limit());
+           HDF5Tools.storeBytes(group, imageCount, bytePointer);
         }
      });
    }

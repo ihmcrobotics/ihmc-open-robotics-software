@@ -185,7 +185,7 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       //  There doesn't seem to be a major speed impact though
       try (BytePointer data = new BytePointer(avPacket.size())) {
          BytePointer.memcpy(data, avPacket.data(), avPacket.size());
-         HDF5Tools.storeBytesFromPointer(dataGroup, presentationTimestamp++, data, avPacket.size());
+         HDF5Tools.storeBytes(dataGroup, presentationTimestamp++, data, avPacket.size());
       }
 
       HDF5Tools.storeByteArray(flagsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.flags()), Integer.BYTES); // Not a long but that's okay
@@ -193,7 +193,7 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       if (avPacket.side_data() != null) {
          try (BytePointer data = new BytePointer(avPacket.side_data().size())) {
             BytePointer.memcpy(data, avPacket.side_data().data(), avPacket.side_data().size());
-            HDF5Tools.storeBytesFromPointer(dataGroup, presentationTimestamp++, data, avPacket.side_data().size());
+            HDF5Tools.storeBytes(dataGroup, presentationTimestamp++, data, avPacket.side_data().size());
          }
       }
 

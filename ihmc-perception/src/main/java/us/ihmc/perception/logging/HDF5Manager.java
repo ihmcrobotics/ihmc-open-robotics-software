@@ -213,6 +213,7 @@ public class HDF5Manager
          group._close();
       }
       file._close();
+      file = null;
    }
 
    public H5File getFile()

@@ -138,7 +138,7 @@ public class RDXPerceptionDataLoaderPanel extends ImGuiPanel
                if (channel.getName().contains("color"))
                {
                   cvImage = new Mat();
-                  loader.loadCompressedImage(channel.getName(), channel.getIndex(), cvImage);
+                  loader.loadCompressedColor(channel.getName(), channel.getIndex(), cvImage);
                   BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
                }
 

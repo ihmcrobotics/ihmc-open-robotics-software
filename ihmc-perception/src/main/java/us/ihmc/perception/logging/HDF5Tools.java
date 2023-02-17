@@ -346,35 +346,44 @@ public class HDF5Tools
       dataset._close();
    }
 
-   public static void storeBytesFromPointer(Group group, long index, BytePointer bytes, long size)
+   public static void storeBytes(Group group, long index, BytePointer srcBytePointer)
    {
+      long size = srcBytePointer.limit();
+
       LogTools.info("Store Byte Array: Index: {} Size: {}", index, size);
       long[] dims = {size};
 
-      DataSpace ds = new DataSpace(1, dims);
-      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_B8()), ds);
+      DataType dataType = new DataType(PredType.NATIVE_B8());
+      DataSpace dataSpace = new DataSpace(1, dims);
+      DataSet dataSet = group.createDataSet(String.valueOf(index), dataType, dataSpace);
 
-      dataset.write((Pointer) bytes, new DataType(PredType.NATIVE_B8()));
+      dataSet.write((Pointer) srcBytePointer, dataType);
 
-      ds._close();
-      dataset._close();
+      dataSpace._close();
+      dataSet._close();
+      //dataType._close();
    }
 
    /* TODO: Does not work yet. Needs to be fixed. */
 
-   public static byte[] loadRawByteArray(Group group, int index)
+   public static int loadBytes(Group group, int index, BytePointer bytePointer)
    {
-      DataSet dataset = group.openDataSet(String.valueOf(index));
+      DataSet dataSet = group.openDataSet(String.valueOf(index));
 
-      int size = extractShape(dataset, 0);
+      long size = dataSet.getInMemDataSize();
+      if(size > bytePointer.capacity())
+      {
+         LogTools.warn("Byte array is too small to hold the data. Resizing to {} from {}", size, bytePointer.capacity());
+         bytePointer.capacity(size);
+      }
 
-      byte[] byteArray = new byte[size];
+      DataType dataType = new DataType(PredType.NATIVE_B8());
+      dataSet.read((Pointer) bytePointer, dataType);
 
-      BytePointer bytePointer = new BytePointer(byteArray);
-      dataset.read(bytePointer, new DataType(PredType.NATIVE_B8()));
-      bytePointer.get(byteArray, 0, byteArray.length);
+      //dataType._close();
+      //dataSet._close();
 
-      return byteArray;
+      return (int) size;
    }
 
    // TODO: Complete this method to load timestamps associated with any HDF5 dataset object.

@@ -152,7 +152,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
 
          avformat.av_read_frame(avFormatContext, packet);
          // get packet from HDF5
-         byte[] rawData = HDF5Tools.loadRawByteArray(framesGroup, streamIndex);
+         byte[] rawData = HDF5Tools.loadBytes(framesGroup, streamIndex);
          BytePointer packetData = new BytePointer(ByteBuffer.wrap(rawData));
          BytePointer.memcpy(packet.data(), packetData, rawData.length);
       }
