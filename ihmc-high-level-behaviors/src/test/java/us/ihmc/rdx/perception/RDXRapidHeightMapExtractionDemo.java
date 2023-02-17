@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
@@ -65,7 +66,10 @@ public class RDXRapidHeightMapExtractionDemo
    private final Notification heightMapUpdateNotification = new Notification();
 
    private Activator nativesLoadedActivator;
+
    private BytedecoImage loadedDepthImage;
+   private final BytePointer depthBytePointer = new BytePointer(1000000);
+
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
    private PerceptionDataLoader perceptionDataLoader;
@@ -109,7 +113,7 @@ public class RDXRapidHeightMapExtractionDemo
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
 
-            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), loadedDepthImage.getBytedecoOpenCVMat());
+            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), depthBytePointer, loadedDepthImage.getBytedecoOpenCVMat());
             loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
             rapidHeightMapUpdater.create(openCLManager, openCLProgram, loadedDepthImage);
@@ -131,7 +135,7 @@ public class RDXRapidHeightMapExtractionDemo
                {
                   loadAndDecompressThreadExecutor.clearQueueAndExecute(() ->
                   {
-                     perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), loadedDepthImage.getBytedecoOpenCVMat());
+                     perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), depthBytePointer, loadedDepthImage.getBytedecoOpenCVMat());
                   });
                   updateHeightMap();
                }
@@ -223,7 +227,7 @@ public class RDXRapidHeightMapExtractionDemo
          rapidHeightMapUpdater.setModified(false);
          rapidHeightMapUpdater.setProcessing(false);
 
-         BytedecoOpenCVTools.displayDepth("Output Height Map", rapidHeightMapUpdater.getOutputHeightMapImage().getBytedecoOpenCVMat(), 1, 1/ (0.3f + 0.20f * rapidHeightMapUpdater.getCellSizeXYInMeters()));
+         BytedecoOpenCVTools.displayHeightMap("Output Height Map", rapidHeightMapUpdater.getOutputHeightMapImage().getBytedecoOpenCVMat(), 1, 1/ (0.3f + 0.20f * rapidHeightMapUpdater.getCellSizeXYInMeters()));
       }
 
    }

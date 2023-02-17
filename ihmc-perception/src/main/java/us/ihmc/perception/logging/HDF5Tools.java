@@ -408,7 +408,10 @@ public class HDF5Tools
          bytePointer.capacity(2 * size);
       }
 
-      DataType dataType = new DataType(PredType.NATIVE_B8());
+      long dtype = DataType.getHDFObjType(dataSet.getId());
+      LogTools.info("Dataset DType: {}", dtype);
+
+      DataType dataType = new DataType(PredType.NATIVE_UINT8());
       dataSet.read((Pointer) bytePointer, dataType);
 
       //dataType._close();
