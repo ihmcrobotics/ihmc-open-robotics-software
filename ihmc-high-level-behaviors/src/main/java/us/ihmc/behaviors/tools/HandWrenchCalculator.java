@@ -14,6 +14,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -22,6 +23,7 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
@@ -192,5 +194,17 @@ public class HandWrenchCalculator
    public SideDependentList<List<JointReadOnly>> getJointsFromBaseToEndEffector()
    {
       return jointsFromBaseToEndEffector;
+   }
+
+   public double getLinearWrenchMagnitude(RobotSide side, boolean filtered)
+   {
+      SideDependentList<? extends FixedFrameSpatialVectorBasics> wrench = filtered ? getFilteredWrench() : getUnfilteredWrench();
+      return wrench.get(side).getLinearPart().norm();
+   }
+
+   public double getAngularWrenchMagnitude(RobotSide side, boolean filtered)
+   {
+      SideDependentList<? extends FixedFrameSpatialVectorBasics> wrench = filtered ? getFilteredWrench() : getUnfilteredWrench();
+      return wrench.get(side).getAngularPart().norm();
    }
 }

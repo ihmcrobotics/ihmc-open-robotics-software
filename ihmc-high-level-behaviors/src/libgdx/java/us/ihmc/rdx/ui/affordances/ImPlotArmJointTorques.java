@@ -11,23 +11,23 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImPlotArmTorque
+public class ImPlotArmJointTorques
 {
    // actuator torques: arm has 7 joint torques
    private SideDependentList<ImPlotPlotPanel> torquePlotPanels = new SideDependentList<>();
    private SideDependentList<ImPlotPlot> torquePlots = new SideDependentList<>();
    private final SideDependentList<ArrayList<ImPlotDoublePlotLine>> plotLines = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
-   public ImPlotArmTorque(RDXBaseUI baseUI, String title, SideDependentList<List<OneDoFJointBasics>> armJoints)
+   public ImPlotArmJointTorques(RDXBaseUI baseUI, String title, SideDependentList<List<OneDoFJointBasics>> armJoints)
    {
       this(baseUI, title, "", armJoints);
    }
 
-   public ImPlotArmTorque(RDXBaseUI baseUI, String title, String prefix, SideDependentList<List<OneDoFJointBasics>> armJoints)
+   public ImPlotArmJointTorques(RDXBaseUI baseUI, String title, String prefix, SideDependentList<List<OneDoFJointBasics>> armJoints)
    {
       for (RobotSide side : RobotSide.values)
       {
-         torquePlotPanels.set(side, new ImPlotPlotPanel(side + ": " + title));
+         torquePlotPanels.set(side, new ImPlotPlotPanel(side.getPascalCaseName() + " " + title));
          torquePlots.set(side, new ImPlotPlot());
          List<OneDoFJointBasics> oneArmJoints = armJoints.get(side);
          for (int i = 0; i < oneArmJoints.size(); ++i)
@@ -37,7 +37,7 @@ public class ImPlotArmTorque
             torquePlots.get(side).getPlotLines().add(doublePlotLine);
          }
          torquePlotPanels.get(side).getPlots().add(torquePlots.get(side));
-         baseUI.getImGuiPanelManager().addPanel(torquePlotPanels.get(side));
+         baseUI.getImGuiPanelManager().queueAddPanel(torquePlotPanels.get(side));
       }
    }
 
