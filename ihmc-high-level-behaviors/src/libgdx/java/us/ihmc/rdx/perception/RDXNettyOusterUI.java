@@ -183,7 +183,7 @@ public class RDXNettyOusterUI
       }
    }
 
-   public void getRenderables (Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (sceneLevels.contains(RDXSceneLevel.MODEL))
          pointCloudRenderer.getRenderables(renderables, pool);
