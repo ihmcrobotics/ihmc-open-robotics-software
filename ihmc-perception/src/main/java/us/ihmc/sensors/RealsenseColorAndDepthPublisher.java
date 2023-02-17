@@ -48,7 +48,6 @@ public class RealsenseColorAndDepthPublisher
    private BytedecoRealsense realsense;
    private Mat depth16UC1Image;
    private Mat color8UC3Image;
-   private final Mat yuvColorImage = new Mat();
 
    private final OpenCVPNGCompression pngCompression = new OpenCVPNGCompression();
    private final OpenCVJPEGCompression jpegCompression = new OpenCVJPEGCompression(80);
@@ -73,7 +72,10 @@ public class RealsenseColorAndDepthPublisher
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
       ros2Helper = new ROS2Helper(ros2Node);
+   }
 
+   public void run()
+   {
       while (running)
       {
          update();
@@ -99,6 +101,7 @@ public class RealsenseColorAndDepthPublisher
             realsense.initialize();
 
             pngCompression.allocate(realsense.getDepthWidth() * realsense.getDepthHeight() * ImageMessageFormat.DEPTH_PNG_16UC1.getBytesPerPixel());
+            jpegCompression.allocate(realsense.getColorWidth() * realsense.getColorHeight() * ImageMessageFormat.COLOR_JPEG_YUVI420.getBytesPerPixel());
          }
 
          if (realsense.readFrameData())
@@ -124,7 +127,7 @@ public class RealsenseColorAndDepthPublisher
             jpegCompression.compressRGB(color8UC3Image);
 
             PerceptionMessageTools.packImageMessageData(pngCompression.getCompressedData(), depthImageMessage);
-            depthImageMessage.setFormat(ImageMessageFormat.DEPTH_PNG_16UC1.ordinal());
+            ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
             depthImageMessage.setImageHeight(realsense.getDepthHeight());
             depthImageMessage.setImageWidth(realsense.getDepthWidth());
             depthImageMessage.getPosition().set(cameraPose.getPosition());
@@ -134,7 +137,7 @@ public class RealsenseColorAndDepthPublisher
             ros2Helper.publish(depthTopic, depthImageMessage);
 
             PerceptionMessageTools.packImageMessageData(jpegCompression.getCompressedData(), colorImageMessage);
-            colorImageMessage.setFormat(ImageMessageFormat.COLOR_JPEG_YUVI420.getBytesPerPixel());
+            ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
             colorImageMessage.setImageHeight(realsense.getColorHeight());
             colorImageMessage.setImageWidth(realsense.getColorWidth());
             colorImageMessage.getPosition().set(cameraPose.getPosition());
@@ -146,7 +149,7 @@ public class RealsenseColorAndDepthPublisher
       }
    }
 
-   private void destroy()
+   public void destroy()
    {
       running = false;
       realsense.deleteDevice();
@@ -162,10 +165,12 @@ public class RealsenseColorAndDepthPublisher
 
       // Tripod: F1121365, F0245563
       String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
-      new RealsenseColorAndDepthPublisher(l515SerialNumber,
-                                          RealsenseSettingsProfile.L515_COLOR_720P_DEPTH_768P_30HZ,
-                                          ROS2Tools.L515_DEPTH_IMAGE,
-                                          ROS2Tools.L515_COLOR_IMAGE,
-                                          ReferenceFrame::getWorldFrame);
+      RealsenseColorAndDepthPublisher realsensePublisher = new RealsenseColorAndDepthPublisher(l515SerialNumber,
+                                                                                               RealsenseSettingsProfile.L515_COLOR_720P_DEPTH_768P_30HZ,
+                                                                                               ROS2Tools.L515_DEPTH_IMAGE,
+                                                                                               ROS2Tools.L515_COLOR_IMAGE,
+                                                                                               ReferenceFrame::getWorldFrame);
+      Runtime.getRuntime().addShutdownHook(new Thread(realsensePublisher::destroy, "Shutdown"));
+      realsensePublisher.run();
    }
 }
