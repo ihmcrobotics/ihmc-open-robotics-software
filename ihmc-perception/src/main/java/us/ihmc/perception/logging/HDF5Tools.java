@@ -388,7 +388,7 @@ public class HDF5Tools
       LogTools.info("Store Byte Array: Index: {} Size: {}", index, size);
       long[] dims = {size};
 
-      DataType dataType = new DataType(PredType.NATIVE_B8());
+      DataType dataType = new DataType(PredType.NATIVE_UINT8());
       DataSpace dataSpace = new DataSpace(1, dims);
       DataSet dataSet = group.createDataSet(String.valueOf(index), dataType, dataSpace);
 
