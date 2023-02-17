@@ -39,11 +39,8 @@ public class HandWrenchCalculator
 
    private SideDependentList<AlphaFilteredYoSpatialVector> alphaFilteredYoSpatialVectors = new SideDependentList<>();
    // RobotConfigurationData is published at 120Hz -> break freq.: 5Hz - 20Hz
-   private static final double ALPHA_FILTER = 0.5;
    private final Notification receivedRCDNotification;
    private SideDependentList<List<JointReadOnly>> jointsFromBaseToEndEffector = new SideDependentList<>();
-
-   private SideDependentList<EquiPollentVector> equiPollentWrenchVectors = new SideDependentList<>();
 
    public HandWrenchCalculator(FullHumanoidRobotModel fullRobotModel)
    {
@@ -91,8 +88,6 @@ public class HandWrenchCalculator
                                                                            spatialVectorForSetup.getAngularPart(),
                                                                            spatialVectorForSetup.getLinearPart()));
          jointTorques.set(side, new double[armJoints.get(side).size()]);
-
-         equiPollentWrenchVectors.set(side, new EquiPollentVector());
       }
    }
 
@@ -134,7 +129,6 @@ public class HandWrenchCalculator
 
             rawWrenches.set(side, makeWrench(jacobianCalculators.get(side).getJacobianFrame(), wrenchVector));
             alphaFilteredYoSpatialVectors.get(side).update(rawWrenches.get(side).getAngularPart(), rawWrenches.get(side).getLinearPart());
-            equiPollentWrenchVectors.get(side).update(alphaFilteredYoSpatialVectors.get(side));
          }
       }
    }
@@ -198,59 +192,5 @@ public class HandWrenchCalculator
    public SideDependentList<List<JointReadOnly>> getJointsFromBaseToEndEffector()
    {
       return jointsFromBaseToEndEffector;
-   }
-
-   public SideDependentList<EquiPollentVector> getEquiPollentWrenchVectors()
-   {
-      return equiPollentWrenchVectors;
-   }
-
-   public class EquiPollentVector
-   {
-      private ReferenceFrame frame = null;
-      private FrameVector3D forceVectorTemp = new FrameVector3D();
-      private FrameVector3D forceVector = new FrameVector3D();
-      private FrameVector3D momentArm = new FrameVector3D();
-
-      public EquiPollentVector()
-      {
-
-      }
-
-      public void update(SpatialVectorReadOnly spatialVector)
-      {
-         if (frame == null)
-         {
-            frame = spatialVector.getReferenceFrame();
-            forceVector.setReferenceFrame(frame);
-            forceVectorTemp.setReferenceFrame(frame);
-            momentArm.setReferenceFrame(frame);
-         }
-
-         forceVector.set(spatialVector.getLinearPart());
-         forceVectorTemp.set(spatialVector.getLinearPart());
-         double forceVectorNormSquared = forceVectorTemp.normSquared();
-         FrameVector3DReadOnly torqueToMatch = spatialVector.getAngularPart();
-         forceVectorTemp.cross(torqueToMatch);
-         double x = forceVectorTemp.getX() / forceVectorNormSquared;
-         double y = forceVectorTemp.getY() / forceVectorNormSquared;
-         double z = forceVectorTemp.getZ() / forceVectorNormSquared;
-         momentArm.set(x, y, z);
-      }
-
-      public FrameVector3D getForceVector()
-      {
-         return forceVector;
-      }
-
-      public FrameVector3D getMomentArm()
-      {
-         return momentArm;
-      }
-
-      public ReferenceFrame getFrame()
-      {
-         return frame;
-      }
    }
 }
