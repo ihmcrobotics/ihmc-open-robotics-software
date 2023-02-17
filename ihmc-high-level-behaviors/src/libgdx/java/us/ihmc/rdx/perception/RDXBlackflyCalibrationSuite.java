@@ -14,14 +14,13 @@ import org.bytedeco.opencv.opencv_features2d.SimpleBlobDetector;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.sensorHead.SensorHeadParameters;
+import us.ihmc.perception.spinnaker.BlackflyFisheyeParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -33,8 +32,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.*;
 
 import java.util.ArrayList;
@@ -50,17 +47,6 @@ import java.util.ArrayList;
 public class RDXBlackflyCalibrationSuite
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
-
-   // https://www.fujifilm.com/us/en/business/optical-devices/machine-vision-lens/fe185-series
-   private static final double FE185C086HA_1_FOCAL_LENGTH = 0.0027;
-   // https://www.flir.com/products/blackfly-usb3/?model=BFLY-U3-23S6C-C&vertical=machine+vision&segment=iis
-   private static final double BFLY_U3_23S6C_CMOS_SENSOR_FORMAT = UnitConversions.inchesToMeters(1.0 / 1.2);
-   private static final double BFLY_U3_23S6C_CMOS_SENSOR_WIDTH = 0.01067;
-   private static final double BFLY_U3_23S6C_CMOS_SENSOR_HEIGHT = 0.00800;
-   private static final double BFLY_U3_23S6C_WIDTH_PIXELS = 1920.0;
-   private static final double BFLY_U3_23S6C_HEIGHT_PIXELS = 1200.0;
-   private static final double FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS
-         = FE185C086HA_1_FOCAL_LENGTH * BFLY_U3_23S6C_WIDTH_PIXELS / BFLY_U3_23S6C_CMOS_SENSOR_WIDTH;
 
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
@@ -88,10 +74,10 @@ public class RDXBlackflyCalibrationSuite
    private MatVector cornersOrCentersMatVector;
    private SimpleBlobDetector simpleBlobDetector;
    private final ImFloat patternDistanceBetweenPoints = new ImFloat(0.0189f);
-   private final ImDouble fxGuess = new ImDouble(FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS);
-   private final ImDouble fyGuess = new ImDouble(FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS);
-   private final ImDouble cxGuess = new ImDouble(BFLY_U3_23S6C_WIDTH_PIXELS / 2.0);
-   private final ImDouble cyGuess = new ImDouble(BFLY_U3_23S6C_HEIGHT_PIXELS / 2.0);
+   private final ImDouble fxGuess = new ImDouble(BlackflyFisheyeParameters.FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS);
+   private final ImDouble fyGuess = new ImDouble(BlackflyFisheyeParameters.FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS);
+   private final ImDouble cxGuess = new ImDouble(BlackflyFisheyeParameters.BFLY_U3_23S6C_WIDTH_PIXELS / 2.0);
+   private final ImDouble cyGuess = new ImDouble(BlackflyFisheyeParameters.BFLY_U3_23S6C_HEIGHT_PIXELS / 2.0);
    private final MatVector estimatedRotationVectors = new MatVector();
    private final MatVector estimatedTranslationVectors = new MatVector();
    private double averageReprojectionError = Double.NaN;
@@ -105,10 +91,10 @@ public class RDXBlackflyCalibrationSuite
    private final ImDouble calibratedFy = new ImDouble(fyGuess.get());
    private final ImDouble calibratedCx = new ImDouble(cxGuess.get());
    private final ImDouble calibratedCy = new ImDouble(cyGuess.get());
-   private final ImDouble coloringFx = new ImDouble(472.44896); // These were tuned with sliders on the benchtop
-   private final ImDouble coloringFy = new ImDouble(475.51022); // by Bhavyansh and Duncan and copied here
-   private final ImDouble coloringCx = new ImDouble(970.06801); // by hand.
-   private final ImDouble coloringCy = new ImDouble(608.84360); // TODO: Make them stored properties
+   private final ImDouble coloringFx = new ImDouble(BlackflyFisheyeParameters.FOCAL_LENGTH_X_FOR_COLORING);
+   private final ImDouble coloringFy = new ImDouble(BlackflyFisheyeParameters.FOCAL_LENGTH_Y_FOR_COLORING);
+   private final ImDouble coloringCx = new ImDouble(BlackflyFisheyeParameters.PRINCIPAL_POINT_X_FOR_COLORING);
+   private final ImDouble coloringCy = new ImDouble(BlackflyFisheyeParameters.PRINCIPAL_POINT_Y_FOR_COLORING);
    private final ImString coloringCameraMatrixAsText = new ImString(512);
    private final ImString cameraMatrixAsText = new ImString(512);
    private final ImString newCameraMatrixAsText = new ImString(512);
@@ -116,8 +102,8 @@ public class RDXBlackflyCalibrationSuite
    private final ImDouble distortionCoefficientK2 = new ImDouble(0.00455);
    private final ImDouble distortionCoefficientK3 = new ImDouble(-0.00399);
    private final ImDouble distortionCoefficientK4 = new ImDouble(0.00051);
-   private final ImInt undistortedImageWidth = new ImInt((int) BFLY_U3_23S6C_WIDTH_PIXELS);
-   private final ImInt undistortedImageHeight = new ImInt((int) BFLY_U3_23S6C_HEIGHT_PIXELS);
+   private final ImInt undistortedImageWidth = new ImInt((int) BlackflyFisheyeParameters.BFLY_U3_23S6C_WIDTH_PIXELS);
+   private final ImInt undistortedImageHeight = new ImInt((int) BlackflyFisheyeParameters.BFLY_U3_23S6C_HEIGHT_PIXELS);
    private final ImDouble balanceNewFocalLength = new ImDouble(0.0);
    private final ImDouble fovScaleFocalLengthDivisor = new ImDouble(1.0);
    private Mat distortionCoefficients;
@@ -197,29 +183,7 @@ public class RDXBlackflyCalibrationSuite
                   baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
 
                   nettyOusterUI.createAfterNativesLoaded();
-                  nettyOusterUI.getSensorFrame().update(transformToBlackfly ->
-                  {
-                     // For the benchtop sensorhead setup
-                     FramePose3D ousterPose = new FramePose3D();
-                     ousterPose.getPosition().set(0.225, 0.004, 0.459);
-                     RotationMatrix rotationMatrix = new RotationMatrix();
-                     rotationMatrix.setAndNormalize( 0.779, -0.155,  0.607,
-                                                     0.189,  0.982,  0.009,
-                                                    -0.598,  0.108,  0.794);
-                     ousterPose.getOrientation().set(rotationMatrix);
-                     ousterPose.getOrientation().appendPitchRotation(Math.toRadians(-2));
-
-                     RigidBodyTransform transformChestToBlackflyFujinon = new RigidBodyTransform();
-                     transformChestToBlackflyFujinon.setIdentity();
-                     transformChestToBlackflyFujinon.getTranslation().set(0.160, -0.095, 0.419);
-                     transformChestToBlackflyFujinon.getRotation().setAndNormalize( 0.986, -0.000, 0.167, 0.000, 1.000, -0.000, -0.167, 0.000, 0.986);
-                     ReferenceFrame blackflyFrame
-                           = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                      transformChestToBlackflyFujinon);
-
-                     ousterPose.changeFrame(blackflyFrame);
-                     ousterPose.get(transformToBlackfly);
-                  });
+                  nettyOusterUI.getSensorFrame().update(transformToBlackfly -> transformToBlackfly.set(SensorHeadParameters.OUSTER_TO_FISHEYE_TRANSFORM));
 
                   baseUI.getLayoutManager().reloadLayout();
 
@@ -254,7 +218,7 @@ public class RDXBlackflyCalibrationSuite
                   newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
                   opencv_core.setIdentity(newCameraMatrixEstimate);
                   cameraMatrixForMonitorShifting = opencv_core.noArray();
-                  sourceImageSize = new Size((int) BFLY_U3_23S6C_WIDTH_PIXELS, (int) BFLY_U3_23S6C_HEIGHT_PIXELS);
+                  sourceImageSize = new Size((int) BlackflyFisheyeParameters.BFLY_U3_23S6C_WIDTH_PIXELS, (int) BlackflyFisheyeParameters.BFLY_U3_23S6C_HEIGHT_PIXELS);
                   undistortedImageSize = new Size(undistortedImageWidth.get(), undistortedImageHeight.get());
                   imageForUndistortion = new SwapReference<>(Mat::new);
                   spareRGBMatForArUcoDrawing = new Mat(100, 100, opencv_core.CV_8UC3);
