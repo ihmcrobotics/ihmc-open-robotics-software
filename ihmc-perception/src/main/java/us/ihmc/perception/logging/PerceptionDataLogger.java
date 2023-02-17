@@ -59,6 +59,7 @@ public class PerceptionDataLogger
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
    private HDF5Manager hdf5Manager;
+   private final HDF5Tools hdf5Tools = new HDF5Tools();
    private RealtimeROS2Node realtimeROS2Node;
    private String filePath;
 
@@ -456,7 +457,7 @@ public class PerceptionDataLogger
             counts.put(namespace, imageCount + 1);
 
             imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-            HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+            hdf5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
             LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
          }
@@ -482,7 +483,7 @@ public class PerceptionDataLogger
             counts.put(namespace, imageCount + 1);
 
             imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-            HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+            hdf5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
             LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
          }
@@ -507,7 +508,7 @@ public class PerceptionDataLogger
             counts.put(namespace, imageCount + 1);
 
             imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-            HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+            hdf5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
             if (stopLoggingRequest.get())
             {
@@ -529,7 +530,7 @@ public class PerceptionDataLogger
            int imageCount = counts.get(namespace);
            counts.put(namespace, imageCount + 1);
 
-           HDF5Tools.storeBytes(group, imageCount, bytePointer);
+           hdf5Tools.storeBytes(group, imageCount, bytePointer);
         }
      });
    }
@@ -542,7 +543,7 @@ public class PerceptionDataLogger
          {
             Group group = hdf5Manager.getGroup(namespace);
             int index = hdf5Manager.getCount(namespace);
-            HDF5Tools.storeByteArray(group, index, message.getScan().toArray(), message.getScan().size());
+            hdf5Tools.storeByteArray(group, index, message.getScan().toArray(), message.getScan().size());
 
             if (stopLoggingRequest.get())
             {
@@ -565,7 +566,7 @@ public class PerceptionDataLogger
             if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
             {
                long count = hdf5Manager.getCount(namespace);
-               HDF5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
+               hdf5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
                hdf5Manager.resetBuffer(namespace);
             }
             buffer.addAll(array);
@@ -574,7 +575,7 @@ public class PerceptionDataLogger
             {
                LogTools.warn("Logging Last Remaining: [{}] -> Count: [{}]", namespace, bufferSize);
                long count = hdf5Manager.getCount(namespace);
-               HDF5Tools.storeFloatArray2D(group, count, buffer, bufferSize, array.length);
+               hdf5Tools.storeFloatArray2D(group, count, buffer, bufferSize, array.length);
                channels.get(namespace).setEnabled(false);
             }
          }
@@ -594,7 +595,7 @@ public class PerceptionDataLogger
             if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
             {
                long count = hdf5Manager.getCount(namespace);
-               HDF5Tools.storeLongArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
+               hdf5Tools.storeLongArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
                hdf5Manager.resetBuffer(namespace);
             }
             buffer.addAll(array);
@@ -603,7 +604,7 @@ public class PerceptionDataLogger
             {
                LogTools.warn("Logging Last Remaining: [{}] -> Count: [{}]", namespace, bufferSize);
                long count = hdf5Manager.getCount(namespace);
-               HDF5Tools.storeLongArray2D(group, count, buffer, bufferSize, array.length);
+               hdf5Tools.storeLongArray2D(group, count, buffer, bufferSize, array.length);
                channels.get(namespace).setEnabled(false);
             }
          }
