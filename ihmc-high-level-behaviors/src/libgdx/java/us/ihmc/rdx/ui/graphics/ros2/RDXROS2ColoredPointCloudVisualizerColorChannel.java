@@ -10,13 +10,13 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.ros2.ROS2Topic;
 
-public class RDXROS2ColoredPointCloudVisualizerPinholeColorChannel extends RDXROS2ColoredPointCloudVisualizerChannel
+public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2ColoredPointCloudVisualizerChannel
 {
    private Mat yuv1420Image;
    private BytedecoImage color8UC3Image;
    private BytedecoImage color8UC4Image;
 
-   public RDXROS2ColoredPointCloudVisualizerPinholeColorChannel(ROS2Topic<ImageMessage> topic)
+   public RDXROS2ColoredPointCloudVisualizerColorChannel(ROS2Topic<ImageMessage> topic)
    {
       super("Color ", topic);
    }
