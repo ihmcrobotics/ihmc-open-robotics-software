@@ -4,10 +4,21 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class SensorHeadParameters
 {
+   public static final double FOCAL_LENGTH_X_FOR_COLORING = 472.44896;   // These were tuned with sliders on the benchtop
+   public static final double FOCAL_LENGTH_Y_FOR_COLORING = 475.51022;   // by Bhavyansh and Duncan and copied here
+   public static final double PRINCIPAL_POINT_X_FOR_COLORING = 970.06801;// by hand.
+   public static final double PRINCIPAL_POINT_Y_FOR_COLORING = 608.84360;
+   // Fujinon FE185C086HA_1 lens
+   // https://www.fujifilm.com/us/en/business/optical-devices/machine-vision-lens/fe185-series
+   public static final double FE185C086HA_1_FOCAL_LENGTH = 0.0027;
+   public static final double FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS
+         = FE185C086HA_1_FOCAL_LENGTH * SpinnakerBlackfly.BFLY_U3_23S6C_WIDTH_PIXELS / SpinnakerBlackfly.BFLY_U3_23S6C_CMOS_SENSOR_WIDTH;
+
    public static final RigidBodyTransform OUSTER_TO_FISHEYE_TRANSFORM = new RigidBodyTransform();
    static
    {

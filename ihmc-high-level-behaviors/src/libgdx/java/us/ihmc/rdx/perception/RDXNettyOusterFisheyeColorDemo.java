@@ -4,7 +4,6 @@ import imgui.type.ImDouble;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
-import us.ihmc.perception.spinnaker.BlackflyFisheyeParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -24,10 +23,10 @@ public class RDXNettyOusterFisheyeColorDemo
    private RDXInteractableBlackflyFujinon interactableBlackflyFujinon;
    private volatile boolean running = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDouble coloringFx = new ImDouble(BlackflyFisheyeParameters.FOCAL_LENGTH_X_FOR_COLORING);
-   private final ImDouble coloringFy = new ImDouble(BlackflyFisheyeParameters.FOCAL_LENGTH_Y_FOR_COLORING);
-   private final ImDouble coloringCx = new ImDouble(BlackflyFisheyeParameters.PRINCIPAL_POINT_X_FOR_COLORING);
-   private final ImDouble coloringCy = new ImDouble(BlackflyFisheyeParameters.PRINCIPAL_POINT_Y_FOR_COLORING);
+   private final ImDouble coloringFx = new ImDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_COLORING);
+   private final ImDouble coloringFy = new ImDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_COLORING);
+   private final ImDouble coloringCx = new ImDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_COLORING);
+   private final ImDouble coloringCy = new ImDouble(SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_COLORING);
 
    public RDXNettyOusterFisheyeColorDemo()
    {
