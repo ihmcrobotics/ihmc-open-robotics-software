@@ -8,11 +8,11 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.ros2.ROS2Topic;
 
-public class RDXROS2ColoredPointCloudVisualizerPinholeDepthChannel extends RDXROS2ColoredPointCloudVisualizerChannel
+public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2ColoredPointCloudVisualizerChannel
 {
    private BytedecoImage depth16UC1Image;
 
-   public RDXROS2ColoredPointCloudVisualizerPinholeDepthChannel(ROS2Topic<ImageMessage> topic)
+   public RDXROS2ColoredPointCloudVisualizerDepthChannel(ROS2Topic<ImageMessage> topic)
    {
       super("Depth ", topic);
    }

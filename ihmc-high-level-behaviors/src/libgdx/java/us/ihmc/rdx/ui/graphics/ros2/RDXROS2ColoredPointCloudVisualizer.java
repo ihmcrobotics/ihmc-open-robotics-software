@@ -35,8 +35,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    private RDXColorGradientMode gradientMode = RDXColorGradientMode.WORLD_Z;
    private final ImBoolean useSinusoidalGradientPattern = new ImBoolean(false);
 
-   private final RDXROS2ColoredPointCloudVisualizerPinholeDepthChannel depthChannel;
-   private final RDXROS2ColoredPointCloudVisualizerPinholeColorChannel colorChannel;
+   private final RDXROS2ColoredPointCloudVisualizerDepthChannel depthChannel;
+   private final RDXROS2ColoredPointCloudVisualizerColorChannel colorChannel;
 
    private final PubSubImplementation pubSubImplementation;
    private RealtimeROS2Node realtimeROS2Node;
@@ -59,8 +59,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
       super(title + " (ROS 2)");
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
-      depthChannel = new RDXROS2ColoredPointCloudVisualizerPinholeDepthChannel(depthTopic);
-      colorChannel = new RDXROS2ColoredPointCloudVisualizerPinholeColorChannel(colorTopic);
+      depthChannel = new RDXROS2ColoredPointCloudVisualizerDepthChannel(depthTopic);
+      colorChannel = new RDXROS2ColoredPointCloudVisualizerColorChannel(colorTopic);
    }
 
    private void subscribe()
