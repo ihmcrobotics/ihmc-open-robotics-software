@@ -28,30 +28,28 @@ import us.ihmc.tools.string.StringTools;
 
 public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements RenderableProvider
 {
-   private final RDXROS2ColoredPointCloudVisualizerPinholeDepthChannel depthChannel;
-   private final RDXROS2ColoredPointCloudVisualizerPinholeColorChannel colorChannel;
-
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-
-   private final Object imageMessagesSyncObject = new Object();
-
+   private final String titleBeforeAdditions;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(false);
    private final ImBoolean useSensorColor = new ImBoolean(true);
    private RDXColorGradientMode gradientMode = RDXColorGradientMode.WORLD_Z;
    private final ImBoolean useSinusoidalGradientPattern = new ImBoolean(false);
 
-   private final String titleBeforeAdditions;
+   private final RDXROS2ColoredPointCloudVisualizerPinholeDepthChannel depthChannel;
+   private final RDXROS2ColoredPointCloudVisualizerPinholeColorChannel colorChannel;
+
    private final PubSubImplementation pubSubImplementation;
    private RealtimeROS2Node realtimeROS2Node;
+   private final Object imageMessagesSyncObject = new Object();
 
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer finalColoredDepthBuffer;
    private _cl_program openCLProgram;
    private _cl_kernel createPointCloudKernel;
-
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
    private final OpenCLRigidBodyTransformParameter sensorTransformToWorldParameter = new OpenCLRigidBodyTransformParameter();
+
+   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
                                              PubSubImplementation pubSubImplementation,
@@ -68,7 +66,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    private void subscribe()
    {
       subscribed.set(true);
-      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
       depthChannel.subscribe(realtimeROS2Node, imageMessagesSyncObject);
       colorChannel.subscribe(realtimeROS2Node, imageMessagesSyncObject);
       realtimeROS2Node.spin();
