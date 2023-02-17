@@ -43,7 +43,7 @@ import us.ihmc.tools.string.StringTools;
 
 import java.nio.ByteBuffer;
 
-public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements RenderableProvider
+public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements RenderableProvider
 {
    private final float FOCAL_LENGTH_COLOR = 0.00254f;
    private final float CMOS_WIDTH_COLOR = 0.0036894f;
@@ -114,7 +114,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private int colorWidth;
    private int colorHeight;
 
-   public RDXROS2ColoredDepthVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic)
+   public RDXROS2ColoredPointCloudVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> depthTopic, ROS2Topic<ImageMessage> colorTopic)
    {
       super(title + " (ROS 2)");
       titleBeforeAdditions = title;
