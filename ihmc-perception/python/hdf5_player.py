@@ -79,11 +79,11 @@ if __name__ == '__main__':
 
     path = '/home/bmishra/.ihmc/logs/perception/'
 
-    old_file = '20230117_161540_PerceptionLog.hdf5'
+    old_file = '20230207_214209_PerceptionLog.hdf5'
 
     new_file = '20230217_130000_PerceptionLog.hdf5'
 
-    test_file = 'test.hdf5'
+    test_file = 'UrbanIndoorPlanesOuster.hdf5'
 
     new_h5 = h5py.File(path + new_file, 'r')
 
@@ -95,10 +95,10 @@ if __name__ == '__main__':
 
 
     print_file_info(old_h5, old_file)
-    print_file_info(new_h5, new_file)
+    # print_file_info(new_h5, new_file)
 
-    for i in range(700):
-        copy_byte_dataset(old_h5, "l515/depth/" + str(i), test_h5, "l515/depth/" + str(i))
+    for i in range(507):
+        copy_byte_dataset(old_h5, "ouster/depth/" + str(i), test_h5, "ouster/depth/" + str(i))
 
     print_file_info(test_h5, test_file)
 
