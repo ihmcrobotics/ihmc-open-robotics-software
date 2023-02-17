@@ -28,20 +28,15 @@ public class OpenCLRigidBodyTransformParameter
 
    public void setParameter(RigidBodyTransform rigidBodyTransform)
    {
-      backingDirectFloatBuffer.rewind();
-      setTranslation(rigidBodyTransform.getTranslation());
-      setRotationMatrix(rigidBodyTransform.getRotation());
+      setParameter(rigidBodyTransform.getTranslation(), rigidBodyTransform.getRotation());
    }
 
-   public void setTranslation(Tuple3DReadOnly translation)
+   public void setParameter(Tuple3DReadOnly translation, RotationMatrixReadOnly rotationMatrix)
    {
+      backingDirectFloatBuffer.rewind();
       backingDirectFloatBuffer.put(translation.getX32());
       backingDirectFloatBuffer.put(translation.getY32());
       backingDirectFloatBuffer.put(translation.getZ32());
-   }
-
-   public void setRotationMatrix(RotationMatrixReadOnly rotationMatrix)
-   {
       backingDirectFloatBuffer.put((float) rotationMatrix.getM00());
       backingDirectFloatBuffer.put((float) rotationMatrix.getM01());
       backingDirectFloatBuffer.put((float) rotationMatrix.getM02());
