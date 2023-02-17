@@ -82,36 +82,37 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
       doReceiveMessageOnThread(() ->
       {
          int numberOfBytes;
-         int imageFormat;
          synchronized (syncObject) // For interacting with the ImageMessage
          {
             imageWidth = imageMessage.getImageWidth();
             imageHeight = imageMessage.getImageHeight();
             numberOfPixels = imageWidth * imageHeight;
-            imageFormat = imageMessage.getFormat();
 
             if (incomingCompressedImageBuffer == null)
             {
-               if (imageFormat == ImageMessageFormat.DEPTH_PNG_16UC1)
+               switch (ImageMessageFormat.getFormat(imageMessage))
                {
-                  LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_COMPRESSED_16", topic.getName());
-                  bytesIfUncompressed = numberOfPixels * 2;
-                  incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                  incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+                  case DEPTH_PNG_16UC1:
+                  {
+                     LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_COMPRESSED_16", topic.getName());
+                     bytesIfUncompressed = numberOfPixels * 2;
+                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
+                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
 
-                  compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-                  decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
-                  normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
-               }
-               else if (imageFormat == ImageMessageFormat.COLOR_JPEG_RGB8)
-               {
-                  LogTools.info("Creating Image Message Visualizer for {} with type COLOR_JPEG_COMPRESSED_24", topic.getName());
-                  bytesIfUncompressed = numberOfPixels * 3;
-                  incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-                  incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+                     compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+                     decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+                     normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
+                  }
+                  case COLOR_JPEG_RGB8:
+                  {
+                     LogTools.info("Creating Image Message Visualizer for {} with type COLOR_JPEG_COMPRESSED_24", topic.getName());
+                     bytesIfUncompressed = numberOfPixels * 3;
+                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
+                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
 
-                  compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-                  decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+                     compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+                     decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+                  }
                }
             }
 
@@ -136,14 +137,17 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
          {
             updateImageDimensions(imageMessage.getImageWidth(), imageMessage.getImageHeight());
 
-            if (imageFormat == ImageMessageFormat.DEPTH_PNG_16UC1)
+            switch (ImageMessageFormat.getFormat(imageMessage))
             {
-               BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
-               BytedecoOpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
-            }
-            else if (imageFormat == ImageMessageFormat.COLOR_JPEG_RGB8)
-            {
-               opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+               case DEPTH_PNG_16UC1:
+               {
+                  BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
+                  BytedecoOpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
+               }
+               case COLOR_JPEG_RGB8:
+               {
+                  opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+               }
             }
          }
       });

@@ -26,6 +26,7 @@ import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.nio.ByteBuffer;
@@ -252,5 +253,24 @@ public class PerceptionMessageTools
    public static void publishPlanarRegionsList(PlanarRegionsList planarRegionsList, ROS2Topic<PlanarRegionsListMessage> topic, ROS2Helper ros2Helper)
    {
       ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+   }
+
+   public static void extractImageMessageData(ImageMessage imageMessage, ByteBuffer byteBuffer)
+   {
+      int numberOfBytes = imageMessage.getData().size();
+      int bytesPerPixel = ImageMessageFormat.getFormat(imageMessage).getBytesPerPixel();
+      byteBuffer.rewind();
+      byteBuffer.limit(imageMessage.getImageWidth() * imageMessage.getImageHeight() * bytesPerPixel);
+      for (int i = 0; i < numberOfBytes; i++)
+      {
+         byteBuffer.put(imageMessage.getData().get(i));
+      }
+      byteBuffer.flip();
+   }
+
+   public static double calculateDelay(ImageMessage imageMessage)
+   {
+      return TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
+                                      imageMessage.getAcquisitionTime().getAdditionalNanos());
    }
 }

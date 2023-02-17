@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.comms.ImageMessageFormat;
 
 import java.awt.image.BufferedImage;
 import java.time.Instant;
@@ -374,14 +375,14 @@ public class BytedecoOpenCVTools
                                        long sequenceNumber,
                                        int height,
                                        int width,
-                                       int format)
+                                       ImageMessageFormat format)
    {
       imageMessage.getData().resetQuick();
       for (int i = 0; i < data.limit(); i++)
       {
          imageMessage.getData().add(data.get(i));
       }
-      imageMessage.setFormat(format);
+      imageMessage.setFormat(format.ordinal());
       imageMessage.setImageHeight(height);
       imageMessage.setImageWidth(width);
       imageMessage.getPosition().set(cameraPose.getPosition());
