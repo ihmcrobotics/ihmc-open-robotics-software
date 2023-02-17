@@ -3,6 +3,7 @@ package us.ihmc.rdx.logging;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
@@ -24,6 +25,7 @@ public class RDXPerceptionDataLoaderPanel extends ImGuiPanel
 {
    private PerceptionDataLoader loader;
    private Mat cvImage;
+   private final BytePointer imageBytePointer = new BytePointer(1000000);
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString perceptionLogPath = new ImString(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY + "/");
@@ -132,7 +134,7 @@ public class RDXPerceptionDataLoaderPanel extends ImGuiPanel
                if (channel.getName().contains("depth"))
                {
                   cvImage = new Mat();
-                  loader.loadCompressedDepth(channel.getName(), channel.getIndex(), cvImage);
+                  loader.loadCompressedDepth(channel.getName(), channel.getIndex(), imageBytePointer, cvImage);
                   BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
                }
                if (channel.getName().contains("color"))

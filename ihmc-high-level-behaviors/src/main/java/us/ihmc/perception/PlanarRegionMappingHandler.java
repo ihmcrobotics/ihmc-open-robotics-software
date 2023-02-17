@@ -1,6 +1,7 @@
 package us.ihmc.perception;
 
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -87,9 +88,11 @@ public class PlanarRegionMappingHandler
    private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
 
    private int planarRegionListIndex = 0;
-   private int perceptionLogIndex = 400;
+   private int perceptionLogIndex = 0;
 
    private String sensorLogChannelName;
+
+   private final BytePointer depthPointer = new BytePointer(1000000);
    private BytedecoImage depth16UC1Image;
 
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
@@ -164,9 +167,9 @@ public class PlanarRegionMappingHandler
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
-      perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depth16UC1Image.getBytedecoOpenCVMat());
-      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
-      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
+      perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
+      //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
+      //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
    }
 
    private void createOuster(int depthHeight, int depthWidth, boolean smoothing)
@@ -177,7 +180,7 @@ public class PlanarRegionMappingHandler
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
-      perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depth16UC1Image.getBytedecoOpenCVMat());
+      perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
       perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
    }
@@ -293,9 +296,9 @@ public class PlanarRegionMappingHandler
 
    private void loadDataFromPerceptionLog(PerceptionDataLoader loader, int index)
    {
-      loader.loadCompressedDepth(sensorLogChannelName, index, depth16UC1Image.getBytedecoOpenCVMat());
-      sensorTransformToWorld.getTranslation().set(sensorPositionBuffer.get(index));
-      sensorTransformToWorld.getRotation().set(sensorOrientationBuffer.get(index));
+      loader.loadCompressedDepth(sensorLogChannelName, index, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
+      //sensorTransformToWorld.getTranslation().set(sensorPositionBuffer.get(index));
+      //sensorTransformToWorld.getRotation().set(sensorOrientationBuffer.get(index));
       cameraFrame.update();
    }
 
