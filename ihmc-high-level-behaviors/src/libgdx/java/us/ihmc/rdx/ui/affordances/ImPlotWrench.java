@@ -47,7 +47,7 @@ public class ImPlotWrench
          wrenchPlotPanels.get(side).getPlots().add(linearPlots.get(side));
          wrenchPlotPanels.get(side).getPlots().add(angularPlots.get(side));
 
-         baseUI.getImGuiPanelManager().queueAddPanel(wrenchPlotPanels.get(side));
+         baseUI.getImGuiPanelManager().addPanel(wrenchPlotPanels.get(side));
       }
    }
 

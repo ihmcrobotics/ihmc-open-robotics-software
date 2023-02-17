@@ -47,12 +47,14 @@ public class RDXArmManager
    private volatile boolean readyToCopySolution = false;
 
    private final HandWrenchCalculator handWrenchCalculator;
+
+   // plots were for debugging purpose, but could be useful in the future so it is here for now but not added to the panels or instantiated.
+   private final boolean doPlotWrenchAndJointTorques = false;
    private ImPlotWrench wrenchPlot;
    private ImPlotArmJointTorques armTorquePlot;
    private ImPlotArmJointTorques armGravityTorquePlot;
    private RDXBaseUI baseUI = null;
    private ImBoolean indicateWrenchOnScreen = new ImBoolean(true);
-
 
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -88,9 +90,12 @@ public class RDXArmManager
    {
       create();
       this.baseUI = baseUI;
-      wrenchPlot = new ImPlotWrench(baseUI);
-      armTorquePlot = new ImPlotArmJointTorques(baseUI, "Arm joints torque", handWrenchCalculator.getArmJoints());
-      armGravityTorquePlot = new ImPlotArmJointTorques(baseUI, "Arm joints gravity compensation torque", "gravity compensation", handWrenchCalculator.getArmJoints());
+      if (doPlotWrenchAndJointTorques)
+      {
+         wrenchPlot = new ImPlotWrench(baseUI);
+         armTorquePlot = new ImPlotArmJointTorques(baseUI, "Arm joints torque", handWrenchCalculator.getArmJoints());
+         armGravityTorquePlot = new ImPlotArmJointTorques(baseUI, "Arm joints gravity compensation torque", "gravity compensation", handWrenchCalculator.getArmJoints());
+      }
    }
 
    public void create()
@@ -113,12 +118,10 @@ public class RDXArmManager
       for (RobotSide side : interactableHands.sides())
       {
          armManagers.get(side).update(interactableHands.get(side), desiredRobot);
-         wrenchPlot.update(side, handWrenchCalculator.getFilteredWrench().get(side));
-         armTorquePlot.update(side, handWrenchCalculator.getJointTorques().get(side));
-         armGravityTorquePlot.update(side, handWrenchCalculator.getJointTorquesForGravity().get(side));
-         baseUI.getPrimary3DPanel().getPanelHandWrenchIndicator().update(side,
-                                         handWrenchCalculator.getLinearWrenchMagnitude(side, true),
-                                         handWrenchCalculator.getAngularWrenchMagnitude(side, true));
+         if (doPlotWrenchAndJointTorques)
+         {
+            updatePlots(side);
+         }
 
          // wrench expressed in wrist pitch body fixed-frame
          interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getFilteredWrench().get(side));
@@ -170,6 +173,16 @@ public class RDXArmManager
 
       // TODO Update the spine joints
       desiredRobot.getRootJoint().updateFramesRecursively();
+   }
+
+   private void updatePlots(RobotSide side)
+   {
+      wrenchPlot.update(side, handWrenchCalculator.getFilteredWrench().get(side));
+      armTorquePlot.update(side, handWrenchCalculator.getJointTorques().get(side));
+      armGravityTorquePlot.update(side, handWrenchCalculator.getJointTorquesForGravity().get(side));
+      baseUI.getPrimary3DPanel().getPanelHandWrenchIndicator().update(side,
+                                                                      handWrenchCalculator.getLinearWrenchMagnitude(side, true),
+                                                                      handWrenchCalculator.getAngularWrenchMagnitude(side, true));
    }
 
    public void renderImGuiWidgets()
