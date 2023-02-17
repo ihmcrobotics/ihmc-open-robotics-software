@@ -24,8 +24,7 @@ kernel void imageToPointCloud(global float* parameters,
    int x = get_global_id(0);
    int y = get_global_id(1);
 
-   int pointsToAddAboveAndBelowForColorDetail = parameters[POINTS_TO_ADD_ABOVE_AND_BELOW_FOR_COLOR_DETAIL];
-   int totalVerticalPointsForColorDetail = 1 + 2 * pointsToAddAboveAndBelowForColorDetail;
+   int totalVerticalPointsForColorDetail = 1 + 2 * parameters[POINTS_TO_ADD_ABOVE_AND_BELOW_FOR_COLOR_DETAIL];
    int ousterY = y / totalVerticalPointsForColorDetail;
 
    float discreteResolution = 0.001f;
@@ -55,7 +54,7 @@ kernel void imageToPointCloud(global float* parameters,
                                                   origin);
 
    float pointSize = parameters[POINT_SIZE] * eyeDepthInMeters;
-   int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - pointsToAddAboveAndBelowForColorDetail;
+   int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - parameters[POINTS_TO_ADD_ABOVE_AND_BELOW_FOR_COLOR_DETAIL];
    float verticalPointOffsetLocalZ = verticalColorDetailOffsetIndex * pointSize / 2.0f;
    float3 colorDetailPointOffsetLocalFrame = (float3) (0.0, 0.0, verticalPointOffsetLocalZ);
    float3 colorDetailPointOffset = transformPoint3D32_2(colorDetailPointOffsetLocalFrame,
