@@ -18,6 +18,11 @@ public enum ImageMessageFormat
       this.bytesPerPixel = bytesPerPixel;
    }
 
+   public void packMessageFormat(ImageMessage imageMessage)
+   {
+      imageMessage.setFormat(ordinal());
+   }
+
    public static ImageMessageFormat getFormat(ImageMessage imageMessage)
    {
       for (ImageMessageFormat imageMessageFormat : values)
