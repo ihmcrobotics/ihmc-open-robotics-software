@@ -114,6 +114,8 @@ public class BytedecoRealsense
          realsense2.rs2_start_processing_queue(colorAlignProcessingBlock, colorFrameQueue, error);
          checkError(true, "");
       }
+
+      LogTools.info("Started processing queue");
    }
 
    public boolean readFrameData()
@@ -194,6 +196,13 @@ public class BytedecoRealsense
             {
                depthFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(syncedFrames, error);
                realsense2.rs2_get_video_stream_intrinsics(depthFrameStreamProfile, depthStreamIntrinsics, error);
+               LogTools.info("Depth intrinsics: {}", String.format("Depth: fx: %.4f, fy: %.4f, cx: %.4f, cy: %.4f, h: %d, w: %d",
+                                                                   depthStreamIntrinsics.fx(),
+                                                                   depthStreamIntrinsics.fy(),
+                                                                   depthStreamIntrinsics.ppx(),
+                                                                   depthStreamIntrinsics.ppy(),
+                                                                   depthHeight,
+                                                                   depthWidth));
             }
 
             if (colorEnabled)
@@ -211,6 +220,13 @@ public class BytedecoRealsense
                {
                   colorFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(extractedColorFrame, error);
                   realsense2.rs2_get_video_stream_intrinsics(colorFrameStreamProfile, colorStreamIntrinsics, error);
+                  LogTools.info("Color intrinsics: {}", String.format("Color: fx: %.4f, fy: %.4f, cx: %.4f, cy: %.4f, h: %d, w: %d",
+                                                                      colorStreamIntrinsics.fx(),
+                                                                      colorStreamIntrinsics.fy(),
+                                                                      colorStreamIntrinsics.ppx(),
+                                                                      colorStreamIntrinsics.ppy(),
+                                                                      colorHeight,
+                                                                      colorWidth));
                }
             }
 
