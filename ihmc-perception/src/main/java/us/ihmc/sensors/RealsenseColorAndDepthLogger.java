@@ -34,10 +34,6 @@ import java.util.Date;
  */
 public class RealsenseColorAndDepthLogger
 {
-   /*
-    *  TODO: Add shutdown hook
-   * */
-
    private final Activator nativesLoadedActivator;
    private final FramePose3D cameraPose = new FramePose3D();
    private final String colorChannelName;
@@ -169,8 +165,10 @@ public class RealsenseColorAndDepthLogger
             cameraPose.setToZero(cameraFrame);
             cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-            BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthBytePointer);
-            perceptionDataLogger.storeBytesFromPointer(depthChannelName, compressedDepthBytePointer);
+//            BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthBytePointer);
+//            perceptionDataLogger.storeBytesFromPointer(depthChannelName, compressedDepthBytePointer);
+
+            BytedecoOpenCVTools.displayDepth("Depth", depth16UC1Image, 1);
 
             //BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorBytePointer);
             //perceptionDataLogger.storeBytesFromPointer(colorChannelName, compressedDepthBytePointer);

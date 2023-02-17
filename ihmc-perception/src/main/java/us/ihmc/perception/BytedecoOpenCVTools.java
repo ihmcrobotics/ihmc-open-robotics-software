@@ -341,16 +341,24 @@ public class BytedecoOpenCVTools
       Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
       Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
 
+      BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
+      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
+
+      opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
+      display(tag, finalDisplayDepth, delay);
+   }
+
+   public static void displayHeightMap(String tag, Mat image, int delay, float scale)
+   {
+      Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
+      Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
 
       BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
 
       opencv_imgproc.threshold(displayDepth, displayDepth, 100, 255, opencv_imgproc.CV_THRESH_TOZERO_INV);
-
       opencv_core.normalize(displayDepth, displayDepth, 255, 0, opencv_core.NORM_MINMAX, opencv_core.CV_8UC1, new Mat());
 
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
-
-
 
       opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
       display(tag, finalDisplayDepth, delay);

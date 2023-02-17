@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImInt;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
@@ -84,6 +85,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    
    private Activator nativesLoadedActivator;
    private BytedecoImage bytedecoDepthImage;
+   private final BytePointer depthBytePointer = new BytePointer(1000000);
+
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
@@ -123,7 +126,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             try
             {
-               perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+               perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), depthBytePointer, bytedecoDepthImage.getBytedecoOpenCVMat());
                Thread.sleep(100);
                perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
                Thread.sleep(100);
@@ -156,7 +159,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
             try
             {
-               perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+               perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), depthBytePointer, bytedecoDepthImage.getBytedecoOpenCVMat());
                Thread.sleep(100);
                perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
                Thread.sleep(100);
@@ -214,7 +217,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                   {
                      if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
                      {
-                        perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+                        perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), depthBytePointer, bytedecoDepthImage.getBytedecoOpenCVMat());
                         ThreadTools.sleep(100);
                      }
                   });

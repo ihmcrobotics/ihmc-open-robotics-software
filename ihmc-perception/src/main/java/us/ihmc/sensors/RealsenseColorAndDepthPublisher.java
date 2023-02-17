@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -94,6 +95,12 @@ public class RealsenseColorAndDepthPublisher
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_depth_node");
       ros2Helper = new ROS2Helper(ros2Node);
+
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+      {
+         ThreadTools.sleepSeconds(0.5);
+         destroy();
+      }, getClass().getSimpleName() + "Shutdown"));
 
       while (running)
       {
