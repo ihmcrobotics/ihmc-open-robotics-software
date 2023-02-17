@@ -9,7 +9,6 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.realsense.BytedecoRealsense;
@@ -25,14 +24,25 @@ import us.ihmc.tools.thread.Throttler;
 import java.time.Instant;
 import java.util.function.Supplier;
 
-import static org.bytedeco.opencv.global.opencv_highgui.imshow;
-import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
-
 /**
  * Publishes color and depth from Realsense D435
- * ----+ L515 Device Configuration: Serial Number: F0245563, Depth Height 768, Depth Width: 1024, Depth FPS: 15, Color Height 720, Color Width: 1280, Color FPS:
- * 15
- * ----+ D435: Serial Number: 752112070330, Depth Width: 848, Depth Height: 480, Depth FPS: 30, Color Width: 848, Color Height: 480, Color FPS: 30
+ * L515 Device Configuration:
+ * - Serial Number: F0245563
+ * - Depth Height: 768
+ * - Depth Width: 1024
+ * - Depth FPS: 15
+ * - Color Height: 720
+ * - Color Width: 1280
+ * - Color FPS: 15
+ *
+ * D435 Device Configuration:
+ * - Serial Number: 752112070330
+ * - Depth Width: 848
+ * - Depth Height: 480
+ * - Depth FPS: 30
+ * - Color Width: 848
+ * - Color Height: 480
+ * - Color FPS: 30
  */
 public class RealsenseColorAndDepthPublisher
 {
@@ -158,11 +168,26 @@ public class RealsenseColorAndDepthPublisher
             cameraPose.setToZero(cameraFrame);
             cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-            PerceptionMessageTools.publishPNGCompressedDepthImage(depth16UC1Image, depthTopic, depthImageMessage, ros2Helper, cameraPose, now, depthSequenceNumber++,
-                                                           sensor.getDepthHeight(), sensor.getDepthWidth());
+            PerceptionMessageTools.publishPNGCompressedDepthImage(depth16UC1Image,
+                                                                  depthTopic,
+                                                                  depthImageMessage,
+                                                                  ros2Helper,
+                                                                  cameraPose,
+                                                                  now,
+                                                                  depthSequenceNumber++,
+                                                                  sensor.getDepthHeight(),
+                                                                  sensor.getDepthWidth());
 
-            PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3Image, yuvColorImage, colorTopic, colorImageMessage, ros2Helper, cameraPose, now,
-                                                           colorSequenceNumber++, sensor.getColorHeight(), sensor.getColorWidth());
+            PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3Image,
+                                                                  yuvColorImage,
+                                                                  colorTopic,
+                                                                  colorImageMessage,
+                                                                  ros2Helper,
+                                                                  cameraPose,
+                                                                  now,
+                                                                  colorSequenceNumber++,
+                                                                  sensor.getColorHeight(),
+                                                                  sensor.getColorWidth());
 
          }
       }
