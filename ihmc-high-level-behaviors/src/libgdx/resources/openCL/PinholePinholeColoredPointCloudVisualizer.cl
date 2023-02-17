@@ -1,20 +1,12 @@
+#define GRADIENT_MODE_WORLD_Z 0
+#define GRADIENT_MODE_SENSOR_X 1
+
 kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
                              read_only image2d_t colorRGBAImage,
                              global float* finalPointFloatBuffer,
                              global float* parameters,
-                             global int sinusoidalPatternEnabled,
                              global float* sensorTransformToWorld)
 {
-   // for 3 modes of coloring
-   enum VIEWMODE
-   {
-      COLOR = 1,
-      DEPTH = 2,
-      HEIGHT = 3
-   };
-   enum VIEWMODE viewMode;
-   viewMode = COLOR;
-
    float focalLength = parameters[0];
    float cmosWidth = parameters[1];
    float cmosHeight = parameters[2];
@@ -30,8 +22,9 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
    int colorImageWidth = parameters[9];
    int colorImageHeight = parameters[10];
    float discreteResolution = parameters[11];
-
-   bool sinusoidal = sinusoidalPatternEnabled;
+   bool useSensorColor = parameters[12];
+   int coloringMode = parameters[13];
+   bool sinusoidal = parameters[14];
 
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -61,25 +54,18 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
    float3 worldFramePoint = transform(zUp3DX, zUp3DY, zUp3DZ, sensorTransformToWorld);
 
    int color;
-   if (viewMode == COLOR)
+   if (useSensorColor && pixelInBounds)
    {
-      if (pixelInBounds)
-      {
-         uint4 rgba8888Color = read_imageui(colorRGBAImage, (int2) (pixelIndexX, pixelIndexY));
-         color = (rgba8888Color.x << 24) | (rgba8888Color.y << 16) | (rgba8888Color.z << 8) | 255;
-      }
-      else
-      {
-         color = calculateGradientColor((float) worldFramePoint.z, sinusoidal);
-      }
+      uint4 rgba8888Color = read_imageui(colorRGBAImage, (int2) (pixelIndexX, pixelIndexY));
+      color = (rgba8888Color.x << 24) | (rgba8888Color.y << 16) | (rgba8888Color.z << 8) | 255;
    }
-   else if (viewMode == DEPTH)
-   {
-      color = calculateGradientColor((float) eyeDepthInMeters, sinusoidal);
-   }
-   else
+   else if (gradientMode == GRADIENT_MODE_WORLD_Z)
    {
       color = calculateGradientColor((float) worldFramePoint.z, sinusoidal);
+   }
+   else // GRADIENT_MODE_SENSOR_X
+   {
+      color = calculateGradientColor((float) eyeDepthInMeters, sinusoidal);
    }
 
    int pointStartIndex = (depthImageWidth * y + x) * 8;

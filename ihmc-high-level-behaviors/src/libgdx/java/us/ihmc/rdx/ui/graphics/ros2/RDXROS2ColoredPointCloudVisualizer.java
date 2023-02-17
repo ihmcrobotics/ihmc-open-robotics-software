@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
@@ -13,7 +13,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.opencl.OpenCLBooleanParameter;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 import us.ihmc.perception.realsense.BytedecoRealsense;
@@ -21,6 +20,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.graphics.RDXColoredPointCloudMode;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -28,8 +28,6 @@ import us.ihmc.tools.string.StringTools;
 
 public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements RenderableProvider
 {
-   private final static boolean sinusoidalPatternEnabled = false;
-
    private final RDXROS2ColoredPointCloudVisualizerPinholeDepthChannel depthChannel;
    private final RDXROS2ColoredPointCloudVisualizerPinholeColorChannel colorChannel;
 
@@ -39,6 +37,10 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(false);
+   private final ImBoolean useSensorColor = new ImBoolean(true);
+   private RDXColoredPointCloudMode coloringMode = RDXColoredPointCloudMode.WORLD_Z;
+   private final ImBoolean useSinusoidalGradientPattern = new ImBoolean(false);
+
    private final String titleBeforeAdditions;
    private final PubSubImplementation pubSubImplementation;
    private RealtimeROS2Node realtimeROS2Node;
@@ -49,7 +51,6 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    private _cl_kernel createPointCloudKernel;
 
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
-   private final OpenCLBooleanParameter sinusoidalPatternEnabledParameter = new OpenCLBooleanParameter();
    private final OpenCLRigidBodyTransformParameter sensorTransformToWorldParameter = new OpenCLRigidBodyTransformParameter();
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
@@ -124,7 +125,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
          parametersBuffer.setParameter((float) colorChannel.getImageWidth());
          parametersBuffer.setParameter((float) colorChannel.getImageHeight());
          parametersBuffer.setParameter(BytedecoRealsense.L515_DEPTH_DISCRETIZATION);
-         sinusoidalPatternEnabledParameter.setParameter(sinusoidalPatternEnabled);
+         parametersBuffer.setParameter(useSensorColor.get());
+         parametersBuffer.setParameter(coloringMode.ordinal());
+         parametersBuffer.setParameter(useSinusoidalGradientPattern.get());
 
          // Upload the buffers to the OpenCL device (GPU)
          depthChannel.getDepth16UC1Image().writeOpenCLImage(openCLManager);
@@ -137,8 +140,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
          openCLManager.setKernelArgument(createPointCloudKernel, 1, colorChannel.getColor8UC4Image().getOpenCLImageObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 2, finalColoredDepthBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 3, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(createPointCloudKernel, 4, sinusoidalPatternEnabledParameter);
-         openCLManager.setKernelArgument(createPointCloudKernel, 5, sensorTransformToWorldParameter.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(createPointCloudKernel, 4, sensorTransformToWorldParameter.getOpenCLBufferObject());
 
          // Run the OpenCL kernel
          openCLManager.execute2D(createPointCloudKernel, depthChannel.getImageWidth(), depthChannel.getImageHeight());
@@ -185,6 +187,15 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
          colorChannel.getSequenceDiscontinuityPlot().renderImGuiWidgets();
       if (depthChannel.getReceivedOne())
          depthChannel.getSequenceDiscontinuityPlot().renderImGuiWidgets();
+      ImGui.checkbox(labels.get("Use sensor color"), useSensorColor);
+      ImGui.text("Gradient mode:");
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("World Z"), coloringMode == RDXColoredPointCloudMode.WORLD_Z))
+         coloringMode = RDXColoredPointCloudMode.WORLD_Z;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Sensor X"), coloringMode == RDXColoredPointCloudMode.SENSOR_X))
+         coloringMode = RDXColoredPointCloudMode.SENSOR_X;
+      ImGui.checkbox(labels.get("Sinusoidal gradient"), useSinusoidalGradientPattern);
    }
 
    @Override
