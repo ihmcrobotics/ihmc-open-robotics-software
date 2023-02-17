@@ -77,17 +77,24 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
-   public void testLoggingByteArray()
+   public void testLoggingByteArray() throws InterruptedException
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_byte_array.hdf5", hdf5.H5F_ACC_TRUNC());
       Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
 
-      byte[] dataArray = {(byte) 123, (byte) 255, (byte) 1, (byte) 3, (byte) 4, (byte) 42, (byte) 153, (byte) 10, (byte) 11, (byte) 13, (byte) 15};
+      //byte[] dataArray = {(byte) 123, (byte) 255, (byte) 1, (byte) 3, (byte) 4, (byte) 42, (byte) 153, (byte) 10, (byte) 11, (byte) 13, (byte) 15};
+      byte[] dataArray = new byte[100];
+
+      for (int i = 0; i < dataArray.length; i++)
+      {
+         dataArray[i] = (byte) i;
+      }
+
       BytePointer dataBytePointer = new BytePointer(dataArray);
 
       HDF5Tools.storeBytes(writeGroup, 0, dataBytePointer);
 
-      writeGroup._close();
+      //writeGroup._close();
       hdf5ManagerWriter.closeFile();
       LogTools.info("File closed");
 
