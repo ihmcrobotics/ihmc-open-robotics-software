@@ -4,13 +4,11 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -18,7 +16,8 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
-import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
@@ -27,36 +26,45 @@ import java.time.Instant;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
 public class OusterHeightMapUpdater
 {
    private static final long updateDTMillis = 100;
    private static final int initialPublishFrequency = 5;
 
+   private final RealtimeROS2Node realtimeROS2Node;
+   private final IHMCRealtimeROS2Publisher<HeightMapMessage> heightMapPublisher;
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final HeightMapUpdater heightMapUpdater;
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
-   private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
-                                                                                                    ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-   public OusterHeightMapUpdater(String robotName, RealtimeROS2Node ros2Node)
+   private final ScheduledExecutorService executorService
+         = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
+                                                                 ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+
+   public OusterHeightMapUpdater(ROS2ControllerPublishSubscribeAPI ros2)
    {
-      IHMCRealtimeROS2Publisher<HeightMapMessage > heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.HEIGHT_MAP_STATE_REQUEST, m -> consumeStateRequestMessage(m.readNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, ControllerAPIDefinition.getOutputTopic(robotName), m -> consumeStateChangedMessage(m.readNextData()));
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_height_map_publisher");
+      heightMapPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.HEIGHT_MAP_OUTPUT, ROS2QosProfile.BEST_EFFORT());
+      ros2.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_STATE_REQUEST, this::consumeStateRequestMessage);
+      ros2.subscribeToControllerViaCallback(HighLevelStateChangeStatusMessage.class, this::consumeStateChangedMessage);
 
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
 
-      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(new ROS2Helper(ros2Node));
+      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2);
       ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.PARAMETERS, heightMapUpdater.getHeightMapParameters());
       ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.FILTER_PARAMETERS, heightMapUpdater.getHeightMapFilterParameters());
 
       heightMapUpdater.setPublishFrequency(initialPublishFrequency);
       heightMapUpdater.setEnableUpdates(true);
 
+      realtimeROS2Node.spin();
+   }
+
+   public void start()
+   {
       executorService.scheduleAtFixedRate(this::update, 0, updateDTMillis, TimeUnit.MILLISECONDS);
    }
 
