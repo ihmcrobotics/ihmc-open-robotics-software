@@ -2,9 +2,9 @@ package us.ihmc.perception.opencl;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_mem;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.tools.NativeMemoryTools;
 
@@ -29,20 +29,28 @@ public class OpenCLRigidBodyTransformParameter
    public void setParameter(RigidBodyTransform rigidBodyTransform)
    {
       backingDirectFloatBuffer.rewind();
-      Vector3DBasics translation = rigidBodyTransform.getTranslation();
+      setTranslation(rigidBodyTransform.getTranslation());
+      setRotationMatrix(rigidBodyTransform.getRotation());
+   }
+
+   public void setTranslation(Tuple3DReadOnly translation)
+   {
       backingDirectFloatBuffer.put(translation.getX32());
       backingDirectFloatBuffer.put(translation.getY32());
       backingDirectFloatBuffer.put(translation.getZ32());
-      RotationMatrixBasics rotation = rigidBodyTransform.getRotation();
-      backingDirectFloatBuffer.put((float) rotation.getM00());
-      backingDirectFloatBuffer.put((float) rotation.getM01());
-      backingDirectFloatBuffer.put((float) rotation.getM02());
-      backingDirectFloatBuffer.put((float) rotation.getM10());
-      backingDirectFloatBuffer.put((float) rotation.getM11());
-      backingDirectFloatBuffer.put((float) rotation.getM12());
-      backingDirectFloatBuffer.put((float) rotation.getM20());
-      backingDirectFloatBuffer.put((float) rotation.getM21());
-      backingDirectFloatBuffer.put((float) rotation.getM22());
+   }
+
+   public void setRotationMatrix(RotationMatrixReadOnly rotationMatrix)
+   {
+      backingDirectFloatBuffer.put((float) rotationMatrix.getM00());
+      backingDirectFloatBuffer.put((float) rotationMatrix.getM01());
+      backingDirectFloatBuffer.put((float) rotationMatrix.getM02());
+      backingDirectFloatBuffer.put((float) rotationMatrix.getM10());
+      backingDirectFloatBuffer.put((float) rotationMatrix.getM11());
+      backingDirectFloatBuffer.put((float) rotationMatrix.getM12());
+      backingDirectFloatBuffer.put((float) rotationMatrix.getM20());
+      backingDirectFloatBuffer.put((float) rotationMatrix.getM21());
+      backingDirectFloatBuffer.put((float) rotationMatrix.getM22());
    }
 
    public void getResult(RigidBodyTransform rigidBodyTransformToPack)

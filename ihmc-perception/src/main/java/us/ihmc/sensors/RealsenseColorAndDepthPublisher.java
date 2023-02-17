@@ -147,11 +147,11 @@ public class RealsenseColorAndDepthPublisher
 
             MutableBytePointer depthFrameData = sensor.getDepthFrameData();
             depth16UC1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
-            PerceptionMessageTools.setDepthExtrinsicsFromRealsense(sensor, depthImageMessage.getIntrinsicParameters());
+            PerceptionMessageTools.setDepthExtrinsicsFromRealsense(sensor, depthImageMessage);
 
             MutableBytePointer colorFrameData = sensor.getColorFrameData();
             color8UC3Image = new Mat(this.colorHeight, this.colorWidth, opencv_core.CV_8UC3, colorFrameData);
-            PerceptionMessageTools.setColorExtrinsicsFromRealsense(sensor, colorImageMessage.getIntrinsicParameters());
+            PerceptionMessageTools.setColorExtrinsicsFromRealsense(sensor, colorImageMessage);
 
             // Important not to store as a field, as update() needs to be called each frame
             ReferenceFrame cameraFrame = sensorFrameUpdater.get();
