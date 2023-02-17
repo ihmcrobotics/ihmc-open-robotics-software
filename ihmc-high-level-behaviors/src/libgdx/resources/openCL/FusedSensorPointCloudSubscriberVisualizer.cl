@@ -1,6 +1,4 @@
-kernel void unpackPointCloud(global float* parameters,
-                             global int* decompressedPointBuffer,
-                             global float* pointCloudVertexBuffer)
+kernel void unpackPointCloud(global float* parameters, global int* decompressedPointBuffer, global float* pointCloudVertexBuffer)
 {
    int n = get_global_id(0);
 

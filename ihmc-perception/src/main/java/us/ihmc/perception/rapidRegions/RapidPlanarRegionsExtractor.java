@@ -307,8 +307,6 @@ public class RapidPlanarRegionsExtractor
          openCLManager.execute2D(perspectiveBackProjectionKernel, imageWidth, imageHeight);
          cloudBuffer.readOpenCLBufferObject(openCLManager);
       }
-
-      openCLManager.finish();
    }
 
    public void copyFeatureGridMapUsingOpenCL()
@@ -327,7 +325,6 @@ public class RapidPlanarRegionsExtractor
       openCLManager.setKernelArgument(copyKernel, 11, previousFeatureGrid.getCzImage().getOpenCLImageObject());
       openCLManager.setKernelArgument(copyKernel, 12, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(copyKernel, patchImageWidth, patchImageHeight);
-      openCLManager.finish();
    }
 
    /**
