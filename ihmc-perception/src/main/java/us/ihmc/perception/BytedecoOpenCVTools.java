@@ -202,9 +202,9 @@ public class BytedecoOpenCVTools
       opencv_imgcodecs.imencode(".png", depth, data, compressionParametersPNG);
    }
 
-   public static void decompressDepthPNG(byte[] data, Mat image)
+   public static void decompressDepthPNG(BytePointer bytePointer, Mat image)
    {
-      Mat compressedMat = new Mat(1, data.length, opencv_core.CV_8UC1, new BytePointer(data));
+      Mat compressedMat = new Mat(1, (int) bytePointer.limit(), opencv_core.CV_8UC1, bytePointer);
       opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, image);
    }
 
@@ -390,16 +390,12 @@ public class BytedecoOpenCVTools
       MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
    }
 
-   public static Mat decompressImageJPGUsingYUV(byte[] dataArray)
+   public static Mat decompressImageJPGUsingYUV(BytePointer messageEncodedBytePointer)
    {
-      BytePointer messageEncodedBytePointer = new BytePointer(dataArray.length);
-      messageEncodedBytePointer.put(dataArray, 0, dataArray.length);
-      messageEncodedBytePointer.limit(dataArray.length);
-
       Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
       Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
 
-      inputJPEGMat.cols(dataArray.length);
+      inputJPEGMat.cols((int) messageEncodedBytePointer.limit());
       inputJPEGMat.data(messageEncodedBytePointer);
 
       // imdecode takes the longest by far out of all this stuff
