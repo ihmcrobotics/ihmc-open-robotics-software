@@ -16,6 +16,7 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLBooleanParameter;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
+import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -27,10 +28,6 @@ import us.ihmc.tools.string.StringTools;
 
 public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements RenderableProvider
 {
-   private final float FOCAL_LENGTH_COLOR = 0.00254f;
-   private final float CMOS_WIDTH_COLOR = 0.0036894f;
-   private final float CMOS_HEIGHT_COLOR = 0.0020753f;
-   private static final float depthToMetersScalar = 2.500000118743628E-4f;
    private final static boolean sinusoidalPatternEnabled = false;
 
    private final RDXROS2ColoredPointCloudVisualizerPinholeDepthChannel depthChannel;
@@ -115,9 +112,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
          }
 
          // If both depth and color images are available, configure the OpenCL kernel and run it, to generate the point cloud float buffer.
-         parametersBuffer.setParameter(FOCAL_LENGTH_COLOR);
-         parametersBuffer.setParameter(CMOS_WIDTH_COLOR);
-         parametersBuffer.setParameter(CMOS_HEIGHT_COLOR);
+         parametersBuffer.setParameter(BytedecoRealsense.L515_FOCAL_LENGTH_METERS);
+         parametersBuffer.setParameter(BytedecoRealsense.L515_CMOS_WIDTH_METERS);
+         parametersBuffer.setParameter(BytedecoRealsense.L515_CMOS_HEIGHT_METERS);
          parametersBuffer.setParameter(depthChannel.getCx());
          parametersBuffer.setParameter(depthChannel.getCy());
          parametersBuffer.setParameter(depthChannel.getFx());
@@ -126,7 +123,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
          parametersBuffer.setParameter((float) depthChannel.getImageHeight());
          parametersBuffer.setParameter((float) colorChannel.getImageWidth());
          parametersBuffer.setParameter((float) colorChannel.getImageHeight());
-         parametersBuffer.setParameter(depthToMetersScalar);
+         parametersBuffer.setParameter(BytedecoRealsense.L515_DEPTH_DISCRETIZATION);
          sinusoidalPatternEnabledParameter.setParameter(sinusoidalPatternEnabled);
 
          // Upload the buffers to the OpenCL device (GPU)
