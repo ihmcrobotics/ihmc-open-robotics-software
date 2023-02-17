@@ -359,8 +359,8 @@ public class HDF5Tools
 
       dataSet.write((Pointer) srcBytePointer, dataType);
 
-      dataSpace._close();
-      dataSet._close();
+      //dataSpace._close();
+      //dataSet._close();
       //dataType._close();
    }
 
