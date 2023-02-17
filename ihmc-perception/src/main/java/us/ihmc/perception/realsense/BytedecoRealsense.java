@@ -14,6 +14,10 @@ import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
 public class BytedecoRealsense
 {
+   public static final float L515_FOCAL_LENGTH_METERS = 0.00254f;
+   public static final float L515_CMOS_WIDTH_METERS = 0.0036894f;
+   public static final float L515_CMOS_HEIGHT_METERS = 0.0020753f;
+   public static final float L515_DEPTH_DISCRETIZATION = 2.500000118743628E-4f;
    private static final int RS2_FRAME_POINTER_SIZE = Pointer.sizeof(rs2_frame.class);
 
    protected final int depthWidth;

@@ -57,9 +57,9 @@ public class RDXRealsenseL515UI
    private RDXPointCloudRenderer pointCloudRenderer;
    private OpenCLManager openCLManager;
    private final FramePoint3D framePoint = new FramePoint3D();
-   private final ImFloat focalLength = new ImFloat(0.00254f); // should be 1.88mm, but tuned it;
-   private final ImFloat cmosWidth = new ImFloat(0.0036894f); // 1/6" format
-   private final ImFloat cmosHeight = new ImFloat(0.0020753f); // 1/6" format
+   private final ImFloat focalLength = new ImFloat(BytedecoRealsense.L515_FOCAL_LENGTH_METERS); // should be 1.88mm, but tuned it;
+   private final ImFloat cmosWidth = new ImFloat(BytedecoRealsense.L515_CMOS_WIDTH_METERS); // 1/6" format
+   private final ImFloat cmosHeight = new ImFloat(BytedecoRealsense.L515_CMOS_HEIGHT_METERS); // 1/6" format
    private OpenCLFloatBuffer parametersBuffer;
    private _cl_program openCLProgram;
    private _cl_kernel createPointCloudKernel;
