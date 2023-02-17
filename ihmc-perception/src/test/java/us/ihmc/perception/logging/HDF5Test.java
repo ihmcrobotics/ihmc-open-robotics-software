@@ -4,21 +4,13 @@ import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.*;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
 
+import java.io.File;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
-/**
- * We can't initialize an HDF5 file from resource currently, so we can't run this on CI at all.
- */
-@Disabled
 public class HDF5Test
 {
    static
@@ -29,9 +21,9 @@ public class HDF5Test
    @Test
    public void testInts()
    {
-      WorkspaceFile file = getFile("NativeInts");
+      File file = new File("NativeInts.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "ints";
 
@@ -70,9 +62,9 @@ public class HDF5Test
    @Test
    public void testFloats()
    {
-      WorkspaceFile file = getFile("NativeFloats");
+      File file = new File("NativeFloats.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "floats";
 
@@ -112,9 +104,9 @@ public class HDF5Test
    @Test
    public void testDoubles()
    {
-      WorkspaceFile file = getFile("NativeDoubles");
+      File file = new File("NativeDoubles.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "doubles";
 
@@ -154,9 +146,9 @@ public class HDF5Test
    @Test
    public void testChars()
    {
-      WorkspaceFile file = getFile("NativeChars");
+      File file = new File("NativeChars.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "chars";
 
@@ -196,9 +188,9 @@ public class HDF5Test
    @Test
    public void testShorts()
    {
-      WorkspaceFile file = getFile("NativeShorts");
+      File file = new File("NativeShorts.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "shorts";
 
@@ -237,9 +229,9 @@ public class HDF5Test
    @Test
    public void testBytesWithoutZeros()
    {
-      WorkspaceFile file = getFile("NativeBytesWithoutZeros");
+      File file = new File("NativeBytesWithoutZeros.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "bytes";
 
@@ -279,9 +271,9 @@ public class HDF5Test
    @Test
    public void testBytesWithZeros()
    {
-      WorkspaceFile file = getFile("NativeBytesWithZeros");
+      File file = new File("NativeBytesWithZeros.hdf5");
 
-      String filePath = file.getFilePath().toString();
+      String filePath = file.getAbsolutePath();
       H5File h5File = new H5File(filePath, hdf5.H5F_ACC_TRUNC);
       String datasetId = "bytes";
 
@@ -337,17 +329,5 @@ public class HDF5Test
       {
          testInts();
       }
-   }
-
-   private static WorkspaceFile getFile(String name)
-   {
-      return new WorkspaceFile(getDirectory(), name + HDF5Tools.HDF5_FILE_EXTENSION);
-   }
-
-   private static WorkspaceDirectory getDirectory()
-   {
-      WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-perception/src/test/resources", HDF5Test.class);
-      FileTools.ensureDirectoryExists(directory.getDirectoryPath(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      return directory;
    }
 }

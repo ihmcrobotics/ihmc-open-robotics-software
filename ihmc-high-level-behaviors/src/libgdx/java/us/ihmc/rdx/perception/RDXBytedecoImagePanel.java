@@ -106,16 +106,19 @@ public class RDXBytedecoImagePanel
 
    public void resize(BytedecoImage bytedecoImage)
    {
-      int imageWidth = bytedecoImage.getImageWidth();
-      int imageHeight = bytedecoImage.getImageHeight();
-      this.bytedecoImage.resize(imageWidth, imageHeight, null, bytedecoImage.getBackingDirectByteBuffer());
-      createPixmapFromBytedecoImage(imageWidth, imageHeight);
-      panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-      imagePanel.setTexture(panelTexture);
+      if (!BytedecoOpenCVTools.dimensionsMatch(this.bytedecoImage, bytedecoImage))
+      {
+         int imageWidth = bytedecoImage.getImageWidth();
+         int imageHeight = bytedecoImage.getImageHeight();
+         this.bytedecoImage.resize(imageWidth, imageHeight, null, bytedecoImage.getBackingDirectByteBuffer());
+         createPixmapFromBytedecoImage(imageWidth, imageHeight);
+         panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
+         imagePanel.setTexture(panelTexture);
 
-      normalizedScaledImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+         normalizedScaledImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
 
-      BytedecoOpenCVTools.setRGBA8888ImageAlpha(this.bytedecoImage.getBytedecoOpenCVMat(), 255);
+         BytedecoOpenCVTools.setRGBA8888ImageAlpha(this.bytedecoImage.getBytedecoOpenCVMat(), 255);
+      }
    }
 
    public void resize(int imageWidth, int imageHeight, OpenCLManager openCLManager)

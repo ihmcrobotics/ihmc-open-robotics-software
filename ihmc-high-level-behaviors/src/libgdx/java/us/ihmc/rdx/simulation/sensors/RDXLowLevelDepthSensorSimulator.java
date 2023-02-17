@@ -301,7 +301,6 @@ public class RDXLowLevelDepthSensorSimulator
       openCLManager.execute2D(openCLKernel, imageWidth, imageHeight);
       metersDepthImage.readOpenCLImage(openCLManager);
       pointCloudRenderingBuffer.readOpenCLBufferObject(openCLManager);
-      openCLManager.finish();
 
       if (depthPanel.getImagePanel().getIsShowing().get())
          depthPanel.drawDepthImage(metersDepthImage.getBytedecoOpenCVMat());

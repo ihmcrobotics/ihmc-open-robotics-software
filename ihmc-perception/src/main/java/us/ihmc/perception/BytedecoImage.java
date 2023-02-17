@@ -140,6 +140,11 @@ public class BytedecoImage
 
    public void createOpenCLImage(OpenCLManager openCLManager, int flags)
    {
+      if (openCLChannelOrder == OpenCL.CL_RGB)
+      {
+         throw new RuntimeException("OpenCL will throw CL_OUT_OF_RESOURCES unless you use RGBA and CV_8UC4."
+                                    + "It's probably something about memory alignment on hardware. Just include the alpha channel.");
+      }
       openCLImageObjectFlags = flags;
       openCLImageObject = openCLManager.createImage(flags, openCLChannelOrder, openCLChannelDataType, imageWidth, imageHeight, bytedecoByteBufferPointer);
    }
@@ -168,6 +173,11 @@ public class BytedecoImage
       if (isBackedByExternalByteBuffer)
       {
          backingDirectByteBuffer = externalByteBuffer;
+         if (backingDirectByteBuffer.capacity() < imageWidth * imageHeight * bytesPerPixel)
+         {
+            throw new RuntimeException("Externally managed byte buffer large enough."
+                                       + "Resize it before calling this resize method.");
+         }
       }
       else
       {
@@ -182,6 +192,30 @@ public class BytedecoImage
       if (openCLObjectCreated)
       {
          createOpenCLImage(openCLManager, openCLImageObjectFlags);
+      }
+   }
+
+   /**
+    * Resizes this image to match the dimensions of other if necessary.
+    *
+    * Warning: Assumes we are not using OpenCL on this image and this BytedecoImage is not
+    *   backed by an external buffer.
+    */
+   public void ensureDimensionsMatch(BytedecoImage other)
+   {
+      ensureDimensionsMatch(other, null);
+   }
+
+   /**
+    * Resizes this image to match the dimensions of other if necessary.
+    *
+    * // FIXME: Broken for external byte buffers
+    */
+   public void ensureDimensionsMatch(BytedecoImage other, OpenCLManager openCLManager)
+   {
+      if (!BytedecoOpenCVTools.dimensionsMatch(this, other))
+      {
+         resize(other.getImageWidth(), other.getImageHeight(), openCLManager, backingDirectByteBuffer);
       }
    }
 
@@ -267,5 +301,10 @@ public class BytedecoImage
    private long getLinearizedIndex(int row, int column)
    {
       return (long) row * imageWidth + column;
+   }
+
+   public BytePointer getPointerForAccessSpeed()
+   {
+      return pointerForAccessSpeed;
    }
 }
