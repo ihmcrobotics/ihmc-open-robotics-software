@@ -94,7 +94,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
                {
                   case DEPTH_PNG_16UC1:
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_COMPRESSED_16", topic.getName());
+                     LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_16UC1", topic.getName());
                      bytesIfUncompressed = numberOfPixels * 2;
                      incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
                      incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
@@ -103,9 +103,9 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
                      normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
                   }
-                  case COLOR_JPEG_RGB8:
+                  case COLOR_JPEG_YUVI420:
                   {
-                     LogTools.info("Creating Image Message Visualizer for {} with type COLOR_JPEG_COMPRESSED_24", topic.getName());
+                     LogTools.info("Creating Image Message Visualizer for {} with type COLOR_JPEG_YUVI420", topic.getName());
                      bytesIfUncompressed = numberOfPixels * 3;
                      incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
                      incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
@@ -144,7 +144,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
                   BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
                   BytedecoOpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
                }
-               case COLOR_JPEG_RGB8:
+               case COLOR_JPEG_YUVI420:
                {
                   opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
                }
