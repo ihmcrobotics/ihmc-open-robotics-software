@@ -63,7 +63,7 @@ public class RealSenseHardwareManager
 
    public BytedecoRealsense createFullFeaturedL515(String serialNumberToFind)
    {
-      return createBytedecoRealsenseDevice(serialNumberToFind, 1024, 768, 30);
+      return createBytedecoRealsenseDevice(serialNumberToFind, RealsenseSettingsProfile.L515_COLOR_720P_DEPTH_768P_30HZ);
    }
 
    /**
