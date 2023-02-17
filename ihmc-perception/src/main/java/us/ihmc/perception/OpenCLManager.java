@@ -5,6 +5,7 @@ import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
 import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.opencl.OpenCLBooleanParameter;
 import us.ihmc.tools.string.StringTools;
 
 import java.nio.file.Path;
@@ -34,9 +35,10 @@ public class OpenCLManager
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
    private final TreeSet<_cl_mem> bufferObjects = new TreeSet<>(Comparator.comparing(Pointer::address));
    private final SizeTPointer globalWorkSize = new SizeTPointer(0, 0, 0);
-   private PointerPointer tempPointerPointerForSetKernelArgument = new PointerPointer(1);
-   private long pointerPointerSize = Pointer.sizeof(PointerPointer.class);
-   private SizeTPointer origin = new SizeTPointer(3);
+   private final PointerPointer tempPointerPointerForSetKernelArgument = new PointerPointer(1);
+   private final long pointerPointerSize = Pointer.sizeof(PointerPointer.class);
+   private final long intPointerSize = Pointer.sizeof(IntPointer.class);
+   private final SizeTPointer origin = new SizeTPointer(3);
    private final SizeTPointer region = new SizeTPointer(3);
    private final IntPointer returnCode = new IntPointer(1);
    //   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Rethink this
@@ -278,14 +280,27 @@ public class OpenCLManager
 
    public void setKernelArgument(_cl_kernel kernel, int argumentIndex, _cl_mem bufferObject)
    {
-      tempPointerPointerForSetKernelArgument.put(bufferObject);
-      setKernelArgument(kernel, argumentIndex, pointerPointerSize, tempPointerPointerForSetKernelArgument);
+      setKernelArgument(kernel, argumentIndex, pointerPointerSize, bufferObject);
    }
 
-   public void setKernelArgument(_cl_kernel kernel, int argumentIndex, long argumentSize, Pointer bufferObject)
+   public void setKernelArgument(_cl_kernel kernel, int argumentIndex, IntPointer intPointer)
+   {
+      setKernelArgument(kernel, argumentIndex, intPointerSize, intPointer);
+   }
+
+   /**
+    * You can't pass booleans to OpenCL kernels, so we use an int.
+    */
+   public void setKernelArgument(_cl_kernel kernel, int argumentIndex, OpenCLBooleanParameter booleanParameter)
+   {
+      setKernelArgument(kernel, argumentIndex, intPointerSize, booleanParameter.getIntPointer());
+   }
+
+   private void setKernelArgument(_cl_kernel kernel, int argumentIndex, long argumentSize, Pointer bufferObject)
    {
       /* Set OpenCL kernel argument */
-      checkReturnCode(clSetKernelArg(kernel, argumentIndex, argumentSize, bufferObject));
+      tempPointerPointerForSetKernelArgument.put(bufferObject);
+      checkReturnCode(clSetKernelArg(kernel, argumentIndex, argumentSize, tempPointerPointerForSetKernelArgument));
    }
 
    public void execute1D(_cl_kernel kernel, long workSizeX)
@@ -365,19 +380,6 @@ public class OpenCLManager
                                          numberOfEventsInWaitList,
                                          eventWaitList,
                                          event));
-   }
-
-   public int flush()
-   {
-      checkReturnCode(clFlush(commandQueue));
-      return returnCode.get();
-   }
-
-   public int finish()
-   {
-      checkReturnCode(clFlush(commandQueue));
-      checkReturnCode(clFinish(commandQueue));
-      return returnCode.get();
    }
 
    private void checkReturnCode(int returnCode)
