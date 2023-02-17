@@ -1,4 +1,4 @@
-kernel void createPointCloud(read_only image2d_t depthImageMeters, 
+kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
                              read_only image2d_t colorRGBAImage,
                              global float* finalPointFloatBuffer,
                              global float* parameters,
@@ -29,13 +29,14 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
    int depthImageHeight = parameters[8];
    int colorImageWidth = parameters[9];
    int colorImageHeight = parameters[10];
+   float discreteResolution = parameters[11];
 
    bool sinusoidal = sinusoidalPatternEnabled;
 
    int x = get_global_id(0);
    int y = get_global_id(1);
 
-   float eyeDepthInMeters = read_imagef(depthImageMeters, (int2) (x, y)).x;
+   float eyeDepthInMeters = read_imageui(depthImageDiscretized, (int2) (x, y)).x * discreteResolution;
 
    float zUp3DX = eyeDepthInMeters;
    float zUp3DY = -(x - principalOffsetXPixels) / focalLengthPixelsX * eyeDepthInMeters;
