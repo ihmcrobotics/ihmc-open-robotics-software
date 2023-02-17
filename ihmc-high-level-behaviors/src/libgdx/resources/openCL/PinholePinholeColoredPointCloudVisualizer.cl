@@ -1,7 +1,9 @@
 kernel void createPointCloud(read_only image2d_t depthImageMeters, 
                              read_only image2d_t colorRGBAImage,
                              global float* finalPointFloatBuffer,
-                             global float* parameters)
+                             global float* parameters,
+                             global int sinusoidalPatternEnabled,
+                             global float* sensorTransformToWorld)
 {
    // for 3 modes of coloring
    enum VIEWMODE
@@ -19,34 +21,19 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
    float halfCMOSWidth = cmosWidth / 2.0f;
    float halfCMOSHeight = cmosHeight / 2.0f;
 
-   float translationX = parameters[3];
-   float translationY = parameters[4];
-   float translationZ = parameters[5];
-   float rotationMatrixM00 = parameters[6];
-   float rotationMatrixM01 = parameters[7];
-   float rotationMatrixM02 = parameters[8];
-   float rotationMatrixM10 = parameters[9];
-   float rotationMatrixM11 = parameters[10];
-   float rotationMatrixM12 = parameters[11];
-   float rotationMatrixM20 = parameters[12];
-   float rotationMatrixM21 = parameters[13];
-   float rotationMatrixM22 = parameters[14];
+   float principalOffsetXPixels = parameters[3];
+   float principalOffsetYPixels = parameters[4];
+   float focalLengthPixelsX = parameters[5];
+   float focalLengthPixelsY = parameters[6];
+   int depthImageWidth = parameters[7];
+   int depthImageHeight = parameters[8];
+   int colorImageWidth = parameters[9];
+   int colorImageHeight = parameters[10];
 
-   float principalOffsetXPixels = parameters[15];
-   float principalOffsetYPixels = parameters[16];
-   float focalLengthPixelsX = parameters[17];
-   float focalLengthPixelsY = parameters[18];
-   int depthImageWidth = parameters[19];
-   int depthImageHeight = parameters[20];
-   int colorImageWidth = parameters[21];
-   int colorImageHeight = parameters[22];
-
-   bool sinusoidal = parameters[23] > 0.5f; // TODO: Create a boolean OpenCL buffer for these binary parameters
+   bool sinusoidal = sinusoidalPatternEnabled;
 
    int x = get_global_id(0);
    int y = get_global_id(1);
-
-   // printf("OpenCLKernel -> (x: %d, y: %d)\n", x, y);
 
    float eyeDepthInMeters = read_imagef(depthImageMeters, (int2) (x, y)).x;
 
@@ -70,8 +57,7 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
    int pixelIndexY = (int) round(distanceFromSensorTopX * cmosToPixelsY);
    pixelInBounds &= intervalContains(pixelIndexY, 0, colorImageHeight);
 
-   float4 worldFramePoint = transform(zUp3DX, zUp3DY, zUp3DZ, translationX, translationY, translationZ, rotationMatrixM00, rotationMatrixM01, rotationMatrixM02,
-                                      rotationMatrixM10, rotationMatrixM11, rotationMatrixM12, rotationMatrixM20, rotationMatrixM21, rotationMatrixM22);
+   float3 worldFramePoint = transform(zUp3DX, zUp3DY, zUp3DZ, sensorTransformToWorld);
 
    int color;
    if (viewMode == COLOR)
@@ -84,21 +70,14 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
       else
       {
          color = calculateGradientColor((float) worldFramePoint.z, sinusoidal);
-         //          color = (255 << 24) | (255 << 16) | (255 << 8) | 255; // white is default
       }
    }
    else if (viewMode == DEPTH)
    {
-      //              float4 rgb = calculateGradientColorFromDepth(eyeDepthInMeters);
-      //              color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
       color = calculateGradientColor((float) eyeDepthInMeters, sinusoidal);
-      //              printf("%f, %f, %f\n", rgb.x,rgb.y,rgb.z);
    }
    else
    {
-      //               float4 rgb = calculateGradientColorFromZDepth(zUp3DZ);
-      //               color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
-      //               printf("r: %f, g: %f, b: %f\n", rgb.x,rgb.y,rgb.z);
       color = calculateGradientColor((float) worldFramePoint.z, sinusoidal);
    }
 

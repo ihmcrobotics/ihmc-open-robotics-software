@@ -20,6 +20,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
+import us.ihmc.perception.opencl.OpenCLBooleanParameter;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 import us.ihmc.perception.tools.NativeMemoryTools;
@@ -47,6 +48,8 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private final float FOCAL_LENGTH_COLOR = 0.00254f;
    private final float CMOS_WIDTH_COLOR = 0.0036894f;
    private final float CMOS_HEIGHT_COLOR = 0.0020753f;
+   private static final float depthToMetersScalar = 2.500000118743628E-4f;
+   private final static boolean sinusoidalPatternEnabled = false;
 
    private final CameraPinholeBrown depthCameraInstrinsics = new CameraPinholeBrown();
    private final CameraPinholeBrown colorCameraInstrinsics = new CameraPinholeBrown();
@@ -84,9 +87,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
    private boolean depthInitialized = false;
    private boolean colorInitialized = false;
-   private boolean sinusoidalPatternEnabled = false;
 
-   private float depthToMetersScalar = 2.500000118743628E-4f;
    private int totalNumberOfPoints = 0;
 
    private OpenCLManager openCLManager;
@@ -95,6 +96,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private _cl_kernel createPointCloudKernel;
 
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
+   private final OpenCLBooleanParameter sinusoidalPatternEnabledParameter = new OpenCLBooleanParameter();
    private final OpenCLRigidBodyTransformParameter sensorTransformToWorldParameter = new OpenCLRigidBodyTransformParameter();
    private final RotationMatrix sensorRotationMatrixToWorld = new RotationMatrix();
    private Mat yuv1420Image;
@@ -293,18 +295,6 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
          parametersBuffer.setParameter(FOCAL_LENGTH_COLOR);
          parametersBuffer.setParameter(CMOS_WIDTH_COLOR);
          parametersBuffer.setParameter(CMOS_HEIGHT_COLOR);
-         parametersBuffer.setParameter(sensorTransformToWorld.getTranslation().getX32());
-         parametersBuffer.setParameter(sensorTransformToWorld.getTranslation().getY32());
-         parametersBuffer.setParameter(sensorTransformToWorld.getTranslation().getZ32());
-         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM00());
-         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM01());
-         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM02());
-         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM10());
-         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM11());
-         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM12());
-         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM20());
-         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM21());
-         parametersBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM22());
          parametersBuffer.setParameter((float) depthCameraInstrinsics.getCx());
          parametersBuffer.setParameter((float) depthCameraInstrinsics.getCy());
          parametersBuffer.setParameter((float) depthCameraInstrinsics.getFx());
@@ -313,18 +303,21 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
          parametersBuffer.setParameter((float) depth32FC1Image.getImageHeight());
          parametersBuffer.setParameter((float) color8UC4Image.getImageWidth());
          parametersBuffer.setParameter((float) color8UC4Image.getImageHeight());
-         parametersBuffer.setParameter(sinusoidalPatternEnabled ? 1.0f : 0.0f);
+         sinusoidalPatternEnabledParameter.setParameter(sinusoidalPatternEnabled);
 
          // Upload the buffers to the OpenCL device (GPU)
          depth32FC1Image.writeOpenCLImage(openCLManager);
          color8UC4Image.writeOpenCLImage(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
+         sensorTransformToWorldParameter.writeOpenCLBufferObject(openCLManager);
 
          // Set the OpenCL kernel arguments
          openCLManager.setKernelArgument(createPointCloudKernel, 0, depth32FC1Image.getOpenCLImageObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 1, color8UC4Image.getOpenCLImageObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 2, finalColoredDepthBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 3, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(createPointCloudKernel, 4, sinusoidalPatternEnabledParameter);
+         openCLManager.setKernelArgument(createPointCloudKernel, 5, sensorTransformToWorldParameter.getOpenCLBufferObject());
 
          // Run the OpenCL kernel
          openCLManager.execute2D(createPointCloudKernel, depthWidth, depthHeight);
