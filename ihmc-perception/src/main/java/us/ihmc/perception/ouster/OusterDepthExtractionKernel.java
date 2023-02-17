@@ -6,8 +6,6 @@ import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -21,8 +19,7 @@ import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
-import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Extracts the ranges (depth) from the incoming Ouster data buffer
@@ -37,11 +34,12 @@ public class OusterDepthExtractionKernel
    private final BytePointer lidarFrameByteBufferPointer;
    private final ByteBuffer lidarFrameByteBufferCopy;
    private final BytePointer lidarFrameByteBufferPointerCopy;
+   private final Supplier<Boolean> publishLidarScan;
 
    private final OpenCLManager openCLManager;
    private final _cl_program depthImageExtractionProgram;
    private final _cl_kernel extractDepthImageKernel;
-   private _cl_kernel imageToPointCloudKernel;
+   private final _cl_kernel imageToPointCloudKernel;
    private final _cl_mem lidarFrameBufferObject;
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
    private final OpenCLFloatParameters sensorValuesBuffer = new OpenCLFloatParameters();
@@ -50,18 +48,11 @@ public class OusterDepthExtractionKernel
    private final OpenCLIntBuffer pixelShiftOpenCLBuffer;
    private final OpenCLFloatBuffer pointCloudXYZBuffer;
 
-   private final List<Class<?>> outputTopicsTypes;
-
-   public OusterDepthExtractionKernel(NettyOuster nettyOuster, OpenCLManager openCLManager)
-   {
-      this(nettyOuster, openCLManager, Arrays.asList(ImageMessage.class));
-   }
-
-   public OusterDepthExtractionKernel(NettyOuster nettyOuster, OpenCLManager openCLManager, List<Class<?>> outputTopicsTypes)
+   public OusterDepthExtractionKernel(NettyOuster nettyOuster, OpenCLManager openCLManager, Supplier<Boolean> publishLidarScan)
    {
       this.nettyOuster = nettyOuster;
       this.openCLManager = openCLManager;
-      this.outputTopicsTypes = outputTopicsTypes;
+      this.publishLidarScan = publishLidarScan;
 
       lidarFrameByteBufferCopy = ByteBuffer.allocateDirect(nettyOuster.getLidarFrameByteBuffer().limit());
       lidarFrameByteBufferPointerCopy = new BytePointer(lidarFrameByteBufferCopy);
@@ -132,7 +123,7 @@ public class OusterDepthExtractionKernel
 
       extractedDepthImage.readOpenCLImage(openCLManager);
 
-      if (outputTopicsTypes.contains(LidarScanMessage.class))
+      if (publishLidarScan.get())
       {
          populateSensorValuesBuffer(cameraPose);
          openCLManager.setKernelArgument(imageToPointCloudKernel, 0, sensorValuesBuffer.getOpenCLBufferObject());
