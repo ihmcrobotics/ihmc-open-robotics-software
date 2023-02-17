@@ -77,6 +77,11 @@ public class BytedecoRealsense
       LogTools.info("Configured Depth Stream of L515 Device. Serial number: {}", serialNumber);
    }
 
+   public void enableColor(RealsenseSettingsProfile settingsProfile)
+   {
+      enableColor(settingsProfile.getColorWidth(), settingsProfile.getColorHeight(), settingsProfile.getColorFPS());
+   }
+
    public void enableColor(int colorWidth, int colorHeight, int fps)
    {
       this.colorWidth = colorWidth;
