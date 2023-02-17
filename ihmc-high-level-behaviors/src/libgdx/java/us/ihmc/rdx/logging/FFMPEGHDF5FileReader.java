@@ -46,7 +46,10 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    private final long startTime;
 
    private HDF5Manager hdf5Manager;
+   private final HDF5Tools hdf5Tools = new HDF5Tools();
    private Group framesGroup;
+
+   BytePointer packetData = new BytePointer(0);
 
    /**
     * Due to the current intermediate design of the FFMPEGHDF5Logger, there are two files which
@@ -56,7 +59,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    {
       avutil.av_log_set_level(avutil.AV_LOG_WARNING);
 
-      String file = hdf5File.replaceFirst(HDF5Tools.HDF5_FILE_EXTENSION, ""); // BAD
+      String file = hdf5File.replaceFirst(hdf5Tools.HDF5_FILE_EXTENSION, ""); // BAD
 
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = avformat.avformat_alloc_context();
@@ -152,9 +155,9 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
 
          avformat.av_read_frame(avFormatContext, packet);
          // get packet from HDF5
-         byte[] rawData = HDF5Tools.loadBytes(framesGroup, streamIndex);
-         BytePointer packetData = new BytePointer(ByteBuffer.wrap(rawData));
-         BytePointer.memcpy(packet.data(), packetData, rawData.length);
+
+         hdf5Tools.loadBytes(framesGroup, streamIndex, packetData);
+         BytePointer.memcpy(packet.data(), packetData, packetData.capacity());
       }
       while (packet.stream_index() != streamIndex);
 

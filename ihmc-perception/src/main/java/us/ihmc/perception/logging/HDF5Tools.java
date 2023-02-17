@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public class HDF5Tools
 {
-   public final String HDF5_FILE_EXTENSION = ".hdf5";
+   public static final String HDF5_FILE_EXTENSION = ".hdf5";
    static final int NUMBER_OF_FIELDS_PER_POINT = 3;
 
    /**
@@ -393,10 +393,6 @@ public class HDF5Tools
       DataSet dataSet = group.createDataSet(String.valueOf(index), dataType, dataSpace);
 
       dataSet.write((Pointer) srcBytePointer, dataType);
-
-      //dataSpace._close();
-      //dataSet._close();
-      //dataType._close();
    }
 
    /* TODO: Does not work yet. Needs to be fixed. */
