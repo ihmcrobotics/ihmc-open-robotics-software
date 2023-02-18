@@ -78,7 +78,7 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
                previousRegionsGraphic.update();
             }
             ImGui.sameLine();
-            ImGui.sliderInt("Previous", icpPreviousIndex.getData(), 0, mappingManager.getSensorPositionBuffer().size() - 1);
+            ImGui.sliderInt("Previous", icpPreviousIndex.getData(), 0, mappingManager.getTotalDepthCount() - 1);
 
             icpPreviousIndex.set(Math.min(icpPreviousIndex.get(), icpCurrentIndex.get() - 1));
             icpCurrentIndex.set(Math.max(1, icpCurrentIndex.get()));
@@ -91,7 +91,7 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
                drawMatches();
             }
             ImGui.sameLine();
-            ImGui.sliderInt("Current", icpCurrentIndex.getData(), 0, mappingManager.getSensorPositionBuffer().size() - 1);
+            ImGui.sliderInt("Current", icpCurrentIndex.getData(), 1, mappingManager.getTotalDepthCount() - 1);
             if(ImGui.button("Optimize Transform"))
             {
                mappingManager.computeICP();
