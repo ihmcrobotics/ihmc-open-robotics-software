@@ -100,6 +100,12 @@ if __name__ == '__main__':
     for i in range(507):
         copy_byte_dataset(old_h5, "ouster/depth/" + str(i), test_h5, "ouster/depth/" + str(i))
 
+    for i in range(50):
+        copy_float_dataset(old_h5, "ouster/sensor/position/" + str(i), test_h5, "ouster/sensor/position/" + str(i))
+
+    for i in range(50):
+        copy_float_dataset(old_h5, "ouster/sensor/orientation/" + str(i), test_h5, "ouster/sensor/orientation/" + str(i))
+
     print_file_info(test_h5, test_file)
 
     test_h5.close()
