@@ -134,16 +134,25 @@ public class RealsenseColorAndDepthPublisher
             depthImageMessage.getOrientation().set(cameraPose.getOrientation());
             depthImageMessage.setSequenceNumber(depthSequenceNumber++);
             MessageTools.toMessage(aquisitionTime, depthImageMessage.getAcquisitionTime());
+            depthImageMessage.setFocalLengthXPixels(realsense.getDepthIntrinsicParameters().fx());
+            depthImageMessage.setFocalLengthYPixels(realsense.getDepthIntrinsicParameters().fy());
+            depthImageMessage.setPrincipalPointXPixels(realsense.getDepthIntrinsicParameters().ppx());
+            depthImageMessage.setPrincipalPointYPixels(realsense.getDepthIntrinsicParameters().ppy());
+            depthImageMessage.setDepthDiscretization(BytedecoRealsense.L515_DEPTH_DISCRETIZATION);
             ros2Helper.publish(depthTopic, depthImageMessage);
 
             PerceptionMessageTools.packImageMessageData(jpegCompression.getCompressedData(), colorImageMessage);
             ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
             colorImageMessage.setImageHeight(realsense.getColorHeight());
             colorImageMessage.setImageWidth(realsense.getColorWidth());
-            colorImageMessage.getPosition().set(cameraPose.getPosition());
-            colorImageMessage.getOrientation().set(cameraPose.getOrientation());
+            colorImageMessage.getPosition().set(realsense.getDepthToColorTranslation());
+            colorImageMessage.getOrientation().set(realsense.getDepthToColorRotation());
             colorImageMessage.setSequenceNumber(colorSequenceNumber++);
             MessageTools.toMessage(aquisitionTime, colorImageMessage.getAcquisitionTime());
+            colorImageMessage.setFocalLengthXPixels(realsense.getColorIntrinsicParameters().fx());
+            colorImageMessage.setFocalLengthYPixels(realsense.getColorIntrinsicParameters().fy());
+            colorImageMessage.setPrincipalPointXPixels(realsense.getColorIntrinsicParameters().ppx());
+            colorImageMessage.setPrincipalPointYPixels(realsense.getColorIntrinsicParameters().ppy());
             ros2Helper.publish(colorTopic, colorImageMessage);
          }
       }

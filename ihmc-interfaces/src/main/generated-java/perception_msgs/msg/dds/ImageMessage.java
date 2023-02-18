@@ -53,6 +53,10 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             */
    public boolean is_equidistant_fisheye_camera_model_;
    /**
+            * Is Ouster camera model
+            */
+   public boolean is_ouster_camera_model_;
+   /**
             * Horizontal focal length in units of pixels (Fx)
             */
    public float focal_length_x_pixels_;
@@ -68,6 +72,19 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             * Principal point Y in units of pixels (Cy)
             */
    public float principal_point_y_pixels_;
+   /**
+            * Depth discretization, if a depth image. Depth images are sent as unsigned 16 bit integers
+            * in units of this value
+            */
+   public float depth_discretization_;
+   /**
+            * If Ouster camera model, the vertical field of view in radians
+            */
+   public float ouster_vertical_field_of_view_;
+   /**
+            * If Ouster camera model, the horizontal field of view in radians
+            */
+   public float ouster_horizontal_field_of_view_;
 
    public ImageMessage()
    {
@@ -102,6 +119,8 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       is_equidistant_fisheye_camera_model_ = other.is_equidistant_fisheye_camera_model_;
 
+      is_ouster_camera_model_ = other.is_ouster_camera_model_;
+
       focal_length_x_pixels_ = other.focal_length_x_pixels_;
 
       focal_length_y_pixels_ = other.focal_length_y_pixels_;
@@ -109,6 +128,12 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       principal_point_x_pixels_ = other.principal_point_x_pixels_;
 
       principal_point_y_pixels_ = other.principal_point_y_pixels_;
+
+      depth_discretization_ = other.depth_discretization_;
+
+      ouster_vertical_field_of_view_ = other.ouster_vertical_field_of_view_;
+
+      ouster_horizontal_field_of_view_ = other.ouster_horizontal_field_of_view_;
 
    }
 
@@ -239,6 +264,21 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    }
 
    /**
+            * Is Ouster camera model
+            */
+   public void setIsOusterCameraModel(boolean is_ouster_camera_model)
+   {
+      is_ouster_camera_model_ = is_ouster_camera_model;
+   }
+   /**
+            * Is Ouster camera model
+            */
+   public boolean getIsOusterCameraModel()
+   {
+      return is_ouster_camera_model_;
+   }
+
+   /**
             * Horizontal focal length in units of pixels (Fx)
             */
    public void setFocalLengthXPixels(float focal_length_x_pixels)
@@ -298,6 +338,53 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       return principal_point_y_pixels_;
    }
 
+   /**
+            * Depth discretization, if a depth image. Depth images are sent as unsigned 16 bit integers
+            * in units of this value
+            */
+   public void setDepthDiscretization(float depth_discretization)
+   {
+      depth_discretization_ = depth_discretization;
+   }
+   /**
+            * Depth discretization, if a depth image. Depth images are sent as unsigned 16 bit integers
+            * in units of this value
+            */
+   public float getDepthDiscretization()
+   {
+      return depth_discretization_;
+   }
+
+   /**
+            * If Ouster camera model, the vertical field of view in radians
+            */
+   public void setOusterVerticalFieldOfView(float ouster_vertical_field_of_view)
+   {
+      ouster_vertical_field_of_view_ = ouster_vertical_field_of_view;
+   }
+   /**
+            * If Ouster camera model, the vertical field of view in radians
+            */
+   public float getOusterVerticalFieldOfView()
+   {
+      return ouster_vertical_field_of_view_;
+   }
+
+   /**
+            * If Ouster camera model, the horizontal field of view in radians
+            */
+   public void setOusterHorizontalFieldOfView(float ouster_horizontal_field_of_view)
+   {
+      ouster_horizontal_field_of_view_ = ouster_horizontal_field_of_view;
+   }
+   /**
+            * If Ouster camera model, the horizontal field of view in radians
+            */
+   public float getOusterHorizontalFieldOfView()
+   {
+      return ouster_horizontal_field_of_view_;
+   }
+
 
    public static Supplier<ImageMessagePubSubType> getPubSubType()
    {
@@ -333,6 +420,8 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_equidistant_fisheye_camera_model_, other.is_equidistant_fisheye_camera_model_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_ouster_camera_model_, other.is_ouster_camera_model_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.focal_length_x_pixels_, other.focal_length_x_pixels_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.focal_length_y_pixels_, other.focal_length_y_pixels_, epsilon)) return false;
@@ -340,6 +429,12 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.principal_point_x_pixels_, other.principal_point_x_pixels_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.principal_point_y_pixels_, other.principal_point_y_pixels_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.depth_discretization_, other.depth_discretization_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ouster_vertical_field_of_view_, other.ouster_vertical_field_of_view_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ouster_horizontal_field_of_view_, other.ouster_horizontal_field_of_view_, epsilon)) return false;
 
 
       return true;
@@ -370,6 +465,8 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if(this.is_equidistant_fisheye_camera_model_ != otherMyClass.is_equidistant_fisheye_camera_model_) return false;
 
+      if(this.is_ouster_camera_model_ != otherMyClass.is_ouster_camera_model_) return false;
+
       if(this.focal_length_x_pixels_ != otherMyClass.focal_length_x_pixels_) return false;
 
       if(this.focal_length_y_pixels_ != otherMyClass.focal_length_y_pixels_) return false;
@@ -377,6 +474,12 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       if(this.principal_point_x_pixels_ != otherMyClass.principal_point_x_pixels_) return false;
 
       if(this.principal_point_y_pixels_ != otherMyClass.principal_point_y_pixels_) return false;
+
+      if(this.depth_discretization_ != otherMyClass.depth_discretization_) return false;
+
+      if(this.ouster_vertical_field_of_view_ != otherMyClass.ouster_vertical_field_of_view_) return false;
+
+      if(this.ouster_horizontal_field_of_view_ != otherMyClass.ouster_horizontal_field_of_view_) return false;
 
 
       return true;
@@ -408,6 +511,8 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       builder.append(this.is_pinhole_camera_model_);      builder.append(", ");
       builder.append("is_equidistant_fisheye_camera_model=");
       builder.append(this.is_equidistant_fisheye_camera_model_);      builder.append(", ");
+      builder.append("is_ouster_camera_model=");
+      builder.append(this.is_ouster_camera_model_);      builder.append(", ");
       builder.append("focal_length_x_pixels=");
       builder.append(this.focal_length_x_pixels_);      builder.append(", ");
       builder.append("focal_length_y_pixels=");
@@ -415,7 +520,13 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       builder.append("principal_point_x_pixels=");
       builder.append(this.principal_point_x_pixels_);      builder.append(", ");
       builder.append("principal_point_y_pixels=");
-      builder.append(this.principal_point_y_pixels_);
+      builder.append(this.principal_point_y_pixels_);      builder.append(", ");
+      builder.append("depth_discretization=");
+      builder.append(this.depth_discretization_);      builder.append(", ");
+      builder.append("ouster_vertical_field_of_view=");
+      builder.append(this.ouster_vertical_field_of_view_);      builder.append(", ");
+      builder.append("ouster_horizontal_field_of_view=");
+      builder.append(this.ouster_horizontal_field_of_view_);
       builder.append("}");
       return builder.toString();
    }

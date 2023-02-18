@@ -29,6 +29,9 @@ bool is_pinhole_camera_model
 # Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
 bool is_equidistant_fisheye_camera_model
 
+# Is Ouster camera model
+bool is_ouster_camera_model
+
 # Horizontal focal length in units of pixels (Fx)
 float32 focal_length_x_pixels
 
@@ -40,3 +43,13 @@ float32 principal_point_x_pixels
 
 # Principal point Y in units of pixels (Cy)
 float32 principal_point_y_pixels
+
+# Depth discretization, if a depth image. Depth images are sent as unsigned 16 bit integers
+# in units of this value
+float32 depth_discretization
+
+# If Ouster camera model, the vertical field of view in radians
+float32 ouster_vertical_field_of_view
+
+# If Ouster camera model, the horizontal field of view in radians
+float32 ouster_horizontal_field_of_view
