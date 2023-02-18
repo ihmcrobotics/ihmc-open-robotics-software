@@ -25,6 +25,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -41,6 +42,10 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    private double stepHeight = 9.25 * 0.0254;
    private double stepLength = 0.32;
    private boolean useExperimentalPhysicsEngine = false;
+   private double startX;
+   private double startZ;
+   private boolean up;
+   private DRCRobotModel robotModel;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -99,16 +104,68 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
                           Consumer<FootstepDataListMessage> corruptor)
          throws Exception
    {
-      DRCRobotModel robotModel = getRobotModel();
-      double actualFootLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
-      double startX = up ? 0.0 : 1.2 + numberOfSteps * stepLength + 0.3;
-      double startZ = up ? 0.0 : numberOfSteps * stepHeight;
+//      robotModel = getRobotModel();
+//      double actualFootLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
+//      startX = up ? 0.0 : 1.2 + numberOfSteps * stepLength + 0.3;
+//      startZ = up ? 0.0 : numberOfSteps * stepHeight;
+//
+//      StairsEnvironment environment = new StairsEnvironment(numberOfSteps, stepHeight, stepLength, true);
+//      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters);
+//      simulationTestHelperFactory.setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(startX, 0, startZ));
+//      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(useExperimentalPhysicsEngine);
+//      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+//      simulationTestHelper.start();
+//
+//      simulationTestHelper.setCameraFocusPosition(startX, 0.0, 0.8 + startZ);
+//      simulationTestHelper.setCameraPosition(startX, -5.0, 0.8 + startZ);
+//
+//      assertTrue(simulationTestHelper.simulateNow(0.5));
+//
+//      FootstepDataListMessage footsteps = createStairsFootsteps(slow, up, stepHeight, stepLength, 0.25, numberOfSteps);
+//      if (up)
+//         translate(footsteps, new Vector3D(0.6 - 0.045 - actualFootLength / 2.0, 0.0, 0.0));
+//      else
+//         translate(footsteps, new Vector3D(1.8 - 0.045 - actualFootLength / 2.0 + (numberOfSteps + 1) * stepLength, 0.0, startZ));
+//      EndToEndTestTools.setStepDurations(footsteps, swingDuration, transferDuration);
+//      if (corruptor != null)
+//         corruptor.accept(footsteps);
+//      publishHeightOffset(heightOffset);
+//
+//      simulationTestHelper.setInPoint();
+//
+//      publishFootstepsAndSimulate(robotModel, footsteps);
+      initialize(up);
+      testStairsAfterInitialize(slow, swingDuration, transferDuration, heightOffset, corruptor);
+//
+      if (EXPORT_TORQUE_SPEED_DATA)
+      {
+         EndToEndTestTools.exportTorqueSpeedCurves(simulationTestHelper,
+                                                   EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null),
+                                                   testInfo.getTestMethod().get().getName());
+      }
+   }
+
+   public void initialize(boolean up)
+   {
+      robotModel = getRobotModel();
+      startX = up ? 0.0 : 1.2 + numberOfSteps * stepLength + 0.3;
+      startZ = up ? 0.0 : numberOfSteps * stepHeight;
+      this.up = up;
 
       StairsEnvironment environment = new StairsEnvironment(numberOfSteps, stepHeight, stepLength, true);
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(startX, 0, startZ));
       simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(useExperimentalPhysicsEngine);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+   }
+
+   public void testStairsAfterInitialize(boolean slow,
+                                          double swingDuration,
+                                          double transferDuration,
+                                          double heightOffset,
+                                          Consumer<FootstepDataListMessage> corruptor) throws Exception
+   {
+      double actualFootLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
       simulationTestHelper.start();
 
       simulationTestHelper.setCameraFocusPosition(startX, 0.0, 0.8 + startZ);
@@ -129,13 +186,6 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       simulationTestHelper.setInPoint();
 
       publishFootstepsAndSimulate(robotModel, footsteps);
-
-      if (EXPORT_TORQUE_SPEED_DATA)
-      {
-         EndToEndTestTools.exportTorqueSpeedCurves(simulationTestHelper,
-                                                   EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null),
-                                                   testInfo.getTestMethod().get().getName());
-      }
    }
 
    private void publishHeightOffset(double heightOffset) throws Exception
@@ -304,5 +354,10 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       {
          return terrainObject;
       }
+   }
+
+   public SCS2AvatarTestingSimulation getAvatarSimulation()
+   {
+      return simulationTestHelper;
    }
 }
