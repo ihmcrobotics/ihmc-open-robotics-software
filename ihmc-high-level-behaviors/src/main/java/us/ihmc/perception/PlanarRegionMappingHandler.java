@@ -89,6 +89,7 @@ public class PlanarRegionMappingHandler
 
    private int planarRegionListIndex = 0;
    private int perceptionLogIndex = 0;
+   private int totalDepthCount = 0;
 
    private String sensorLogChannelName;
 
@@ -170,6 +171,8 @@ public class PlanarRegionMappingHandler
       perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
       //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
       //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
+
+      totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
    }
 
    private void createOuster(int depthHeight, int depthWidth, boolean smoothing)
@@ -183,6 +186,8 @@ public class PlanarRegionMappingHandler
       perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
       perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
       perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
+
+      totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
    }
 
    public PlanarRegionMappingHandler(File planarRegionLogDirectory, boolean smoothing)
@@ -454,5 +459,10 @@ public class PlanarRegionMappingHandler
    public FramePlanarRegionsList getCurrentRegions()
    {
       return currentRegions;
+   }
+
+   public int getTotalDepthCount()
+   {
+      return totalDepthCount;
    }
 }

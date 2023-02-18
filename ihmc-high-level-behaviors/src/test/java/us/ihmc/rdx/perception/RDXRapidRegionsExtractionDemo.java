@@ -51,7 +51,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    //20230117_162417_PerceptionLog.hdf5 (231 MB)
    //20230117_162825_PerceptionLog.hdf5 (328 MB)
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230207_214209_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("L515_RoughTerrain_PerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI( "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
@@ -115,8 +115,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            //createL515(768, 1024);
-            createOuster(128, 1024);
+            createL515(768, 1024);
+            //createOuster(128, 1024);
          }
 
          private void createOuster(int depthHeight, int depthWidth)
@@ -124,23 +124,11 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
             perceptionDataLoader.openLogFile(perceptionLogFile);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-            try
-            {
-               perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), depthBytePointer, bytedecoDepthImage.getBytedecoOpenCVMat());
-               Thread.sleep(100);
-               perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
-               Thread.sleep(100);
-               perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
-               Thread.sleep(100);
-               //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
-               //Thread.sleep(100);
-               //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
-               //Thread.sleep(100);
-            }
-            catch (InterruptedException e)
-            {
-               throw new RuntimeException(e);
-            }
+            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), depthBytePointer, bytedecoDepthImage.getBytedecoOpenCVMat());
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
+            //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
+            //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
 
             pointCloudRenderer.create(depthHeight * depthWidth);
@@ -157,26 +145,15 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             perceptionDataLoader.openLogFile(perceptionLogFile);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
-            try
-            {
-               perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), depthBytePointer, bytedecoDepthImage.getBytedecoOpenCVMat());
-               Thread.sleep(100);
-               perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
-               Thread.sleep(100);
-               perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
-               Thread.sleep(100);
-               //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
-               //Thread.sleep(100);
-               //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
-               //Thread.sleep(100);
-            }
-            catch (InterruptedException e)
-            {
-               throw new RuntimeException(e);
-            }
+            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), depthBytePointer, bytedecoDepthImage.getBytedecoOpenCVMat());
+            //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
+            //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
+            //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
+            //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
 
             rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 730.7891, 731.0859, 528.6094, 408.1602);
+            rapidPlanarRegionsExtractor.getDebugger().setEnabled(true);
 
             pointCloudRenderer.create(depthHeight * depthWidth);
             rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor);
@@ -282,12 +259,12 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          {
             ThreadTools.startAsDaemon(() ->
             {
-               Point3D position = sensorPositionBuffer.get(frameIndex.get());
-               Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
-
-               // sensorTransformToWorld.set(orientation, position);
-               cameraPose.set(position, orientation);
-               cameraFrame.setPoseAndUpdate(cameraPose);
+               //Point3D position = sensorPositionBuffer.get(frameIndex.get());
+               //Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
+               //
+               //// sensorTransformToWorld.set(orientation, position);
+               //cameraPose.set(position, orientation);
+               //cameraFrame.setPoseAndUpdate(cameraPose);
 
                // cameraFrame.update();
 
