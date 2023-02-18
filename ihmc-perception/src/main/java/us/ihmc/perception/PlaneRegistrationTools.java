@@ -168,16 +168,18 @@ public class PlaneRegistrationTools
       for (int i = 0; i < maxIterations; i++)
       {
          matches.clear();
-         PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, 0.5f,
-                                                            0.7f, 0.4f, 0.3f);
+         PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
+                                                           (float) parameters.getBestMatchAngularThreshold(),
+                                                           (float) parameters.getBestMatchDistanceThreshold(), 0.3f);
          transform = PlaneRegistrationTools.computeQuaternionAveragingTransform(previousRegions, currentRegions, matches);
          currentRegions.applyTransform(transform);
 
          double error = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
+         double ratio = (previousError - error) / previousError;
 
-         LogTools.info(String.format("Iteration: %d, Matches: %d, Previous Error: %.5f, Error: %.5f", i, matches.size(), previousError, error));
+         LogTools.info(String.format("Iteration: %d, Matches: %d, Previous Error: %.5f, Error: %.5f, Ratio: %.5f", i, matches.size(), previousError, error, ratio));
 
-         if ( ((previousError - error) / previousError < parameters.getMaxRegistrationError()) || (matches.size() < 5))
+         if ( (ratio < parameters.getICPTerminationRatio()) || (matches.size() < parameters.getICPMinMatches()))
          {
             break;
          }
@@ -190,7 +192,7 @@ public class PlaneRegistrationTools
 
       LogTools.info("[{}]", ">".repeat(Math.abs((int) ((float) previousError / 0.0002f))) + ".".repeat(Math.max((int) ((0.03f - (float) previousError) / 0.0002f), 0)));
 
-      if(previousError > 0.03)
+      if(previousError > parameters.getICPErrorCutoff())
       {
          LogTools.warn("ICP failed to converge, error: {}", previousError);
          return false;

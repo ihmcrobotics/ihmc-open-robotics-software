@@ -686,12 +686,12 @@ public class PlanarRegionMap
 
          PerceptionPrintTools.printTransform("ICP", transformToPrevious);
 
-         isKeyframe = (translation.norm() > 0.05f) || (euler.norm() > 0.05f);
+         isKeyframe = (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
 
-         if(translation.norm() > 0.1f)
+         if(translation.norm() > parameters.getKeyframeDistanceThreshold())
             LogTools.warn("[Keyframe] High Translation: " + translation.norm());
 
-         if(euler.norm() > 0.1f)
+         if(euler.norm() > parameters.getKeyframeAngularThreshold())
             LogTools.warn("[Keyframe] High Rotation: " + euler.norm());
       }
 
@@ -703,7 +703,9 @@ public class PlanarRegionMap
          regions.applyTransform(transformToPrevious);
          regions.applyTransform(keyframes.get(keyframes.size() - 1).getTransformToWorld());
 
-         finalMap = crossReduceRegionsIteratively(finalMap, regions);
+         //finalMap = crossReduceRegionsIteratively(finalMap, regions);
+
+         finalMap.addPlanarRegionsList(regions);
 
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToPrevious, keyframes.get(keyframes.size() - 1).getTransformToWorld(), previousRegions));
 

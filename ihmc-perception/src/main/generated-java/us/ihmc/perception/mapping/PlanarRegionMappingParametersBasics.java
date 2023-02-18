@@ -53,21 +53,6 @@ public interface PlanarRegionMappingParametersBasics extends PlanarRegionMapping
       set(PlanarRegionMappingParameters.odometryNoiseVariance, odometryNoiseVariance);
    }
 
-   default void setTerminationRatio(double terminationRatio)
-   {
-      set(PlanarRegionMappingParameters.terminationRatio, terminationRatio);
-   }
-
-   default void setICPMaxIterations(int icpMaxIterations)
-   {
-      set(PlanarRegionMappingParameters.icpMaxIterations, icpMaxIterations);
-   }
-
-   default void setMaxRegistrationError(double maxRegistrationError)
-   {
-      set(PlanarRegionMappingParameters.maxRegistrationError, maxRegistrationError);
-   }
-
    default void setBestMatchAngularThreshold(double bestMatchAngularThreshold)
    {
       set(PlanarRegionMappingParameters.bestMatchAngularThreshold, bestMatchAngularThreshold);
@@ -83,8 +68,33 @@ public interface PlanarRegionMappingParametersBasics extends PlanarRegionMapping
       set(PlanarRegionMappingParameters.bestMinimumOverlapThreshold, bestMinimumOverlapThreshold);
    }
 
+   default void setKeyframeDistanceThreshold(double keyframeDistanceThreshold)
+   {
+      set(PlanarRegionMappingParameters.keyframeDistanceThreshold, keyframeDistanceThreshold);
+   }
+
+   default void setKeyframeAngularThreshold(double keyframeAngularThreshold)
+   {
+      set(PlanarRegionMappingParameters.keyframeAngularThreshold, keyframeAngularThreshold);
+   }
+
+   default void setICPMaxIterations(int icpMaxIterations)
+   {
+      set(PlanarRegionMappingParameters.icpMaxIterations, icpMaxIterations);
+   }
+
    default void setICPMinMatches(int icpMinMatches)
    {
       set(PlanarRegionMappingParameters.icpMinMatches, icpMinMatches);
+   }
+
+   default void setICPTerminationRatio(double icpTerminationRatio)
+   {
+      set(PlanarRegionMappingParameters.icpTerminationRatio, icpTerminationRatio);
+   }
+
+   default void setICPErrorCutoff(double icpErrorCutoff)
+   {
+      set(PlanarRegionMappingParameters.icpErrorCutoff, icpErrorCutoff);
    }
 }
