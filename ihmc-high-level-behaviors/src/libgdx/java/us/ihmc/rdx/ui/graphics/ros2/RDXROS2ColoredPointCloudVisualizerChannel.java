@@ -39,6 +39,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private float cy;
    private final RotationMatrix rotationMatrixToWorld = new RotationMatrix();
    private final Vector3D translationToWorld = new Vector3D();
+   private float depthDiscretization;
 
    public RDXROS2ColoredPointCloudVisualizerChannel(String name, ROS2Topic<ImageMessage> topic)
    {
@@ -81,6 +82,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       fy = imageMessage.getFocalLengthYPixels();
       cx = imageMessage.getPrincipalPointXPixels();
       cy = imageMessage.getPrincipalPointYPixels();
+      depthDiscretization = imageMessage.getDepthDiscretization();
       translationToWorld.set(imageMessage.getPosition());
       rotationMatrixToWorld.set(imageMessage.getOrientation());
 
@@ -173,5 +175,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    public RDXSequenceDiscontinuityPlot getSequenceDiscontinuityPlot()
    {
       return sequenceDiscontinuityPlot;
+   }
+
+   public float getDepthDiscretization()
+   {
+      return depthDiscretization;
    }
 }

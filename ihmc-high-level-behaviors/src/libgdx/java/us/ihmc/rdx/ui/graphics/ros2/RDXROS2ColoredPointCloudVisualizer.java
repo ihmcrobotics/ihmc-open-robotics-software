@@ -15,12 +15,12 @@ import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
-import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
+import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -47,7 +47,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    private _cl_program openCLProgram;
    private _cl_kernel createPointCloudKernel;
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
-   private final OpenCLRigidBodyTransformParameter sensorTransformToWorldParameter = new OpenCLRigidBodyTransformParameter();
+   private final OpenCLRigidBodyTransformParameter depthToWorldTransformParameter = new OpenCLRigidBodyTransformParameter();
+   private final OpenCLRigidBodyTransformParameter depthToColorTransformParameter = new OpenCLRigidBodyTransformParameter();
+   private RDXOusterDepthImageToPointCloudKernel depthImageToPointCloudKernel;
 
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
@@ -106,38 +108,42 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
                finalColoredDepthBuffer.createOpenCLBufferObject(openCLManager);
             }
 
-            sensorTransformToWorldParameter.setParameter(depthChannel.getTranslationToWorld(), depthChannel.getRotationMatrixToWorld());
          }
 
          // If both depth and color images are available, configure the OpenCL kernel and run it, to generate the point cloud float buffer.
-         parametersBuffer.setParameter(BytedecoRealsense.L515_FOCAL_LENGTH_METERS);
-         parametersBuffer.setParameter(BytedecoRealsense.L515_CMOS_WIDTH_METERS);
-         parametersBuffer.setParameter(BytedecoRealsense.L515_CMOS_HEIGHT_METERS);
-         parametersBuffer.setParameter(depthChannel.getCx());
-         parametersBuffer.setParameter(depthChannel.getCy());
+         parametersBuffer.setParameter(colorChannel.getFx());
+         parametersBuffer.setParameter(colorChannel.getFy());
+         parametersBuffer.setParameter(colorChannel.getCx());
+         parametersBuffer.setParameter(colorChannel.getCy());
          parametersBuffer.setParameter(depthChannel.getFx());
          parametersBuffer.setParameter(depthChannel.getFy());
+         parametersBuffer.setParameter(depthChannel.getCx());
+         parametersBuffer.setParameter(depthChannel.getCy());
          parametersBuffer.setParameter((float) depthChannel.getImageWidth());
          parametersBuffer.setParameter((float) depthChannel.getImageHeight());
          parametersBuffer.setParameter((float) colorChannel.getImageWidth());
          parametersBuffer.setParameter((float) colorChannel.getImageHeight());
-         parametersBuffer.setParameter(BytedecoRealsense.L515_DEPTH_DISCRETIZATION);
+         parametersBuffer.setParameter(depthChannel.getDepthDiscretization());
          parametersBuffer.setParameter(useSensorColor.get());
          parametersBuffer.setParameter(gradientMode.ordinal());
          parametersBuffer.setParameter(useSinusoidalGradientPattern.get());
+         depthToWorldTransformParameter.setParameter(depthChannel.getTranslationToWorld(), depthChannel.getRotationMatrixToWorld());
+         depthToColorTransformParameter.setParameter(colorChannel.getTranslationToWorld(), colorChannel.getRotationMatrixToWorld());
 
          // Upload the buffers to the OpenCL device (GPU)
          depthChannel.getDepth16UC1Image().writeOpenCLImage(openCLManager);
          colorChannel.getColor8UC4Image().writeOpenCLImage(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
-         sensorTransformToWorldParameter.writeOpenCLBufferObject(openCLManager);
+         depthToWorldTransformParameter.writeOpenCLBufferObject(openCLManager);
+         depthToColorTransformParameter.writeOpenCLBufferObject(openCLManager);
 
          // Set the OpenCL kernel arguments
          openCLManager.setKernelArgument(createPointCloudKernel, 0, depthChannel.getDepth16UC1Image().getOpenCLImageObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 1, colorChannel.getColor8UC4Image().getOpenCLImageObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 2, finalColoredDepthBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 3, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(createPointCloudKernel, 4, sensorTransformToWorldParameter.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(createPointCloudKernel, 4, depthToWorldTransformParameter.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(createPointCloudKernel, 5, depthToColorTransformParameter.getOpenCLBufferObject());
 
          // Run the OpenCL kernel
          openCLManager.execute2D(createPointCloudKernel, depthChannel.getImageWidth(), depthChannel.getImageHeight());

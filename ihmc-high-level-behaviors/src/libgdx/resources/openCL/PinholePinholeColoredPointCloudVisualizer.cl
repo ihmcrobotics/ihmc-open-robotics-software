@@ -5,18 +5,18 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
                              read_only image2d_t colorRGBAImage,
                              global float* finalPointFloatBuffer,
                              global float* parameters,
-                             global float* depthTransformToWorld)
+                             global float* depthToWorldTransform,
+                             global float* depthToColorTransform)
 {
-   float focalLength = parameters[0];
-   float cmosWidth = parameters[1];
-   float cmosHeight = parameters[2];
-   float halfCMOSWidth = cmosWidth / 2.0f;
-   float halfCMOSHeight = cmosHeight / 2.0f;
+   float colorFocalLengthXPixels = parameters[0];
+   float colorFocalLengthYPixels = parameters[1];
+   float colorPrincipalPointXPixels = parameters[2];
+   float colorPrincipalPointYPixels = parameters[3];
+   float focalLengthPixelsX = parameters[4];
+   float focalLengthPixelsY = parameters[5];
+   float dephtPrincipalPointXPixels = parameters[6];
+   float dephtPrincipalPointYPixels = parameters[7];
 
-   float dephtPrincipalPointXPixels = parameters[3];
-   float dephtPrincipalPointYPixels = parameters[4];
-   float focalLengthPixelsX = parameters[5];
-   float focalLengthPixelsY = parameters[6];
    int depthImageWidth = parameters[7];
    int depthImageHeight = parameters[8];
    int colorImageWidth = parameters[9];
@@ -35,23 +35,24 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
                             -(x - dephtPrincipalPointXPixels) / focalLengthPixelsX * eyeDepthInMeters,
                             -(y - dephtPrincipalPointYPixels) / focalLengthPixelsY * eyeDepthInMeters);
 
+   float3 worldFramePoint = transformPoint3D32(depthFramePoint, depthToWorldTransform);
+   float3 colorFramePoint = transformPoint3D32(depthFramePoint, depthToColorTransform);
+
    float cmosToPixelsX = colorImageWidth / cmosWidth;
    float cmosToPixelsY = colorImageHeight / cmosHeight;
 
    // Flip because positive yaw is to the left, but image coordinates go to the right
-   float yaw = -angle(1.0f, 0.0f, depthFramePoint.x, depthFramePoint.y);
+   float yaw = -angle(1.0f, 0.0f, colorFramePoint.x, colorFramePoint.y);
    float distanceFromSensorCenterX = focalLength * tan(yaw);
    float distanceFromSensorLeftX = distanceFromSensorCenterX + halfCMOSWidth;
    int pixelIndexX = (int) round(distanceFromSensorLeftX * cmosToPixelsX);
    bool pixelInBounds = intervalContains(pixelIndexX, 0, colorImageWidth);
 
-   float pitch = -angle(1.0f, 0.0f, depthFramePoint.x, depthFramePoint.z);
+   float pitch = -angle(1.0f, 0.0f, colorFramePoint.x, colorFramePoint.z);
    float distanceFromSensorCenterY = focalLength * tan(pitch);
    float distanceFromSensorTopX = distanceFromSensorCenterY + halfCMOSHeight;
    int pixelIndexY = (int) round(distanceFromSensorTopX * cmosToPixelsY);
    pixelInBounds &= intervalContains(pixelIndexY, 0, colorImageHeight);
-
-   float3 worldFramePoint = transformPoint3D32(depthFramePoint, depthTransformToWorld);
 
    int color;
    if (useSensorColor && pixelInBounds)
@@ -70,7 +71,7 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
 
    int pointStartIndex = (depthImageWidth * y + x) * 8;
 
-   finalPointFloatBuffer[pointStartIndex] = worldFramePoint.x;
+   finalPointFloatBuffer[pointStartIndex]     = worldFramePoint.x;
    finalPointFloatBuffer[pointStartIndex + 1] = worldFramePoint.y;
    finalPointFloatBuffer[pointStartIndex + 2] = worldFramePoint.z;
    finalPointFloatBuffer[pointStartIndex + 3] = color;

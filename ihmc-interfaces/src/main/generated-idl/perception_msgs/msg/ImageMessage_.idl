@@ -59,6 +59,10 @@ module perception_msgs
          */
         boolean is_equidistant_fisheye_camera_model;
         /**
+         * Is Ouster camera model
+         */
+        boolean is_ouster_camera_model;
+        /**
          * Horizontal focal length in units of pixels (Fx)
          */
         float focal_length_x_pixels;
@@ -74,6 +78,19 @@ module perception_msgs
          * Principal point Y in units of pixels (Cy)
          */
         float principal_point_y_pixels;
+        /**
+         * Depth discretization, if a depth image. Depth images are sent as unsigned 16 bit integers
+         * in units of this value
+         */
+        float depth_discretization;
+        /**
+         * If Ouster camera model, the vertical field of view in radians
+         */
+        float ouster_vertical_field_of_view;
+        /**
+         * If Ouster camera model, the horizontal field of view in radians
+         */
+        float ouster_horizontal_field_of_view;
       };
     };
   };
