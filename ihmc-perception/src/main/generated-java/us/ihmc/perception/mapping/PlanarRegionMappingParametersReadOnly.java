@@ -55,21 +55,6 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
       return get(odometryNoiseVariance);
    }
 
-   default double getTerminationRatio()
-   {
-      return get(terminationRatio);
-   }
-
-   default int getICPMaxIterations()
-   {
-      return get(icpMaxIterations);
-   }
-
-   default double getMaxRegistrationError()
-   {
-      return get(maxRegistrationError);
-   }
-
    default double getBestMatchAngularThreshold()
    {
       return get(bestMatchAngularThreshold);
@@ -85,8 +70,33 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
       return get(bestMinimumOverlapThreshold);
    }
 
+   default double getKeyframeDistanceThreshold()
+   {
+      return get(keyframeDistanceThreshold);
+   }
+
+   default double getKeyframeAngularThreshold()
+   {
+      return get(keyframeAngularThreshold);
+   }
+
+   default int getICPMaxIterations()
+   {
+      return get(icpMaxIterations);
+   }
+
    default int getICPMinMatches()
    {
       return get(icpMinMatches);
+   }
+
+   default double getICPTerminationRatio()
+   {
+      return get(icpTerminationRatio);
+   }
+
+   default double getICPErrorCutoff()
+   {
+      return get(icpErrorCutoff);
    }
 }

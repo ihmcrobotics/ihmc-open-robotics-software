@@ -570,19 +570,38 @@ public class PlanarRegionSLAMTools
       matches.clear();
       List<PlanarRegion> newRegions = incoming.getPlanarRegionsAsList();
       List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
+      Vector3D originVector = new Vector3D();
+
 
       for (int i = 0; i < newRegions.size(); i++)
       {
-         PlanarRegion newRegion = newRegions.get(i);
+         double minSimilarity = Double.POSITIVE_INFINITY;
+         int minSimilarityIndex = -1;
+
+         UnitVector3DReadOnly newRegionNormal = newRegions.get(i).getNormal();
+         Point3DReadOnly newRegionOrigin = newRegions.get(i).getPoint();
 
          for (int j = 0; j < mapRegions.size(); j++)
          {
-            PlanarRegion mapRegion = mapRegions.get(j);
+            UnitVector3DReadOnly mapRegionNormal = mapRegions.get(j).getNormal();
+            Point3DReadOnly mapRegionOrigin = mapRegions.get(j).getPoint();
 
-            if (checkRegionsForOverlap(newRegion, mapRegion, overlapThreshold, normalThreshold, distanceThreshold, minBoxSize, true))
+            originVector.sub(newRegionOrigin, mapRegionOrigin);
+
+            double distance = originVector.norm();
+            double normalDistance = Math.abs(originVector.dot(mapRegionNormal));
+            double normalSimilarity = mapRegionNormal.dot(newRegionNormal);
+
+            if ((normalSimilarity < minSimilarity) && (distance < distanceThreshold) && (normalSimilarity > normalThreshold))
             {
-               matches.put(i, j);
+               minSimilarity = normalSimilarity;
+               minSimilarityIndex = j;
             }
+         }
+
+         if(minSimilarityIndex != -1)
+         {
+            matches.put(i, minSimilarityIndex);
          }
       }
    }

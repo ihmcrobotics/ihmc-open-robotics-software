@@ -134,7 +134,9 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
       HashMap<Integer, Integer> matches = new HashMap<>();
       PlanarRegionSLAMTools.findBestPlanarRegionMatches(mappingManager.getCurrentRegions().getPlanarRegionsList(),
                                                         mappingManager.getPreviousRegions().getPlanarRegionsList(), matches,
-                                                        0.5f, 0.8f, 0.4f, 0.3f);
+                                                        (float) mappingManager.getParameters().getBestMinimumOverlapThreshold(),
+                                                        (float) mappingManager.getParameters().getBestMatchAngularThreshold(),
+                                                        (float) mappingManager.getParameters().getBestMatchDistanceThreshold(), 0.3f);
 
       ArrayList<Point3DReadOnly> matchEndPoints = new ArrayList<>();
       for(Integer match : matches.keySet())
