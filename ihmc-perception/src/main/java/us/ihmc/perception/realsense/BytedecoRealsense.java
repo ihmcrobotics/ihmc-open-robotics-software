@@ -50,9 +50,9 @@ public class BytedecoRealsense
    {
       realsenseToIHMCZUpTransform.getRotation().setYawPitchRoll(Math.toRadians(-90.0), 0.0, Math.toRadians(-90.0));
    }
-   private ReferenceFrame realsenseFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("Realsense",
-                                                                                                             ReferenceFrame.getWorldFrame(),
-                                                                                                             realsenseToIHMCZUpTransform);
+   private final ReferenceFrame realsenseFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("Realsense",
+                                                                                                                   ReferenceFrame.getWorldFrame(),
+                                                                                                                   realsenseToIHMCZUpTransform);
    protected final FrameVector3D depthToColorTranslation = new FrameVector3D(realsenseFrame);
    protected final FrameRotationMatrix depthToColorRotationMatrix = new FrameRotationMatrix(realsenseFrame);
    protected final Quaternion depthToColorQuaternion = new Quaternion();
