@@ -21,6 +21,15 @@ public class PlanarRegionKeyframe
       this.transformToWorld.multiply(previousToWorldTransform);
    }
 
+   public PlanarRegionKeyframe(int index, RigidBodyTransform transformToWorld, PlanarRegionsList planarRegionsList)
+   {
+      this.planarRegionsList.addPlanarRegionsList(planarRegionsList);
+      this.timeIndex = index;
+      this.transformToPrevious.set(transformToPrevious);
+
+      this.transformToWorld.set(transformToWorld);
+   }
+
    public RigidBodyTransform getTransformToWorld()
    {
       return transformToWorld;

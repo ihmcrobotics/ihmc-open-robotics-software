@@ -146,7 +146,7 @@ public class PlanarRegionMap
       if (initialized)
       {
          currentToPreviousSensorTransform.setIdentity();
-         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, frameRegions.getPlanarRegionsList(), 1, currentToPreviousSensorTransform, parameters);
+         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, frameRegions.getPlanarRegionsList(), currentToPreviousSensorTransform, parameters);
 
          //currentToPreviousSensorTransform.set(frameRegions.getSensorToWorldFrameTransform());
          //currentToPreviousSensorTransform.multiply(worldToPreviousSensorFrameTransform);
@@ -670,8 +670,9 @@ public class PlanarRegionMap
       else
       {
          transformToPrevious.setIdentity();
+
          LogTools.info("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
-         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions, regions.copy(), 6, transformToPrevious, parameters);
+         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions, regions.copy(), transformToPrevious, parameters);
 
          if(!valid)
          {
@@ -679,20 +680,7 @@ public class PlanarRegionMap
             return;
          }
 
-         // Add a keyframe if either the translation or rotation is large enough in separate if blocks
-         Point3D euler = new Point3D();
-         Vector3DBasics translation = transformToPrevious.getTranslation();
-         transformToPrevious.getRotation().getEuler(euler);
-
-         PerceptionPrintTools.printTransform("ICP", transformToPrevious);
-
-         isKeyframe = (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
-
-         if(translation.norm() > parameters.getKeyframeDistanceThreshold())
-            LogTools.warn("[Keyframe] High Translation: " + translation.norm());
-
-         if(euler.norm() > parameters.getKeyframeAngularThreshold())
-            LogTools.warn("[Keyframe] High Rotation: " + euler.norm());
+         isKeyframe = performKeyframeCheck(transformToPrevious);
       }
 
       if(isKeyframe)
@@ -700,17 +688,50 @@ public class PlanarRegionMap
          previousRegions.clear();
          previousRegions.addPlanarRegionsList(regions.copy());
 
-         regions.applyTransform(transformToPrevious);
-         regions.applyTransform(keyframes.get(keyframes.size() - 1).getTransformToWorld());
+         RigidBodyTransform transformToWorld = new RigidBodyTransform(transformToPrevious);
+         transformToWorld.multiply(keyframes.get(keyframes.size() - 1).getTransformToWorld());
 
-         //finalMap = crossReduceRegionsIteratively(finalMap, regions);
+         regions.applyTransform(transformToWorld);
 
-         finalMap.addPlanarRegionsList(regions);
+         RigidBodyTransform residualTransform = new RigidBodyTransform();
+         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, regions.copy(), residualTransform, parameters);
 
-         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToPrevious, keyframes.get(keyframes.size() - 1).getTransformToWorld(), previousRegions));
+         if(valid)
+         {
+            regions.applyTransform(residualTransform);
+            transformToWorld.preMultiply(residualTransform);
+         }
+
+         finalMap = crossReduceRegionsIteratively(finalMap, regions);
+
+         //finalMap.addPlanarRegionsList(regions);
+
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
+
+         PerceptionPrintTools.printTransform("Transform to World", transformToWorld);
 
          LogTools.info("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
       }
+   }
+
+   private boolean performKeyframeCheck(RigidBodyTransform transformToPrevious)
+   {
+      // Add a keyframe if either the translation or rotation is large enough in separate if blocks
+      Point3D euler = new Point3D();
+      Vector3DBasics translation = transformToPrevious.getTranslation();
+      transformToPrevious.getRotation().getEuler(euler);
+
+      PerceptionPrintTools.printTransform("ICP", transformToPrevious);
+
+      boolean isKeyframe = (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
+
+      if(translation.norm() > parameters.getKeyframeDistanceThreshold())
+         LogTools.warn("[Keyframe] High Translation: " + translation.norm());
+
+      if(euler.norm() > parameters.getKeyframeAngularThreshold())
+         LogTools.warn("[Keyframe] High Rotation: " + euler.norm());
+
+      return isKeyframe;
    }
 
    private void processUniqueRegions(PlanarRegionsList map)
