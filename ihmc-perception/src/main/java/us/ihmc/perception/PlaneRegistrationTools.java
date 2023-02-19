@@ -10,8 +10,10 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -151,9 +153,10 @@ public class PlaneRegistrationTools
     *
     * @param previousRegions
     * @param currentRegions
-    * @param maxIterations
+    * @param transformToPack
+    * @param parameters
     */
-   public static boolean computeIterativeClosestPlane(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, int maxIterations,
+   public static boolean computeIterativeClosestPlane(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions,
                                                       RigidBodyTransform transformToPack, PlanarRegionMappingParameters parameters)
    {
       RigidBodyTransform transform;
@@ -166,7 +169,7 @@ public class PlaneRegistrationTools
                                                         (float) parameters.getBestMatchDistanceThreshold(),
                                                         0.3f);
       double previousError = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
-      for (int i = 0; i < maxIterations; i++)
+      for (int i = 0; i < parameters.getICPMaxIterations(); i++)
       {
          matches.clear();
          PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
@@ -247,7 +250,8 @@ public class PlaneRegistrationTools
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
       ArrayList<QuaternionReadOnly> quaternions = findRotationEstimates(previousRegions, currentRegions, matches);
-      Quaternion averageQuaternion = RotationTools.computeAverageQuaternion(quaternions);
+      ArrayList<Double> weights = computeResidualWeights(previousRegions, currentRegions, matches, quaternions);
+      Quaternion averageQuaternion = RotationTools.computeAverageQuaternion(quaternions, weights);
 
       Point3D averageTranslation = new Point3D();
       ArrayList<Point3DReadOnly> translations = findTranslationEstimates(previousRegions, currentRegions, matches);
@@ -323,6 +327,38 @@ public class PlaneRegistrationTools
       averageTranslation.scale(1.0 / translations.size());
 
       return averageTranslation;
+   }
+
+   public static ArrayList<Double> computeResidualWeights(PlanarRegionsList previousRegions,
+                                                          PlanarRegionsList currentRegions,
+                                                          HashMap<Integer, Integer> matches,
+                                                          ArrayList<QuaternionReadOnly> quaternions)
+   {
+      ArrayList<Double> weightsToPack = new ArrayList<>();
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+
+      for (int i = 0; i < quaternions.size(); i++)
+      {
+         double weight = 0.0;
+         transform.setRotationAndZeroTranslation(quaternions.get(i));
+
+         for (Integer index : matches.keySet())
+         {
+            PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(index));
+            PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(index);
+
+            UnitVector3D currentNormal = new UnitVector3D(currentRegion.getNormal());
+            UnitVector3D previousNormal = new UnitVector3D(previousRegion.getNormal());
+
+            currentNormal.applyTransform(transform);
+            weight += (previousNormal.dot(currentNormal));
+         }
+
+         weightsToPack.add(weight);
+      }
+
+      return weightsToPack;
    }
 
    public static void constructLeastSquaresProblem(PlanarRegionsList previousRegions,

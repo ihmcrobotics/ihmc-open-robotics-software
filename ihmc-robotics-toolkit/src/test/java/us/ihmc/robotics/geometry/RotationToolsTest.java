@@ -514,6 +514,8 @@ public class RotationToolsTest
    public void testQuaternionAveraging() throws Exception
    {
       ArrayList<QuaternionReadOnly> quaternions = new ArrayList<>();
+      ArrayList<Double> weights = new ArrayList<>();
+
 
       int totalQuaternions = 10;
 
@@ -525,10 +527,16 @@ public class RotationToolsTest
          quaternions.add(quaternion);
       }
 
+      //Fill weights with ones of the same length as quaternions
+      for(int i = 0; i<totalQuaternions; i++)
+      {
+         weights.add(1.0);
+      }
+
       averageEulerAngles.scale(1.0 / (float) totalQuaternions);
 
       Point3D averageQuaternionEulerAngles = new Point3D();
-      Quaternion averageQuaternion = RotationTools.computeAverageQuaternion(quaternions);
+      Quaternion averageQuaternion = RotationTools.computeAverageQuaternion(quaternions, weights);
       averageQuaternion.getEuler(averageQuaternionEulerAngles);
 
       LogTools.info("Average Euler angles: " + averageEulerAngles);

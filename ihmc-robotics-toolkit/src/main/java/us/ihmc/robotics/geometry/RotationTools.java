@@ -644,10 +644,17 @@ public class RotationTools
          return wz + Math.tan(pitch) * (Math.sin(yaw) * wy + Math.cos(yaw) * wx);
    }
 
-   public static Quaternion computeAverageQuaternion(List<QuaternionReadOnly> quaternions)
+   public static Quaternion computeAverageQuaternion(List<QuaternionReadOnly> quaternions, List<Double> weights)
    {
       DMatrixRMaj Q = new DMatrixRMaj(4, quaternions.size());
-      DMatrixRMaj QQt = new DMatrixRMaj(4, 4);
+      DMatrixRMaj QWQt = new DMatrixRMaj(4, 4);
+      DMatrixRMaj QW = new DMatrixRMaj(4, weights.size());
+
+      DMatrixRMaj W = new DMatrixRMaj(weights.size(), weights.size());
+      for(int i = 0; i< weights.size(); i++)
+      {
+         W.set(i, i, weights.get(i));
+      }
 
       for(int i = 0; i< quaternions.size(); i++)
       {
@@ -658,15 +665,16 @@ public class RotationTools
          Q.set(3, i, quaternion.getS());
       }
 
-      CommonOps_DDRM.multTransB(Q, Q, QQt);
-      CommonOps_DDRM.scale(quaternions.size(), QQt);
+      CommonOps_DDRM.mult(Q, W, QW);
+      CommonOps_DDRM.multTransB(QW, Q, QWQt);
+      CommonOps_DDRM.scale(quaternions.size() / CommonOps_DDRM.trace(W), QWQt);
 
       SvdImplicitQrDecompose_DDRM svd = new SvdImplicitQrDecompose_DDRM(false, true, true, true);
       DMatrixRMaj U = new DMatrixRMaj(4, 4);
       DMatrixRMaj D = new DMatrixRMaj(4, 4);
       DMatrixRMaj Vt = new DMatrixRMaj(4, 4);
 
-      if (svd.decompose(QQt))
+      if (svd.decompose(QWQt))
       {
          svd.getU(U, false);
          svd.getV(Vt, true);

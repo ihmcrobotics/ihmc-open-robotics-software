@@ -51,7 +51,6 @@ public class PlanarRegionMappingHandler
    private final DataSource source;
 
    private final static long PUBLISH_MILLISECONDS = 100;
-   private final static int ICP_MAX_ITERATIONS = 10;
 
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
@@ -392,7 +391,7 @@ public class PlanarRegionMappingHandler
       RigidBodyTransform currentToPreviousTransform = new RigidBodyTransform();
       boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions.getPlanarRegionsList(),
                                                                          currentRegions.getPlanarRegionsList(),
-                                                                         ICP_MAX_ITERATIONS, currentToPreviousTransform, getParameters());
+                                                                         currentToPreviousTransform, getParameters());
 
       PerceptionPrintTools.printTransform("ComputeICP", currentToPreviousTransform);
    }
