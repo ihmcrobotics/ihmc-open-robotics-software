@@ -1151,7 +1151,7 @@ class PlanarRegionSLAMTest
 
       HashMap<Integer, Integer> matches = new HashMap<>();
 
-      PlanarRegionSLAMTools.findBestPlanarRegionMatches(listOne, listTwo, matches, 0.4f, 0.6f, 0.4f, 0.5f);
+      PlaneRegistrationTools.findBestPlanarRegionMatches(listOne, listTwo, matches, 0.4f, 0.6f, 0.4f, 0.5f);
 
       for(Integer key : matches.keySet())
       {
