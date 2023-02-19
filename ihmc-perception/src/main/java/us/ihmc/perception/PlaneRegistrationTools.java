@@ -27,6 +27,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 public class PlaneRegistrationTools
@@ -160,7 +161,7 @@ public class PlaneRegistrationTools
 
       HashMap<Integer, Integer> matches = new HashMap<>();
 
-      PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
+      PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
                                                         (float) parameters.getBestMatchAngularThreshold(),
                                                         (float) parameters.getBestMatchDistanceThreshold(),
                                                         0.3f);
@@ -168,7 +169,7 @@ public class PlaneRegistrationTools
       for (int i = 0; i < maxIterations; i++)
       {
          matches.clear();
-         PlanarRegionSLAMTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
+         PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
                                                            (float) parameters.getBestMatchAngularThreshold(),
                                                            (float) parameters.getBestMatchDistanceThreshold(), 0.3f);
          transform = PlaneRegistrationTools.computeQuaternionAveragingTransform(previousRegions, currentRegions, matches);
@@ -487,5 +488,53 @@ public class PlaneRegistrationTools
       }
       error /= matches.size();
       return error;
+   }
+
+
+   public static void findBestPlanarRegionMatches(PlanarRegionsList map,
+                                                  PlanarRegionsList incoming,
+                                                  HashMap<Integer, Integer> matches,
+                                                  float overlapThreshold,
+                                                  float normalThreshold,
+                                                  float distanceThreshold,
+                                                  float minBoxSize)
+   {
+      matches.clear();
+      List<PlanarRegion> newRegions = incoming.getPlanarRegionsAsList();
+      List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
+      Vector3D originVector = new Vector3D();
+
+
+      for (int i = 0; i < newRegions.size(); i++)
+      {
+         double minSimilarity = Double.POSITIVE_INFINITY;
+         int minSimilarityIndex = -1;
+
+         UnitVector3DReadOnly newRegionNormal = newRegions.get(i).getNormal();
+         Point3DReadOnly newRegionOrigin = newRegions.get(i).getPoint();
+
+         for (int j = 0; j < mapRegions.size(); j++)
+         {
+            UnitVector3DReadOnly mapRegionNormal = mapRegions.get(j).getNormal();
+            Point3DReadOnly mapRegionOrigin = mapRegions.get(j).getPoint();
+
+            originVector.sub(newRegionOrigin, mapRegionOrigin);
+
+            double distance = originVector.norm();
+            double normalDistance = Math.abs(originVector.dot(mapRegionNormal));
+            double normalSimilarity = mapRegionNormal.dot(newRegionNormal);
+
+            if ((normalSimilarity < minSimilarity) && (distance < distanceThreshold) && (normalSimilarity > normalThreshold))
+            {
+               minSimilarity = normalSimilarity;
+               minSimilarityIndex = j;
+            }
+         }
+
+         if(minSimilarityIndex != -1)
+         {
+            matches.put(i, minSimilarityIndex);
+         }
+      }
    }
 }

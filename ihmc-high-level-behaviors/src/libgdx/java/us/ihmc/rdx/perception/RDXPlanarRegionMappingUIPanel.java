@@ -10,6 +10,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.PlanarRegionMappingHandler;
+import us.ihmc.perception.PlaneRegistrationTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXLineMeshModel;
@@ -132,11 +133,11 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    {
       lineMeshModel.clear();
       HashMap<Integer, Integer> matches = new HashMap<>();
-      PlanarRegionSLAMTools.findBestPlanarRegionMatches(mappingManager.getCurrentRegions().getPlanarRegionsList(),
-                                                        mappingManager.getPreviousRegions().getPlanarRegionsList(), matches,
-                                                        (float) mappingManager.getParameters().getBestMinimumOverlapThreshold(),
-                                                        (float) mappingManager.getParameters().getBestMatchAngularThreshold(),
-                                                        (float) mappingManager.getParameters().getBestMatchDistanceThreshold(), 0.3f);
+      PlaneRegistrationTools.findBestPlanarRegionMatches(mappingManager.getCurrentRegions().getPlanarRegionsList(),
+                                                         mappingManager.getPreviousRegions().getPlanarRegionsList(), matches,
+                                                         (float) mappingManager.getParameters().getBestMinimumOverlapThreshold(),
+                                                         (float) mappingManager.getParameters().getBestMatchAngularThreshold(),
+                                                         (float) mappingManager.getParameters().getBestMatchDistanceThreshold(), 0.3f);
 
       ArrayList<Point3DReadOnly> matchEndPoints = new ArrayList<>();
       for(Integer match : matches.keySet())

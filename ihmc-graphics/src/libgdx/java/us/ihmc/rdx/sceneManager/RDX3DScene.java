@@ -47,7 +47,7 @@ public class RDX3DScene
       this.sceneLevelsToRender = new TreeSet<>();
       Collections.addAll(this.sceneLevelsToRender, sceneLevelsToRender);
 
-      Pair<String, String> shaderStrings = LibGDXTools.loadCombinedShader(getClass().getName().replace(".", "/") + ".glsl");
+      Pair<String, String> shaderStrings = LibGDXTools.loadCombinedShader(getClass().getName().replace(".", "/") + "_v0.1.glsl");
       String vertexShader = shaderStrings.getLeft();
       String fragmentShader = shaderStrings.getRight();
       shadowsDisabledModelBatch = new ModelBatch(null, new DepthSensorShaderProvider(vertexShader, fragmentShader), null);
