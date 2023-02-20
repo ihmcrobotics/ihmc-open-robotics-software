@@ -175,6 +175,13 @@ public class PlaneRegistrationTools
          PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
                                                            (float) parameters.getBestMatchAngularThreshold(),
                                                            (float) parameters.getBestMatchDistanceThreshold(), 0.3f);
+
+         if (matches.size() < parameters.getICPMinMatches())
+         {
+            LogTools.info("Not Enough Matches: {}", matches.size());
+            return false;
+         }
+
          transform = PlaneRegistrationTools.computeQuaternionAveragingTransform(previousRegions, currentRegions, matches);
          currentRegions.applyTransform(transform);
 
