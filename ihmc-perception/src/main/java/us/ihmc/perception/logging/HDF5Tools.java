@@ -409,7 +409,7 @@ public class HDF5Tools
       }
 
       long dtype = DataType.getHDFObjType(dataSet.getId());
-      LogTools.info("Dataset DType: {}", dtype);
+      LogTools.info("Namespace: {}, Dataset DType: {}, Size: {}", group.toString(), dtype, size);
 
       DataType dataType = new DataType(PredType.NATIVE_UINT8());
       dataSet.read((Pointer) bytePointer, dataType);
