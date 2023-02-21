@@ -6,6 +6,7 @@ import javafx.animation.AnimationTimer;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -137,7 +138,15 @@ public class HeightMapNavigationUpdater extends AnimationTimer
                                              });
 
       footstepPlannerParameters.setIdealFootstepLength(0.28);
-      planningModule = new FootstepPlanningModule("HeightMap", new DefaultVisibilityGraphParameters(), new AStarBodyPathPlannerParameters(), footstepPlannerParameters, new DefaultSwingPlannerParameters(), walkingControllerParameters, footPolygons, null);
+      planningModule = new FootstepPlanningModule("HeightMap",
+                                                  new DefaultVisibilityGraphParameters(),
+                                                  new AStarBodyPathPlannerParameters(),
+                                                  footstepPlannerParameters,
+                                                  new DefaultSwingPlannerParameters(),
+                                                  walkingControllerParameters,
+                                                  footPolygons,
+                                                  null,
+                                                  ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       logger = new FootstepPlannerLogger(planningModule);
       planningModule.addCustomTerminationCondition((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> iterations > 1);
 

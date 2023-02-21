@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
 import org.junit.jupiter.api.*;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -71,7 +72,8 @@ public class FootstepPlanningWithBodyPathTest
       request.setRequestedInitialStanceSide(initialStanceFootSide);
       request.setGoalFootPoses(defaultStepWidth, goalPose);
 
-      FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
 
@@ -129,7 +131,7 @@ public class FootstepPlanningWithBodyPathTest
       goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(regions);
-      FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(1.0);

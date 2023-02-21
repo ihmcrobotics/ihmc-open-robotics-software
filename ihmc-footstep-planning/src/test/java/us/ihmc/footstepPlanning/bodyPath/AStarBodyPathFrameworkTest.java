@@ -105,7 +105,9 @@ public class AStarBodyPathFrameworkTest
    protected static double walkerMarchingSpeed = 0.25;
 
    // For the occlusion test
-   private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
+   private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule,",
+                                                                                    ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+
    private final FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
 
    @BeforeEach

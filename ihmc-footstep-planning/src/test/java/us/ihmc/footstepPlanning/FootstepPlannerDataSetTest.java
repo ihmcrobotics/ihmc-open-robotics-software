@@ -25,7 +25,8 @@ public abstract class FootstepPlannerDataSetTest
    private static final boolean VERBOSE = true;
    private static boolean GENERATE_LOG_FOR_FAILING_TESTS = true;
 
-   private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
+   private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule",
+                                                                                    ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
    private final FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
 
    protected abstract boolean getPlanBodyPath();

@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsVisualizer;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -76,7 +77,8 @@ public class SwingOverPlanarRegionsLogViewer
                                                                          parameters,
                                                                          walkingControllerParameters,
                                                                          footPolygons,
-                                                                         null);
+                                                                         null,
+                                                                         ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
 
       Graphics3DObject startGraphics = new Graphics3DObject();
       Graphics3DObject endGraphics = new Graphics3DObject();
