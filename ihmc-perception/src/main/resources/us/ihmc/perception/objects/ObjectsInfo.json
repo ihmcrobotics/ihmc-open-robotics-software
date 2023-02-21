@@ -14,17 +14,6 @@
           "virtualAppendixFileName": "environmentObjects/door/doorPanel/DoorPanelSimple.g3dj"
         }
       ]
-    },
-    {
-      "name": "PullDoor",
-      "properties": [
-        {
-          "markerId": 1,
-          "markerSize": 0.2032,
-          "translationMarkerToMainBody": [0.05, -0.088, 0.2414],
-          "yawPitchRollMarkerToMainBody": [0.0, 0.0, 0.0]
-        }
-      ]
     }
   ]
 }

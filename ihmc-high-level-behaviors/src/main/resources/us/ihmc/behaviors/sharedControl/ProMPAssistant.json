@@ -8,7 +8,8 @@
   "numberOfInferredSpeeds": 30,
   "tasks":[
     {
-      "name":"Door",
+      "context": "Door",
+      "name": "ReachHandle",
       "bodyPartForRecognition": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
       "translationGoalToEE": [0.135, -0.027,  0.174],
