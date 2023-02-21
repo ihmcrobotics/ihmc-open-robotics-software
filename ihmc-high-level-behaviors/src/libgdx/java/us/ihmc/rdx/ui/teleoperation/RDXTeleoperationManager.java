@@ -223,7 +223,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
 
          // create the manager for the desired arm setpoints
-         armManager.create();
+         armManager.create(baseUI);
 
          for (RDXRobotCollidable robotCollidable : environmentCollisionModel.getRobotCollidables())
          {
