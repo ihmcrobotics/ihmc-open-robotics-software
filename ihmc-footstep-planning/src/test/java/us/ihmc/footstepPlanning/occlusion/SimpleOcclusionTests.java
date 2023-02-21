@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
@@ -93,7 +94,7 @@ public class SimpleOcclusionTests
       YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
 

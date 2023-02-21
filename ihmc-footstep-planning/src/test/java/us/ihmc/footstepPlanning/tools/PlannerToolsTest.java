@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.tools;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -139,7 +140,7 @@ public class PlannerToolsTest
 
    private void testDataSet(DataSet debrisDataSet)
    {
-      FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule("testModule");
+      FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule("testModule", ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       footstepPlanningModule.getFootstepPlannerParameters().setCheckForBodyBoxCollisions(false);
       footstepPlanningModule.getFootstepPlannerParameters().setBodyBoxDepth(0.3);
       footstepPlanningModule.getFootstepPlannerParameters().setBodyBoxWidth(0.8);

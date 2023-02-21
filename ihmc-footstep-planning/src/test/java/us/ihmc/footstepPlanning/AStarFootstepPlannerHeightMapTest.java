@@ -30,7 +30,8 @@ public class AStarFootstepPlannerHeightMapTest
    private static final boolean VERBOSE = true;
    private static boolean GENERATE_LOG_FOR_FAILING_TESTS = true;
 
-   private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
+   private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule", ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+
    private final FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
 
    private String getTestNamePrefix()

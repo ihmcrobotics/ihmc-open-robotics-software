@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.narrowPassage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
@@ -44,7 +45,9 @@ public class NarrowPassageBodyPathOptimizerTest
    @BeforeEach
    public void setup()
    {
-      FootstepPlanningModule defaultFootstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlanningModule defaultFootstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName(),
+                                                                                        ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+
       VisibilityGraphsParametersBasics visibilityGraphParameters = defaultFootstepPlanningModule.getVisibilityGraphParameters();
       visibilityGraphParameters.setOptimizeForNarrowPassage(true);
       footstepPlanningParameters = defaultFootstepPlanningModule.getFootstepPlannerParameters();
@@ -56,7 +59,8 @@ public class NarrowPassageBodyPathOptimizerTest
                                           defaultFootstepPlanningModule.getSwingPlannerParameters(),
                                           null,
                                           PlannerTools.createDefaultFootPolygons(),
-                                          null);
+                                          null,
+                                          ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
    }
 
    @AfterEach

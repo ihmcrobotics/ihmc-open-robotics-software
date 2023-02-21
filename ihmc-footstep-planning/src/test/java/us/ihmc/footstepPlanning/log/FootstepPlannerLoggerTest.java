@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -33,7 +34,7 @@ public class FootstepPlannerLoggerTest
    @Test
    public void testLogger()
    {
-      FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
+      FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule", ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_EOD_Cinders);
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();

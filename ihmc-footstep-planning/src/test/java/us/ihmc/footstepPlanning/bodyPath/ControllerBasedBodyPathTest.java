@@ -9,6 +9,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import net.java.games.input.Component;
 import net.java.games.input.Event;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -102,7 +103,8 @@ public class ControllerBasedBodyPathTest
       private final WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
 
       private final FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      private final FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule("controllerBasedBodyPathTest");
+      private final FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule("controllerBasedBodyPathTest",
+                                                                                                ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       private final FootstepPlannerRequest request = new FootstepPlannerRequest();
 
       private static final int stepsPerSide = 10;

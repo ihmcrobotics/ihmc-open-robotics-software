@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -56,7 +57,8 @@ public class FootstepPathCalculatorModule
    private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphsParameters;
 
    private final Messager messager;
-   private final FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+   private final FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
+                                                                                    ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
 
    public FootstepPathCalculatorModule(Messager messager)
    {

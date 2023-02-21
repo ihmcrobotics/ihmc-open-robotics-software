@@ -5,6 +5,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -26,7 +27,7 @@ public class FootstepPlanningModuleTest
    // TODO expose NowSupplier in Stopwatch or base planner timing on some manual time source for unit testing
    public void testStreamingOutput()
    {
-      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190219_182005_Random);
       PlannerInput plannerInput = dataSet.getPlannerInput();
 
@@ -87,7 +88,7 @@ public class FootstepPlanningModuleTest
    @Test
    public void testGoalProximityWhenGoalIsUnreachable()
    {
-      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
@@ -112,7 +113,7 @@ public class FootstepPlanningModuleTest
    @Test
    public void testGoalProximityWhenGoalIsReachable()
    {
-      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       planningModule.getFootstepPlannerParameters().setMaximumBranchFactor(0);
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
@@ -138,7 +139,7 @@ public class FootstepPlanningModuleTest
    @Test
    public void testRequestSnapGoalSteps()
    {
-      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
 
       double groundHeight = 2.5;
       double providedGoalNodeHeights = -1.0;
@@ -266,7 +267,7 @@ public class FootstepPlanningModuleTest
    @Test
    public void testCustomTermination()
    {
-      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190219_182005_Random);
       PlannerInput plannerInput = dataSet.getPlannerInput();
 
