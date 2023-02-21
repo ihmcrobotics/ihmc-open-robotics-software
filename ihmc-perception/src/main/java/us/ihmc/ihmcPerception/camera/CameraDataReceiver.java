@@ -54,8 +54,11 @@ public class CameraDataReceiver implements CloseableAndDisposable
    private boolean hasStarted = false;
    private boolean isPaused = false;
 
-   public CameraDataReceiver(FullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-                             CompressedVideoHandler compressedVideoHandler, LongUnaryOperator robotMonotonicTimeCalculator)
+   public CameraDataReceiver(FullRobotModelFactory fullRobotModelFactory,
+                             String sensorNameInSdf,
+                             RobotConfigurationDataBuffer robotConfigurationDataBuffer,
+                             CompressedVideoHandler compressedVideoHandler,
+                             LongUnaryOperator robotMonotonicTimeCalculator)
    {
       fullRobotModel = fullRobotModelFactory.createFullRobotModel();
       this.robotMonotonicTimeCalculator = robotMonotonicTimeCalculator;

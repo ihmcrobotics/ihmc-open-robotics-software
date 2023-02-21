@@ -12,7 +12,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.memory.NativeMemoryTools;
+import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.io.*;
 import java.net.Socket;
@@ -33,9 +33,11 @@ import java.util.function.Consumer;
  * To test, use the GNU netcat command:
  * netcat -ul 7502
  *
+ * <p>
  * Lidar incoming data format:
+ * </p>
  *
- * <img src="https://i.imgur.com/tB4dI3H.png" width="800" alt="description of MyImage">
+ * <img src="https://www.ihmc.us/wp-content/uploads/2023/02/OusterLidarDataFormat.png" width="800">
  *
  */
 public class NettyOuster

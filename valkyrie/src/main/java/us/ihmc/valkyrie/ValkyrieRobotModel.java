@@ -27,6 +27,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -73,6 +74,7 @@ import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 public class ValkyrieRobotModel implements DRCRobotModel
 {
    private static final boolean PRINT_MODEL = false;
+   public static final String CUSTOM_ROBOT_PATH_ENVIRONMENT_VARIABLE_NAME = "IHMC_CUSTOM_VALKYRIE_ROBOT_PATH";
 
    private final String[] resourceDirectories = {"models/", "models/gazebo/", "models/val_description/", "models/val_description/urdf/"};
 
@@ -255,6 +257,21 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (robotDefinition != null)
          throw new IllegalArgumentException("Cannot set customModel once robotDefinition has been created.");
       this.customModel = customModel;
+   }
+
+   public void setCustomModelFromEnvironment()
+   {
+      String valueFromEnvironment = System.getenv(CUSTOM_ROBOT_PATH_ENVIRONMENT_VARIABLE_NAME);
+
+      if (valueFromEnvironment == null)
+      {
+         LogTools.warn("No custom robot was set via environment variable.");
+      }
+      else
+      {
+         LogTools.info("Loading custom robot from environment: {}", valueFromEnvironment);
+         setCustomModel(valueFromEnvironment);
+      }
    }
 
    /**

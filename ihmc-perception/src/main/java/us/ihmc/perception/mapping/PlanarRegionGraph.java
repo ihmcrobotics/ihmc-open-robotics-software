@@ -1,18 +1,7 @@
 package us.ihmc.perception.mapping;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
-import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
-import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
@@ -197,7 +186,7 @@ public class PlanarRegionGraph
             while (childIndex < childNodes.size())
             {
                PlanarRegionNode childNode = childNodes.get(childIndex);
-               if (PlanarRegionSLAMTools.mergeRegionIntoParent(planarRegion, childNode.planarRegion, updateTowardsChildAlpha))
+               if (PlanarRegionSLAMTools.mergeRegionIntoParentUsingFilter(planarRegion, childNode.planarRegion, updateTowardsChildAlpha))
                {
                   changed = true;
                   childNodes.remove(childIndex);
