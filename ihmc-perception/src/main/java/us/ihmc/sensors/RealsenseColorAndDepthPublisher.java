@@ -138,7 +138,7 @@ public class RealsenseColorAndDepthPublisher
             depthImageMessage.setFocalLengthYPixels(realsense.getDepthIntrinsicParameters().fy());
             depthImageMessage.setPrincipalPointXPixels(realsense.getDepthIntrinsicParameters().ppx());
             depthImageMessage.setPrincipalPointYPixels(realsense.getDepthIntrinsicParameters().ppy());
-            depthImageMessage.setDepthDiscretization(BytedecoRealsense.L515_DEPTH_DISCRETIZATION);
+            depthImageMessage.setDepthDiscretization((float) realsense.getDepthDiscretization());
             ros2Helper.publish(depthTopic, depthImageMessage);
 
             PerceptionMessageTools.packImageMessageData(jpegCompression.getCompressedData(), colorImageMessage);
