@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
@@ -50,7 +49,7 @@ public class RDXArmManager
    private final HandWrenchCalculator handWrenchCalculator;
    private ImBoolean indicateWrenchOnScreen = new ImBoolean(true);
    private RDX3DPanelToolbarButton wrenchToolbarButton;
-   private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator();
+   private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -86,7 +85,7 @@ public class RDXArmManager
    {
       this.baseUI = baseUI;
       workingRobot = robotModel.createFullRobotModel();
-
+      panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
       for (RobotSide side : RobotSide.values)
       {
          armManagers.get(side).create(robotModel, syncedRobot.getFullRobotModel(), desiredRobot, workingRobot);
@@ -100,13 +99,7 @@ public class RDXArmManager
                                           indicateWrenchOnScreen.set(showWrench);
                                           panelHandWrenchIndicator.setShowAndUpdate(showWrench);
                                        });
-      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderHandWrenchIndicator);
-   }
-
-   private void renderHandWrenchIndicator()
-   {
-      RDX3DPanel panel = baseUI.getPrimary3DPanel();
-      panelHandWrenchIndicator.render(panel.getWindowSizeX(), panel.getWindowPositionX(), panel.getWindowPositionY());
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(panelHandWrenchIndicator::renderImGuiOverlay);
    }
 
    // TODO this update should be moved into the control ring, and should use the control ring pose.
