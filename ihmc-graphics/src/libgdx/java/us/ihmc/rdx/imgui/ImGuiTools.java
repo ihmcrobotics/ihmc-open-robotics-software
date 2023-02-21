@@ -186,6 +186,21 @@ public class ImGuiTools
       return ImGui.inputDouble(label, imDouble, step, stepFast, format, inputTextFlags);
    }
 
+   public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue);
+   }
+
+   public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue, String format)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format);
+   }
+
+   public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue, String format, int imGuiSliderFlags)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format, imGuiSliderFlags);
+   }
+
    /**
     * Returns true if the user presses Enter, but unlike the EnterReturnsTrue flag,
     * using this method, the currently input text can be retrieved without the

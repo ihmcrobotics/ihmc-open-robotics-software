@@ -81,8 +81,6 @@ public class GPUPointCloudTools
 
       transformedPointCloudBuffer.readOpenCLBufferObject(openCLManager);
 
-      openCLManager.finish();
-
       return retrieveTransformedPoints(points.size(), transformedPointCloudBuffer.getBackingDirectFloatBuffer());
    }
 

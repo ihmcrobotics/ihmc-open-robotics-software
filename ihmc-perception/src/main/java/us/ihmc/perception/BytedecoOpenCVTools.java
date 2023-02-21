@@ -18,6 +18,7 @@ import us.ihmc.log.LogTools;
 import java.awt.image.BufferedImage;
 import java.time.Instant;
 
+
 public class BytedecoOpenCVTools
 {
    public static final IntPointer compressionParametersPNG = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION);
@@ -332,12 +333,26 @@ public class BytedecoOpenCVTools
 
    public static void displayDepth(String tag, Mat image, int delay)
    {
+      displayDepth(tag, image, delay, 1.0f);
+   }
+
+   public static void displayDepth(String tag, Mat image, int delay, float scale)
+   {
       Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
       Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
 
-      BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 255.0);
+
+      BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
+
+      opencv_imgproc.threshold(displayDepth, displayDepth, 100, 255, opencv_imgproc.CV_THRESH_TOZERO_INV);
+
+      opencv_core.normalize(displayDepth, displayDepth, 255, 0, opencv_core.NORM_MINMAX, opencv_core.CV_8UC1, new Mat());
+
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
+
+
+      opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
       display(tag, finalDisplayDepth, delay);
    }
 
@@ -400,5 +415,10 @@ public class BytedecoOpenCVTools
    public static void convertFloatToShort(Mat metricDepth, Mat shortDepthToPack, double scale, double delta)
    {
       metricDepth.convertTo(shortDepthToPack, opencv_core.CV_16UC1, scale, delta);
+   }
+
+   public static boolean dimensionsMatch(BytedecoImage a, BytedecoImage b)
+   {
+      return a.getImageWidth() == b.getImageWidth() && a.getImageHeight() == b.getImageHeight();
    }
 }

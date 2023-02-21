@@ -9,7 +9,7 @@ import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
@@ -31,7 +31,7 @@ public class RDXOpenCVWebcamReader
    private double reportedFPS = 30.0;
    private String backendName = "";
    private Mat bgrImage;
-   private RDXOpenCVSwapVideoPanel swapCVPanel;
+   private RDXOpenCVGuidedSwapVideoPanel swapCVPanel;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
    private boolean imageWasRead = false;
@@ -78,7 +78,7 @@ public class RDXOpenCVWebcamReader
 
       bgrImage = new Mat();
 
-      swapCVPanel = new RDXOpenCVSwapVideoPanel("Webcam Monitor", this::monitorPanelUpdateOnAsynchronousThread, this::monitorPanelUpdateOnUIThread);
+      swapCVPanel = new RDXOpenCVGuidedSwapVideoPanel("Webcam Monitor", this::monitorPanelUpdateOnAsynchronousThread, this::monitorPanelUpdateOnUIThread);
       swapCVPanel.allocateInitialTextures(imageWidth, imageHeight);
    }
 
@@ -131,7 +131,7 @@ public class RDXOpenCVWebcamReader
          if (monitorPanelUIThreadPreprocessor != null && texture.getRGBA8Image() != null)
             monitorPanelUIThreadPreprocessor.accept(texture);
 
-         texture.updateOnUIThread(swapCVPanel.getImagePanel());
+         texture.updateTextureAndDraw(swapCVPanel.getImagePanel());
       }
    }
 
@@ -169,7 +169,7 @@ public class RDXOpenCVWebcamReader
       return panel;
    }
 
-   public RDXOpenCVSwapVideoPanel getSwapCVPanel()
+   public RDXOpenCVGuidedSwapVideoPanel getSwapCVPanel()
    {
       return swapCVPanel;
    }
