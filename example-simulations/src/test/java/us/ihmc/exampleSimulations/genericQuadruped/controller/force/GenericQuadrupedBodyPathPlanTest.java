@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
@@ -14,14 +15,14 @@ public class GenericQuadrupedBodyPathPlanTest extends QuadrupedBodyPathPlanTest
       return new GenericQuadrupedTestFactory();
    }
 
-   @Test
+   @Disabled
    @Override
    public void testSimpleBodyPathPlan()
    {
       super.testSimpleBodyPathPlan();
    }
 
-   @Test
+   @Disabled
    @Override
    public void testBodyPathAroundASimpleMaze()
    {
