@@ -16,8 +16,10 @@ import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
@@ -71,6 +73,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
+   private ROS2Heartbeat activeHeartbeat;
 
    public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
@@ -138,7 +141,17 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    {
       super.update();
 
-      if (subscribed.get() && isActive())
+      boolean subscribedAndActive = subscribed.get() && isActive();
+
+      if (topic.getType().equals(LidarScanMessage.class))
+      {
+         if (activeHeartbeat == null)
+            activeHeartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.PUBLISH_LIDAR_SCAN);
+
+         activeHeartbeat.setAlive(subscribedAndActive);
+      }
+
+      if (subscribedAndActive)
       {
          FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
          if (fusedMessage != null)

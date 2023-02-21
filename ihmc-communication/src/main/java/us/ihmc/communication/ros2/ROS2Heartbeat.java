@@ -4,6 +4,9 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
@@ -19,7 +22,9 @@ public class ROS2Heartbeat
     * half a second and there could 1000s of these without overloading the network.
     */
    public static final double HEARTBEAT_PERIOD = UnitConversions.hertzToSeconds(2.5);
-   private final ROS2PublishSubscribeAPI ros2;
+   private ROS2PublishSubscribeAPI ros2;
+   private IHMCROS2Publisher<Empty> heartbeatPublisher;
+   private final Empty emptyMessage = new Empty();
    private final ROS2Topic<Empty> heartbeatTopic;
    private volatile boolean alive = false;
    private final Throttler throttler = new Throttler();
@@ -28,6 +33,12 @@ public class ROS2Heartbeat
    {
       this.ros2 = ros2;
       this.heartbeatTopic = heartbeatTopic;
+
+   }
+   public ROS2Heartbeat(ROS2NodeInterface ros2Node, ROS2Topic<Empty> heartbeatTopic)
+   {
+      this.heartbeatTopic = heartbeatTopic;
+      heartbeatPublisher = ROS2Tools.createPublisher(ros2Node, heartbeatTopic);
    }
 
    public void setAlive(boolean alive)
@@ -49,7 +60,10 @@ public class ROS2Heartbeat
       while (alive)
       {
          throttler.waitAndRun(HEARTBEAT_PERIOD);
-         ros2.publish(heartbeatTopic);
+         if (ros2 != null)
+            ros2.publish(heartbeatTopic);
+         else
+            heartbeatPublisher.publish(emptyMessage);
       }
    }
 }
