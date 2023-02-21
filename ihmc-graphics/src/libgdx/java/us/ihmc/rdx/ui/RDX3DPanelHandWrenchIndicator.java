@@ -10,13 +10,13 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class RDX3DPanelHandWrenchIndicator
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private boolean show = true;
+   private boolean showAndUpdate = true;
    private SideDependentList<Double> linearParts = new SideDependentList<>((double) 0, (double) 0);
    private SideDependentList<Double> angularParts = new SideDependentList<>((double) 0, (double) 0);
 
    public void render(float windowWidth, float windowHeight, float windowPosX, float windowPosY)
    {
-      if (show)
+      if (showAndUpdate)
       {
          // temporarily set arbitrary width height
          float panelWidth = 200;
@@ -43,12 +43,15 @@ public class RDX3DPanelHandWrenchIndicator
 
    public void update(RobotSide side, double linearWrenchMagnitude, double angularWrenchMagnitude)
    {
-      linearParts.set(side, linearWrenchMagnitude);
-      angularParts.set(side, angularWrenchMagnitude);
+      if (showAndUpdate)
+      {
+         linearParts.set(side, linearWrenchMagnitude);
+         angularParts.set(side, angularWrenchMagnitude);
+      }
    }
 
-   public void setShow(boolean show)
+   public void setShowAndUpdate(boolean showAndUpdate)
    {
-      this.show = show;
+      this.showAndUpdate = showAndUpdate;
    }
 }

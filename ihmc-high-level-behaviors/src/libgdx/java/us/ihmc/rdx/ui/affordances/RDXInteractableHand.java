@@ -74,7 +74,6 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
          }
       }
       estimatedHandWrenchArrows = new RDXSpatialVectorArrows(handFrame);
-      estimatedHandWrenchArrows.setDrawAngularPart(true);
       estimatedHandWrenchArrows.setAngularPartScale(0.05);
       contextMenuName = side + " Hand Context Menu";
    }
@@ -119,5 +118,10 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    public String getContextMenuName()
    {
       return contextMenuName;
+   }
+
+   public RDXSpatialVectorArrows getEstimatedHandWrenchArrows()
+   {
+      return estimatedHandWrenchArrows;
    }
 }

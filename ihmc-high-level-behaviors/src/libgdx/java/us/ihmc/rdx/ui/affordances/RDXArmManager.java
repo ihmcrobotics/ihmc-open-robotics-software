@@ -14,9 +14,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDX3DPanelHandWrenchIndicator;
+import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -55,6 +54,7 @@ public class RDXArmManager
    private ImPlotArmJointTorques armGravityTorquePlot;
    private RDXBaseUI baseUI = null;
    private ImBoolean indicateWrenchOnScreen = new ImBoolean(true);
+   private RDX3DPanelToolbarButton wrenchToolbarButton;
 
    public RDXArmManager(DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
@@ -96,6 +96,15 @@ public class RDXArmManager
          armTorquePlot = new ImPlotArmJointTorques(baseUI, "Arm joints torque", handWrenchCalculator.getArmJoints());
          armGravityTorquePlot = new ImPlotArmJointTorques(baseUI, "Arm joints gravity compensation torque", "gravity compensation", handWrenchCalculator.getArmJoints());
       }
+      wrenchToolbarButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      wrenchToolbarButton.loadAndSetIcon("icons/handWrench.png");
+      wrenchToolbarButton.setTooltipText("Show / hide estimated hand wrench");
+      wrenchToolbarButton.setOnPressed(()->
+                                       {
+                                          boolean showWrench = !indicateWrenchOnScreen.get();
+                                          indicateWrenchOnScreen.set(showWrench);
+                                          baseUI.getPrimary3DPanel().getPanelHandWrenchIndicator().setShowAndUpdate(showWrench);
+                                       });
    }
 
    public void create()
@@ -124,6 +133,8 @@ public class RDXArmManager
          }
 
          // wrench expressed in wrist pitch body fixed-frame
+         if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != indicateWrenchOnScreen.get())
+            interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(indicateWrenchOnScreen.get());
          interactableHands.get(side).updateEstimatedWrench(handWrenchCalculator.getFilteredWrench().get(side));
 
          // We only want to evaluate this when we are going to take action on it
@@ -132,6 +143,10 @@ public class RDXArmManager
          {
             desiredHandsChanged |= armManagers.get(side).getArmDesiredChanged();
          }
+
+         baseUI.getPrimary3DPanel().getPanelHandWrenchIndicator().update(side,
+                                                                         handWrenchCalculator.getLinearWrenchMagnitude(side, true),
+                                                                         handWrenchCalculator.getAngularWrenchMagnitude(side, true));
       }
 
       // The following puts the solver on a thread as to not slow down the UI
@@ -180,9 +195,6 @@ public class RDXArmManager
       wrenchPlot.update(side, handWrenchCalculator.getFilteredWrench().get(side));
       armTorquePlot.update(side, handWrenchCalculator.getJointTorques().get(side));
       armGravityTorquePlot.update(side, handWrenchCalculator.getJointTorquesForGravity().get(side));
-      baseUI.getPrimary3DPanel().getPanelHandWrenchIndicator().update(side,
-                                                                      handWrenchCalculator.getLinearWrenchMagnitude(side, true),
-                                                                      handWrenchCalculator.getAngularWrenchMagnitude(side, true));
    }
 
    public void renderImGuiWidgets()
@@ -235,7 +247,7 @@ public class RDXArmManager
 
       if (ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen))
       {
-         baseUI.getPrimary3DPanel().getPanelHandWrenchIndicator().setShow(indicateWrenchOnScreen.get());
+         baseUI.getPrimary3DPanel().getPanelHandWrenchIndicator().setShowAndUpdate(indicateWrenchOnScreen.get());
       }
    }
 
