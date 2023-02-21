@@ -28,6 +28,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -60,6 +61,8 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
    private PushRobotControllerSCS2 pushRobotController;
 
    private boolean usePerfectSensors = false;
+
+   private double pushHeightOffsetFromChest = 0.3;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -276,6 +279,11 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       // apply the push
       testPush(forceDirection, pushChangeInVelocity, percentInTransferState, condition, transferTime, 6);
    }
+   
+   public void setPushHeightOffsetFromChest(double zHeight)
+   {
+      pushHeightOffsetFromChest = zHeight;
+   }
 
    private void setupTest()
    {
@@ -300,7 +308,14 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
+      
+      YoDouble time = simulationTestHelper.getSimulationConstructionSet().getTime();
+      Robot robot = simulationTestHelper.getRobot();
+      String jointBeforeSpine = fullRobotModel.getChest().getParentJoint().getName();
+      Vector3D forcePointOffset = new Vector3D(0, 0, pushHeightOffsetFromChest);
+      pushRobotController = new PushRobotControllerSCS2(time, robot, jointBeforeSpine, forcePointOffset, 0.005);
+      
+      
       simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
       simulationTestHelper.setCamera(new Point3D(0.6, 0.0, 0.6), new Point3D(10.0, 3.0, 3.0));
 
