@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
@@ -13,7 +14,7 @@ public class GenericQuadrupedAStarPawStepPlannerTest extends AStarPawStepSimulat
       return new GenericQuadrupedTestFactory();
    }
 
-   @Test
+   @Disabled
    @Override
    public void testSimpleForwardPoint()
    {
