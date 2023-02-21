@@ -2,7 +2,6 @@ package us.ihmc.perception.ouster;
 
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
@@ -87,7 +86,7 @@ public class OusterDriverAndDepthPublisher
          if (openCLManager == null)
          {
             openCLManager = new OpenCLManager();
-            depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, publishLidarScanMonitor::isAlive);
+            depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, publishLidarScanMonitor::isAlive, publishHeightMapMonitor::isAlive);
             depthPublisher.initialize(ouster.getImageWidth(), ouster.getImageHeight());
          }
 

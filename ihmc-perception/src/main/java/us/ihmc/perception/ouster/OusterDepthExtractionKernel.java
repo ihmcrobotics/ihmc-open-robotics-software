@@ -33,8 +33,9 @@ public class OusterDepthExtractionKernel
    private final NettyOuster nettyOuster;
    private final BytePointer lidarFrameByteBufferPointer;
    private final ByteBuffer lidarFrameByteBufferCopy;
+   private final Supplier<Boolean> computeHeightMap;
    private final BytePointer lidarFrameByteBufferPointerCopy;
-   private final Supplier<Boolean> publishLidarScan;
+   private final Supplier<Boolean> computeLidarScan;
 
    private final OpenCLManager openCLManager;
    private final _cl_program depthImageExtractionProgram;
@@ -48,11 +49,21 @@ public class OusterDepthExtractionKernel
    private final OpenCLIntBuffer pixelShiftOpenCLBuffer;
    private final OpenCLFloatBuffer pointCloudXYZBuffer;
 
-   public OusterDepthExtractionKernel(NettyOuster nettyOuster, OpenCLManager openCLManager, Supplier<Boolean> publishLidarScan)
+   public OusterDepthExtractionKernel(NettyOuster nettyOuster,
+                                      OpenCLManager openCLManager)
+   {
+      this(nettyOuster, openCLManager, () -> true, () -> true);
+   }
+
+   public OusterDepthExtractionKernel(NettyOuster nettyOuster,
+                                      OpenCLManager openCLManager,
+                                      Supplier<Boolean> computeLidarScan,
+                                      Supplier<Boolean> computeHeightMap)
    {
       this.nettyOuster = nettyOuster;
       this.openCLManager = openCLManager;
-      this.publishLidarScan = publishLidarScan;
+      this.computeLidarScan = computeLidarScan;
+      this.computeHeightMap = computeHeightMap;
 
       lidarFrameByteBufferCopy = ByteBuffer.allocateDirect(nettyOuster.getLidarFrameByteBuffer().limit());
       lidarFrameByteBufferPointerCopy = new BytePointer(lidarFrameByteBufferCopy);
@@ -123,7 +134,7 @@ public class OusterDepthExtractionKernel
 
       extractedDepthImage.readOpenCLImage(openCLManager);
 
-      if (publishLidarScan.get())
+      if (computeLidarScan.get() || computeHeightMap.get())
       {
          populateSensorValuesBuffer(cameraPose);
          openCLManager.setKernelArgument(imageToPointCloudKernel, 0, sensorValuesBuffer.getOpenCLBufferObject());

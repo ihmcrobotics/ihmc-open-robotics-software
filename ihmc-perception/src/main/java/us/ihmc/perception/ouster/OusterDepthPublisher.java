@@ -86,8 +86,8 @@ public class OusterDepthPublisher
     * This should also be guaranteed by the ResettableExceptionHandlingExecutorService.
     */
    public void extractCompressAndPublish(ReferenceFrame ousterSensorFrame,
-                                                      OusterDepthExtractionKernel depthExtractionKernel,
-                                                      Instant acquisitionInstant)
+                                         OusterDepthExtractionKernel depthExtractionKernel,
+                                         Instant acquisitionInstant)
    {
       // Important not to store as a field, as update() needs to be called each frame
       cameraPose.setToZero(ousterSensorFrame);
@@ -123,7 +123,8 @@ public class OusterDepthPublisher
          lidarScanMessage.getLidarOrientation().set(cameraPose.getOrientation());
          lidarScanMessage.setRobotTimestamp(Conversions.secondsToNanoseconds(acquisitionInstant.getEpochSecond()) + acquisitionInstant.getNano());
          lidarScanMessage.getScan().reset();
-         LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan, lidarScanMessage, (i, j) -> depthExtractionKernel.getPointCloudInSensorFrame().get(3 * i + j));
+         LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan, lidarScanMessage,
+                                                       (i, j) -> depthExtractionKernel.getPointCloudInSensorFrame().get(3 * i + j));
 
          lidarScanPublisher.publish(lidarScanMessage);
       }
