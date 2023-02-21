@@ -35,7 +35,7 @@ public class RDXWebcamROS2SubscriberDemo
    private final RDXBaseUI baseUI = new RDXBaseUI("ROS 2 Webcam Subscriber");
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
 //   private ImGuiVideoPanel videoPanel;
-   private RDXCVImagePanel cvImagePanel;
+   private RDXBytedecoImagePanel cvImagePanel;
    private final ImPlotFrequencyPlot receiveFrequencyPlot = new ImPlotFrequencyPlot("Receive frequency");
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Network transmission duration");
    private final ImPlotStopwatchPlot decodeDurationPlot = new ImPlotStopwatchPlot("Decode duration");
@@ -94,8 +94,8 @@ public class RDXWebcamROS2SubscriberDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  cvImagePanel = new RDXCVImagePanel("Video1", 1920, 1080);
-                  baseUI.getImGuiPanelManager().addPanel(cvImagePanel.getVideoPanel());
+                  cvImagePanel = new RDXBytedecoImagePanel("Video1", 1920, 1080);
+                  baseUI.getImGuiPanelManager().addPanel(cvImagePanel.getImagePanel());
 
                   baseUI.getLayoutManager().reloadLayout();
 

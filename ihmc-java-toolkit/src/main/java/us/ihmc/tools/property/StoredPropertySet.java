@@ -346,6 +346,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       legacyFileNameINI = uncapitalizedClassName + currentVersionSuffix + ".ini";
       workspaceLegacyINIFile = new WorkspaceFile(workspaceDirectory, legacyFileNameINI);
       saveFileNameJSON = basePropertySetClass.getSimpleName() + currentVersionSuffix + ".json";
+      LogTools.info("Updated backing save file: {}", saveFileNameJSON);
       workspaceJSONFile = new WorkspaceFile(workspaceDirectory, saveFileNameJSON);
    }
 
