@@ -166,7 +166,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       footstepPlanning = new RDXFootstepPlanning(robotModel, teleoperationParameters, syncedRobot);
 
       // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(ROS2Tools.RAPID_REGIONS, regions ->
+      ros2Helper.subscribeViaCallback(ROS2Tools.PERSPECTIVE_RAPID_REGIONS, regions ->
       {
          footstepPlanning.setPlanarRegions(regions);
          interactableFootstepPlan.setPlanarRegionsList(regions);
@@ -223,7 +223,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
 
          // create the manager for the desired arm setpoints
-         armManager.create();
+         armManager.create(baseUI);
 
          for (RDXRobotCollidable robotCollidable : environmentCollisionModel.getRobotCollidables())
          {

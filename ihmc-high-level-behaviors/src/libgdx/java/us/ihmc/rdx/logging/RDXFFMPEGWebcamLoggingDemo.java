@@ -12,7 +12,8 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.log.LogTools;
@@ -26,7 +27,7 @@ public class RDXFFMPEGWebcamLoggingDemo
 {
    private static final String WEBCAM_FILE = System.getProperty("webcam.file");
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final boolean lossless = false;
    private final int framerate = 15;
@@ -44,7 +45,7 @@ public class RDXFFMPEGWebcamLoggingDemo
    private int imageWidth = -1;
    private double reportedFPS = -1;
    private String backendName = "";
-   private ImGuiOpenCVSwapVideoPanel swapCVPanel;
+   private RDXOpenCVGuidedSwapVideoPanel swapCVPanel;
    private ImPlotStopwatchPlot readPerformancePlot;
    private ImPlotFrequencyPlot readFrequencyPlot;
 
@@ -93,8 +94,8 @@ public class RDXFFMPEGWebcamLoggingDemo
 
                   bgrImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
 
-                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
-                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
+                  swapCVPanel = new RDXOpenCVGuidedSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread);
+                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   readPerformancePlot = new ImPlotStopwatchPlot("VideoCapture read(Mat)");
@@ -102,36 +103,35 @@ public class RDXFFMPEGWebcamLoggingDemo
 
                   ffmpegLoggerDemoHelper.create(imageWidth, imageHeight, () ->
                   {
-                     swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
-                     {
-                        readPerformancePlot.start();
-                        boolean imageWasRead = videoCapture.read(bgrImage.getBytedecoOpenCVMat());
-                        readPerformancePlot.stop();
-                        readFrequencyPlot.ping();
-
-                        if (!imageWasRead)
-                        {
-                           LogTools.error("Image was not read!");
-                        }
-
-                        ffmpegLoggerDemoHelper.getLogger().put(bgrImage);
-
-                        data.updateOnImageUpdateThread(imageWidth, imageHeight);
-                        opencv_imgproc.cvtColor(bgrImage.getBytedecoOpenCVMat(), data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
-                     });
+                     swapCVPanel.updateOnAsynchronousThread();
                   });
 
                   baseUI.getLayoutManager().reloadLayout();
                }
 
-               swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
-               {
-                  data.updateOnUIThread(swapCVPanel.getVideoPanel());
-               });
+               swapCVPanel.updateOnUIThread();
             }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         private void videoUpdateOnAsynchronousThread(RDXImagePanelTexture texture)
+         {
+            readPerformancePlot.start();
+            boolean imageWasRead = videoCapture.read(bgrImage.getBytedecoOpenCVMat());
+            readPerformancePlot.stop();
+            readFrequencyPlot.ping();
+
+            if (!imageWasRead)
+            {
+               LogTools.error("Image was not read!");
+            }
+
+            ffmpegLoggerDemoHelper.getLogger().put(bgrImage);
+
+            texture.ensureTextureDimensions(imageWidth, imageHeight);
+            opencv_imgproc.cvtColor(bgrImage.getBytedecoOpenCVMat(), texture.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
          }
 
          private void renderImGuiWidgets()

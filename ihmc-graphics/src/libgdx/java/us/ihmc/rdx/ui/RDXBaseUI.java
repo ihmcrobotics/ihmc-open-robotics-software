@@ -12,6 +12,7 @@ import imgui.type.ImInt;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.time.Stopwatch;
@@ -28,9 +29,11 @@ import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkingDirectoryPathComponents;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.nio.file.Files;
@@ -121,14 +124,51 @@ public class RDXBaseUI
    private Path themeFilePath;
    private final String shadePrefix = "shade=";
 
-   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public RDXBaseUI()
    {
-      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+      this(0, null, null, null);
    }
 
-   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public RDXBaseUI(String windowTitle)
    {
-      this.windowTitle = windowTitle;
+      this(0, null, null, windowTitle);
+   }
+
+   /**
+    * Typically you won't need this method. It's package private unless we find a use for it.
+    *
+    * @param additionalStackHeightForFindingCaller This is if you have something that sets up a RDXBaseUI for another class.
+    *                                              We want the highest level calling class to be the one used for loading resources.
+    * @param directoryNameToAssumePresent Directory that's either a part present in the working directory of an immediate child.
+    * @param subsequentPathToResourceFolder The subsequent path to the resources folder from the directory assumed to be present.
+    */
+   /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller,
+                                  String directoryNameToAssumePresent,
+                                  String subsequentPathToResourceFolder,
+                                  String windowTitle)
+   {
+      StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+      Class<?> classForLoading = ExceptionTools.handle(() -> Class.forName(stackTraceElements[3 + additionalStackHeightForFindingCaller].getClassName()),
+                                                       DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      LogTools.info("Using class for loading resources: {}", classForLoading.getName());
+
+      this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
+
+      // Try to figure out where the resources for this class are
+      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
+      {
+         WorkingDirectoryPathComponents inferredPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForLoading);
+         if (inferredPathComponents != null)
+         {
+            directoryNameToAssumePresent = inferredPathComponents.getDirectoryNameToAssumePresent();
+            subsequentPathToResourceFolder = inferredPathComponents.getSubsequentPathToResourceFolder();
+         }
+      }
+
+      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
+      {
+         LogTools.warn("We won't be able to write files to version controlled resources, because we probably aren't in a workspace.");
+      }
 
       configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,

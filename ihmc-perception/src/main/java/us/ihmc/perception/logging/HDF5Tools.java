@@ -1,12 +1,10 @@
 package us.ihmc.perception.logging;
 
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.*;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -15,7 +13,6 @@ import us.ihmc.log.LogTools;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class HDF5Tools
 {
@@ -26,18 +23,18 @@ public class HDF5Tools
     * Extracts the shape of a dataset and outputs the length along the requested dimension/axis (dim)
     *
     * @param dataSet The HDF5 dataset of which the shape is requested
-    * @param dimension     The dimension or axis along which the length is requested
+    * @param dimensionIndex     The dimension or axis along which the length is requested
     * @return The length of the dataset along the requested dimension or axis
     */
-   private static int extractShape(DataSet dataSet, int dimension)
+   private static int extractShape(DataSet dataSet, int dimensionIndex)
    {
       DataSpace dataSpace = dataSet.getSpace();
-      int dimensions = dataSpace.getSimpleExtentNdims();
-      long[] shape = new long[dimensions];
+      int numberOfDimensions = dataSpace.getSimpleExtentNdims();
+      long[] shape = new long[numberOfDimensions];
       dataSpace.getSimpleExtentDims(shape);
-      if (dimension < dimensions)
+      if (dimensionIndex < numberOfDimensions)
       {
-         return (int) shape[dimension];
+         return (int) shape[dimensionIndex];
       }
       else
          return 0;
@@ -108,7 +105,7 @@ public class HDF5Tools
       dataset.read(intPointer, new DataType(PredType.NATIVE_INT()));
       intPointer.get(intArray, 0, intArray.length);
 
-      dataset.close();
+      dataset._close();
 
       return intArray;
    }
@@ -151,8 +148,8 @@ public class HDF5Tools
 
       dataset.write(new IntPointer(data), new DataType(PredType.NATIVE_INT()));
 
-      dataSpace.close();
-      dataset.close();
+      dataSpace._close();
+      dataset._close();
    }
 
    /**
@@ -178,6 +175,25 @@ public class HDF5Tools
    }
 
    /**
+    * Stores a 2D long array passed as TLongArrayList into an HDF5 dataset
+    *
+    * @param group The HDF5 group where the requested is stored
+    * @param index The index of the dataset within the requested group.
+    * @param data  The long data for the 2D matrix to be stored
+    * @param rows  Number of rows in the 2D matrix to be stored
+    * @param cols  Number of columns in the 2D matrix to be stored
+    */
+   public static void storeLongArray2D(Group group, long index, TLongArrayList data, int rows, int cols)
+   {
+      // Log the timestamps buffer as separate dataset with same index
+      long[] dimensions = {rows, cols};
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_LONG()), new DataSpace(2, dimensions));
+      long[] array = data.toArray();
+      dataset.write(new LongPointer(array), new DataType(PredType.NATIVE_LONG()));
+      dataset._close();
+   }
+
+   /**
     * Stores a 2D float array passed as TFloatArrayList into an HDF5 dataset
     *
     * @param group The HDF5 group where the requested is stored
@@ -188,12 +204,53 @@ public class HDF5Tools
     */
    public static void storeFloatArray2D(Group group, long index, TFloatArrayList data, int rows, int cols)
    {
+      // Log the data buffer as separate dataset with same index
       long[] dimensions = {rows, cols};
-
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dimensions));
       float[] dataObject = data.toArray();
       dataset.write(new FloatPointer(dataObject), new DataType(PredType.NATIVE_FLOAT()));
-      dataset.close();
+      dataset._close();
+   }
+
+   /**
+    * Loads a 2D float array from an HDF5 dataset
+    *
+    * @param group The HDF5 group where the requested float array is stored
+    * @param index The index of the dataset within the requested group.
+    */
+   public static float[] loadFloatArray(Group group, long index)
+   {
+      DataSet dataset = group.openDataSet(String.valueOf(index));
+
+      int size = extractShape(dataset, 0);
+      int cols = extractShape(dataset, 1);
+
+      float[] floatArray = new float[size * cols];
+
+      FloatPointer floatPointer = new FloatPointer(floatArray);
+      dataset.read(floatPointer, new DataType(PredType.NATIVE_FLOAT()));
+      floatPointer.get(floatArray, 0, floatArray.length);
+
+      dataset._close();
+
+      return floatArray;
+   }
+
+   /**
+    * Loads a float array from an HDF5 dataset
+    *
+    * @param group The HDF5 group where the requested float array is stored
+    * @param index The index of the dataset within the requested group.
+    */
+   public static void loadFloatArray(Group group, long index, float[] arrayToPack)
+   {
+      DataSet dataset = group.openDataSet(String.valueOf(index));
+
+      FloatPointer floatPointer = new FloatPointer(arrayToPack);
+      dataset.read(floatPointer, new DataType(PredType.NATIVE_FLOAT()));
+      floatPointer.get(arrayToPack, 0, arrayToPack.length);
+
+      dataset._close();
    }
 
    /**
@@ -202,15 +259,20 @@ public class HDF5Tools
     * @param file The HDF5 file to be explored.
     * @return List of all topic names inside the HDF5 file.
     */
-   public static ArrayList<String> getTopicNames(H5File file)
+   public static ArrayList<String> findTopicNames(H5File file)
    {
       ArrayList<String> names = new ArrayList<>();
 
       for (int i = 0; i < file.getNumObjs(); i++)
       {
-         String objectName = file.getObjnameByIdx(i).getString();
-         Group group = file.openGroup(objectName);
-         recursivelyExploreHDF5File(group, names, objectName);
+         BytePointer objnameByIdx = file.getObjnameByIdx(i);
+         if (file.childObjType(objnameByIdx) == hdf5.H5O_TYPE_GROUP)
+         {
+            String partialTopicName = "/" + objnameByIdx.getString();
+            Group group = file.openGroup(objnameByIdx);
+            recursivelyFindTopicNames(group, names, partialTopicName);
+            group._close();
+         }
       }
 
       return names;
@@ -218,35 +280,37 @@ public class HDF5Tools
 
    /* Recursive function to go through the various topic names in the HDF5 hierarchically. Called by
     *  getTopicNames() to create a list of topic names stored within the file. */
-   private static void recursivelyExploreHDF5File(Group group, ArrayList<String> names, String prefix)
+   private static int recursivelyFindTopicNames(Group group, ArrayList<String> names, String topicNameInProgress)
    {
       int numberOfGroups = 0;
       for (int i = 0; i < group.getNumObjs(); i++)
       {
-         BytePointer objectBytePointer = group.getObjnameByIdx(i);
-         if (group.childObjType(objectBytePointer) == hdf5.H5O_TYPE_GROUP)
+         BytePointer objnameByIdx = group.getObjnameByIdx(i);
+         if (group.childObjType(objnameByIdx) == hdf5.H5O_TYPE_GROUP)
          {
-            numberOfGroups++;
-            String groupName = group.getObjnameByIdx(i).getString();
-            Group groupHandle = group.openGroup(groupName);
-            recursivelyExploreHDF5File(groupHandle, names, prefix + "/" + groupName);
+            String topicNamePart = objnameByIdx.getString();
+            Group groupHandle = group.openGroup(objnameByIdx);
+            numberOfGroups += recursivelyFindTopicNames(groupHandle, names, topicNameInProgress + "/" + topicNamePart);
+            groupHandle._close();
          }
 
          // TODO: Handle the case where the type of the object is a dataset.
 
          //         if (group.childObjType(objPtr) == H5O_TYPE_DATASET) {
          //            String dsName = group.getObjnameByIdx(i).getString();
-         //            System.out.println("Dataset: " + dsName + "\t" + "Prefix: " + prefix);
+         //            System.out.println("Dataset: " + dsName + "\t" + "Prefix: " + topicNameInProgress);
          //         }
 
          //         System.out.println("ExploreH5: " + group.getObjnameByIdx(i).getString());
       }
 
+      // If leaf node, that's a topic, so let's add it to the list
       if (numberOfGroups == 0)
       {
-         System.out.println("Prefix: " + prefix);
-         names.add(prefix);
+         names.add(topicNameInProgress + "/");
       }
+
+      return numberOfGroups;
    }
 
    // TODO: Complete the method to store a double matrix
@@ -257,12 +321,12 @@ public class HDF5Tools
       {
          DataSet dataset = group.openDataSet(String.valueOf(0));
          dataset.write(new DoublePointer(data), new DataType(PredType.NATIVE_DOUBLE()));
-         dataset.close();
+         dataset._close();
       }
       else
       {
          DataSet dataset = group.createDataSet(String.valueOf(0), new DataType(PredType.NATIVE_DOUBLE()), new DataSpace(2, dimensions));
-         dataset.close();
+         dataset._close();
       }
    }
 
@@ -278,8 +342,22 @@ public class HDF5Tools
 
       dataset.write(new BytePointer(data), new DataType(PredType.NATIVE_UCHAR()));
 
-      dataSpace.close();
-      dataset.close();
+      dataSpace._close();
+      dataset._close();
+   }
+
+   public static void storeBytesFromPointer(Group group, long index, BytePointer bytes, long size)
+   {
+      LogTools.info("Store Byte Array: Index: {} Size: {}", index, size);
+      long[] dims = {size};
+
+      DataSpace ds = new DataSpace(1, dims);
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_B8()), ds);
+
+      dataset.write((Pointer) bytes, new DataType(PredType.NATIVE_B8()));
+
+      ds._close();
+      dataset._close();
    }
 
    /* TODO: Does not work yet. Needs to be fixed. */
