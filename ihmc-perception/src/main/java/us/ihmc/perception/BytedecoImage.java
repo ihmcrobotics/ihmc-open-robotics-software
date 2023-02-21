@@ -302,4 +302,9 @@ public class BytedecoImage
    {
       return (long) row * imageWidth + column;
    }
+
+   public BytePointer getPointerForAccessSpeed()
+   {
+      return pointerForAccessSpeed;
+   }
 }

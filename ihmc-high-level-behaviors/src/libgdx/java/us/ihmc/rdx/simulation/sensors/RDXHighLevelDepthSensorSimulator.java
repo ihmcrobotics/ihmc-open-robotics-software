@@ -595,7 +595,6 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             openCLManager.setKernelArgument(discretizePointsKernel, 2, parametersBuffer.getOpenCLBufferObject());
             openCLManager.execute1D(discretizePointsKernel, pointsPerSegment);
             discretizedIntBuffer.readOpenCLBufferObject(openCLManager);
-            openCLManager.finish();
 
             compressedPointCloudBuffer.rewind();
             compressedPointCloudBuffer.limit(compressedPointCloudBuffer.capacity());

@@ -2,7 +2,7 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : true,
-    "Filtered Map" : true,
+    "Dataset Navigation Panel" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false
   }

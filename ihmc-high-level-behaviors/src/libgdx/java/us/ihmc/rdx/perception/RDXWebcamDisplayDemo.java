@@ -12,9 +12,7 @@ import us.ihmc.tools.thread.Activator;
 public class RDXWebcamDisplayDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                  "Webcam Display Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Webcam Display Demo");
    private RDXOpenCVWebcamReader webcamReader;
    private volatile boolean running = true;
 

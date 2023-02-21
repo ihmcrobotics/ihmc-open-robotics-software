@@ -47,11 +47,7 @@ kernel void imageToPointCloud(global float* parameters,
    float3 rotationMatrixRow1 = (float3) (angledRotationMatrix.s3, angledRotationMatrix.s4, angledRotationMatrix.s5);
    float3 rotationMatrixRow2 = (float3) (angledRotationMatrix.s6, angledRotationMatrix.s7, angledRotationMatrix.s8);
 
-   float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint,
-                                                  rotationMatrixRow0,
-                                                  rotationMatrixRow1,
-                                                  rotationMatrixRow2,
-                                                  origin);
+   float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint, rotationMatrixRow0, rotationMatrixRow1, rotationMatrixRow2, origin);
 
    float pointSize = parameters[POINT_SIZE] * eyeDepthInMeters;
    int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - parameters[POINTS_TO_ADD_ABOVE_AND_BELOW_FOR_COLOR_DETAIL];
@@ -109,8 +105,7 @@ kernel void imageToPointCloud(global float* parameters,
          int fisheyeRow = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y]
                         + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y] * angleOfIncidence * sin(azimuthalAngle);
 
-         if (fisheyeCol >= 0 && fisheyeCol < fisheyeParameters[FISHEYE_IMAGE_WIDTH]
-          && fisheyeRow >= 0 && fisheyeRow < fisheyeParameters[FISHEYE_IMAGE_HEIGHT])
+         if (fisheyeCol >= 0 && fisheyeCol < fisheyeParameters[FISHEYE_IMAGE_WIDTH] && fisheyeRow >= 0 && fisheyeRow < fisheyeParameters[FISHEYE_IMAGE_HEIGHT])
          {
             uint4 fisheyeColor = read_imageui(fThetaFisheyeRGBA8Image, (int2) (fisheyeCol, fisheyeRow));
             pointColorR = (fisheyeColor.x / 255.0f);

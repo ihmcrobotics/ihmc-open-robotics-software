@@ -14,9 +14,7 @@ import java.util.ArrayList;
 
 public class RDXFootstepGraphicDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  "Footstep Graphic Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Footstep Graphic Demo");
    private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic();
 
    public RDXFootstepGraphicDemo()
