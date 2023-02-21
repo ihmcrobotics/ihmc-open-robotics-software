@@ -95,6 +95,10 @@ public class RDXNettyOusterUI
       isReady = true;
    }
 
+   /**
+    * This method can be called multiple times from the UI thread when the parameters require buffer sizes to change.
+    * It will automatically calculate the new sizes of everything.
+    */
    private void createPointCloudAndKernel()
    {
       int totalVerticalPointsForColorDetail = 1 + 2 * pointsToAddAboveAndBelowForColorDetail.get();
