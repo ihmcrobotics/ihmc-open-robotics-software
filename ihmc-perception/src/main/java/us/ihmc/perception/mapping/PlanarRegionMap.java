@@ -133,8 +133,8 @@ public class PlanarRegionMap
       PlanarRegionsList priorRegionsInWorld = new PlanarRegionsList();
       PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
 
-      LogTools.debug("--------------------------------------------- New Iteration [{}] ------------------------------------------", sensorPoseIndex);
-      LogTools.debug("Incoming: {}", regionsInSensorFrame.getPlanarRegionsAsList().size());
+      LogTools.info("--------------------------------------------- New Iteration [{}] ------------------------------------------", sensorPoseIndex);
+      LogTools.info("Incoming: {}", regionsInSensorFrame.getPlanarRegionsAsList().size());
 
       if (regionsInSensorFrame.getNumberOfPlanarRegions() == 0)
       {
@@ -145,24 +145,21 @@ public class PlanarRegionMap
       // Compute relative (t) to (t-1) transform
       if (initialized)
       {
-         currentToPreviousSensorTransform.setIdentity();
-         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, frameRegions.getPlanarRegionsList(), currentToPreviousSensorTransform, parameters);
-
-         //currentToPreviousSensorTransform.set(frameRegions.getSensorToWorldFrameTransform());
-         //currentToPreviousSensorTransform.multiply(worldToPreviousSensorFrameTransform);
+         currentToPreviousSensorTransform.set(frameRegions.getSensorToWorldFrameTransform());
+         currentToPreviousSensorTransform.multiply(worldToPreviousSensorFrameTransform);
       }
 
       // Compute the new prior (t_prior) transform
-      //sensorToWorldTransformPrior.set(currentToPreviousSensorTransform);
-      //sensorToWorldTransformPrior.multiply(sensorToWorldTransformPosterior);
+      sensorToWorldTransformPrior.set(currentToPreviousSensorTransform);
+      sensorToWorldTransformPrior.multiply(sensorToWorldTransformPosterior);
 
-      LogTools.debug("Current to Previous: \n{}", currentToPreviousSensorTransform);
-      LogTools.debug("Sensor To World [Prior]: \n{}", sensorToWorldTransformPrior);
-      LogTools.debug("Sensor To World [Posterior]: \n{}", sensorToWorldTransformPosterior);
+      LogTools.info("Current to Previous: \n{}", currentToPreviousSensorTransform);
+      LogTools.info("Sensor To World [Prior]: \n{}", sensorToWorldTransformPrior);
+      LogTools.info("Sensor To World [Posterior]: \n{}", sensorToWorldTransformPosterior);
 
       // Generate regions in world frame with prior transform
       priorRegionsInWorld.addPlanarRegionsList(regionsInSensorFrame.copy());
-      //priorRegionsInWorld.applyTransform(sensorToWorldTransformPrior);
+      priorRegionsInWorld.applyTransform(sensorToWorldTransformPrior);
 
       modified = true;
 
@@ -180,6 +177,9 @@ public class PlanarRegionMap
       if (!initialized)
       {
          finalMap.addPlanarRegionsList(priorRegionsInWorld);
+
+         LogTools.info("Merge Mode: {}", merger);
+
          if (merger == MergingMode.SMOOTHING)
          {
             initializeFactorGraphForSmoothing(finalMap, sensorToWorldTransformPrior);
@@ -226,9 +226,9 @@ public class PlanarRegionMap
                                                                             posteriorRegionsInWorld.addPlanarRegion(region);
                                                                          });
 
-            LogTools.debug("Estimated Transform: \n{}", frameRegions.getSensorToWorldFrameTransform());
-            LogTools.debug("Sensor To World [Prior]: \n{}", sensorToWorldTransformPrior);
-            LogTools.debug("Sensor To World [Posterior (Optimized)]: \n{}", sensorToWorldTransformPosterior);
+            LogTools.info("Estimated Transform: \n{}", frameRegions.getSensorToWorldFrameTransform());
+            LogTools.info("Sensor To World [Prior]: \n{}", sensorToWorldTransformPrior);
+            LogTools.info("Sensor To World [Posterior (Optimized)]: \n{}", sensorToWorldTransformPosterior);
          }
 
          // merge all the new regions in
@@ -247,13 +247,13 @@ public class PlanarRegionMap
       finalMap.getPlanarRegionsAsList().forEach(region -> mapIDs.add(region.getRegionId()));
       priorRegionsInWorld.getPlanarRegionsAsList().forEach(region -> incomingIDs.add(region.getRegionId()));
 
-      LogTools.debug("Map IDs: {}", Arrays.toString(mapIDs.toArray()));
+      LogTools.info("Map IDs: {}", Arrays.toString(mapIDs.toArray()));
 
       mapIDs.clear();
       incomingIDs.clear();
 
       currentTimeIndex++;
-      LogTools.debug("-------------------------------------------------------- Done --------------------------------------------------------------\n");
+      LogTools.info("-------------------------------------------------------- Done --------------------------------------------------------------\n");
    }
 
    /**
@@ -309,12 +309,12 @@ public class PlanarRegionMap
 
          finalMap = planarRegionGraph.getAsPlanarRegionsList();
 
-         LogTools.debug("Regions: {}, Unique: {}, Map: {}",
+         LogTools.info("Regions: {}, Unique: {}, Map: {}",
                         regions.getPlanarRegionsAsList().size(),
                         uniqueRegionsFound,
                         finalMap.getPlanarRegionsAsList().size());
 
-         LogTools.debug("Unique Set: [{}]", mapRegionIDSet);
+         LogTools.info("Unique Set: [{}]", mapRegionIDSet);
       }
    }
 
@@ -361,7 +361,7 @@ public class PlanarRegionMap
                if (wasMatched)
                   wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) <= distanceThreshold;
 
-               //LogTools.debug(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
+               //LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
                //                            mapRegionIndex,
                //                            mapRegion.getRegionId(),
                //                            newRegion.getRegionId(),
@@ -427,11 +427,11 @@ public class PlanarRegionMap
          int parentIndex = 0;
          int childIndex = 0;
 
-         //LogTools.debug("Change Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
+         //LogTools.info("Change Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
 
          while (parentIndex < map.getNumberOfPlanarRegions())
          {
-            //LogTools.debug("Parent Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
+            //LogTools.info("Parent Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
             childIndex = 0;
             PlanarRegion parentRegion = map.getPlanarRegion(parentIndex);
             while (childIndex < map.getNumberOfPlanarRegions())
@@ -447,7 +447,7 @@ public class PlanarRegionMap
 
                   PlanarRegion childRegion = map.getPlanarRegion(childIndex);
 
-                  //LogTools.debug("Checking Match: Parent({}) - Child({})", parentId, childId);
+                  //LogTools.info("Checking Match: Parent({}) - Child({})", parentId, childId);
 
                   if (PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion,
                                                                    childRegion,
@@ -460,7 +460,7 @@ public class PlanarRegionMap
                      // Request a merge for parent and child regions. If they don't merge, pick the parent if it belongs to the map (based on sign of ID)
                      if (PlanarRegionSLAMTools.mergeRegionIntoParentUsingFilter(parentRegion, childRegion, parameters.getUpdateAlphaTowardsMatch()))
                      {
-                        //LogTools.debug("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
+                        //LogTools.info("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
 
                         // Generate ID for the merged region
                         int finalId = generatePostMergeId(parentRegion.getRegionId(), childRegion.getRegionId());
@@ -495,7 +495,7 @@ public class PlanarRegionMap
 
    private PlanarRegionsList crossReduceRegionsIteratively(PlanarRegionsList map, PlanarRegionsList regions)
    {
-      LogTools.debug("Performing Cross Reduction");
+      LogTools.info("Performing Cross Reduction");
       map.addPlanarRegionsList(regions);
       map = selfReduceRegionsIteratively(map);
       return map;
@@ -508,12 +508,12 @@ public class PlanarRegionMap
                                                HashMap<Integer, TIntArrayList> matches,
                                                int poseIndex)
    {
-      LogTools.debug("------------------------------- Performing Factor Graph Based Smoothing ---------------------------------");
+      LogTools.info("------------------------------- Performing Factor Graph Based Smoothing ---------------------------------");
 
-      LogTools.debug("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
+      LogTools.info("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
       factorGraph.addOdometryFactorSE3(poseIndex, PerceptionEuclidTools.toArray(currentToPreviousTransform));
 
-      LogTools.debug("Adding Pose Initial Value: {}", poseIndex);
+      LogTools.info("Adding Pose Initial Value: {}", poseIndex);
       factorGraph.setPoseInitialValueSE3(poseIndex, PerceptionEuclidTools.toArray(sensorToWorldTransformPrior));
 
       for (Integer incomingIndex : matches.keySet())
@@ -525,17 +525,17 @@ public class PlanarRegionMap
 
          if (landmarkId > 0)
          {
-            LogTools.debug("Best Match: Incoming({}) -> Map({})", incomingId, landmarkId);
+            LogTools.info("Best Match: Incoming({}) -> Map({})", incomingId, landmarkId);
             insertLandmarkFactorAndValue(incomingRegion, sensorToWorldTransformPrior, poseIndex, landmarkId);
          }
       }
 
-      LogTools.debug("Solving factor graph");
+      LogTools.info("Solving factor graph");
       factorGraph.optimizeISAM2((byte) 4);
 
       factorGraph.printResults();
 
-      LogTools.debug("+++++++++ --------- +++++++++ Done (Smoothing) +++++++++ --------- +++++++++");
+      LogTools.info("+++++++++ --------- +++++++++ Done (Smoothing) +++++++++ --------- +++++++++");
    }
 
    public void insertLandmarkFactorAndValue(PlanarRegion childRegion, RigidBodyTransform sensorToWorldTransformPrior, int poseId, int landmarkId)
@@ -558,7 +558,7 @@ public class PlanarRegionMap
       float[] planeInSensorFrame = new float[] {childNormal.getX32(), childNormal.getY32(), childNormal.getZ32(), (float) -localDot};
 
       // Insert plane factor based on planar region normal and origin in sensor frame
-      LogTools.debug("Adding plane factor: x{} -> l{} ({})", poseId, landmarkId, Arrays.toString(planeInSensorFrame));
+      LogTools.info("Adding plane factor: x{} -> l{} ({})", poseId, landmarkId, Arrays.toString(planeInSensorFrame));
       factorGraph.addOrientedPlaneFactor(landmarkId, poseId, planeInSensorFrame);
 
       // Compute plane parameters in world frame
@@ -566,13 +566,13 @@ public class PlanarRegionMap
       float[] planeInWorldFrame = new float[] {childNormalInWorld.getX32(), childNormalInWorld.getY32(), childNormalInWorld.getZ32(), (float) -worldDot};
 
       // Set initial value for plane based on planar region normal and origin in world frame
-      LogTools.debug("Setting plane value: {} {}", landmarkId, Arrays.toString(planeInWorldFrame));
+      LogTools.info("Setting plane value: {} {}", landmarkId, Arrays.toString(planeInWorldFrame));
       factorGraph.setOrientedPlaneInitialValue(landmarkId, planeInWorldFrame);
    }
 
    public void initializeFactorGraphForSmoothing(PlanarRegionsList map, RigidBodyTransform transform)
    {
-      LogTools.debug("------------------------------- Initializing Factor Graph ---------------------------------");
+      LogTools.info("------------------------------- Initializing Factor Graph ---------------------------------");
 
       // Set up the factor graph noise models
       odomNoise = (float) parameters.getOdometryNoiseVariance();
@@ -599,7 +599,7 @@ public class PlanarRegionMap
          factorGraph.setOrientedPlaneInitialValue(region.getRegionId(), plane);
       }
 
-      LogTools.debug("+++++++++ --------- +++++++++ Done (Smoothing Initialization) +++++++++ --------- +++++++++");
+      LogTools.info("+++++++++ --------- +++++++++ Done (Smoothing Initialization) +++++++++ --------- +++++++++");
    }
 
    private int findBestMatchIndex(int incomingId, PlanarRegionsList mapRegions, TIntArrayList matchedMapIndices)
@@ -632,27 +632,27 @@ public class PlanarRegionMap
       else if (parentIndex > 0 && childIndex > 0) // Both belong to the map
       {
          idToReturn = Math.min(parentIndex, childIndex);
-         //LogTools.debug("Action: Both belong to the map: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+         //LogTools.info("Action: Both belong to the map: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
       }
       else if (parentIndex > 0 && childIndex < 0) // Parent belongs to the map, child belongs to the incoming regions
       {
          idToReturn = parentIndex;
-         //LogTools.debug("Action: Parent in map, child incoming: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+         //LogTools.info("Action: Parent in map, child incoming: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
       }
       else if (parentIndex < 0 && childIndex > 0) // Parent belongs to the incoming regions, child belongs to the map
       {
          idToReturn = childIndex;
-         //LogTools.debug("Action: Parent incoming, child in map: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+         //LogTools.info("Action: Parent incoming, child in map: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
       }
       else if (parentIndex < 0 && childIndex < 0) // Both belong to the incoming regions
       {
          idToReturn = Math.max(parentIndex, childIndex);
-         //LogTools.debug("Action: Both incoming: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
+         //LogTools.info("Action: Both incoming: ({}) ({}) -> ({})", parentIndex, childIndex, idToReturn);
       }
       return idToReturn;
    }
 
-   public void registerRegions(PlanarRegionsList regions)
+   public RigidBodyTransform registerRegions(PlanarRegionsList regions)
    {
       currentTimeIndex++;
       boolean isKeyframe = false;
@@ -665,7 +665,8 @@ public class PlanarRegionMap
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, new RigidBodyTransform(), new RigidBodyTransform(), regions.copy()));
          finalMap.addPlanarRegionsList(regions);
          previousRegions.addPlanarRegionsList(regions);
-         initialized = true;
+
+         submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, new RigidBodyTransform()));
       }
       else
       {
@@ -677,7 +678,7 @@ public class PlanarRegionMap
          if(!valid)
          {
             LogTools.warn("[FAILED] Last Index: {}, Current Index: {}", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
-            return;
+            return null;
          }
 
          isKeyframe = performKeyframeCheck(transformToPrevious);
@@ -691,18 +692,19 @@ public class PlanarRegionMap
          RigidBodyTransform transformToWorld = new RigidBodyTransform(transformToPrevious);
          transformToWorld.multiply(keyframes.get(keyframes.size() - 1).getTransformToWorld());
 
-         regions.applyTransform(transformToWorld);
+         //regions.applyTransform(transformToWorld);
+         //
+         //RigidBodyTransform residualTransform = new RigidBodyTransform();
+         //boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, regions.copy(), residualTransform, parameters);
+         //
+         //if(valid)
+         //{
+         //   transformToWorld.preMultiply(residualTransform);
+         //}
 
-         RigidBodyTransform residualTransform = new RigidBodyTransform();
-         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, regions.copy(), residualTransform, parameters);
+         submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, transformToWorld));
 
-         if(valid)
-         {
-            regions.applyTransform(residualTransform);
-            transformToWorld.preMultiply(residualTransform);
-         }
-
-         finalMap = crossReduceRegionsIteratively(finalMap, regions);
+         //finalMap = crossReduceRegionsIteratively(finalMap, regions);
 
          //finalMap.addPlanarRegionsList(regions);
 
@@ -711,7 +713,11 @@ public class PlanarRegionMap
          PerceptionPrintTools.printTransform("Transform to World", transformToWorld);
 
          LogTools.info("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
+
+         return transformToWorld;
       }
+
+      return null;
    }
 
    private boolean performKeyframeCheck(RigidBodyTransform transformToPrevious)
@@ -736,12 +742,12 @@ public class PlanarRegionMap
 
    private void processUniqueRegions(PlanarRegionsList map)
    {
-      LogTools.debug("------------------------------- Processing Unique Region IDs ---------------------------------");
+      LogTools.info("------------------------------- Processing Unique Region IDs ---------------------------------");
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {
          region.setRegionId(Math.abs(region.getRegionId()));
       }
-      LogTools.debug("+++++++++ --------- +++++++++ Done (Processing Unique Region IDs) +++++++++ --------- +++++++++");
+      LogTools.info("+++++++++ --------- +++++++++ Done (Processing Unique Region IDs) +++++++++ --------- +++++++++");
    }
 
    public PlanarRegionsList getMapRegions()

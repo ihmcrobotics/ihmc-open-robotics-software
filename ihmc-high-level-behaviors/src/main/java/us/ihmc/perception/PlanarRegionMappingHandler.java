@@ -64,6 +64,7 @@ public class PlanarRegionMappingHandler
    private final AtomicReference<FramePlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForRendering = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
+   private final AtomicReference<RigidBodyTransform> latestKeyframePoseForRendering = new AtomicReference<>(new RigidBodyTransform());
 
    private boolean enableCapture = false;
    private boolean enableLiveMode = false;
@@ -311,6 +312,12 @@ public class PlanarRegionMappingHandler
       return latestPlanarRegionsForRendering.getAndSet(null);
    }
 
+   public RigidBodyTransform pollKeyframePose()
+   {
+      LogTools.info("Polling Keyframe Pose: {}", latestKeyframePoseForRendering.get());
+      return latestKeyframePoseForRendering.getAndSet(null);
+   }
+
    public boolean pollIsModified()
    {
       boolean modified = planarRegionMap.isModified();
@@ -327,9 +334,12 @@ public class PlanarRegionMappingHandler
    {
       LogTools.info("Adding Regions to Map.");
 
-      planarRegionMap.registerRegions(regions.getPlanarRegionsList());
+      RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList());
 
       //planarRegionMap.submitRegionsUsingIterativeReduction(regions);
+
+      if (keyframePose != null)
+         latestKeyframePoseForRendering.set(keyframePose);
 
       latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
       latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
@@ -353,6 +363,7 @@ public class PlanarRegionMappingHandler
    public void resetMap()
    {
       planarRegionMap.reset();
+      latestKeyframePoseForRendering.set(new RigidBodyTransform());
       latestPlanarRegionsForRendering.set(new PlanarRegionsList());
       planarRegionMap.setModified(true);
       perceptionLogIndex = 0;
