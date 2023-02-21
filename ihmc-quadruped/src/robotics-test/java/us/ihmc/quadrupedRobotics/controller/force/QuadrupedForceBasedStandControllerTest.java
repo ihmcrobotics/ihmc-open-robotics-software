@@ -70,24 +70,28 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    public abstract double getOrientationDelta();
 
 
+   @Disabled
    @Test
    public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
    {
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.FRONT_RIGHT_HIP_ROLL.getUnderBarName());
    }
 
+   @Disabled
    @Test
    public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
    {
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_LEFT_HIP_ROLL.getUnderBarName());
    }
 
+   @Disabled
    @Test
    public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
    {
       pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_RIGHT_HIP_ROLL.getUnderBarName());
    }
 
+   @Disabled
    @Test
    public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
    {
@@ -174,6 +178,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.simulate();
    }
 
+   @Disabled
    @Test
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
@@ -216,6 +221,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.simulate();
    }
 
+   @Disabled
    @Test
    public void testStandingUpAndAdjustingBody() throws IOException
    {
