@@ -2,6 +2,7 @@ package us.ihmc.avatar.roughTerrainWalking;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -136,13 +137,14 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
 //      publishFootstepsAndSimulate(robotModel, footsteps);
       initialize(up);
       testStairsAfterInitialize(slow, swingDuration, transferDuration, heightOffset, corruptor);
+      exportIfAppropriate(testInfo);
 //
-      if (EXPORT_TORQUE_SPEED_DATA)
-      {
-         EndToEndTestTools.exportTorqueSpeedCurves(simulationTestHelper,
-                                                   EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null),
-                                                   testInfo.getTestMethod().get().getName());
-      }
+//      if (EXPORT_TORQUE_SPEED_DATA)
+//      {
+//         EndToEndTestTools.exportTorqueSpeedCurves(simulationTestHelper,
+//                                                   EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null),
+//                                                   testInfo.getTestMethod().get().getName());
+//      }
    }
 
    public void initialize(boolean up)
@@ -186,6 +188,16 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       simulationTestHelper.setInPoint();
 
       publishFootstepsAndSimulate(robotModel, footsteps);
+   }
+
+   public void exportIfAppropriate(TestInfo testInfo) throws IOException
+   {
+      if (EXPORT_TORQUE_SPEED_DATA)
+      {
+         EndToEndTestTools.exportTorqueSpeedCurves(simulationTestHelper,
+                                                   EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null),
+                                                   testInfo.getTestMethod().get().getName());
+      }
    }
 
    private void publishHeightOffset(double heightOffset) throws Exception
