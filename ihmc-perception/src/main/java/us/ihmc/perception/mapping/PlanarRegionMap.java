@@ -150,12 +150,10 @@ public class PlanarRegionMap
       }
 
       // Compute the new prior (t_prior) transform
-      sensorToWorldTransformPrior.set(currentToPreviousSensorTransform);
-      sensorToWorldTransformPrior.multiply(sensorToWorldTransformPosterior);
+      sensorToWorldTransformPrior.set(frameRegions.getSensorToWorldFrameTransform());
 
       LogTools.info("Current to Previous: \n{}", currentToPreviousSensorTransform);
       LogTools.info("Sensor To World [Prior]: \n{}", sensorToWorldTransformPrior);
-      LogTools.info("Sensor To World [Posterior]: \n{}", sensorToWorldTransformPosterior);
 
       // Generate regions in world frame with prior transform
       priorRegionsInWorld.addPlanarRegionsList(regionsInSensorFrame.copy());
@@ -226,8 +224,6 @@ public class PlanarRegionMap
                                                                             posteriorRegionsInWorld.addPlanarRegion(region);
                                                                          });
 
-            LogTools.info("Estimated Transform: \n{}", frameRegions.getSensorToWorldFrameTransform());
-            LogTools.info("Sensor To World [Prior]: \n{}", sensorToWorldTransformPrior);
             LogTools.info("Sensor To World [Posterior (Optimized)]: \n{}", sensorToWorldTransformPosterior);
          }
 
@@ -708,13 +704,13 @@ public class PlanarRegionMap
 
          //finalMap.addPlanarRegionsList(regions);
 
-         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, sensorToWorldTransformPosterior, previousRegions.copy()));
 
-         PerceptionPrintTools.printTransform("Transform to World", transformToWorld);
+         PerceptionPrintTools.printTransform("Transform to World", sensorToWorldTransformPosterior);
 
          LogTools.info("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
 
-         return transformToWorld;
+         return sensorToWorldTransformPosterior;
       }
 
       return null;
