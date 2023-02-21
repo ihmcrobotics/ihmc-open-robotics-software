@@ -15,12 +15,14 @@ void main() {
 #type fragment
 
 out vec4 out_color;
-out float out_processedDepth;
 
 void main() {
 
-    out_color.a = 1.0;
-    out_processedDepth = 2.0 * gl_FragCoord.z - 1.0; // Normalized to -1.0 to 1.0
+    vec3 lightPosition = vec3(0.0, 0.0, 0.0);
+
+    vec3 lightDirection = normalize(lightPosition - gl_FragCoord.xyz);
+
+    out_color = vec4(0.0, 1.0, 0.0, 1.0);
 }
 
 
