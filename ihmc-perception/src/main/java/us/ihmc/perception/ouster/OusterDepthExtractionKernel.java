@@ -142,8 +142,6 @@ public class OusterDepthExtractionKernel
 
          pointCloudXYZBuffer.readOpenCLBufferObject(openCLManager);
       }
-
-      openCLManager.finish();
    }
 
    public BytedecoImage getExtractedDepthImage()

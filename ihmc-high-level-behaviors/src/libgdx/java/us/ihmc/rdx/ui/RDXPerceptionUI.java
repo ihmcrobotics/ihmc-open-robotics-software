@@ -41,7 +41,7 @@ public class RDXPerceptionUI
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "perception_ui_node");
 
       globalVisualizersUI = new RDXGlobalVisualizersPanel();
-      baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Perception Visualizer");
+      baseUI = new RDXBaseUI("Perception UI");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {

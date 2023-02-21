@@ -931,8 +931,6 @@ public class GPUAStarBodyPathPlanner
       // get the data from the GPU
       sampledHeightBuffer.readOpenCLBufferObject(openCLManager);
       leastSquaresNormalXYZBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
    /**
@@ -1022,8 +1020,6 @@ public class GPUAStarBodyPathPlanner
 
       int totalCells = cellsPerSide * cellsPerSide;
       openCLManager.execute1D(computeNormalsWithRansacKernel, totalCells);
-
-      openCLManager.finish();
    }
 
    /**
@@ -1041,8 +1037,6 @@ public class GPUAStarBodyPathPlanner
       openCLManager.execute1D(snapVerticesKernel, totalCells);
 
       snappedNodeHeightBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
    /**
@@ -1058,8 +1052,6 @@ public class GPUAStarBodyPathPlanner
       openCLManager.execute1D(computeHeuristicCostKernel, totalCells);
 
       heuristicCostMapBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
    /**
@@ -1099,8 +1091,6 @@ public class GPUAStarBodyPathPlanner
       rollCostMapBuffer.readOpenCLBufferObject(openCLManager);
       traversibilityCostMapBuffer.readOpenCLBufferObject(openCLManager);
       edgeCostMapBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
    /**

@@ -84,8 +84,8 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
                                                                                  getFastTransferTime(),
                                                                                  startPose,
                                                                                  true);
-      footsteps.setOffsetFootstepsHeightWithExecutionError(true);
-      footsteps.setAreFootstepsAdjustable(true);
+//      footsteps.setOffsetFootstepsHeightWithExecutionError(true);
+//      footsteps.setAreFootstepsAdjustable(true);
       simulationTestHelper.publishToController(footsteps);
 
       boolean success = simulationTestHelper.simulateNow(1.1
