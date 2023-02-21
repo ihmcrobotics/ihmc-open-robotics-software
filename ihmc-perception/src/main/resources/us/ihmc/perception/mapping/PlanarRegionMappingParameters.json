@@ -10,12 +10,12 @@
   "Plane noise variance" : 0.001,
   "Odometry noise variance" : 0.0001,
   "Best match angular threshold": 0.75,
-  "Best match distance threshold": 0.4,
+  "Best match distance threshold": 0.5,
   "Best minimum overlap threshold" : 0.5,
   "Keyframe distance threshold" : 0.05,
   "Keyframe angular threshold" : 0.05,
-  "ICP max iterations" : 10,
-  "ICP min matches" : 5,
-  "ICP termination ratio" : 0.001,
+  "ICP max iterations" : 15,
+  "ICP min matches" : 3,
+  "ICP termination ratio" : -0.01,
   "ICP error cutoff" : 0.03
 }

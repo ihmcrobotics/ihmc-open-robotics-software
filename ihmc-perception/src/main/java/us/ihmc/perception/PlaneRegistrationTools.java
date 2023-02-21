@@ -526,8 +526,8 @@ public class PlaneRegistrationTools
          double cosineTheta = Math.abs(translation.dot(referenceRegion.getNormal()) / translation.norm());
          translation.scale(cosineTheta);
 
-         error += (1.0 - cosineSimilarity);
-         error += Math.min((translation.norm()) * 0.5, 1.0);
+         error += (1.0 - Math.abs(cosineSimilarity));
+         //error += Math.min((translation.norm()) * 0.1, 1.0);
       }
       error /= matches.size();
       return error;
