@@ -39,7 +39,7 @@ public class RDXBlackflyDisplayDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   blackflyReader.create();
-                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapImagePanel().getImagePanel());
                   baseUI.getLayoutManager().reloadLayout();
 
                   ThreadTools.startAsDaemon(() ->

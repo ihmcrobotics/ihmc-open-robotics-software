@@ -9,8 +9,8 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.live.RDXROS1BoxVisualizer;
-import us.ihmc.rdx.ui.graphics.live.RDXROS1PointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros1.RDXROS1BoxVisualizer;
+import us.ihmc.rdx.ui.graphics.ros1.RDXROS1PointCloudVisualizer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 
