@@ -11,8 +11,7 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
 public class RDXGizmoDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
 
    private RDXFocusBasedCamera focusBasedCamera;
    private final RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo();

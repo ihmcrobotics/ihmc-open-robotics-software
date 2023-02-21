@@ -27,7 +27,7 @@ public class RDXFFMPEGWebcamLoggingDemo
 {
    private static final String WEBCAM_FILE = System.getProperty("webcam.file");
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final boolean lossless = false;
    private final int framerate = 15;

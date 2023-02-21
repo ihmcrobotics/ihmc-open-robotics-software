@@ -69,9 +69,16 @@ public class WorkspaceDirectory
       tempPathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring.replaceAll("/", ".");
       pathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring;
 
-      workspaceDirectory = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent,
-                                                                 subsequentPathToResourceFolder,
-                                                                 putTogetherResourcePath);
+      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
+      {
+         workspaceDirectory = null;
+      }
+      else
+      {
+         workspaceDirectory = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent,
+                                                                    subsequentPathToResourceFolder,
+                                                                    putTogetherResourcePath);
+      }
    }
 
    private WorkspaceDirectory(Class<?> classForLoading,
