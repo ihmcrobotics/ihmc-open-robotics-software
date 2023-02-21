@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui;
+package us.ihmc.rdx.ui.affordances;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
@@ -14,7 +14,7 @@ public class RDX3DPanelHandWrenchIndicator
    private SideDependentList<Double> linearParts = new SideDependentList<>((double) 0, (double) 0);
    private SideDependentList<Double> angularParts = new SideDependentList<>((double) 0, (double) 0);
 
-   public void render(float windowWidth, float windowHeight, float windowPosX, float windowPosY)
+   public void render(float windowWidth, float windowPosX, float windowPosY)
    {
       if (showAndUpdate)
       {
