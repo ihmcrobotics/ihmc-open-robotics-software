@@ -22,16 +22,14 @@ import java.nio.ByteOrder;
 
 public class RDXRealsenseD435UI
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Activator nativesLoadedActivator;
    private RDXInteractableRealsenseD435 d435Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense d435;
-   private RDXCVImagePanel depthImagePanel;
+   private RDXBytedecoImagePanel depthImagePanel;
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
    private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
@@ -78,8 +76,8 @@ public class RDXRealsenseD435UI
                      depthU16C1Image = new Mat(d435.getDepthHeight(), d435.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
 
                      depth32FC1Image = new BytedecoImage(d435.getDepthWidth(), d435.getDepthHeight(), opencv_core.CV_32FC1);
-                     depthImagePanel = new RDXCVImagePanel("D435 Depth", d435.getDepthWidth(), d435.getDepthHeight());
-                     baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getVideoPanel());
+                     depthImagePanel = new RDXBytedecoImagePanel("D435 Depth", d435.getDepthWidth(), d435.getDepthHeight());
+                     baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getImagePanel());
 
                      baseUI.getLayoutManager().reloadLayout();
                   }

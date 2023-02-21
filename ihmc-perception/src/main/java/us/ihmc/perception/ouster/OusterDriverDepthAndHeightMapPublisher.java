@@ -97,7 +97,6 @@ public class OusterDriverDepthAndHeightMapPublisher
          if (nativesLoadedActivator.isNewlyActivated())
          {
             openCLManager = new OpenCLManager();
-            openCLManager.create();
          }
 
          if (depthExtractionKernel == null)

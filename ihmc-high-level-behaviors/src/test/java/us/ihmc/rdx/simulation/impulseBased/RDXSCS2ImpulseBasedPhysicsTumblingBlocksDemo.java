@@ -31,9 +31,7 @@ import java.util.Random;
 
 public class RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXSCS2BulletSimulationSession rdxSCS2SimulationSession = new RDXSCS2BulletSimulationSession();
 
    public RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo()
