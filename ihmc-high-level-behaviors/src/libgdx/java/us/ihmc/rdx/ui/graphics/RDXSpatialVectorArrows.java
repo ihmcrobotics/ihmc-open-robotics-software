@@ -12,10 +12,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
 
 public class RDXSpatialVectorArrows
 {
@@ -34,10 +32,10 @@ public class RDXSpatialVectorArrows
    private YoDoubleClientHelper angularYYoVariable;
    private YoDoubleClientHelper angularZYoVariable;
    private final Vector3D tempVector = new Vector3D();
-   private boolean drawAngularPart = true;
 
    private double linearPartScale = 0.005;
    private double angularPartScale = 0.02;
+   private boolean show = true;
 
    public RDXSpatialVectorArrows(ReferenceFrame originFrame, YoVariableClientHelper yoVariableClientHelper, String variablePrefix)
    {
@@ -107,19 +105,16 @@ public class RDXSpatialVectorArrows
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      linearPartArrow.getRenderables(renderables, pool);
-      if (drawAngularPart)
+      if (show)
+      {
+         linearPartArrow.getRenderables(renderables, pool);
          angularPartArrow.getRenderables(renderables, pool);
+      }
    }
 
    public int getIndexOfSensor()
    {
       return indexOfSensor;
-   }
-
-   public void setDrawAngularPart(boolean drawAngularPart)
-   {
-      this.drawAngularPart = drawAngularPart;
    }
 
    public void setLinearPartScale(double linearPartScale)
@@ -130,5 +125,15 @@ public class RDXSpatialVectorArrows
    public void setAngularPartScale(double angularPartScale)
    {
       this.angularPartScale = angularPartScale;
+   }
+
+   public boolean getShow()
+   {
+      return show;
+   }
+
+   public void setShow(boolean show)
+   {
+      this.show = show;
    }
 }
