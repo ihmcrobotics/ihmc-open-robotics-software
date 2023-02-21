@@ -21,7 +21,7 @@ public class RDXNettyOusterFisheyeColorDemo
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
 
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Activator nativesLoadedActivator;
    private final RDXNettyOusterUI nettyOusterUI = new RDXNettyOusterUI();
    private RDXBlackflyReader blackflyReader;
