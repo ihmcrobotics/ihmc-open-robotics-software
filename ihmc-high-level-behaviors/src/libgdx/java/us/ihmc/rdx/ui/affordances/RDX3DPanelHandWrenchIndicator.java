@@ -10,23 +10,18 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDX3DPanelHandWrenchIndicator
 {
-   private RDX3DPanel rdx3DPanel;
+   private RDX3DPanel panel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private boolean showAndUpdate = true;
    private SideDependentList<Double> linearParts = new SideDependentList<>((double) 0, (double) 0);
    private SideDependentList<Double> angularParts = new SideDependentList<>((double) 0, (double) 0);
 
-   public RDX3DPanelHandWrenchIndicator(RDX3DPanel rdx3DPanel)
+   public RDX3DPanelHandWrenchIndicator(RDX3DPanel panel)
    {
-      this.rdx3DPanel = rdx3DPanel;
+      this.panel = panel;
    }
 
    public void renderImGuiOverlay()
-   {
-      render(rdx3DPanel.getWindowSizeX(), rdx3DPanel.getWindowPositionX(), rdx3DPanel.getWindowPositionY());
-   }
-
-   public void render(float windowWidth, float windowPosX, float windowPosY)
    {
       if (showAndUpdate)
       {
@@ -35,8 +30,8 @@ public class RDX3DPanelHandWrenchIndicator
          float panelHeight = 110;
 
          ImGui.setNextWindowSize(panelWidth, panelHeight);
-         float startX = windowPosX + (windowWidth - panelWidth - 5);
-         float startY = (windowPosY + 10);
+         float startX = panel.getWindowPositionX() + (panel.getWindowSizeX() - panelWidth - 5);
+         float startY = (panel.getWindowPositionY() + 10);
          ImGui.setNextWindowPos(startX, startY);
          ImGui.setNextWindowBgAlpha(0.2f);
          int windowFlags = ImGuiWindowFlags.NoTitleBar; // undecorated
