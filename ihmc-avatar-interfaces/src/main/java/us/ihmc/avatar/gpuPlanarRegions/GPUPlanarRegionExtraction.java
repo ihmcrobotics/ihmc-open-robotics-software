@@ -140,7 +140,6 @@ public class GPUPlanarRegionExtraction
       graphImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
       gaussianKernelSize = new Size();
 
-      openCLManager.create();
       planarRegionExtractionProgram = openCLManager.loadProgram("PlanarRegionExtraction");
       filterKernel = openCLManager.createKernel(planarRegionExtractionProgram, "filterKernel");
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
@@ -313,8 +312,6 @@ public class GPUPlanarRegionExtraction
       openCLManager.enqueueReadImage(cyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, cyImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(czImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, czImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, graphImage.getBytedecoByteBufferPointer());
-
-      openCLManager.finish();
    }
 
    public void findRegions(Consumer<RapidPlanarRegionIsland> forDrawingDebugPanel)

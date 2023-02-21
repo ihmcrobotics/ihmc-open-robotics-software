@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.perception.BytedecoImage;
 
 /**
@@ -13,7 +13,7 @@ import us.ihmc.perception.BytedecoImage;
  * two sets of pixmaps, textures, and images where each set shares some
  * native memory, that gets copied to the GPU in the UI update method.
  */
-public class RDXOpenCVSwapVideoPanelData
+public class RDXImagePanelTexture
 {
    private Pixmap pixmap;
    private boolean needNewTexture = false;
@@ -22,6 +22,7 @@ public class RDXOpenCVSwapVideoPanelData
 
    /**
     * Ensure the texture is allocated and is the correct dimensions.
+    * Does not require active OpenGL context.
     */
    public void ensureTextureDimensions(int imageWidth, int imageHeight)
    {
@@ -43,7 +44,7 @@ public class RDXOpenCVSwapVideoPanelData
     * OpenGL context. This does what we can't do asynchronously:
     * creating textures and copying textures to the GPU.
     */
-   public void updateOnUIThread(ImGuiVideoPanel videoPanel)
+   public void updateTextureAndDraw(RDXImagePanel imagePanel)
    {
       if (pixmap != null)
       {
@@ -60,7 +61,7 @@ public class RDXOpenCVSwapVideoPanelData
 
          texture.draw(pixmap, 0, 0); // Copies from RAM to the GPU
 
-         videoPanel.setTexture(texture);
+         imagePanel.setTexture(texture);
       }
    }
 

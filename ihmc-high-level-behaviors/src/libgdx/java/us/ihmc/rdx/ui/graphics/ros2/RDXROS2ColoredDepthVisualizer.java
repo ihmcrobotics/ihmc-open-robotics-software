@@ -159,7 +159,6 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
       super.create();
 
       openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLProgram = openCLManager.loadProgram("ColoredPointCloudCreator", "PerceptionCommon.cl");
       createPointCloudKernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
 
@@ -343,7 +342,6 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
          // Read the OpenCL buffer back to the CPU
          finalColoredDepthBuffer.readOpenCLBufferObject(openCLManager);
-         openCLManager.finish();
 
          // Request the PointCloudRenderer to render the point cloud from OpenCL-mapped buffers
          pointCloudRenderer.updateMeshFastest(totalNumberOfPoints);
