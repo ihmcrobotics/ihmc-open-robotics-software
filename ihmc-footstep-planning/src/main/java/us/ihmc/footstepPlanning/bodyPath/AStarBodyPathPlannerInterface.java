@@ -14,12 +14,18 @@ import java.util.List;
 public interface AStarBodyPathPlannerInterface
 {
     void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack);
-    void setHeightMapData(HeightMapData heightMapData);
-    void clearLoggedData();
-    BodyPathLatticePoint getNextNode();
-    void halt();
-    List<AStarBodyPathIterationData> getIterationData();
-    HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> getEdgeDataMap();
-    YoRegistry getRegistry();
 
+    void setHeightMapData(HeightMapData heightMapData);
+
+    void clearLoggedData();
+
+    BodyPathLatticePoint getNextNode();
+
+    void halt();
+
+    List<AStarBodyPathIterationData> getIterationData();
+
+    HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> getEdgeDataMap();
+
+    YoRegistry getRegistry();
 }
