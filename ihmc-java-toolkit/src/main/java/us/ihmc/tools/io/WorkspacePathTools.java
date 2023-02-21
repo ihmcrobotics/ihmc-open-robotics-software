@@ -1,8 +1,12 @@
 package us.ihmc.tools.io;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.log.LogTools;
 
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -102,17 +106,20 @@ public class WorkspacePathTools
       {
          protectionDomain = classForLoading.getProtectionDomain();
          CodeSource codeSource = protectionDomain.getCodeSource();
-         if (codeSource != null && codeSource.getLocation() != null && !codeSource.getLocation().getPath().isEmpty())
+         URL location = codeSource == null ? null : codeSource.getLocation();
+         // Going through URI is required to support Windows
+         URI locationURI = location == null ? null : ExceptionTools.handle(location::toURI, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         if (locationURI != null && !location.getPath().isEmpty())
          {
-            Path classDirectory = Paths.get(codeSource.getLocation().getPath());
-            LogTools.debug("Class path: {}", classDirectory);
+            Path codeSourceDirectory = Paths.get(locationURI);
+            LogTools.debug("Code source directory: {}", codeSourceDirectory);
             Path workingDirectory = WorkspacePathTools.getWorkingDirectory();
             LogTools.debug("Working directory: {}", workingDirectory);
 
             int lastIndexOfSrc = -1;
-            for (int nameElementIndex = 0; nameElementIndex < classDirectory.getNameCount(); nameElementIndex++)
+            for (int nameElementIndex = 0; nameElementIndex < codeSourceDirectory.getNameCount(); nameElementIndex++)
             {
-               if (classDirectory.getName(nameElementIndex).toString().equals("src"))
+               if (codeSourceDirectory.getName(nameElementIndex).toString().equals("src"))
                {
                   lastIndexOfSrc = nameElementIndex;
                }
@@ -121,7 +128,7 @@ public class WorkspacePathTools
             if (lastIndexOfSrc >= 0)
             {
                // Add 2 to keep 'src' and the source set part after 'src'
-               Path pathBeforeResources = classDirectory.subpath(0, lastIndexOfSrc + 2);
+               Path pathBeforeResources = codeSourceDirectory.subpath(0, lastIndexOfSrc + 2);
                LogTools.debug("Path before resources: {}", pathBeforeResources);
 
                Path pathWithResources = pathBeforeResources.resolve("resources").normalize();
