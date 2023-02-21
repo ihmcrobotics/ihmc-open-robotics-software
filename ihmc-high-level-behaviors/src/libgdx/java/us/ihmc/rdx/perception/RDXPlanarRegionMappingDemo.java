@@ -16,14 +16,12 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
-import us.ihmc.utilities.ros.RosTools;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,7 +42,11 @@ public class RDXPlanarRegionMappingDemo
    private final RDXLineMeshModel mocapGraphic = new RDXLineMeshModel(0.02f, Color.YELLOW);
    private final RDXLineMeshModel rootJointGraphic = new RDXLineMeshModel(0.02f, Color.RED);
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230207_214209_PerceptionLogFixed.hdf5").toString();
+   // 20230207_214209_PerceptionLogFixed.hdf5 -> Ouster_Indoor_Urban
+   // L515_CinderBlocks_PerceptionLog.hdf5 -> L515_CinderBlocks
+   // L515_RoughTerrain_PerceptionLog.hdf5 -> L515_RoughTerrain
+
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("L515_RoughTerrain_PerceptionLog.hdf5").toString();
 
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
@@ -64,14 +66,10 @@ public class RDXPlanarRegionMappingDemo
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
-
             // To Run With Perception Logs (HDF5)
             mappingManager = new PlanarRegionMappingHandler(perceptionLogFile, true);
 
-            pointCloudRenderer.create(mappingManager.getRapidRegionsExtractor().getImageHeight()
-                                          * mappingManager.getRapidRegionsExtractor().getImageWidth());
-
-
+            pointCloudRenderer.create(mappingManager.getRapidRegionsExtractor().getImageHeight() * mappingManager.getRapidRegionsExtractor().getImageWidth());
 
             // To Run with Planar Region Logs (PRLLOG)
             //mappingManager = new PlanarRegionMappingManager(regionLogDirectory , false);
@@ -96,7 +94,6 @@ public class RDXPlanarRegionMappingDemo
             baseUI.getLayoutManager().reloadLayout();
          }
 
-
          public void renderPlanarRegions()
          {
             if (mappingManager.pollIsModified() && mappingManager.hasPlanarRegionsToRender())
@@ -106,7 +103,7 @@ public class RDXPlanarRegionMappingDemo
                mapPlanarRegionsGraphic.update();
 
                RigidBodyTransform transform = mappingManager.pollKeyframePose();
-               if(transform != null)
+               if (transform != null)
                {
                   framePose.set(transform);
                   modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.1, Color.YELLOW);
@@ -119,7 +116,7 @@ public class RDXPlanarRegionMappingDemo
                   baseUI.getPrimaryScene().addRenderableProvider(model, RDXSceneLevel.VIRTUAL);
                }
 
-               if(mappingPanel.getPointCloudRenderEnabled())
+               if (mappingPanel.getPointCloudRenderEnabled())
                {
                   pointCloudRenderer.setPointsToRender(mappingManager.getRapidRegionsExtractor().getDebugger().getDebugPoints(), Color.GRAY);
                   pointCloudRenderer.updateMesh();
@@ -130,25 +127,23 @@ public class RDXPlanarRegionMappingDemo
          @Override
          public void render()
          {
-            if(nativesLoadedActivator.poll())
+            if (nativesLoadedActivator.poll())
             {
-               if(nativesLoadedActivator.isNewlyActivated())
+               if (nativesLoadedActivator.isNewlyActivated())
                {
                   baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
                   baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
                }
 
-               if(!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
+               if (!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
                {
-                  MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(),
-                                                          mappingManager.getSensorPositionBuffer().get(0));
+                  MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
 
                   mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
                   mocapGraphic.update();
-
                }
 
-               if(!mappingManager.getSensorPositionBuffer().isEmpty())
+               if (!mappingManager.getSensorPositionBuffer().isEmpty())
                {
                   rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
                   rootJointGraphic.update();
