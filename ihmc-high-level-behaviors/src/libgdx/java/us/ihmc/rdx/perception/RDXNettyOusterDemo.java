@@ -9,7 +9,7 @@ import us.ihmc.tools.thread.Activator;
 
 public class RDXNettyOusterDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Activator nativesLoadedActivator;
    private final RDXNettyOusterUI nettyOusterUI = new RDXNettyOusterUI();
 

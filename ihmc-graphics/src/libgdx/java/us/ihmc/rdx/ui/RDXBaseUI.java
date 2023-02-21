@@ -29,9 +29,11 @@ import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkingDirectoryPathComponents;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.nio.file.Files;
@@ -122,14 +124,14 @@ public class RDXBaseUI
    private Path themeFilePath;
    private final String shadePrefix = "shade=";
 
-   public RDXBaseUI(String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public RDXBaseUI()
    {
-      this(0, directoryNameToAssumePresent, subsequentPathToResourceFolder, null);
+      this(0, null, null, null);
    }
 
-   public RDXBaseUI(String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public RDXBaseUI(String windowTitle)
    {
-      this(0, directoryNameToAssumePresent, subsequentPathToResourceFolder, windowTitle);
+      this(0, null, null, windowTitle);
    }
 
    /**
@@ -137,6 +139,8 @@ public class RDXBaseUI
     *
     * @param additionalStackHeightForFindingCaller This is if you have something that sets up a RDXBaseUI for another class.
     *                                              We want the highest level calling class to be the one used for loading resources.
+    * @param directoryNameToAssumePresent Directory that's either a part present in the working directory of an immediate child.
+    * @param subsequentPathToResourceFolder The subsequent path to the resources folder from the directory assumed to be present.
     */
    /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller,
                                   String directoryNameToAssumePresent,
@@ -149,6 +153,22 @@ public class RDXBaseUI
       LogTools.info("Using class for loading resources: {}", classForLoading.getName());
 
       this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
+
+      // Try to figure out where the resources for this class are
+      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
+      {
+         WorkingDirectoryPathComponents inferredPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForLoading);
+         if (inferredPathComponents != null)
+         {
+            directoryNameToAssumePresent = inferredPathComponents.getDirectoryNameToAssumePresent();
+            subsequentPathToResourceFolder = inferredPathComponents.getSubsequentPathToResourceFolder();
+         }
+      }
+
+      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
+      {
+         LogTools.warn("We won't be able to write files to version controlled resources, because we probably aren't in a workspace.");
+      }
 
       configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
