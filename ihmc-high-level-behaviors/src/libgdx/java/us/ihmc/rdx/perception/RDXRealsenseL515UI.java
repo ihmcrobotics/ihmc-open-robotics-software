@@ -33,8 +33,7 @@ import java.nio.ByteOrder;
 public class RDXRealsenseL515UI
 {
    private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F1121365");
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Activator nativesLoadedActivator;
    private RDXInteractableRealsenseL515 l515Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());

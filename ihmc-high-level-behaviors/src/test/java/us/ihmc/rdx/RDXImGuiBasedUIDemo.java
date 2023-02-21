@@ -21,9 +21,7 @@ import java.time.LocalDateTime;
 
 public class RDXImGuiBasedUIDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  "Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Demo");
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
    private final ImGuiLogWidget logWidget = new ImGuiLogWidget("Log");

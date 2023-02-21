@@ -22,8 +22,7 @@ import java.nio.ByteOrder;
 
 public class RDXRealsenseD435UI
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Activator nativesLoadedActivator;
    private RDXInteractableRealsenseD435 d435Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
