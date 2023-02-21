@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.perception.MutableBytePointer;
-import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.librealsense2.*;
 import org.bytedeco.librealsense2.global.realsense2;
 import us.ihmc.log.LogTools;
@@ -23,12 +22,6 @@ import static org.bytedeco.librealsense2.global.realsense2.rs2_release_frame;
 
 public class BytedecoRealsense
 {
-   public static final float L515_FOCAL_LENGTH_METERS = 0.00254f;
-   public static final float L515_CMOS_WIDTH_METERS = 0.0036894f;
-   public static final float L515_CMOS_HEIGHT_METERS = 0.0020753f;
-   public static final float L515_DEPTH_DISCRETIZATION = 2.500000118743628E-4f;
-   private static final int RS2_FRAME_POINTER_SIZE = Pointer.sizeof(rs2_frame.class);
-
    protected final int depthWidth;
    protected final int depthHeight;
    protected final int fps;
@@ -58,7 +51,7 @@ public class BytedecoRealsense
    protected final Quaternion depthToColorQuaternion = new Quaternion();
    protected rs2_stream_profile depthFrameStreamProfile;
    protected rs2_stream_profile colorFrameStreamProfile;
-   protected double depthToMeterConversion;
+   protected double depthDiscretization;
    protected rs2_frame syncedFrames = new rs2_frame();
    protected mutable_rs2_frame depthFrame = new mutable_rs2_frame();
    protected mutable_rs2_frame colorFrame = new mutable_rs2_frame();
@@ -92,8 +85,6 @@ public class BytedecoRealsense
 
       rs2_sensor_list sensorList = realsense2.rs2_query_sensors(device, error);
       sensor = realsense2.rs2_create_sensor(sensorList, 0, error);
-
-      depthToMeterConversion = realsense2.rs2_get_depth_scale(sensor, error);
 
       LogTools.info("Configured Depth Stream of L515 Device. Serial number: {}", serialNumber);
    }
@@ -229,6 +220,8 @@ public class BytedecoRealsense
                                                                    depthStreamIntrinsics.ppy(),
                                                                    depthHeight,
                                                                    depthWidth));
+               depthDiscretization = realsense2.rs2_get_depth_scale(sensor, error);
+               LogTools.info("Depth discretization: {} (meters/unit)", depthDiscretization);
             }
 
             if (colorEnabled)
@@ -364,9 +357,9 @@ public class BytedecoRealsense
       return depthFrameDataSize;
    }
 
-   public double getDepthToMeterConversion()
+   public double getDepthDiscretization()
    {
-      return depthToMeterConversion;
+      return depthDiscretization;
    }
 
    public rs2_intrinsics getDepthIntrinsicParameters()
