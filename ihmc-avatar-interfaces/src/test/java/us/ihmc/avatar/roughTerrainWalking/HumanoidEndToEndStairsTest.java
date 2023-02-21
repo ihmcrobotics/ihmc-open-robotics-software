@@ -39,6 +39,8 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
+   private DRCRobotModel robotModel;
+
    private int numberOfSteps = 6;
    private double stepHeight = 9.25 * 0.0254;
    private double stepLength = 0.32;
@@ -46,7 +48,11 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    private double startX;
    private double startZ;
    private boolean up;
-   private DRCRobotModel robotModel;
+   private boolean slow;
+   private double swingDuration;
+   private double transferDuration;
+   private double heightOffset;
+   private Consumer<FootstepDataListMessage> corruptor;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -105,54 +111,27 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
                           Consumer<FootstepDataListMessage> corruptor)
          throws Exception
    {
-//      robotModel = getRobotModel();
-//      double actualFootLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
-//      startX = up ? 0.0 : 1.2 + numberOfSteps * stepLength + 0.3;
-//      startZ = up ? 0.0 : numberOfSteps * stepHeight;
-//
-//      StairsEnvironment environment = new StairsEnvironment(numberOfSteps, stepHeight, stepLength, true);
-//      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters);
-//      simulationTestHelperFactory.setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(startX, 0, startZ));
-//      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(useExperimentalPhysicsEngine);
-//      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
-//      simulationTestHelper.start();
-//
-//      simulationTestHelper.setCameraFocusPosition(startX, 0.0, 0.8 + startZ);
-//      simulationTestHelper.setCameraPosition(startX, -5.0, 0.8 + startZ);
-//
-//      assertTrue(simulationTestHelper.simulateNow(0.5));
-//
-//      FootstepDataListMessage footsteps = createStairsFootsteps(slow, up, stepHeight, stepLength, 0.25, numberOfSteps);
-//      if (up)
-//         translate(footsteps, new Vector3D(0.6 - 0.045 - actualFootLength / 2.0, 0.0, 0.0));
-//      else
-//         translate(footsteps, new Vector3D(1.8 - 0.045 - actualFootLength / 2.0 + (numberOfSteps + 1) * stepLength, 0.0, startZ));
-//      EndToEndTestTools.setStepDurations(footsteps, swingDuration, transferDuration);
-//      if (corruptor != null)
-//         corruptor.accept(footsteps);
-//      publishHeightOffset(heightOffset);
-//
-//      simulationTestHelper.setInPoint();
-//
-//      publishFootstepsAndSimulate(robotModel, footsteps);
-      initialize(up);
-      testStairsAfterInitialize(slow, swingDuration, transferDuration, heightOffset, corruptor);
+      initialize(up, slow, swingDuration, transferDuration, heightOffset, corruptor);
+      testStairsAfterInitialize();
       exportIfAppropriate(testInfo);
-//
-//      if (EXPORT_TORQUE_SPEED_DATA)
-//      {
-//         EndToEndTestTools.exportTorqueSpeedCurves(simulationTestHelper,
-//                                                   EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null),
-//                                                   testInfo.getTestMethod().get().getName());
-//      }
    }
 
-   public void initialize(boolean up)
+   public void initialize(boolean up,
+                          boolean slow,
+                          double swingDuration,
+                          double transferDuration,
+                          double heightOffset,
+                          Consumer<FootstepDataListMessage> corruptor)
    {
       robotModel = getRobotModel();
       startX = up ? 0.0 : 1.2 + numberOfSteps * stepLength + 0.3;
       startZ = up ? 0.0 : numberOfSteps * stepHeight;
       this.up = up;
+      this.slow = slow;
+      this.swingDuration = swingDuration;
+      this.transferDuration = transferDuration;
+      this.heightOffset = heightOffset;
+      this.corruptor = corruptor;
 
       StairsEnvironment environment = new StairsEnvironment(numberOfSteps, stepHeight, stepLength, true);
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters);
@@ -161,11 +140,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
    }
 
-   public void testStairsAfterInitialize(boolean slow,
-                                          double swingDuration,
-                                          double transferDuration,
-                                          double heightOffset,
-                                          Consumer<FootstepDataListMessage> corruptor) throws Exception
+   public void testStairsAfterInitialize() throws Exception
    {
       double actualFootLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
       simulationTestHelper.start();

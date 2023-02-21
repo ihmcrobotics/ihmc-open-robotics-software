@@ -29,6 +29,11 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
 
+   public SCS2AvatarTestingSimulation getAvatarSimulation()
+   {
+      return simulationTestHelper;
+   }
+
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
@@ -56,6 +61,50 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
    @Test
    public void testWalkingOntoRocks()
    {
+//      setupTestingParameters(simulationTestingParameters);
+//      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+//      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
+//      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+//                                                                                                                                             simulationTestingParameters);
+//      simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
+//      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+//      simulationTestHelper.start();
+//
+//      setupCameraForWalkingOntoRocks();
+//
+//      ThreadTools.sleep(1000);
+//      boolean success = simulationTestHelper.simulateNow(2.0);
+//
+//      FootstepDataListMessage footstepDataList = createFootstepsForWalkingToTheRocks();
+//      simulationTestHelper.publishToController(footstepDataList);
+//
+//      success = success && simulationTestHelper.simulateNow(6.5);
+//
+//      if (success)
+//      {
+//         footstepDataList = createFootstepsForSteppingOntoTheRocks();
+//         simulationTestHelper.publishToController(footstepDataList);
+//
+//         success = success && simulationTestHelper.simulateNow(6.0);
+//      }
+//
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+//      //      simulationTestHelper.checkNothingChanged();
+//
+//      assertTrue("Caught Exception: " + simulationTestHelper.getLastThrownException(), success);
+//
+//      Point3D center = new Point3D(0.6853965087476173, 4.5173529666394305, 0.8898586980716016);
+//      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+//      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+//      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+//
+//      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      initialize();
+      runAfterInitialize();
+   }
+
+   public void initialize()
+   {
       setupTestingParameters(simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
@@ -63,6 +112,10 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+   }
+
+   public void runAfterInitialize()
+   {
       simulationTestHelper.start();
 
       setupCameraForWalkingOntoRocks();

@@ -36,12 +36,29 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+import java.io.IOException;
+
 public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterface
 {
    private static final boolean EXPORT_TORQUE_SPEED_DATA = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-
+   private DRCRobotModel robotModel;
    private SCS2AvatarTestingSimulation simulationTestHelper;
+
+   private double heightOffset;
+   private double swingDuration;
+   private double transferDuration;
+   private double maxStepLength;
+   private double torsoPitch;
+   private boolean disableToeOff;
+   private double startYaw;
+   private boolean up;
+   private double startX;
+   private double startZ;
+   private double slopeLength;
+   private double topZ;
+   private boolean useSideSteps;
+   private double slopeAngle;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -91,14 +108,39 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
                          double slopeAngle)
          throws Exception
    {
-      DRCRobotModel robotModel = getRobotModel();
-      double footLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
-      double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootWidth();
-      double slopeLength = 3.0;
-      double topZ = Math.tan(slopeAngle) * slopeLength;
-      double startX = (up ? 0.0 : 1.2 + slopeLength) + 0.3;
-      double startZ = up ? 0.0 : topZ;
-      double startYaw = useSideSteps ? -Math.PI / 2.0 : 0.0;
+      initialize(up, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, useExperimentalPhysicsEngine, disableToeOff, slopeAngle);
+      testSlopeAfterInitialize();
+      exportIfAppropriate(testInfo);
+   }
+
+   public void initialize(boolean up,
+                          boolean useSideSteps,
+                          double swingDuration,
+                          double transferDuration,
+                          double maxStepLength,
+                          double heightOffset,
+                          double torsoPitch,
+                          boolean useExperimentalPhysicsEngine,
+                          boolean disableToeOff,
+                          double slopeAngle)
+   {
+      robotModel = getRobotModel();
+      this.swingDuration = swingDuration;
+      this.transferDuration = transferDuration;
+      this.maxStepLength = maxStepLength;
+      this.heightOffset = heightOffset;
+      this.torsoPitch = torsoPitch;
+      this.disableToeOff = disableToeOff;
+      this.up = up;
+      this.useSideSteps = useSideSteps;
+
+      this.slopeLength = 3.0;
+      this.slopeAngle = slopeAngle;
+      this.topZ = Math.tan(slopeAngle) * slopeLength;
+      this.startX = (up ? 0.0 : 1.2 + slopeLength) + 0.3;
+      this.startZ = up ? 0.0 : topZ;
+      this.startYaw = useSideSteps ? -Math.PI / 2.0 : 0.0;
+
 
       SlopeEnvironment environment = new SlopeEnvironment(slopeAngle, 1.5, slopeLength);
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
@@ -114,6 +156,13 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
          simulationTestHelperFactory.setImpulseBasedPhysicsEngineContactParameters(contactParameters);
       }
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+   }
+
+   public void testSlopeAfterInitialize() throws Exception
+   {
+      double footLength = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootLength();
+      double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getActualFootWidth();
+
       simulationTestHelper.start();
 
       simulationTestHelper.setCameraPosition(startX, -slopeLength, 0.8 + startZ);
@@ -156,7 +205,10 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       simulationTestHelper.setInPoint();
 
       publishFootstepsAndSimulate(robotModel, footsteps);
+   }
 
+   public void exportIfAppropriate(TestInfo testInfo) throws IOException
+   {
       if (EXPORT_TORQUE_SPEED_DATA)
       {
          EndToEndTestTools.exportTorqueSpeedCurves(simulationTestHelper,
@@ -396,6 +448,11 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
       footstep.setRobotSide(stepSide.toByte());
       footstep.getLocation().set(x, y, z);
+   }
+
+   public SCS2AvatarTestingSimulation getAvatarSimulation()
+   {
+      return simulationTestHelper;
    }
 
    private static class SlopeEnvironment implements CommonAvatarEnvironmentInterface
