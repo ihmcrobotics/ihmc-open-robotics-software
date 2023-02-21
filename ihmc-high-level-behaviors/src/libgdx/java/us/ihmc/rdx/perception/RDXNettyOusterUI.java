@@ -34,6 +34,7 @@ public class RDXNettyOusterUI
    private RDXPointCloudRenderer pointCloudRenderer;
    private final ImFloat verticalFieldOfView = new ImFloat((float) Math.toRadians(90.0));
    private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
+   private final ImFloat pointSize = new ImFloat(0.01f);
    private ModifiableReferenceFrame sensorFrame;
    private RDXInteractableFrameModel ousterInteractable;
    private int depthWidth;
@@ -118,8 +119,7 @@ public class RDXNettyOusterUI
 
          depthImageToPointCloudKernel.updateSensorTransform(ousterInteractable.getReferenceFrame());
          depthImageToPointCloudStopwatchPlot.start();
-         float pointSize = 0.01f;
-         depthImageToPointCloudKernel.runKernel(horizontalFieldOfView.get(), verticalFieldOfView.get(), pointSize);
+         depthImageToPointCloudKernel.runKernel(horizontalFieldOfView.get(), verticalFieldOfView.get(), pointSize.get());
          depthImageToPointCloudStopwatchPlot.stop();
       }
    }
@@ -140,6 +140,7 @@ public class RDXNettyOusterUI
 
       ImGuiTools.volatileInputFloat(labels.get("Vertical field of view"), verticalFieldOfView);
       ImGuiTools.volatileInputFloat(labels.get("Horizontal field of view"), horizontalFieldOfView);
+      ImGui.sliderFloat(labels.get("Point size"), pointSize.getData(), 0.0005f, 0.05f);
 
       if (isOusterInitialized())
       {
@@ -177,5 +178,15 @@ public class RDXNettyOusterUI
    public RDXInteractableFrameModel getOusterInteractable()
    {
       return ousterInteractable;
+   }
+
+   public RDXOusterDepthImageToPointCloudKernel getDepthImageToPointCloudKernel()
+   {
+      return depthImageToPointCloudKernel;
+   }
+
+   public boolean getIsReady()
+   {
+      return isReady;
    }
 }

@@ -44,7 +44,6 @@ public class OpenCLManagerTest
       openCLManager.setKernelArgument(kernel, 0, bufferObject);
       openCLManager.execute1D(kernel, numberOfFloats);
       openCLManager.enqueueReadBuffer(bufferObject, sizeInBytes, hostMemoryPointer);
-      openCLManager.finish();
 
       /* Display result */
       for (int i = 0; i < numberOfFloats; i++)
@@ -84,9 +83,7 @@ public class OpenCLManagerTest
 //      openCLManager.enqueueWriteImage(image, imageWidth, imageHeight, hostMemoryPointer); // Not actually required
       openCLManager.setKernelArgument(kernel, 0, image);
       openCLManager.execute2D(kernel, imageWidth, imageHeight);
-      openCLManager.flush();
       openCLManager.enqueueReadImage(image, imageWidth, imageHeight, hostMemoryPointer);
-      openCLManager.finish();
 
       /* Display result */
       for (int x = 0; x < imageWidth; x++)
