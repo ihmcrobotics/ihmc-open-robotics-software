@@ -191,6 +191,9 @@ public class FullRobotModelWrapper implements FullRobotModel
 
       for (JointBasics childJoint : start.getChildrenJoints())
       {
+         // Quickfix to handle kinematic loops
+         if (jointsToPack.contains(childJoint))
+            break;
          if (childJoint instanceof OneDoFJointBasics)
             jointsToPack.add((OneDoFJointBasics) childJoint);
          collectOneDoFJoints(childJoint.getSuccessor(), jointsToPack);

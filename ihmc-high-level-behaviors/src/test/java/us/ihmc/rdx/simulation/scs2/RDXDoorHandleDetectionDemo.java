@@ -15,8 +15,7 @@ import us.ihmc.tools.thread.Activator;
 
 public class RDXDoorHandleDetectionDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
    private RDXEnvironmentBuilder environmentBuilder;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();

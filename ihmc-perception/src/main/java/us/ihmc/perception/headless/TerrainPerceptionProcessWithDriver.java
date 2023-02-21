@@ -180,7 +180,6 @@ public class TerrainPerceptionProcessWithDriver
                MessageTools.toMessage(now, depthImageMessage.getAcquisitionTime());
                MessageTools.toMessage(now, colorImageMessage.getAcquisitionTime());
 
-               this.openCLManager.create();
                openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
                rapidRegionsExtractor.create(openCLManager,
                                             openCLProgram,

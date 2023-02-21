@@ -11,7 +11,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXCVImagePanel;
+import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -40,8 +40,8 @@ public class RDXFFMPEGPlaybackDemo
                                                                                        RDXFFMPEGPlaybackDemo.class),
                                                                 "example.webm");
 
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
-   private RDXCVImagePanel imagePanel;
+   private final RDXBaseUI baseUI = new RDXBaseUI();
+   private RDXBytedecoImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private FFMPEGVideoPlaybackManager video;
    private boolean videoReload;
@@ -120,7 +120,7 @@ public class RDXFFMPEGPlaybackDemo
             if (videoReload)
             {
                videoReload = false;
-               baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
+               baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
                baseUI.getLayoutManager().reloadLayout();
             }
          }
@@ -134,7 +134,7 @@ public class RDXFFMPEGPlaybackDemo
 
             video = new FFMPEGVideoPlaybackManager(file);
             if (imagePanel == null)
-               imagePanel = new RDXCVImagePanel("Playback Video", video.getImage());
+               imagePanel = new RDXBytedecoImagePanel("Playback Video", video.getImage());
             else
                imagePanel.resize(video.getImage());
             video.seek(0);

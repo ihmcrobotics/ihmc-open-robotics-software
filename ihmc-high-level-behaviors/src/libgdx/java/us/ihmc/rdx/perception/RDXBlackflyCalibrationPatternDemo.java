@@ -4,7 +4,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanelData;
+import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.tools.thread.Activator;
 
 /**
@@ -16,9 +16,7 @@ public class RDXBlackflyCalibrationPatternDemo
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
 
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                  "Blackfly Calibration Pattern Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Blackfly Calibration Pattern Demo");
    private RDXBlackflyReader blackflyReader;
    private RDXCalibrationPatternDetectionUI calibrationPatternDetectionUI;
    private volatile boolean running = true;
@@ -45,7 +43,7 @@ public class RDXBlackflyCalibrationPatternDemo
                {
                   blackflyReader.create();
                   blackflyReader.setMonitorPanelUIThreadPreprocessor(this::monitorUIThreadPreprocessor);
-                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
+                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapImagePanel().getImagePanel());
 
                   calibrationPatternDetectionUI = new RDXCalibrationPatternDetectionUI();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetectionUI.getPanel());
@@ -70,9 +68,9 @@ public class RDXBlackflyCalibrationPatternDemo
             baseUI.renderEnd();
          }
 
-         private void monitorUIThreadPreprocessor(RDXOpenCVSwapVideoPanelData data)
+         private void monitorUIThreadPreprocessor(RDXImagePanelTexture texture)
          {
-            calibrationPatternDetectionUI.drawCornersOrCenters(data.getRGBA8Mat());
+            calibrationPatternDetectionUI.drawCornersOrCenters(texture.getRGBA8Mat());
          }
 
          @Override

@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.graphics;
 
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
-import us.ihmc.tools.thread.GuidedSwapReference;
+import us.ihmc.rdx.ui.RDXImagePanel;
+import us.ihmc.tools.thread.SwapReference;
 
 import java.util.function.Consumer;
 
@@ -16,30 +16,13 @@ import java.util.function.Consumer;
  */
 public class RDXOpenCVSwapVideoPanel
 {
-   private final ImGuiVideoPanel videoPanel;
-   private final GuidedSwapReference<RDXOpenCVSwapVideoPanelData> dataSwapReferenceManager;
+   private final RDXImagePanel imagePanel;
+   private final SwapReference<RDXImagePanelTexture> dataSwapReference;
 
-   public RDXOpenCVSwapVideoPanel(String panelName, Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread)
+   public RDXOpenCVSwapVideoPanel(String panelName)
    {
-      this(panelName, updateOnAsynchronousThread, null);
-   }
-
-   public RDXOpenCVSwapVideoPanel(String panelName,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnUIThread)
-   {
-      this(panelName, false, updateOnAsynchronousThread, updateOnUIThread);
-   }
-
-   public RDXOpenCVSwapVideoPanel(String panelName,
-                                  boolean flipY,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnAsynchronousThread,
-                                  Consumer<RDXOpenCVSwapVideoPanelData> updateOnUIThread)
-   {
-      this.videoPanel = new ImGuiVideoPanel(panelName, flipY);
-      dataSwapReferenceManager = new GuidedSwapReference<>(RDXOpenCVSwapVideoPanelData::new,
-                                                           updateOnAsynchronousThread,
-                                                           updateOnUIThread == null ? this::defaultUpdateOnUIThread : updateOnUIThread);
+      this.imagePanel = new RDXImagePanel(panelName, RDXImagePanel.DO_NOT_FLIP_Y);
+      dataSwapReference = new SwapReference<>(RDXImagePanelTexture::new);
    }
 
    /**
@@ -48,29 +31,64 @@ public class RDXOpenCVSwapVideoPanel
     */
    public void allocateInitialTextures(int imageWidth, int imageHeight)
    {
-      dataSwapReferenceManager.initializeBoth(data -> data.ensureTextureDimensions(imageWidth, imageHeight));
+      dataSwapReference.initializeBoth(data -> data.ensureTextureDimensions(imageWidth, imageHeight));
    }
 
-   public void updateOnAsynchronousThread()
+   public RDXImagePanel getImagePanel()
    {
-      dataSwapReferenceManager.accessOnLowPriorityThread();
+      return imagePanel;
    }
 
-   public void updateOnUIThread()
+   /**
+    * Synchronize on getSyncObject() around accessing this data.
+    */
+   public RDXImagePanelTexture getUIThreadData()
    {
-      dataSwapReferenceManager.accessOnHighPriorityThread();
+      return dataSwapReference.getForThreadOne();
    }
 
-   private void defaultUpdateOnUIThread(RDXOpenCVSwapVideoPanelData data)
+   /**
+    * Used for synchronized over access of the UI thread data.
+    * We intentionally erase the type because we don't want the user
+    * calling methods directly on dataSwapReference. It would be confusing.
+    */
+   public Object getSyncObject()
    {
-      if (data.getRGBA8Image() != null)
+      return dataSwapReference;
+   }
+
+   /**
+    * Most of the time this is all you need to do on the UI thread.
+    *
+    * This method has internal synchronization so you don't have to do it outside
+    * of this if it is the only thing you need to do on the UI thread.
+    */
+   public void updateTextureAndDrawOnUIThread()
+   {
+      synchronized (dataSwapReference)
       {
-         data.updateOnUIThread(videoPanel);
+         RDXImagePanelTexture texture = getUIThreadData();
+         if (texture.getRGBA8Image() != null)
+         {
+            texture.updateTextureAndDraw(imagePanel);
+         }
       }
    }
 
-   public ImGuiVideoPanel getVideoPanel()
+   /**
+    * Access this data at any time on the asynchronous thread, no synchronization
+    * required, just call swap() when you're done.
+    */
+   public RDXImagePanelTexture getAsynchronousThreadData()
    {
-      return videoPanel;
+      return dataSwapReference.getForThreadTwo();
+   }
+
+   /**
+    * Atomic swap operation. Call only from the asynchronous thread.
+    */
+   public void swap()
+   {
+      dataSwapReference.swap();
    }
 }

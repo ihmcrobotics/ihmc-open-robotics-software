@@ -67,14 +67,14 @@ int calculateGradientColor(double input, bool sinusoidal)
 
       if (r < 0)
          r = 0;
-      else if(r > 255)
+      else if (r > 255)
          r = 255;
       //    r=max(0,min(255,r));
       float g = sin(a - 2 * PI / 3) * 192 + 128;
       if (g < 0)
          g = 0;
       else if (g > 255)
-         g =255;
+         g = 255;
       //    g=max(0,min(255,g));
       float b = sin(a - 4 * PI / 3) * 192 + 128;
       if (b < 0)
@@ -82,11 +82,11 @@ int calculateGradientColor(double input, bool sinusoidal)
       else if (b > 255)
          b = 255;
       //    b=max(0,min(255,b));
-      int color = ((int)round(r) << 24) | ((int)round(g) << 16) | ((int)round(b) << 8) | 255;
+      int color = ((int) round(r) << 24) | ((int) round(g) << 16) | ((int) round(b) << 8) | 255;
       return color;
    }
    else
    {
-       return calculateInterpolatedGradientColorInt(input);
+      return calculateInterpolatedGradientColorInt(input);
    }
 }

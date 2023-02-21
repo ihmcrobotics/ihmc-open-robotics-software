@@ -102,7 +102,6 @@ public class RDXROS1FusedPointCloudVisualizer extends RDXROS1Visualizer
          l515PointsOnlyHostBuffer = BufferUtils.newByteBuffer(151413 * 4 * 3);
          l515PointsOnly = new Mat(1, 151413, opencv_core.CV_32FC3, new BytePointer(l515PointsOnlyHostBuffer));
 
-         openCLManager.create();
          numberOfOusterPoints = 1024 * 128;
          ousterInBytesLength = numberOfOusterPoints * 48;
          zed2InBytesLength = 1280 * 720 * 3;
@@ -245,7 +244,6 @@ public class RDXROS1FusedPointCloudVisualizer extends RDXROS1Visualizer
    public static void main(String[] args)
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLManager.loadSingleFunctionProgramAndCreateKernel("projectZED2ToOusterPoints");
    }
 }

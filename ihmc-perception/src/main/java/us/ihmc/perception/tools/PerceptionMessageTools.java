@@ -52,7 +52,6 @@ public class PerceptionMessageTools
    public PerceptionMessageTools()
    {
       openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLProgram = openCLManager.loadProgram("PerceptionMessageTools");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
    }
@@ -154,8 +153,6 @@ public class PerceptionMessageTools
       openCLManager.execute2D(unpackPointCloudKernel, depthWidth, depthHeight);
 
       pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
 
       Point3D[] pointCloud = new Point3D[totalNumberOfPoints];
       FloatBuffer pointElementBuffer = pointCloudVertexBuffer.getBackingDirectFloatBuffer();
