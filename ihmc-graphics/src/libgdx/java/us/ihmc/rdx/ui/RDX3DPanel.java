@@ -68,7 +68,8 @@ public class RDX3DPanel
    private float windowDrawMinY;
    private float windowDrawMaxX;
    private float windowDrawMaxY;
-   private final RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator();
+   private float windowPositionX;
+   private float windowPositionY;
 
   public RDX3DPanel(String panelName)
    {
@@ -130,8 +131,8 @@ public class RDX3DPanel
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
 
-         float windowPositionX = ImGui.getWindowPosX();
-         float windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
+         windowPositionX = ImGui.getWindowPosX();
+         windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
          windowSizeX = ImGui.getWindowSizeX();
          windowSizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
          renderSizeX = windowSizeX * antiAliasing;
@@ -226,7 +227,6 @@ public class RDX3DPanel
          ImGui.end();
 
          toolbar.render(windowSizeX, windowPositionX, windowPositionY);
-         panelHandWrenchIndicator.render(windowSizeX, windowSizeY, windowPositionX, windowPositionY);
       }
    }
 
@@ -430,8 +430,18 @@ public class RDX3DPanel
       this.modelSceneMouseCollisionEnabled = modelSceneMouseCollisionEnabled;
    }
 
-   public RDX3DPanelHandWrenchIndicator getPanelHandWrenchIndicator()
+   public float getWindowSizeX()
    {
-      return panelHandWrenchIndicator;
+      return windowSizeX;
+   }
+
+   public float getWindowPositionX()
+   {
+      return windowPositionX;
+   }
+
+   public float getWindowPositionY()
+   {
+      return windowPositionY;
    }
 }
