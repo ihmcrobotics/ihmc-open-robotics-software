@@ -54,12 +54,12 @@ public class OusterDepthPublisher
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "ouster_depth_publisher");
 
       LogTools.info("Publishing ROS 2 ImageMessage: {}", imageMessageTopic);
-      imagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT());
+      imagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, imageMessageTopic, ROS2QosProfile.BEST_EFFORT());
 
       if (lidarScanTopic != null)
       {
          LogTools.info("Publishing ROS 2 LidarScanMessage: {}", lidarScanTopic);
-         lidarScanPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.OUSTER_LIDAR_SCAN, ROS2QosProfile.BEST_EFFORT());
+         lidarScanPublisher = ROS2Tools.createPublisher(realtimeROS2Node, lidarScanTopic, ROS2QosProfile.BEST_EFFORT());
       }
       else
       {
