@@ -1,7 +1,11 @@
 package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.PlanarRegionMappingHandler;
@@ -10,14 +14,19 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
+import us.ihmc.utilities.ros.RosTools;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class RDXPlanarRegionMappingDemo
 {
@@ -38,6 +47,10 @@ public class RDXPlanarRegionMappingDemo
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230207_214209_PerceptionLogFixed.hdf5").toString();
 
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
+   private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
+   private ModelInstance modelInstance;
+   private final FramePose3D framePose = new FramePose3D(ReferenceFrame.getWorldFrame());
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    private boolean graphicsInitialized = false;
 
@@ -91,6 +104,20 @@ public class RDXPlanarRegionMappingDemo
                mapPlanarRegionsGraphic.clear();
                mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
                mapPlanarRegionsGraphic.update();
+
+               RigidBodyTransform transform = mappingManager.pollKeyframePose();
+               if(transform != null)
+               {
+                  framePose.set(transform);
+                  modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.1, Color.YELLOW);
+                  LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
+                  poseModels.add(modelInstance);
+               }
+
+               for (ModelInstance model : poseModels)
+               {
+                  baseUI.getPrimaryScene().addRenderableProvider(model, RDXSceneLevel.VIRTUAL);
+               }
 
                if(mappingPanel.getPointCloudRenderEnabled())
                {
