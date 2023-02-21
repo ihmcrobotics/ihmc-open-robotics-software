@@ -18,7 +18,7 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVGuidedSwapVideoPanel;
 import us.ihmc.rdx.ui.graphics.RDXImagePanelTexture;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 public class RDXCameraCalibrationDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
    private VideoCapture videoCapture;
    private int imageHeight = 1080;
@@ -46,7 +46,7 @@ public class RDXCameraCalibrationDemo
    private Mat bgrImage;
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
-   private RDXOpenCVSwapVideoPanel swapCVPanel;
+   private RDXOpenCVGuidedSwapVideoPanel swapCVPanel;
    private final Consumer<RDXImagePanelTexture> accessOnHighPriorityThread = this::generateNewCameraMatrixOnUIThread;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read Duration");
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode Duration");
@@ -149,7 +149,7 @@ public class RDXCameraCalibrationDemo
                   yuv420Image = new Mat();
                   jpegImageBytePointer = new BytePointer();
 
-                  swapCVPanel = new RDXOpenCVSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
+                  swapCVPanel = new RDXOpenCVGuidedSwapVideoPanel("Video", this::videoUpdateOnAsynchronousThread, this::videoUpdateOnUIThread);
                   undistortedVideoPanel = new RDXBytedecoImagePanel("Undistorted Video", imageWidth, imageHeight);
                   testImagePanel = new RDXBytedecoImagePanel("Test Image 1", imageWidth, imageHeight);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getImagePanel());
@@ -267,7 +267,7 @@ public class RDXCameraCalibrationDemo
                currentNumberOfImagesInDirectory++;
             }
 
-            texture.updateOnUIThread(swapCVPanel.getImagePanel());
+            texture.updateTextureAndDraw(swapCVPanel.getImagePanel());
          }
       });
    }
