@@ -4,15 +4,27 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDX3DPanelHandWrenchIndicator
 {
+   private RDX3DPanel rdx3DPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private boolean showAndUpdate = true;
    private SideDependentList<Double> linearParts = new SideDependentList<>((double) 0, (double) 0);
    private SideDependentList<Double> angularParts = new SideDependentList<>((double) 0, (double) 0);
+
+   public RDX3DPanelHandWrenchIndicator(RDX3DPanel rdx3DPanel)
+   {
+      this.rdx3DPanel = rdx3DPanel;
+   }
+
+   public void renderImGuiOverlay()
+   {
+      render(rdx3DPanel.getWindowSizeX(), rdx3DPanel.getWindowPositionX(), rdx3DPanel.getWindowPositionY());
+   }
 
    public void render(float windowWidth, float windowPosX, float windowPosY)
    {
