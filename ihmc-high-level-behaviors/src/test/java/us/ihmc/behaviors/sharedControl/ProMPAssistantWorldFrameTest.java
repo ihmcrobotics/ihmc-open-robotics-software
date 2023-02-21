@@ -35,12 +35,12 @@ public class ProMPAssistantWorldFrameTest
       // use a csv file with the trajectories of the hands of the robot for testing
       WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
       String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
-      String demoDirectory = directoryAbsolutePath + "/test/PushDoorTest";
+      String demoDirectory = directoryAbsolutePath + "/test/PushDoorWorldFrameTest";
       //get test number from config file
       String testFilePath = demoDirectory + "/" + proMPAssistant.getTestNumber() + ".csv";
       //copy test file to have it always under same name for faster plotting
       Path originalPath = Paths.get(testFilePath);
-      Path copyForPlottingPath = Paths.get(demoDirectory + "/test.csv");
+      Path copyForPlottingPath = Paths.get(demoDirectory + "/../test.csv");
       Files.copy(originalPath, copyForPlottingPath, StandardCopyOption.REPLACE_EXISTING);
 
       // replay that file

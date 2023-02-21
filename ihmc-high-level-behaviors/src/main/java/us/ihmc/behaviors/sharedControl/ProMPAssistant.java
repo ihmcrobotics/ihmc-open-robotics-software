@@ -31,7 +31,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ProMPAssistant
 {
-   private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); //proMPManagers stores a proMPManager for each task
+   private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
+   private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
    private String currentTask = ""; // detected task
    private int numberObservations = 0; // number of observations used to update the prediction
    private String bodyPartRecognition = "";
@@ -55,6 +56,7 @@ public class ProMPAssistant
 
    public ProMPAssistant()
    {
+      String lastContext = "";
       List<String> taskNames = new ArrayList<>();
       List<String> bodyPartsRecognition = new ArrayList<>();
       List<String> bodyPartsGoal = new ArrayList<>();
@@ -85,6 +87,13 @@ public class ProMPAssistant
             {
                switch (taskPropertyMap.getKey().toString())
                {
+                  case "context" ->
+                  {
+                     String context = (String) taskPropertyMap.getValue();
+                     if(!contextTasksMap.containsKey(context))
+                        contextTasksMap.put(context,new ArrayList<>());
+                     lastContext = context;
+                  }
                   case "name" -> taskNames.add((String) taskPropertyMap.getValue());
                   case "bodyPartForRecognition" -> bodyPartsRecognition.add((String) taskPropertyMap.getValue());
                   case "bodyPartWithObservableGoal" -> bodyPartsGoal.add((String) taskPropertyMap.getValue());
@@ -137,6 +146,8 @@ public class ProMPAssistant
                   }
                }
             }
+            // in contextTaskMap add the last task to the last context
+            contextTasksMap.get(lastContext).add(taskNames.get(taskNames.size() - 1));
          }
          int numberBasisFunctions = (int) ((long) jsonObject.get("numberBasisFunctions"));
          long speedFactor = ((long) jsonObject.get("allowedIncreaseDecreaseSpeedFactor"));
@@ -257,20 +268,29 @@ public class ProMPAssistant
    {
       if (currentTask.isEmpty() && !objectName.isEmpty())
       {
-         // TODO A.1. if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
-         // TODO B.1. what if someone is lefthanded, or simply wants to use the left hand for that task?
-         //  Learn task for both hands and called them ...L and ...R, just check initial velocity of hands to determine which one is being used
-         if(proMPManagers.containsKey(objectName))
+         if(contextTasksMap.containsKey(objectName))
          {
-            currentTask = objectName;
-            // get the body part used for recognition for this task
-            bodyPartRecognition = taskBodyPartRecognitionMap.get(currentTask);
-            // get the body part that has to reach a goal for this task
-            bodyPartGoal = taskBodyPartGoalMap.get(currentTask);
+            List<String> candidateTasks = contextTasksMap.get(objectName);
+            if(candidateTasks.size() > 0)
+            {
+               // TODO if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
+               currentTask = candidateTasks.get(0);
+               // TODO what if someone is lefthanded, or simply wants to use the left hand for that task?
+               //  Learn task for both hands and called them ...L and ...R, check initial velocity of hands to determine which one is being used
+               // get the body part used for recognition for this task
+               bodyPartRecognition = taskBodyPartRecognitionMap.get(currentTask);
+               // get the body part that has to reach a goal for this task
+               bodyPartGoal = taskBodyPartGoalMap.get(currentTask);
 
-            // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
-            for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
-               bodyPartObservedTrajectoryMap.put(bodyPart, new ArrayList<>());
+               // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
+               for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
+                  bodyPartObservedTrajectoryMap.put(bodyPart, new ArrayList<>());
+            }
+            else
+            {
+               LogTools.warn("Detected object ({}) should but does NOT have any associated learned policy for assistance. Check file ProMPAssistant.json", objectName);
+               return false;
+            }
          }
          else
          {

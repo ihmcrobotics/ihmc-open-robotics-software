@@ -143,6 +143,16 @@ public class ProMPManager
          learnedProMPs.replace(bodyPart, new ProMP(trainingTrajectories.get(bodyPart), numberBasisFunctions));
    }
 
+   public int inferClosestTask(List<FramePose3D> observedFrameTrajectory, String bodyPart)
+   {
+      EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory, bodyPart);
+      TrajectoryVector meanTrajectories = trainingTrajectories.get(bodyPart).trajectories();
+      meanTrajectories.push_back(meanTrajectories.get_mean_start_value());
+
+      int taskId = infer_closest_trajectory(observedTrajectory, meanTrajectories);
+      return taskId;
+   }
+
    /** Update the speed of the ProMPs of the task based on observation of a body part trajectory (e.g., RightHand or LeftHand) */
    public void updateTaskSpeed(List<FramePose3D> observedFrameTrajectory, String bodyPart)
    {
