@@ -87,6 +87,8 @@ public class PlanarRegionMappingHandler
    private final ArrayList<Point3D> mocapPositionBuffer = new ArrayList<>();
    private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
 
+   private final int[] logIndices = new int[] {0, 44, 84, 109, 123, 130, 137} ;
+
    private int planarRegionListIndex = 0;
    private int perceptionLogIndex = 0;
    private int totalDepthCount = 0;
@@ -277,7 +279,7 @@ public class PlanarRegionMappingHandler
          {
             LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
 
-            loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
+            loadDataFromPerceptionLog(perceptionDataLoader, logIndices[perceptionLogIndex]);
 
             framePlanarRegionsList = new FramePlanarRegionsList();
             rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, framePlanarRegionsList);

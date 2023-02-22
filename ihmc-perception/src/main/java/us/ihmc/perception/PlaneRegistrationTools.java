@@ -190,7 +190,7 @@ public class PlaneRegistrationTools
 
          LogTools.info(String.format("Iteration: %d, Matches: %d, Previous Error: %.5f, Error: %.5f, Ratio: %.5f", i, matches.size(), previousError, error, ratio));
 
-         if ( (ratio < parameters.getICPTerminationRatio()) || (matches.size() < parameters.getICPMinMatches()))
+         if ( (Math.abs(ratio) < parameters.getICPTerminationRatio()) || (matches.size() < parameters.getICPMinMatches()))
          {
             break;
          }

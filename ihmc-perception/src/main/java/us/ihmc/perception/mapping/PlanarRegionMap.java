@@ -662,7 +662,8 @@ public class PlanarRegionMap
          finalMap.addPlanarRegionsList(regions);
          previousRegions.addPlanarRegionsList(regions);
 
-         submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, new RigidBodyTransform()));
+         initialized = true;
+         //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, new RigidBodyTransform()));
       }
       else
       {
@@ -671,13 +672,17 @@ public class PlanarRegionMap
          LogTools.info("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
          boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions, regions.copy(), transformToPrevious, parameters);
 
+         PerceptionPrintTools.printTransform("Transform to previous", transformToPrevious);
+
          if(!valid)
          {
             LogTools.warn("[FAILED] Last Index: {}, Current Index: {}", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
             return null;
          }
 
-         isKeyframe = performKeyframeCheck(transformToPrevious);
+         //isKeyframe = performKeyframeCheck(transformToPrevious);
+
+         isKeyframe = true;
       }
 
       if(isKeyframe)
@@ -688,7 +693,8 @@ public class PlanarRegionMap
          RigidBodyTransform transformToWorld = new RigidBodyTransform(transformToPrevious);
          transformToWorld.multiply(keyframes.get(keyframes.size() - 1).getTransformToWorld());
 
-         //regions.applyTransform(transformToWorld);
+         regions.applyTransform(transformToWorld);
+
          //
          //RigidBodyTransform residualTransform = new RigidBodyTransform();
          //boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, regions.copy(), residualTransform, parameters);
@@ -698,19 +704,20 @@ public class PlanarRegionMap
          //   transformToWorld.preMultiply(residualTransform);
          //}
 
-         submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, transformToWorld));
+         //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, transformToWorld));
+         //transformToWorld.set(sensorToWorldTransformPosterior);
 
          //finalMap = crossReduceRegionsIteratively(finalMap, regions);
 
-         //finalMap.addPlanarRegionsList(regions);
+         finalMap.addPlanarRegionsList(regions);
 
-         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, sensorToWorldTransformPosterior, previousRegions.copy()));
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
 
-         PerceptionPrintTools.printTransform("Transform to World", sensorToWorldTransformPosterior);
+         PerceptionPrintTools.printTransform("Transform to World", transformToWorld);
 
          LogTools.info("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
 
-         return sensorToWorldTransformPosterior;
+         return transformToWorld;
       }
 
       return null;
