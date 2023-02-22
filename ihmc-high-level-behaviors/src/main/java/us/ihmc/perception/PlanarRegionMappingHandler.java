@@ -279,7 +279,7 @@ public class PlanarRegionMappingHandler
          {
             LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
 
-            loadDataFromPerceptionLog(perceptionDataLoader, logIndices[perceptionLogIndex]);
+            loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
 
             framePlanarRegionsList = new FramePlanarRegionsList();
             rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, framePlanarRegionsList);
@@ -296,7 +296,7 @@ public class PlanarRegionMappingHandler
             }
          }
 
-         perceptionLogIndex += 1;
+         perceptionLogIndex += 3;
          rapidRegionsExtractor.setProcessing(false);
       }
    }

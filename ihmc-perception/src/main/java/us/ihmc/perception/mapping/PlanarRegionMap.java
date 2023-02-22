@@ -695,21 +695,21 @@ public class PlanarRegionMap
 
          regions.applyTransform(transformToWorld);
 
-         //
-         //RigidBodyTransform residualTransform = new RigidBodyTransform();
-         //boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, regions.copy(), residualTransform, parameters);
-         //
-         //if(valid)
-         //{
-         //   transformToWorld.preMultiply(residualTransform);
-         //}
+         RigidBodyTransform residualTransform = new RigidBodyTransform();
+         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, regions.copy(), residualTransform, parameters);
+
+         if(valid)
+         {
+            transformToWorld.preMultiply(residualTransform);
+            regions.applyTransform(residualTransform);
+         }
 
          //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, transformToWorld));
          //transformToWorld.set(sensorToWorldTransformPosterior);
 
-         //finalMap = crossReduceRegionsIteratively(finalMap, regions);
+         finalMap = crossReduceRegionsIteratively(finalMap, regions);
 
-         finalMap.addPlanarRegionsList(regions);
+         //finalMap.addPlanarRegionsList(regions);
 
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
 

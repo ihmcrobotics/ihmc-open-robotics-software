@@ -14,7 +14,7 @@
   "Best minimum overlap threshold" : 0.5,
   "Keyframe distance threshold" : 0.05,
   "Keyframe angular threshold" : 0.05,
-  "ICP max iterations" : 30,
+  "ICP max iterations" : 50,
   "ICP min matches" : 3,
   "ICP termination ratio" : 0.000001,
   "ICP error cutoff" : 0.03
