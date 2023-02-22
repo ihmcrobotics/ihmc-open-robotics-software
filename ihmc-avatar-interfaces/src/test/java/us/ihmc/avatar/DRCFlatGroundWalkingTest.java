@@ -68,6 +68,11 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    @Override
    public abstract DRCRobotModel getRobotModel();
 
+   public SCS2AvatarTestingSimulation getAvatarSimulation()
+   {
+      return simulationTestHelper;
+   }
+
    public abstract boolean doPelvisWarmup();
 
    public boolean getUsePerfectSensors()
@@ -91,7 +96,12 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    public void runFlatGroundWalking(boolean useBulletPhysicsEngine)
    {
-      boolean doPelvisWarmup = doPelvisWarmup();
+      initialize(useBulletPhysicsEngine);
+      runAfterInitialize();
+   }
+
+   public void initialize(boolean useBulletPhysicsEngine)
+   {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
@@ -109,10 +119,15 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       }
       physicsEngineName = useBulletPhysicsEngine ? "Bullet Physics Engine: " : "SCS2 Physics Engine: ";
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+   }
+
+   public void runAfterInitialize()
+   {
+      boolean doPelvisWarmup = doPelvisWarmup();
       simulationTestHelper.start();
 
       if (CHECK_ICP_CONTINUITY)
-         simulationTestHelper.addDesiredICPContinuityAssertion(3.0 * robotModel.getControllerDT());
+         simulationTestHelper.addDesiredICPContinuityAssertion(3.0 * getRobotModel().getControllerDT());
 
       simulateAndAssertGoodWalking(simulationTestHelper, doPelvisWarmup);
 
