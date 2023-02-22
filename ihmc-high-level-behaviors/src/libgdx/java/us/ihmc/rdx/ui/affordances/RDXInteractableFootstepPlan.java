@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -32,10 +33,13 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -171,7 +175,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    }
 
    // NOTE: using RecyclingList to update planned footsteps. Make sure this only gets called when new plan comes in.
-   public void updateFromPlan(FootstepPlan footstepPlan)
+   public void updateFromPlan(FootstepPlan footstepPlan, List< EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
    {
       for (RDXInteractableFootstep step : footsteps)
       {
@@ -183,7 +187,12 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          PlannedFootstep plannedStep = footstepPlan.getFootstep(i);
          RDXInteractableFootstep addedStep = footsteps.add();
-         addedStep.updateFromPlannedStep(baseUI, plannedStep, i);
+         EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory;
+         if (swingTrajectories == null)
+            swingTrajectory = null;
+         else
+            swingTrajectory = swingTrajectories.get(i);
+         addedStep.updateFromPlannedStep(baseUI, plannedStep, swingTrajectory, i);
       }
 
       wasPlanUpdated = true;

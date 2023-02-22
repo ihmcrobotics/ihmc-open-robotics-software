@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -23,6 +24,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -31,6 +33,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -45,6 +50,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,12 +101,11 @@ public class CollisionFreeSwingCalculator
    private final YoEnum<PlanPhase> planPhase = new YoEnum<>("planPhase", registry, PlanPhase.class, true);
    private final BagOfBalls downSampledWaypoints;
 
+   private final List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = new ArrayList<>();
+
    private enum PlanPhase
    {
-      PLAN_NOMINAL_TRAJECTORY,
-      PERFORM_COLLISION_CHECK,
-      RECOMPUTE_FULL_TRAJECTORY,
-      COMPUTE_DOWN_SAMPLED_TRAJECTORY
+      PLAN_NOMINAL_TRAJECTORY, PERFORM_COLLISION_CHECK, RECOMPUTE_FULL_TRAJECTORY, COMPUTE_DOWN_SAMPLED_TRAJECTORY
    }
 
    public CollisionFreeSwingCalculator(FootstepPlannerParametersReadOnly footstepPlannerParameters,
@@ -150,7 +155,11 @@ public class CollisionFreeSwingCalculator
          }
 
          soleFrameGraphicPose = new YoFramePoseUsingYawPitchRoll("soleGraphicPose", ReferenceFrame.getWorldFrame(), registry);
-         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D("footPolygon", "", ReferenceFrame.getWorldFrame(), footPolygons.get(RobotSide.LEFT).getNumberOfVertices(), registry);
+         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D("footPolygon",
+                                                                           "",
+                                                                           ReferenceFrame.getWorldFrame(),
+                                                                           footPolygons.get(RobotSide.LEFT).getNumberOfVertices(),
+                                                                           registry);
          yoFootPolygon.set(footPolygons.get(RobotSide.LEFT));
          footPolygonGraphic = new YoGraphicPolygon("soleGraphicPolygon", yoFootPolygon, soleFrameGraphicPose, 1.0, YoAppearance.RGBColorFromHex(0x386166));
          graphicsList.add(footPolygonGraphic);
@@ -180,6 +189,7 @@ public class CollisionFreeSwingCalculator
 
    public void computeSwingTrajectories(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
    {
+      swingTrajectories.clear();
       if ((planarRegionsList == null || planarRegionsList.isEmpty()) && (heightMapData == null))
       {
          return;
@@ -212,6 +222,7 @@ public class CollisionFreeSwingCalculator
          double minXYTranslationToPlanSwing = swingPlannerParameters.getMinXYTranslationToPlanSwing();
          if (swingReach < minXYTranslationToPlanSwing)
          {
+            swingTrajectories.add(null);
             continue;
          }
 
@@ -224,11 +235,12 @@ public class CollisionFreeSwingCalculator
 
          if (!collisionFound.getValue())
          {
+            swingTrajectories.add(null);
             continue;
          }
 
          footstep.setTrajectoryType(TrajectoryType.CUSTOM);
-         recomputeTrajectory(footstep);
+         swingTrajectories.add(recomputeTrajectory(footstep));
       }
    }
 
@@ -303,6 +315,7 @@ public class CollisionFreeSwingCalculator
             tickAndUpdatable.tickAndUpdate();
          }
       }
+
    }
 
    private void optimizeKnotPoints()
@@ -413,7 +426,7 @@ public class CollisionFreeSwingCalculator
       return EuclidCoreTools.interpolate(valueLow, valueHigh, alpha);
    }
 
-   private void recomputeTrajectory(PlannedFootstep footstep)
+   private EnumMap<Axis3D, List<PolynomialReadOnly>> recomputeTrajectory(PlannedFootstep footstep)
    {
       planPhase.set(PlanPhase.RECOMPUTE_FULL_TRAJECTORY);
       modifiedWaypoints.clear();
@@ -488,6 +501,8 @@ public class CollisionFreeSwingCalculator
          footstep.getCustomWaypointPositions().forEach(downSampledWaypoints::setBall);
          tickAndUpdatable.tickAndUpdate();
       }
+
+      return copySwingTrajectories(positionTrajectoryGenerator.getTrajectories(), footstep.getCustomWaypointPositions().size() + 1);
    }
 
    private void initializeGraphics(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
@@ -553,6 +568,11 @@ public class CollisionFreeSwingCalculator
       return footstepVisualizer[indexToGet];
    }
 
+   public List<EnumMap<Axis3D, List<PolynomialReadOnly>>> getSwingTrajectories()
+   {
+      return swingTrajectories;
+   }
+
    private static final SideDependentList<AppearanceDefinition> footPolygonAppearances = new SideDependentList<>(YoAppearance.Purple(), YoAppearance.Green());
    private static SideDependentList<MutableInt> footGraphicIndices = new SideDependentList<>(side -> new MutableInt());
 
@@ -582,5 +602,29 @@ public class CollisionFreeSwingCalculator
          soleFramePose.setToNaN();
          footPolygonViz.update();
       }
+   }
+
+   public static EnumMap<Axis3D, List<PolynomialReadOnly>> copySwingTrajectories(EnumMap<Axis3D, ArrayList<YoPolynomial>> trajectories)
+   {
+      return copySwingTrajectories(trajectories, trajectories.get(Axis3D.X).size());
+
+   }
+   public static EnumMap<Axis3D, List<PolynomialReadOnly>> copySwingTrajectories(EnumMap<Axis3D, ArrayList<YoPolynomial>> trajectories, int trajectoriesToCopy)
+   {
+      EnumMap<Axis3D, List<PolynomialReadOnly>> copy = new EnumMap<>(Axis3D.class);
+         trajectories.keySet().forEach(axis ->
+                                       {
+                                          List<PolynomialReadOnly> listCopy = new ArrayList<>();
+                                          for (int i = 0; i < trajectoriesToCopy; i++)
+                                          {
+                                             PolynomialReadOnly polynomialReadOnly = trajectories.get(axis).get(i);
+                                             Polynomial polynomialCopy = new Polynomial(polynomialReadOnly.getNumberOfCoefficients());
+                                             polynomialCopy.set(polynomialReadOnly);
+                                             listCopy.add(polynomialCopy);
+                                          }
+                                          copy.put(axis, listCopy);
+                                       });
+
+      return copy;
    }
 }
