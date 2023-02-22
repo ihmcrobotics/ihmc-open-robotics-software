@@ -1,6 +1,6 @@
 {
   "title" : "PlanarRegionMappingParameters",
-  "Update Alpha towards match" : 0.02,
+  "Update Alpha towards match" : 0.01,
   "Similarity threshold between normals" : 0.8,
   "Orthogonal distance threshold" : 0.2,
   "Max Inter Region Distance" : 0.05,
@@ -9,8 +9,8 @@
   "Minimum bounding box size" : 0.3,
   "Plane noise variance" : 0.001,
   "Odometry noise variance" : 0.0001,
-  "Best match angular threshold": 0.8,
-  "Best match distance threshold": 0.5,
+  "Best match angular threshold": 0.7,
+  "Best match distance threshold": 0.7,
   "Best minimum overlap threshold" : 0.5,
   "Keyframe distance threshold" : 0.05,
   "Keyframe angular threshold" : 0.05,

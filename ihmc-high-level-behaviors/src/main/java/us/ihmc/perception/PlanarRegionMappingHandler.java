@@ -296,7 +296,7 @@ public class PlanarRegionMappingHandler
             }
          }
 
-         perceptionLogIndex += 3;
+         perceptionLogIndex += 2;
          rapidRegionsExtractor.setProcessing(false);
       }
    }
