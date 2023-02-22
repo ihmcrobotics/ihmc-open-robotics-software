@@ -129,4 +129,42 @@ public class HeightMapPolygonSnapperTest
          Assertions.assertTrue(Math.abs(plane.getZOnPlane(0.0, 0.0) - snapper.getBestFitPlane().getZOnPlane(0.0, 0.0)) < 1e-10);
       }
    }
+
+   @Test
+   public void testAreaWhenFootOverhangs()
+   {
+      double gridResolution = 0.05;
+      double gridSizeXY = 0.3;
+      double gridCenterXY = 0.0;
+      HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY, gridCenterXY, gridCenterXY);
+
+      for (double x = -0.10; x <= 0.1; x += gridResolution)
+      {
+         for (double y = -0.10; y <= 0.1; y += gridResolution)
+         {
+            heightMapData.setHeightAt(x, y, 0.2);
+         }
+      }
+
+      ConvexPolygon2D polygonToSnap = new ConvexPolygon2D();
+
+      double footLength = 0.2;
+      double footWidth = 0.1;
+      polygonToSnap.addVertex(footLength / 2.0, footWidth / 2.0);
+      polygonToSnap.addVertex(footLength / 2.0, -footWidth / 2.0);
+      polygonToSnap.addVertex(-footLength / 2.0, -footWidth / 2.0);
+      polygonToSnap.addVertex(-footLength / 2.0, footWidth / 2.0);
+      polygonToSnap.update();
+
+      HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
+      snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, 0.05);
+
+      Assertions.assertTrue(snapper.getArea() >= polygonToSnap.getArea());
+
+      // make the foot overhang by a fair bit
+      polygonToSnap.translate(-gridResolution, 0.0);
+      snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, 0.05);
+      Assertions.assertFalse(snapper.getArea() >= polygonToSnap.getArea());
+      Assertions.assertEquals(snapper.getArea(), (footLength - 0.05) * footWidth, 1e-3);
+   }
 }
