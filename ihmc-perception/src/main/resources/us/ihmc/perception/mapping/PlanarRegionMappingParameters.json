@@ -9,13 +9,13 @@
   "Minimum bounding box size" : 0.3,
   "Plane noise variance" : 0.001,
   "Odometry noise variance" : 0.0001,
-  "Best match angular threshold": 0.75,
+  "Best match angular threshold": 0.8,
   "Best match distance threshold": 0.5,
   "Best minimum overlap threshold" : 0.5,
   "Keyframe distance threshold" : 0.05,
   "Keyframe angular threshold" : 0.05,
-  "ICP max iterations" : 15,
+  "ICP max iterations" : 30,
   "ICP min matches" : 3,
-  "ICP termination ratio" : -0.01,
+  "ICP termination ratio" : 0.000001,
   "ICP error cutoff" : 0.03
 }
