@@ -390,7 +390,7 @@ public class RDXInteractableFootstep
    {
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(footstepPose);
       selectablePose3DGizmo.getPoseGizmo().updateTransforms();
-      wasPoseUpdated = plannedFootstepInternal.getFootstepPose().epsilonEquals(footstepPose, 5e-3);
+      wasPoseUpdated = plannedFootstepInternal.getFootstepPose().epsilonEquals(footstepPose, 1e-2);
       plannedFootstepInternal.getFootstepPose().set(footstepPose);
    }
 
