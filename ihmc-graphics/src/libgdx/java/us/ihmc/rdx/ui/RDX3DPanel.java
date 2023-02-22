@@ -68,6 +68,8 @@ public class RDX3DPanel
    private float windowDrawMinY;
    private float windowDrawMaxX;
    private float windowDrawMaxY;
+   private float windowPositionX;
+   private float windowPositionY;
 
   public RDX3DPanel(String panelName)
    {
@@ -129,8 +131,8 @@ public class RDX3DPanel
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
 
-         float windowPositionX = ImGui.getWindowPosX();
-         float windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
+         windowPositionX = ImGui.getWindowPosX();
+         windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
          windowSizeX = ImGui.getWindowSizeX();
          windowSizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
          renderSizeX = windowSizeX * antiAliasing;
@@ -426,5 +428,20 @@ public class RDX3DPanel
    public void setModelSceneMouseCollisionEnabled(boolean modelSceneMouseCollisionEnabled)
    {
       this.modelSceneMouseCollisionEnabled = modelSceneMouseCollisionEnabled;
+   }
+
+   public float getWindowSizeX()
+   {
+      return windowSizeX;
+   }
+
+   public float getWindowPositionX()
+   {
+      return windowPositionX;
+   }
+
+   public float getWindowPositionY()
+   {
+      return windowPositionY;
    }
 }
