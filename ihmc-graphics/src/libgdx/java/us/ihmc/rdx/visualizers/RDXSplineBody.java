@@ -79,6 +79,13 @@ public class RDXSplineBody implements RenderableProvider
    {
       meshBuilder.clear();
       points.clear();
+
+      if (lastModel != null)
+      {
+         lastModel.dispose();
+         lastModel = null;
+      }
+      modelInstance = null;
    }
 
    @Override
