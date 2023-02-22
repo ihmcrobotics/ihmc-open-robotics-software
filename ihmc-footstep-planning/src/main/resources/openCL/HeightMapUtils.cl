@@ -1,10 +1,22 @@
-int key_to_x_index(int key, int center_index) { return key % (2 * center_index + 1); }
+int key_to_x_index(int key, int center_index)
+{
+   return key % (2 * center_index + 1);
+}
 
-int key_to_y_index(int key, int center_index) { return key / (2 * center_index + 1); }
+int key_to_y_index(int key, int center_index)
+{
+   return key / (2 * center_index + 1);
+}
 
-int indices_to_key(int x_index, int y_index, int centerIndex) { return x_index + y_index * (2 * centerIndex + 1); }
+int indices_to_key(int x_index, int y_index, int centerIndex)
+{
+   return x_index + y_index * (2 * centerIndex + 1);
+}
 
-int coordinate_to_index(float coordinate, float center, float resolution, int center_index) { return round((coordinate - center) / resolution) + center_index; }
+int coordinate_to_index(float coordinate, float center, float resolution, int center_index)
+{
+   return round((coordinate - center) / resolution) + center_index;
+}
 
 int coordinate_to_key(float2 coordinates, float2 center, float resolution, int center_index)
 {
@@ -13,7 +25,10 @@ int coordinate_to_key(float2 coordinates, float2 center, float resolution, int c
    return indices_to_key(x_index, y_index, center_index);
 }
 
-float index_to_coordinate(int index, float center, float resolution, int center_index) { return (index - center_index) * resolution + center; }
+float index_to_coordinate(int index, float center, float resolution, int center_index)
+{
+   return (index - center_index) * resolution + center;
+}
 
 float2 indices_to_coordinate(int2 index, float2 center, float resolution, int center_index)
 {
