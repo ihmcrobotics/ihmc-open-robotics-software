@@ -1066,9 +1066,15 @@ float shiftAngleInRange(float angleToShift, float angleStart)
    return angleStart + deltaFromStart;
 }
 
-float trimAngleMinusPiToPi(float angleToShift) { return shiftAngleInRange(angleToShift, -M_PI_F); }
+float trimAngleMinusPiToPi(float angleToShift)
+{
+   return shiftAngleInRange(angleToShift, -M_PI_F);
+}
 
-float angleDifferenceMinusPiToPi(float angleA, float angleB) { return trimAngleMinusPiToPi(angleA - angleB); }
+float angleDifferenceMinusPiToPi(float angleA, float angleB)
+{
+   return trimAngleMinusPiToPi(angleA - angleB);
+}
 
 float computeDeltaHeadingMagnitude(float x0, float y0, float x1, float y1, float x2, float y2, float deadband)
 {
