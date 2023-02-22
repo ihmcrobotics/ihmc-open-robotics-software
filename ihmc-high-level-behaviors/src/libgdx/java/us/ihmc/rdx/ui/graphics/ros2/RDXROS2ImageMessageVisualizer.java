@@ -92,7 +92,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
             {
                switch (ImageMessageFormat.getFormat(imageMessage))
                {
-                  case DEPTH_PNG_16UC1:
+                  case DEPTH_PNG_16UC1 ->
                   {
                      LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_16UC1", topic.getName());
                      bytesIfUncompressed = numberOfPixels * 2;
@@ -103,7 +103,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
                      decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
                      normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
                   }
-                  case COLOR_JPEG_YUVI420:
+                  case COLOR_JPEG_YUVI420 ->
                   {
                      LogTools.info("Creating Image Message Visualizer for {} with type COLOR_JPEG_YUVI420", topic.getName());
                      bytesIfUncompressed = numberOfPixels * 3;
@@ -139,12 +139,12 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 
             switch (ImageMessageFormat.getFormat(imageMessage))
             {
-               case DEPTH_PNG_16UC1:
+               case DEPTH_PNG_16UC1 ->
                {
                   BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
                   BytedecoOpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
                }
-               case COLOR_JPEG_YUVI420:
+               case COLOR_JPEG_YUVI420 ->
                {
                   opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
                }
