@@ -390,8 +390,8 @@ public class RDXInteractableFootstep
    {
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(footstepPose);
       selectablePose3DGizmo.getPoseGizmo().updateTransforms();
+      wasPoseUpdated = plannedFootstepInternal.getFootstepPose().epsilonEquals(footstepPose, 5e-3);
       plannedFootstepInternal.getFootstepPose().set(footstepPose);
-      wasPoseUpdated = true;
    }
 
    public boolean pollWasPoseUpdated()
