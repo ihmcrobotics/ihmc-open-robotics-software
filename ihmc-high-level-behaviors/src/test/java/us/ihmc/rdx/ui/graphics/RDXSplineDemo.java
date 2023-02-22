@@ -10,7 +10,7 @@ import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 
 public class RDXSplineDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXSplineGraphic spline;
    private double startTime;
 
