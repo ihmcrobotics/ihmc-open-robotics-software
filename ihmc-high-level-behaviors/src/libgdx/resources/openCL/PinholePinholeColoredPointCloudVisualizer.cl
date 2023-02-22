@@ -3,7 +3,7 @@
 
 kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
                              read_only image2d_t colorRGBAImage,
-                             global float* finalPointFloatBuffer,
+                             global float* pointCloudVertexBuffer,
                              global float* parameters,
                              global float* depthToWorldTransform,
                              global float* depthToColorTransform)
@@ -14,17 +14,16 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
    float colorPrincipalPointYPixels = parameters[3];
    float focalLengthPixelsX = parameters[4];
    float focalLengthPixelsY = parameters[5];
-   float dephtPrincipalPointXPixels = parameters[6];
-   float dephtPrincipalPointYPixels = parameters[7];
-
-   int depthImageWidth = parameters[7];
-   int depthImageHeight = parameters[8];
-   int colorImageWidth = parameters[9];
-   int colorImageHeight = parameters[10];
-   float discreteResolution = parameters[11];
-   bool useSensorColor = parameters[12];
-   int gradientMode = parameters[13];
-   bool sinusoidal = parameters[14];
+   float depthPrincipalPointXPixels = parameters[6];
+   float depthPrincipalPointYPixels = parameters[7];
+   int depthImageWidth = parameters[8];
+   int depthImageHeight = parameters[9];
+   int colorImageWidth = parameters[10];
+   int colorImageHeight = parameters[11];
+   float discreteResolution = parameters[12];
+   bool useSensorColor = parameters[13];
+   int gradientMode = parameters[14];
+   bool sinusoidal = parameters[15];
 
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -32,64 +31,58 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
    float eyeDepthInMeters = read_imageui(depthImageDiscretized, (int2) (x, y)).x * discreteResolution;
 
    float3 depthFramePoint = (float3) (eyeDepthInMeters,
-                            -(x - dephtPrincipalPointXPixels) / focalLengthPixelsX * eyeDepthInMeters,
-                            -(y - dephtPrincipalPointYPixels) / focalLengthPixelsY * eyeDepthInMeters);
+                            -(x - depthPrincipalPointXPixels) / focalLengthPixelsX * eyeDepthInMeters,
+                            -(y - depthPrincipalPointYPixels) / focalLengthPixelsY * eyeDepthInMeters);
 
    float3 worldFramePoint = transformPoint3D32(depthFramePoint, depthToWorldTransform);
-   float3 colorFramePoint = transformPoint3D32(depthFramePoint, depthToColorTransform);
 
-   float cmosToPixelsX = colorImageWidth / cmosWidth;
-   float cmosToPixelsY = colorImageHeight / cmosHeight;
-
-   // Flip because positive yaw is to the left, but image coordinates go to the right
-   float yaw = -angle(1.0f, 0.0f, colorFramePoint.x, colorFramePoint.y);
-   float distanceFromSensorCenterX = focalLength * tan(yaw);
-   float distanceFromSensorLeftX = distanceFromSensorCenterX + halfCMOSWidth;
-   int pixelIndexX = (int) round(distanceFromSensorLeftX * cmosToPixelsX);
-   bool pixelInBounds = intervalContains(pixelIndexX, 0, colorImageWidth);
-
-   float pitch = -angle(1.0f, 0.0f, colorFramePoint.x, colorFramePoint.z);
-   float distanceFromSensorCenterY = focalLength * tan(pitch);
-   float distanceFromSensorTopX = distanceFromSensorCenterY + halfCMOSHeight;
-   int pixelIndexY = (int) round(distanceFromSensorTopX * cmosToPixelsY);
-   pixelInBounds &= intervalContains(pixelIndexY, 0, colorImageHeight);
-
-   int color;
-   if (useSensorColor && pixelInBounds)
+   float4 pointColor;
+   bool appliedColorFromSensor = false;
+   if (useSensorColor)
    {
-      uint4 rgba8888Color = read_imageui(colorRGBAImage, (int2) (pixelIndexX, pixelIndexY));
-      color = (rgba8888Color.x << 24) | (rgba8888Color.y << 16) | (rgba8888Color.z << 8) | 255;
+      // TODO: Fix this, maybe getting wrong transform in BytedecoRealsense driver
+      // float3 colorFramePoint = transformPoint3D32(depthFramePoint, depthToColorTransform);
+      float3 colorFramePoint = depthFramePoint;
+
+      // Flip because positive yaw is to the left, but image coordinates go to the right
+      float yaw = -angle(1.0f, 0.0f, colorFramePoint.x, colorFramePoint.y);
+      int pixelCol = round(colorPrincipalPointXPixels + colorFocalLengthXPixels * tan(yaw));
+
+      float pitch = -angle(1.0f, 0.0f, colorFramePoint.x, colorFramePoint.z);
+      int pixelRow = round(colorPrincipalPointYPixels + colorFocalLengthYPixels * tan(pitch));
+
+      bool pixelInBounds = intervalContains(pixelCol, 0, colorImageWidth) && intervalContains(pixelRow, 0, colorImageHeight);
+
+      if (pixelInBounds)
+      {
+         uint4 rgba8888Color = read_imageui(colorRGBAImage, (int2) (pixelCol, pixelRow));
+         // pointColor = rgba8888Color / 255.0f; ?
+         pointColor.x = (rgba8888Color.x / 255.0f);
+         pointColor.y = (rgba8888Color.y / 255.0f);
+         pointColor.z = (rgba8888Color.z / 255.0f);
+         pointColor.w = (rgba8888Color.w / 255.0f);
+         appliedColorFromSensor = true;
+      }
    }
-   else if (gradientMode == GRADIENT_MODE_WORLD_Z)
+   if (!appliedColorFromSensor)
    {
-      color = calculateGradientColor((float) worldFramePoint.z, sinusoidal);
-   }
-   else // GRADIENT_MODE_SENSOR_X
-   {
-      color = calculateGradientColor((float) eyeDepthInMeters, sinusoidal);
+      if (gradientMode == GRADIENT_MODE_WORLD_Z)
+      {
+         pointColor = calculateGradientColorOptionFloat4(worldFramePoint.z, sinusoidal);
+      }
+      else // GRADIENT_MODE_SENSOR_X
+      {
+         pointColor = calculateGradientColorOptionFloat4(eyeDepthInMeters, sinusoidal);
+      }
    }
 
    int pointStartIndex = (depthImageWidth * y + x) * 8;
-
-   finalPointFloatBuffer[pointStartIndex]     = worldFramePoint.x;
-   finalPointFloatBuffer[pointStartIndex + 1] = worldFramePoint.y;
-   finalPointFloatBuffer[pointStartIndex + 2] = worldFramePoint.z;
-   finalPointFloatBuffer[pointStartIndex + 3] = color;
-
-   int rInt = (color >> 24) & 0xFF;
-   int gInt = (color >> 16) & 0xFF;
-   int bInt = (color >> 8) & 0xFF;
-   int aInt = color & 0xFF;
-
-   float r = rInt / 255.0f;
-   float g = gInt / 255.0f;
-   float b = bInt / 255.0f;
-   float a = aInt / 255.0f;
-
-   finalPointFloatBuffer[pointStartIndex + 3] = r;
-   finalPointFloatBuffer[pointStartIndex + 4] = g;
-   finalPointFloatBuffer[pointStartIndex + 5] = b;
-   finalPointFloatBuffer[pointStartIndex + 6] = a;
-
-   finalPointFloatBuffer[pointStartIndex + 7] = 0.01f;
+   pointCloudVertexBuffer[pointStartIndex]     = worldFramePoint.x;
+   pointCloudVertexBuffer[pointStartIndex + 1] = worldFramePoint.y;
+   pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
+   pointCloudVertexBuffer[pointStartIndex + 3] = pointColor.x;
+   pointCloudVertexBuffer[pointStartIndex + 4] = pointColor.y;
+   pointCloudVertexBuffer[pointStartIndex + 5] = pointColor.z;
+   pointCloudVertexBuffer[pointStartIndex + 6] = pointColor.w;
+   pointCloudVertexBuffer[pointStartIndex + 7] = 0.01f;
 }

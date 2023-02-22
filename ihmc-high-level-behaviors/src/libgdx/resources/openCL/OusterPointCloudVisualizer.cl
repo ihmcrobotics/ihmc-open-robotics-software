@@ -82,6 +82,7 @@ kernel void imageToPointCloud(global float* parameters,
    float pointColorG;
    float pointColorB;
    float pointColorA;
+   bool appliedColorFromSensor = false;
    if (useFisheyeColorImage)
    {
       float3 fisheyeFramePoint = transformPoint3D32(ousterFramePoint, ousterToFisheyeTransform);
@@ -101,10 +102,10 @@ kernel void imageToPointCloud(global float* parameters,
          // https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function
          // https://www.ihmc.us/wp-content/uploads/2023/02/equidistant_fisheye_model-1024x957.jpeg
          float azimuthalAngle = atan2(-fisheyeFramePoint.z, -fisheyeFramePoint.y);
-         int fisheyeCol = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X]
-                        + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_X] * angleOfIncidence * cos(azimuthalAngle);
-         int fisheyeRow = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y]
-                        + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y] * angleOfIncidence * sin(azimuthalAngle);
+         int fisheyeCol = round(fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X]
+                              + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_X] * angleOfIncidence * cos(azimuthalAngle));
+         int fisheyeRow = round(fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y]
+                              + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y] * angleOfIncidence * sin(azimuthalAngle));
 
          if (intervalContains(fisheyeCol, 0, fisheyeParameters[FISHEYE_IMAGE_WIDTH])
           && intervalContains(fisheyeRow, 0, fisheyeParameters[FISHEYE_IMAGE_HEIGHT])
@@ -114,18 +115,11 @@ kernel void imageToPointCloud(global float* parameters,
             pointColorG = (fisheyeColor.y / 255.0f);
             pointColorB = (fisheyeColor.z / 255.0f);
             pointColorA = (fisheyeColor.w / 255.0f);
+            appliedColorFromSensor = true;
          }
       }
-      else
-      {
-         float4 rgba8888Color = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
-         pointColorR = rgba8888Color.x;
-         pointColorG = rgba8888Color.y;
-         pointColorB = rgba8888Color.z;
-         pointColorA = rgba8888Color.w;
-      }
    }
-   else
+   if (!appliedColorFromSensor)
    {
       float4 rgba8888Color = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
       pointColorR = (rgba8888Color.x);

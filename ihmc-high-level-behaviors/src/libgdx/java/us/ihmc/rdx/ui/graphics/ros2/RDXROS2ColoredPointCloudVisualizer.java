@@ -43,7 +43,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    private final Object imageMessagesSyncObject = new Object();
 
    private OpenCLManager openCLManager;
-   private OpenCLFloatBuffer finalColoredDepthBuffer;
+   private OpenCLFloatBuffer pointCloudVertexBuffer;
    private _cl_program openCLProgram;
    private _cl_kernel createPointCloudKernel;
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
@@ -96,16 +96,16 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
             depthChannel.update(openCLManager);
             colorChannel.update(openCLManager);
 
-            if (finalColoredDepthBuffer == null)
+            if (pointCloudVertexBuffer == null)
             {
                int totalNumberOfPoints = depthChannel.getTotalNumberOfPixels();
                // Allocates memory for vertex buffer for the point cloud
                LogTools.info("Allocated new buffers. {} total points", totalNumberOfPoints);
                pointCloudRenderer.create(totalNumberOfPoints);
 
-               finalColoredDepthBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
-                                                               pointCloudRenderer.getVertexBuffer());
-               finalColoredDepthBuffer.createOpenCLBufferObject(openCLManager);
+               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
+                                                              pointCloudRenderer.getVertexBuffer());
+               pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
             }
 
          }
@@ -140,7 +140,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
          // Set the OpenCL kernel arguments
          openCLManager.setKernelArgument(createPointCloudKernel, 0, depthChannel.getDepth16UC1Image().getOpenCLImageObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 1, colorChannel.getColor8UC4Image().getOpenCLImageObject());
-         openCLManager.setKernelArgument(createPointCloudKernel, 2, finalColoredDepthBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(createPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 3, parametersBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 4, depthToWorldTransformParameter.getOpenCLBufferObject());
          openCLManager.setKernelArgument(createPointCloudKernel, 5, depthToColorTransformParameter.getOpenCLBufferObject());
@@ -149,7 +149,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
          openCLManager.execute2D(createPointCloudKernel, depthChannel.getImageWidth(), depthChannel.getImageHeight());
 
          // Read the OpenCL buffer back to the CPU
-         finalColoredDepthBuffer.readOpenCLBufferObject(openCLManager);
+         pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
 
          // Request the PointCloudRenderer to render the point cloud from OpenCL-mapped buffers
          pointCloudRenderer.updateMeshFastest(depthChannel.getTotalNumberOfPixels());
