@@ -337,7 +337,7 @@ public class RDXBlackflyCalibrationSuite
                   {
                      nettyOusterUI.createAfterOusterInitialized();
 
-                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI.getPointCloudRenderer(), RDXSceneLevel.MODEL);
+                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI::getRenderables);
                      baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
                      baseUI.getLayoutManager().reloadLayout();
                   }
