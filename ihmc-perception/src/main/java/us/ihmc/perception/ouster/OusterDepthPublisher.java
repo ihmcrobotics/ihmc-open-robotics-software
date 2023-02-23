@@ -12,6 +12,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.OpenCVImageFormat;
+import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -85,10 +86,14 @@ public class OusterDepthPublisher
             {
                outputImageMessage.getData().add(pngImageBytePointer.get(i));
             }
-            outputImageMessage.setFormat(OpenCVImageFormat.PNG.ordinal());
+
+            ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(outputImageMessage);
             outputImageMessage.setSequenceNumber(sequenceNumber++);
             outputImageMessage.setImageWidth(depthWidth);
             outputImageMessage.setImageHeight(depthHeight);
+            outputImageMessage.setIsOusterCameraModel(true);
+            outputImageMessage.setOusterVerticalFieldOfView((float) (Math.PI / 2.0));
+            outputImageMessage.setOusterHorizontalFieldOfView((float) (2.0 * Math.PI));
 
             publisherMap.get(topic).publish(outputImageMessage);
          }
