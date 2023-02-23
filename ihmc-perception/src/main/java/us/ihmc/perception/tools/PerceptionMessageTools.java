@@ -4,9 +4,9 @@ import boofcv.struct.calib.CameraPinhole;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -16,8 +16,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.realsense.BytedecoRealsense;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -106,8 +106,8 @@ public class PerceptionMessageTools
    }
 
    public static void publishFramePlanarRegionsList(FramePlanarRegionsList framePlanarRegionsList,
-                                                       ROS2Topic<FramePlanarRegionsListMessage> topic,
-                                                       ROS2Helper ros2Helper)
+                                                    ROS2Topic<FramePlanarRegionsListMessage> topic,
+                                                    ROS2Helper ros2Helper)
    {
       ros2Helper.publish(topic, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
    }
