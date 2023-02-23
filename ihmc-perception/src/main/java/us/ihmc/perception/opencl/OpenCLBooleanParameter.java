@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.IntPointer;
 
 /**
  * You can't pass booleans to OpenCL kernels, so we use an int.
+ * @deprecated This isn't working!
  */
 public class OpenCLBooleanParameter
 {
