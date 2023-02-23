@@ -31,7 +31,6 @@ public class AStarFootstepPlannerHeightMapTest
    private static boolean GENERATE_LOG_FOR_FAILING_TESTS = true;
 
    private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
-
    private final FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
 
    private String getTestNamePrefix()
