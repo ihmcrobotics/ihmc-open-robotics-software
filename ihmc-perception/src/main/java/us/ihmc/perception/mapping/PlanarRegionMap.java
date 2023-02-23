@@ -661,7 +661,12 @@ public class PlanarRegionMap
       {
          previousRegions.addPlanarRegionsList(regions.copy());
 
-         RigidBodyTransform initialTransform = new RigidBodyTransform(new Quaternion(0.0, Math.toRadians(60.0), 0.0), new Point3D());
+         // L515-only
+         //RigidBodyTransform initialTransform = new RigidBodyTransform(new Quaternion(0.0, Math.toRadians(60.0), 0.0), new Point3D());
+
+         // Ouster-only
+         RigidBodyTransform initialTransform = new RigidBodyTransform();
+
          regions.applyTransform(initialTransform);
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, initialTransform, regions.copy()));
          finalMap.addPlanarRegionsList(regions);

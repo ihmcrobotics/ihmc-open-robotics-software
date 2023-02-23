@@ -51,7 +51,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    //20230117_162417_PerceptionLog.hdf5 (231 MB)
    //20230117_162825_PerceptionLog.hdf5 (328 MB)
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230222_125406_RoughTerrainLoop_01.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230207_214209_PerceptionLogFixed.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI( "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
@@ -115,8 +115,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createL515(768, 1024);
-            //createOuster(128, 1024);
+            //createL515(768, 1024);
+            createOuster(128, 1024);
          }
 
          private void createOuster(int depthHeight, int depthWidth)
