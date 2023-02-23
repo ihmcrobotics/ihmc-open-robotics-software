@@ -79,7 +79,10 @@ float index_to_yaw(int yaw_index, int yaw_total_indices)
    return M_2_PI_F * (yaw_index - center_index) / yaw_total_indices;
 }
 
-int yaw_to_index(float yaw, int yaw_total_indices) { return ((int) (yaw / yaw_total_indices)) + (yaw_total_indices / 2); }
+int yaw_to_index(float yaw, int yaw_total_indices)
+{
+   return ((int) (yaw / yaw_total_indices)) + (yaw_total_indices / 2);
+}
 
 float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector)
 {
