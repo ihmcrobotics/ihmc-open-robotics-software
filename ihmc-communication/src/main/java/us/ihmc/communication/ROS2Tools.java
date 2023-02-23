@@ -230,6 +230,9 @@ public class ROS2Tools
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
 
+   public static final ROS2Topic<Empty> PUBLISH_LIDAR_SCAN = new ROS2Topic<>();
+   public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = new ROS2Topic<>();
+
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
    public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getBipedalSupportRegionParametersTopic(String robotName)
