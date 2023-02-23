@@ -90,7 +90,7 @@ public class PlanarRegionMappingHandler
    private final int[] logIndices = new int[] {0, 44, 84, 109, 123, 130, 137} ;
 
    private int planarRegionListIndex = 0;
-   private int perceptionLogIndex = 0;
+   private int perceptionLogIndex = 100;
    private int totalDepthCount = 0;
 
    private String sensorLogChannelName;
@@ -158,8 +158,8 @@ public class PlanarRegionMappingHandler
       //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
       //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
-      //createOuster(128, 1024, smoothing);
-      createL515(768, 1024, smoothing);
+      createOuster(128, 1024, smoothing);
+      //createL515(768, 1024, smoothing);
    }
 
    private void createL515(int depthHeight, int depthWidth, boolean smoothing)
@@ -296,7 +296,7 @@ public class PlanarRegionMappingHandler
             }
          }
 
-         perceptionLogIndex += 4;
+         perceptionLogIndex += 1;
          rapidRegionsExtractor.setProcessing(false);
       }
    }
