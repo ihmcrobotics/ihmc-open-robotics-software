@@ -2,7 +2,8 @@ package us.ihmc.perception.realsense;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.javacpp.FloatPointer;
-import us.ihmc.euclid.referenceFrame.FrameRotationMatrix;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -10,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.MutableBytePointer;
 import org.bytedeco.librealsense2.*;
 import org.bytedeco.librealsense2.global.realsense2;
@@ -38,7 +40,8 @@ public class BytedecoRealsense
    protected rs2_intrinsics depthStreamIntrinsics = new rs2_intrinsics();
    protected rs2_intrinsics colorStreamIntrinsics = new rs2_intrinsics();
    protected rs2_extrinsics depthToColorExtrinsics = new rs2_extrinsics();
-   // Realsense is Y down, Z forward
+   // Realsense is X right, Y down, Z forward
+   // IHMC is X forward, Y left, Z up
    private final RigidBodyTransform realsenseToIHMCZUpTransform = new RigidBodyTransform();
    {
       realsenseToIHMCZUpTransform.getRotation().setYawPitchRoll(Math.toRadians(-90.0), 0.0, Math.toRadians(-90.0));
@@ -47,7 +50,6 @@ public class BytedecoRealsense
                                                                                                                    ReferenceFrame.getWorldFrame(),
                                                                                                                    realsenseToIHMCZUpTransform);
    protected final FrameVector3D depthToColorTranslation = new FrameVector3D(realsenseFrame);
-   protected final FrameRotationMatrix depthToColorRotationMatrix = new FrameRotationMatrix(realsenseFrame);
    protected final Quaternion depthToColorQuaternion = new Quaternion();
    protected rs2_stream_profile depthFrameStreamProfile;
    protected rs2_stream_profile colorFrameStreamProfile;
@@ -246,25 +248,44 @@ public class BytedecoRealsense
                                                                       colorStreamIntrinsics.ppy(),
                                                                       colorHeight,
                                                                       colorWidth));
+
                   realsense2.rs2_get_extrinsics(depthFrameStreamProfile, colorFrameStreamProfile, depthToColorExtrinsics, error);
                   FloatPointer translation = depthToColorExtrinsics.translation();
                   FloatPointer rotation = depthToColorExtrinsics.rotation();
-                  depthToColorTranslation.set(translation.get(0),
-                                              translation.get(1),
-                                              translation.get(2));
+
+                  float realsenseXRight = translation.get(0);
+                  float realsenseYDown = translation.get(1);
+                  float realsenseZForward = translation.get(2);
+                  depthToColorTranslation.set(realsenseXRight, realsenseYDown, realsenseZForward);
+                  RotationMatrix depthToColorRotationMatrix = new RotationMatrix();
                   depthToColorRotationMatrix.setAndNormalize(rotation.get(0), // Have to convert column major to row major
                                                              rotation.get(3),
-                                                             rotation.get(7),
+                                                             rotation.get(6),
                                                              rotation.get(1),
                                                              rotation.get(4),
                                                              rotation.get(7),
                                                              rotation.get(2),
                                                              rotation.get(5),
                                                              rotation.get(8));
+
+                  FramePose3D depthSensorPose = new FramePose3D(realsenseFrame);
+                  FramePose3D colorSensorPose = new FramePose3D(realsenseFrame);
+                  // Because we've got depth to color, let's do inverse transform to go color to depth
+                  RigidBodyTransform depthToColorTransform = new RigidBodyTransform(depthToColorRotationMatrix, depthToColorTranslation);
+                  depthToColorTransform.inverseTransform(colorSensorPose);
+
+                  depthSensorPose.changeFrame(ReferenceFrame.getWorldFrame());
+                  colorSensorPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+                  // The rotation part is actually wrong at this point; we gotta get the rotationDepthToColorIHMCFrame
+                  // from the depth sensor
+                  depthToColorQuaternion.difference(depthSensorPose.getRotation(), colorSensorPose.getRotation());
+
                   depthToColorTranslation.changeFrame(ReferenceFrame.getWorldFrame());
-                  depthToColorRotationMatrix.changeFrame(ReferenceFrame.getWorldFrame());
-                  depthToColorQuaternion.set(depthToColorRotationMatrix);
-                  LogTools.info("Depth to color extrinsics:\nTranslation: {}\nRotation:\n{}", depthToColorTranslation, depthToColorRotationMatrix);
+                  depthToColorRotationMatrix.set(depthToColorQuaternion);
+
+                  LogTools.info("Depth to color extrinsics (ZUp frame):\n   Translation: {}\n   Rotation: {}",
+                                depthToColorTranslation, new YawPitchRoll(depthToColorQuaternion));
                }
             }
 

@@ -40,9 +40,7 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
    bool appliedColorFromSensor = false;
    if (useSensorColor)
    {
-      // TODO: Fix this, maybe getting wrong transform in BytedecoRealsense driver
-      // float3 colorFramePoint = transformPoint3D32(depthFramePoint, depthToColorTransform);
-      float3 colorFramePoint = depthFramePoint;
+      float3 colorFramePoint = transformPoint3D32(depthFramePoint, depthToColorTransform);
 
       // Flip because positive yaw is to the left, but image coordinates go to the right
       float yaw = -angle(1.0f, 0.0f, colorFramePoint.x, colorFramePoint.y);
