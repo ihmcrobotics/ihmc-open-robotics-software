@@ -301,8 +301,7 @@ public class SwingOverPlanarRegionsTest
                                                                          swingPlannerParameters,
                                                                          walkingControllerParameters,
                                                                          footPolygons,
-                                                                         null,
-                                                                         ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+                                                                         null);
 
       Graphics3DObject startGraphics = new Graphics3DObject();
       Graphics3DObject endGraphics = new Graphics3DObject();

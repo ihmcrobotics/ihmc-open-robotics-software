@@ -140,7 +140,7 @@ public class PlannerToolsTest
 
    private void testDataSet(DataSet debrisDataSet)
    {
-      FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule("testModule", ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule("testModule");
       footstepPlanningModule.getFootstepPlannerParameters().setCheckForBodyBoxCollisions(false);
       footstepPlanningModule.getFootstepPlannerParameters().setBodyBoxDepth(0.3);
       footstepPlanningModule.getFootstepPlannerParameters().setBodyBoxWidth(0.8);

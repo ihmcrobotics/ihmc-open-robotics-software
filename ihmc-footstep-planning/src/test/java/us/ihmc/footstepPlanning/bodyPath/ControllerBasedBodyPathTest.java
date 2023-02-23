@@ -103,8 +103,7 @@ public class ControllerBasedBodyPathTest
       private final WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
 
       private final FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      private final FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule("controllerBasedBodyPathTest",
-                                                                                                ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      private final FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule("controllerBasedBodyPathTest");
       private final FootstepPlannerRequest request = new FootstepPlannerRequest();
 
       private static final int stepsPerSide = 10;

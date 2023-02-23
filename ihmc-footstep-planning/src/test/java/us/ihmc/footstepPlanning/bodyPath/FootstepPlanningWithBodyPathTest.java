@@ -72,7 +72,7 @@ public class FootstepPlanningWithBodyPathTest
       request.setRequestedInitialStanceSide(initialStanceFootSide);
       request.setGoalFootPoses(defaultStepWidth, goalPose);
 
-      FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
 
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
@@ -131,7 +131,7 @@ public class FootstepPlanningWithBodyPathTest
       goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(regions);
-      FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(1.0);
