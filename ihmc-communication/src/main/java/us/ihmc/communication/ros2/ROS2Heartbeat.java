@@ -66,4 +66,10 @@ public class ROS2Heartbeat
             heartbeatPublisher.publish(emptyMessage);
       }
    }
+
+   public void destroy()
+   {
+      if (heartbeatPublisher != null)
+         heartbeatPublisher.destroy();
+   }
 }
