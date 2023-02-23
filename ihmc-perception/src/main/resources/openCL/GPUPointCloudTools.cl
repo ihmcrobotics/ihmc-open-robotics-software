@@ -11,7 +11,10 @@
 #define ty 10
 #define tz 11
 
-float transform_p(float x, float y, float z, float r0, float r1, float r2, float t) { return r0 * x + r1 * y + r2 * z + t; }
+float transform_p(float x, float y, float z, float r0, float r1, float r2, float t)
+{
+   return r0 * x + r1 * y + r2 * z + t;
+}
 
 void kernel transformPointsKernel(global float* points_in, global float* localization, global float* points_out)
 {

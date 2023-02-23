@@ -163,7 +163,7 @@ public class CaptureRegionSafetyHeuristics
          vectorToVertex.sub(vertexToProject, stancePosition);
 
          // if you're already near the reachability limit, don't do any projection, it's just likely to mess you up.
-         if (vectorToVertex.norm() > reachabilityLimit.getValue() - 0.2 * extraDistanceToStepFromStanceFoot.getValue())
+         if (vectorToVertex.norm() > reachabilityLimit.getValue() - 0.42 * extraDistanceToStepFromStanceFoot.getValue())
             continue;
 
          // Compute the maximum distance that the vertex can be projected along the line before hitting the reachability limit.
