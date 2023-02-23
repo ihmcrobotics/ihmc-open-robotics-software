@@ -94,7 +94,7 @@ public class SimpleOcclusionTests
       YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
 

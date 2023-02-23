@@ -34,7 +34,7 @@ public class FootstepPlannerLoggerTest
    @Test
    public void testLogger()
    {
-      FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule", ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_EOD_Cinders);
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();

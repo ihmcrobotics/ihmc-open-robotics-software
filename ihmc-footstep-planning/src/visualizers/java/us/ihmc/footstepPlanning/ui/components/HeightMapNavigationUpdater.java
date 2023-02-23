@@ -145,8 +145,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
                                                   new DefaultSwingPlannerParameters(),
                                                   walkingControllerParameters,
                                                   footPolygons,
-                                                  null,
-                                                  ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+                                                  null);
       logger = new FootstepPlannerLogger(planningModule);
       planningModule.addCustomTerminationCondition((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> iterations > 1);
 

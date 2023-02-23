@@ -91,7 +91,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final List<Consumer<SwingPlannerType>> swingReplanRequestCallbacks = new ArrayList<>();
    private final List<Consumer<FootstepPlan>> swingReplanStatusCallbacks = new ArrayList<>();
 
-   public FootstepPlanningModule(String name, boolean useGPU)
+   private final boolean useGPU = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+   public FootstepPlanningModule(String name)
    {
       this(name,
            new DefaultVisibilityGraphParameters(),
@@ -100,8 +102,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
            new DefaultSwingPlannerParameters(),
            null,
            PlannerTools.createDefaultFootPolygons(),
-           null,
-              useGPU);
+           null);
    }
 
    public FootstepPlanningModule(String name,
@@ -111,8 +112,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons,
-                                 StepReachabilityData stepReachabilityData,
-                                 boolean useGPU)
+                                 StepReachabilityData stepReachabilityData)
    {
       this.name = name;
       this.visibilityGraphParameters = visibilityGraphParameters;

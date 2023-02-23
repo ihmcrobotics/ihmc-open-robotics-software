@@ -16,7 +16,7 @@ public class FootstepPlanningModuleTimingTest
 {
    public FootstepPlanningModuleTimingTest()
    {
-      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(), ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190219_182005_Random);
       PlannerInput plannerInput = dataSet.getPlannerInput();
 

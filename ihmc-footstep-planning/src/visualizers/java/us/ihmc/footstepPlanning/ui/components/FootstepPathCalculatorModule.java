@@ -57,9 +57,7 @@ public class FootstepPathCalculatorModule
    private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphsParameters;
 
    private final Messager messager;
-   private final FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
-                                                                                    ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
-
+   private final FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
    public FootstepPathCalculatorModule(Messager messager)
    {
       this.messager = messager;

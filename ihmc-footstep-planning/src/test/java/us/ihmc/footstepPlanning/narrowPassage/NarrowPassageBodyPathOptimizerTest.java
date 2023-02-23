@@ -45,8 +45,7 @@ public class NarrowPassageBodyPathOptimizerTest
    @BeforeEach
    public void setup()
    {
-      FootstepPlanningModule defaultFootstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName(),
-                                                                                        ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      FootstepPlanningModule defaultFootstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
 
       VisibilityGraphsParametersBasics visibilityGraphParameters = defaultFootstepPlanningModule.getVisibilityGraphParameters();
       visibilityGraphParameters.setOptimizeForNarrowPassage(true);
@@ -59,8 +58,7 @@ public class NarrowPassageBodyPathOptimizerTest
                                           defaultFootstepPlanningModule.getSwingPlannerParameters(),
                                           null,
                                           PlannerTools.createDefaultFootPolygons(),
-                                          null,
-                                          ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+                                          null);
    }
 
    @AfterEach
