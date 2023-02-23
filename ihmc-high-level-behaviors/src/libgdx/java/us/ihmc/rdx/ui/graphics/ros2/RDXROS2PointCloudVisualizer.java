@@ -81,6 +81,11 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       this.ros2Node = ros2Node;
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+
+      if (topic.getType().equals(LidarScanMessage.class))
+      {
+         lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.PUBLISH_LIDAR_SCAN);
+      }
    }
 
    private void subscribe()
@@ -143,11 +148,8 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
 
       boolean subscribedAndActive = subscribed.get() && isActive();
 
-      if (topic.getType().equals(LidarScanMessage.class))
+      if (lidarActiveHeartbeat != null)
       {
-         if (lidarActiveHeartbeat == null)
-            lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.PUBLISH_LIDAR_SCAN);
-
          lidarActiveHeartbeat.setAlive(subscribedAndActive);
       }
 
