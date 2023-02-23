@@ -138,7 +138,7 @@ public class RDXModelInstanceScaler
       modelInstance = new ModelInstance(model);
 
       if (stopwatch.totalElapsed() > 0.1)
-         LogTools.warn("Took {} s to scale, whcih is a little long.", stopwatch.lapElapsed());
+         LogTools.warn("Took {} s to scale, which is a little long.", stopwatch.lapElapsed());
    }
 
    public Point3D32 getWholeModelCentroid()

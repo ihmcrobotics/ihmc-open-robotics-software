@@ -3,7 +3,7 @@
 #define DEPTH_IMAGE_WIDTH 2
 #define DEPTH_IMAGE_HEIGHT 3
 #define POINT_SIZE 4
-#define POINTS_TO_ADD_ABOVE_AND_BELOW_FOR_COLOR_DETAIL 5
+#define LEVEL_OF_COLOR_DETAIL 5
 
 #define FISHEYE_IMAGE_WIDTH 0
 #define FISHEYE_IMAGE_HEIGHT 1
@@ -24,8 +24,9 @@ kernel void imageToPointCloud(global float* parameters,
    int x = get_global_id(0);
    int y = get_global_id(1);
 
-   int pointsToAddAboveAndBelowForColorDetail = parameters[POINTS_TO_ADD_ABOVE_AND_BELOW_FOR_COLOR_DETAIL];
-   int totalVerticalPointsForColorDetail = 1 + 2 * pointsToAddAboveAndBelowForColorDetail;
+   // Adds points above and below the lidar point symetrically
+   // for the purpose of displaying more color details
+   int totalVerticalPointsForColorDetail = 1 + 2 * parameters[LEVEL_OF_COLOR_DETAIL];
    int ousterY = y / totalVerticalPointsForColorDetail;
 
    float discreteResolution = 0.001f;
@@ -51,7 +52,7 @@ kernel void imageToPointCloud(global float* parameters,
    float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint, rotationMatrixRow0, rotationMatrixRow1, rotationMatrixRow2, origin);
 
    float pointSize = parameters[POINT_SIZE] * eyeDepthInMeters;
-   int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - pointsToAddAboveAndBelowForColorDetail;
+   int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - parameters[LEVEL_OF_COLOR_DETAIL];
    float verticalPointOffsetLocalZ = verticalColorDetailOffsetIndex * pointSize / 2.0f;
    float3 colorDetailPointOffsetLocalFrame = (float3) (0.0, 0.0, verticalPointOffsetLocalZ);
    float3 colorDetailPointOffset = transformPoint3D32_2(colorDetailPointOffsetLocalFrame,

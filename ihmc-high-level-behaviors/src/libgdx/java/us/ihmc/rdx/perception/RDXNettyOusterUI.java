@@ -52,8 +52,8 @@ public class RDXNettyOusterUI
    private final ImPlotStopwatchPlot drawDepthImageStopwatchPlot = new ImPlotStopwatchPlot("Draw depth image");
    private final ImPlotStopwatchPlot depthImageToPointCloudStopwatchPlot = new ImPlotStopwatchPlot("Image to point cloud kernel");
    private final Notification newFrameAvailable = new Notification();
-   private final ImInt pointsToAddAboveAndBelowForColorDetail = new ImInt(0);
-   private final Notification pointsAboveAndBelowChanged = new Notification();
+   private final ImInt levelOfColorDetail = new ImInt(0);
+   private final Notification levelOfColorDetailChanged = new Notification();
 
    public void create(RDXBaseUI baseUI)
    {
@@ -95,9 +95,13 @@ public class RDXNettyOusterUI
       isReady = true;
    }
 
+   /**
+    * This method can be called multiple times from the UI thread when the parameters require buffer sizes to change.
+    * It will automatically calculate the new sizes of everything.
+    */
    private void createPointCloudAndKernel()
    {
-      int totalVerticalPointsForColorDetail = 1 + 2 * pointsToAddAboveAndBelowForColorDetail.get();
+      int totalVerticalPointsForColorDetail = 1 + 2 * levelOfColorDetail.get();
       int heightWithVerticalPointsForColorDetail = ouster.getImageHeight() * totalVerticalPointsForColorDetail;
       numberOfDepthPoints = ouster.getImageWidth() * heightWithVerticalPointsForColorDetail;
 
@@ -113,11 +117,11 @@ public class RDXNettyOusterUI
          depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(pointCloudRenderer,
                                                                                   openCLManager,
                                                                                   depthExtractionKernel.getExtractedDepthImage(),
-                                                                                  pointsToAddAboveAndBelowForColorDetail.get());
+                                                                                  levelOfColorDetail.get());
       }
       else
       {
-         depthImageToPointCloudKernel.changePointsToAddAboveAndBelow(pointCloudRenderer, pointsToAddAboveAndBelowForColorDetail.get());
+         depthImageToPointCloudKernel.changeLevelOfColorDetail(pointCloudRenderer, levelOfColorDetail.get());
       }
    }
 
@@ -125,7 +129,7 @@ public class RDXNettyOusterUI
    {
       if (newFrameAvailable.poll())
       {
-         if (pointsAboveAndBelowChanged.poll())
+         if (levelOfColorDetailChanged.poll())
             createPointCloudAndKernel();
 
          // Synchronize with copying the Ouster's buffer to the buffer used for this kernel
@@ -168,8 +172,8 @@ public class RDXNettyOusterUI
       ImGuiTools.volatileInputFloat(labels.get("Vertical field of view"), verticalFieldOfView);
       ImGuiTools.volatileInputFloat(labels.get("Horizontal field of view"), horizontalFieldOfView);
       ImGui.sliderFloat(labels.get("Point size"), pointSize.getData(), 0.0005f, 0.05f);
-      if (ImGui.sliderInt(labels.get("Points to add above and below for color detail"), pointsToAddAboveAndBelowForColorDetail.getData(), 0, 3))
-         pointsAboveAndBelowChanged.set();
+      if (ImGui.sliderInt(labels.get("Level of color detail"), levelOfColorDetail.getData(), 0, 3))
+         levelOfColorDetailChanged.set();
 
       if (isOusterInitialized())
       {
@@ -183,7 +187,7 @@ public class RDXNettyOusterUI
       }
    }
 
-   public void getRenderables (Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (sceneLevels.contains(RDXSceneLevel.MODEL))
          pointCloudRenderer.getRenderables(renderables, pool);
