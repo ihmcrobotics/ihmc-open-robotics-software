@@ -77,6 +77,7 @@ public class SwingOverPlanarRegionsLogViewer
                                                                          walkingControllerParameters,
                                                                          footPolygons,
                                                                          null);
+
       Graphics3DObject startGraphics = new Graphics3DObject();
       Graphics3DObject endGraphics = new Graphics3DObject();
       startGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.blue));
