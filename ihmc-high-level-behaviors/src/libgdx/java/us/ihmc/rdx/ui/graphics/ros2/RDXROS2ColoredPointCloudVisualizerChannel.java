@@ -40,6 +40,9 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private final RotationMatrix rotationMatrixToWorld = new RotationMatrix();
    private final Vector3D translationToWorld = new Vector3D();
    private float depthDiscretization;
+   private boolean isPinholeCameraModel;
+   private boolean isEquidistantFisheyeCameraModel;
+   private boolean isOusterCameraModel;
 
    public RDXROS2ColoredPointCloudVisualizerChannel(String name, ROS2Topic<ImageMessage> topic)
    {
@@ -91,6 +94,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       messageSizeReadout.update(imageMessage.getData().size());
       sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
       delayPlot.addValue(PerceptionMessageTools.calculateDelay(imageMessage));
+
+      isPinholeCameraModel = imageMessage.getIsPinholeCameraModel();
+      isEquidistantFisheyeCameraModel = imageMessage.getIsEquidistantFisheyeCameraModel();
+      isOusterCameraModel = imageMessage.getIsOusterCameraModel();
 
       imageAvailable = false;
    }
@@ -180,5 +187,20 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    public float getDepthDiscretization()
    {
       return depthDiscretization;
+   }
+
+   public boolean getIsPinholeCameraModel()
+   {
+      return isPinholeCameraModel;
+   }
+
+   public boolean getIsEquidistantFisheyeCameraModel()
+   {
+      return isEquidistantFisheyeCameraModel;
+   }
+
+   public boolean getIsOusterCameraModel()
+   {
+      return isOusterCameraModel;
    }
 }
