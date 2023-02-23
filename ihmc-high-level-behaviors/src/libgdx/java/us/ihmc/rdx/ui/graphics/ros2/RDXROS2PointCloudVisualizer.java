@@ -73,7 +73,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
-   private ROS2Heartbeat activeHeartbeat;
+   private ROS2Heartbeat lidarActiveHeartbeat;
 
    public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
@@ -145,10 +145,10 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
 
       if (topic.getType().equals(LidarScanMessage.class))
       {
-         if (activeHeartbeat == null)
-            activeHeartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.PUBLISH_LIDAR_SCAN);
+         if (lidarActiveHeartbeat == null)
+            lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.PUBLISH_LIDAR_SCAN);
 
-         activeHeartbeat.setAlive(subscribedAndActive);
+         lidarActiveHeartbeat.setAlive(subscribedAndActive);
       }
 
       if (subscribedAndActive)
@@ -329,7 +329,8 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    @Override
    public void destroy()
    {
-      activeHeartbeat.destroy();
+      if (lidarActiveHeartbeat != null)
+         lidarActiveHeartbeat.destroy();
       super.destroy();
    }
 
