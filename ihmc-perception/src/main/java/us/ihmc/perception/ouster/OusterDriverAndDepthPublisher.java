@@ -69,6 +69,8 @@ public class OusterDriverAndDepthPublisher
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
+         publishLidarScanMonitor.destroy();
+         publishHeightMapMonitor.destroy();
          depthPublisher.destroy();
          heightMapUpdater.stop();
          heightMapUpdater.destroy();

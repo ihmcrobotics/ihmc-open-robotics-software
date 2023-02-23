@@ -24,6 +24,7 @@ public class ROS2HeartbeatMonitor
 
    // To provide callback when aliveness changes
    private boolean monitorThreadStarted = false;
+   private volatile boolean running = true;
    private final Throttler throttler = new Throttler();
    private boolean wasAlive = false;
    private Consumer<Boolean> callback = null;
@@ -57,7 +58,7 @@ public class ROS2HeartbeatMonitor
 
    private void monitorThread()
    {
-      while (true)
+      while (running)
       {
          throttler.waitAndRun(ROS2Heartbeat.HEARTBEAT_PERIOD);
          boolean isAlive = isAlive();
@@ -69,5 +70,10 @@ public class ROS2HeartbeatMonitor
                callback.accept(isAlive);
          }
       }
+   }
+
+   public void destroy()
+   {
+      running = false;
    }
 }

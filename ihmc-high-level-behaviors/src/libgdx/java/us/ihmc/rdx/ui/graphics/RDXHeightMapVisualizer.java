@@ -104,6 +104,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
 
    public void destroy()
    {
+      activeHeartbeat.destroy();
       gridMapGraphic.destroy();
    }
 }
