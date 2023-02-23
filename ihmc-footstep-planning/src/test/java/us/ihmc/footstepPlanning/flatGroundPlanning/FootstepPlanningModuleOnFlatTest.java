@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

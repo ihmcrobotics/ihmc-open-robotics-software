@@ -9,7 +9,6 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import net.java.games.input.Component;
 import net.java.games.input.Event;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;

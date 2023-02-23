@@ -106,7 +106,6 @@ public class AStarBodyPathFrameworkTest
 
    // For the occlusion test
    private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule,");
-
    private final FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
 
    @BeforeEach

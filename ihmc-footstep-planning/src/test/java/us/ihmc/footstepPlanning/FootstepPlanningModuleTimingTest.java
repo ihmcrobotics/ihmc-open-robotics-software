@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.pathPlanning.DataSet;
