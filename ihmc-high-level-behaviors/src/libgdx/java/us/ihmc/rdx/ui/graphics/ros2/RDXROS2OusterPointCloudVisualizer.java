@@ -61,6 +61,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    private int depthWidth;
    private int depthHeight;
+   private float horizontalFieldOfView;
+   private float verticalFieldOfView;
 
    public RDXROS2OusterPointCloudVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
    {
@@ -115,6 +117,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
             {
                depthWidth = imageMessage.getImageWidth();
                depthHeight = imageMessage.getImageHeight();
+               horizontalFieldOfView = imageMessage.getOusterHorizontalFieldOfView();
+               verticalFieldOfView = imageMessage.getOusterVerticalFieldOfView();
                totalNumberOfPoints = depthWidth * depthHeight;
                pointCloudRenderer.create(totalNumberOfPoints);
                decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * Short.BYTES);
@@ -154,11 +158,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                                    depthImageToPointCloudKernel.getDepthImage().getBytedecoOpenCVMat());
          depthImageToPointCloudKernel.getDepthImage().getBackingDirectByteBuffer().rewind();
 
-         // TODO: Create tuners for these
-         double verticalFieldOfView = Math.PI / 2.0;
-         double horizontalFieldOfView = 2.0 * Math.PI;
          depthImageToPointCloudKernel.getOusterToWorldTransform().set(imageMessage.getOrientation(), imageMessage.getPosition());
-         depthImageToPointCloudKernel.runKernel((float) horizontalFieldOfView, (float) verticalFieldOfView, pointSize.get());
+         depthImageToPointCloudKernel.runKernel(horizontalFieldOfView, verticalFieldOfView, pointSize.get());
 
          delayPlot.addValue(TimeTools.calculateDelay(acquisitionTimeSecondsSinceEpoch, acquisitionTimeAdditionalNanos));
       }

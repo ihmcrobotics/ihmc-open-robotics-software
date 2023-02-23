@@ -139,6 +139,7 @@ public class RealsenseColorAndDepthPublisher
             depthImageMessage.setPrincipalPointXPixels(realsense.getDepthIntrinsicParameters().ppx());
             depthImageMessage.setPrincipalPointYPixels(realsense.getDepthIntrinsicParameters().ppy());
             depthImageMessage.setDepthDiscretization((float) realsense.getDepthDiscretization());
+            depthImageMessage.setIsPinholeCameraModel(true);
             ros2Helper.publish(depthTopic, depthImageMessage);
 
             PerceptionMessageTools.packImageMessageData(jpegCompression.getCompressedData(), colorImageMessage);
@@ -153,6 +154,7 @@ public class RealsenseColorAndDepthPublisher
             colorImageMessage.setFocalLengthYPixels(realsense.getColorIntrinsicParameters().fy());
             colorImageMessage.setPrincipalPointXPixels(realsense.getColorIntrinsicParameters().ppx());
             colorImageMessage.setPrincipalPointYPixels(realsense.getColorIntrinsicParameters().ppy());
+            colorImageMessage.setIsPinholeCameraModel(true);
             ros2Helper.publish(colorTopic, colorImageMessage);
          }
       }
