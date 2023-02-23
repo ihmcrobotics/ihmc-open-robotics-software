@@ -275,7 +275,7 @@ public class PlanarRegionMappingHandler
 
       if (source == DataSource.PERCEPTION_LOG)
       {
-         if (perceptionLogIndex % HDF5Manager.MAX_BUFFER_SIZE != (HDF5Manager.MAX_BUFFER_SIZE - 1))
+//         if (perceptionLogIndex % HDF5Manager.MAX_BUFFER_SIZE != (HDF5Manager.MAX_BUFFER_SIZE - 1))
          {
             LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
 
@@ -296,7 +296,7 @@ public class PlanarRegionMappingHandler
             }
          }
 
-         perceptionLogIndex += 2;
+         perceptionLogIndex += 4;
          rapidRegionsExtractor.setProcessing(false);
       }
    }

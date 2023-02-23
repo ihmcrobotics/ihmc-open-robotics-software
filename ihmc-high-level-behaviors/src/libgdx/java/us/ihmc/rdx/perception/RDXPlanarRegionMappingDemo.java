@@ -106,7 +106,7 @@ public class RDXPlanarRegionMappingDemo
                if (transform != null)
                {
                   framePose.set(transform);
-                  modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.1, Color.YELLOW);
+                  modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.25, Color.GREEN);
                   LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
                   poseModels.add(modelInstance);
                }

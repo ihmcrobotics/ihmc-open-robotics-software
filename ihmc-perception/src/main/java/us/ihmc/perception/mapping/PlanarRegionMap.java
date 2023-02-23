@@ -5,6 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
@@ -658,9 +659,12 @@ public class PlanarRegionMap
 
       if(!initialized)
       {
-         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, new RigidBodyTransform(), new RigidBodyTransform(), regions.copy()));
+         previousRegions.addPlanarRegionsList(regions.copy());
+
+         RigidBodyTransform initialTransform = new RigidBodyTransform(new Quaternion(0.0, Math.toRadians(60.0), 0.0), new Point3D());
+         regions.applyTransform(initialTransform);
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, initialTransform, regions.copy()));
          finalMap.addPlanarRegionsList(regions);
-         previousRegions.addPlanarRegionsList(regions);
 
          initialized = true;
          //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, new RigidBodyTransform()));
