@@ -45,7 +45,6 @@ public class NarrowPassageBodyPathOptimizerTest
    public void setup()
    {
       FootstepPlanningModule defaultFootstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
-
       VisibilityGraphsParametersBasics visibilityGraphParameters = defaultFootstepPlanningModule.getVisibilityGraphParameters();
       visibilityGraphParameters.setOptimizeForNarrowPassage(true);
       footstepPlanningParameters = defaultFootstepPlanningModule.getFootstepPlannerParameters();

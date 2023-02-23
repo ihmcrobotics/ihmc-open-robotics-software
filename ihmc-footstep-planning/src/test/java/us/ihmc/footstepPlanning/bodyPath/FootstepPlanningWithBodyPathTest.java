@@ -72,7 +72,6 @@ public class FootstepPlanningWithBodyPathTest
       request.setGoalFootPoses(defaultStepWidth, goalPose);
 
       FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
-
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
 
