@@ -326,6 +326,13 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       ros2Callback = null;
    }
 
+   @Override
+   public void destroy()
+   {
+      activeHeartbeat.destroy();
+      super.destroy();
+   }
+
    public boolean isSubscribed()
    {
       return subscribed.get();

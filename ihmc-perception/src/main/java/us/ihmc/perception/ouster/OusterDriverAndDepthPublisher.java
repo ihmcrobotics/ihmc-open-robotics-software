@@ -71,6 +71,7 @@ public class OusterDriverAndDepthPublisher
       {
          depthPublisher.destroy();
          heightMapUpdater.stop();
+         heightMapUpdater.destroy();
          ouster.setOnFrameReceived(null);
          ouster.destroy();
          ThreadTools.sleepSeconds(0.5);

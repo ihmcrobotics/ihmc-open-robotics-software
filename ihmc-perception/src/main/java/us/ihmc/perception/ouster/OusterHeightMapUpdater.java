@@ -119,4 +119,9 @@ public class OusterHeightMapUpdater
    {
       executorService.shutdown();
    }
+
+   public void destroy()
+   {
+      realtimeROS2Node.destroy();
+   }
 }
