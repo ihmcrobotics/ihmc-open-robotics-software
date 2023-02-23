@@ -192,7 +192,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                {
                   loadAndDecompressThreadExecutor.clearQueueAndExecute(() ->
                   {
-                     if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
+//                     if ((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
                      {
                         perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), depthBytePointer, bytedecoDepthImage.getBytedecoOpenCVMat());
                         ThreadTools.sleep(100);
