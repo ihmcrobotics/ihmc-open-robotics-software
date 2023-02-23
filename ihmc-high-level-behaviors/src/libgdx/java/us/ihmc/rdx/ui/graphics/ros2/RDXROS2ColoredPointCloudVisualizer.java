@@ -6,15 +6,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_program;
+import imgui.type.ImInt;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.opencl.OpenCLFloatParameters;
-import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -34,6 +32,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    private final ImBoolean useSensorColor = new ImBoolean(true);
    private RDXColorGradientMode gradientMode = RDXColorGradientMode.WORLD_Z;
    private final ImBoolean useSinusoidalGradientPattern = new ImBoolean(false);
+   private final ImInt levelOfColorDetail = new ImInt(0);
+   private final Notification levelOfColorDetailChanged = new Notification();
 
    private final RDXROS2ColoredPointCloudVisualizerDepthChannel depthChannel;
    private final RDXROS2ColoredPointCloudVisualizerColorChannel colorChannel;
@@ -44,14 +44,10 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
 
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer pointCloudVertexBuffer;
-   private _cl_program openCLProgram;
-   private _cl_kernel createPointCloudKernel;
-   private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
-   private final OpenCLRigidBodyTransformParameter depthToWorldTransformParameter = new OpenCLRigidBodyTransformParameter();
-   private final OpenCLRigidBodyTransformParameter depthToColorTransformParameter = new OpenCLRigidBodyTransformParameter();
+   private RDXColoredPointCloudPinholePinholeKernel pinholePinholeKernel;
    private RDXOusterDepthImageToPointCloudKernel depthImageToPointCloudKernel;
 
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+   private RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
                                              PubSubImplementation pubSubImplementation,
@@ -80,8 +76,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
       super.create();
 
       openCLManager = new OpenCLManager();
-      openCLProgram = openCLManager.loadProgram("PinholePinholeColoredPointCloudVisualizer", "PerceptionCommon.cl");
-      createPointCloudKernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
+      pinholePinholeKernel = new RDXColoredPointCloudPinholePinholeKernel(openCLManager);
+      depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(pointCloudRenderer, openCLManager, 100, 100);
    }
 
    @Override
@@ -108,51 +104,44 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
                pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
             }
 
+            if (depthChannel.getIsPinholeCameraModel() && colorChannel.getIsPinholeCameraModel())
+            {
+
+            }
+            else if (depthChannel.getIsOusterCameraModel() && colorChannel.getIsEquidistantFisheyeCameraModel())
+            {
+
+            }
          }
 
-         // If both depth and color images are available, configure the OpenCL kernel and run it, to generate the point cloud float buffer.
-         parametersBuffer.setParameter(colorChannel.getFx());
-         parametersBuffer.setParameter(colorChannel.getFy());
-         parametersBuffer.setParameter(colorChannel.getCx());
-         parametersBuffer.setParameter(colorChannel.getCy());
-         parametersBuffer.setParameter(depthChannel.getFx());
-         parametersBuffer.setParameter(depthChannel.getFy());
-         parametersBuffer.setParameter(depthChannel.getCx());
-         parametersBuffer.setParameter(depthChannel.getCy());
-         parametersBuffer.setParameter((float) depthChannel.getImageWidth());
-         parametersBuffer.setParameter((float) depthChannel.getImageHeight());
-         parametersBuffer.setParameter((float) colorChannel.getImageWidth());
-         parametersBuffer.setParameter((float) colorChannel.getImageHeight());
-         parametersBuffer.setParameter(depthChannel.getDepthDiscretization());
-         parametersBuffer.setParameter(useSensorColor.get());
-         parametersBuffer.setParameter(gradientMode.ordinal());
-         parametersBuffer.setParameter(useSinusoidalGradientPattern.get());
-         depthToWorldTransformParameter.setParameter(depthChannel.getTranslationToWorld(), depthChannel.getRotationMatrixToWorld());
-         depthToColorTransformParameter.setParameter(colorChannel.getTranslationToWorld(), colorChannel.getRotationMatrixToWorld());
+         pointCloudRenderer.updateMeshFastestBeforeKernel();
 
-         // Upload the buffers to the OpenCL device (GPU)
-         depthChannel.getDepth16UC1Image().writeOpenCLImage(openCLManager);
-         colorChannel.getColor8UC4Image().writeOpenCLImage(openCLManager);
-         parametersBuffer.writeOpenCLBufferObject(openCLManager);
-         depthToWorldTransformParameter.writeOpenCLBufferObject(openCLManager);
-         depthToColorTransformParameter.writeOpenCLBufferObject(openCLManager);
+         if (depthChannel.getIsPinholeCameraModel() && colorChannel.getIsPinholeCameraModel())
+         {
+            pinholePinholeKernel.runKernel(colorChannel,
+                                           depthChannel,
+                                           useSensorColor.get(),
+                                           gradientMode.ordinal(),
+                                           useSinusoidalGradientPattern.get(),
+                                           pointCloudVertexBuffer);
+         }
+         else if (depthChannel.getIsOusterCameraModel() && colorChannel.getIsEquidistantFisheyeCameraModel())
+         {
+            if (levelOfColorDetailChanged.poll())
+            {
+               int totalVerticalPointsForColorDetail = 1 + 2 * levelOfColorDetail.get();
+               int heightWithVerticalPointsForColorDetail = depthChannel.getImageHeight() * totalVerticalPointsForColorDetail;
+               int numberOfDepthPoints = depthChannel.getImageWidth() * heightWithVerticalPointsForColorDetail;
 
-         // Set the OpenCL kernel arguments
-         openCLManager.setKernelArgument(createPointCloudKernel, 0, depthChannel.getDepth16UC1Image().getOpenCLImageObject());
-         openCLManager.setKernelArgument(createPointCloudKernel, 1, colorChannel.getColor8UC4Image().getOpenCLImageObject());
-         openCLManager.setKernelArgument(createPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(createPointCloudKernel, 3, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(createPointCloudKernel, 4, depthToWorldTransformParameter.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(createPointCloudKernel, 5, depthToColorTransformParameter.getOpenCLBufferObject());
+               if (pointCloudRenderer != null)
+                  pointCloudRenderer.dispose();
+               pointCloudRenderer = new RDXPointCloudRenderer();
+               pointCloudRenderer.create(numberOfDepthPoints);
+               depthImageToPointCloudKernel.changeLevelOfColorDetail(pointCloudRenderer, levelOfColorDetail.get());
+            }
+         }
 
-         // Run the OpenCL kernel
-         openCLManager.execute2D(createPointCloudKernel, depthChannel.getImageWidth(), depthChannel.getImageHeight());
-
-         // Read the OpenCL buffer back to the CPU
-         pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
-
-         // Request the PointCloudRenderer to render the point cloud from OpenCL-mapped buffers
-         pointCloudRenderer.updateMeshFastest(depthChannel.getTotalNumberOfPixels());
+         pointCloudRenderer.updateMeshFastestAfterKernel();
       }
    }
 
@@ -199,6 +188,11 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
       if (ImGui.radioButton(labels.get("Sensor X"), gradientMode == RDXColorGradientMode.SENSOR_X))
          gradientMode = RDXColorGradientMode.SENSOR_X;
       ImGui.checkbox(labels.get("Sinusoidal gradient"), useSinusoidalGradientPattern);
+      if (depthChannel.getIsOusterCameraModel() && colorChannel.getIsEquidistantFisheyeCameraModel())
+      {
+         if (ImGui.sliderInt(labels.get("Level of color detail"), levelOfColorDetail.getData(), 0, 3))
+            levelOfColorDetailChanged.set();
+      }
    }
 
    @Override
