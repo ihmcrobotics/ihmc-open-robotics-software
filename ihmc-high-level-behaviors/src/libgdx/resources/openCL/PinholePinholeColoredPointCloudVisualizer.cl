@@ -56,11 +56,7 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
       if (pixelInBounds)
       {
          uint4 rgba8888Color = read_imageui(colorRGBAImage, (int2) (pixelCol, pixelRow));
-         // pointColor = rgba8888Color / 255.0f; ?
-         pointColor.x = (rgba8888Color.x / 255.0f);
-         pointColor.y = (rgba8888Color.y / 255.0f);
-         pointColor.z = (rgba8888Color.z / 255.0f);
-         pointColor.w = (rgba8888Color.w / 255.0f);
+         pointColor = convert_float4(rgba8888Color) / 255.0f;
          appliedColorFromSensor = true;
       }
    }
