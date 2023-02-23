@@ -56,6 +56,7 @@ public class AStarFootstepPlanner
    private final IdealStepCalculator idealStepCalculator;
    private final ReferenceBasedIdealStepCalculator referenceBasedIdealStepCalculator;
    private final FootstepPlannerCompletionChecker completionChecker;
+   private final FootstepCostCalculator stepCostCalculator;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
 
    private final FootstepPlannerEdgeData edgeData;
@@ -104,7 +105,8 @@ public class AStarFootstepPlanner
       this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, referenceBasedIdealStepCalculator, footPolygons);
 
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
-      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, referenceBasedIdealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
+      stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, referenceBasedIdealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
+
 
       this.iterationConductor = new AStarFootstepPlannerIterationConductor(expansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
       this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, iterationConductor, distanceAndYawHeuristics, snapper);
@@ -530,6 +532,7 @@ public class AStarFootstepPlanner
    {
       snapper.setHeightMapData(heightMapData);
       checker.setHeightMapData(heightMapData);
+      stepCostCalculator.setHeightMapData(heightMapData);
    }
 
    public ReferenceBasedIdealStepCalculator getReferenceBasedIdealStepCalculator()
