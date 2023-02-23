@@ -457,7 +457,10 @@ void kernel snapVertices(
    snapped_vertex_height[path_key] = running_sum / number_of_samples;
 }
 
-float get_yaw(int yaw_index) { return yaw_index * M_PI_4_F / 2.0f; }
+float get_yaw(int yaw_index)
+{
+   return yaw_index * M_PI_4_F / 2.0f;
+}
 
 int computeCollisionOffsetX(int yaw_idx, int x_offset, int y_offset)
 {
