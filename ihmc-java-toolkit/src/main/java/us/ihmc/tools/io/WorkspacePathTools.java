@@ -116,6 +116,16 @@ public class WorkspacePathTools
             Path workingDirectory = WorkspacePathTools.getWorkingDirectory();
             LogTools.debug("Working directory: {}", workingDirectory);
 
+            if (codeSourceDirectory.getNameCount() < 1 || workingDirectory.getNameCount() < 1
+             || !codeSourceDirectory.getName(0).toString().equals(workingDirectory.getName(0).toString()))
+            {
+               throw new RuntimeException("""
+               The code source directory and working directory need to share a common root.
+                  Code source path: %s
+                  Working directory: %s
+               """.formatted(codeSourceDirectory, workingDirectory));
+            }
+
             int lastIndexOfSrc = -1;
             for (int nameElementIndex = 0; nameElementIndex < codeSourceDirectory.getNameCount(); nameElementIndex++)
             {
@@ -127,33 +137,42 @@ public class WorkspacePathTools
 
             if (lastIndexOfSrc >= 0)
             {
-               // Add 2 to keep 'src' and the source set part after 'src'
+               // Add 2 to keep 'src' and the source set part after 'src' i.e. ../src/main
+               // i.e This removes out/production/classes from [...]/src/main/out/production/classes
                Path pathBeforeResources = codeSourceDirectory.subpath(0, lastIndexOfSrc + 2);
                LogTools.debug("Path before resources: {}", pathBeforeResources);
 
                Path pathWithResources = pathBeforeResources.resolve("resources").normalize();
                LogTools.debug("Path with resources: {}", pathWithResources);
 
-               int indexWhereWorkingDirectoryEnds = -1;
-               for (int nameElementIndex = 0; nameElementIndex < pathWithResources.getNameCount()
-                                              && nameElementIndex < workingDirectory.getNameCount(); nameElementIndex++)
+               // We go through both working directory and code source directory to find the common part
+               int afterLastCommonPathElement = -1;
+               for (int pathNameElement = 0; pathNameElement < pathWithResources.getNameCount()
+                                          && pathNameElement < workingDirectory.getNameCount(); pathNameElement++)
                {
-                  if (pathWithResources.getName(nameElementIndex).toString().equals(workingDirectory.getName(nameElementIndex).toString()))
+                  if (pathWithResources.getName(pathNameElement).toString().equals(workingDirectory.getName(pathNameElement).toString()))
                   {
-                     indexWhereWorkingDirectoryEnds = nameElementIndex + 1;
+                     // We add 1 here, to make sure the directory to assume present
+                     // is closer to the 'src' folder, which is what the other tools assume right now.
+                     afterLastCommonPathElement = pathNameElement + 1;
                   }
                }
 
-               if (indexWhereWorkingDirectoryEnds >= 0)
+               // Sometimes the working directory is set to within the src folder heirarchy.
+               // In that case, let's back out and make the parent of 'src' our directory to assume present.
+               if (afterLastCommonPathElement >= lastIndexOfSrc)
                {
-                  String directoryNameToAssumePresent = pathWithResources.getName(indexWhereWorkingDirectoryEnds).toString();
-                  String subsequentPathToResourceFolder
-                        = pathWithResources.subpath(indexWhereWorkingDirectoryEnds + 1, pathWithResources.getNameCount()) .toString();
-                  inferredPathComponents = new WorkingDirectoryPathComponents(directoryNameToAssumePresent, subsequentPathToResourceFolder);
-
-                  LogTools.info("Inferred workspace directory components:\n Directory name to assume present: {}\n Subsequent path to resource folder: {}",
-                                directoryNameToAssumePresent, subsequentPathToResourceFolder);
+                  afterLastCommonPathElement = lastIndexOfSrc - 1;
                }
+
+               String directoryNameToAssumePresent = pathWithResources.getName(afterLastCommonPathElement).toString();
+               int firstElementOfSubsequentPath = afterLastCommonPathElement + 1;
+               String subsequentPathToResourceFolder
+                     = pathWithResources.subpath(firstElementOfSubsequentPath, pathWithResources.getNameCount()).toString();
+               inferredPathComponents = new WorkingDirectoryPathComponents(directoryNameToAssumePresent, subsequentPathToResourceFolder);
+
+               LogTools.info("Inferred workspace directory components:\n Directory name to assume present: {}\n Subsequent path to resource folder: {}",
+                             directoryNameToAssumePresent, subsequentPathToResourceFolder);
             }
             else
             {
