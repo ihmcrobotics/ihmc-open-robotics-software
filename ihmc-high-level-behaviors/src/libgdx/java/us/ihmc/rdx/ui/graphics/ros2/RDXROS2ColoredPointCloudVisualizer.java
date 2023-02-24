@@ -86,16 +86,12 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    {
       super.update();
 
-      if (subscribed.get() && isActive() && depthChannel.getImageAvailable())
+      if (subscribed.get() && isActive())
       {
          synchronized (imageMessagesSyncObject)
          {
             depthChannel.update(openCLManager);
-            if (colorChannel.getImageAvailable())
-            {
-               colorChannel.update(openCLManager);
-               colorReceptionTimer.reset();
-            }
+            colorChannel.update(openCLManager);
          }
 
          // We decompress outside of the incoming message synchronization block.
@@ -103,63 +99,65 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
          // to not have to wait for compression to finish and also not have to copy
          // the unpacked result to a decompression input buffer.
          depthChannel.decompress();
-         if (colorChannel.getImageAvailable())
-            colorChannel.decompress();
+         colorChannel.decompress();
 
-         // Stop coloring points if there's been no data in a few seconds
-         boolean usingColor = colorReceptionTimer.isRunning(2.0);
-
-         int totalNumberOfPoints = depthChannel.getTotalNumberOfPixels();
-         if (depthChannel.getIsOusterCameraModel() && usingColor && colorChannel.getIsEquidistantFisheyeCameraModel())
+         if (depthChannel.getDecompressedImageReady().poll())
          {
-            totalNumberOfPoints = depthImageToPointCloudKernel.calculateNumberOfPointsForLevelOfColorDetail(depthChannel.getImageWidth(),
-                                                                                                            depthChannel.getImageHeight(),
-                                                                                                            levelOfColorDetail.get());
+            // Stop coloring points if there's been no data in a few seconds
+            if (colorChannel.getDecompressedImageReady().poll())
+               colorReceptionTimer.reset();
+            boolean usingColor = colorReceptionTimer.isRunning(2.0);
+
+            int totalNumberOfPoints = depthChannel.getTotalNumberOfPixels();
+            if (depthChannel.getIsOusterCameraModel() && usingColor && colorChannel.getIsEquidistantFisheyeCameraModel())
+            {
+               totalNumberOfPoints = depthImageToPointCloudKernel.calculateNumberOfPointsForLevelOfColorDetail(depthChannel.getImageWidth(),
+                                                                                                               depthChannel.getImageHeight(),
+                                                                                                               levelOfColorDetail.get());
+            }
+
+            if (pointCloudVertexBuffer == null || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX < totalNumberOfPoints)
+            {
+               LogTools.info("Allocating new buffers. {} total points", totalNumberOfPoints);
+
+               if (pointCloudRenderer != null)
+                  pointCloudRenderer.dispose();
+               pointCloudRenderer = new RDXPointCloudRenderer();
+               pointCloudRenderer.create(totalNumberOfPoints);
+
+               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX, pointCloudRenderer.getVertexBuffer());
+               pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
+            }
+
+            pointCloudRenderer.updateMeshFastestBeforeKernel();
+            pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
+
+            if (depthChannel.getIsPinholeCameraModel()) // Assuming color camera is also pinhole if using it
+            {
+               pinholePinholeKernel.runKernel(colorChannel,
+                                              depthChannel,
+                                              usingColor && useSensorColor.get(),
+                                              gradientMode.ordinal(),
+                                              useSinusoidalGradientPattern.get(),
+                                              pointSize.get(),
+                                              pointCloudVertexBuffer);
+            }
+            else if (depthChannel.getIsOusterCameraModel()) // Assuming color is equidistant fisheye if using it
+            {
+               depthImageToPointCloudKernel.runKernel(depthChannel.getOusterHorizontalFieldOfView(),
+                                                      depthChannel.getOusterVerticalFieldOfView(),
+                                                      pointSize.get(),
+                                                      depthChannel.getDepth16UC1Image(),
+                                                      colorChannel.getFx(),
+                                                      colorChannel.getFy(),
+                                                      colorChannel.getCx(),
+                                                      colorChannel.getCy(),
+                                                      usingColor ? colorChannel.getColor8UC4Image() : null,
+                                                      pointCloudVertexBuffer);
+            }
+
+            pointCloudRenderer.updateMeshFastestAfterKernel();
          }
-
-         if (pointCloudVertexBuffer == null
-          || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX < totalNumberOfPoints)
-         {
-            LogTools.info("Allocating new buffers. {} total points", totalNumberOfPoints);
-
-            if (pointCloudRenderer != null)
-               pointCloudRenderer.dispose();
-            pointCloudRenderer = new RDXPointCloudRenderer();
-            pointCloudRenderer.create(totalNumberOfPoints);
-
-            pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
-                                                           pointCloudRenderer.getVertexBuffer());
-            pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
-         }
-
-         pointCloudRenderer.updateMeshFastestBeforeKernel();
-         pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
-
-         if (depthChannel.getIsPinholeCameraModel()) // Assuming color camera is also pinhole if using it
-         {
-            pinholePinholeKernel.runKernel(colorChannel,
-                                           depthChannel,
-                                           usingColor && useSensorColor.get(),
-                                           gradientMode.ordinal(),
-                                           useSinusoidalGradientPattern.get(),
-                                           pointSize.get(),
-                                           pointCloudVertexBuffer);
-         }
-         else if (depthChannel.getIsOusterCameraModel()) // Assuming color is equidistant fisheye if using it
-         {
-            depthImageToPointCloudKernel.runKernel(depthChannel.getOusterHorizontalFieldOfView(),
-                                                   depthChannel.getOusterVerticalFieldOfView(),
-                                                   pointSize.get(),
-                                                   depthChannel.getDepth16UC1Image(),
-                                                   colorChannel.getFx(),
-                                                   colorChannel.getFy(),
-                                                   colorChannel.getCx(),
-                                                   colorChannel.getCy(),
-                                                   usingColor ? colorChannel.getColor8UC4Image() : null,
-                                                   pointCloudVertexBuffer);
-         }
-
-         pointCloudRenderer.updateMeshFastestAfterKernel();
       }
    }
 
@@ -216,7 +214,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (isActive())
+      if (isActive() && pointCloudRenderer != null)
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 

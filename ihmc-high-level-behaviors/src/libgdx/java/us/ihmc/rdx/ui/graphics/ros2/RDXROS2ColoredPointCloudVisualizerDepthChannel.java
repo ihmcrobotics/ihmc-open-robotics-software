@@ -20,17 +20,22 @@ public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2Color
    @Override
    protected void initialize(OpenCLManager openCLManager)
    {
-      // Create OpenCV mat for depth image
       depth16UC1Image = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
       depth16UC1Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
    }
 
    public void decompress()
    {
-      opencv_imgcodecs.imdecode(decompressionInputSwapReference.getForThreadTwo().getInputMat(),
-                                opencv_imgcodecs.IMREAD_UNCHANGED,
-                                depth16UC1Image.getBytedecoOpenCVMat());
-      decompressionInputSwapReference.swap();
+      if (readyForDecompression.poll())
+      {
+         synchronized (decompressionInputSwapReference)
+         {
+            opencv_imgcodecs.imdecode(decompressionInputSwapReference.getForThreadTwo().getInputMat(),
+                                      opencv_imgcodecs.IMREAD_UNCHANGED,
+                                      depth16UC1Image.getBytedecoOpenCVMat());
+         }
+         decompressedImageReady.set();
+      }
    }
 
    public BytedecoImage getDepth16UC1Image()

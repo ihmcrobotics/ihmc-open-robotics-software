@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -29,7 +30,9 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    protected final SwapReference<ImageMessageDecompressionInput> decompressionInputSwapReference = new SwapReference<>(ImageMessageDecompressionInput::new);
    private boolean initialized = false;
-   private volatile boolean imageAvailable = false;
+   protected final Notification subscribedImageAvailable = new Notification();
+   protected final Notification readyForDecompression = new Notification();
+   protected final Notification decompressedImageReady = new Notification();
    private volatile boolean receivedOne = false;
    protected int imageWidth;
    protected int imageHeight;
@@ -64,7 +67,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
             frequencyPlot.ping();
             imageMessage.getData().resetQuick();
             subscriber.takeNextData(imageMessage, sampleInfo);
-            imageAvailable = true;
+            subscribedImageAvailable.set();
             receivedOne = true;
          }
       });
@@ -78,42 +81,42 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
     */
    public void update(OpenCLManager openCLManager)
    {
-      if (!initialized)
+      if (subscribedImageAvailable.poll())
       {
-         imageWidth = imageMessage.getImageWidth();
-         imageHeight = imageMessage.getImageHeight();
-         totalNumberOfPixels = imageHeight * imageWidth;
-         int bytesPerPixel = ImageMessageFormat.getFormat(imageMessage).getBytesPerPixel();
-         decompressionInputSwapReference.initializeBoth(decompressionInput -> decompressionInput.setup(totalNumberOfPixels * bytesPerPixel));
+         if (!initialized)
+         {
+            imageWidth = imageMessage.getImageWidth();
+            imageHeight = imageMessage.getImageHeight();
+            totalNumberOfPixels = imageHeight * imageWidth;
+            int bytesPerPixel = ImageMessageFormat.getFormat(imageMessage).getBytesPerPixel();
+            decompressionInputSwapReference.initializeBoth(decompressionInput -> decompressionInput.setup(totalNumberOfPixels * bytesPerPixel));
 
-         initialize(openCLManager);
-         initialized = true;
-      }
+            initialize(openCLManager);
+            initialized = true;
+         }
 
-      fx = imageMessage.getFocalLengthXPixels();
-      fy = imageMessage.getFocalLengthYPixels();
-      cx = imageMessage.getPrincipalPointXPixels();
-      cy = imageMessage.getPrincipalPointYPixels();
-      depthDiscretization = imageMessage.getDepthDiscretization();
-      translationToWorld.set(imageMessage.getPosition());
-      rotationMatrixToWorld.set(imageMessage.getOrientation());
+         fx = imageMessage.getFocalLengthXPixels();
+         fy = imageMessage.getFocalLengthYPixels();
+         cx = imageMessage.getPrincipalPointXPixels();
+         cy = imageMessage.getPrincipalPointYPixels();
+         depthDiscretization = imageMessage.getDepthDiscretization();
+         translationToWorld.set(imageMessage.getPosition());
+         rotationMatrixToWorld.set(imageMessage.getOrientation());
 
-      synchronized (decompressionInputSwapReference)
-      {
          decompressionInputSwapReference.getForThreadOne().extract(imageMessage);
+         decompressionInputSwapReference.swap();
+         readyForDecompression.set();
+
+         messageSizeReadout.update(imageMessage.getData().size());
+         sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
+         delayPlot.addValue(PerceptionMessageTools.calculateDelay(imageMessage));
+
+         isPinholeCameraModel = imageMessage.getIsPinholeCameraModel();
+         isEquidistantFisheyeCameraModel = imageMessage.getIsEquidistantFisheyeCameraModel();
+         isOusterCameraModel = imageMessage.getIsOusterCameraModel();
+         ousterHorizontalFieldOfView = imageMessage.getOusterHorizontalFieldOfView();
+         ousterVerticalFieldOfView = imageMessage.getOusterVerticalFieldOfView();
       }
-
-      messageSizeReadout.update(imageMessage.getData().size());
-      sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
-      delayPlot.addValue(PerceptionMessageTools.calculateDelay(imageMessage));
-
-      isPinholeCameraModel = imageMessage.getIsPinholeCameraModel();
-      isEquidistantFisheyeCameraModel = imageMessage.getIsEquidistantFisheyeCameraModel();
-      isOusterCameraModel = imageMessage.getIsOusterCameraModel();
-      ousterHorizontalFieldOfView = imageMessage.getOusterHorizontalFieldOfView();
-      ousterVerticalFieldOfView = imageMessage.getOusterVerticalFieldOfView();
-
-      imageAvailable = false;
    }
 
    protected abstract void initialize(OpenCLManager openCLManager);
@@ -123,9 +126,9 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       return topic;
    }
 
-   public boolean getImageAvailable()
+   public Notification getDecompressedImageReady()
    {
-      return imageAvailable;
+      return decompressedImageReady;
    }
 
    public int getImageWidth()
