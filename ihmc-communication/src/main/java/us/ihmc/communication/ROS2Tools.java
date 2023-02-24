@@ -230,8 +230,8 @@ public class ROS2Tools
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
 
-   public static final ROS2Topic<Empty> PUBLISH_LIDAR_SCAN = new ROS2Topic<>();
-   public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = new ROS2Topic<>();
+   public static final ROS2Topic<Empty> PUBLISH_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("publish_lidar_scan").withType(Empty.class);
+   public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("publish_height_map").withType(Empty.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 

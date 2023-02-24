@@ -4,6 +4,7 @@
 #define DEPTH_IMAGE_HEIGHT 3
 #define POINT_SIZE 4
 #define LEVEL_OF_COLOR_DETAIL 5
+#define USE_FISHEYE_COLOR 6
 
 #define FISHEYE_IMAGE_WIDTH 0
 #define FISHEYE_IMAGE_HEIGHT 1
@@ -15,7 +16,6 @@
 kernel void imageToPointCloud(global float* parameters,
                               global float* ousterToWorldTransform,
                               read_only image2d_t discretizedDepthImage,
-                              int useFisheyeColorImage,
                               global float* fisheyeParameters,
                               read_only image2d_t fThetaFisheyeRGBA8Image,
                               global float* ousterToFisheyeTransform,
@@ -79,12 +79,9 @@ kernel void imageToPointCloud(global float* parameters,
       pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }
 
-   float pointColorR;
-   float pointColorG;
-   float pointColorB;
-   float pointColorA;
+   float4 pointColor = (float4) (1.0f, 1.0f, 1.0f, 1.0f);
    bool appliedColorFromSensor = false;
-   if (useFisheyeColorImage)
+   if (fisheyeParameters[USE_FISHEYE_COLOR])
    {
       float3 fisheyeFramePoint = transformPoint3D32(ousterFramePoint, ousterToFisheyeTransform);
 
@@ -112,26 +109,19 @@ kernel void imageToPointCloud(global float* parameters,
           && intervalContains(fisheyeRow, 0, fisheyeParameters[FISHEYE_IMAGE_HEIGHT])
          {
             uint4 fisheyeColor = read_imageui(fThetaFisheyeRGBA8Image, (int2) (fisheyeCol, fisheyeRow));
-            pointColorR = (fisheyeColor.x / 255.0f);
-            pointColorG = (fisheyeColor.y / 255.0f);
-            pointColorB = (fisheyeColor.z / 255.0f);
-            pointColorA = (fisheyeColor.w / 255.0f);
+            pointColor = convert_float4(fisheyeColor) / 255.0f;
             appliedColorFromSensor = true;
          }
       }
    }
    if (!appliedColorFromSensor)
    {
-      float4 rgba8888Color = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
-      pointColorR = (rgba8888Color.x);
-      pointColorG = (rgba8888Color.y);
-      pointColorB = (rgba8888Color.z);
-      pointColorA = (rgba8888Color.w);
+      pointColor = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
    }
 
-   pointCloudVertexBuffer[pointStartIndex + 3] = pointColorR;
-   pointCloudVertexBuffer[pointStartIndex + 4] = pointColorG;
-   pointCloudVertexBuffer[pointStartIndex + 5] = pointColorB;
-   pointCloudVertexBuffer[pointStartIndex + 6] = pointColorA;
+   pointCloudVertexBuffer[pointStartIndex + 3] = pointColor.x;
+   pointCloudVertexBuffer[pointStartIndex + 4] = pointColor.y;
+   pointCloudVertexBuffer[pointStartIndex + 5] = pointColor.z;
+   pointCloudVertexBuffer[pointStartIndex + 6] = pointColor.w;
    pointCloudVertexBuffer[pointStartIndex + 7] = pointSize;
 }

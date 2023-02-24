@@ -95,7 +95,7 @@ public class RealsenseColorAndDepthPublisher
             if (realsense.getDevice() == null)
             {
                running = false;
-               throw new RuntimeException("Device not found. Set -Dd435.serial.number=00000000000");
+               throw new RuntimeException("Device not found. Set -D<model>.serial.number=00000000000");
             }
             realsense.enableColor(settingsProfile);
             realsense.initialize();
