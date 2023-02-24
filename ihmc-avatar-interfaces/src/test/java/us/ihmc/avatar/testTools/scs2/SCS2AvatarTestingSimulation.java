@@ -535,7 +535,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
             {
                Window primaryWindow = getSimulationConstructionSet().getPrimaryGUIWindow();
                primaryWindow.requestFocus();
-               String errorMessage = "Test complete!";
+               String errorMessage = "Test completed successfully!";
                if (lastThrowable.get() != null)
                {
                   errorMessage = lastThrowable.get().getCause().getMessage();
