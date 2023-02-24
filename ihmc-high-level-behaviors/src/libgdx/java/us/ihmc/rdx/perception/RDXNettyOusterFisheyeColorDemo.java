@@ -72,8 +72,7 @@ public class RDXNettyOusterFisheyeColorDemo
                   {
                      if (nettyOusterUI.getIsReady())
                      {
-                        nettyOusterUI.getDepthImageToPointCloudKernel()
-                                     .setFisheyeImageToColorPoints(texture.getRGBA8Image(),
+                        nettyOusterUI.setFisheyeImageToColorPoints(texture.getRGBA8Image(),
                                                                    coloringFx.get(),
                                                                    coloringFy.get(),
                                                                    coloringCx.get(),

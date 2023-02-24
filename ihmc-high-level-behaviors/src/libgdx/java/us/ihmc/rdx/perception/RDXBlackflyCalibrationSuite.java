@@ -333,11 +333,11 @@ public class RDXBlackflyCalibrationSuite
 
             if (nettyOusterUI.getIsReady())
             {
-               nettyOusterUI.getDepthImageToPointCloudKernel().setFisheyeImageToColorPoints(texture.getRGBA8Image(),
-                                                                                            coloringFx.get(),
-                                                                                            coloringFy.get(),
-                                                                                            coloringCx.get(),
-                                                                                            coloringCy.get());
+               nettyOusterUI.setFisheyeImageToColorPoints(texture.getRGBA8Image(),
+                                                          coloringFx.get(),
+                                                          coloringFy.get(),
+                                                          coloringCx.get(),
+                                                          coloringCy.get());
                nettyOusterUI.getSensorFrame().getReferenceFrame()
                             .getTransformToDesiredFrame(nettyOusterUI.getDepthImageToPointCloudKernel().getOusterToFisheyeTransformToPack(),
                                                         blackflySensorFrame);

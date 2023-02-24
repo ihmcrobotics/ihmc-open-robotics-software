@@ -30,11 +30,10 @@ public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2Color
       color8UC4Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
    }
 
-   public void update(OpenCLManager openCLManager)
+   public void decompress()
    {
-      super.update(openCLManager);
-
-      opencv_imgcodecs.imdecode(decompressionInput.getInputMat(), opencv_imgcodecs.IMREAD_UNCHANGED, yuv1420Image);
+      opencv_imgcodecs.imdecode(decompressionInputSwapReference.getForThreadTwo().getInputMat(), opencv_imgcodecs.IMREAD_UNCHANGED, yuv1420Image);
+      decompressionInputSwapReference.swap();
 
       opencv_imgproc.cvtColor(yuv1420Image, color8UC3Image.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
       // Put the depth image into OpenCL buffer
