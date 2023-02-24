@@ -99,4 +99,9 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
    {
       return get(icpErrorCutoff);
    }
+
+   default int getMinimumNumberOfTimesMatched()
+   {
+      return get(minimumNumberOfTimesMatched);
+   }
 }

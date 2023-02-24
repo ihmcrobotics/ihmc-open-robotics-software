@@ -462,6 +462,8 @@ public class PlanarRegionMap
                         // Generate ID for the merged region
                         int finalId = generatePostMergeId(parentRegion.getRegionId(), childRegion.getRegionId());
                         parentRegion.setRegionId(finalId);
+                        parentRegion.setTickOfLastMeasurement(currentTimeIndex);
+                        parentRegion.incrementNumberOfTimesMatched();
                         changed = true;
 
                         map.getPlanarRegionsAsList().remove(childRegion);
@@ -778,6 +780,15 @@ public class PlanarRegionMap
    public void performMapCleanUp()
    {
       PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
+
+      for(PlanarRegion region : finalMap.getPlanarRegionsAsList())
+      {
+         if((currentTimeIndex - region.getTickOfLastMeasurement() > 5) // Region has not been matched enough in a while. Not good region.
+             && (region.getNumberOfTimesMatched() < parameters.getMinimumNumberOfTimesMatched())) // Region has not been matched enough
+         {
+            finalMap.getPlanarRegionsAsList().remove(region);
+         }
+      }
    }
 
    private void processUniqueRegions(PlanarRegionsList map)
@@ -786,6 +797,8 @@ public class PlanarRegionMap
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {
          region.setRegionId(Math.abs(region.getRegionId()));
+         region.incrementNumberOfTimesMatched();
+         region.setTickOfLastMeasurement(currentTimeIndex);
       }
       LogTools.info("+++++++++ --------- +++++++++ Done (Processing Unique Region IDs) +++++++++ --------- +++++++++");
    }
