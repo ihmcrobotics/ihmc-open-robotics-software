@@ -1699,6 +1699,14 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
                     getTickOfLastMeasurement());
    }
 
+   public Point3D getConcaveHullPoint3DInWorld(int index)
+   {
+      Point2D pointInPlane = concaveHullsVertices.get(index);
+      Point3D pointInWorld = new Point3D(pointInPlane.getX(), pointInPlane.getY(), 0.0);
+      pointInWorld.applyTransform(fromLocalToWorldTransform);
+      return pointInWorld;
+   }
+
    public int getNumberOfTimesMatched()
    {
       return numberOfTimesMatched;

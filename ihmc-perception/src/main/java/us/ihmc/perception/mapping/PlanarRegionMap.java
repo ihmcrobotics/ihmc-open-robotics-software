@@ -5,11 +5,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.PlaneRegistrationTools;
+import us.ihmc.perception.tools.PlanarRegionCuttingTools;
+import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
 import us.ihmc.perception.tools.PerceptionEuclidTools;
 import us.ihmc.perception.tools.PerceptionPrintTools;
@@ -717,6 +717,7 @@ public class PlanarRegionMap
          //transformToWorld.set(sensorToWorldTransformPosterior);
 
          finalMap = crossReduceRegionsIteratively(finalMap, regions);
+         //PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
 
          //finalMap.addPlanarRegionsList(regions);
 
@@ -750,6 +751,11 @@ public class PlanarRegionMap
          LogTools.warn("[Keyframe] High Rotation: " + euler.norm());
 
       return isKeyframe;
+   }
+
+   public void performMapCleanUp()
+   {
+      PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
    }
 
    private void processUniqueRegions(PlanarRegionsList map)

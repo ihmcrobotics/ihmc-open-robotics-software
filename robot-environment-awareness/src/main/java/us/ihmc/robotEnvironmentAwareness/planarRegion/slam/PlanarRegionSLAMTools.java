@@ -751,4 +751,33 @@ public class PlanarRegionSLAMTools
 
       return wasMatched;
    }
+
+   /**
+    * Checks to see if the two regions intersect. This is done by checking if the normals are close to orthogonal and if the bounding boxes overlap.
+    * @param regionA
+    * @param regionB
+    * @return true if the regions intersect, false otherwise
+    */
+   public static boolean checkRegionsForIntersection(PlanarRegion regionA,
+                                                      PlanarRegion regionB)
+   {
+      // Get normal from region one
+      Vector3D normalA = new Vector3D();
+      regionA.getNormal(normalA);
+
+      // Get normal from region two
+      Vector3D normalB = new Vector3D();
+      regionB.getNormal(normalB);
+
+      // Find bounding box overlap score for the two regions
+      double overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, 0.05, true);
+
+      // Check if normals are close to orthogonal
+      if (Math.abs(normalA.dot(normalB)) < 0.2 && overlapScore > 0.01)
+      {
+         return true;
+      }
+
+      return false;
+   }
 }

@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -12,8 +13,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHull;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCutter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
@@ -87,5 +90,75 @@ public class PlanarRegionCuttingTools
       }
 
       return resultingRegions;
+   }
+
+   /**
+    * Given two planar regions, chop off the extra part that lives outside (in the opposite direction of the normal) of the other region, for each region.
+    *
+    * @param regionOne First region
+    * @param regionTwo Second region
+    * @return resultRegions List of planar regions after the cut
+    */
+   public static List<PlanarRegion> chopOffExtraPartsAtIntersection(PlanarRegion regionOne, PlanarRegion regionTwo)
+   {
+      Vector3D oneToTwo = new Vector3D();
+      oneToTwo.sub(regionTwo.getPoint(), regionOne.getPoint());
+
+      Plane3D planeOne = regionOne.getPlane();
+      // Negate plane normal if the dot product of the normal and the vector from one to two is negative
+      if (oneToTwo.dot(planeOne.getNormal()) < 0.0)
+      {
+         planeOne.getNormal().negate();
+      }
+
+      Plane3D planeTwo = regionTwo.getPlane();
+      // Negate plane normal if the dot product of the normal and the vector from two to one is negative
+      if (oneToTwo.dot(planeTwo.getNormal()) > 0.0)
+      {
+         planeTwo.getNormal().negate();
+      }
+
+      List<PlanarRegion> resultRegions = new ArrayList<>();
+      resultRegions.addAll(cutRegionByPlane(planeTwo, regionOne));
+      resultRegions.addAll(cutRegionByPlane(planeOne, regionTwo));
+      return resultRegions;
+   }
+
+   /**
+    * Method for chopping off extra parts in pairs of planar regions within a list
+    */
+   public static void chopOffExtraPartsFromIntersectingPairs(PlanarRegionsList planarRegions)
+   {
+      for (int i = 0; i < planarRegions.getNumberOfPlanarRegions(); i++)
+      {
+         PlanarRegion regionA = planarRegions.getPlanarRegion(i);
+
+         for (int j = i + 1; j < planarRegions.getNumberOfPlanarRegions(); j++)
+         {
+            PlanarRegion regionB = planarRegions.getPlanarRegion(j);
+
+            if (PlanarRegionSLAMTools.checkRegionsForIntersection(regionA, regionB))
+            {
+               List<PlanarRegion> resultRegions = PlanarRegionCuttingTools.chopOffExtraPartsAtIntersection(regionA, regionB);
+
+               if (resultRegions.size() == 2)
+               {
+                  PlanarRegion finalRegionA = resultRegions.get(0);
+                  PlanarRegion finalRegionB = resultRegions.get(1);
+
+                  if(finalRegionA.getConcaveHull() == null || finalRegionB.getConcaveHull() == null)
+                     continue;
+                  else if(finalRegionA.getConcaveHull().size() < 3 || finalRegionB.getConcaveHull().size() < 3)
+                     continue;
+
+                  regionA.set(finalRegionA);
+                  regionA.setRegionId(finalRegionA.getRegionId());
+
+                  regionB.set(finalRegionB);
+                  regionB.setRegionId(finalRegionB.getRegionId());
+               }
+            }
+         }
+      }
    }
 }
