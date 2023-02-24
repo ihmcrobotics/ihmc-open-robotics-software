@@ -516,6 +516,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       finishTest(keepSCSUp);
    }
 
+   public boolean simulationHasFailed()
+   {
+      return lastThrowable.get() != null;
+   }
+
    public void finishTest(boolean waitUntilGUIIsDone)
    {
       if (waitUntilGUIIsDone && getSimulationConstructionSet() != null && getSimulationConstructionSet().isVisualizerEnabled()
@@ -530,7 +535,12 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
             {
                Window primaryWindow = getSimulationConstructionSet().getPrimaryGUIWindow();
                primaryWindow.requestFocus();
-               Alert alert = new Alert(AlertType.INFORMATION, "Test complete!", ButtonType.OK);
+               String errorMessage = "Test complete!";
+               if (lastThrowable.get() != null)
+               {
+                  errorMessage = lastThrowable.get().getCause().getMessage();
+               }
+               Alert alert = new Alert(AlertType.INFORMATION, errorMessage, ButtonType.OK);
                SessionVisualizerIOTools.addSCSIconToDialog(alert);
                alert.initOwner(primaryWindow);
                JavaFXMissingTools.centerDialogInOwner(alert);

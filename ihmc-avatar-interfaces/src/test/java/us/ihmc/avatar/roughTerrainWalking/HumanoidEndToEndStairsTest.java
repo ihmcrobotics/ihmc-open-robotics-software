@@ -41,6 +41,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    private double stepHeight = 9.25 * 0.0254;
    private double stepLength = 0.32;
    private boolean useExperimentalPhysicsEngine = false;
+   private final boolean keepScsUp = true;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -58,7 +59,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    {
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest();
+         simulationTestHelper.finishTest(keepScsUp);
          simulationTestHelper = null;
       }
 
