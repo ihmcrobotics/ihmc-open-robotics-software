@@ -657,6 +657,14 @@ public class PlanarRegionMap
 
       LogTools.info("Registering regions: " + regions.getNumberOfPlanarRegions() + " regions");
 
+      for (PlanarRegion region : regions.getPlanarRegionsAsList())
+      {
+         if (!initialized)
+            region.setRegionId(uniqueIDtracker++);
+         else
+            region.setRegionId(-uniqueIDtracker++);
+      }
+
       if(!initialized)
       {
          previousRegions.addPlanarRegionsList(regions.copy());
@@ -716,7 +724,21 @@ public class PlanarRegionMap
          //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, transformToWorld));
          //transformToWorld.set(sensorToWorldTransformPosterior);
 
+         PerceptionPrintTools.printRegionIDs("Regions", regions);
+         PerceptionPrintTools.printRegionIDs("Map", finalMap);
+
+         PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
+                                                       regions,
+                                                       incomingToMapMatches,
+                                                       (float) parameters.getMinimumOverlapThreshold(),
+                                                       (float) parameters.getSimilarityThresholdBetweenNormals(),
+                                                       (float) parameters.getOrthogonalDistanceThreshold(),
+                                                       (float) parameters.getMinimumBoundingBoxSize());
+
+         PerceptionPrintTools.printMatches("Cross Matches", finalMap, regions, incomingToMapMatches);
+
          finalMap = crossReduceRegionsIteratively(finalMap, regions);
+         processUniqueRegions(finalMap);
          //PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
 
          //finalMap.addPlanarRegionsList(regions);

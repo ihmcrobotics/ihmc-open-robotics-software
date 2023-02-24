@@ -770,10 +770,10 @@ public class PlanarRegionSLAMTools
       regionB.getNormal(normalB);
 
       // Find bounding box overlap score for the two regions
-      double overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, 0.05, true);
+      double overlapScore = computeBoundingBoxOverlapScore(regionA, regionB, 0.01, true);
 
       // Check if normals are close to orthogonal
-      if (Math.abs(normalA.dot(normalB)) < 0.2 && overlapScore > 0.01)
+      if (Math.abs(normalA.dot(normalB)) < 0.2 && overlapScore > 0.02)
       {
          return true;
       }
