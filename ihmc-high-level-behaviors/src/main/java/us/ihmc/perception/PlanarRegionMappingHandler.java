@@ -20,7 +20,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.mapping.PlanarRegionMap;
@@ -28,6 +27,7 @@ import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.odometry.RapidPatchesBasedICP;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionPrintTools;
+import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
@@ -158,8 +158,8 @@ public class PlanarRegionMappingHandler
       //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
       //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
-      createOuster(128, 1024, smoothing);
-      //createL515(768, 1024, smoothing);
+      //createOuster(128, 1024, smoothing);
+      createL515(768, 1024, smoothing);
    }
 
    private void createL515(int depthHeight, int depthWidth, boolean smoothing)
@@ -301,6 +301,13 @@ public class PlanarRegionMappingHandler
       }
    }
 
+   public void performMapCleanUp()
+   {
+      planarRegionMap.performMapCleanUp();
+      latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
+      planarRegionMap.setModified(true);
+   }
+
    private void loadDataFromPerceptionLog(PerceptionDataLoader loader, int index)
    {
       loader.loadCompressedDepth(sensorLogChannelName, index, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
@@ -403,8 +410,8 @@ public class PlanarRegionMappingHandler
    {
       RigidBodyTransform currentToPreviousTransform = new RigidBodyTransform();
       boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions.getPlanarRegionsList(),
-                                                                         currentRegions.getPlanarRegionsList(),
-                                                                         currentToPreviousTransform, getParameters());
+                                                                          currentRegions.getPlanarRegionsList(),
+                                                                          currentToPreviousTransform, getParameters());
 
       PerceptionPrintTools.printTransform("ComputeICP", currentToPreviousTransform);
    }

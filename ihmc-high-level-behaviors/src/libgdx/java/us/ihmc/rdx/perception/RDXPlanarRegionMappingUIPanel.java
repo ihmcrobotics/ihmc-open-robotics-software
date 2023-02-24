@@ -10,12 +10,11 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.PlanarRegionMappingHandler;
-import us.ihmc.perception.PlaneRegistrationTools;
+import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +54,9 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
          {
             if (ImGui.button("Load Next Set"))
                mappingManager.nextButtonCallback();
+            ImGui.sameLine();
+            if(ImGui.button("Perform Map Clean-up"))
+               mappingManager.performMapCleanUp();
             if (ImGui.button("Auto Increment"))
                mappingManager.autoIncrementButtonCallback();
             if (ImGui.checkbox("Enable Live Mode", liveModeEnabled))
