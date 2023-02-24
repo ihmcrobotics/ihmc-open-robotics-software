@@ -2,6 +2,9 @@ package us.ihmc.rdx.ui.graphics.ros2;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
+import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
@@ -15,12 +18,15 @@ public class RDXColoredPointCloudPinholePinholeKernel
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
    private final OpenCLRigidBodyTransformParameter depthToWorldTransformParameter = new OpenCLRigidBodyTransformParameter();
    private final OpenCLRigidBodyTransformParameter depthToColorTransformParameter = new OpenCLRigidBodyTransformParameter();
+   private final BytedecoImage placeholderColorImage;
 
    public RDXColoredPointCloudPinholePinholeKernel(OpenCLManager openCLManager)
    {
       this.openCLManager = openCLManager;
       openCLProgram = openCLManager.loadProgram("PinholePinholeColoredPointCloudVisualizer", "PerceptionCommon.cl");
       kernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
+      placeholderColorImage = new BytedecoImage(1, 1, opencv_core.CV_8UC4);
+      placeholderColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
    }
 
    public void runKernel(RDXROS2ColoredPointCloudVisualizerColorChannel colorChannel,
@@ -53,16 +59,17 @@ public class RDXColoredPointCloudPinholePinholeKernel
 
       // Upload the buffers to the OpenCL device (GPU)
       depthChannel.getDepth16UC1Image().writeOpenCLImage(openCLManager);
-      if (useSensorColor)
-         colorChannel.getColor8UC4Image().writeOpenCLImage(openCLManager);
+      // It appears you've got to write something to the OpenCL argument even if you don't use it,
+      // so we write a placeholder image.
+      BytedecoImage colorImage = useSensorColor ? colorChannel.getColor8UC4Image() : placeholderColorImage;
+      colorImage.writeOpenCLImage(openCLManager);
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
       depthToWorldTransformParameter.writeOpenCLBufferObject(openCLManager);
       depthToColorTransformParameter.writeOpenCLBufferObject(openCLManager);
 
       // Set the OpenCL kernel arguments
       openCLManager.setKernelArgument(kernel, 0, depthChannel.getDepth16UC1Image().getOpenCLImageObject());
-      if (useSensorColor)
-         openCLManager.setKernelArgument(kernel, 1, colorChannel.getColor8UC4Image().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 1, colorImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(kernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(kernel, 3, parametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(kernel, 4, depthToWorldTransformParameter.getOpenCLBufferObject());

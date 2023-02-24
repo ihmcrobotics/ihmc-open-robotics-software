@@ -32,12 +32,17 @@ public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2Color
 
    public void decompress()
    {
-      opencv_imgcodecs.imdecode(decompressionInputSwapReference.getForThreadTwo().getInputMat(), opencv_imgcodecs.IMREAD_UNCHANGED, yuv1420Image);
-      decompressionInputSwapReference.swap();
-
-      opencv_imgproc.cvtColor(yuv1420Image, color8UC3Image.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
-      // Put the depth image into OpenCL buffer
-      opencv_imgproc.cvtColor(color8UC3Image.getBytedecoOpenCVMat(), color8UC4Image.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+      if (readyForDecompression.poll())
+      {
+         synchronized (decompressionInputSwapReference)
+         {
+            Mat decompressionInputMat = decompressionInputSwapReference.getForThreadTwo().getInputMat();
+            opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, yuv1420Image);
+         }
+         opencv_imgproc.cvtColor(yuv1420Image, color8UC3Image.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+         opencv_imgproc.cvtColor(color8UC3Image.getBytedecoOpenCVMat(), color8UC4Image.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+         decompressedImageReady.set();
+      }
    }
 
    public BytedecoImage getColor8UC4Image()
