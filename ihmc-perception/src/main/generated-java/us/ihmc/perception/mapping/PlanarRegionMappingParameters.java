@@ -40,6 +40,7 @@ public class PlanarRegionMappingParameters extends StoredPropertySet implements 
    public static final IntegerStoredPropertyKey icpMinMatches = keys.addIntegerKey("ICP min matches");
    public static final DoubleStoredPropertyKey icpTerminationRatio = keys.addDoubleKey("ICP termination ratio");
    public static final DoubleStoredPropertyKey icpErrorCutoff = keys.addDoubleKey("ICP error cutoff");
+   public static final IntegerStoredPropertyKey minimumNumberOfTimesMatched = keys.addIntegerKey("Minimum number of times matched");
 
    /**
     * Loads this property set.

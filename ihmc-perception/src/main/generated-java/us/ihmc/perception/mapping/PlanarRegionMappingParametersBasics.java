@@ -97,4 +97,9 @@ public interface PlanarRegionMappingParametersBasics extends PlanarRegionMapping
    {
       set(PlanarRegionMappingParameters.icpErrorCutoff, icpErrorCutoff);
    }
+
+   default void setMinimumNumberOfTimesMatched(int minimumNumberOfTimesMatched)
+   {
+      set(PlanarRegionMappingParameters.minimumNumberOfTimesMatched, minimumNumberOfTimesMatched);
+   }
 }
