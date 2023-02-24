@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -70,7 +71,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    {
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest();
+         simulationTestHelper.finishTest(true);
          simulationTestHelper = null;
       }
 
@@ -97,6 +98,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       this.useExperimentalPhysicsEngine = useExperimentalPhysicsEngine;
    }
 
+   @Test
    public void testStairs(TestInfo testInfo, boolean slow, boolean up, double swingDuration, double transferDuration, double heightOffset) throws Exception
    {
       testStairs(testInfo, slow, up, swingDuration, transferDuration, heightOffset, null);

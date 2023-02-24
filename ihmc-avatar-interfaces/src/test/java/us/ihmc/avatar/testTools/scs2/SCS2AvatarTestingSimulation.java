@@ -530,7 +530,12 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
             {
                Window primaryWindow = getSimulationConstructionSet().getPrimaryGUIWindow();
                primaryWindow.requestFocus();
-               Alert alert = new Alert(AlertType.INFORMATION, "Test complete!", ButtonType.OK);
+               String alertText = "Test complete!";
+               if (lastThrowable.get() != null)
+               {
+                  alertText = lastThrowable.get().getCause().getMessage();
+               }
+               Alert alert = new Alert(AlertType.INFORMATION, alertText, ButtonType.OK);
                SessionVisualizerIOTools.addSCSIconToDialog(alert);
                alert.initOwner(primaryWindow);
                JavaFXMissingTools.centerDialogInOwner(alert);
