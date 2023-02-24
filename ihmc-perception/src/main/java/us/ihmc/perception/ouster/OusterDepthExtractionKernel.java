@@ -24,6 +24,8 @@ import java.util.function.Supplier;
 /**
  * Extracts the ranges (depth) from the incoming Ouster data buffer
  * and provides an OpenCV CV_16UC1 Mat using an OpenCL kernel.
+ *
+ * FIXME: We need to be able to resize the buffers of this kernel without reloading the program.
  */
 public class OusterDepthExtractionKernel
 {

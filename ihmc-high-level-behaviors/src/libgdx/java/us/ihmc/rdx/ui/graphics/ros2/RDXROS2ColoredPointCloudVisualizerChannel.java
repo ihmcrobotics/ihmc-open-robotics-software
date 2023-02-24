@@ -16,6 +16,7 @@ import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.tools.thread.SwapReference;
 
 public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 {
@@ -26,7 +27,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private final ImPlotDoublePlot delayPlot;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
-   protected final ImageMessageDecompressionInput decompressionInput = new ImageMessageDecompressionInput();
+   protected final SwapReference<ImageMessageDecompressionInput> decompressionInputSwapReference = new SwapReference<>(ImageMessageDecompressionInput::new);
    private boolean initialized = false;
    private volatile boolean imageAvailable = false;
    private volatile boolean receivedOne = false;
@@ -43,6 +44,8 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private boolean isPinholeCameraModel;
    private boolean isEquidistantFisheyeCameraModel;
    private boolean isOusterCameraModel;
+   private float ousterHorizontalFieldOfView;
+   private float ousterVerticalFieldOfView;
 
    public RDXROS2ColoredPointCloudVisualizerChannel(String name, ROS2Topic<ImageMessage> topic)
    {
@@ -67,6 +70,12 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       });
    }
 
+   /**
+    * This method is synchronized so that the ROS 2 callback is not updating the ImageMessage
+    * while this update is running. We store everything as fields and the data in a swap
+    * reference so we can do the decompression and run the GPU kernels without needing to
+    * synchronize that part.
+    */
    public void update(OpenCLManager openCLManager)
    {
       if (!initialized)
@@ -75,7 +84,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
          imageHeight = imageMessage.getImageHeight();
          totalNumberOfPixels = imageHeight * imageWidth;
          int bytesPerPixel = ImageMessageFormat.getFormat(imageMessage).getBytesPerPixel();
-         decompressionInput.setup(totalNumberOfPixels * bytesPerPixel);
+         decompressionInputSwapReference.initializeBoth(decompressionInput -> decompressionInput.setup(totalNumberOfPixels * bytesPerPixel));
 
          initialize(openCLManager);
          initialized = true;
@@ -89,7 +98,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       translationToWorld.set(imageMessage.getPosition());
       rotationMatrixToWorld.set(imageMessage.getOrientation());
 
-      decompressionInput.extract(imageMessage);
+      synchronized (decompressionInputSwapReference)
+      {
+         decompressionInputSwapReference.getForThreadOne().extract(imageMessage);
+      }
 
       messageSizeReadout.update(imageMessage.getData().size());
       sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
@@ -98,6 +110,8 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       isPinholeCameraModel = imageMessage.getIsPinholeCameraModel();
       isEquidistantFisheyeCameraModel = imageMessage.getIsEquidistantFisheyeCameraModel();
       isOusterCameraModel = imageMessage.getIsOusterCameraModel();
+      ousterHorizontalFieldOfView = imageMessage.getOusterHorizontalFieldOfView();
+      ousterVerticalFieldOfView = imageMessage.getOusterVerticalFieldOfView();
 
       imageAvailable = false;
    }
@@ -202,5 +216,15 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    public boolean getIsOusterCameraModel()
    {
       return isOusterCameraModel;
+   }
+
+   public float getOusterHorizontalFieldOfView()
+   {
+      return ousterHorizontalFieldOfView;
+   }
+
+   public float getOusterVerticalFieldOfView()
+   {
+      return ousterVerticalFieldOfView;
    }
 }

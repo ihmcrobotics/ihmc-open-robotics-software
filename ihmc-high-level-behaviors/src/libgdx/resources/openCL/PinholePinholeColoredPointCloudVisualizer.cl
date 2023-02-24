@@ -24,6 +24,7 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
    bool useSensorColor = parameters[13];
    int gradientMode = parameters[14];
    bool sinusoidal = parameters[15];
+   float pointSize = parameters[16];
 
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -78,5 +79,5 @@ kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
    pointCloudVertexBuffer[pointStartIndex + 4] = pointColor.y;
    pointCloudVertexBuffer[pointStartIndex + 5] = pointColor.z;
    pointCloudVertexBuffer[pointStartIndex + 6] = pointColor.w;
-   pointCloudVertexBuffer[pointStartIndex + 7] = 0.01f;
+   pointCloudVertexBuffer[pointStartIndex + 7] = pointSize;
 }

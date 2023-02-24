@@ -28,6 +28,7 @@ public class RDXColoredPointCloudPinholePinholeKernel
                          boolean useSensorColor,
                          int gradientMode,
                          boolean useSinusoidalGradientPattern,
+                         float pointSize,
                          OpenCLFloatBuffer pointCloudVertexBuffer)
    {
       parametersBuffer.setParameter(colorChannel.getFx());
@@ -46,19 +47,22 @@ public class RDXColoredPointCloudPinholePinholeKernel
       parametersBuffer.setParameter(useSensorColor);
       parametersBuffer.setParameter(gradientMode);
       parametersBuffer.setParameter(useSinusoidalGradientPattern);
+      parametersBuffer.setParameter(pointSize);
       depthToWorldTransformParameter.setParameter(depthChannel.getTranslationToWorld(), depthChannel.getRotationMatrixToWorld());
       depthToColorTransformParameter.setParameter(colorChannel.getTranslationToWorld(), colorChannel.getRotationMatrixToWorld());
 
       // Upload the buffers to the OpenCL device (GPU)
       depthChannel.getDepth16UC1Image().writeOpenCLImage(openCLManager);
-      colorChannel.getColor8UC4Image().writeOpenCLImage(openCLManager);
+      if (useSensorColor)
+         colorChannel.getColor8UC4Image().writeOpenCLImage(openCLManager);
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
       depthToWorldTransformParameter.writeOpenCLBufferObject(openCLManager);
       depthToColorTransformParameter.writeOpenCLBufferObject(openCLManager);
 
       // Set the OpenCL kernel arguments
       openCLManager.setKernelArgument(kernel, 0, depthChannel.getDepth16UC1Image().getOpenCLImageObject());
-      openCLManager.setKernelArgument(kernel, 1, colorChannel.getColor8UC4Image().getOpenCLImageObject());
+      if (useSensorColor)
+         openCLManager.setKernelArgument(kernel, 1, colorChannel.getColor8UC4Image().getOpenCLImageObject());
       openCLManager.setKernelArgument(kernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(kernel, 3, parametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(kernel, 4, depthToWorldTransformParameter.getOpenCLBufferObject());
