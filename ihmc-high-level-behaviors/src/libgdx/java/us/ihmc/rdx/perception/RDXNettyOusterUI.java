@@ -11,7 +11,6 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
@@ -85,13 +84,12 @@ public class RDXNettyOusterUI
       ouster = new NettyOuster();
       ouster.setOnFrameReceived(this::onFrameReceived);
       ouster.bind();
-
-      depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(openCLManager);
    }
 
    public void createAfterNativesLoaded()
    {
       openCLManager = new OpenCLManager();
+      depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(openCLManager);
    }
 
    public boolean isOusterInitialized()
@@ -116,10 +114,9 @@ public class RDXNettyOusterUI
    {
       depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager);
 
-      int totalNumberOfPoints = ouster.getImageWidth() * ouster.getImageHeight();
-      totalNumberOfPoints = depthImageToPointCloudKernel.calculateNumberOfPointsForLevelOfColorDetail(ouster.getImageWidth(),
-                                                                                                      ouster.getImageHeight(),
-                                                                                                      levelOfColorDetail.get());
+      int totalNumberOfPoints = depthImageToPointCloudKernel.calculateNumberOfPointsForLevelOfColorDetail(ouster.getImageWidth(),
+                                                                                                          ouster.getImageHeight(),
+                                                                                                          levelOfColorDetail.get());
 
       if (pointCloudVertexBuffer == null
           || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX < totalNumberOfPoints)

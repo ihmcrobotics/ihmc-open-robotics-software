@@ -106,7 +106,7 @@ kernel void imageToPointCloud(global float* parameters,
                               + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y] * angleOfIncidence * sin(azimuthalAngle));
 
          if (intervalContains(fisheyeCol, 0, fisheyeParameters[FISHEYE_IMAGE_WIDTH])
-          && intervalContains(fisheyeRow, 0, fisheyeParameters[FISHEYE_IMAGE_HEIGHT])
+          && intervalContains(fisheyeRow, 0, fisheyeParameters[FISHEYE_IMAGE_HEIGHT]))
          {
             uint4 fisheyeColor = read_imageui(fThetaFisheyeRGBA8Image, (int2) (fisheyeCol, fisheyeRow));
             pointColor = convert_float4(fisheyeColor) / 255.0f;
