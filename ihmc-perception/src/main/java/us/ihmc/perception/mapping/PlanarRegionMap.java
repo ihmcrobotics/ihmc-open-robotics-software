@@ -741,8 +741,8 @@ public class PlanarRegionMap
 
          applyFactorGraphBasedSmoothing(finalMap,
                                         regions.copy(),
-                                        sensorToWorldTransformPrior,
-                                        currentToPreviousSensorTransform,
+                                        transformToWorld,
+                                        transformToPrevious,
                                         incomingToMapMatches,
                                         sensorPoseIndex);
 
@@ -755,16 +755,18 @@ public class PlanarRegionMap
          // Transform the incoming regions to the map frame with the optimal transform
          PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
          regions.copy().getPlanarRegionsAsList().forEach(region ->
-                                                                      {
-                                                                         region.applyTransform(sensorToWorldTransformPosterior);
-                                                                         posteriorRegionsInWorld.addPlanarRegion(region);
-                                                                      });
+          {
+             region.applyTransform(sensorToWorldTransformPosterior);
+             posteriorRegionsInWorld.addPlanarRegion(region);
+          });
 
          finalMap = crossReduceRegionsIteratively(finalMap, regions);
          processUniqueRegions(finalMap);
          //PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
 
          //finalMap.addPlanarRegionsList(regions);
+
+         sensorPoseIndex++;
 
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
 
