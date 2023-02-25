@@ -26,6 +26,16 @@ public class PerceptionPrintTools
       LogTools.info("------------------------------------------------ Printing Matches End ---------------------------------------------");
    }
 
+   public static void printPlanarRegionVertices(PlanarRegion region)
+   {
+      LogTools.info("Planar Region Vertices: {}", region.getRegionId());
+      for (int i = 0; i < region.getConcaveHullSize(); i++)
+      {
+         LogTools.info("[Region: {}] Point {} : {}", region.getRegionId(), i, region.getConcaveHullPoint3DInWorld(i));
+      }
+      System.out.println();
+   }
+
    public static void printRegionIDs(String tag, PlanarRegionsList regions)
    {
       int[] ids = new int[regions.getNumberOfPlanarRegions()];

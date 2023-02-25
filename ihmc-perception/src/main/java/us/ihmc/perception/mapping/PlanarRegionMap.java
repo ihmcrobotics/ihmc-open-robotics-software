@@ -739,6 +739,27 @@ public class PlanarRegionMap
 
          PerceptionPrintTools.printMatches("Cross Matches", finalMap, regions, incomingToMapMatches);
 
+         applyFactorGraphBasedSmoothing(finalMap,
+                                        regions.copy(),
+                                        sensorToWorldTransformPrior,
+                                        currentToPreviousSensorTransform,
+                                        incomingToMapMatches,
+                                        sensorPoseIndex);
+
+         // Extract the optimal transform from the factor graph
+         double[] transformArray = new double[16];
+         factorGraph.getPoseById(sensorPoseIndex, transformArray);
+
+         sensorToWorldTransformPosterior.set(transformArray);
+
+         // Transform the incoming regions to the map frame with the optimal transform
+         PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
+         regions.copy().getPlanarRegionsAsList().forEach(region ->
+                                                                      {
+                                                                         region.applyTransform(sensorToWorldTransformPosterior);
+                                                                         posteriorRegionsInWorld.addPlanarRegion(region);
+                                                                      });
+
          finalMap = crossReduceRegionsIteratively(finalMap, regions);
          processUniqueRegions(finalMap);
          //PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
