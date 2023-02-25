@@ -51,8 +51,12 @@ public class RDXPlanarRegionMappingDemo
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
    private ModelInstance modelInstance;
+
    private final FramePose3D framePose = new FramePose3D(ReferenceFrame.getWorldFrame());
+   private final FramePose3D framePreviousPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private RDXLineMeshModel keyframeTrajectoryGraphic = new RDXLineMeshModel(0.02f, Color.WHITE);
 
    private boolean graphicsInitialized = false;
 
@@ -107,9 +111,13 @@ public class RDXPlanarRegionMappingDemo
                {
                   framePose.set(transform);
                   modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.25, Color.GREEN);
+
+//                  keyframeTrajectoryGraphic.generateMeshes();
+
                   LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
                   poseModels.add(modelInstance);
                }
+               framePreviousPose.set(framePose);
 
                for (ModelInstance model : poseModels)
                {
