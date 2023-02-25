@@ -26,9 +26,19 @@ public class PerceptionPrintTools
       LogTools.info("------------------------------------------------ Printing Matches End ---------------------------------------------");
    }
 
+   public static void printPlanarRegionsListVertices(String tag, PlanarRegionsList regions)
+   {
+      LogTools.info("[{}]", tag);
+      for(int i = 0; i<regions.getNumberOfPlanarRegions(); i++)
+      {
+         LogTools.info("Region Index: {}, Region ID: {}", i, regions.getPlanarRegion(i).getRegionId());
+         printPlanarRegionVertices(regions.getPlanarRegion(i));
+      }
+   }
+
    public static void printPlanarRegionVertices(PlanarRegion region)
    {
-      LogTools.info("Planar Region Vertices: {}", region.getRegionId());
+      LogTools.info("Concave Hull Vertices -----------------------------------");
       for (int i = 0; i < region.getConcaveHullSize(); i++)
       {
          LogTools.info("[Region: {}] Point {} : {}", region.getRegionId(), i, region.getConcaveHullPoint3DInWorld(i));
@@ -61,6 +71,6 @@ public class PerceptionPrintTools
       Point3D euler = new Point3D();
       transform.getRotation().getEuler(euler);
 
-      LogTools.info("[{}] Translation: {}, Rotation: {}", tag, transform.getTranslation(), euler);
+      LogTools.info("[{}] Translation: {}, Rotation: {}\n", tag, transform.getTranslation(), euler);
    }
 }

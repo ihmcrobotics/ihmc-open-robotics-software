@@ -8,10 +8,12 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.tools.PerceptionPrintTools;
 import us.ihmc.perception.tools.PlanarRegionCuttingTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTestTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.List;
 
@@ -145,13 +147,51 @@ public class PlanarRegionMapTest
       convexPolygon.addVertex(pointD.getX(), pointD.getY());
       convexPolygon.update();
 
+
       PlanarRegion planarRegionOne = new PlanarRegion(new RigidBodyTransform(new Quaternion(0.0, -Math.PI / 2, 0.0), new Point3D(0.0, 0.0, 0.0)), convexPolygon);
       PlanarRegion planarRegionTwo = new PlanarRegion(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0), new Point3D(-1.0, 0.0, 0.0)), convexPolygon);
       PlanarRegion planarRegionThree = new PlanarRegion(new RigidBodyTransform(new Quaternion(-Math.PI / 2, -Math.PI / 2, 0.0), new Point3D(-1.0, 0.0, 0.0)),
                                                         convexPolygon);
 
-      PerceptionPrintTools.printPlanarRegionVertices(planarRegionOne);
-      PerceptionPrintTools.printPlanarRegionVertices(planarRegionTwo);
-      PerceptionPrintTools.printPlanarRegionVertices(planarRegionThree);
+      RigidBodyTransform sensorToWorldOne = new RigidBodyTransform(new Quaternion(-Math.PI/4, 0.0, 0.0), new Point3D(-1.0, 1.0, 0.5));
+      RigidBodyTransform sensorToWorldTwo = new RigidBodyTransform(new Quaternion(-Math.PI/4, 0.0, 0.0), new Point3D(-0.9, 0.9, 0.5));
+      RigidBodyTransform sensorToWorldThree = new RigidBodyTransform(new Quaternion(-Math.PI/4, 0.0, 0.0), new Point3D(-0.8, 0.8, 0.5));
+
+      PlanarRegionsList regionsList = new PlanarRegionsList();
+      regionsList.addPlanarRegion(planarRegionOne);
+      regionsList.addPlanarRegion(planarRegionTwo);
+      regionsList.addPlanarRegion(planarRegionThree);
+
+      PlanarRegionsList planarRegionsListOne = regionsList.copy();
+      RigidBodyTransform worldToSensorOne = new RigidBodyTransform(sensorToWorldOne);
+      worldToSensorOne.invert();
+      planarRegionsListOne.applyTransform(worldToSensorOne);
+
+      PlanarRegionsList planarRegionsListTwo = regionsList.copy();
+      RigidBodyTransform worldToSensorTwo = new RigidBodyTransform(sensorToWorldTwo);
+      worldToSensorTwo.invert();
+      planarRegionsListTwo.applyTransform(worldToSensorTwo);
+
+      PlanarRegionsList planarRegionsListThree = regionsList.copy();
+      RigidBodyTransform worldToSensorThree = new RigidBodyTransform(sensorToWorldThree);
+      worldToSensorThree.invert();
+      planarRegionsListThree.applyTransform(worldToSensorThree);
+
+      PerceptionPrintTools.printPlanarRegionsListVertices("List One", planarRegionsListOne);
+      PerceptionPrintTools.printPlanarRegionsListVertices("List Two", planarRegionsListTwo);
+      PerceptionPrintTools.printPlanarRegionsListVertices("List Three", planarRegionsListThree);
+
+      PlanarRegionMap planarRegionMap = new PlanarRegionMap(true);
+
+      planarRegionMap.setInitialSensorPose(sensorToWorldOne);
+      planarRegionMap.registerRegions(planarRegionsListOne);
+
+      RigidBodyTransform keyframePoseThree = planarRegionMap.registerRegions(planarRegionsListTwo);
+      PerceptionPrintTools.printTransform("Keyframe Pose Two", keyframePoseThree);
+
+      RigidBodyTransform keyframePoseTwo = planarRegionMap.registerRegions(planarRegionsListThree);
+      PerceptionPrintTools.printTransform("Keyframe Pose Three", keyframePoseTwo);
+
+      PerceptionPrintTools.printPlanarRegionsListVertices("Final Map", planarRegionMap.getMapRegions());
    }
 }

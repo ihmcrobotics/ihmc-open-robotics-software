@@ -44,7 +44,7 @@ public class PlanarRegionMap
 
    int sensorPoseIndex = 0;
 
-   float planeNoise = 0.01f;
+   float planeNoise = 0.001f;
    float odomNoise = 0.00001f;
 
    private MergingMode merger;
@@ -65,6 +65,8 @@ public class PlanarRegionMap
    private boolean modified = false;
    private int uniqueRegionsFound = 0;
    private int uniqueIDtracker = 1;
+
+   RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
 
    private final ArrayList<PlanarRegionKeyframe> keyframes = new ArrayList<>();
    private PlanarRegionsList previousRegions = new PlanarRegionsList();
@@ -580,23 +582,25 @@ public class PlanarRegionMap
       factorGraph.createOdometryNoiseModel(new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise});
       factorGraph.createOrientedPlaneNoiseModel(new float[] {planeNoise, planeNoise, planeNoise});
 
-      factorGraph.addPriorPoseFactorSE3(0, PerceptionEuclidTools.toArray(transform));
-      factorGraph.setPoseInitialValueSE3(0, PerceptionEuclidTools.toArray(transform));
+      factorGraph.addPriorPoseFactorSE3(sensorPoseIndex, PerceptionEuclidTools.toArray(transform));
+      factorGraph.setPoseInitialValueSE3(sensorPoseIndex, PerceptionEuclidTools.toArray(transform));
 
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {
          // Get origin and normal in sensor frame.
-         Point3D childOrigin = new Point3D();
-         Vector3D childNormal = new Vector3D();
-         region.getOrigin(childOrigin);
-         region.getNormal(childNormal);
+         Point3D origin = new Point3D();
+         Vector3D normal = new Vector3D();
+         region.getOrigin(origin);
+         region.getNormal(normal);
 
          // Insert plane factor based on planar region normal and origin in sensor frame
-         double localDot = childOrigin.dot(childNormal);
-         float[] plane = new float[] {childNormal.getX32(), childNormal.getY32(), childNormal.getZ32(), (float) -localDot};
-         factorGraph.addOrientedPlaneFactor(region.getRegionId(), 0, plane);
+         double localDot = origin.dot(normal);
+         float[] plane = new float[] {normal.getX32(), normal.getY32(), normal.getZ32(), (float) -localDot};
+         factorGraph.addOrientedPlaneFactor(region.getRegionId(), sensorPoseIndex, plane);
          factorGraph.setOrientedPlaneInitialValue(region.getRegionId(), plane);
       }
+
+      sensorPoseIndex++;
 
       LogTools.info("+++++++++ --------- +++++++++ Done (Smoothing Initialization) +++++++++ --------- +++++++++");
    }
@@ -675,11 +679,13 @@ public class PlanarRegionMap
          //RigidBodyTransform initialTransform = new RigidBodyTransform(new Quaternion(0.0, Math.toRadians(60.0), 0.0), new Point3D());
 
          // Ouster-only
-         RigidBodyTransform initialTransform = new RigidBodyTransform();
 
-         regions.applyTransform(initialTransform);
-         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, initialTransform, regions.copy()));
+
+         regions.applyTransform(initialTransformToWorld);
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, initialTransformToWorld, regions.copy()));
          finalMap.addPlanarRegionsList(regions);
+
+         initializeFactorGraphForSmoothing(regions, initialTransformToWorld);
 
          initialized = true;
          //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, new RigidBodyTransform()));
@@ -739,8 +745,14 @@ public class PlanarRegionMap
 
          PerceptionPrintTools.printMatches("Cross Matches", finalMap, regions, incomingToMapMatches);
 
+         RigidBodyTransform transformToSensor = new RigidBodyTransform(transformToWorld);
+         transformToSensor.invert();
+
+         PlanarRegionsList graphRegions = regions.copy();
+         graphRegions.applyTransform(transformToSensor);
+
          applyFactorGraphBasedSmoothing(finalMap,
-                                        regions.copy(),
+                                        graphRegions,
                                         transformToWorld,
                                         transformToPrevious,
                                         incomingToMapMatches,
@@ -750,22 +762,23 @@ public class PlanarRegionMap
          double[] transformArray = new double[16];
          factorGraph.getPoseById(sensorPoseIndex, transformArray);
 
-         sensorToWorldTransformPosterior.set(transformArray);
+         transformToWorld.set(transformArray);
 
          // Transform the incoming regions to the map frame with the optimal transform
          PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
-         regions.copy().getPlanarRegionsAsList().forEach(region ->
+         graphRegions.getPlanarRegionsAsList().forEach(region ->
           {
-             region.applyTransform(sensorToWorldTransformPosterior);
+             region.applyTransform(transformToWorld);
              posteriorRegionsInWorld.addPlanarRegion(region);
           });
 
-         finalMap = crossReduceRegionsIteratively(finalMap, regions);
+         finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
          processUniqueRegions(finalMap);
          //PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
 
          //finalMap.addPlanarRegionsList(regions);
 
+         factorGraph.clearISAM2();
          sensorPoseIndex++;
 
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
@@ -864,6 +877,11 @@ public class PlanarRegionMap
       double[] landmark = new double[4];
       factorGraph.getPlanarLandmarkById(landmarkId, landmark);
       return new Vector4D(landmark);
+   }
+
+   public void setInitialSensorPose(RigidBodyTransform transformToWorld)
+   {
+      initialTransformToWorld.set(transformToWorld);
    }
 }
 
