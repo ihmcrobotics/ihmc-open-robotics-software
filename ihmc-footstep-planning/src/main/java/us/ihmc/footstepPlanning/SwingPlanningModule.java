@@ -226,6 +226,11 @@ public class SwingPlanningModule
       return swingOverPlanarRegionsTrajectoryExpander;
    }
 
+   public CollisionFreeSwingCalculator getCollisionFreeSwingCalculator()
+   {
+      return collisionFreeSwingCalculator;
+   }
+
    public List<EnumMap<Axis3D, List<PolynomialReadOnly>>> getSwingTrajectories()
    {
       return swingTrajectories;
