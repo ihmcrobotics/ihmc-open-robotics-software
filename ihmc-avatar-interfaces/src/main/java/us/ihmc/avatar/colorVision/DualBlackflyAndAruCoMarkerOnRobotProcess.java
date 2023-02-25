@@ -96,7 +96,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                boolean allInitialized = true;
                for (RobotSide side : blackflies.sides())
                {
-                  allInitialized &= blackflies.get(side).getRos2VideoPublisher() != null;
+                  allInitialized &= blackflies.get(side).getRos2ImagePublisher() != null;
                }
 
                if (allInitialized)
