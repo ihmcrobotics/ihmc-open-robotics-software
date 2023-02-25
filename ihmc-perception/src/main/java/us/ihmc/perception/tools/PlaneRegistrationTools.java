@@ -192,7 +192,7 @@ public class PlaneRegistrationTools
          }
 
          finalTransform.multiply(transform);
-         previousError = error;
+         previousError = error + 1e-7;
       }
 
       LogTools.info("Size: {}", (int) ( (float)previousError / 0.0002f));

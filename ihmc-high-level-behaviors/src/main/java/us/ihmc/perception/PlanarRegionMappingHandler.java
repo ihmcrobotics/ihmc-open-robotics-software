@@ -87,10 +87,8 @@ public class PlanarRegionMappingHandler
    private final ArrayList<Point3D> mocapPositionBuffer = new ArrayList<>();
    private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
 
-   private final int[] logIndices = new int[] {0, 44, 84, 109, 123, 130, 137} ;
-
    private int planarRegionListIndex = 0;
-   private int perceptionLogIndex = 100;
+   private int perceptionLogIndex = 0;
    private int totalDepthCount = 0;
 
    private String sensorLogChannelName;
@@ -296,7 +294,7 @@ public class PlanarRegionMappingHandler
             }
          }
 
-         perceptionLogIndex += 1;
+         perceptionLogIndex += 3;
          rapidRegionsExtractor.setProcessing(false);
       }
    }
