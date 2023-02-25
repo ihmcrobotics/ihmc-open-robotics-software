@@ -98,7 +98,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-//      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
    }
 
    @Test
@@ -397,9 +397,9 @@ public class SwingOverHeightMapTest
 
       if (visualize)
       {
-         scs.startSimulationThread();
+         scs.start(true, true, true);
          scs.cropBuffer();
-         ThreadTools.sleepForever();
+//         ThreadTools.sleepForever();
       }
 
       return Pair.of(request, footstepPlan);
