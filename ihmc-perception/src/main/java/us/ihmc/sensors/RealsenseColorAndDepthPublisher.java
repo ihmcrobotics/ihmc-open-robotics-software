@@ -53,7 +53,7 @@ public class RealsenseColorAndDepthPublisher
    private Mat color8UC3Image;
 
    private volatile boolean running = true;
-   private final double outputPeriod = UnitConversions.hertzToSeconds(30.0);
+   private final double outputPeriod;
 
    private BytePointer compressedColorPointer;
    private BytePointer compressedDepthPointer;
@@ -89,6 +89,8 @@ public class RealsenseColorAndDepthPublisher
       this.colorTopic = colorTopic;
       this.depthTopic = depthTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
+
+      outputPeriod = UnitConversions.hertzToSeconds(15.0);
 
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
