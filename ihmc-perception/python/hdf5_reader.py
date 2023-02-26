@@ -117,11 +117,15 @@ def get_data(data, namespace):
     data_block = np.vstack(ds)
     return data_block
 
-def display_image(data, namespace):
-    buffer = data[namespace + str(i)][:].byteswap().view('uint8')
+def display_image(data, index, namespace, delay):
+    buffer = data[namespace + str(index)][:].byteswap().view('uint8')
     buffer_image = np.asarray(buffer, dtype=np.uint8)
     buffer_image = cv2.imdecode(buffer_image, cv2.IMREAD_COLOR)
     cv2.imshow("Depth Image", buffer_image)
+    code = cv2.waitKeyEx(delay)
+
+    if code == 113:
+        exit()
 
 def playback_images(data, channels):
 

@@ -157,14 +157,17 @@ public class PlanarRegionMappingHandler
       //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
       //createOuster(128, 1024, smoothing);
-      createL515(768, 1024, smoothing);
+      createL515(768, 1024, smoothing, true);
    }
 
-   private void createL515(int depthHeight, int depthWidth, boolean smoothing)
+   private void createL515(int depthHeight, int depthWidth, boolean smoothing, boolean simulation)
    {
       planarRegionMap = new PlanarRegionMap(smoothing);
       sensorLogChannelName = PerceptionLoggerConstants.L515_DEPTH_NAME;
-      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 730.7891, 731.0859, 528.6094, 408.1602);
+
+      String version = simulation ? "Simulation" : "";
+
+      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 730.7891, 731.0859, 528.6094, 408.1602, version);
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 

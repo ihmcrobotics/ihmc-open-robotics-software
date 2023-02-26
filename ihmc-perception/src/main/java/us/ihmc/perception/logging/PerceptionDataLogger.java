@@ -48,7 +48,8 @@ public class PerceptionDataLogger
     * */
    private static final int BUFFER_SIZE = 2500000;
 
-   private final HashMap<String, byte[]> byteBuffers = new HashMap<>();
+   private final HashMap<String, byte[]> byteArrays = new HashMap<>();
+   private final HashMap<String, BytePointer> bytePointers = new HashMap<>();
    private final HashMap<String, Integer> counts = new HashMap<>();
 
    private final CommunicationMode communicationMode;
@@ -155,7 +156,8 @@ public class PerceptionDataLogger
       // Add callback for D435 Color images
       if (channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).isEnabled())
       {
-         byteBuffers.put(PerceptionLoggerConstants.D435_COLOR_NAME, new byte[BUFFER_SIZE]);
+         byteArrays.put(PerceptionLoggerConstants.D435_COLOR_NAME, new byte[1000000]);
+         bytePointers.put(PerceptionLoggerConstants.D435_COLOR_NAME, new BytePointer(1000000));
          counts.put(PerceptionLoggerConstants.D435_COLOR_NAME, 0);
          var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.D435_COLOR_IMAGE);
          d435VideoSubscription.addCallback(this::logColorD435);
@@ -165,7 +167,8 @@ public class PerceptionDataLogger
       // Add callback for D435 Depth images
       if (channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).isEnabled())
       {
-         byteBuffers.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new byte[BUFFER_SIZE]);
+         byteArrays.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new byte[1000000]);
+         bytePointers.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new BytePointer(1000000));
          counts.put(PerceptionLoggerConstants.D435_DEPTH_NAME, 0);
          var d435DepthSubscription = ros2Helper.subscribe(ROS2Tools.D435_DEPTH_IMAGE);
          d435DepthSubscription.addCallback(this::logDepthD435);
@@ -175,7 +178,8 @@ public class PerceptionDataLogger
       // Add callback for L515 Depth Maps
       if (channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).isEnabled())
       {
-         byteBuffers.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new byte[BUFFER_SIZE]);
+         byteArrays.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new byte[1000000]);
+         bytePointers.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new BytePointer(1000000));
          counts.put(PerceptionLoggerConstants.L515_DEPTH_NAME, 0);
          var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH_IMAGE);
          l515DepthSubscription.addCallback(this::logDepthL515);
@@ -185,7 +189,8 @@ public class PerceptionDataLogger
       // Add callback for L515 Color Images
       if (channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).isEnabled())
       {
-         byteBuffers.put(PerceptionLoggerConstants.L515_COLOR_NAME, new byte[BUFFER_SIZE]);
+         byteArrays.put(PerceptionLoggerConstants.L515_COLOR_NAME, new byte[1000000]);
+         bytePointers.put(PerceptionLoggerConstants.L515_COLOR_NAME, new BytePointer(1000000));
          counts.put(PerceptionLoggerConstants.L515_COLOR_NAME, 0);
          var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_COLOR_IMAGE);
          l515ColorSubscription.addCallback(this::logColorL515);
@@ -195,7 +200,8 @@ public class PerceptionDataLogger
       // Add callback for D435 Color images
       if (channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
       {
-         byteBuffers.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new byte[BUFFER_SIZE]);
+         byteArrays.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new byte[1000000]);
+         bytePointers.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new BytePointer(1000000));
          counts.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0);
          var zed2StereoSubscription = ros2Helper.subscribe(ROS2Tools.ZED2_STEREO_COLOR);
          zed2StereoSubscription.addCallback(this::logColorZED2);
@@ -206,7 +212,8 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
       {
          SampleInfo sampleInfo = new SampleInfo();
-         byteBuffers.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new byte[BUFFER_SIZE]);
+         byteArrays.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new byte[1000000]);
+         bytePointers.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new BytePointer(1000000));
          counts.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0);
          ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
          {
@@ -224,7 +231,8 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
       {
          SampleInfo sampleInfo = new SampleInfo();
-         byteBuffers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[BUFFER_SIZE]);
+         byteArrays.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[1000000]);
+         bytePointers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new BytePointer(1000000));
          counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
          ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
          {
@@ -418,7 +426,7 @@ public class PerceptionDataLogger
          long timestamp =
                Conversions.secondsToNanoseconds(message.getAcquisitionTimeSecondsSinceEpoch()) + message.getAcquisitionTimeAdditionalNanos();
          storeLongArray(PerceptionLoggerConstants.BLACKFLY_COLOR_TIME, timestamp);
-         storeCompressedImage(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, message);
+         //storeCompressedImage(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, message);
       }
    }
 
@@ -438,85 +446,23 @@ public class PerceptionDataLogger
       }
    }
 
-   /*
-    *  Store methods which actually deploy threads and call HDF5 specific functions for storing compressed data.
-    */
-   public void storeCompressedImage(String namespace, VideoPacket packet)
-   {
-      executorService.submit(() ->
-      {
-         synchronized (hdf5Manager)
-         {
-            Group group = hdf5Manager.getGroup(namespace);
-
-            byte[] heapArray = byteBuffers.get(namespace);
-            int imageCount = counts.get(namespace);
-            IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
-
-            LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
-            counts.put(namespace, imageCount + 1);
-
-            imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-            hdf5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
-
-            LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
-         }
-      });
-   }
-
-   /*
-    *  Store methods which actually deploy threads and call HDF5 specific functions for storing compressed data.
-    */
-   public void storeCompressedImage(String namespace, BigVideoPacket packet)
-   {
-      executorService.submit(() ->
-      {
-         synchronized (hdf5Manager)
-         {
-            Group group = hdf5Manager.getGroup(namespace);
-
-            byte[] heapArray = byteBuffers.get(namespace);
-            int imageCount = counts.get(namespace);
-            IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
-
-            LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
-            counts.put(namespace, imageCount + 1);
-
-            imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-            hdf5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
-
-            LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
-         }
-      });
-   }
-
    public void storeCompressedImage(String namespace, ImageMessage packet)
    {
       LogTools.info("Storing Compressed Image: {}", namespace);
 
-      long begin_store = System.nanoTime();
-      executorService.submit(() ->
+      byte[] heapArray = byteArrays.get(namespace);
+      IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+      imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size());
+
+      BytePointer bytePointer = bytePointers.get(namespace);
+      bytePointer.put(heapArray, 0, packet.getData().size());
+      bytePointer.limit(packet.getData().size());
+      storeBytesFromPointer(namespace, bytePointer);
+
+      if (stopLoggingRequest.get())
       {
-         synchronized (hdf5Manager)
-         {
-            Group group = hdf5Manager.getGroup(namespace);
-
-            byte[] heapArray = byteBuffers.get(namespace);
-            IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
-
-            int imageCount = counts.get(namespace);
-            counts.put(namespace, imageCount + 1);
-
-            imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-            hdf5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
-
-            if (stopLoggingRequest.get())
-            {
-               channels.get(namespace).setEnabled(false);
-            }
-         }
-      });
-      long end_store = System.nanoTime();
+         channels.get(namespace).setEnabled(false);
+      }
    }
 
    public void storeBytesFromPointer(String namespace, BytePointer bytePointer)

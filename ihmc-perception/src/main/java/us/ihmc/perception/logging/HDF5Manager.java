@@ -208,12 +208,15 @@ public class HDF5Manager
 
    public void closeFile()
    {
-      for (Group group : groups.values())
+      if (file != null)
       {
-         group._close();
+         for (Group group : groups.values())
+         {
+            group._close();
+         }
+         file._close();
+         file = null;
       }
-      file._close();
-      file = null;
    }
 
    public H5File getFile()

@@ -155,7 +155,7 @@ public class PerceptionDataLoader
    {
       String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
       String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20230217_170834_PerceptionLog.hdf5";
+      String logFileName = "20230226_005704_PerceptionLog.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(Paths.get(logDirectory, logFileName).toString());
@@ -259,7 +259,7 @@ public class PerceptionDataLoader
 
                BytedecoOpenCVTools.displayDepth("L515 Depth", depthImage, 1);
 
-               int code = opencv_highgui.waitKeyEx(1);
+               int code = opencv_highgui.waitKeyEx(50);
                if (code == 113)
                {
                   System.exit(0);

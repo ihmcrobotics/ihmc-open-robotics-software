@@ -81,7 +81,7 @@ public class RDXPerceptionDataLoggerPanel extends ImGuiPanel
          SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
          String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
          FileTools.ensureDirectoryExists(Paths.get(perceptionLogPath.get()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-         logger.startLogging(perceptionLogPath.get() + File.separator + logFileName, "Nadia");
+         logger.startLogging(perceptionLogPath.get() + File.separator + logFileName, "Robot");
       }
 
       if(ImGui.button(labels.get("Stop Logging")))
