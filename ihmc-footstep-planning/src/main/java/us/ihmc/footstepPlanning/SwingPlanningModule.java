@@ -106,9 +106,9 @@ public class SwingPlanningModule
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses,
                                      SwingPlannerType swingPlannerType)
    {
-      boolean hasPlanarRegions = (planarRegionsList == null || planarRegionsList.isEmpty());
+      boolean hasPlanarRegions = (planarRegionsList != null && !planarRegionsList.isEmpty());
       swingTrajectories.clear();
-      if (hasPlanarRegions && heightMapData == null)
+      if (!hasPlanarRegions && heightMapData == null)
       {
          return;
       }

@@ -55,8 +55,11 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
+import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -298,26 +301,25 @@ public class SwingOverHeightMapTest
       WalkingControllerParameters walkingControllerParameters = getWalkingControllerParameters();
       ConvexPolygon2D foot = getFootPolygon();
 
-      HeightMapMessage heightMapData = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
+      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
       SwingPlannerParametersBasics swingPlannerParameters = getParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
-      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
-                                                                         new DefaultVisibilityGraphParameters(),
-                                                                         new AStarBodyPathPlannerParameters(),
-                                                                         new DefaultFootstepPlannerParameters(),
-                                                                         swingPlannerParameters,
-                                                                         walkingControllerParameters,
-                                                                         footPolygons,
-                                                                         null);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+      CollisionFreeSwingCalculator expander = new CollisionFreeSwingCalculator(new DefaultFootstepPlannerParameters(),
+                                                                               swingPlannerParameters,
+                                                                               walkingControllerParameters,
+                                                                               footPolygons,
+                                                                               null,
+                                                                               yoGraphicsListRegistry,
+                                                                               registry);
 
       Graphics3DObject startGraphics = new Graphics3DObject();
       Graphics3DObject endGraphics = new Graphics3DObject();
       startGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.blue));
       endGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.RED));
 
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      registry.addChild(planningModule.getSwingOverPlanarRegionsTrajectoryExpander().getYoVariableRegistry());
-      YoGraphicsListRegistry yoGraphicsListRegistry = planningModule.getSwingOverPlanarRegionsTrajectoryExpander().getGraphicsListRegistry();
 
       RobotSide swingSide = RobotSide.RIGHT;
 
@@ -346,20 +348,31 @@ public class SwingOverHeightMapTest
 
       request.getStartFootPoses().get(RobotSide.LEFT).set(stanceFoot);
       request.getStartFootPoses().get(RobotSide.RIGHT).set(startFoot);
-      request.setHeightMapMessage(heightMapData);
-//      request.setPlanarRegionsList(planarRegionsList);
+      request.setPlanarRegionsList(planarRegionsList);
+      request.setHeightMapMessage(heightMapMessage);
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
-      CollisionFreeSwingCalculator expander = planningModule.getSwingPlanningModule().getCollisionFreeSwingCalculator();
-
-      SimulationConstructionSet2 scs = null;
+      final SimulationConstructionSet2 scs;
       if (visualize)
       {
          scs = new SimulationConstructionSet2();
 
-//         SwingOverPlanarRegionsVisualizer visualizer = new SwingOverPlanarRegionsVisualizer(scs, registry, yoGraphicsListRegistry, foot, expander);
-//         expander.attachVisualizer(visualizer::update);
+         expander.addTickAndUpdatable(new TickAndUpdatable()
+         {
+            @Override
+            public void tickAndUpdate()
+            {
+               scs.simulateNow(1);
+            }
+
+            @Override
+            public void tickAndUpdate(double timeToSetInSeconds)
+            {
+               scs.simulateNow(timeToSetInSeconds);
+            }
+         });
+
 
          scs.setDT(1.0);
          scs.addRegistry(registry);
@@ -368,9 +381,16 @@ public class SwingOverHeightMapTest
 //         Conver();
 //         environment.getTerrainObject3D().getLinkGraphics();
          scs.addTerrainObject(environment.getTerrainObjectDefinition());
+         scs.startSimulationThread();
+      }
+      else
+      {
+         scs = null;
       }
 
-      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses(), SwingPlannerType.TWO_WAYPOINT_POSITION);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      expander.setHeightMapData(heightMapData);
+      expander.computeSwingTrajectories(request.getStartFootPoses(), footstepPlan);
 
 //      boolean wasAdjusted = expander.wereWaypointsAdjusted();
 //      if (wasAdjusted)
@@ -397,9 +417,9 @@ public class SwingOverHeightMapTest
 
       if (visualize)
       {
-         scs.start(true, true, true);
-         scs.cropBuffer();
-//         ThreadTools.sleepForever();
+
+         //         scs.cropBuffer();
+         ThreadTools.sleepForever();
       }
 
       return Pair.of(request, footstepPlan);
@@ -435,14 +455,20 @@ public class SwingOverHeightMapTest
 
       List<Point3D> waypoints = footstepPlan.getFootstep(0).getCustomWaypointPositions();
       RecyclingArrayList<FramePoint3D> waypointListCopy = new RecyclingArrayList<>(FramePoint3D.class);
-      waypointListCopy.add().set(waypoints.get(0));
-      waypointListCopy.add().set(waypoints.get(1));
+      if (waypoints.size() > 0)
+      {
+         waypointListCopy.add().set(waypoints.get(0));
+         waypointListCopy.add().set(waypoints.get(1));
+      }
 
       twoWaypointSwingGenerator.setStanceFootPosition(stanceFootPosition);
       twoWaypointSwingGenerator.setInitialConditions(swingStartPosition, initialVelocity);
       twoWaypointSwingGenerator.setFinalConditions(swingEndPosition, touchdownVelocity);
       twoWaypointSwingGenerator.setStepTime(1.0);
-      twoWaypointSwingGenerator.setTrajectoryType(TrajectoryType.CUSTOM, waypointListCopy);
+      if (waypointListCopy.size() > 0)
+         twoWaypointSwingGenerator.setTrajectoryType(TrajectoryType.CUSTOM, waypointListCopy);
+      else
+         twoWaypointSwingGenerator.setTrajectoryType(TrajectoryType.DEFAULT, null);
       twoWaypointSwingGenerator.initialize();
 
       PoseReferenceFrame endFootPoseFrame = new PoseReferenceFrame("endFootPoseFrame", ReferenceFrame.getWorldFrame());
