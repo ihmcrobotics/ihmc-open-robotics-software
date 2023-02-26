@@ -4,6 +4,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.logging.RDXPerceptionDataLoaderPanel;
@@ -16,6 +17,7 @@ import us.ihmc.rdx.ui.graphics.ros2.*;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 import java.net.URISyntaxException;
 
@@ -109,8 +111,15 @@ public class RDXPerceptionUI
             RDXROS2OusterPointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2OusterPointCloudVisualizer("Ouster Point Cloud",
                                                                                                                  PubSubImplementation.FAST_RTPS,
                                                                                                                  ROS2Tools.OUSTER_DEPTH_IMAGE);
+
             ousterPointCloudVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(ousterPointCloudVisualizer);
+
+            RDXROS2RigidBodyPoseVisualizer mocapPoseVisualizer = new RDXROS2RigidBodyPoseVisualizer("Mocap Pose",
+                                                                                                    PubSubImplementation.FAST_RTPS,
+                                                                                                    ROS2Tools.MOCAP_RIGID_BODY);
+            mocapPoseVisualizer.setSubscribed(true);
+            globalVisualizersUI.addVisualizer(mocapPoseVisualizer);
 
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
