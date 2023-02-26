@@ -17,7 +17,7 @@ import java.time.Instant;
 
 public class PerceptionMessageTools
 {
-   public static void setDepthExtrinsicsFromRealsense(BytedecoRealsense sensor, IntrinsicParametersMessage intrinsicParametersMessage)
+   public static void setDepthIntrinsicsFromRealsense(BytedecoRealsense sensor, IntrinsicParametersMessage intrinsicParametersMessage)
    {
       intrinsicParametersMessage.setFx(sensor.getDepthFocalLengthPixelsX());
       intrinsicParametersMessage.setFy(sensor.getDepthFocalLengthPixelsY());
@@ -26,7 +26,7 @@ public class PerceptionMessageTools
       intrinsicParametersMessage.setCy(sensor.getDepthPrincipalOffsetYPixels());
    }
 
-   public static void setColorExtrinsicsFromRealsense(BytedecoRealsense sensor, IntrinsicParametersMessage intrinsicParametersMessage)
+   public static void setColorIntrinsicsFromRealsense(BytedecoRealsense sensor, IntrinsicParametersMessage intrinsicParametersMessage)
    {
       intrinsicParametersMessage.setFx(sensor.getColorFocalLengthPixelsX());
       intrinsicParametersMessage.setFy(sensor.getColorFocalLengthPixelsY());

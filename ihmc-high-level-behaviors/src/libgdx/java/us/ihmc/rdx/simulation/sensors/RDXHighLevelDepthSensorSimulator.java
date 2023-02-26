@@ -22,6 +22,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
+import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -30,6 +31,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
 import perception_msgs.msg.dds.BigVideoPacket;
 import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
+import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import sensor_msgs.Image;
 import us.ihmc.commons.Conversions;
@@ -38,15 +40,15 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLIntBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.*;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -84,7 +86,13 @@ import static us.ihmc.rdx.simulation.sensors.RDXLowLevelDepthSensorSimulator.FLO
 public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
 {
    private static final MutableInt INDEX = new MutableInt();
+
+   private Mat depthImageMat;
+
+   private final ImageMessage colorImageMessage = new ImageMessage();
+   private final ImageMessage depthImageMessage = new ImageMessage();
    private final String sensorName;
+   private final FramePose3D sensorPose = new FramePose3D();
    private final ReferenceFrame sensorFrame;
    private final Matrix4 gdxTransform = new Matrix4();
    private final RDXLowLevelDepthSensorSimulator depthSensorSimulator;
@@ -95,10 +103,15 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private final Mat rgba8Mat;
 
+   int depthSequenceNumber = 0;
+   int colorSequenceNumber = 0;
+
    private RosNodeInterface ros1Node;
    private String ros1DepthImageTopic;
    private String ros1ColorImageTopic;
    private ROS2Topic<?> ros2PointCloudTopic;
+   private ROS2Topic<ImageMessage> ros2DepthTopic;
+   private ROS2Topic<ImageMessage> ros2ColorTopic;
    private String ros1PointCloudTopic;
    private RosImagePublisher ros1DepthPublisher;
    private RosPointCloudPublisher ros1PointCloudPublisher;
@@ -111,6 +124,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private ByteBuffer rgb8Buffer;
 
    private ROS2NodeInterface ros2Node;
+   private ROS2Helper ros2Helper;
    private Class<?> pointCloudMessageType;
    private IHMCROS2Publisher<?> publisher;
    private RealtimeROS2Node realtimeROS2Node;
@@ -145,6 +159,8 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private final ImBoolean publishPointCloudROS1 = new ImBoolean(false);
    private final ImBoolean publishColorImageROS2 = new ImBoolean(false);
    private final ImBoolean publishPointCloudROS2 = new ImBoolean(false);
+   private final ImBoolean publishDepthImageMessageROS2 = new ImBoolean(false);
+   private final ImBoolean publishColorImageMessageROS2 = new ImBoolean(false);
 
    private final ImBoolean useSensorColor = new ImBoolean(false);
    private final ImBoolean colorBasedOnWorldZ = new ImBoolean(true);
@@ -208,6 +224,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       updateCameraPinholeBrown();
 
       rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
+      rgb8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
    }
 
    public void setupForROS1Depth(RosNodeInterface ros1Node, String ros1DepthImageTopic, String ros1DepthCameraInfoTopic)
@@ -243,6 +260,17 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       ros1PointsToPublish = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D::new);
       ros1PointCloudPublisher = new RosPointCloudPublisher(PointType.XYZ, false);
       ros1Node.attachPublisher(ros1PointCloudTopic, ros1PointCloudPublisher);
+   }
+
+   public void setupForROS2ImageMessages(ROS2NodeInterface ros2Node, ROS2Topic<ImageMessage> ros2DepthTopic, ROS2Topic<ImageMessage> ros2ColorTopic)
+   {
+      this.ros2Node = ros2Node;
+      this.ros2Helper = new ROS2Helper(ros2Node);
+      this.ros2DepthTopic = ros2DepthTopic;
+      this.ros2ColorTopic = ros2ColorTopic;
+
+      this.depthImageMat = new Mat();
+      this.yuv420Image = new Mat();
    }
 
    public void setupForROS2PointCloud(ROS2NodeInterface ros2Node, ROS2Topic<?> ros2PointCloudTopic)
@@ -332,6 +360,14 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             {
                if (publishColorImageROS2.get())
                   publishColorImageROS2();
+            }
+
+            if(ros2Node != null)
+            {
+               if (publishDepthImageMessageROS2.get())
+                  publishROS2DepthImageMessage();
+               if (publishColorImageMessageROS2.get())
+                  publishROS2ColorImageMessage();
             }
          }
          if (pointCloudMessageType != null && pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
@@ -490,6 +526,14 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                ImGui.text("Number of segments: " + segmentationDivisor.get());
             }
          }
+         if (ros2DepthTopic != null)
+         {
+            ImGui.checkbox(labels.get("ROS 2 Depth image (" + ros2DepthTopic + ")"), publishDepthImageMessageROS2);
+         }
+         if (ros2ColorTopic != null)
+         {
+            ImGui.checkbox(labels.get("ROS 2 Color image (" + ros2ColorTopic + ")"), publishColorImageMessageROS2);
+         }
          if (realtimeROS2Node != null)
          {
             ImGui.sameLine();
@@ -621,6 +665,59 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       }
    }
 
+   public void publishROS2DepthImageMessage()
+   {
+      if(!depthExecutor.isExecuting() && publishDepthImageMessageROS2.get())
+      {
+         depthExecutor.execute(() -> {
+
+            BytedecoOpenCVTools.convertFloatToShort(depthSensorSimulator.getMetersDepthOpenCVMat(),
+                                                    depthImageMat, 1000.0, 0.0);
+
+            depthImageMessage.setImageHeight(depthSensorSimulator.getImageHeight());
+            depthImageMessage.setImageWidth(depthSensorSimulator.getImageWidth());
+            depthImageMessage.getIntrinsicParameters().setFx(depthSensorSimulator.getFocalLengthPixels().get());
+            depthImageMessage.getIntrinsicParameters().setFy(depthSensorSimulator.getFocalLengthPixels().get());
+            depthImageMessage.getIntrinsicParameters().setCx(depthSensorSimulator.getPrincipalOffsetXPixels().get());
+            depthImageMessage.getIntrinsicParameters().setCy(depthSensorSimulator.getPrincipalOffsetYPixels().get());
+            depthImageMessage.getIntrinsicParameters().setSkew(0.0);
+
+            Instant now = Instant.now();
+            sensorPose.setToZero(sensorFrame);
+            sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
+            PerceptionMessageTools.publishPNGCompressedDepthImage(depthImageMat, ros2DepthTopic, depthImageMessage, ros2Helper, sensorPose, now, depthSequenceNumber++,
+                                                                  depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth());
+
+         });
+      }
+   }
+
+   public void publishROS2ColorImageMessage()
+   {
+      if(!colorExecutor.isExecuting() && publishColorImageMessageROS2.get())
+      {
+         colorExecutor.execute(() -> {
+
+            colorImageMessage.setImageHeight(depthSensorSimulator.getImageHeight());
+            colorImageMessage.setImageWidth(depthSensorSimulator.getImageWidth());
+            colorImageMessage.getIntrinsicParameters().setFx(depthSensorSimulator.getFocalLengthPixels().get());
+            colorImageMessage.getIntrinsicParameters().setFy(depthSensorSimulator.getFocalLengthPixels().get());
+            colorImageMessage.getIntrinsicParameters().setCx(depthSensorSimulator.getPrincipalOffsetXPixels().get());
+            colorImageMessage.getIntrinsicParameters().setCy(depthSensorSimulator.getPrincipalOffsetYPixels().get());
+            colorImageMessage.getIntrinsicParameters().setSkew(0.0);
+
+            opencv_imgproc.cvtColor(rgba8Mat, rgb8Mat, opencv_imgproc.COLOR_RGBA2RGB);
+
+            Instant now = Instant.now();
+            sensorPose.setToZero(sensorFrame);
+            sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
+            PerceptionMessageTools.publishJPGCompressedColorImage(rgba8Mat, yuv420Image, ros2ColorTopic, colorImageMessage, ros2Helper, sensorPose, now, colorSequenceNumber++,
+                                                                  depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth());
+         });
+      }
+
+   }
+
    private void publishPointCloudROS1()
    {
       if (!pointCloudExecutor.isExecuting())
@@ -727,6 +824,16 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    public void setPublishPointCloudROS2(boolean publish)
    {
       publishPointCloudROS2.set(publish);
+   }
+
+   public void setPublishDepthImageMessageROS2(boolean publish)
+   {
+      publishDepthImageMessageROS2.set(publish);
+   }
+
+   public void setPublishColorImageMessageROS2(boolean publish)
+   {
+      publishColorImageMessageROS2.set(publish);
    }
 
    public void setUseSensorColor(boolean useSensorColor)
