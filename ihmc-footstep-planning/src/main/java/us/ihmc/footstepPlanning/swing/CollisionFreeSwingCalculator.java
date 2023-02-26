@@ -72,7 +72,7 @@ public class CollisionFreeSwingCalculator
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final TickAndUpdatable tickAndUpdatable;
+   private final List<TickAndUpdatable> tickAndUpdatables = new ArrayList<>();
 
    private final FramePose3D startOfSwingPose = new FramePose3D();
    private final FramePose3D endOfSwingPose = new FramePose3D();
@@ -127,7 +127,8 @@ public class CollisionFreeSwingCalculator
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.swingPlannerParameters = swingPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.tickAndUpdatable = tickAndUpdatable;
+      if (tickAndUpdatable != null)
+         this.tickAndUpdatables.add(tickAndUpdatable);
       this.graphicsListRegistry = graphicsListRegistry;
       this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, 30, numberOfKnotPoints, ReferenceFrame.getWorldFrame());
 
@@ -175,6 +176,11 @@ public class CollisionFreeSwingCalculator
          footPolygonGraphic = null;
          downSampledWaypoints = null;
       }
+   }
+
+   public void addTickAndUpdatable(TickAndUpdatable tickAndUpdatable)
+   {
+      this.tickAndUpdatables.add(tickAndUpdatable);
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -312,7 +318,8 @@ public class CollisionFreeSwingCalculator
          {
             swingKnotPoints.forEach(kp -> kp.updateGraphics(false));
             swingKnotPoints.get(boxToShow).updateGraphics(true);
-            tickAndUpdatable.tickAndUpdate();
+            for (TickAndUpdatable tickAndUpdatable : tickAndUpdatables)
+               tickAndUpdatable.tickAndUpdate();
          }
       }
 
@@ -379,7 +386,8 @@ public class CollisionFreeSwingCalculator
 
          if (visualize)
          {
-            tickAndUpdatable.tickAndUpdate();
+            for (TickAndUpdatable tickAndUpdatable : tickAndUpdatables)
+               tickAndUpdatable.tickAndUpdate();
          }
 
          if (!intersectionFound || maxCollisionDistance.getDoubleValue() < collisionDistanceEpsilon)
@@ -459,7 +467,8 @@ public class CollisionFreeSwingCalculator
 
          soleFrameGraphicPose.setToNaN();
          footPolygonGraphic.update();
-         tickAndUpdatable.tickAndUpdate();
+         for (TickAndUpdatable tickAndUpdatable : tickAndUpdatables)
+            tickAndUpdatable.tickAndUpdate();
       }
 
       /* Down sample to 3 waypoints */
@@ -499,7 +508,8 @@ public class CollisionFreeSwingCalculator
          soleFrameGraphicPose.setToNaN();
          footPolygonGraphic.update();
          footstep.getCustomWaypointPositions().forEach(downSampledWaypoints::setBall);
-         tickAndUpdatable.tickAndUpdate();
+         for (TickAndUpdatable tickAndUpdatable : tickAndUpdatables)
+            tickAndUpdatable.tickAndUpdate();
       }
 
       return copySwingTrajectories(positionTrajectoryGenerator.getTrajectories(), footstep.getCustomWaypointPositions().size() + 1);
@@ -538,7 +548,8 @@ public class CollisionFreeSwingCalculator
          footstepVisualizer.visualizeFootstep(footstep.getFootstepPose());
       }
 
-      tickAndUpdatable.tickAndUpdate();
+      for (TickAndUpdatable tickAndUpdatable : tickAndUpdatables)
+         tickAndUpdatable.tickAndUpdate();
    }
 
    private double calculateSwingTime(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
