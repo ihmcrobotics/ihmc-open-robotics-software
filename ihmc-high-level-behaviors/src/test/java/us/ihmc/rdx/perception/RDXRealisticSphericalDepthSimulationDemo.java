@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 
 public class RDXRealisticSphericalDepthSimulationDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
 
    private RDXRealisticSphericalDepthSimulator sphericalDepthSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();

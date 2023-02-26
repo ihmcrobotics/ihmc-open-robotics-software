@@ -6,8 +6,12 @@ from hdf5_reader import *
 from hdf5_converter import *
 import argparse
 
-if __name__ == '__main__':
+def convert_main():
 
+    # Simulation:
+    # 20230225_235428_PerceptionLog.hdf5
+
+    # Real:
     # 20221212_184748_PerceptionLog.hdf5
     # 20221212_184906_PerceptionLog.hdf5
     # 20221212_184940_PerceptionLog.hdf5
@@ -43,4 +47,22 @@ if __name__ == '__main__':
 
 
 
+def play_main():
 
+    home = os.path.expanduser('~')
+
+    path = home + '/.ihmc/logs/perception/'
+
+
+    data = h5py.File(path + '20230226_003847_PerceptionLog.hdf5', 'r')
+
+    print(data.keys())
+
+    for i in range(2, 10):
+
+        print("Showing image: ", i)
+        display_image(data, i, 'l515/depth/', 1000)
+    
+
+if __name__ == '__main__':
+    play_main()

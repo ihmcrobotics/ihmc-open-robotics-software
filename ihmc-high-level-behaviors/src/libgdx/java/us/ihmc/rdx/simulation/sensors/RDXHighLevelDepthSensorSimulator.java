@@ -709,8 +709,6 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             opencv_imgproc.cvtColor(rgba8Mat, rgb8Mat, opencv_imgproc.COLOR_RGBA2RGB);
 
             Instant now = Instant.now();
-            sensorPose.setToZero(sensorFrame);
-            sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
             PerceptionMessageTools.publishJPGCompressedColorImage(rgba8Mat, yuv420Image, ros2ColorTopic, colorImageMessage, ros2Helper, sensorPose, now, colorSequenceNumber++,
                                                                   depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth());
          });
