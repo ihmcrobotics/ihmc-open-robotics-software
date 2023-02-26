@@ -63,9 +63,7 @@ public class RDXBlackflyCalibrationSuite
          = FE185C086HA_1_FOCAL_LENGTH * BFLY_U3_23S6C_WIDTH_PIXELS / BFLY_U3_23S6C_CMOS_SENSOR_WIDTH;
 
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI("ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                  "Blackfly Calibration Suite");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Blackfly Calibration Suite");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXBlackflyReader blackflyReader;
    private RDXCalibrationPatternDetectionUI calibrationPatternDetectionUI;
@@ -339,7 +337,7 @@ public class RDXBlackflyCalibrationSuite
                   {
                      nettyOusterUI.createAfterOusterInitialized();
 
-                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI.getPointCloudRenderer(), RDXSceneLevel.MODEL);
+                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI::getRenderables);
                      baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
                      baseUI.getLayoutManager().reloadLayout();
                   }

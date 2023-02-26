@@ -147,13 +147,25 @@ float16 newRotationMatrix()
    return (float16) (1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0); // unused values
 }
 
-float normSquared2D(float x, float y) { return x * x + y * y; }
+float normSquared2D(float x, float y)
+{
+   return x * x + y * y;
+}
 
-float norm2D(float x, float y) { return sqrt(normSquared2D(x, y)); }
+float norm2D(float x, float y)
+{
+   return sqrt(normSquared2D(x, y));
+}
 
-float normSquared(float x, float y, float z) { return x * x + y * y + z * z; }
+float normSquared(float x, float y, float z)
+{
+   return x * x + y * y + z * z;
+}
 
-float norm(float x, float y, float z) { return sqrt(normSquared(x, y, z)); }
+float norm(float x, float y, float z)
+{
+   return sqrt(normSquared(x, y, z));
+}
 
 float angle(float x1, float y1, float x2, float y2)
 {
@@ -181,9 +193,15 @@ float distanceSquaredBetweenPoint3Ds(float firstPointX, float firstPointY, float
    return normSquared(deltaX, deltaY, deltaZ);
 }
 
-bool intervalContains(float value, float lowerEndpoint, float upperEndpoint) { return value >= lowerEndpoint && value <= upperEndpoint; }
+bool intervalContains(float value, float lowerEndpoint, float upperEndpoint)
+{
+   return value >= lowerEndpoint && value <= upperEndpoint;
+}
 
-double interpolate(double a, double b, double alpha) { return (1.0 - alpha) * a + alpha * b; }
+double interpolate(double a, double b, double alpha)
+{
+   return (1.0 - alpha) * a + alpha * b;
+}
 
 /**
  * Returns the determinant of a 3x3 matrix that is represented as a 9 element row major matrix.
@@ -279,7 +297,10 @@ uint2 nextRandomInt(uint seed, uint bound)
 /**
  * Checks whether variable a is within the value of variable b by some epsilon. Returns true if it is.
  **/
-bool epsilonEquals(float a, float b, float epsilon) { return fabs(a - b) < epsilon; }
+bool epsilonEquals(float a, float b, float epsilon)
+{
+   return fabs(a - b) < epsilon;
+}
 
 /**
  * Returns the signed distane of a point 3D to a plane 3D that's defined by the point on the plane and the plane normal.

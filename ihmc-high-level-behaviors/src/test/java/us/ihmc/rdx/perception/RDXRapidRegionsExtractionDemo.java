@@ -53,7 +53,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230222_125406_RoughTerrainLoop_01.hdf5").toString();
 
-   private final RDXBaseUI baseUI = new RDXBaseUI( "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor
          = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress", true, 1);
