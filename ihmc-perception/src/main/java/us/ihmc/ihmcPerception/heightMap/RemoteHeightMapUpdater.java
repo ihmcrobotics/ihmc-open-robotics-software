@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
-import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -32,7 +32,7 @@ public class RemoteHeightMapUpdater
 
    private final RealtimeROS2Node ros2Node;
    private static final FramePose3D zeroPose = new FramePose3D();
-   private final PerceptionMessageTools perceptionMessageTools = new PerceptionMessageTools();
+   private final HeightMapKernel heightMapKernel = new HeightMapKernel();
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final HeightMapUpdater heightMapUpdater;
 
@@ -129,6 +129,6 @@ public class RemoteHeightMapUpdater
    {
       ros2Node.destroy();
       executorService.shutdown();
-      perceptionMessageTools.destroy();
+      heightMapKernel.destroy();
    }
 }

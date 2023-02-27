@@ -56,7 +56,7 @@ public class RDXBlackflyReader
       spinImage = new spinImage();
 
       blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
-      blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGB8);
+      blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
       blackfly.startAcquiringImages();
 
       swapImagePanel = new RDXOpenCVSwapVideoPanel("Blackfly Monitor");
@@ -90,15 +90,15 @@ public class RDXBlackflyReader
          {
             imageWidth = blackfly.getWidth(spinImage);
             imageHeight = blackfly.getHeight(spinImage);
-            spinImageDataPointer = new BytePointer(imageWidth * imageHeight * 3); // RGB8
-            blackflySourceMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+            spinImageDataPointer = new BytePointer(imageWidth * imageHeight * 3); // 8 bits per pixel
+            blackflySourceMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
             swapImagePanel.allocateInitialTextures(imageWidth, imageHeight);
          }
 
          Spinnaker_C.spinImageGetData(spinImage, spinImageDataPointer);
          blackflySourceMat.data(spinImageDataPointer);
 
-         opencv_imgproc.cvtColor(blackflySourceMat, swapImagePanel.getAsynchronousThreadData().getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA, 0);
+         opencv_imgproc.cvtColor(blackflySourceMat, swapImagePanel.getAsynchronousThreadData().getRGBA8Mat(), opencv_imgproc.COLOR_BayerRG2BGRA);
          swapImagePanel.swap();
 
          Spinnaker_C.spinImageRelease(spinImage);
@@ -122,6 +122,7 @@ public class RDXBlackflyReader
          synchronized (swapImagePanel.getSyncObject())
          {
             RDXImagePanelTexture texture = swapImagePanel.getUIThreadData();
+
             if (monitorPanelUIThreadPreprocessor != null && texture.getRGBA8Image() != null)
                monitorPanelUIThreadPreprocessor.accept(texture);
 
@@ -175,7 +176,7 @@ public class RDXBlackflyReader
       return imageWidth;
    }
 
-   public Mat getRGBImage()
+   public Mat getBayerRGImage()
    {
       return blackflySourceMat;
    }

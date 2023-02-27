@@ -8,6 +8,9 @@ import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
 
+/**
+ * TODO: This needs to extend ROS2NodeInterface
+ */
 public interface ROS2PublishSubscribeAPI
 {
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback);

@@ -142,6 +142,9 @@ public class BodyPathLogRenderer extends AnimationTimer
 
    private void buildFullPlanMesh(int costIndex, List<AStarBodyPathIterationData> iterationDataList, Map<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> edgeDataMap)
    {
+      if (iterationDataList.size() < 1)
+         return;
+
       LogTools.info("Generating the full plan mesh");
 
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette());

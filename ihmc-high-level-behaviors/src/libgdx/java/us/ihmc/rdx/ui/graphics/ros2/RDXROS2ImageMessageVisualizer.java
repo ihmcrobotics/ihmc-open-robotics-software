@@ -37,7 +37,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    private final ROS2Topic<ImageMessage> topic;
    private RealtimeROS2Node realtimeROS2Node;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(true);
+   private final ImBoolean subscribed = new ImBoolean(false);
    private final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();

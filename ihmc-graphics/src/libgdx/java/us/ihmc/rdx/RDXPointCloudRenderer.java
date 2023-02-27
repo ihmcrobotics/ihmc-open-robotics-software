@@ -445,6 +445,11 @@ public class RDXPointCloudRenderer implements RenderableProvider
       return floatsPerVertex;
    }
 
+   public int getMaxPoints()
+   {
+      return maxPoints;
+   }
+
    public int getCurrentSegmentIndex()
    {
       return currentSegmentIndex;
