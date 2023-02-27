@@ -1,6 +1,6 @@
 pluginManagement {
    plugins {
-      id("us.ihmc.ihmc-build") version "0.28.7"
+      id("us.ihmc.ihmc-build") version "0.28.8"
    }
 }
 
@@ -10,7 +10,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath("us.ihmc:ihmc-build:0.28.7")
+      classpath("us.ihmc:ihmc-build:0.28.8")
    }
 }
 

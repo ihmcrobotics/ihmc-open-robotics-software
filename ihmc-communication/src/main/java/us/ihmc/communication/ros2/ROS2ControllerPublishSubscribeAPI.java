@@ -1,9 +1,8 @@
-package us.ihmc.avatar.ros2;
+package us.ihmc.communication.ros2;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;

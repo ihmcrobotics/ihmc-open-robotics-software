@@ -262,10 +262,10 @@ public class RDXBlackflyCalibrationSuite
                      while (running)
                      {
                         blackflyReader.readBlackflyImage();
-                        calibrationPatternDetectionUI.copyInSourceRGBImage(blackflyReader.getRGBImage());
+                        calibrationPatternDetectionUI.copyInSourceImage(blackflyReader.getBayerRGImage());
 
                         if (hdf5ImageLoggingUI != null)
-                           hdf5ImageLoggingUI.copyRGBImage(blackflyReader.getRGBImage());
+                           hdf5ImageLoggingUI.copyRGBImage(blackflyReader.getBayerRGImage());
                      }
                   }, "CameraRead");
                   ThreadTools.startAsDaemon(() ->
@@ -337,7 +337,7 @@ public class RDXBlackflyCalibrationSuite
                   {
                      nettyOusterUI.createAfterOusterInitialized();
 
-                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI.getPointCloudRenderer(), RDXSceneLevel.MODEL);
+                     baseUI.getPrimaryScene().addRenderableProvider(nettyOusterUI::getRenderables);
                      baseUI.getImGuiPanelManager().addPanel(nettyOusterUI.getImagePanel().getImagePanel());
                      baseUI.getLayoutManager().reloadLayout();
                   }

@@ -79,7 +79,10 @@ float index_to_yaw(int yaw_index, int yaw_total_indices)
    return M_2_PI_F * (yaw_index - center_index) / yaw_total_indices;
 }
 
-int yaw_to_index(float yaw, int yaw_total_indices) { return ((int) (yaw / yaw_total_indices)) + (yaw_total_indices / 2); }
+int yaw_to_index(float yaw, int yaw_total_indices)
+{
+   return ((int) (yaw / yaw_total_indices)) + (yaw_total_indices / 2);
+}
 
 float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector)
 {
@@ -457,7 +460,10 @@ void kernel snapVertices(
    snapped_vertex_height[path_key] = running_sum / number_of_samples;
 }
 
-float get_yaw(int yaw_index) { return yaw_index * M_PI_4_F / 2.0f; }
+float get_yaw(int yaw_index)
+{
+   return yaw_index * M_PI_4_F / 2.0f;
+}
 
 int computeCollisionOffsetX(int yaw_idx, int x_offset, int y_offset)
 {
@@ -1066,9 +1072,15 @@ float shiftAngleInRange(float angleToShift, float angleStart)
    return angleStart + deltaFromStart;
 }
 
-float trimAngleMinusPiToPi(float angleToShift) { return shiftAngleInRange(angleToShift, -M_PI_F); }
+float trimAngleMinusPiToPi(float angleToShift)
+{
+   return shiftAngleInRange(angleToShift, -M_PI_F);
+}
 
-float angleDifferenceMinusPiToPi(float angleA, float angleB) { return trimAngleMinusPiToPi(angleA - angleB); }
+float angleDifferenceMinusPiToPi(float angleA, float angleB)
+{
+   return trimAngleMinusPiToPi(angleA - angleB);
+}
 
 float computeDeltaHeadingMagnitude(float x0, float y0, float x1, float y1, float x2, float y2, float deadband)
 {
