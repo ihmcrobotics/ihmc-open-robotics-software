@@ -245,7 +245,8 @@ public class RapidRegionsDebutOutputGenerator
 
       //      constructCentroidSurfelCloud(patchFeatureGrid.getCxImage(), patchFeatureGrid.getCyImage(), patchFeatureGrid.getCzImage(), patchFeatureGrid.getNxImage(),
 //                                   patchFeatureGrid.getNyImage(), patchFeatureGrid.getNzImage());
-//      displayInputDepth(inputDepthImage, 1);
+
+      BytedecoOpenCVTools.displayDepth("Depth", inputDepthImage, 1);
       showDebugImage(1);
    }
 

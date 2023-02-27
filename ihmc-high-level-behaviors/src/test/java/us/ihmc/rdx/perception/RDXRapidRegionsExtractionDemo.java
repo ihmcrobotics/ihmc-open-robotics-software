@@ -51,7 +51,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    //20230117_162417_PerceptionLog.hdf5 (231 MB)
    //20230117_162825_PerceptionLog.hdf5 (328 MB)
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230227_134236_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230227_140700_D455_RoughTerrain.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
