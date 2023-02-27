@@ -12,7 +12,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
@@ -33,7 +32,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testACoupleMoreQueuedControllerCommands() throws SimulationExceededMaximumTimeException
+   public void testACoupleMoreQueuedControllerCommands()
    {
       super.testACoupleMoreQueuedControllerCommands();
    }
@@ -41,7 +40,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testACoupleQueuedControllerCommands() throws SimulationExceededMaximumTimeException
+   public void testACoupleQueuedControllerCommands()
    {
       super.testACoupleQueuedControllerCommands();
    }
@@ -49,7 +48,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testACoupleStepsUsingQueuedControllerCommands() throws SimulationExceededMaximumTimeException
+   public void testACoupleStepsUsingQueuedControllerCommands()
    {
       super.testACoupleStepsUsingQueuedControllerCommands();
    }
@@ -67,7 +66,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
+   public void testLongStepsMaxHeightPauseAndResume()
    {
       super.testLongStepsMaxHeightPauseAndResume();
    }
@@ -75,7 +74,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
+   public void testRotatedStepInTheAir()
    {
       super.testRotatedStepInTheAir();
    }
@@ -83,7 +82,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground")
    @Override
    @Test
-   public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
+   public void testSimpleScripts() throws IOException
    {
       super.testSimpleScripts();
    }
@@ -91,7 +90,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
+   public void testStandingForACoupleSeconds()
    {
       super.testStandingForACoupleSeconds();
    }
@@ -101,7 +100,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    // TODO re-enable that test when we have polygon to polygon contact model for SCS
    @Disabled
    @Test
-   public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
+   public void testStandingOnUnevenTerrainForACoupleSeconds()
    {
       super.testStandingOnUnevenTerrainForACoupleSeconds();
    }
@@ -109,7 +108,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
+   public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly()
    {
       super.testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly();
    }
@@ -117,7 +116,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
+   public void testTurningInPlaceAndPassingPI()
    {
       super.testTurningInPlaceAndPassingPI();
    }
@@ -125,7 +124,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
+   public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees()
    {
       super.testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees();
    }
@@ -133,7 +132,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingUpToRampWithShortSteps()
    {
       super.testWalkingUpToRampWithShortSteps();
    }
@@ -141,7 +140,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testRepeatedWalking() throws SimulationExceededMaximumTimeException
+   public void testRepeatedWalking()
    {
       super.testRepeatedWalking();
    }
@@ -149,7 +148,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Tag("humanoid-flat-ground-slow-4")
    @Override
    @Test
-   public void testPrepareForLocomotion() throws SimulationExceededMaximumTimeException
+   public void testPrepareForLocomotion()
    {
       super.testPrepareForLocomotion();
    }

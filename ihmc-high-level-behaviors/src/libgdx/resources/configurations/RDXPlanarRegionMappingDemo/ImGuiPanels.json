@@ -1,0 +1,10 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Filtered Map" : true,
+    "PlanarRegionMappingParameters" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

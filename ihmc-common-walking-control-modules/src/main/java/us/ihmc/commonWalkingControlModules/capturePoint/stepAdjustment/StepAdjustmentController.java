@@ -8,6 +8,8 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.List;
+
 public interface StepAdjustmentController
 {
    void reset();
@@ -16,18 +18,15 @@ public interface StepAdjustmentController
 
    void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration, double nextTransferDuration);
 
-   void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
+   void submitSwingSpeedUpUnderDisturbance(double remainingTimeForSwing);
 
-   void setStepConstraintRegion(StepConstraintRegion stepConstraintRegion);
-
-   boolean hasStepConstraintRegion();
+   void setStepConstraintRegions(List<StepConstraintRegion> stepConstraintRegion);
 
    void initialize(double initialTime, RobotSide supportSide);
 
    void compute(double currentTime,
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly residualICPError,
                        double omega0);
 
    FramePose3DReadOnly getFootstepSolution();

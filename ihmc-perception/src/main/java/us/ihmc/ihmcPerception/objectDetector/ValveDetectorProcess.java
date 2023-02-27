@@ -9,9 +9,9 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang3.tuple.Pair;
 
 import controller_msgs.msg.dds.BoundingBoxesPacket;
-import controller_msgs.msg.dds.HeatMapPacket;
-import controller_msgs.msg.dds.ObjectDetectorResultPacket;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.HeatMapPacket;
+import perception_msgs.msg.dds.ObjectDetectorResultPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;

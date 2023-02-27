@@ -1,18 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.InterpolationTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class CoPAndVelocityRotationEdgeCalculatorTest extends RotationEdgeCalculatorTest
 {

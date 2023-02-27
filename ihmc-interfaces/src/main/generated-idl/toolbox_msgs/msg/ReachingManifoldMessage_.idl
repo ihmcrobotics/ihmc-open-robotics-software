@@ -1,0 +1,56 @@
+#ifndef __toolbox_msgs__msg__ReachingManifoldMessage__idl__
+#define __toolbox_msgs__msg__ReachingManifoldMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet CONFIGURATION_SPACE_NAME_X =
+      0;
+
+      const octet CONFIGURATION_SPACE_NAME_Y =
+      1;
+
+      const octet CONFIGURATION_SPACE_NAME_Z =
+      2;
+
+      const octet CONFIGURATION_SPACE_NAME_ROLL =
+      3;
+
+      const octet CONFIGURATION_SPACE_NAME_PITCH =
+      4;
+
+      const octet CONFIGURATION_SPACE_NAME_YAW =
+      5;
+
+      const octet CONFIGURATION_SPACE_NAME_SO3 =
+      6;
+
+
+      /**
+       * Message used to encode the manifold of an object to be used as input by a reaching motion planner.
+       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::ReachingManifoldMessage_")
+      struct ReachingManifoldMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        long end_effector_hash_code;
+        geometry_msgs::msg::dds::Point manifold_origin_position;
+        geometry_msgs::msg::dds::Quaternion manifold_origin_orientation;
+        sequence<octet> manifold_configuration_space_names;
+        sequence<double> manifold_lower_limits;
+        sequence<double> manifold_upper_limits;
+      };
+    };
+  };
+};
+
+#endif

@@ -1,12 +1,10 @@
 package us.ihmc.behaviors.stairs;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.stateMachine.core.State;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;

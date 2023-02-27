@@ -1,0 +1,10 @@
+{
+  "title" : "SimpleGPUHeightMapParameters",
+  "Resolution" : 0.025,
+  "Map length" : 3.5,
+  "Max height range" : 1.0,
+  "Min valid distance" : 0.0,
+  "Ramped height range B" : 1.0,
+  "Ramped height range A" : 0.3,
+  "Ramped height range C" : 0.2
+}

@@ -574,6 +574,11 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       // 5. Add a block/wall far out so that there is a far object to test SLAM against.
       setUpWall(combinedTerrainObject, new double[] {12.0f, 15.0f}, 0.65, 1.0, 1.0, 45.0, heightOffset, YoAppearance.DarkGoldenRod());
+      
+      // 6. Add a table for simulating picking up boxes in a factory.
+      setUpWall(combinedTerrainObject, new double[] {0.0f, 14.0f}, 3.0, 0.65, 0.55, 0.0, heightOffset, YoAppearance.DarkGoldenRod());
+      setUpWall(combinedTerrainObject, new double[] {5.5f, 16.0f}, 0.65, 3.0, 0.55, 0.0, heightOffset, YoAppearance.DarkGoldenRod());
+
       return combinedTerrainObject;
    }
 
@@ -1743,7 +1748,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       CombinedTerrainObject3D fiducualTerrainObject = new CombinedTerrainObject3D(fiducial.name());
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.setRotationEulerAndZeroTranslation(Math.toRadians(90.0), 0.0, yaw - Math.toRadians(90.0));
+      location.getRotation().setEuler(Math.toRadians(90.0), 0.0, yaw - Math.toRadians(90.0));
       location.getTranslation().set(position);
 
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, boxSideLength, boxSideLength, boxSideLength), fiducialTexture);
@@ -1758,8 +1763,8 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       CombinedTerrainObject3D fiducualTerrainObject = new CombinedTerrainObject3D(fiducial.name());
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.setRotationEulerAndZeroTranslation(0.0, 0.0, yaw);
-      location.setTranslation(position);
+      location.getRotation().setEuler(0.0, 0.0, yaw);
+      location.getTranslation().set(position);
 
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, 0.001, boxSideLength, boxSideLength), fiducialTexture);
       fiducualTerrainObject.addTerrainObject(newBox);
@@ -1774,7 +1779,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       CombinedTerrainObject3D valveTerrainObject = new CombinedTerrainObject3D("ValveBox");
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.setRotationEulerAndZeroTranslation(Math.toRadians(90.0), 0.0, yaw - Math.toRadians(90.0));
+      location.getRotation().setEuler(Math.toRadians(90.0), 0.0, yaw - Math.toRadians(90.0));
       location.getTranslation().set(position);
 
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, boxSideLength, boxSideLength, boxSideLength), valveTexture);

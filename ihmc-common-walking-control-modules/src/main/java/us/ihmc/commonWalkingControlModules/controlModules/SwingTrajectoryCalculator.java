@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -38,6 +37,7 @@ public class SwingTrajectoryCalculator
 
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
 
+   private final MovingReferenceFrame pelvisFrame;
    private final MovingReferenceFrame soleFrame;
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
@@ -57,6 +57,7 @@ public class SwingTrajectoryCalculator
 
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
+   private final FrameVector3D pelvisVelocity = new FrameVector3D();
    private final FrameQuaternion initialOrientation = new FrameQuaternion();
    private final FrameVector3D initialAngularVelocity = new FrameVector3D();
 
@@ -64,8 +65,6 @@ public class SwingTrajectoryCalculator
    private final FrameVector3D finalLinearVelocity = new FrameVector3D();
    private final FrameQuaternion finalOrientation = new FrameQuaternion();
    private final FrameVector3D finalAngularVelocity = new FrameVector3D();
-
-   private final FrameVector3D finalCoMVelocity = new FrameVector3D();
 
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
@@ -90,6 +89,7 @@ public class SwingTrajectoryCalculator
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
       double customWaypointAngleThreshold = walkingControllerParameters.getSteppingParameters().getCustomWaypointAngleThreshold();
 
+      pelvisFrame = controllerToolbox.getReferenceFrames().getPelvisFrame();
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide);
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
@@ -106,6 +106,7 @@ public class SwingTrajectoryCalculator
 
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix, Footstep.maxNumberOfSwingWaypoints + 2, registry);
 
+      // Setting the number of waypoints to two, since we only use the swing trajectory generator when there's two waypoints
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix,
                                                                minSwingHeightFromStanceFoot,
                                                                maxSwingHeightFromStanceFoot,
@@ -183,7 +184,9 @@ public class SwingTrajectoryCalculator
       finalPosition.changeFrame(worldFrame);
       finalOrientation.changeFrame(worldFrame);
       finalPosition.addZ(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
-      finalCoMVelocity.setToNaN();
+      finalLinearVelocity.set(swingTrajectoryParameters.getDesiredTouchdownVelocity());
+      finalLinearVelocity.scale(1.0 / Math.min(swingDuration.getDoubleValue(), 1.0));
+      finalAngularVelocity.setToZero(worldFrame);
 
       if (footstep.getTrajectoryType() == null)
       {
@@ -213,18 +216,15 @@ public class SwingTrajectoryCalculator
    }
 
    /**
-    * Invoke this setter after {@link #setFootstep(Footstep)} to register the center of mass velocity
-    * predicted at the end of swing.
-    * <p>
-    * The x and y components of the CoM velocity are added to the desired swing final velocity. The
+    * Invoke this setter after {@link #setFootstep(Footstep)} to register what the final velocity is
+    * predicted at the end of swing, mainly to account for non-zero com velocity. The
     * objective is to increase robustness to late touchdown.
-    * </p>
-    * 
-    * @param finalCoMVelocity the predicted center of mass velocity at touchdown. Not modified.
+    *
+    * @param finalLinearVelocity the final velocity at touchdown to use. Not modified.
     */
-   public void setFinalCoMVelocity(FrameVector3DReadOnly finalCoMVelocity)
+   public void setFinalLinearVelocity(FrameVector3DReadOnly finalLinearVelocity)
    {
-      this.finalCoMVelocity.set(finalCoMVelocity);
+      this.finalLinearVelocity.set(finalLinearVelocity);
    }
 
    public void setSwingDuration(double swingDuration)
@@ -233,7 +233,7 @@ public class SwingTrajectoryCalculator
    }
 
    /**
-    * Sets the initial conditions that the calculator uses to the calculate the swing trajectory to the
+    * Sets the initial conditions that the calculator uses to calculate the swing trajectory to the
     * current state of the sole frame.
     */
    public void setInitialConditionsToCurrent()
@@ -243,13 +243,23 @@ public class SwingTrajectoryCalculator
       currentStateProvider.getOrientation(initialOrientation);
       currentStateProvider.getAngularVelocity(initialAngularVelocity);
 
+      pelvisVelocity.setIncludingFrame(pelvisFrame.getTwistOfFrame().getLinearPart());
+      pelvisVelocity.changeFrame(worldFrame);
+
+      initialLinearVelocity.scaleAdd(swingTrajectoryParameters.getPelvisVelocityInjectionRatio(), pelvisVelocity, initialLinearVelocity);
+
       if (swingTrajectoryParameters.ignoreSwingInitialAngularVelocityZ())
       {
          initialAngularVelocity.changeFrame(worldFrame);
          initialAngularVelocity.setZ(0.0);
       }
-      initialLinearVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialLinearVelocityMagnitude());
-      initialAngularVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialAngularVelocityMagnitude());
+      initialLinearVelocity.changeFrame(worldFrame);
+      double liftOffVelocity = swingTrajectoryParameters.getMinLiftOffVerticalVelocity() / (Math.min(1.0, swingDuration.getDoubleValue()));
+      initialLinearVelocity.setZ(Math.max(liftOffVelocity, initialLinearVelocity.getZ()));
+
+      initialLinearVelocity.clipToMaxNorm(swingTrajectoryParameters.getMaxSwingInitialLinearVelocityMagnitude());
+      initialAngularVelocity.clipToMaxNorm(swingTrajectoryParameters.getMaxSwingInitialAngularVelocityMagnitude());
+
       stanceFootPosition.setToZero(oppositeSoleFrame);
    }
 
@@ -267,15 +277,7 @@ public class SwingTrajectoryCalculator
     */
    public void initializeTrajectoryWaypoints(boolean initializeOptimizer)
    {
-      finalLinearVelocity.setIncludingFrame(swingTrajectoryParameters.getDesiredTouchdownVelocity());
       finalAngularVelocity.setToZero(worldFrame);
-
-      if (!finalCoMVelocity.containsNaN())
-      {
-         double injectionRatio = swingTrajectoryParameters.getFinalCoMVelocityInjectionRatio();
-         finalLinearVelocity.setX(injectionRatio * finalCoMVelocity.getX());
-         finalLinearVelocity.setY(injectionRatio * finalCoMVelocity.getY());
-      }
 
       // append current pose as initial trajectory point
       swingTrajectory.clear(worldFrame);
@@ -329,43 +331,6 @@ public class SwingTrajectoryCalculator
    {
       double zDifference = Math.abs(footstepPosition.getZ() - lastFootstepPosition.getZ());
       return zDifference > swingTrajectoryParameters.getMinHeightDifferenceForStepUpOrDown();
-   }
-
-   private void modifyFinalOrientationForTouchdown(FrameQuaternion finalOrientationToPack)
-   {
-      finalPosition.changeFrame(oppositeSoleZUpFrame);
-      stanceFootPosition.changeFrame(oppositeSoleZUpFrame);
-      double stepHeight = finalPosition.getZ() - stanceFootPosition.getZ();
-      double initialFootstepPitch = finalOrientationToPack.getPitch();
-
-      double footstepPitchModification;
-      if (MathTools.intervalContains(stepHeight,
-                                     swingTrajectoryParameters.getStepDownHeightForToeTouchdown(),
-                                     swingTrajectoryParameters.getMaximumHeightForHeelTouchdown())
-            && swingTrajectoryParameters.doHeelTouchdownIfPossible())
-      { // not stepping down too far, and not stepping up too far, so do heel strike
-         double stepLength = finalPosition.getX() - stanceFootPosition.getX();
-         double heelTouchdownAngle = MathTools.clamp(-stepLength * swingTrajectoryParameters.getHeelTouchdownLengthRatio(),
-                                                     -swingTrajectoryParameters.getHeelTouchdownAngle());
-         // use the footstep pitch if its greater than the heel strike angle
-         footstepPitchModification = Math.max(initialFootstepPitch, heelTouchdownAngle);
-         // decrease the foot pitch modification if next step pitches down
-         footstepPitchModification = Math.min(footstepPitchModification, heelTouchdownAngle + initialFootstepPitch);
-         footstepPitchModification -= initialFootstepPitch;
-      }
-      else if (stepHeight < swingTrajectoryParameters.getStepDownHeightForToeTouchdown() && swingTrajectoryParameters.doToeTouchdownIfPossible())
-      { // stepping down and do toe touchdown
-         double toeTouchdownAngle = MathTools.clamp(-swingTrajectoryParameters.getToeTouchdownDepthRatio()
-               * (stepHeight - swingTrajectoryParameters.getStepDownHeightForToeTouchdown()), swingTrajectoryParameters.getToeTouchdownAngle());
-         footstepPitchModification = Math.max(toeTouchdownAngle, initialFootstepPitch);
-         footstepPitchModification -= initialFootstepPitch;
-      }
-      else
-      {
-         footstepPitchModification = 0.0;
-      }
-
-      finalOrientationToPack.appendPitchRotation(footstepPitchModification);
    }
 
    private void setWaypointsFromStepPosition(Footstep footstep)
@@ -428,7 +393,6 @@ public class SwingTrajectoryCalculator
       // append footstep pose if not provided in the waypoints
       if (appendFootstepPose)
       {
-         modifyFinalOrientationForTouchdown(finalOrientation);
          swingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
          swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);
       }
@@ -436,10 +400,10 @@ public class SwingTrajectoryCalculator
       {
          // In this case our swing trajectory contains the touchdown so we should use those values to be continuous.
          FrameSE3TrajectoryPoint lastPoint = swingWaypoints.getLast();
-         lastPoint.getPositionIncludingFrame(finalPosition);
-         lastPoint.getLinearVelocityIncludingFrame(finalLinearVelocity);
-         lastPoint.getOrientationIncludingFrame(finalOrientation);
-         lastPoint.getAngularVelocity(finalAngularVelocity);
+         finalPosition.setIncludingFrame(lastPoint.getPosition());
+         finalLinearVelocity.setIncludingFrame(lastPoint.getLinearVelocity());
+         finalOrientation.setIncludingFrame(lastPoint.getOrientation());
+         finalAngularVelocity.set(lastPoint.getAngularVelocity());
       }
    }
 
@@ -466,7 +430,6 @@ public class SwingTrajectoryCalculator
          swingTrajectory.appendOrientationWaypoint(0.5 * swingDuration.getDoubleValue(), tmpOrientation, tmpVector);
       }
 
-      modifyFinalOrientationForTouchdown(finalOrientation);
       swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
       swingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
       swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);

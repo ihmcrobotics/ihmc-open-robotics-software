@@ -1,0 +1,9 @@
+# - Config file for the inria_wbc_teleop package
+
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+
+find_package(Eigen3 REQUIRED)
+
+include("${CMAKE_CURRENT_LIST_DIR}/prompTargets.cmake")
+

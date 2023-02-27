@@ -15,6 +15,6 @@ bool force_execution
 bool enable_user_pelvis_control_during_walking
 
 # The orientation trajectory information.
-controller_msgs/SO3TrajectoryMessage so3_trajectory
+ihmc_common_msgs/SO3TrajectoryMessage so3_trajectory
 
 

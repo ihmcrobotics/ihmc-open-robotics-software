@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.Random;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import javafx.application.Application;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.PlanarRegionFileTools;
 
-public class PointCloudDataLoader extends Application
+public class PointCloudDataLoader extends ApplicationNoModule
 {
    private static final boolean SHOW_PLANAR_REGIONS = true;
    private static final boolean SHOW_STEREO_POINT_CLOUD = true;

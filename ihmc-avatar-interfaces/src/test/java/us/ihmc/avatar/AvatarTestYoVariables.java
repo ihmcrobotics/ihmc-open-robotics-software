@@ -3,7 +3,8 @@ package us.ihmc.avatar;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimFloatingJointBasics;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -32,14 +33,15 @@ public abstract class AvatarTestYoVariables
 
    private final YoBoolean controllerIsInDoubleSupport;
 
-   public AvatarTestYoVariables(SimulationConstructionSet scs)
+   public AvatarTestYoVariables(SimulationConstructionSet2 scs)
    {
-      yoTime = (YoDouble) scs.findVariable("t");
+      yoTime = (YoDouble) scs.getTime();
 
-      pelvisX = (YoDouble) scs.findVariable("q_x");
-      pelvisY = (YoDouble) scs.findVariable("q_y");
-      pelvisZ = (YoDouble) scs.findVariable("q_z");
-      pelvisYaw = (YoDouble) scs.findVariable("q_yaw");
+      SimFloatingJointBasics rootJoint = scs.getRobots().get(0).getFloatingRootJoint();
+      pelvisX = (YoDouble) scs.findVariable("q_" + rootJoint.getName() + "_x");
+      pelvisY = (YoDouble) scs.findVariable("q_" + rootJoint.getName() + "_y");
+      pelvisZ = (YoDouble) scs.findVariable("q_" + rootJoint.getName() + "_z");
+      pelvisYaw = (YoDouble) scs.findVariable("q_" + rootJoint.getName() + "_yaw");
 
       midFeetZUpZ = (YoDouble) scs.findVariable("midFeetZUpZ");
 
@@ -53,10 +55,16 @@ public abstract class AvatarTestYoVariables
          desiredCOMHeight = (YoDouble) scs.findVariable("desiredCOMHeight");
       }
 
-      solePositions.set(RobotSide.LEFT, new YoFramePoint3D((YoDouble) scs.findVariable("leftSoleX"), (YoDouble) scs.findVariable("leftSoleY"),
-                                                         (YoDouble) scs.findVariable("leftSoleZ"), ReferenceFrame.getWorldFrame()));
-      solePositions.set(RobotSide.RIGHT, new YoFramePoint3D((YoDouble) scs.findVariable("rightSoleX"), (YoDouble) scs.findVariable("rightSoleY"),
-                                                         (YoDouble) scs.findVariable("rightSoleZ"), ReferenceFrame.getWorldFrame()));
+      solePositions.set(RobotSide.LEFT,
+                        new YoFramePoint3D((YoDouble) scs.findVariable("leftSoleX"),
+                                           (YoDouble) scs.findVariable("leftSoleY"),
+                                           (YoDouble) scs.findVariable("leftSoleZ"),
+                                           ReferenceFrame.getWorldFrame()));
+      solePositions.set(RobotSide.RIGHT,
+                        new YoFramePoint3D((YoDouble) scs.findVariable("rightSoleX"),
+                                           (YoDouble) scs.findVariable("rightSoleY"),
+                                           (YoDouble) scs.findVariable("rightSoleZ"),
+                                           ReferenceFrame.getWorldFrame()));
 
       angularMomentumX = (YoDouble) scs.findVariable("AngularMomentumX");
       angularMomentumY = (YoDouble) scs.findVariable("AngularMomentumY");

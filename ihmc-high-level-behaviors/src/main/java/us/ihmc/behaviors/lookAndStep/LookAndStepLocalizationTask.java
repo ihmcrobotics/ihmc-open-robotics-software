@@ -5,11 +5,11 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -55,6 +55,7 @@ public class LookAndStepLocalizationTask
    public static class LookAndStepBodyPathLocalization extends LookAndStepLocalizationTask
    {
       private ResettableExceptionHandlingExecutorService executor;
+      private ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
       private final Input swingSleepCompleteInput = new Input();
       private LookAndStepImminentStanceTracker imminentStanceTracker;
@@ -62,7 +63,8 @@ public class LookAndStepLocalizationTask
       public void initialize(LookAndStepBehavior lookAndStep)
       {
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
-         lookAndStepParameters = lookAndStep.lookAndStepParameters;
+         ros2LookAndStepParameters = lookAndStep.ros2LookAndStepParameters;
+         lookAndStepParameters = ros2LookAndStepParameters.getStoredPropertySet();
          finishedWalkingNotification = lookAndStep.helper.subscribeToWalkingCompletedViaNotification();
          ros2EmptyPublisher = lookAndStep.helper::publish;
          bodyPathPlanning = lookAndStep.bodyPathPlanning;
@@ -106,6 +108,7 @@ public class LookAndStepLocalizationTask
 
       private void snapshotAndRun()
       {
+         ros2LookAndStepParameters.update();
          bodyPathPlan = bodyPathPlanInput.getLatest();
          syncedRobot.update();
          imminentStanceFeet = imminentStanceTracker.calculateImminentStancePoses();
@@ -132,20 +135,17 @@ public class LookAndStepLocalizationTask
       imminentMidFeetPose.appendRotation(toZUp);
 
       // find closest point along body path plan
-      Point3D closestPointAlongPath = new Point3D();
-      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, imminentMidFeetPose.getPosition(), closestPointAlongPath);
+      Pose3D closestPoseAlongPath = new Pose3D();
+      int closestSegmentIndex = BodyPathPlannerTools.findClosestPoseAlongPath(bodyPathPlan, imminentMidFeetPose.getPosition(), closestPoseAlongPath);
 
-      Pose3D imminentPoseAlongPath = new Pose3D(imminentMidFeetPose);
-      imminentPoseAlongPath.getPosition().set(closestPointAlongPath);
-      uiPublisher.publishToUI(ClosestPointForUI, imminentPoseAlongPath);
+      uiPublisher.publishToUI(ClosestPointForUI, closestPoseAlongPath);
 
       Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
-      double distanceToExactGoal = closestPointAlongPath.distanceXY(terminalGoal.getPosition());
+      double distanceToExactGoal = imminentMidFeetPose.getPosition().distanceXY(terminalGoal.getPosition());
       boolean reachedGoalZone = distanceToExactGoal < lookAndStepParameters.getGoalSatisfactionRadius();
       double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(imminentMidFeetPose.getYaw(), terminalGoal.getYaw()));
       reachedGoalZone &= yawToExactGoal < lookAndStepParameters.getGoalSatisfactionOrientationDelta();
 
-      statusLogger.info(StringTools.format("Imminent pose: {}", StringTools.zUpPoseString(imminentPoseAlongPath)));
       statusLogger.info(StringTools.format("Remaining distanceXY: {} < {} yaw: {} < {}",
                                            FormattingTools.getFormattedDecimal3D(distanceToExactGoal),
                                            lookAndStepParameters.getGoalSatisfactionRadius(),
@@ -178,7 +178,7 @@ public class LookAndStepLocalizationTask
       else
       {
          didFootstepPlanningOnceToEnsureSomeProgress = true;
-         LookAndStepBodyPathLocalizationResult result = new LookAndStepBodyPathLocalizationResult(closestPointAlongPath,
+         LookAndStepBodyPathLocalizationResult result = new LookAndStepBodyPathLocalizationResult(closestPoseAlongPath,
                                                                                                   closestSegmentIndex,
                                                                                                   imminentMidFeetPose,
                                                                                                   bodyPathPlan);

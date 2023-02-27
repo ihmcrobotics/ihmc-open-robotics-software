@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.javafx.video;
 
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import sensor_msgs.msg.dds.CompressedImage;
 import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.IHMCROS2Callback;

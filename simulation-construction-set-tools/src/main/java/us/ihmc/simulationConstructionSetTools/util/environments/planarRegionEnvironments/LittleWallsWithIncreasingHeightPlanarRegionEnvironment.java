@@ -17,7 +17,7 @@ public class LittleWallsWithIncreasingHeightPlanarRegionEnvironment extends Plan
       generator.translate(-2.0, 0.0, 0.0);
       generator.translate(0.35, 0.2, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
-      generator.translate(0.62, 0.0, 0.0);
+      generator.translate(0.63, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.14);
       generator.translate(0.3, -0.3, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.15);

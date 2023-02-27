@@ -1,10 +1,13 @@
 package us.ihmc.avatar.dynamicsSimulation;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.AvatarSimulation;
-import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
+import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -14,25 +17,21 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.gui.AWTTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 public class HumanoidDynamicsSimulation
 {
    private final RealtimeROS2Node realtimeROS2Node;
-   private final SimulationConstructionSet simulationConstructionSet;
-   private final AvatarSimulation avatarSimulation;
+   private final SimulationConstructionSet2 simulationConstructionSet;
+   private final SCS2AvatarSimulation avatarSimulation;
 
    public static HumanoidDynamicsSimulation createForManualTest(DRCRobotModel robotModel,
-                                                             CommonAvatarEnvironmentInterface environment,
-                                                             int recordTicksPerControllerTick,
-                                                             int dataBufferSize)
+                                                                CommonAvatarEnvironmentInterface environment,
+                                                                int recordTicksPerControllerTick,
+                                                                int dataBufferSize)
    {
       return create(robotModel, environment, PubSubImplementation.FAST_RTPS, recordTicksPerControllerTick, dataBufferSize, false);
    }
@@ -43,25 +42,25 @@ public class HumanoidDynamicsSimulation
    }
 
    public static HumanoidDynamicsSimulation create(DRCRobotModel robotModel,
-                                                CommonAvatarEnvironmentInterface environment,
-                                                PubSubImplementation pubSubImplementation,
-                                                int recordTicksPerControllerTick,
-                                                int dataBufferSize,
-                                                boolean logToFile)
+                                                   CommonAvatarEnvironmentInterface environment,
+                                                   PubSubImplementation pubSubImplementation,
+                                                   int recordTicksPerControllerTick,
+                                                   int dataBufferSize,
+                                                   boolean logToFile)
    {
       return create(robotModel, environment, 0.0, 0.0, 0.0, 0.0, pubSubImplementation, recordTicksPerControllerTick, dataBufferSize, logToFile);
    }
 
    public static HumanoidDynamicsSimulation create(DRCRobotModel robotModel,
-                                                CommonAvatarEnvironmentInterface environment,
-                                                double groundHeight,
-                                                double startingX,
-                                                double startingY,
-                                                double startingYaw,
-                                                PubSubImplementation pubSubImplementation,
-                                                int recordTicksPerControllerTick,
-                                                int dataBufferSize,
-                                                boolean logToFile)
+                                                   CommonAvatarEnvironmentInterface environment,
+                                                   double groundHeight,
+                                                   double startingX,
+                                                   double startingY,
+                                                   double startingYaw,
+                                                   PubSubImplementation pubSubImplementation,
+                                                   int recordTicksPerControllerTick,
+                                                   int dataBufferSize,
+                                                   boolean logToFile)
    {
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
@@ -77,8 +76,8 @@ public class HumanoidDynamicsSimulation
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory
-            .setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
       {
          contactableBodiesFactory.addAdditionalContactPoint(contactPointParameters.getAdditionalContactRigidBodyNames().get(i),
@@ -90,8 +89,6 @@ public class HumanoidDynamicsSimulation
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     robotModel.getSensorInformation().getFeetForceSensorNames(),
-                                                                                                    robotModel.getSensorInformation()
-                                                                                                              .getFeetContactSensorNames(),
                                                                                                     robotModel.getSensorInformation()
                                                                                                               .getWristForceSensorNames(),
                                                                                                     robotModel.getHighLevelControllerParameters(),
@@ -108,37 +105,34 @@ public class HumanoidDynamicsSimulation
       controllerFactory.setInitialState(HighLevelControllerName.WALKING);
       controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node);
 
-      AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
+      SCS2AvatarSimulationFactory avatarSimulationFactory = new SCS2AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);
-      avatarSimulationFactory.setShapeCollisionSettings(robotModel.getShapeCollisionSettings());
       avatarSimulationFactory.setHighLevelHumanoidControllerFactory(controllerFactory);
-      avatarSimulationFactory.setCommonAvatarEnvironment(environment);
+      avatarSimulationFactory.setCommonAvatarEnvrionmentInterface(environment);
       avatarSimulationFactory.setRobotInitialSetup(robotModel.getDefaultRobotInitialSetup(groundHeight, startingYaw, startingX, startingY));
-      avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
-      avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
+      avatarSimulationFactory.setInitializeEstimatorToActual(true);
+      avatarSimulationFactory.setSimulationDataRecordTimePeriod(robotModel.getControllerDT() * recordTicksPerControllerTick);
+      avatarSimulationFactory.setSimulationDataBufferSize(dataBufferSize);
+      avatarSimulationFactory.setUseImpulseBasedPhysicsEngine(false);
+      avatarSimulationFactory.setShowGUI(simulationTestingParameters.getCreateGUI());
+      avatarSimulationFactory.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
+      avatarSimulationFactory.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(false);
       avatarSimulationFactory.setLogToFile(logToFile);
 
-      AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-      SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();
-      if (scs.getGUI() != null )
-         scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
-      scs.skipLoadingDefaultConfiguration();
-      scs.setupGraph("t");
+      SCS2AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
+      avatarSimulation.setSystemExitOnDestroy(false);
+      SimulationConstructionSet2 scs = avatarSimulation.getSimulationConstructionSet();
 
       avatarSimulation.start();
-      realtimeROS2Node.spin();  // TODO Should probably happen in start()
 
       // TODO set up some useful graphs
-
-      scs.setupGraph("root.atlas.t");
-      scs.setupGraph("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.highLevelControllerNameCurrentState");
 
       return new HumanoidDynamicsSimulation(realtimeROS2Node, avatarSimulation);
    }
 
-   private HumanoidDynamicsSimulation(RealtimeROS2Node realtimeROS2Node, AvatarSimulation avatarSimulation)
+   private HumanoidDynamicsSimulation(RealtimeROS2Node realtimeROS2Node, SCS2AvatarSimulation avatarSimulation)
    {
       this.realtimeROS2Node = realtimeROS2Node;
       this.avatarSimulation = avatarSimulation;
@@ -157,12 +151,12 @@ public class HumanoidDynamicsSimulation
       return realtimeROS2Node;
    }
 
-   public SimulationConstructionSet getSimulationConstructionSet()
+   public SimulationConstructionSet2 getSimulationConstructionSet()
    {
       return simulationConstructionSet;
    }
 
-   public AvatarSimulation getAvatarSimulation()
+   public SCS2AvatarSimulation getAvatarSimulation()
    {
       return avatarSimulation;
    }

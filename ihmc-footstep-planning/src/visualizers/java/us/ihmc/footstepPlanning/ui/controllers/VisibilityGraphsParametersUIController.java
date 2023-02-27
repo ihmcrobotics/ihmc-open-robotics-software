@@ -32,7 +32,7 @@ public class VisibilityGraphsParametersUIController
 
    public void bindControls()
    {
-      tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap);
+      tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap, 5);
       tableViewWrapper.setTableUpdatedCallback(() -> messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, planningParameters));
    }
 

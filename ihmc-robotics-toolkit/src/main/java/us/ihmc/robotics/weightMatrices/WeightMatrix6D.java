@@ -5,7 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 /**
  * The {@code WeightMatrix3D} provides a simple way to define weights in a particular frame, which
@@ -247,9 +247,9 @@ public class WeightMatrix6D
     * 
     * @param angularWeights the linear weights
     */
-   public void setAngularWeights(Vector3DReadOnly angularWeights)
+   public void setAngularWeights(Tuple3DReadOnly angularWeights)
    {
-      this.angularWeights.setWeights(angularWeights.getX(), angularWeights.getY(), angularWeights.getZ());
+      this.angularWeights.setWeights(angularWeights);
    }
 
    /**
@@ -316,9 +316,9 @@ public class WeightMatrix6D
     * 
     * @param linearWeights the linear weights
     */
-   public void setLinearWeights(Vector3DReadOnly linearWeights)
+   public void setLinearWeights(Tuple3DReadOnly linearWeights)
    {
-      this.linearWeights.setWeights(linearWeights.getX(), linearWeights.getY(), linearWeights.getZ());
+      this.linearWeights.setWeights(linearWeights);
    }
 
    /**

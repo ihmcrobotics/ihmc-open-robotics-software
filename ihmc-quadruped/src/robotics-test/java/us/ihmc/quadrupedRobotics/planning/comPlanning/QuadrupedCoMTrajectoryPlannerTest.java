@@ -1,8 +1,12 @@
 package us.ihmc.quadrupedRobotics.planning.comPlanning;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.TranslationMovingReferenceFrame;
 import us.ihmc.commons.MathTools;
@@ -20,9 +24,6 @@ import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class QuadrupedCoMTrajectoryPlannerTest
 {
@@ -69,7 +70,6 @@ public class QuadrupedCoMTrajectoryPlannerTest
       planner = null;
    }
 
-
    @Test
    public void testStanding()
    {
@@ -98,10 +98,8 @@ public class QuadrupedCoMTrajectoryPlannerTest
       {
          planner.computeSetpoints(timeInState, new ArrayList<>(), feetInContact);
 
-         EuclidFrameTestTools
-               .assertFramePoint3DGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, planner.getDesiredDCMPosition(), epsilon);
-         EuclidFrameTestTools
-               .assertFrameVector3DGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), planner.getDesiredDCMVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), planner.getDesiredDCMVelocity(), epsilon);
       }
    }
 
@@ -120,7 +118,6 @@ public class QuadrupedCoMTrajectoryPlannerTest
       planner.initialize();
       planner.setInitialState(0.0, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, nominalHeight), new FrameVector3D(), new FramePoint3D());
 
-
       FramePoint3D expectedDesiredDCM = new FramePoint3D();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -133,15 +130,12 @@ public class QuadrupedCoMTrajectoryPlannerTest
 
       List<QuadrupedTimedStep> steps = new ArrayList<>();
 
-
       for (double timeInState = 0.0; timeInState < 0.5; timeInState += 0.5)
       {
          planner.computeSetpoints(timeInState, steps, feetInContact);
 
-         EuclidFrameTestTools
-               .assertFramePoint3DGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, planner.getDesiredDCMPosition(), epsilon);
-         EuclidFrameTestTools
-               .assertFrameVector3DGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), planner.getDesiredDCMVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), planner.getDesiredDCMVelocity(), epsilon);
       }
 
       time.set(0.3);
@@ -182,7 +176,6 @@ public class QuadrupedCoMTrajectoryPlannerTest
 
       feetInContact.add(RobotQuadrant.FRONT_LEFT);
 
-
       FramePoint3D finalDCM = new FramePoint3D();
 
       FramePoint3D solePosition = new FramePoint3D(soleFrames.get(RobotQuadrant.FRONT_RIGHT));
@@ -209,16 +202,16 @@ public class QuadrupedCoMTrajectoryPlannerTest
       {
          planner.computeSetpoints(time.getDoubleValue(), steps, feetInContact);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("time = " + time.getDoubleValue(), finalDCM, planner.getDesiredDCMPosition(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("time = " + time.getDoubleValue(), zero, planner.getDesiredDCMVelocity(), epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("time = " + time.getDoubleValue(), finalDCM, planner.getDesiredVRPPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("time = " + time.getDoubleValue(), finalDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("time = " + time.getDoubleValue(), zero, planner.getDesiredDCMVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("time = " + time.getDoubleValue(), finalDCM, planner.getDesiredVRPPosition(), epsilon);
 
          // give a bunch of extra convergence time before starting to check this
          if (time.getDoubleValue() > 3.0)
          {
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("time = " + time.getDoubleValue(), finalDCM, planner.getDesiredCoMPosition(), 0.01);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("time = " + time.getDoubleValue(), zero, planner.getDesiredCoMVelocity(), 0.01);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("time = " + time.getDoubleValue(), zero, planner.getDesiredCoMAcceleration(), 0.01);
+            EuclidFrameTestTools.assertGeometricallyEquals("time = " + time.getDoubleValue(), finalDCM, planner.getDesiredCoMPosition(), 0.01);
+            EuclidFrameTestTools.assertGeometricallyEquals("time = " + time.getDoubleValue(), zero, planner.getDesiredCoMVelocity(), 0.01);
+            EuclidFrameTestTools.assertGeometricallyEquals("time = " + time.getDoubleValue(), zero, planner.getDesiredCoMAcceleration(), 0.01);
          }
       }
    }

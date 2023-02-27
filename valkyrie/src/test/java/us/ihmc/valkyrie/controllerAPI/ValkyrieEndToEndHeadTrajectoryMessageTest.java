@@ -7,7 +7,6 @@ import us.ihmc.avatar.controllerAPI.EndToEndHeadTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTrajectoryMessageTest
@@ -17,7 +16,7 @@ public class ValkyrieEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTraje
    @Tag("controller-api-2")
    @Override
    @Test
-   public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
+   public void testSingleWaypoint()
    {
       super.testSingleWaypoint();
    }
@@ -25,7 +24,7 @@ public class ValkyrieEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTraje
    @Tag("controller-api-slow-3")
    @Override
    @Test
-   public void testLookingLeftAndRight() throws SimulationExceededMaximumTimeException
+   public void testLookingLeftAndRight()
    {
       super.testLookingLeftAndRight();
    }

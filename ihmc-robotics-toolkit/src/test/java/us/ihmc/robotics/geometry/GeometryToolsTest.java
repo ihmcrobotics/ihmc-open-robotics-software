@@ -17,6 +17,7 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -31,8 +32,11 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class GeometryToolsTest
@@ -259,13 +263,13 @@ public class GeometryToolsTest
    {
       Tuple3DBasics tuple3d = new Point3D(1.0, -1.0, 0.0);
       GeometryTools.clipToBoundingBox(tuple3d, -0.5, 0.5, 0.5, -0.5, 0.0, 0.0);
-      EuclidCoreTestTools.assertTuple3DEquals("not equal", new Point3D(0.5, -0.5, 0.0), tuple3d, 0.0);
+      EuclidCoreTestTools.assertEquals("not equal", new Point3D(0.5, -0.5, 0.0), tuple3d, 0.0);
       tuple3d.set(1.0, -1.0, 0.0);
       GeometryTools.clipToBoundingBox(tuple3d, 0.5, -0.5, -0.5, 0.5, -0.1, 0.1);
-      EuclidCoreTestTools.assertTuple3DEquals("not equal", new Point3D(0.5, -0.5, 0.0), tuple3d, 0.0);
+      EuclidCoreTestTools.assertEquals("not equal", new Point3D(0.5, -0.5, 0.0), tuple3d, 0.0);
       tuple3d.set(1.0, -1.0, 2.0);
       GeometryTools.clipToBoundingBox(tuple3d, 0.5, -0.5, -0.5, 0.5, -0.1, 1.0);
-      EuclidCoreTestTools.assertTuple3DEquals("not equal", new Point3D(0.5, -0.5, 1.0), tuple3d, 0.0);
+      EuclidCoreTestTools.assertEquals("not equal", new Point3D(0.5, -0.5, 1.0), tuple3d, 0.0);
    }
 
    @Test
@@ -331,17 +335,17 @@ public class GeometryToolsTest
 
          expectedVector.setAndNormalize(actualVector);
          GeometryTools.normalizeSafelyZUp(actualVector);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+         EuclidCoreTestTools.assertEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
 
          actualVector = RandomGeometry.nextVector3D(random, 0.999 * Epsilons.ONE_TRILLIONTH);
          expectedVector.set(0.0, 0.0, 1.0);
          GeometryTools.normalizeSafelyZUp(actualVector);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+         EuclidCoreTestTools.assertEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
 
          actualVector = new Vector3D();
          expectedVector.set(0.0, 0.0, 1.0);
          GeometryTools.normalizeSafelyZUp(actualVector);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+         EuclidCoreTestTools.assertEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
       }
    }
 
@@ -409,7 +413,7 @@ public class GeometryToolsTest
          ReferenceFrame frameA = GeometryTools.constructReferenceFrameFromPointAndZAxis("frameA", randomPoint, randomVector);
          ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis3D.Z, randomVector);
 
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(frameA.getTransformToRoot(), frameB.getTransformToRoot(), 1.0e-2);
+         EuclidCoreTestTools.assertEquals(frameA.getTransformToRoot(), frameB.getTransformToRoot(), 1.0e-2);
       }
    }
 
@@ -674,6 +678,47 @@ public class GeometryToolsTest
 
          assertFalse(GeometryTools.arePoint3DsSameSideOfPlane3D(firstQuery, secondQuery, firstPointOnPlane, secondPointOnPlane, firstPlaneTangent));
       }
+   }
+
+   @Test
+   public void testComputeBoundingBoxIntersection3D()
+   {
+      BoundingBox3D boundingBox1 = new BoundingBox3D(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+      BoundingBox3D boundingBox2 = new BoundingBox3D(0.5, 0.0, 0.0, 1.5, 1.0, 1.0);
+
+      assertEquals(1.0, GeometryTools.computeBoundingBoxVolume3D(boundingBox1), EPSILON, "[FAILED] Volume should be 1.0");
+      assertEquals(1.0, GeometryTools.computeBoundingBoxVolume3D(boundingBox2), EPSILON, "[FAILED] Volume should be 1.0");
+
+      assertEquals(1/3.0, GeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boundingBox1, boundingBox2), EPSILON, "[FAILED] Intersection should be 1/3.0");
+      assertEquals(0.5, GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boundingBox2, boundingBox1), EPSILON, "[FAILED] Intersection should be 0.5");
+
+      boundingBox2 = new BoundingBox3D(0.5, 0.5, 0.5, 1.5, 1.5, 1.5);
+
+      assertEquals(1.0, GeometryTools.computeBoundingBoxVolume3D(boundingBox2), EPSILON, "[FAILED] Volume should be 1.0");
+
+      assertEquals(1/15.0, GeometryTools.computeIntersectionOverUnionOfTwoBoundingBoxes(boundingBox1, boundingBox2), EPSILON, "[FAILED] Intersection should be 1/3.0");
+      assertEquals( 1/8.0, GeometryTools.computeIntersectionOverSmallerOfTwoBoundingBoxes(boundingBox2, boundingBox1), EPSILON, "[FAILED] Intersection should be 1/15.0");
+   }
+
+   @Test
+   public void testPointProjectionsOntoPlane()
+   {
+      Point3D pointOnPlane = new Point3D(1.0, 1.0, 1.0);
+      UnitVector3D planeNormal = new UnitVector3D(1.0, 1.0, 1.0);
+
+      Vector4D plane = new Vector4D(planeNormal.getX(), planeNormal.getY(), planeNormal.getZ(), -pointOnPlane.dot(planeNormal));
+
+      Point3D pointToProject = new Point3D(0.0, 0.0, 0.0);
+
+      Point3D projectedPoint = GeometryTools.projectPointOntoPlane(plane, pointToProject);
+
+
+      Point3D expectedProjection = new Point3D(1.0, 1.0, 1.0);
+
+      LogTools.info("Projected point: {} {} {}", projectedPoint.getX(), projectedPoint.getY(), projectedPoint.getZ());
+      LogTools.info("Expected projection: {} {} {}", expectedProjection.getX(), expectedProjection.getY(), expectedProjection.getZ());
+
+      assertEquals(0.0, projectedPoint.distance(expectedProjection), EPSILON);
    }
 
    public static void main(String[] args)

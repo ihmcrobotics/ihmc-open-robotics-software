@@ -92,12 +92,12 @@ public class PlanarRegionTerrainObjectTest
          if (planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
          {
             assertEquals(planarRegionZAtXY, heightAt, 1e-10);
-            EuclidCoreTestTools.assertTuple3DEquals("Normals are not equal!", terrainObjectNormalToPack, expectedTerrainNormal, 1e-10);
+            EuclidCoreTestTools.assertEquals("Normals are not equal!", terrainObjectNormalToPack, expectedTerrainNormal, 1e-10);
          }
          else
          {
             assertNotEquals(planarRegionZAtXY, heightAt, 1e-10);
-            EuclidCoreTestTools.assertTuple3DEquals("Normals are not equal!", standardGroundNormal, terrainObjectNormalToPack, 1e-10);
+            EuclidCoreTestTools.assertEquals("Normals are not equal!", standardGroundNormal, terrainObjectNormalToPack, 1e-10);
          }
       }
    }
@@ -136,9 +136,9 @@ public class PlanarRegionTerrainObjectTest
          }
          else
          {
-            EuclidCoreTestTools.assertTuple3DEquals("Bounding box min points are not equal!", planarRegionBoundingBoxMinPoint, terrainObjectBoundingBoxMinPoint,
+            EuclidCoreTestTools.assertEquals("Bounding box min points are not equal!", planarRegionBoundingBoxMinPoint, terrainObjectBoundingBoxMinPoint,
                                                     1e-10);
-            EuclidCoreTestTools.assertTuple3DEquals("Bounding box max points are not equal!", planarRegionBoundingBoxMaxPoint, terrainObjectBoundingBoxMaxPoint,
+            EuclidCoreTestTools.assertEquals("Bounding box max points are not equal!", planarRegionBoundingBoxMaxPoint, terrainObjectBoundingBoxMaxPoint,
                                                     1e-10);
          }
       }
@@ -218,8 +218,8 @@ public class PlanarRegionTerrainObjectTest
          if (planarRegion.isPointOnOrSlightlyBelow(randomPoint, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS))
          {
             assertTrue(terrainObject.checkIfInside(randomXCoord, randomYCoord, randomZCoord, terrainObjectIntersectionToPack, terrainObjectNormalToPack));
-            EuclidCoreTestTools.assertTuple3DEquals("Intersection to pack is not correct!", randomPoint, terrainObjectIntersectionToPack, 1e-10);
-            EuclidCoreTestTools.assertTuple3DEquals("Surface normal to pack is not correct!", planarRegionSurfaceNormal, terrainObjectNormalToPack, 1e-10);
+            EuclidCoreTestTools.assertEquals("Intersection to pack is not correct!", randomPoint, terrainObjectIntersectionToPack, 1e-10);
+            EuclidCoreTestTools.assertEquals("Surface normal to pack is not correct!", planarRegionSurfaceNormal, terrainObjectNormalToPack, 1e-10);
          }
          else
          {

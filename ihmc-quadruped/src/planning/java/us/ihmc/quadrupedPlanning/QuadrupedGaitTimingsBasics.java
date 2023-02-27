@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedPlanning;
 
-import controller_msgs.msg.dds.QuadrupedGaitTimingsPacket;
+import quadruped_msgs.msg.dds.QuadrupedGaitTimingsPacket;
 
 public interface QuadrupedGaitTimingsBasics extends QuadrupedGaitTimingsReadOnly
 {

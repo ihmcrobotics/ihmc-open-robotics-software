@@ -12,6 +12,8 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -33,7 +35,7 @@ public class WalkingFailureDetectionControlModule
    private final YoBoolean isUsingNextFootstep;
    private final YoBoolean isFallDetectionActivated;
    private final YoDouble icpDistanceFromFootPolygon;
-   private final YoDouble icpDistanceFromFootPolygonThreshold;
+   private final DoubleProvider icpDistanceFromFootPolygonThreshold;
    private final YoBoolean isRobotFalling;
    private final AtomicBoolean fallWasReported = new AtomicBoolean(false);
    private final FrameVector2D fallingDirection2D = new FrameVector2D();
@@ -62,8 +64,7 @@ public class WalkingFailureDetectionControlModule
       isFallDetectionActivated = new YoBoolean("isFallDetectionActivated", registry);
       isFallDetectionActivated.set(true);
 
-      icpDistanceFromFootPolygonThreshold = new YoDouble("icpDistanceFromFootPolygonThreshold", registry);
-      icpDistanceFromFootPolygonThreshold.set(0.05);
+      icpDistanceFromFootPolygonThreshold = new DoubleParameter("icpDistanceFromFootPolygonThreshold", registry, 0.05);
       icpDistanceFromFootPolygon = new YoDouble("icpDistanceFromFootPolygon", registry);
       isRobotFalling = new YoBoolean("isRobotFalling", registry);
 
@@ -110,8 +111,8 @@ public class WalkingFailureDetectionControlModule
          icpDistanceFromFootPolygon.set(combinedFootPolygon.distance(capturePoint2d));
       // TODO need to investigate this method, seems to be buggy
       //      boolean isCapturePointCloseToFootPolygon = combinedFootPolygon.isPointInside(capturePoint, icpDistanceFromFootPolygonThreshold.getDoubleValue());
-      boolean isCapturePointCloseToFootPolygon = icpDistanceFromFootPolygon.getDoubleValue() < icpDistanceFromFootPolygonThreshold.getDoubleValue();
-      boolean isCapturePointCloseToDesiredCapturePoint = desiredCapturePoint2d.distance(capturePoint2d) < icpDistanceFromFootPolygonThreshold.getDoubleValue();
+      boolean isCapturePointCloseToFootPolygon = icpDistanceFromFootPolygon.getDoubleValue() < icpDistanceFromFootPolygonThreshold.getValue();
+      boolean isCapturePointCloseToDesiredCapturePoint = desiredCapturePoint2d.distance(capturePoint2d) < icpDistanceFromFootPolygonThreshold.getValue();
 
       isRobotFalling.set(fallWasReported.getAndSet(false) || (!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint));
 
@@ -161,6 +162,6 @@ public class WalkingFailureDetectionControlModule
 
    public double getICPDistanceFromFootPolygonThreshold()
    {
-      return icpDistanceFromFootPolygonThreshold.getDoubleValue();
+      return icpDistanceFromFootPolygonThreshold.getValue();
    }
 }

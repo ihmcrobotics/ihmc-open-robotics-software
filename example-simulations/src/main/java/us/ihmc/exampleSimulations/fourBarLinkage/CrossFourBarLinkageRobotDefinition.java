@@ -260,7 +260,7 @@ public class CrossFourBarLinkageRobotDefinition extends RobotDefinition
             visualDefinitionFactory.addEllipsoid(radii.getX(),
                                                  radii.getY(),
                                                  radii.getZ(),
-                                                 new MaterialDefinition(ColorDefinitions.LightGreen().derive(0, 1, 1, 0.5)));
+                                                 ColorDefinitions.LightGreen().derive(0, 1, 1, 0.5));
          }
       }
       rigidBodyDefinition.getVisualDefinitions().addAll(visualDefinitionFactory.getVisualDefinitions());

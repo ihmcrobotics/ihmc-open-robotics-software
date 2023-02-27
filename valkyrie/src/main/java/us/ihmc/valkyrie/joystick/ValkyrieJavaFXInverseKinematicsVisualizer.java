@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.joystick;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -130,7 +130,7 @@ public class ValkyrieJavaFXInverseKinematicsVisualizer
          joints[i] = frame.getDesiredJointAngles().get(i);
       }
 
-      newRootJointPoseReference.set(new RigidBodyTransform(frame.getDesiredRootOrientation(), frame.getDesiredRootTranslation()));
+      newRootJointPoseReference.set(new RigidBodyTransform(frame.getDesiredRootOrientation(), frame.getDesiredRootPosition()));
       newJointConfigurationReference.set(joints);
    }
 

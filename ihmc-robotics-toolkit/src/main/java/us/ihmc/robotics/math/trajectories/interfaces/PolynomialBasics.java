@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
 import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.core.PolynomialTools;
 
@@ -56,23 +57,123 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setIsConstraintMatrixUpToDate(false);
    }
 
+   /**
+    * Sets the coefficients assuming the following ordering [a0, a1, a2, ..., aN]^T given the following
+    * notation:
+    * 
+    * <pre>
+    * p(x) = a0 + a1 x + a2 x^2 + ... + aN x^N
+    * </pre>
+    * 
+    * @param coefficients
+    */
    default void setDirectly(DMatrixRMaj coefficients)
    {
-      reshape(coefficients.getNumRows());
+      setDirectly(coefficients, 0, coefficients.getNumRows());
+   }
+
+   /**
+    * Sets the coefficients assuming the following ordering [a0, a1, a2, ..., aN]^T given the following
+    * notation:
+    * 
+    * <pre>
+    * p(x) = a0 + a1 x + a2 x^2 + ... + aN x^N
+    * </pre>
+    * 
+    * @param coefficients the column vector containing the coefficients at rows in [{@code startRow},
+    *                     {@code startRow + numberOfCoefficients - 1}].
+    */
+   default void setDirectly(DMatrixRMaj coefficients, int startRow, int numberOfCoefficients)
+   {
+      reshape(numberOfCoefficients);
       int index = 0;
       for (; index < getNumberOfCoefficients(); index++)
-         setCoefficient(index, coefficients.get(index, 0));
+         setCoefficient(index, coefficients.get(startRow + index, 0));
       for (; index < getMaximumNumberOfCoefficients(); index++)
          setCoefficient(index, Double.NaN);
       setIsConstraintMatrixUpToDate(false);
    }
 
+   /**
+    * Sets the coefficients assuming the following ordering [aN, ..., a2, a1, a0]^T given the following
+    * notation:
+    * 
+    * <pre>
+    * p(x) = a0 + a1 x + a2 x^2 + ... + aN x^N
+    * </pre>
+    * 
+    * @param coefficients
+    */
+   default void setDirectlyReverse(DMatrixRMaj coefficients)
+   {
+      setDirectlyReverse(coefficients, 0, coefficients.getNumRows());
+   }
+
+   /**
+    * Sets the coefficients assuming the following ordering [aN, ..., a2, a1, a0]^T given the following
+    * notation:
+    * 
+    * <pre>
+    * p(x) = a0 + a1 x + a2 x^2 + ... + aN x^N
+    * </pre>
+    * 
+    * @param coefficients the column vector containing the coefficients at rows in [{@code startRow},
+    *                     {@code startRow + numberOfCoefficients - 1}].
+    */
+   default void setDirectlyReverse(DMatrixRMaj coefficients, int startRow, int numberOfCoefficients)
+   {
+      reshape(numberOfCoefficients);
+
+      int index = 0;
+      int argIndex = startRow + numberOfCoefficients - 1;
+
+      for (; index < getNumberOfCoefficients(); index++)
+         setCoefficient(index, coefficients.get(argIndex--, 0));
+      for (; index < getMaximumNumberOfCoefficients(); index++)
+         setCoefficient(index, Double.NaN);
+      setIsConstraintMatrixUpToDate(false);
+   }
+
+   /**
+    * Sets the coefficients assuming the following ordering [a0, a1, a2, ..., aN] given the following
+    * notation:
+    * 
+    * <pre>
+    * p(x) = a0 + a1 x + a2 x^2 + ... + aN x^N
+    * </pre>
+    * 
+    * @param coefficients
+    */
    default void setDirectly(double[] coefficients)
    {
       reshape(coefficients.length);
       int index = 0;
       for (; index < getNumberOfCoefficients(); index++)
          setCoefficient(index, coefficients[index]);
+      for (; index < getMaximumNumberOfCoefficients(); index++)
+         setCoefficient(index, Double.NaN);
+      setIsConstraintMatrixUpToDate(false);
+   }
+
+   /**
+    * Sets the coefficients assuming the following ordering [aN, ..., a2, a1, a0] given the following
+    * notation:
+    * 
+    * <pre>
+    * p(x) = a0 + a1 x + a2 x^2 + ... + aN x^N
+    * </pre>
+    * 
+    * @param coefficients
+    */
+   default void setDirectlyReverse(double[] coefficients)
+   {
+      reshape(coefficients.length);
+
+      int index = 0;
+      int argIndex = getNumberOfCoefficients() - 1;
+
+      for (; index < getNumberOfCoefficients(); index++)
+         setCoefficient(index, coefficients[argIndex--]);
       for (; index < getMaximumNumberOfCoefficients(); index++)
          setCoefficient(index, Double.NaN);
       setIsConstraintMatrixUpToDate(false);
@@ -537,6 +638,24 @@ public interface PolynomialBasics extends PolynomialReadOnly
       setIsConstraintMatrixUpToDate(true);
 
       initialize();
+   }
+
+   default void setCubicDirectly(double duration, double z0, double zd0, double zFinal, double zdFinal)
+   {
+      reset();
+
+      getTimeInterval().setIntervalUnsafe(0.0, duration);
+      reshape(4);
+
+      double d2 = duration * duration;
+      double d3 = duration * d2;
+      double c3 = 2.0 / d3 * (z0 - zFinal) + 1.0 / d2 * (zd0 + zdFinal);
+      double c2 = 1.0 / (2.0 * duration) * (zdFinal - zd0) - 1.5 * duration * c3;
+      setCoefficient(0, z0);
+      setCoefficient(1, zd0);
+      setCoefficient(2, c2);
+      setCoefficient(3, c3);
+      setIsConstraintMatrixUpToDate(false);
    }
 
    default void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0,

@@ -81,9 +81,13 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final boolean hasWristForceSensors;
    private final boolean hasFootForceSensors;
 
-   public ForceSensorStateUpdater(FloatingJointBasics rootJoint, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-                                  ForceSensorDataHolder forceSensorDataHolderToUpdate, StateEstimatorParameters stateEstimatorParameters, double gravity,
-                                  RobotMotionStatusHolder robotMotionStatusHolder, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public ForceSensorStateUpdater(FloatingJointBasics rootJoint,
+                                  SensorOutputMapReadOnly sensorOutputMapReadOnly,
+                                  ForceSensorDataHolder forceSensorDataHolderToUpdate,
+                                  StateEstimatorParameters stateEstimatorParameters,
+                                  double gravity,
+                                  RobotMotionStatusHolder robotMotionStatusHolder,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry,
                                   YoRegistry parentreRegistry)
    {
       this.gravity = Math.abs(gravity);
@@ -227,13 +231,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
             double forceVizScaling = 10.0;
             AppearanceDefinition forceAppearance = YoAppearance.DarkRed();
             AppearanceDefinition torqueAppearance = YoAppearance.DarkBlue();
-            wrenchVisualizer = new WrenchVisualizer("ForceSensorData",
-                                                    bodies,
-                                                    forceVizScaling,
-                                                    yoGraphicsListRegistry,
-                                                    registry,
-                                                    forceAppearance,
-                                                    torqueAppearance);
+            wrenchVisualizer = new WrenchVisualizer("ForceSensorData", forceVizScaling, yoGraphicsListRegistry, registry, forceAppearance, torqueAppearance);
+            wrenchVisualizer.registerRigidBodies(bodies);
          }
       }
       else

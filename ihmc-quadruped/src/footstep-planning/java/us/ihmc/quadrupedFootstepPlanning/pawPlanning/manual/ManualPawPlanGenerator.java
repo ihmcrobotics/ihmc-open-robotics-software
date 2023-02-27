@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.manual;
 
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;

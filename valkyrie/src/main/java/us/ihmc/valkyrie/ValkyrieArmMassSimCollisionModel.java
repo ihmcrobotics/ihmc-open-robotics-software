@@ -203,10 +203,24 @@ public class ValkyrieArmMassSimCollisionModel implements RobotCollisionModel
             MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
 
             Vector3D footShapePosition = new Vector3D(0.044, 0.0, -0.042);
-            Vector3D footShapeSize = new Vector3D(0.275, 0.16, 0.095);
+            Vector3D footShapeSize = new Vector3D(0.275, 0.16, 0.09);
 
             if (createForSimulation)
             {
+               double[] xOffsets = new double[] { 0.163, -0.07};
+               double[] yOffsets = new double[] {- 0.067, 0.067};
+               double zOffset = -0.087;
+
+               for (double xOffset : xOffsets)
+               {
+                  for (double yOffset : yOffsets)
+                  {
+                     FrameSphere3D footContactPoint = new FrameSphere3D(ankleRollFrame, 0.005);
+                     footContactPoint.getPosition().set(xOffset, yOffset, zOffset);
+                     collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footContactPoint));
+                  }
+               }
+
                FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame);
                footShape.getSize().set(footShapeSize);
                footShape.setMargins(1.0e-5, 4.0e-4);

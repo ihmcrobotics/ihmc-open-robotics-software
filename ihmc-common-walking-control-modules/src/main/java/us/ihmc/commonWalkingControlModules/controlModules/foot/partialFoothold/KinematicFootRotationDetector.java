@@ -48,7 +48,7 @@ public class KinematicFootRotationDetector implements FootRotationDetector
 
    public KinematicFootRotationDetector(RobotSide side,
                                         MovingReferenceFrame soleFrame,
-                                        FootholdRotationParameters rotationParameters,
+                                        YoPartialFootholdModuleParameters rotationParameters,
                                         double controllerDt,
                                         YoRegistry parentRegistry)
    {

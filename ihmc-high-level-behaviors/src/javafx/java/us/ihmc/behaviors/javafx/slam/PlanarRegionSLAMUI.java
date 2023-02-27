@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.javafx.slam;
 
-import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -8,14 +7,15 @@ import javafx.scene.SubScene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.behaviors.tools.LocalParameterServer;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 
-public class PlanarRegionSLAMUI extends Application
+public class PlanarRegionSLAMUI extends ApplicationNoModule
 {
    @FXML
    private PlanarRegionSLAMUITabController planarRegionSLAMUITabController;

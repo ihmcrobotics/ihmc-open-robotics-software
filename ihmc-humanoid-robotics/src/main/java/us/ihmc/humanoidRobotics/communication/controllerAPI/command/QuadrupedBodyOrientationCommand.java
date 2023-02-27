@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
+import quadruped_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;

@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,24 +22,24 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
 
    private final SideDependentList<AtomicReference<HandJointAnglePacket>> packets = new SideDependentList<AtomicReference<HandJointAnglePacket>>();
    private ArrayList<GraphicsUpdatable> graphicsToUpdate = new ArrayList<GraphicsUpdatable>();
-   private HandModel handModel;
+   private SideDependentList<HandModel> handModels;
 
-   public HandJointAngleProvider(FullRobotModel fullRobotModel, HandModel handModel)
+   public HandJointAngleProvider(FullRobotModel fullRobotModel, SideDependentList<HandModel> handModels)
    {
-      this.handModel = handModel;
+      this.handModels = handModels;
 
-      if (handModel == null)
+      if (handModels == null)
       {
-         PrintTools.warn("Hand model is null.");
+         LogTools.warn("Hand models is null.");
       }
       else
       {
-         for (RobotSide side : RobotSide.values)
+         for (RobotSide side : handModels.sides())
          {
             final HashMap<HandJointName, OneDoFJointBasics> joints = new HashMap<HandJointName, OneDoFJointBasics>();
             packets.put(side, new AtomicReference<HandJointAnglePacket>());
 
-            for (HandJointName jointName : handModel.getHandJointNames())
+            for (HandJointName jointName : handModels.get(side).getHandJointNames())
             {
                joints.put(jointName, fullRobotModel.getOneDoFJointByName(jointName.getJointName(side)));
             }
@@ -56,16 +56,16 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
 
    public void updateHandModel()
    {
-      if (handModel != null)
+      if (handModels != null)
       {
-         for (RobotSide robotSide : RobotSide.values)
+         for (RobotSide robotSide : handModels.sides())
          {
             HandJointAnglePacket handJointAngles = packets.get(robotSide).getAndSet(null);
             HashMap<HandJointName, OneDoFJointBasics> joints = handJoints.get(robotSide);
 
             if (handJointAngles != null && joints != null)
             {
-               for (HandJointName jointName : handModel.getHandJointNames())
+               for (HandJointName jointName : handModels.get(robotSide).getHandJointNames())
                {
                   if (jointName != null)
                   {
@@ -95,8 +95,13 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
 
    public void receivedPacket(HandJointAnglePacket object)
    {
-
-      if (handModel != null)
-         packets.get(RobotSide.fromByte(object.getRobotSide())).set(object);
+      if (handModels != null)
+      {
+         RobotSide side = RobotSide.fromByte(object.getRobotSide());
+         if (handModels.containsKey(side))
+         {
+            packets.get(side).set(object);
+         }
+      }
    }
 }

@@ -1,6 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -9,6 +10,8 @@ import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -27,6 +30,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
 {
    private final BoundingBox3D boundingBox;
    private final ConvexPolygon2D convexPolygon;
+   private final ConvexPolytope3D collisionShape = new ConvexPolytope3D();
    private final Plane3D topPlane;
    private final List<Plane3D> sidePlanes = new ArrayList<Plane3D>();
 
@@ -62,6 +66,12 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             lowest = height;
          if (height > highest)
             highest = height;
+         collisionShape.addVertex(new Point3D(vertex.getX(), vertex.getY(), height));
+      }
+      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = convexPolygon.getVertex(i);
+         collisionShape.addVertex(new Point3D(vertex.getX(), vertex.getY(), lowest));
       }
 
       Point2DReadOnly minPoint = polygonBoundingBox.getMinPoint();
@@ -373,6 +383,12 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
    public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
+   }
+
+   @Override
+   public List<? extends Shape3DReadOnly> getTerrainCollisionShapes()
+   {
+      return Collections.singletonList(collisionShape);
    }
 
    @Override

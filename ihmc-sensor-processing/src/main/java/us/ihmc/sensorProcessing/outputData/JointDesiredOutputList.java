@@ -51,12 +51,6 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    }
 
    @Override
-   public JointDesiredOutput getJointDesiredOutput(OneDoFJointReadOnly joint)
-   {
-      return jointMap.get(joint.hashCode());
-   }
-
-   @Override
    public JointDesiredOutput getJointDesiredOutputFromHash(int jointHashCode)
    {
       return jointMap.get(jointHashCode);

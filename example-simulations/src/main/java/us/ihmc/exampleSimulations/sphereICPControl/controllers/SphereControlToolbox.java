@@ -7,7 +7,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.*;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -117,7 +117,7 @@ public class SphereControlToolbox
    private FootstepTestHelper footstepTestHelper;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private ICPOptimizationParameters icpOptimizationParameters;
+   private ICPControllerParameters icpOptimizationParameters;
 
    private YoDouble yoTime;
 
@@ -343,7 +343,7 @@ public class SphereControlToolbox
       return footPosesAtTouchdown;
    }
 
-   public ICPOptimizationParameters getICPOptimizationParameters()
+   public ICPControllerParameters getICPOptimizationParameters()
    {
       return icpOptimizationParameters;
    }
@@ -570,28 +570,10 @@ public class SphereControlToolbox
       icp.set(capturePoint2d, 0.0);
    }
 
-   public ICPOptimizationParameters createICPOptimizationParameters()
+   public ICPControllerParameters createICPOptimizationParameters()
    {
-      return new ICPOptimizationParameters()
+      return new ICPControllerParameters()
       {
-         @Override
-         public double getForwardFootstepWeight()
-         {
-            return 20.0;
-         }
-
-         @Override
-         public double getLateralFootstepWeight()
-         {
-            return 20.0;
-         }
-
-         @Override
-         public double getFootstepRateWeight()
-         {
-            return 0.001;
-         }
-
          @Override
          public double getFeedbackForwardWeight()
          {
@@ -626,21 +608,9 @@ public class SphereControlToolbox
          }
 
          @Override
-         public double getDynamicsObjectiveDoubleSupportWeightModifier()
-         {
-            return 1.0;
-         }
-
-         @Override
          public double getAngularMomentumMinimizationWeight()
          {
             return 50.0;
-         }
-
-         @Override
-         public boolean scaleStepRateWeightWithTime()
-         {
-            return false;
          }
 
          @Override
@@ -650,39 +620,9 @@ public class SphereControlToolbox
          }
 
          @Override
-         public boolean useFeedbackRate()
-         {
-            return true;
-         }
-
-         @Override
-         public boolean allowStepAdjustment()
-         {
-            return true;
-         }
-
-         @Override
          public boolean useAngularMomentum()
          {
             return true;
-         }
-
-        @Override
-         public boolean useFootstepRate()
-         {
-            return true;
-         }
-
-         @Override
-         public double getMinimumTimeRemaining()
-         {
-            return 0.0001;
-         }
-
-         @Override
-         public double getAdjustmentDeadband()
-         {
-            return 0.03;
          }
       };
    }

@@ -2,33 +2,32 @@ package us.ihmc.footstepPlanning.log;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessagePubSubType;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessagePubSubType;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.DataSet;
-import us.ihmc.pathPlanning.DataSetIOTools;
-import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
-import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoVariableType;
 
@@ -37,13 +36,14 @@ import java.io.*;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class FootstepPlannerLogLoader
 {
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
-   private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
+   private final JSONSerializer<StoredPropertySetMessage> bodyPathParametersSerializer = new JSONSerializer<>(new StoredPropertySetMessagePubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
@@ -164,19 +164,22 @@ public class FootstepPlannerLogLoader
          log.getRequestPacket().set(requestPacketSerializer.deserialize(jsonNode.toString()));
          requestPacketInputStream.close();
 
-         // load body path parameters packet
-         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
-         InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
-         jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
-         log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
-         bodyPathParametersPacketInputStream.close();
-
          // load footstep parameters packet
          File footstepParametersFile = new File(logDirectory, FootstepPlannerLogger.footstepParametersFileName);
          InputStream footstepParametersPacketInputStream = new FileInputStream(footstepParametersFile);
          jsonNode = objectMapper.readTree(footstepParametersPacketInputStream);
          log.getFootstepParametersPacket().set(footstepParametersSerializer.deserialize(jsonNode.toString()));
          footstepParametersPacketInputStream.close();
+
+         // load body path parameters packet
+         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
+         if (bodyPathParametersFile.exists())
+         {
+            InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
+            jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
+            log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
+            bodyPathParametersPacketInputStream.close();
+         }
 
          // load swing parameters packet
          File swingParametersFile = new File(logDirectory, FootstepPlannerLogger.swingParametersFileName);
@@ -195,68 +198,10 @@ public class FootstepPlannerLogLoader
          log.getStatusPacket().set(statusPacketSerializer.deserialize(jsonNode.toString()));
          statusPacketInputStream.close();
 
-         // load body path data file
-         File bodyPathPlannerFile = new File(logDirectory, FootstepPlannerLogger.bodyPathPlanFileName);
-         BufferedReader dataFileReader = new BufferedReader(new FileReader(bodyPathPlannerFile));
-         log.getVisibilityGraphHolder().setStartMapId(getIntCSV(true, dataFileReader.readLine())[0]);
-         log.getVisibilityGraphHolder().setGoalMapId(getIntCSV(true, dataFileReader.readLine())[0]);
-         log.getVisibilityGraphHolder().setInterRegionsMapId(getIntCSV(true, dataFileReader.readLine())[0]);
-         loadVisibilityMap(dataFileReader, log.getVisibilityGraphHolder().getStartVisibilityMap());
-         loadVisibilityMap(dataFileReader, log.getVisibilityGraphHolder().getGoalVisibilityMap());
-         loadVisibilityMap(dataFileReader, log.getVisibilityGraphHolder().getInterRegionsVisibilityMap());
-
-         int numberOfNavigableRegions = getIntCSV(true, dataFileReader.readLine())[0];
-         List<PlanarRegion> planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage()).getPlanarRegionsAsList();
-         for (int i = 0; i < numberOfNavigableRegions; i++)
-         {
-            VisibilityMapWithNavigableRegion navigableRegion = loadNavigableRegion(dataFileReader, planarRegionsList);
-            if (navigableRegion == null)
-            {
-               LogTools.error("Couldn't find corresponding planar region in visibility graph log");
-               break;
-            }
-            log.getVisibilityGraphHolder().addNavigableRegion(navigableRegion);
-         }
-
-         // load header file
-         dataFileReader.close();
+         // load footstep header file
          File headerFile = new File(logDirectory, FootstepPlannerLogger.headerFileName);
-         dataFileReader = new BufferedReader(new FileReader(headerFile));
-
-         List<String[]> enumValues = new ArrayList<>();
-
-         int numberOfEnums = getIntCSV(true, dataFileReader.readLine())[0];
-         for (int i = 0; i < numberOfEnums; i++)
-         {
-            String line = dataFileReader.readLine();
-            if (line == null)
-            {
-               throw new RuntimeException("Reached end of header file before expected");
-            }
-            enumValues.add(line.split(":")[1].split(","));
-         }
-
-         int numberOfVariables = getIntCSV(true, dataFileReader.readLine())[0];
-         for (int i = 0; i < numberOfVariables; i++)
-         {
-            String line = dataFileReader.readLine();
-            if (line == null)
-            {
-               break;
-            }
-
-            String[] descriptorStrings = line.replaceAll("\\s+", "").split(",");
-            YoVariableType type = YoVariableType.valueOf(descriptorStrings[1]);
-            if (type == YoVariableType.ENUM)
-            {
-               log.getVariableDescriptors().add(new VariableDescriptor(descriptorStrings[0], type, descriptorStrings[2], enumValues.get(Integer.parseInt(descriptorStrings[3]))));
-            }
-            else
-            {
-               log.getVariableDescriptors().add(new VariableDescriptor(descriptorStrings[0], type, descriptorStrings[2]));
-            }
-         }
-
+         BufferedReader dataFileReader = new BufferedReader(new FileReader(headerFile));
+         int numberOfVariables = loadVariableDescriptors(dataFileReader, log.getVariableDescriptors());
          log.getFootPolygons().put(RobotSide.LEFT, readPolygon(dataFileReader.readLine()));
          log.getFootPolygons().put(RobotSide.RIGHT, readPolygon(dataFileReader.readLine()));
 
@@ -297,6 +242,47 @@ public class FootstepPlannerLogLoader
             }
          }
 
+         // load body path header file
+         dataFileReader.close();
+         headerFile = new File(logDirectory, FootstepPlannerLogger.bodyPathHeaderFileName);
+         dataFileReader = new BufferedReader(new FileReader(headerFile));
+         numberOfVariables = loadVariableDescriptors(dataFileReader, log.getBodyPathVariableDescriptors());
+
+         // load data file
+         dataFileReader.close();
+         dataFile = new File(logDirectory, FootstepPlannerLogger.astarBodyPathPlanFileName);
+         dataFileReader = new BufferedReader(new FileReader(dataFile));
+
+         while (dataFileReader.readLine() != null)
+         {
+            AStarBodyPathIterationData iterationData = new AStarBodyPathIterationData();
+            iterationData.setParentNode(readBodyPathNode(dataFileReader.readLine()));
+            int edges = getIntCSV(true, dataFileReader.readLine())[0];
+            iterationData.setParentNodeHeight(getDoubleCSV(true, dataFileReader.readLine())[0]);
+            log.getBodyPathIterationData().add(iterationData);
+
+            for (int i = 0; i < edges; i++)
+            {
+               // edge marker
+               dataFileReader.readLine();
+
+               AStarBodyPathEdgeData edgeData = new AStarBodyPathEdgeData(numberOfVariables);
+               edgeData.setParentNode(iterationData.getParentNode());
+               edgeData.setChildNode(readBodyPathNode(dataFileReader.readLine()));
+               edgeData.setSolutionEdge(getBooleanCSV(true, dataFileReader.readLine())[0]);
+               edgeData.setChildSnapHeight(getDoubleCSV(true, dataFileReader.readLine())[0]);
+
+               long[] longCSV = getLongCSV(true, dataFileReader.readLine());
+               for (int j = 0; j < longCSV.length; j++)
+               {
+                  edgeData.setData(j, longCSV[j]);
+               }
+
+               iterationData.getChildNodes().add(edgeData.getChildNode());
+               log.getBodyPathEdgeDataMap().put(new GraphEdge<>(iterationData.getParentNode(), edgeData.getChildNode()), edgeData);
+            }
+         }
+
          return LoadResult.LOADED;
       }
       catch (Exception e)
@@ -305,6 +291,44 @@ public class FootstepPlannerLogLoader
          e.printStackTrace();
          return LoadResult.ERROR;
       }
+   }
+
+   private int loadVariableDescriptors(BufferedReader dataFileReader, List<VariableDescriptor> variableDescriptors) throws IOException
+   {
+      List<String[]> enumValues = new ArrayList<>();
+
+      int numberOfEnums = getIntCSV(true, dataFileReader.readLine())[0];
+      for (int i = 0; i < numberOfEnums; i++)
+      {
+         String line = dataFileReader.readLine();
+         if (line == null)
+         {
+            throw new RuntimeException("Reached end of header file before expected");
+         }
+         enumValues.add(line.split(":")[1].split(","));
+      }
+
+      int numberOfVariables = getIntCSV(true, dataFileReader.readLine())[0];
+      for (int i = 0; i < numberOfVariables; i++)
+      {
+         String line = dataFileReader.readLine();
+         if (line == null)
+         {
+            break;
+         }
+
+         String[] descriptorStrings = line.replaceAll("\\s+", "").split(",");
+         YoVariableType type = YoVariableType.valueOf(descriptorStrings[1]);
+         if (type == YoVariableType.ENUM)
+         {
+            variableDescriptors.add(new VariableDescriptor(descriptorStrings[0], type, descriptorStrings[2], enumValues.get(Integer.parseInt(descriptorStrings[3]))));
+         }
+         else
+         {
+            variableDescriptors.add(new VariableDescriptor(descriptorStrings[0], type, descriptorStrings[2]));
+         }
+      }
+      return numberOfVariables;
    }
 
    public FootstepPlannerLog getLog()
@@ -440,6 +464,12 @@ public class FootstepPlannerLogLoader
       }
    }
 
+   private static BodyPathLatticePoint readBodyPathNode(String dataFileString)
+   {
+      int[] csv = getIntCSV(true, dataFileString);
+      return new BodyPathLatticePoint(csv[0], csv[1]);
+   }
+
    private static FootstepGraphNode readNode(String dataFileString)
    {
       int[] csv = getIntCSV(true, dataFileString);
@@ -487,35 +517,29 @@ public class FootstepPlannerLogLoader
       return polygon;
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws IOException
    {
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      LoadResult loadResult = logLoader.load();
-      if (loadResult != LoadResult.LOADED)
-      {
-         return;
-      }
+      logLoader.load();
 
       FootstepPlannerLog log = logLoader.getLog();
-      FootstepPlanningRequestPacket requestPacket = log.getRequestPacket();
-      Pose3D startPose = new Pose3D();
-      Pose3D goalPose = new Pose3D();
-      startPose.interpolate(requestPacket.getStartLeftFootPose(), requestPacket.getStartRightFootPose(), 0.5);
-      goalPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
+      HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
 
-      String dataSetName = "20210419_111333_GPUCinders1";
-      PlanarRegionsListMessage planarRegionsMessage = requestPacket.getPlanarRegionsListMessage();
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
+      JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
+      byte[] serializedHeightMap = serializer.serializeToBytes(heightMapMessage);
 
-      DataSet dataSet = new DataSet(dataSetName, planarRegionsList);
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      String fileName = "HeightMap" + dateFormat.format(new Date()) + ".json";
+      String file = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + fileName;
 
-      PlannerInput plannerInput = new PlannerInput();
-      plannerInput.setStartPosition(startPose.getPosition());
-      plannerInput.setStartYaw(startPose.getYaw());
-      plannerInput.setGoalPosition(goalPose.getPosition());
-      plannerInput.setGoalYaw(goalPose.getYaw());
-      dataSet.setPlannerInput(plannerInput);
+      FileTools.ensureFileExists(new File(file).toPath());
+      FileOutputStream outputStream = new FileOutputStream(file);
+      PrintStream printStream = new PrintStream(outputStream);
 
-      DataSetIOTools.exportDataSet(dataSet);
+      printStream.write(serializedHeightMap);
+      printStream.flush();
+      outputStream.close();
+      printStream.close();
+
    }
 }

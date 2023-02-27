@@ -8,9 +8,6 @@ import us.ihmc.avatar.DRCFlatGroundRewindabilityTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.util.ControllerFailureException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground")
 @Disabled
@@ -31,7 +28,7 @@ public class AtlasFlatGroundRewindabilityTest extends DRCFlatGroundRewindability
 
    @Override
    @Test
-   public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
+   public void testCanRewindAndGoForward()
    {
       super.testCanRewindAndGoForward();
    }
@@ -39,7 +36,7 @@ public class AtlasFlatGroundRewindabilityTest extends DRCFlatGroundRewindability
    @Override
    @Disabled
    @Test
-   public void testRewindabilityWithSimpleFastMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
+   public void testRewindabilityWithSimpleFastMethod()
    {
       super.testRewindabilityWithSimpleFastMethod();
    }
@@ -48,14 +45,14 @@ public class AtlasFlatGroundRewindabilityTest extends DRCFlatGroundRewindability
    // This takes a long time. Use it for debugging where the broken changes were made when the tests above fail.
    @Disabled
    @Test
-   public void testRewindabilityWithSlowerMoreExtensiveMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
+   public void testRewindabilityWithSlowerMoreExtensiveMethod()
    {
       super.testRewindabilityWithSlowerMoreExtensiveMethod();
    }
 
    @Override
    @Test
-   public void testRunsTheSameWayTwice() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testRunsTheSameWayTwice()
    {
       super.testRunsTheSameWayTwice();
    }

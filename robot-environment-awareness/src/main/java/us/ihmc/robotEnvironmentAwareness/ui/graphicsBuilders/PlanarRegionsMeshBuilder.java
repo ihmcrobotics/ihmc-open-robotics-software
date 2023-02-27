@@ -2,7 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;

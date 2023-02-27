@@ -35,7 +35,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
       ThreadTools.startAThread(() ->
       {
          int tries = 5;
-         while (!isConnected() && tries > 0)
+         while (!isConnected() && tries > 0 && connecting.getValue())
          {
             try
             {
@@ -67,7 +67,11 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
    public void disconnect()
    {
       if (yoVariableClient != null)
+      {
          yoVariableClient.disconnect();
+         yoVariableClient = null;
+         connecting.setValue(false);
+      }
    }
 
    public String getServerName()
@@ -149,6 +153,27 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
          public void set(boolean set)
          {
             publishDoubleValueToYoVariable(variableName, set ? 1.0 : 0.0);
+         }
+
+         @Override
+         public String getName()
+         {
+            YoVariable variable = tryToGetVariable(variableName);
+            return variable == null ? variableName.substring(variableName.lastIndexOf(".")) : variable.getName();
+         }
+
+         @Override
+         public String getFullName()
+         {
+            YoVariable variable = tryToGetVariable(variableName);
+            return variable == null ? "" : variable.getFullNameString();
+         }
+
+         @Override
+         public String getDescription()
+         {
+            YoVariable variable = tryToGetVariable(variableName);
+            return variable == null ? "" : variable.getDescription();
          }
       };
    }

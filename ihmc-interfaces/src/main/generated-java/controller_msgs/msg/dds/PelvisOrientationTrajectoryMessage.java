@@ -31,11 +31,11 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
    /**
             * The orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
+   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
 
    public PelvisOrientationTrajectoryMessage()
    {
-      so3_trajectory_ = new controller_msgs.msg.dds.SO3TrajectoryMessage();
+      so3_trajectory_ = new ihmc_common_msgs.msg.dds.SO3TrajectoryMessage();
    }
 
    public PelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage other)
@@ -52,7 +52,7 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
 
       enable_user_pelvis_control_during_walking_ = other.enable_user_pelvis_control_during_walking_;
 
-      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
+      ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
    }
 
    /**
@@ -106,7 +106,7 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
    /**
             * The orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
+   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3_trajectory_;
    }

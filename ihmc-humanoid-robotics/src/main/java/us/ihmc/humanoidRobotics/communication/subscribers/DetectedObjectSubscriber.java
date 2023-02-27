@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.DetectedObjectPacket;
+import perception_msgs.msg.dds.DetectedObjectPacket;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.transform.RigidBodyTransform;

@@ -76,7 +76,7 @@ public class IncrementalCovariance3DTest
       Point3D expectedMean = EuclidGeometryTools.averagePoint3Ds(dataset);
       Point3D actualMean = new Point3D();
       incrementalCovariance3D.getMean(actualMean);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedMean, actualMean, EPSILON);
+      EuclidCoreTestTools.assertEquals(expectedMean, actualMean, EPSILON);
 
       DMatrixRMaj expectedCovariance;
       DMatrixRMaj actualCovariance = new DMatrixRMaj(0, 0);

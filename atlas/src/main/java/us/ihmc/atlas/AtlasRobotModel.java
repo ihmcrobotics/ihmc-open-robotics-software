@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import us.ihmc.atlas.behaviors.AtlasLookAndStepParameters;
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
@@ -27,15 +28,16 @@ import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -46,6 +48,8 @@ import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityDa
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -63,6 +67,7 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.model.RobotiqHandModel;
+import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandKinematicController;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsControlThread;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -73,11 +78,13 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
@@ -111,9 +118,12 @@ public class AtlasRobotModel implements DRCRobotModel
    private AtlasSensorSuiteManager sensorSuiteManager;
 
    private Consumer<RobotDefinition> robotDefinitionMutator;
+   private Consumer<RobotDefinition> robotDefinitionHandMutator;
    private RobotDefinition robotDefinition, robotDefinitionWithSDFCollision;
    private String simpleRobotName = "Atlas";
    private StepReachabilityData stepReachabilityData = null;
+   private boolean useSDFCollisions = false;
+   private boolean useHandMutatorCollisions = false;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion)
    {
@@ -216,7 +226,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition)
    {
-      return createRobotDefinition(materialDefinition, true);
+      return createRobotDefinition(materialDefinition, !useSDFCollisions);
    }
 
    public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition, boolean removeCollisions)
@@ -237,7 +247,10 @@ public class AtlasRobotModel implements DRCRobotModel
          RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
 
       getRobotDefinitionMutator().accept(robotDefinition);
-
+      
+      if (isUseHandMutatorCollisions())
+         getRobotDefinitionHandMutator().accept(robotDefinition);
+      
       return robotDefinition;
    }
 
@@ -256,6 +269,11 @@ public class AtlasRobotModel implements DRCRobotModel
       return robotDefinitionWithSDFCollision;
    }
 
+   public void disableOneDoFJointDamping()
+   {
+      setRobotDefinitionMutator(getRobotDefinitionMutator().andThen(def -> def.forEachOneDoFJointDefinition(joint -> joint.setDamping(0.0))));
+   }
+
    public void setRobotDefinitionMutator(Consumer<RobotDefinition> robotDefinitionMutator)
    {
       if (robotDefinition != null)
@@ -269,6 +287,14 @@ public class AtlasRobotModel implements DRCRobotModel
          robotDefinitionMutator = new AtlasRobotDefinitionMutator(getJointMap(), getSensorInformation());
       return robotDefinitionMutator;
    }
+   
+   public Consumer<RobotDefinition> getRobotDefinitionHandMutator()
+   {
+      if (robotDefinitionHandMutator == null)
+         robotDefinitionHandMutator = new AtlasRobotDefinitionHandMutator();
+      return robotDefinitionHandMutator;
+   }
+
 
    @Override
    public HighLevelControllerParameters getHighLevelControllerParameters()
@@ -352,9 +378,9 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandModel getHandModel()
+   public HandModel getHandModel(RobotSide side)
    {
-      if (selectedVersion.hasRobotiqHands())
+      if (selectedVersion.hasRobotiqHands(side))
          return new RobotiqHandModel();
 
       return null;
@@ -507,16 +533,48 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public SimulatedRobotiqHandsControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node)
    {
-      switch (selectedVersion.getHandModel())
+      if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ)
       {
-         case ROBOTIQ:
-            return new SimulatedRobotiqHandsControlThread(createFullRobotModel(),
-                                                          realtimeROS2Node,
-                                                          ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
-                                                          ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
+         return new SimulatedRobotiqHandsControlThread(createFullRobotModel(),
+                                                       realtimeROS2Node,
+                                                       ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()),
+                                                       RobotSide.values);
+      }
+      else if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_LEFT_NUB_RIGHT_ROBOTIQ)
+      {
+         return new SimulatedRobotiqHandsControlThread(createFullRobotModel(),
+                                                       realtimeROS2Node,
+                                                       ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()),
+                                                       new RobotSide[] {RobotSide.RIGHT});
+      }
+      else
+      {
+         return null;
+      }
+   }
 
-         default:
-            return null;
+   @Override
+   public SimulatedHandKinematicController createSimulatedHandKinematicController(FullHumanoidRobotModel fullHumanoidRobotModel,
+                                                                                  RealtimeROS2Node realtimeROS2Node,
+                                                                                  DoubleProvider controllerTime)
+   {
+      if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ)
+      {
+         return new SimulatedRobotiqHandKinematicController(getSimpleRobotName(), fullHumanoidRobotModel, realtimeROS2Node, controllerTime, RobotSide.values);
+      }
+      else if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_LEFT_NUB_RIGHT_ROBOTIQ)
+      {
+         return new SimulatedRobotiqHandKinematicController(getSimpleRobotName(),
+                                                            fullHumanoidRobotModel,
+                                                            realtimeROS2Node,
+                                                            controllerTime,
+                                                            new RobotSide[] {RobotSide.RIGHT});
+      }
+      else
+      {
+         return null;
       }
    }
 
@@ -527,6 +585,12 @@ public class AtlasRobotModel implements DRCRobotModel
                                            jointMap.getModelName(),
                                            selectedVersion.getSdfFileAsStream(),
                                            selectedVersion.getResourceDirectories());
+   }
+
+   @Override
+   public AStarBodyPathPlannerParametersBasics getAStarBodyPathPlannerParameters()
+   {
+      return new AStarBodyPathPlannerParameters();
    }
 
    @Override
@@ -571,6 +635,12 @@ public class AtlasRobotModel implements DRCRobotModel
    public FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
    {
       return new AtlasFootstepPlannerParameters(fileNameSuffix);
+   }
+
+   @Override
+   public LookAndStepBehaviorParameters getLookAndStepParameters()
+   {
+      return new AtlasLookAndStepParameters();
    }
 
    @Override
@@ -655,5 +725,23 @@ public class AtlasRobotModel implements DRCRobotModel
    public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
    {
       return new AtlasDirectRobotInterface(ros2Node, this);
+   }
+
+   public void setUseSDFCollisions(boolean useSDFCollisions)
+   {
+      if (robotDefinition != null)
+         throw new RuntimeException("Must set before RobotDefinition is created!");
+
+      this.useSDFCollisions = useSDFCollisions;
+   }
+
+   public boolean isUseHandMutatorCollisions()
+   {
+      return useHandMutatorCollisions;
+   }
+
+   public void setUseHandMutatorCollisions(boolean useHandMutatorCollisions)
+   {
+      this.useHandMutatorCollisions = useHandMutatorCollisions;
    }
 }

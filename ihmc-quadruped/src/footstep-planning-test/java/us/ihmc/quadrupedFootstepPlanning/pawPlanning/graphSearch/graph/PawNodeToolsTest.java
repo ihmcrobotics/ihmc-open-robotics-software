@@ -264,10 +264,10 @@ public class PawNodeToolsTest
          hindLeftSnapTransform.transform(hindLeftExpectedSnappedNodeTransform);
          hindRightSnapTransform.transform(hindRightExpectedSnappedNodeTransform);
 
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(frontLeftExpectedSnappedNodeTransform, frontLeftSnappedNodeTransform, epsilon);
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(frontRightExpectedSnappedNodeTransform, frontRightSnappedNodeTransform, epsilon);
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(hindLeftExpectedSnappedNodeTransform, hindLeftSnappedNodeTransform, epsilon);
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(hindRightExpectedSnappedNodeTransform, hindRightSnappedNodeTransform, epsilon);
+         EuclidCoreTestTools.assertEquals(frontLeftExpectedSnappedNodeTransform, frontLeftSnappedNodeTransform, epsilon);
+         EuclidCoreTestTools.assertEquals(frontRightExpectedSnappedNodeTransform, frontRightSnappedNodeTransform, epsilon);
+         EuclidCoreTestTools.assertEquals(hindLeftExpectedSnappedNodeTransform, hindLeftSnappedNodeTransform, epsilon);
+         EuclidCoreTestTools.assertEquals(hindRightExpectedSnappedNodeTransform, hindRightSnappedNodeTransform, epsilon);
       }
    }
 }

@@ -14,9 +14,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.17.0")
-   api("us.ihmc:ihmc-yovariables:0.9.11")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
+   api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models:source")
@@ -29,7 +27,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-state-estimation:source")
 
-   api("us.ihmc:scs2-simulation:0.2.0")
+   api("us.ihmc:scs2-definition:17-0.12.4")
 }
 
 testDependencies {

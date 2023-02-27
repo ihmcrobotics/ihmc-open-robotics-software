@@ -50,9 +50,9 @@ public class StringStretcher2dTest
       stringStretcher2d.stretchString(solution);
       assertEquals(3, solution.size());
 
-      EuclidCoreTestTools.assertTuple2DEquals(startPoint, solution.get(0), 1e-7);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.5, 1.0), solution.get(1), 1e-7);
-      EuclidCoreTestTools.assertTuple2DEquals(endPoint, solution.get(2), 1e-7);
+      EuclidCoreTestTools.assertEquals(startPoint, solution.get(0), 1e-7);
+      EuclidCoreTestTools.assertEquals(new Point2D(0.5, 1.0), solution.get(1), 1e-7);
+      EuclidCoreTestTools.assertEquals(endPoint, solution.get(2), 1e-7);
    }
 
 	@Test
@@ -131,8 +131,8 @@ public class StringStretcher2dTest
       List<Point2DBasics> waypoints = new ArrayList<>();
       stringStretcher2d.stretchString(waypoints);
       assertEquals(2, waypoints.size());
-      EuclidCoreTestTools.assertTuple2DEquals(startPoint, waypoints.get(0), 1e-7);
-      EuclidCoreTestTools.assertTuple2DEquals(endPoint, waypoints.get(1), 1e-7);
+      EuclidCoreTestTools.assertEquals(startPoint, waypoints.get(0), 1e-7);
+      EuclidCoreTestTools.assertEquals(endPoint, waypoints.get(1), 1e-7);
    }
 
 	@Test

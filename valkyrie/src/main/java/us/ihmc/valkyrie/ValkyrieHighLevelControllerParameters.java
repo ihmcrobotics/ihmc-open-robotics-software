@@ -402,6 +402,19 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          ret.add(new GroupParameter<>(spineJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
       }
 
+      for (ArmJointName armJointName : new ArmJointName[] {ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH})
+      { // Forearm elbow joint
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         parameters.setPositionBreakFrequency(0.016);
+         parameters.setVelocityBreakFrequency(2.04);
+         parameters.setMaxPositionError(0.2);
+         parameters.setMaxVelocityError(2.0);
+         List<String> jointNames = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
+         ret.add(new GroupParameter<>(armJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
+      }
+
       for (ArmJointName armJointName : new ArmJointName[] {ArmJointName.ELBOW_ROLL})
       { // Forearm elbow joint
          JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();

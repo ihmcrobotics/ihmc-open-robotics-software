@@ -1,36 +1,35 @@
 package us.ihmc.simulationConstructionSetTools.util.simulationrunner;
 
+import static us.ihmc.robotics.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.opentest4j.AssertionFailedError;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.testing.GoalOrientedTestGoal;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationDoneListener;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 
-import static us.ihmc.robotics.Assert.*;
-
-public class GoalOrientedTestConductor implements SimulationDoneListener
+public class GoalOrientedTestConductor
 {
-   private final SimulationConstructionSet scs;
+   private final SimulationConstructionSet2 scs;
    private final SimulationTestingParameters simulationTestingParameters;
-   
+
    private boolean yoTimeChangedListenerActive = false;
-   
+
    private List<GoalOrientedTestGoal> sustainGoals = new ArrayList<>();
    private List<GoalOrientedTestGoal> waypointGoals = new ArrayList<>();
    private List<GoalOrientedTestGoal> terminalGoals = new ArrayList<>();
-   
+
    // Temp lists for reporting
    private List<GoalOrientedTestGoal> sustainGoalsNotMeeting = new ArrayList<>();
    private List<GoalOrientedTestGoal> waypointGoalsNotMet = new ArrayList<>();
@@ -42,18 +41,18 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
    private String assertionFailedMessage = null;
    private String scsCrashedException = null;
-   
-   public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters)
+
+   public GoalOrientedTestConductor(SimulationConstructionSet2 scs, SimulationTestingParameters simulationTestingParameters)
    {
       this.scs = scs;
       this.simulationTestingParameters = simulationTestingParameters;
-      
-      YoDouble yoTime = (YoDouble) scs.findVariable("t");
+
+      YoDouble yoTime = scs.getTime();
       yoTime.addListener(this::notifyOfVariableChange);
-      scs.startOnAThread();
-      scs.addSimulateDoneListener(this);
+      scs.start(true, false, true);
+      scs.addSimulationThrowableListener(t -> simulationDoneWithException(t));
    }
-   
+
    public void notifyOfVariableChange(YoVariable v)
    {
       if (yoTimeChangedListenerActive)
@@ -61,7 +60,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
          sustainGoalsNotMeeting.clear();
          waypointGoalsNotMet.clear();
          terminalGoalsNotMeeting.clear();
-         
+
          for (int i = 0; i < sustainGoals.size(); i++)
          {
             if (!sustainGoals.get(i).currentlyMeetsGoal())
@@ -69,7 +68,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
                sustainGoalsNotMeeting.add(sustainGoals.get(i));
             }
          }
-         
+
          for (int i = 0; i < waypointGoals.size(); i++)
          {
             if (!waypointGoals.get(i).hasMetGoal())
@@ -77,7 +76,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
                waypointGoalsNotMet.add(waypointGoals.get(i));
             }
          }
-   
+
          for (int i = 0; i < terminalGoals.size(); i++)
          {
             if (!terminalGoals.get(i).currentlyMeetsGoal())
@@ -85,14 +84,14 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
                terminalGoalsNotMeeting.add(terminalGoals.get(i));
             }
          }
-         
+
          if (sustainGoalsNotMeeting.size() > 0)
          {
             createAssertionFailedException.set(true);
          }
          else if (terminalGoalsNotMeeting.isEmpty())
          {
-            if(waypointGoalsNotMet.size() > 0)
+            if (waypointGoalsNotMet.size() > 0)
             {
                createAssertionFailedException.set(true);
             }
@@ -103,7 +102,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
          }
       }
    }
-   
+
    private void printSuccessMessage()
    {
       StringBuffer message = new StringBuffer();
@@ -125,7 +124,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       }
       LogTools.info(message.toString());
    }
-   
+
    private void printSimulatingMessage()
    {
       StringBuffer message = new StringBuffer();
@@ -172,18 +171,19 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    }
 
    public void setTerrainObject3D(TerrainObject3D terrainObject3D)
-   {}
-   
+   {
+   }
+
    private void stop()
    {
       yoTimeChangedListenerActive = false;
-      
+
       sustainGoals.clear();
       waypointGoals.clear();
       terminalGoals.clear();
-      scs.stop();
+      scs.pause();
    }
-   
+
    public void simulate()
    {
       assertionFailedMessage = null;
@@ -192,7 +192,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       createAssertionFailedException.set(false);
       printSuccessMessage.set(false);
       scsHasCrashed.set(false);
-      
+
       printSimulatingMessage();
 
       scs.simulate();
@@ -202,30 +202,30 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
          Thread.yield();
       }
 
-      if(createAssertionFailedException.get())
+      if (createAssertionFailedException.get())
       {
          createAssertionFailedException();
          stop();
       }
-      else if(printSuccessMessage.get())
+      else if (printSuccessMessage.get())
       {
          printSuccessMessage();
          stop();
       }
-      else if(scsHasCrashed.get())
+      else if (scsHasCrashed.get())
       {
          stop();
          LogTools.error(scsCrashedException);
          fail("SCS crashed.\n" + scsCrashedException);
       }
-      
+
       //wait to see if scs threw any exceptions
       ThreadTools.sleep(10);
-      
+
       if (assertionFailedMessage != null)
       {
          LogTools.error(assertionFailedMessage);
-         
+
          throw new AssertionFailedError(assertionFailedMessage);
       }
    }
@@ -234,49 +234,51 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
-         ThreadTools.sleepForever();
+         scs.waitUntilVisualizerDown();
       }
-      
+
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, additionalStackDepthForRelevantCallingMethod + 1);
+         BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots().get(0).getName(),
+                                                                                        scs,
+                                                                                        additionalStackDepthForRelevantCallingMethod + 1);
       }
-      
+
       ThreadTools.sleep(200);
-      scs.closeAndDispose();
+      scs.shutdownSession();
    }
 
    public void concludeTesting(String videoName)
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
-         ThreadTools.sleepForever();
+         scs.waitUntilVisualizerDown();
       }
-      
+
       if (simulationTestingParameters.getCreateSCSVideos())
       {
          BambooTools.createVideoWithDateTimeAndStoreInDefaultDirectory(scs, videoName);
       }
-      
+
       ThreadTools.sleep(200);
-      scs.closeAndDispose();
+      scs.shutdownSession();
    }
-   
+
    public void concludeTesting()
    {
       concludeTesting(2);
    }
-   
+
    public void addTimeLimit(YoDouble timeYoVariable, double timeLimit)
    {
       sustainGoals.add(YoVariableTestGoal.doubleLessThan(timeYoVariable, timeYoVariable.getDoubleValue() + timeLimit));
    }
-   
+
    public void addDurationGoal(YoDouble timeYoVariable, double durationFromNow)
    {
       terminalGoals.add(YoVariableTestGoal.timeInFuture(timeYoVariable, durationFromNow));
    }
-   
+
    public void addSustainGoal(GoalOrientedTestGoal yoVariableTestGoal)
    {
       sustainGoals.add(yoVariableTestGoal);
@@ -291,8 +293,8 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    {
       terminalGoals.add(yoVariableTestGoal);
    }
-   
-   public SimulationConstructionSet getScs()
+
+   public SimulationConstructionSet2 getScs()
    {
       return scs;
    }
@@ -302,12 +304,6 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       simulationTestingParameters.setKeepSCSUp(keepSCSUp);
    }
 
-   @Override
-   public void simulationDone()
-   {
-   }
-
-   @Override
    public void simulationDoneWithException(Throwable throwable)
    {
       if (simulationTestingParameters.getKeepSCSUp())

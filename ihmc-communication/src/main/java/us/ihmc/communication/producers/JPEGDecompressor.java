@@ -10,6 +10,26 @@ import us.ihmc.codecs.util.ByteBufferProvider;
 import us.ihmc.codecs.yuv.JPEGDecoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 
+/**
+ * Decodes 3 component YUV color MJPEG
+ * Will handle YUV444, YUV422, or YUV420
+ * See https://bitbucket.ihmc.us/projects/LIBS/repos/ihmc-video-codecs/browse/csrc/JPEGDecoderImpl.cpp
+ *
+ * Adapted from https://chromium.googlesource.com/libyuv/libyuv/+/refs/heads/main/docs/formats.md:
+ * The following formats contains a full size Y plane followed by 2 planes for UV.
+ * The size (subsampling) of the UV varies.
+ *   I420 is half width, half height
+ *   I422 is half width, full height
+ *   I444 is full width, full height
+ * The YUV formats start with a letter to specify the color space. e.g. I420
+ *   I = BT.601 limited range
+ *
+ * YUVPicture toRGB is doing a YUV -> ARGB and then a ARGB -> RGB24
+ * RGB24 is B,G,R in memory
+ * See https://bitbucket.ihmc.us/projects/LIBS/repos/ihmc-video-codecs/browse/csrc/YUVPicture.cpp#166
+ * See https://chromium.googlesource.com/libyuv/libyuv/+/refs/heads/main/docs/formats.md#rgb24-and-raw
+ *
+ */
 public class JPEGDecompressor
 {
    private final JPEGDecoder jpegDecoder = new JPEGDecoder();

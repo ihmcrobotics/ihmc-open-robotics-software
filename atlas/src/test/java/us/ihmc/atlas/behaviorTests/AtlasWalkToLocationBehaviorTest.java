@@ -10,7 +10,6 @@ import us.ihmc.avatar.behaviorTests.DRCWalkToLocationBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTest
 {
@@ -36,7 +35,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testTurn361DegreesInPlace() throws SimulationExceededMaximumTimeException
+   public void testTurn361DegreesInPlace()
    {
       super.testTurn361DegreesInPlace();
    }
@@ -44,7 +43,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Tag("humanoid-behaviors")
    @Override
    @Test
-   public void testWalkAndStopBehavior() throws SimulationExceededMaximumTimeException
+   public void testWalkAndStopBehavior()
    {
       super.testWalkAndStopBehavior();
    }
@@ -52,7 +51,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testWalkAtAngleAndFinishAlignedWithInitialOrientation() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleAndFinishAlignedWithInitialOrientation()
    {
       super.testWalkAtAngleAndFinishAlignedWithInitialOrientation();
    }
@@ -60,7 +59,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testWalkAtAngleAndFinishAlignedWithWalkingPath() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleAndFinishAlignedWithWalkingPath()
    {
       super.testWalkAtAngleAndFinishAlignedWithWalkingPath();
    }
@@ -68,7 +67,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testWalkAtAngleUsingStartOrientation() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleUsingStartOrientation()
    {
       super.testWalkAtAngleUsingStartOrientation();
    }
@@ -76,7 +75,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testWalkAtAngleUsingStartTargetMeanOrientation() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleUsingStartTargetMeanOrientation()
    {
       super.testWalkAtAngleUsingStartTargetMeanOrientation();
    }
@@ -84,7 +83,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testWalkAtAngleUsingTargetOrientation() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleUsingTargetOrientation()
    {
       super.testWalkAtAngleUsingTargetOrientation();
    }
@@ -92,7 +91,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testWalkBackwardsASmallAmountWithoutTurningInPlace() throws SimulationExceededMaximumTimeException
+   public void testWalkBackwardsASmallAmountWithoutTurningInPlace()
    {
       super.testWalkBackwardsASmallAmountWithoutTurningInPlace();
    }
@@ -100,7 +99,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
+   public void testWalkForwardsX()
    {
       super.testWalkForwardsX();
    }
@@ -109,7 +108,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Override
    @Disabled
    @Test
-   public void testWalkPauseAndResumeBehavior() throws SimulationExceededMaximumTimeException
+   public void testWalkPauseAndResumeBehavior()
    {
       super.testWalkPauseAndResumeBehavior();
    }
@@ -118,7 +117,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Override
    @Disabled
    @Test
-   public void testWalkPauseAndResumeOnLastStepBehavior() throws SimulationExceededMaximumTimeException
+   public void testWalkPauseAndResumeOnLastStepBehavior()
    {
       super.testWalkPauseAndResumeOnLastStepBehavior();
    }
@@ -127,7 +126,7 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    @Override
    @Disabled
    @Test
-   public void testWalkStopAndWalkToDifferentLocation() throws SimulationExceededMaximumTimeException
+   public void testWalkStopAndWalkToDifferentLocation()
    {
       super.testWalkStopAndWalkToDifferentLocation();
    }

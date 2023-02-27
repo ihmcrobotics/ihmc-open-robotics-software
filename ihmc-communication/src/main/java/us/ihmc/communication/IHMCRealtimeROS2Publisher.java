@@ -1,13 +1,12 @@
 package us.ihmc.communication;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.RealtimeROS2Publisher;
 
 public class IHMCRealtimeROS2Publisher<T>
 {
    private final RealtimeROS2Publisher<T> realtimeROS2Publisher;
-
-   int numberOfExceptions = 0;
+   private int numberOfExceptions = 0;
 
    IHMCRealtimeROS2Publisher(RealtimeROS2Publisher<T> realtimeROS2Publisher)
    {
@@ -30,7 +29,7 @@ public class IHMCRealtimeROS2Publisher<T>
             if (numberOfExceptions >= 6)
             {
 
-               PrintTools.error("Stopping to print exceptions after 5.");
+               LogTools.error("Stopping to print exceptions after 5.");
             }
          }
 

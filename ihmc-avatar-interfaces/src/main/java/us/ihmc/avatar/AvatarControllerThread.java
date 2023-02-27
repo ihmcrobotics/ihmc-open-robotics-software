@@ -30,6 +30,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
@@ -79,6 +80,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    private final HumanoidRobotContextData humanoidRobotContextData;
 
+   private final ExecutionTimer controllerThreadTimer;
+
    public AvatarControllerThread(String robotName,
                                  DRCRobotModel robotModel,
                                  RobotInitialSetup<?> robotInitialSetup,
@@ -111,9 +114,16 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
-                                                                      ControllerCrashNotificationPacket.class,
-                                                                      ROS2Tools.getControllerOutputTopic(robotName));
+      if(realtimeROS2Node != null)
+      {
+         crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
+                                                                         ControllerCrashNotificationPacket.class,
+                                                                         ROS2Tools.getControllerOutputTopic(robotName));
+      }
+      else
+      {
+         crashNotificationPublisher = null;
+      }
 
       if (ALLOW_MODEL_CORRUPTION)
       {
@@ -141,6 +151,9 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                   arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, robotMotionStatusHolder);
+
+      controllerThreadTimer = new ExecutionTimer("controllerThreadTimer", registry);
+
 
       firstTick.set(true);
       registry.addChild(robotController.getYoRegistry());
@@ -281,11 +294,20 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       firstTick.set(true);
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
+
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+
+      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         jointDesiredOutputList.getJointDesiredOutput(i).clear();
+      }
    }
 
    @Override
    public void run()
    {
+      controllerThreadTimer.startMeasurement();
+
       runController.set(humanoidRobotContextData.getEstimatorRan());
       if (!runController.getValue())
       {
@@ -314,10 +336,15 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
       catch (Exception e)
       {
-         crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e));
+         if(crashNotificationPublisher != null)
+         {
+            crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e));
+         }
 
          throw new RuntimeException(e);
       }
+
+      controllerThreadTimer.stopMeasurement();
    }
 
    @Override

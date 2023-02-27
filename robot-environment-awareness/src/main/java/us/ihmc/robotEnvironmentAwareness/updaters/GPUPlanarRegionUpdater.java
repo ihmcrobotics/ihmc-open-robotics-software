@@ -5,12 +5,12 @@ import map_sense.RawGPUPlanarRegion;
 import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanPointFilter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
@@ -62,10 +62,10 @@ public class GPUPlanarRegionUpdater
    {
       new IHMCROS2Callback<>(ros2Node,
                              ROS2Tools.CONCAVE_HULL_FACTORY_PARAMETERS,
-                             parameters -> concaveHullFactoryParameters.setFromString(parameters.getParameters().toString()));
+                             parameters -> concaveHullFactoryParameters.setFromColonCommaString(parameters.getParameters().toString()));
       new IHMCROS2Callback<>(ros2Node,
                              ROS2Tools.POLYGONIZER_PARAMETERS,
-                             parameters -> polygonizerParameters.setFromString(parameters.getParameters().toString()));
+                             parameters -> polygonizerParameters.setFromColonCommaString(parameters.getParameters().toString()));
    }
 
    public void logRawGPURegions(RawGPUPlanarRegionList rawGPUPlanarRegionList)

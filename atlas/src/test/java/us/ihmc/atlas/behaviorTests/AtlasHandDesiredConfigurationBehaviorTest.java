@@ -9,7 +9,6 @@ import us.ihmc.avatar.behaviorTests.HumanoidHandDesiredConfigurationBehaviorTest
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasHandDesiredConfigurationBehaviorTest extends HumanoidHandDesiredConfigurationBehaviorTest
 {
@@ -35,7 +34,7 @@ public class AtlasHandDesiredConfigurationBehaviorTest extends HumanoidHandDesir
    @Tag("humanoid-behaviors")
    @Override
    @Test
-   public void testCloseHand() throws SimulationExceededMaximumTimeException
+   public void testCloseHand()
    {
       super.testCloseHand();
    }
@@ -43,7 +42,7 @@ public class AtlasHandDesiredConfigurationBehaviorTest extends HumanoidHandDesir
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
+   public void testPauseAndResumeCloseHand()
    {
       super.testPauseAndResumeCloseHand();
    }
@@ -51,7 +50,7 @@ public class AtlasHandDesiredConfigurationBehaviorTest extends HumanoidHandDesir
    @Tag("humanoid-behaviors-slow")
    @Override
    @Test
-   public void testStopCloseHand() throws SimulationExceededMaximumTimeException
+   public void testStopCloseHand()
    {
       super.testStopCloseHand();
    }

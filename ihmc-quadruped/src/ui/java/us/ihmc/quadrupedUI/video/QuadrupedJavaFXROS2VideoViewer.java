@@ -1,16 +1,16 @@
 package us.ihmc.quadrupedUI.video;
 
-import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 
-public class QuadrupedJavaFXROS2VideoViewer extends Application
+public class QuadrupedJavaFXROS2VideoViewer extends ApplicationNoModule
 {
    private static final int width = 1024;
    private static final int height = 544;

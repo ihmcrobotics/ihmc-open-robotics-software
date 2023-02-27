@@ -1,5 +1,0 @@
-<robot xmlns:xacro="http://ros.org/wiki/xacro" name="valkyrie_api">
-                                            
-    <xacro:property name="testbenchApi" value="robot_hardware_interface/TurbodriverAPI" />
-    
-</robot>

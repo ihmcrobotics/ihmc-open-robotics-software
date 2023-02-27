@@ -32,12 +32,25 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    private final YoInteger unstableVelocityNumberThreshold = new YoInteger("unstableVelocityNumberThreshold", registry);
    private final YoDouble unstableVelocityLowDampingScale = new YoDouble("unstableVelocityLowDampingScale", registry);
    private final YoDouble unstableVelocityLowDampingDuration = new YoDouble("unstableVelocityLowDampingDuration", registry);
+   private JointDesiredOutputWriter customWriter;
 
    public SCS2OutputWriter(ControllerInput controllerInput, ControllerOutput controllerOutput, boolean writeBeforeEstimatorTick)
+   {
+      this(controllerInput, controllerOutput, writeBeforeEstimatorTick, null);
+   }
+
+   public SCS2OutputWriter(ControllerInput controllerInput,
+                           ControllerOutput controllerOutput,
+                           boolean writeBeforeEstimatorTick,
+                           JointDesiredOutputWriter customWriter)
    {
       this.controllerInput = controllerInput;
       this.controllerOutput = controllerOutput;
       this.writeBeforeEstimatorTick = writeBeforeEstimatorTick;
+      this.customWriter = customWriter;
+
+      if (customWriter != null)
+         registry.addChild(customWriter.getYoVariableRegistry());
 
       unstableVelocityThreshold.set(0.45);
       unstableVelocityNumberThreshold.set(10);
@@ -48,6 +61,9 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    @Override
    public void setJointDesiredOutputList(JointDesiredOutputListBasics jointDesiredOutputList)
    {
+      if (customWriter != null)
+         customWriter.setJointDesiredOutputList(jointDesiredOutputList);
+
       jointControllers.clear();
 
       for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
@@ -99,6 +115,8 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    @Override
    public void writeBefore(long timestamp)
    {
+      if (customWriter != null)
+         customWriter.writeBefore(timestamp);
       if (writeBeforeEstimatorTick)
       {
          write();
@@ -108,6 +126,8 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    @Override
    public void writeAfter()
    {
+      if (customWriter != null)
+         customWriter.writeAfter();
       if (!writeBeforeEstimatorTick)
       {
          write();

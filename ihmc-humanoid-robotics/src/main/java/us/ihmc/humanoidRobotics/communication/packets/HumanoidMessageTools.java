@@ -9,37 +9,36 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.AdjustFootstepMessage;
 import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
-import controller_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket;
-import controller_msgs.msg.dds.AtlasElectricMotorEnablePacket;
-import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
-import controller_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket;
+import atlas_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
+import atlas_msgs.msg.dds.AtlasElectricMotorAutoEnableFlagPacket;
+import atlas_msgs.msg.dds.AtlasElectricMotorEnablePacket;
+import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
+import atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket;
 import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
-import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
-import controller_msgs.msg.dds.BDIBehaviorStatusPacket;
-import controller_msgs.msg.dds.BehaviorControlModePacket;
-import controller_msgs.msg.dds.BehaviorControlModeResponsePacket;
-import controller_msgs.msg.dds.BehaviorStatusPacket;
-import controller_msgs.msg.dds.BlackFlyParameterPacket;
+import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
+import atlas_msgs.msg.dds.BDIBehaviorStatusPacket;
+import toolbox_msgs.msg.dds.BehaviorControlModePacket;
+import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
+import toolbox_msgs.msg.dds.BehaviorStatusPacket;
+import perception_msgs.msg.dds.BlackFlyParameterPacket;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.ClearDelayQueueMessage;
 import controller_msgs.msg.dds.DesiredAccelerationsMessage;
-import controller_msgs.msg.dds.DetectedObjectPacket;
-import controller_msgs.msg.dds.DoorLocationPacket;
-import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import controller_msgs.msg.dds.FisheyePacket;
+import perception_msgs.msg.dds.DetectedObjectPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import perception_msgs.msg.dds.FisheyePacket;
 import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.FrameInformation;
+import ihmc_common_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandCollisionDetectedPacket;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
@@ -50,22 +49,22 @@ import controller_msgs.msg.dds.HandPowerCyclePacket;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage;
+import toolbox_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
-import controller_msgs.msg.dds.IntrinsicParametersMessage;
+import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
+import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.LegCompliancePacket;
 import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.LocalizationPointMapPacket;
 import controller_msgs.msg.dds.LocalizationStatusPacket;
 import controller_msgs.msg.dds.ManualHandControlPacket;
-import controller_msgs.msg.dds.MultisenseParameterPacket;
+import perception_msgs.msg.dds.MultisenseParameterPacket;
 import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import controller_msgs.msg.dds.ObjectWeightPacket;
@@ -76,34 +75,34 @@ import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.PointCloudWorldPacket;
+import perception_msgs.msg.dds.PointCloudWorldPacket;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
-import controller_msgs.msg.dds.QueueableMessage;
-import controller_msgs.msg.dds.ReachingManifoldMessage;
-import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import ihmc_common_msgs.msg.dds.QueueableMessage;
+import toolbox_msgs.msg.dds.ReachingManifoldMessage;
+import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
+import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 import controller_msgs.msg.dds.SnapFootstepPacket;
 import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
-import controller_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StateEstimatorModePacket;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
-import controller_msgs.msg.dds.ValveLocationPacket;
-import controller_msgs.msg.dds.VehiclePosePacket;
-import controller_msgs.msg.dds.VideoPacket;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import perception_msgs.msg.dds.ValveLocationPacket;
+import perception_msgs.msg.dds.VehiclePosePacket;
+import perception_msgs.msg.dds.VideoPacket;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
-import controller_msgs.msg.dds.WalkToGoalBehaviorPacket;
+import toolbox_msgs.msg.dds.WalkToGoalBehaviorPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import controller_msgs.msg.dds.WallPosePacket;
-import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import perception_msgs.msg.dds.WallPosePacket;
+import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
@@ -175,8 +174,15 @@ public class HumanoidMessageTools
    {
    }
 
-   public static BlackFlyParameterPacket createBlackFlyParameterPacket(boolean fromUI, double gain, double exposure, double frameRate, double shutter,
-                                                                       boolean autoExposure, boolean autoGain, boolean autoShutter, RobotSide side)
+   public static BlackFlyParameterPacket createBlackFlyParameterPacket(boolean fromUI,
+                                                                       double gain,
+                                                                       double exposure,
+                                                                       double frameRate,
+                                                                       double shutter,
+                                                                       boolean autoExposure,
+                                                                       boolean autoGain,
+                                                                       boolean autoShutter,
+                                                                       RobotSide side)
    {
       BlackFlyParameterPacket message = new BlackFlyParameterPacket();
       message.setFromUi(fromUI);
@@ -286,8 +292,11 @@ public class HumanoidMessageTools
     *                               NaN, that joint will use the controller default weight. Can be
     *                               {@code null}.
     */
-   public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions,
-                                                                 double[] desiredJointVelocities, double[] weights)
+   public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide,
+                                                                 double trajectoryTime,
+                                                                 double[] desiredJointPositions,
+                                                                 double[] desiredJointVelocities,
+                                                                 double[] weights)
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
       message.getJointspaceTrajectory().set(createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, desiredJointVelocities, weights));
@@ -342,8 +351,11 @@ public class HumanoidMessageTools
     * @param desiredPosition    desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                   Orientation3DReadOnly desiredOrientation, long trajectoryReferenceFrameId)
+   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide,
+                                                                   double trajectoryTime,
+                                                                   Point3DReadOnly desiredPosition,
+                                                                   Orientation3DReadOnly desiredOrientation,
+                                                                   long trajectoryReferenceFrameId)
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrameId));
@@ -360,8 +372,11 @@ public class HumanoidMessageTools
     * @param desiredPosition    desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                   Orientation3DReadOnly desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
+   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide,
+                                                                   double trajectoryTime,
+                                                                   Point3DReadOnly desiredPosition,
+                                                                   Orientation3DReadOnly desiredOrientation,
+                                                                   ReferenceFrame trajectoryReferenceFrame)
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame));
@@ -369,17 +384,30 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Pose3DReadOnly desiredPose,
+   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide,
+                                                                   double trajectoryTime,
+                                                                   Pose3DReadOnly desiredPose,
                                                                    ReferenceFrame trajectoryReferenceFrame)
    {
+      return createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPose, MessageTools.toFrameId(trajectoryReferenceFrame));
+   }
+
+   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide,
+                                                                   double trajectoryTime,
+                                                                   Pose3DReadOnly desiredPose,
+                                                                   long trajectoryReferenceFrameID)
+   {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
-      message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPose, trajectoryReferenceFrame));
+      message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPose, trajectoryReferenceFrameID));
       message.setRobotSide(robotSide.toByte());
       return message;
    }
 
-   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Pose3DReadOnly desiredPose,
-                                                                   SpatialVectorReadOnly desiredVelocity, ReferenceFrame trajectoryReferenceFrame)
+   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide,
+                                                                   double trajectoryTime,
+                                                                   Pose3DReadOnly desiredPose,
+                                                                   SpatialVectorReadOnly desiredVelocity,
+                                                                   ReferenceFrame trajectoryReferenceFrame)
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPose, desiredVelocity, trajectoryReferenceFrame));
@@ -387,7 +415,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static BehaviorStatusPacket createBehaviorStatusPacket(CurrentBehaviorStatus requestedControl,HumanoidBehaviorType behavior)
+   public static BehaviorStatusPacket createBehaviorStatusPacket(CurrentBehaviorStatus requestedControl, HumanoidBehaviorType behavior)
    {
       BehaviorStatusPacket message = new BehaviorStatusPacket();
       message.setCurrentBehaviorStatus(requestedControl.toByte());
@@ -434,7 +462,11 @@ public class HumanoidMessageTools
    }
 
    // joint values should be in the range [0,1]
-   public static ManualHandControlPacket createManualHandControlPacket(RobotSide robotSide, double index, double middle, double thumb, double spread,
+   public static ManualHandControlPacket createManualHandControlPacket(RobotSide robotSide,
+                                                                       double index,
+                                                                       double middle,
+                                                                       double thumb,
+                                                                       double spread,
                                                                        int controlType)
    {
       ManualHandControlPacket message = new ManualHandControlPacket();
@@ -447,8 +479,13 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static MultisenseParameterPacket createMultisenseParameterPacket(boolean initialize, double gain, double motorSpeed, double dutyCycle,
-                                                                           boolean ledEnable, boolean flashEnable, boolean autoExposure,
+   public static MultisenseParameterPacket createMultisenseParameterPacket(boolean initialize,
+                                                                           double gain,
+                                                                           double motorSpeed,
+                                                                           double dutyCycle,
+                                                                           boolean ledEnable,
+                                                                           boolean flashEnable,
+                                                                           boolean autoExposure,
                                                                            boolean autoWhiteBalance)
    {
       MultisenseParameterPacket message = new MultisenseParameterPacket();
@@ -467,17 +504,17 @@ public class HumanoidMessageTools
    {
       return createDoorLocationPacket(new Pose3D(doorTransformToWorld));
    }
-   
+
    public static DoorLocationPacket createDoorLocationPacket(RigidBodyTransform doorTransformToWorld, byte doorType)
    {
-      return createDoorLocationPacket(new Pose3D(doorTransformToWorld),doorType);
+      return createDoorLocationPacket(new Pose3D(doorTransformToWorld), doorType);
    }
 
    public static DoorLocationPacket createDoorLocationPacket(Pose3D doorTransformToWorld)
    {
-      return createDoorLocationPacket(doorTransformToWorld,DoorLocationPacket.UNKNOWN_TYPE);
+      return createDoorLocationPacket(doorTransformToWorld, DoorLocationPacket.UNKNOWN_TYPE);
    }
-   
+
    public static DoorLocationPacket createDoorLocationPacket(Pose3D doorTransformToWorld, byte doorType)
    {
       DoorLocationPacket message = new DoorLocationPacket();
@@ -609,7 +646,9 @@ public class HumanoidMessageTools
       return createWaypointBasedTrajectoryMessage(endEffector, waypointTimes, waypoints);
    }
 
-   public static WaypointBasedTrajectoryMessage createWaypointBasedTrajectoryMessage(RigidBodyBasics endEffector, double[] waypointTimes, Pose3D[] waypoints,
+   public static WaypointBasedTrajectoryMessage createWaypointBasedTrajectoryMessage(RigidBodyBasics endEffector,
+                                                                                     double[] waypointTimes,
+                                                                                     Pose3D[] waypoints,
                                                                                      SelectionMatrix6D selectionMatrix)
    {
       WaypointBasedTrajectoryMessage message = new WaypointBasedTrajectoryMessage();
@@ -642,7 +681,8 @@ public class HumanoidMessageTools
     * @param desiredPosition    desired pelvis position expressed in world frame.
     * @param desiredOrientation desired pelvis orientation expressed in world frame.
     */
-   public static PelvisTrajectoryMessage createPelvisTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+   public static PelvisTrajectoryMessage createPelvisTrajectoryMessage(double trajectoryTime,
+                                                                       Point3DReadOnly desiredPosition,
                                                                        Orientation3DReadOnly desiredOrientation)
    {
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
@@ -668,51 +708,6 @@ public class HumanoidMessageTools
       message.setResidualError(residualError);
       message.setTotalError(totalError);
       message.setHasMapBeenReset(hasMapBeenReset);
-      return message;
-   }
-
-   public static AdjustFootstepMessage createAdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation,
-                                                                   List<Point2D> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
-   {
-      AdjustFootstepMessage message = new AdjustFootstepMessage();
-      message.setRobotSide(robotSide.toByte());
-      message.getLocation().set(location);
-      message.getOrientation().set(orientation);
-      if (predictedContactPoints != null)
-         MessageTools.copyData(predictedContactPoints.stream().map(Point3D::new).collect(Collectors.toList()), message.getPredictedContactPoints2d());
-      return message;
-   }
-
-   public static AdjustFootstepMessage createAdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType,
-                                                                   double swingHeight)
-   {
-      return createAdjustFootstepMessage(robotSide, location, orientation, null, trajectoryType, swingHeight);
-   }
-
-   public static AdjustFootstepMessage createAdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation,
-                                                                   List<Point2D> predictedContactPoints)
-   {
-      return createAdjustFootstepMessage(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
-   }
-
-   public static AdjustFootstepMessage createAdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
-   {
-      return createAdjustFootstepMessage(robotSide, location, orientation, null);
-   }
-
-   public static AdjustFootstepMessage createAdjustFootstepMessage(Footstep footstep)
-   {
-      AdjustFootstepMessage message = new AdjustFootstepMessage();
-      message.setRobotSide(footstep.getRobotSide().toByte());
-
-      FramePoint3D location = new FramePoint3D();
-      FrameQuaternion orientation = new FrameQuaternion();
-      footstep.getPose(location, orientation);
-      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      message.getLocation().set(location);
-      message.getOrientation().set(orientation);
-      MessageTools.copyData(footstep.getPredictedContactPoints().stream().map(Point3D::new).collect(Collectors.toList()),
-                            message.getPredictedContactPoints2d());
       return message;
    }
 
@@ -762,7 +757,9 @@ public class HumanoidMessageTools
     *                              NaN, that joint will use the controller default weight. Can be
     *                              {@code null}.
     */
-   public static NeckTrajectoryMessage createNeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] desiredJointVelocities,
+   public static NeckTrajectoryMessage createNeckTrajectoryMessage(double trajectoryTime,
+                                                                   double[] desiredJointPositions,
+                                                                   double[] desiredJointVelocities,
                                                                    double[] weights)
    {
       NeckTrajectoryMessage message = new NeckTrajectoryMessage();
@@ -797,7 +794,8 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime,
+                                                                                             Orientation3DReadOnly desiredOrientation,
                                                                                              ReferenceFrame trajectoryFrame)
    {
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
@@ -805,7 +803,8 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(double trajectoryTime,
+                                                                                             Orientation3DReadOnly desiredOrientation,
                                                                                              Vector3DReadOnly desiredAngularVelocity,
                                                                                              ReferenceFrame trajectoryFrame)
    {
@@ -855,7 +854,8 @@ public class HumanoidMessageTools
     * @param trajectoryTime     how long it takes to reach the desired orientation.
     * @param desiredOrientation desired chest orientation expressed in World.
     */
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
+                                                                     Orientation3DReadOnly desiredOrientation,
                                                                      long trajectoryReferenceFrameID)
    {
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
@@ -869,7 +869,8 @@ public class HumanoidMessageTools
     * @param trajectoryTime     how long it takes to reach the desired orientation.
     * @param desiredOrientation desired chest orientation expressed the supplied frame.
     */
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
+                                                                     Orientation3DReadOnly desiredOrientation,
                                                                      ReferenceFrame trajectoryFrame)
    {
       return createChestTrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, trajectoryFrame);
@@ -882,22 +883,28 @@ public class HumanoidMessageTools
     * @param desiredOrientation     desired chest orientation expressed the supplied frame.
     * @param desiredAngularVelocity desired angular velocity at the end of the trajectory.
     */
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
-                                                                     Vector3DReadOnly desiredAngularVelocity, ReferenceFrame trajectoryFrame)
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
+                                                                     Orientation3DReadOnly desiredOrientation,
+                                                                     Vector3DReadOnly desiredAngularVelocity,
+                                                                     ReferenceFrame trajectoryFrame)
    {
       ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       message.getSo3Trajectory().set(createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame));
       return message;
    }
 
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, ReferenceFrame dataFrame,
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
+                                                                     Orientation3DReadOnly desiredOrientation,
+                                                                     ReferenceFrame dataFrame,
                                                                      ReferenceFrame trajectoryFrame)
    {
       return createChestTrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, dataFrame, trajectoryFrame);
    }
 
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
-                                                                     Vector3DReadOnly desiredAngularVelocity, ReferenceFrame dataFrame,
+   public static ChestTrajectoryMessage createChestTrajectoryMessage(double trajectoryTime,
+                                                                     Orientation3DReadOnly desiredOrientation,
+                                                                     Vector3DReadOnly desiredAngularVelocity,
+                                                                     ReferenceFrame dataFrame,
                                                                      ReferenceFrame trajectoryFrame)
    {
       ChestTrajectoryMessage message = createChestTrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame);
@@ -905,14 +912,18 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation, ReferenceFrame dataFrame,
+   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime,
+                                                                   Orientation3DReadOnly desiredOrientation,
+                                                                   ReferenceFrame dataFrame,
                                                                    ReferenceFrame trajectoryFrame)
    {
       return createHeadTrajectoryMessage(trajectoryTime, desiredOrientation, zeroVector3D, dataFrame, trajectoryFrame);
    }
 
-   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
-                                                                   Vector3DReadOnly desiredAngularVelocity, ReferenceFrame dataFrame,
+   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime,
+                                                                   Orientation3DReadOnly desiredOrientation,
+                                                                   Vector3DReadOnly desiredAngularVelocity,
+                                                                   ReferenceFrame dataFrame,
                                                                    ReferenceFrame trajectoryFrame)
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
@@ -928,7 +939,8 @@ public class HumanoidMessageTools
     * @param trajectoryTime     how long it takes to reach the desired orientation.
     * @param desiredOrientation desired head orientation expressed in world frame.
     */
-   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime,
+                                                                   Orientation3DReadOnly desiredOrientation,
                                                                    ReferenceFrame trajectoryFrame)
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
@@ -943,7 +955,8 @@ public class HumanoidMessageTools
     * @param trajectoryTime     how long it takes to reach the desired orientation.
     * @param desiredOrientation desired head orientation expressed in world frame.
     */
-   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
+   public static HeadTrajectoryMessage createHeadTrajectoryMessage(double trajectoryTime,
+                                                                   Orientation3DReadOnly desiredOrientation,
                                                                    long trajectoryReferenceFrameId)
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
@@ -958,14 +971,17 @@ public class HumanoidMessageTools
     * @param desiredPosition            the desired end position
     * @param trajectoryReferenceFrameId the frame id the trajectory will be executed in
     */
-   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime,
+                                                                             Point3DReadOnly desiredPosition,
                                                                              long trajectoryReferenceFrameId)
    {
       return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, zeroVector3D, trajectoryReferenceFrameId);
    }
 
-   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                             Vector3DReadOnly desiredLinearVelocity, long trajectoryReferenceFrameId)
+   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime,
+                                                                             Point3DReadOnly desiredPosition,
+                                                                             Vector3DReadOnly desiredLinearVelocity,
+                                                                             long trajectoryReferenceFrameId)
    {
       EuclideanTrajectoryMessage message = new EuclideanTrajectoryMessage();
       message.getTaskspaceTrajectoryPoints().add().set(createEuclideanTrajectoryPointMessage(trajectoryTime, desiredPosition, desiredLinearVelocity));
@@ -980,14 +996,17 @@ public class HumanoidMessageTools
     * @param desiredPosition          the desired end position
     * @param trajectoryReferenceFrame the frame the trajectory will be executed in
     */
-   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
+   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime,
+                                                                             Point3DReadOnly desiredPosition,
                                                                              ReferenceFrame trajectoryReferenceFrame)
    {
       return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, zeroVector3D, trajectoryReferenceFrame);
    }
 
-   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                             Vector3DReadOnly desiredLinearVelocity, ReferenceFrame trajectoryReferenceFrame)
+   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(double trajectoryTime,
+                                                                             Point3DReadOnly desiredPosition,
+                                                                             Vector3DReadOnly desiredLinearVelocity,
+                                                                             ReferenceFrame trajectoryReferenceFrame)
    {
       return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, desiredLinearVelocity, trajectoryReferenceFrame.hashCode());
    }
@@ -1010,8 +1029,10 @@ public class HumanoidMessageTools
     * @param dataReferenceFrame       the frame the desiredHeight is expressed in, the height will be
     *                                 changed to the trajectory frame on the controller side
     */
-   public static PelvisHeightTrajectoryMessage createPelvisHeightTrajectoryMessage(double trajectoryTime, double desiredHeight,
-                                                                                   ReferenceFrame trajectoryReferenceFrame, ReferenceFrame dataReferenceFrame)
+   public static PelvisHeightTrajectoryMessage createPelvisHeightTrajectoryMessage(double trajectoryTime,
+                                                                                   double desiredHeight,
+                                                                                   ReferenceFrame trajectoryReferenceFrame,
+                                                                                   ReferenceFrame dataReferenceFrame)
    {
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
       message.getEuclideanTrajectory()
@@ -1108,7 +1129,9 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, Point3D actualFootPositionInWorld,
+   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status,
+                                                            int footstepIndex,
+                                                            Point3D actualFootPositionInWorld,
                                                             Quaternion actualFootOrientationInWorld)
    {
       FootstepStatusMessage message = new FootstepStatusMessage();
@@ -1123,8 +1146,11 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, Point3D actualFootPositionInWorld,
-                                                            Quaternion actualFootOrientationInWorld, RobotSide robotSide)
+   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status,
+                                                            int footstepIndex,
+                                                            Point3D actualFootPositionInWorld,
+                                                            Quaternion actualFootOrientationInWorld,
+                                                            RobotSide robotSide)
    {
       FootstepStatusMessage message = new FootstepStatusMessage();
       message.setFootstepStatus(status.toByte());
@@ -1137,9 +1163,13 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, Point3D desiredFootPositionInWorld,
-                                                            Quaternion desiredFootOrientationInWorld, Point3D actualFootPositionInWorld,
-                                                            Quaternion actualFootOrientationInWorld, RobotSide robotSide)
+   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status,
+                                                            int footstepIndex,
+                                                            Point3D desiredFootPositionInWorld,
+                                                            Quaternion desiredFootOrientationInWorld,
+                                                            Point3D actualFootPositionInWorld,
+                                                            Quaternion actualFootOrientationInWorld,
+                                                            RobotSide robotSide)
    {
       FootstepStatusMessage message = new FootstepStatusMessage();
       message.setFootstepStatus(status.toByte());
@@ -1152,14 +1182,18 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
-                                                                 Vector3DReadOnly desiredAngularVelocity, ReferenceFrame trajectoryFrame)
+   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime,
+                                                                 Orientation3DReadOnly desiredOrientation,
+                                                                 Vector3DReadOnly desiredAngularVelocity,
+                                                                 ReferenceFrame trajectoryFrame)
    {
       return createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame.hashCode());
    }
 
-   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime, Orientation3DReadOnly desiredOrientation,
-                                                                 Vector3DReadOnly desiredAngularVelocity, long trajectoryReferenceFrameId)
+   public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime,
+                                                                 Orientation3DReadOnly desiredOrientation,
+                                                                 Vector3DReadOnly desiredAngularVelocity,
+                                                                 long trajectoryReferenceFrameId)
    {
       SO3TrajectoryMessage message = new SO3TrajectoryMessage();
       message.getTaskspaceTrajectoryPoints().add().set(createSO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity));
@@ -1280,7 +1314,6 @@ public class HumanoidMessageTools
       return createFootstepDataListMessage(footstepDataList, 0.0, 0.0, finalTransferDuration, ExecutionMode.OVERRIDE);
    }
 
-
    public static FootstepDataListMessage createFootstepDataListMessage(FootstepDataMessage... footstepDataList)
    {
       List<FootstepDataMessage> messageList = new ArrayList<>();
@@ -1289,6 +1322,7 @@ public class HumanoidMessageTools
 
       return createFootstepDataListMessage(messageList, -1.0);
    }
+
    /**
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
@@ -1297,8 +1331,10 @@ public class HumanoidMessageTools
     * @param defaultTransferDuration
     * @param executionMode
     */
-   public static FootstepDataListMessage createFootstepDataListMessage(List<FootstepDataMessage> footstepDataList, double defaultSwingDuration,
-                                                                       double defaultTransferDuration, ExecutionMode executionMode)
+   public static FootstepDataListMessage createFootstepDataListMessage(List<FootstepDataMessage> footstepDataList,
+                                                                       double defaultSwingDuration,
+                                                                       double defaultTransferDuration,
+                                                                       ExecutionMode executionMode)
    {
       return createFootstepDataListMessage(footstepDataList, defaultSwingDuration, defaultTransferDuration, defaultTransferDuration, executionMode);
    }
@@ -1312,8 +1348,10 @@ public class HumanoidMessageTools
     * @param finalTransferDuration
     * @param executionMode
     */
-   public static FootstepDataListMessage createFootstepDataListMessage(List<FootstepDataMessage> footstepDataList, double defaultSwingDuration,
-                                                                       double defaultTransferDuration, double finalTransferDuration,
+   public static FootstepDataListMessage createFootstepDataListMessage(List<FootstepDataMessage> footstepDataList,
+                                                                       double defaultSwingDuration,
+                                                                       double defaultTransferDuration,
+                                                                       double finalTransferDuration,
                                                                        ExecutionMode executionMode)
    {
       FootstepDataListMessage message = new FootstepDataListMessage();
@@ -1345,7 +1383,8 @@ public class HumanoidMessageTools
     * @param defaultTransferDuration
     * @param finalTransferDuration
     */
-   public static FootstepDataListMessage createFootstepDataListMessage(double defaultSwingDuration, double defaultTransferDuration,
+   public static FootstepDataListMessage createFootstepDataListMessage(double defaultSwingDuration,
+                                                                       double defaultTransferDuration,
                                                                        double finalTransferDuration)
    {
       FootstepDataListMessage message = new FootstepDataListMessage();
@@ -1370,16 +1409,24 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FisheyePacket createFisheyePacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position,
-                                                   Orientation3DReadOnly orientation, CameraPinholeBrown intrinsicParameters)
+   public static FisheyePacket createFisheyePacket(VideoSource videoSource,
+                                                   long timeStamp,
+                                                   byte[] data,
+                                                   Point3DReadOnly position,
+                                                   Orientation3DReadOnly orientation,
+                                                   CameraPinholeBrown intrinsicParameters)
    {
       FisheyePacket message = new FisheyePacket();
       message.getVideoPacket().set(createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
       return message;
    }
 
-   public static VideoPacket createVideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position,
-                                               Orientation3DReadOnly orientation, CameraPinholeBrown intrinsicParameters)
+   public static VideoPacket createVideoPacket(VideoSource videoSource,
+                                               long timeStamp,
+                                               byte[] data,
+                                               Point3DReadOnly position,
+                                               Orientation3DReadOnly orientation,
+                                               CameraPinholeBrown intrinsicParameters)
    {
       VideoPacket message = new VideoPacket();
       message.setVideoSource(videoSource.toByte());
@@ -1511,8 +1558,10 @@ public class HumanoidMessageTools
     * @param weights                the qp weights for the joint accelerations. The array length should
     *                               be equal to the number of controlled joints. Can be {@code null}.
     */
-   public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions,
-                                                                               double[] desiredJointVelocities, double[] weights)
+   public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double trajectoryTime,
+                                                                               double[] desiredJointPositions,
+                                                                               double[] desiredJointVelocities,
+                                                                               double[] weights)
    {
       JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
       for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
@@ -1623,7 +1672,9 @@ public class HumanoidMessageTools
     * @param desiredVelocity desired final velocity.
     * @param weight          the weight for the qp
     */
-   public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition, double desiredVelocity,
+   public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(double trajectoryTime,
+                                                                                 double desiredPosition,
+                                                                                 double desiredVelocity,
                                                                                  double weight)
    {
       OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
@@ -1725,7 +1776,9 @@ public class HumanoidMessageTools
     * @param weights        the qp weights for the joint accelerations. If any index is set to NaN,
     *                       that joint will use the controller default weight
     */
-   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] desiredJointVelocities,
+   public static SpineTrajectoryMessage createSpineTrajectoryMessage(double trajectoryTime,
+                                                                     double[] desiredJointPositions,
+                                                                     double[] desiredJointVelocities,
                                                                      double[] weights)
    {
       SpineTrajectoryMessage message = new SpineTrajectoryMessage();
@@ -1751,15 +1804,25 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                 Orientation3DReadOnly desiredOrientation, long trajectoryReferenceFrameId)
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Pose3DReadOnly desiredPose, long trajectoryReferenceFrameId)
+   {
+      return createSE3TrajectoryMessage(trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation(), trajectoryReferenceFrameId);
+   }
+
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime,
+                                                                 Point3DReadOnly desiredPosition,
+                                                                 Orientation3DReadOnly desiredOrientation,
+                                                                 long trajectoryReferenceFrameId)
    {
       return createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroVector3D, zeroVector3D, trajectoryReferenceFrameId);
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                 Orientation3DReadOnly desiredOrientation, Vector3DReadOnly desiredLinearVelocity,
-                                                                 Vector3DReadOnly desiredAngularVelocity, long trajectoryReferenceFrameId)
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime,
+                                                                 Point3DReadOnly desiredPosition,
+                                                                 Orientation3DReadOnly desiredOrientation,
+                                                                 Vector3DReadOnly desiredLinearVelocity,
+                                                                 Vector3DReadOnly desiredAngularVelocity,
+                                                                 long trajectoryReferenceFrameId)
    {
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
       message.getTaskspaceTrajectoryPoints().add()
@@ -1773,7 +1836,9 @@ public class HumanoidMessageTools
       return createSE3TrajectoryMessage(trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation(), trajectoryReferenceFrame);
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Pose3DReadOnly desiredPose, SpatialVectorReadOnly desiredVelocity,
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime,
+                                                                 Pose3DReadOnly desiredPose,
+                                                                 SpatialVectorReadOnly desiredVelocity,
                                                                  ReferenceFrame trajectoryReferenceFrame)
    {
       return createSE3TrajectoryMessage(trajectoryTime,
@@ -1784,22 +1849,27 @@ public class HumanoidMessageTools
                                         trajectoryReferenceFrame);
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                 Orientation3DReadOnly desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime,
+                                                                 Point3DReadOnly desiredPosition,
+                                                                 Orientation3DReadOnly desiredOrientation,
+                                                                 ReferenceFrame trajectoryReferenceFrame)
    {
       return createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroVector3D, zeroVector3D, trajectoryReferenceFrame);
    }
 
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition,
-                                                                 Orientation3DReadOnly desiredOrientation, Vector3DReadOnly desiredLinearVelocity,
-                                                                 Vector3DReadOnly desiredAngularVelocity, ReferenceFrame trajectoryReferenceFrame)
+   public static SE3TrajectoryMessage createSE3TrajectoryMessage(double trajectoryTime,
+                                                                 Point3DReadOnly desiredPosition,
+                                                                 Orientation3DReadOnly desiredOrientation,
+                                                                 Vector3DReadOnly desiredLinearVelocity,
+                                                                 Vector3DReadOnly desiredAngularVelocity,
+                                                                 ReferenceFrame trajectoryReferenceFrame)
    {
       return createSE3TrajectoryMessage(trajectoryTime,
                                         desiredPosition,
                                         desiredOrientation,
                                         desiredLinearVelocity,
                                         desiredAngularVelocity,
-                                        trajectoryReferenceFrame.hashCode());
+                                        MessageTools.toFrameId(trajectoryReferenceFrame));
    }
 
    public static void configureForStreaming(WholeBodyTrajectoryMessage messageToModify, double streamIntegrationDuration, long timestamp)
@@ -1925,8 +1995,11 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static SE3TrajectoryPointMessage createSE3TrajectoryPointMessage(double time, Point3DReadOnly position, Orientation3DReadOnly orientation,
-                                                                           Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   public static SE3TrajectoryPointMessage createSE3TrajectoryPointMessage(double time,
+                                                                           Point3DReadOnly position,
+                                                                           Orientation3DReadOnly orientation,
+                                                                           Vector3DReadOnly linearVelocity,
+                                                                           Vector3DReadOnly angularVelocity)
    {
       SE3TrajectoryPointMessage message = new SE3TrajectoryPointMessage();
       message.setTime(time);
@@ -1958,20 +2031,28 @@ public class HumanoidMessageTools
       return createFootstepDataMessage(robotSide, location, orientation, null);
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, Orientation3DReadOnly orientation,
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide,
+                                                               Point3DReadOnly location,
+                                                               Orientation3DReadOnly orientation,
                                                                List<? extends Point2DReadOnly> predictedContactPoints)
    {
       return createFootstepDataMessage(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, Orientation3DReadOnly orientation,
-                                                               TrajectoryType trajectoryType, double swingHeight)
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide,
+                                                               Point3DReadOnly location,
+                                                               Orientation3DReadOnly orientation,
+                                                               TrajectoryType trajectoryType,
+                                                               double swingHeight)
    {
       return createFootstepDataMessage(robotSide, location, orientation, null, trajectoryType, swingHeight);
    }
 
-   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, Orientation3DReadOnly orientation,
-                                                               List<? extends Point2DReadOnly> predictedContactPoints, TrajectoryType trajectoryType,
+   public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide,
+                                                               Point3DReadOnly location,
+                                                               Orientation3DReadOnly orientation,
+                                                               List<? extends Point2DReadOnly> predictedContactPoints,
+                                                               TrajectoryType trajectoryType,
                                                                double swingHeight)
    {
       FootstepDataMessage message = new FootstepDataMessage();
@@ -2188,7 +2269,9 @@ public class HumanoidMessageTools
     * @param desiredPosition    desired foot position expressed in world frame.
     * @param desiredOrientation desired foot orientation expressed in world frame.
     */
-   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition,
+   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide,
+                                                                   double trajectoryTime,
+                                                                   Point3DReadOnly desiredPosition,
                                                                    Orientation3DReadOnly desiredOrientation)
    {
       FootTrajectoryMessage message = new FootTrajectoryMessage();
@@ -2203,8 +2286,11 @@ public class HumanoidMessageTools
       return createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
    }
 
-   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Pose3DReadOnly desiredPose,
-                                                                   SpatialVectorReadOnly desiredVelocity, ReferenceFrame trajectoryReferenceFrame)
+   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide,
+                                                                   double trajectoryTime,
+                                                                   Pose3DReadOnly desiredPose,
+                                                                   SpatialVectorReadOnly desiredVelocity,
+                                                                   ReferenceFrame trajectoryReferenceFrame)
    {
       FootTrajectoryMessage message = new FootTrajectoryMessage();
       message.getSe3Trajectory().set(createSE3TrajectoryMessage(trajectoryTime, desiredPose, desiredVelocity, trajectoryReferenceFrame));
@@ -2419,7 +2505,7 @@ public class HumanoidMessageTools
    public static double unpackJointAngle(HandJointAnglePacket handJointAnglePacket, HandJointName jointName)
    {
       int index = jointName.getIndex(RobotSide.fromByte(handJointAnglePacket.getRobotSide()));
-      if (index == -1)
+      if (index == -1 || index >= handJointAnglePacket.getJointAngles().size())
       {
          return 0;
       }
@@ -2456,7 +2542,7 @@ public class HumanoidMessageTools
 
          vertex3D.set(footPolygon.getVertex(i), 0.0);
          footPolygon.getReferenceFrame().transformFromThisToDesiredFrame(ReferenceFrame.getWorldFrame(), vertex3D);
-         
+
       }
    }
 
