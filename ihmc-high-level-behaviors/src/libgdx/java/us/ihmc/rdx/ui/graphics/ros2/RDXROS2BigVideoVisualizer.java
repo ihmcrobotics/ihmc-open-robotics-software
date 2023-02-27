@@ -84,7 +84,7 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
             {
                // YUV I420 has 1.5 times the height of the image
                updateImageDimensions(inputYUVI420Mat.cols(), (int) (inputYUVI420Mat.rows() / 1.5f));
-               opencv_imgproc.cvtColor(inputYUVI420Mat, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+               opencv_imgproc.cvtColor(inputYUVI420Mat, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2BGRA_I420);
             }
          });
       });
