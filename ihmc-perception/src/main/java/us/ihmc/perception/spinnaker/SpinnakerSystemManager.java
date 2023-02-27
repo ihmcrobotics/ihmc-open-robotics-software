@@ -50,6 +50,10 @@ public class SpinnakerSystemManager
       Spinnaker_C.spinSystemReleaseInstance(spinSystem);
    }
 
+   /**
+    * Work around to fix camera state issues if the spinnaker cameras were not
+    * released properly (if the process crashed mid-way, for example)
+    */
    private static void initializeAndShutdownToFixState()
    {
       spinSystem spinSystem = new spinSystem();
