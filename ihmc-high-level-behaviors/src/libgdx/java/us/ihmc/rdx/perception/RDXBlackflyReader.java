@@ -90,7 +90,7 @@ public class RDXBlackflyReader
          {
             imageWidth = blackfly.getWidth(spinImage);
             imageHeight = blackfly.getHeight(spinImage);
-            spinImageDataPointer = new BytePointer(imageWidth * imageHeight * 3); // RGB8
+            spinImageDataPointer = new BytePointer(imageWidth * imageHeight * 3); // 8 bits per pixel
             blackflySourceMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
             swapImagePanel.allocateInitialTextures(imageWidth, imageHeight);
          }
