@@ -98,7 +98,9 @@ public class RDXBlackflyReader
          Spinnaker_C.spinImageGetData(spinImage, spinImageDataPointer);
          blackflySourceMat.data(spinImageDataPointer);
 
-         opencv_imgproc.cvtColor(blackflySourceMat, swapImagePanel.getAsynchronousThreadData().getRGBA8Mat(), opencv_imgproc.COLOR_BayerRG2BGRA);
+         // Here we use COLOR_BayerBG2RGBA opencv conversion. The Blackfly cameras are set to use BayerRG pixel format.
+         // But, for some reason, it's actually BayerBG. Changing to COLOR_BayerRG2RGBA will result in the wrong colors.
+         opencv_imgproc.cvtColor(blackflySourceMat, swapImagePanel.getAsynchronousThreadData().getRGBA8Mat(), opencv_imgproc.COLOR_BayerBG2RGBA);
          swapImagePanel.swap();
 
          Spinnaker_C.spinImageRelease(spinImage);
