@@ -63,13 +63,6 @@ public class SpinnakerSystemManager
       SizeTPointer cameraCount = new SizeTPointer(1);
       assertNoError(Spinnaker_C.spinCameraListGetSize(spinCameraList, cameraCount), "Unable to get spin camera list size");
 
-      if (cameraCount.get() == 0)
-      {
-         assertNoError(Spinnaker_C.spinCameraListClear(spinCameraList), "Unable to clear spin camera list");
-         assertNoError(Spinnaker_C.spinCameraListDestroy(spinCameraList), "Unable to destroy spin camera list");
-         assertNoError(Spinnaker_C.spinSystemReleaseInstance(spinSystem), "Unable to release spin system instance");
-      }
-
       for (int i = 0; i < cameraCount.get(); i++)
       {
          spinCamera spinCamera = new spinCamera();
