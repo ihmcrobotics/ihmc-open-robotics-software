@@ -28,10 +28,7 @@ import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
@@ -42,7 +39,9 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -59,6 +58,7 @@ public class CollisionFreeSwingCalculator
    private static final FrameVector3D zeroVector = new FrameVector3D();
    private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private static final double collisionGradientScale = 0.5;
+   private static final double minCollisionAdjustment = 0.02;
    private static final double collisionDistanceEpsilon = 1e-4;
    private static final int numberOfKnotPoints = 12;
    private static final double downSamplePercentage = 0.3;
@@ -85,6 +85,10 @@ public class CollisionFreeSwingCalculator
    private final List<Vector3D> convolvedGradients = new ArrayList<>();
    private final TDoubleArrayList convolutionWeights = new TDoubleArrayList();
    private final List<SwingKnotPoint> swingKnotPoints = new ArrayList<>();
+
+   private final List<YoFramePoint3D> collisionLocationsViz = new ArrayList<>();
+   private final List<YoFramePoint3D> collisionPointsViz = new ArrayList<>();
+   private final List<YoFrameVector3D> collisionGradientsViz = new ArrayList<>();
 
    private PlanarRegionsList planarRegionsList;
    private HeightMapData heightMapData;
@@ -130,7 +134,7 @@ public class CollisionFreeSwingCalculator
       if (tickAndUpdatable != null)
          this.tickAndUpdatables.add(tickAndUpdatable);
       this.graphicsListRegistry = graphicsListRegistry;
-      this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, 30, numberOfKnotPoints, ReferenceFrame.getWorldFrame());
+      this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, 100, numberOfKnotPoints, ReferenceFrame.getWorldFrame());
 
       for (int i = 0; i < numberOfKnotPoints; i++)
       {
@@ -166,6 +170,24 @@ public class CollisionFreeSwingCalculator
          graphicsList.add(footPolygonGraphic);
 
          downSampledWaypoints = new BagOfBalls(3, 0.015, YoAppearance.White(), registry, graphicsListRegistry);
+
+         for (int i = 0; i < numberOfKnotPoints; i++)
+         {
+            YoFramePoint3D collisionPointViz = new YoFramePoint3D("collisionPointViz" + i, ReferenceFrame.getWorldFrame(), registry);
+            YoFramePoint3D collisionLocationViz = new YoFramePoint3D("collisionLocationViz" + i, ReferenceFrame.getWorldFrame(), registry);
+            YoFrameVector3D collisionGradientViz = new YoFrameVector3D("collisionGradientViz" + i, ReferenceFrame.getWorldFrame(), registry);
+
+            YoGraphicVector collisionGraphic = new YoGraphicVector("collisionDirection" + i, collisionLocationViz, collisionGradientViz, 2.0, YoAppearance.Red());
+            YoGraphicPosition collisionLocation = new YoGraphicPosition("collisionLocation" + i, collisionLocationViz, 0.03, YoAppearance.Red());
+            YoGraphicPosition collisionPoint = new YoGraphicPosition("collision" + i, collisionPointViz, 0.02, YoAppearance.Yellow());
+            graphicsList.add(collisionGraphic);
+            graphicsList.add(collisionLocation);
+            graphicsList.add(collisionPoint);
+
+            collisionPointsViz.add(collisionPointViz);
+            collisionLocationsViz.add(collisionLocationViz);
+            collisionGradientsViz.add(collisionGradientViz);
+         }
 
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
          parentRegistry.addChild(registry);
@@ -348,13 +370,33 @@ public class CollisionFreeSwingCalculator
                EuclidShape3DCollisionResult collisionResult = knotPoint.getCollisionResult();
                collisionGradients.get(j).sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
                collisionGradients.get(j).scale(collisionGradientScale);
+               double length = collisionGradients.get(j).norm();
+               if (length < minCollisionAdjustment)
+               {
+                  collisionGradients.get(j).scale(minCollisionAdjustment / length);
+               }
+//               if (collisionGradients.get(j).getZ() < 0.0)
+//                  collisionGradients.get(j).setZ(0.0);
                swingKnotPoints.get(j).project(collisionGradients.get(j));
                maxCollisionDistance.set(Math.max(maxCollisionDistance.getDoubleValue(), collisionResult.getDistance()));
                intersectionFound = true;
+
+               if (visualize)
+               {
+                  collisionPointsViz.get(j).set(collisionResult.getPointOnB());
+                  collisionLocationsViz.get(j).set(collisionResult.getPointOnA());
+                  collisionGradientsViz.get(j).set(collisionGradients.get(j));
+               }
             }
             else
             {
                collisionGradients.get(j).setToZero();
+               if (visualize)
+               {
+                  collisionPointsViz.get(j).setToNaN();
+                  collisionLocationsViz.get(j).setToNaN();
+                  collisionGradientsViz.get(j).setToNaN();
+               }
                continue;
             }
 
