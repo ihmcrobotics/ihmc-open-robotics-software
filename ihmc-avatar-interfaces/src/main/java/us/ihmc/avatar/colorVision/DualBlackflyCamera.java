@@ -207,9 +207,9 @@ public class DualBlackflyCamera
 
             convertColorDuration.start();
             // Converting BayerRG8 -> BGR -> YUV
-            Mat bgrMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Temporary mat for color conversion
+            final Mat bgrMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Temporary mat for color conversion
             opencv_imgproc.cvtColor(postDistortionMat, bgrMat, opencv_imgproc.COLOR_BayerRG2BGR);
-            opencv_imgproc.cvtColor(bgrMat, yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
+            opencv_imgproc.cvtColor(bgrMat, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
             bgrMat.release();
             convertColorDuration.suspend();
 
