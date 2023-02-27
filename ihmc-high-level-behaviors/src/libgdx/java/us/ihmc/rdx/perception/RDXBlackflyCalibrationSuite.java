@@ -262,10 +262,10 @@ public class RDXBlackflyCalibrationSuite
                      while (running)
                      {
                         blackflyReader.readBlackflyImage();
-                        calibrationPatternDetectionUI.copyInSourceImage(blackflyReader.getBayerRGImage());
+                        calibrationPatternDetectionUI.copyInSourceRGBImage(blackflyReader.getRGBImage());
 
                         if (hdf5ImageLoggingUI != null)
-                           hdf5ImageLoggingUI.copyRGBImage(blackflyReader.getBayerRGImage());
+                           hdf5ImageLoggingUI.copyRGBImage(blackflyReader.getRGBImage());
                      }
                   }, "CameraRead");
                   ThreadTools.startAsDaemon(() ->
