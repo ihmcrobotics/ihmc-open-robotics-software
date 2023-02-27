@@ -190,6 +190,11 @@ public class BytedecoRealsense
             {
                depthFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(syncedFrames, error);
                realsense2.rs2_get_video_stream_intrinsics(depthFrameStreamProfile, depthStreamIntrinsics, error);
+               checkError(false, "Failed to get depth stream intrinsics.");
+
+               LogTools.info("Depth Intrinsics: {}", String.format("Fx: %.2f, Fy: %.2f, Cx: %.2f, Cy: %.2f", depthStreamIntrinsics.fx(),
+                                                                            depthStreamIntrinsics.fy(), depthStreamIntrinsics.ppx(),
+                                                                            depthStreamIntrinsics.ppy()));
             }
 
             if (colorEnabled)
@@ -207,6 +212,11 @@ public class BytedecoRealsense
                {
                   colorFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(extractedColorFrame, error);
                   realsense2.rs2_get_video_stream_intrinsics(colorFrameStreamProfile, colorStreamIntrinsics, error);
+                  checkError(false, "Failed to get color stream intrinsics.");
+
+                  LogTools.info("Color Intrinsics: {}", String.format("Fx: %.2f, Fy: %.2f, Cx: %.2f, Cy: %.2f", colorStreamIntrinsics.fx(),
+                                                                      colorStreamIntrinsics.fy(), colorStreamIntrinsics.ppx(),
+                                                                      colorStreamIntrinsics.ppy()));
                }
             }
 
