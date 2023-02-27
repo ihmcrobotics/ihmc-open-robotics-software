@@ -206,11 +206,13 @@ public class DualBlackflyCamera
             }
 
             convertColorDuration.start();
-            // Converting BayerRG8 -> BGR -> YUV
-            final Mat bgrMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Temporary mat for color conversion
-            opencv_imgproc.cvtColor(postDistortionMat, bgrMat, opencv_imgproc.COLOR_BayerRG2BGR);
-            opencv_imgproc.cvtColor(bgrMat, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
-            bgrMat.release();
+            // Converting BayerRG8 -> RGBA -> YUV
+            final Mat rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Temporary mat for color conversion
+            // Here we use COLOR_BayerBG2RGBA opencv conversion. The Blackfly cameras are set to use BayerRG pixel format.
+            // But, for some reason, it's actually BayerBG. Changing to COLOR_BayerRG2RGBA will result in the wrong colors.
+            opencv_imgproc.cvtColor(postDistortionMat, rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
+            opencv_imgproc.cvtColor(rgbaMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
+            rgbaMat.release();
             convertColorDuration.suspend();
 
             encodingDuration.start();
