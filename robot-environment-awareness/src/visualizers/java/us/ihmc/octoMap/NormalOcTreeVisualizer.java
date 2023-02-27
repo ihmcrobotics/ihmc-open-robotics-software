@@ -7,6 +7,7 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Sphere;
 import javafx.stage.Stage;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.rotationConversion.RotationMatrixConversion;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,11 +23,10 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.robotEnvironmentAwareness.geometry.IntersectionPlaneBoxCalculator;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.lists.SupplierBuilder;
 
-public class NormalOcTreeVisualizer extends Application
+public class NormalOcTreeVisualizer extends ApplicationNoModule
 {
    public final NormalOcTree ocTree = new NormalOcTree(0.025);
    private static final boolean SHOW_FREE_CELLS = false;

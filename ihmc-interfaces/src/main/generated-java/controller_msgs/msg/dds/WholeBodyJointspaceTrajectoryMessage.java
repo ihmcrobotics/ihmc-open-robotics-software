@@ -29,14 +29,14 @@ public class WholeBodyJointspaceTrajectoryMessage extends Packet<WholeBodyJoints
    /**
             * Properties for queueing trajectories.
             */
-   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   public ihmc_common_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public WholeBodyJointspaceTrajectoryMessage()
    {
       joint_hash_codes_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
 
       joint_trajectory_messages_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage> (100, new controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType());
-      queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
+      queueing_properties_ = new ihmc_common_msgs.msg.dds.QueueableMessage();
 
    }
 
@@ -52,7 +52,7 @@ public class WholeBodyJointspaceTrajectoryMessage extends Packet<WholeBodyJoints
 
       joint_hash_codes_.set(other.joint_hash_codes_);
       joint_trajectory_messages_.set(other.joint_trajectory_messages_);
-      controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
    }
 
    /**
@@ -94,7 +94,7 @@ public class WholeBodyJointspaceTrajectoryMessage extends Packet<WholeBodyJoints
    /**
             * Properties for queueing trajectories.
             */
-   public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
+   public ihmc_common_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;
    }

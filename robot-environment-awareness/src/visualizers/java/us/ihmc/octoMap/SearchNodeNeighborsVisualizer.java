@@ -2,20 +2,20 @@ package us.ihmc.octoMap;
 
 import java.util.List;
 
-import us.ihmc.euclid.tuple3D.Point3D;
-
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.stage.Stage;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.tools.OcTreeKeyConversionTools;
 import us.ihmc.jOctoMap.tools.OcTreeKeyTools;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
 
-public class SearchNodeNeighborsVisualizer extends Application
+public class SearchNodeNeighborsVisualizer extends ApplicationNoModule
 {
    private static final Color NEIGHBOR_COLOR = new Color(Color.YELLOW.getRed(), Color.YELLOW.getGreen(), Color.YELLOW.getBlue(), 0.0);
    private final List<OcTreeKey> neighbors;

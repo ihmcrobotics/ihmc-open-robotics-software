@@ -3,7 +3,7 @@ package us.ihmc.behaviors.javafx.graphics.live;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;

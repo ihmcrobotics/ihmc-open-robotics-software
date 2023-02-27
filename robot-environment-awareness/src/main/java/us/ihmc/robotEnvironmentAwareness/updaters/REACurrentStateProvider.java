@@ -2,8 +2,8 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
-import controller_msgs.msg.dds.REAStatusMessage;
+import perception_msgs.msg.dds.REASensorDataFilterParametersMessage;
+import perception_msgs.msg.dds.REAStatusMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.messager.Messager;

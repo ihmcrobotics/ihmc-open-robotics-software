@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
-import controller_msgs.msg.dds.ValveLocationPacket;
+import toolbox_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import perception_msgs.msg.dds.ValveLocationPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;

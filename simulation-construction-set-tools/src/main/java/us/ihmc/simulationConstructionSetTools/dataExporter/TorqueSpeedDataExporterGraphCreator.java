@@ -5,64 +5,101 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.mecano.yoVariables.multiBodySystem.interfaces.YoOneDoFJointBasics;
+import us.ihmc.scs2.sharedMemory.YoSharedBuffer;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.buffer.YoBuffer;
-import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class TorqueSpeedDataExporterGraphCreator extends DataExporterGraphCreator
 {
-   private static boolean DEBUG = false;
- //TODO: currently only does PinJoints
-   private final List<PinJoint> pinJoints = new ArrayList<PinJoint>();
+   private final List<JointStateVariables> jointVariables = new ArrayList<>();
+
+   private static class JointStateVariables
+   {
+      private final YoVariable position;
+      private final YoVariable torque;
+      private final YoVariable speed;
+
+      public JointStateVariables(OneDegreeOfFreedomJoint joint)
+      {
+         this(joint.getQYoVariable(), joint.getTauYoVariable(), joint.getQDYoVariable());
+      }
+
+      public JointStateVariables(YoOneDoFJointBasics joint)
+      {
+         this(joint.getYoQ(), joint.getYoTau(), joint.getYoQd());
+      }
+
+      public JointStateVariables(YoVariable position, YoVariable torque, YoVariable speed)
+      {
+         this.position = position;
+         this.torque = torque;
+         this.speed = speed;
+      }
+   }
+
+   public TorqueSpeedDataExporterGraphCreator(YoVariable time, us.ihmc.scs2.simulation.robot.Robot robot, YoSharedBuffer buffer)
+   {
+      super(time, buffer);
+
+      for (SimJointBasics joint : robot.getAllJoints())
+      {
+         if (joint instanceof YoOneDoFJointBasics)
+            jointVariables.add(new JointStateVariables((YoOneDoFJointBasics) joint));
+      }
+   }
 
    public TorqueSpeedDataExporterGraphCreator(Robot robot, YoBuffer dataBuffer)
    {
       super(robot.getYoTime(), dataBuffer);
 
-      for (Joint rootJoint : robot.getRootJoints())
+      List<OneDegreeOfFreedomJoint> allOneDoFJoints = new ArrayList<>();
+
+      robot.getAllOneDegreeOfFreedomJoints(allOneDoFJoints);
+
+      for (OneDegreeOfFreedomJoint joint : allOneDoFJoints)
       {
-         recursivelyAddPinJoints(rootJoint, pinJoints);
+         if (joint instanceof PinJoint)
+         {
+            jointVariables.add(new JointStateVariables(joint));
+         }
       }
    }
 
    public void createJointTorqueSpeedGraphs(File directory, String fileHeader, boolean createJPG, boolean createPDF)
    {
-      for (PinJoint pinJoint : pinJoints)
+      for (JointStateVariables jointState : jointVariables)
       {
-         YoBufferVariableEntry position = dataBuffer.getEntry(pinJoint.getQYoVariable());
-         YoBufferVariableEntry torque = dataBuffer.getEntry(pinJoint.getTauYoVariable());
-         YoBufferVariableEntry speed = dataBuffer.getEntry(pinJoint.getQDYoVariable());
+         YoVariable position = jointState.position;
+         YoVariable torque = jointState.torque;
+         YoVariable speed = jointState.speed;
 
          String timeLabel = "time [s]";
-         String positionLabel = position.getVariableName() + " [rad]";
-         String torqueLabel = torque.getVariableName() + " [Nm]";
-         String speedLabel = speed.getVariableName() + " [rad/s]";
+         String positionLabel = position.getName() + " [rad]";
+         String torqueLabel = torque.getName() + " [Nm]";
+         String speedLabel = speed.getName() + " [rad/s]";
 
-         String torqueSpeedTitle = torque.getVariableName() + "_Vs_" + speed.getVariableName();
-         String torquePositionTitle = torque.getVariableName() + "_Vs_" + position.getVariableName();
+         String torqueSpeedTitle = torque.getName() + "_Vs_" + speed.getName();
+         String torquePositionTitle = torque.getName() + "_Vs_" + position.getName();
 
          createDataVsTimeGraph(directory, fileHeader, position, createJPG, createPDF, timeLabel, positionLabel, Color.black);
          createDataVsTimeGraph(directory, fileHeader, torque, createJPG, createPDF, timeLabel, torqueLabel, Color.black);
          createDataVsTimeGraph(directory, fileHeader, speed, createJPG, createPDF, timeLabel, speedLabel, Color.black);
          createDataOneVsDataTwoGraph(directory, fileHeader, speed, torque, createJPG, createPDF, torqueSpeedTitle, speedLabel, torqueLabel, Color.black);
-         createDataOneVsDataTwoGraph(directory, fileHeader, position, torque, createJPG, createPDF, torquePositionTitle, positionLabel, torqueLabel, Color.black);
-      }
-   }
-
-   private void recursivelyAddPinJoints(Joint joint, List<PinJoint> pinJoints)
-   {
-      if (joint instanceof PinJoint)
-         pinJoints.add((PinJoint) joint);
-      else if (DEBUG && !(joint instanceof FloatingJoint))
-         PrintTools.error("Joint " + joint.getName() + " not currently handled by " + getClass().getSimpleName());
-
-      for (Joint child : joint.getChildrenJoints())
-      {
-         recursivelyAddPinJoints(child, pinJoints);
+         createDataOneVsDataTwoGraph(directory,
+                                     fileHeader,
+                                     position,
+                                     torque,
+                                     createJPG,
+                                     createPDF,
+                                     torquePositionTitle,
+                                     positionLabel,
+                                     torqueLabel,
+                                     Color.black);
       }
    }
 }

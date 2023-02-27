@@ -172,8 +172,13 @@
                 <Separator prefHeight="20" />
 
                 <HBox>
-                    <Label alignment="CENTER" contentDisplay="BOTTOM" prefHeight="20.0" text=" Load data set: " />
+                    <Label alignment="CENTER" contentDisplay="BOTTOM" prefHeight="20.0" text="Load planar regions: " />
                     <ComboBox fx:id="dataSetSelector" />
+                </HBox>
+
+                <HBox>
+                    <Label alignment="CENTER" contentDisplay="BOTTOM" prefHeight="20.0" text="Load height map: " />
+                    <ComboBox fx:id="heightMapDataSetSelector" />
                 </HBox>
 
             </children>
@@ -228,7 +233,7 @@
 
                 <Region prefHeight="5" />
 
-                <Label alignment="CENTER" contentDisplay="CENTER" text="Walking Preview" textAlignment="CENTER">
+                <Label alignment="CENTER" contentDisplay="CENTER" text="Height Map Navigation" textAlignment="CENTER">
                     <font>
                         <Font size="16.0" />
                     </font>
@@ -237,39 +242,14 @@
                 <Region prefHeight="5" />
 
                 <GridPane alignment="TOP_CENTER" layoutX="23.0" layoutY="29.0">
-                    <Slider fx:id="previewSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" GridPane.columnSpan="6" />
+                    <Button mnemonicParsing="false" onAction="#startHeightMapNavigation" prefWidth="220.0" text="Start Height Map Nav" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                    <Button mnemonicParsing="false" onAction="#stopHeightMapNavigation" prefWidth="220.0" text="Stop Height Map Nav" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                    <Button mnemonicParsing="false" onAction="#approve" prefWidth="150.0" text="Approve" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                    <Button mnemonicParsing="false" onAction="#replan" prefWidth="150.0" text="Replan" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                    <Button mnemonicParsing="false" onAction="#writeHeightMapLog" prefWidth="150.0" text="Log" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                    <Button mnemonicParsing="false" onAction="#resendLastStep" prefWidth="150.0" text="Resend" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                    <Button mnemonicParsing="false" onAction="#reconnect" prefWidth="150.0" text="Reconnect" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
 
-                    <Button mnemonicParsing="false" onAction="#requestWalkingPreview" prefWidth="130.0" text="Preview Steps" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                    <Region prefWidth="150" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                    <Button fx:id="previewPlayButton" onAction="#playWalkingPreview" GridPane.columnIndex="3" GridPane.rowIndex="1">
-                        <graphic>
-                            <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                <image>
-                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/play.png" />
-                                </image>
-                            </ImageView>
-                        </graphic>
-                    </Button>
-
-                    <Button fx:id="previewPauseButton" onAction="#pauseWalkingPreview" GridPane.columnIndex="4" GridPane.rowIndex="1">
-                        <graphic>
-                            <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                <image>
-                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/pause.png" />
-                                </image>
-                            </ImageView>
-                        </graphic>
-                    </Button>
-
-                    <Button fx:id="previewStopButton" onAction="#stopWalkingPreview" GridPane.columnIndex="5" GridPane.rowIndex="1">
-                        <graphic>
-                            <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                <image>
-                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/stop.png" />
-                                </image>
-                            </ImageView>
-                        </graphic>
-                    </Button>
                <columnConstraints>
                   <ColumnConstraints />
                   <ColumnConstraints />

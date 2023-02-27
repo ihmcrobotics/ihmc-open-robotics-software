@@ -103,7 +103,7 @@ public class HexapodMomentumController
       trajectoryGenerator.setFinalDesiredVelocity(desiredComVelocity);
 
       trajectoryGenerator.initialize();
-      trajectoryGenerator.compute(dt);
+      trajectoryGenerator.compute(yoTime.getDoubleValue());
 
       desiredPosition.setIncludingFrame(trajectoryGenerator.getPosition());
       desiredVelocity.setIncludingFrame(trajectoryGenerator.getVelocity());

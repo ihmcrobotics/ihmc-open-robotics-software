@@ -1,0 +1,28 @@
+#ifndef __exoskeleton_msgs__msg__ExoskeletonBehaviorStatePacket__idl__
+#define __exoskeleton_msgs__msg__ExoskeletonBehaviorStatePacket__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is used to switch the control scheme between force and position control.
+       * WARNING: When in position control, the IHMC balance algorithms will be disabled and it is up to the user to ensure stability.
+       */
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::ExoskeletonBehaviorStatePacket_")
+      struct ExoskeletonBehaviorStatePacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        octet exoskeleton_behavior_state;
+      };
+    };
+  };
+};
+
+#endif

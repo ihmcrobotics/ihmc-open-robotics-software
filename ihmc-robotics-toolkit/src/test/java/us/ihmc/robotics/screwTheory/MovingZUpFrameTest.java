@@ -87,7 +87,7 @@ public class MovingZUpFrameTest
          expectedTransform.getTranslation().set(originalTransform.getTranslation());
          expectedTransform.getRotation().setToYawOrientation(originalTransform.getRotation().getYaw());
 
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, zUpFrame.getTransformToWorldFrame(), EPSILON);
+         EuclidCoreTestTools.assertEquals(expectedTransform, zUpFrame.getTransformToWorldFrame(), EPSILON);
       }
    }
 
@@ -249,7 +249,7 @@ public class MovingZUpFrameTest
             expectedTransform.set(entry.getKey().getTransformToRoot());
             actualTransform.set(entry.getValue().getTransformToRoot());
 
-            EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, actualTransform, 1.0e-12);
+            EuclidCoreTestTools.assertEquals(expectedTransform, actualTransform, 1.0e-12);
          }
       }
    }

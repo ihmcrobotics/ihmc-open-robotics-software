@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.tools.footstepPlanner;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;

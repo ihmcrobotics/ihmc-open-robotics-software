@@ -1,0 +1,46 @@
+#ifndef __toolbox_msgs__msg__ExternalForceEstimationOutputStatus__idl__
+#define __toolbox_msgs__msg__ExternalForceEstimationOutputStatus__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+#include "geometry_msgs/msg/./Wrench_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC external force estimation module.
+       * It provides the result from the estimator
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::ExternalForceEstimationOutputStatus_")
+      struct ExternalForceEstimationOutputStatus
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Estimated external force in world frame
+         */
+        sequence<geometry_msgs::msg::dds::Vector3, 10> estimated_external_forces;
+        /**
+         * Estimated root joint wrench, if requested. Will be set to NaN if root joint was not included in the solver
+         */
+        geometry_msgs::msg::dds::Wrench estimated_root_joint_wrench;
+        /**
+         * Estimated contacting rigid body hashcode, if configured with estimate_contact_location=true
+         */
+        long rigid_body_hash_code;
+        /**
+         * Estimated contact point in parent joint frame, if configured with estimate_contact_location=true
+         */
+        geometry_msgs::msg::dds::Point contact_point;
+      };
+    };
+  };
+};
+
+#endif

@@ -7,7 +7,6 @@ import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.attributes.ParticipantAttributes;
 import us.ihmc.pubsub.common.DiscoveryStatus;
-import us.ihmc.pubsub.common.Time;
 import us.ihmc.pubsub.participant.Participant;
 
 public class ROS2TopicList
@@ -16,10 +15,7 @@ public class ROS2TopicList
    {
       int domainID = NetworkParameters.getRTPSDomainID();
       Domain domain = DomainFactory.getDomain(DomainFactory.PubSubImplementation.FAST_RTPS);
-      ParticipantAttributes attributes = domain.createParticipantAttributes();
-      attributes.setDomainId(domainID);
-      attributes.setLeaseDuration(Time.Infinite);
-      attributes.setName(ROS2TopicList.class.getSimpleName());
+      ParticipantAttributes attributes = domain.createParticipantAttributes(domainID, ROS2TopicList.class.getSimpleName());
 
       Participant participant = domain.createParticipant(attributes, (participantLocal, info) ->
       {
@@ -36,13 +32,11 @@ public class ROS2TopicList
          }
       });
       participant.registerEndpointDiscoveryListeners(
-            ((isAlive, guid, unicastLocatorList, multicastLocatorList, participantGuid, typeName,
-              topicName, userDefinedId, typeMaxSerialized, topicKind, writerQosHolder) ->
+            ((isAlive, guid, participantGuid, typeName, topicName, userDefinedId, typeMaxSerialized, topicKind) ->
             {
                LogTools.info("Discovered publisher on topic: {}", topicName);
             }),
-            ((isAlive, guid, expectsInlineQos, unicastLocatorList, multicastLocatorList, participantGuid, typeName,
-              topicName, userDefinedId, javaTopicKind, readerQosHolder) ->
+            ((isAlive, guid, expectsInlineQos, participantGuid, typeName, topicName, userDefinedId, javaTopicKind) ->
             {
                LogTools.info("Discovered subscriber on topic: {}", topicName);
             }));

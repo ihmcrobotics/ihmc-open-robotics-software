@@ -11,7 +11,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
@@ -31,10 +32,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -54,6 +52,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
@@ -297,6 +296,7 @@ public class SwingOverPlanarRegionsTest
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
                                                                          new DefaultVisibilityGraphParameters(),
+                                                                         new AStarBodyPathPlannerParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          swingPlannerParameters,
                                                                          walkingControllerParameters,
@@ -360,7 +360,11 @@ public class SwingOverPlanarRegionsTest
          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
       }
 
-      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses(), SwingPlannerType.TWO_WAYPOINT_POSITION);
+      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(),
+                                                                    HeightMapMessageTools.unpackMessage(request.getHeightMapMessage()),
+                                                                    footstepPlan,
+                                                                    request.getStartFootPoses(),
+                                                                    SwingPlannerType.TWO_WAYPOINT_POSITION);
 
       boolean wasAdjusted = expander.wereWaypointsAdjusted();
       if (wasAdjusted)
@@ -565,12 +569,6 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public ICPControlGains createICPControlGains()
-         {
-            return null;
-         }
-
-         @Override
          public PDGains getCoMHeightControlGains()
          {
             return null;
@@ -590,6 +588,12 @@ public class SwingOverPlanarRegionsTest
 
          @Override
          public PIDSE3Configuration getToeOffFootControlGains()
+         {
+            return null;
+         }
+
+         @Override
+         public StepAdjustmentParameters getStepAdjustmentParameters()
          {
             return null;
          }
@@ -649,7 +653,7 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public ICPOptimizationParameters getICPOptimizationParameters()
+         public ICPControllerParameters getICPControllerParameters()
          {
             return null;
          }
@@ -733,12 +737,6 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public double getDesiredStepForward()
-         {
-            return 0.5; // 0.35;
-         }
-
-         @Override
          public double getMaxStepLength()
          {
             return 0.6; // 0.5; //0.35;
@@ -754,12 +752,6 @@ public class SwingOverPlanarRegionsTest
          public double getMaxStepWidth()
          {
             return 0.6; // 0.4;
-         }
-
-         @Override
-         public double getStepPitch()
-         {
-            return 0.0;
          }
 
          @Override
@@ -803,18 +795,6 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public double getMinAreaPercentForValidFootstep()
-         {
-            return 0.5;
-         }
-
-         @Override
-         public double getDangerAreaPercentForValidFootstep()
-         {
-            return 0.75;
-         }
-
-         @Override
          public double getFootWidth()
          {
             return 0.11;
@@ -850,36 +830,6 @@ public class SwingOverPlanarRegionsTest
    {
       return new SwingTrajectoryParameters()
       {
-         @Override
-         public boolean doToeTouchdownIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public double getToeTouchdownAngle()
-         {
-            return Math.toRadians(20.0);
-         }
-
-         @Override
-         public boolean doHeelTouchdownIfPossible()
-         {
-            return false;
-         }
-
-         @Override
-         public double getHeelTouchdownAngle()
-         {
-            return Math.toRadians(-5.0);
-         }
-
-         @Override
-         public double getMinMechanicalLegLength()
-         {
-            return 0.420;
-         }
-
          @Override
          public double getDesiredTouchdownHeightOffset()
          {

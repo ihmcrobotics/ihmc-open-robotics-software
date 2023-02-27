@@ -75,8 +75,11 @@ public class MessagerHelper implements MessagerPublishSubscribeAPI
          disconnecting = true;
          ThreadTools.startAThread(() ->
          {
-            ExceptionTools.handle(messager::closeMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION);
-            messager = null;
+            if (messager != null)
+            {
+               ExceptionTools.handle(messager::closeMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+               messager = null;
+            }
             disconnecting = false;
          }, "MessagerDisconnectionThread");
       }

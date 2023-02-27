@@ -9,9 +9,8 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCPelvisLowGainsTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 @Disabled
@@ -32,7 +31,7 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
 
    @Override
    @Test
-   public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
+   public void testStandingWithLowPelvisOrientationGains()
    {
       super.testStandingWithLowPelvisOrientationGains();
    }
@@ -50,9 +49,9 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
    }
 
    @Override
-   protected YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
+   protected YoDouble getPelvisOrientationErrorVariableName(YoVariableHolder yoVariableHolder)
    {
-      return (YoDouble) scs.findVariable("HighLevelHumanoidControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController",
-                                                "v1PelvisOrientationErrorMagnitude");
+      return (YoDouble) yoVariableHolder.findVariable("HighLevelHumanoidControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController",
+                                                      "v1PelvisOrientationErrorMagnitude");
    }
 }

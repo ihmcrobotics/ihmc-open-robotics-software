@@ -223,8 +223,7 @@ public class HexapodSimulationController implements RobotController
 
       highLevelController.doControl();
       ControllerCoreCommand controllerCoreCommandList = highLevelController.getControllerCoreCommand();
-      controllerCore.submitControllerCoreCommand(controllerCoreCommandList);
-      controllerCore.compute();
+      controllerCore.compute(controllerCoreCommandList);
       outputWriter.write();
 
       totalTimeToCompleteTick.set(System.nanoTime() - startTime);

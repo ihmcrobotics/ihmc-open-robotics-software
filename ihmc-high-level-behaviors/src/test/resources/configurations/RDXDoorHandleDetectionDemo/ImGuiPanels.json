@@ -1,0 +1,13 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "Blackfly Fisheye Simulator###java.lang.Integer:Blackfly Fisheye Simulator" : false,
+    "Blackfly Fisheye Color###GlobalWidgetIndex:1:Blackfly Fisheye Color" : false,
+    "Blackfly Fisheye Depth###GlobalWidgetIndex:0:Blackfly Fisheye Depth" : false,
+    "Door Handle Detection" : true,
+    "Door Handle Detection Image" : true,
+    "Door Handle Tracking Demo" : true,
+    "Environment###java.lang.Class:Environment" : true,
+    "VR Thread Debugger" : false
+  }
+}

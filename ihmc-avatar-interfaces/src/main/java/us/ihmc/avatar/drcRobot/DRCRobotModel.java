@@ -1,5 +1,6 @@
 package us.ihmc.avatar.drcRobot;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
@@ -13,25 +14,31 @@ import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -44,6 +51,7 @@ import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -70,11 +78,30 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return robotInitialSetup;
    }
 
-   public abstract HandModel getHandModel();
+   public abstract HandModel getHandModel(RobotSide side);
+
+   public default SideDependentList<HandModel> getHandModels()
+   {
+      SideDependentList<HandModel> handModels = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         HandModel handModel = getHandModel(side);
+         if (handModel != null)
+         {
+            handModels.put(side, handModel);
+         }
+      }
+      return handModels;
+   }
 
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
+
+   default double getStepGeneratorDT()
+   {
+      return 10.0 * getControllerDT();
+   }
 
    public default RobotROSClockCalculator getROSClockCalculator()
    {
@@ -89,6 +116,13 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public abstract DRCSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node);
 
    public default AvatarSimulatedHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node)
+   {
+      return null;
+   }
+
+   public default SimulatedHandKinematicController createSimulatedHandKinematicController(FullHumanoidRobotModel fullHumanoidRobotModel,
+                                                                                          RealtimeROS2Node realtimeROS2Node,
+                                                                                          DoubleProvider controllerTime)
    {
       return null;
    }
@@ -171,9 +205,24 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
+   default LookAndStepBehaviorParameters getLookAndStepParameters()
+   {
+      return null;
+   }
+
    default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return null;
+   }
+
+   default AStarBodyPathPlannerParametersBasics getAStarBodyPathPlannerParameters()
+   {
+      return null;
+   }
+
+   default SteppingEnvironmentalConstraintParameters getSteppingEnvironmentalConstraintParameters()
+   {
+      return new SteppingEnvironmentalConstraintParameters();
    }
 
    default String getStepReachabilityResourceName()
@@ -241,6 +290,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
+   {
+      return null;
+   }
+
+   default Path getMultiContactScriptPath()
    {
       return null;
    }

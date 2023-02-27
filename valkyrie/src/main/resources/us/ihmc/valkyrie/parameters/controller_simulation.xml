@@ -183,7 +183,6 @@
                      </registry>
                   </registry>
                   <registry name="FeetManager">
-
                      <registry name="FootControlModuleParameters">
                         <parameter name="CoefficientOfFriction" type="DoubleParameter" min="0.0" max="1.0" value="0.8" />
                      </registry>
@@ -191,32 +190,22 @@
                         <parameter name="dampFootRotations" type="BooleanParameter" value="false" />
                         <parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                      </registry>
-                     <registry name="ToeOffManager">
+                     <registry name="GeometricToeOffManager">
+                        <registry name="LegJointLimitsInspector">
+                           <parameter name="doToeOffWhenHittingAnkleLimit" type="BooleanParameter" value="true" />
+                           <parameter name="doToeOffWhenHittingLeadingKneeUpperLimit" type="BooleanParameter" value="false" />
+                           <parameter name="doToeOffWhenHittingRearKneeLowerLimit" type="BooleanParameter" value="false" />
+                           <parameter name="ankleLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
+                           <parameter name="kneeUpperLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="1.2" />
+                           <parameter name="kneeLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+                        </registry>
+                        <registry name="ToeOffStepPositionInspector">
+                           <parameter name="minStepLengthForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
+                           <parameter name="minStepForwardForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
+                           <parameter name="minStepHeightForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                        </registry>
                         <parameter name="doToeOffIfPossibleInDoubleSupport" type="BooleanParameter" value="true" />
                         <parameter name="doToeOffIfPossibleInSingleSupport" type="BooleanParameter" value="false" />
-                        <parameter name="doToeOffWhenHittingAnkleLimit" type="BooleanParameter" value="true" />
-                        <parameter name="doToeOffWhenHittingLeadingKneeUpperLimit" type="BooleanParameter" value="false" />
-                        <parameter name="doToeOffWhenHittingRearKneeLowerLimit" type="BooleanParameter" value="false" />
-                        <parameter name="ankleLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="-1.0" />
-                        <parameter name="kneeUpperLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="1.2" />
-                        <parameter name="kneeLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="icpPercentOfStanceForDSToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="icpPercentOfStanceForSSToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="ecmpProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.04" />
-                        <parameter name="copProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.03" />
-                        <parameter name="checkECMPForToeOff" type="BooleanParameter" value="true" />
-                        <parameter name="checkCoPForToeOff" type="BooleanParameter" value="false" />
-                        <parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="true" />
-                        <parameter name="extraCoMMaxHeightWithToes" type="DoubleParameter" min="0.0" max="1.0" value="0.08" />
-                        <parameter name="minStepLengthForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
-                        <parameter name="minStepForwardForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
-                        <parameter name="minStepHeightForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
-                        <parameter name="useToeLineContactInSwing" type="BooleanParameter" value="true" />
-                        <parameter name="useToeLineContactInTransfer" type="BooleanParameter" value="false" />
-                        <parameter name="updateLineContactDuringToeOff" type="BooleanParameter" value="false" />
-                        <parameter name="updatePointContactDuringToeOff" type="BooleanParameter" value="false" />
-                        <parameter name="icpProximityForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-                        <parameter name="forceToeOffAtJointLimit" type="BooleanParameter" value="false" />
                      </registry>
                      <registry name="WorkspaceLimiterParameters">
                         <parameter name="footMaxPercOfLegLengthForSingularityAvoidanceInSwingForFoot" type="DoubleParameter" min="0.0" max="1.0" value="0.97" />
@@ -257,6 +246,7 @@
                         </registry>
                         <parameter name="maxContactPointRate" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                      </registry>
+                     <parameter name="extraCoMMaxHeightWithToes" type="DoubleParameter" min="0.0" max="1.0" value="0.08" />
                      <parameter name="FootSwingTouchdownVelocityX" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                      <parameter name="FootSwingTouchdownVelocityY" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                      <parameter name="FootSwingTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.3" />

@@ -13,7 +13,12 @@ public class DoNothingControllerState extends HighLevelControllerState
 
    public DoNothingControllerState(OneDoFJointBasics[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters)
    {
-      super(controllerState, highLevelControllerParameters, controlledJoints);
+      this("", controlledJoints, highLevelControllerParameters);
+   }
+
+   public DoNothingControllerState(String namePrefix, OneDoFJointBasics[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters)
+   {
+      super(namePrefix, controllerState, highLevelControllerParameters, controlledJoints);
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controlledJoints.length);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
    }

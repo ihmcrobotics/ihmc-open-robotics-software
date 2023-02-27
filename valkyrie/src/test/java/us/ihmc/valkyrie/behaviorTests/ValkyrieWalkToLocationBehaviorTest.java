@@ -8,7 +8,6 @@ import us.ihmc.avatar.behaviorTests.DRCWalkToLocationBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 @Tag("humanoid-behaviors-slow")
@@ -30,63 +29,63 @@ public class ValkyrieWalkToLocationBehaviorTest extends DRCWalkToLocationBehavio
 
    @Override
    @Test
-   public void testTurn361DegreesInPlace() throws SimulationExceededMaximumTimeException
+   public void testTurn361DegreesInPlace()
    {
       super.testTurn361DegreesInPlace();
    }
 
    @Override
    @Test
-   public void testWalkAndStopBehavior() throws SimulationExceededMaximumTimeException
+   public void testWalkAndStopBehavior()
    {
       super.testWalkAndStopBehavior();
    }
 
    @Override
    @Test
-   public void testWalkAtAngleAndFinishAlignedWithInitialOrientation() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleAndFinishAlignedWithInitialOrientation()
    {
       super.testWalkAtAngleAndFinishAlignedWithInitialOrientation();
    }
 
    @Override
    @Test
-   public void testWalkAtAngleAndFinishAlignedWithWalkingPath() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleAndFinishAlignedWithWalkingPath()
    {
       super.testWalkAtAngleAndFinishAlignedWithWalkingPath();
    }
 
    @Override
    @Test
-   public void testWalkAtAngleUsingStartOrientation() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleUsingStartOrientation()
    {
       super.testWalkAtAngleUsingStartOrientation();
    }
 
    @Override
    @Test
-   public void testWalkAtAngleUsingStartTargetMeanOrientation() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleUsingStartTargetMeanOrientation()
    {
       super.testWalkAtAngleUsingStartTargetMeanOrientation();
    }
 
    @Override
    @Test
-   public void testWalkAtAngleUsingTargetOrientation() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleUsingTargetOrientation()
    {
       super.testWalkAtAngleUsingTargetOrientation();
    }
 
    @Override
    @Test
-   public void testWalkBackwardsASmallAmountWithoutTurningInPlace() throws SimulationExceededMaximumTimeException
+   public void testWalkBackwardsASmallAmountWithoutTurningInPlace()
    {
       super.testWalkBackwardsASmallAmountWithoutTurningInPlace();
    }
 
    @Override
    @Test
-   public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
+   public void testWalkForwardsX()
    {
       super.testWalkForwardsX();
    }
@@ -94,7 +93,7 @@ public class ValkyrieWalkToLocationBehaviorTest extends DRCWalkToLocationBehavio
    @Override
    @Disabled
    @Test
-   public void testWalkPauseAndResumeBehavior() throws SimulationExceededMaximumTimeException
+   public void testWalkPauseAndResumeBehavior()
    {
       super.testWalkPauseAndResumeBehavior();
    }
@@ -102,7 +101,7 @@ public class ValkyrieWalkToLocationBehaviorTest extends DRCWalkToLocationBehavio
    @Override
    @Disabled
    @Test
-   public void testWalkPauseAndResumeOnLastStepBehavior() throws SimulationExceededMaximumTimeException
+   public void testWalkPauseAndResumeOnLastStepBehavior()
    {
       super.testWalkPauseAndResumeOnLastStepBehavior();
    }
@@ -110,7 +109,7 @@ public class ValkyrieWalkToLocationBehaviorTest extends DRCWalkToLocationBehavio
    @Override
    @Disabled
    @Test
-   public void testWalkStopAndWalkToDifferentLocation() throws SimulationExceededMaximumTimeException
+   public void testWalkStopAndWalkToDifferentLocation()
    {
       super.testWalkStopAndWalkToDifferentLocation();
    }

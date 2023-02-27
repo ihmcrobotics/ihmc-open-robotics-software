@@ -4,7 +4,7 @@ import java.util.function.LongUnaryOperator;
 
 import org.ros.node.NodeConfiguration;
 
-import controller_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;

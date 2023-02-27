@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.javafx.behaviors;
 
-import controller_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
@@ -35,7 +35,7 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
 {
    public static final JavaFXBehaviorUIDefinition DEFINITION = new JavaFXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION, LookAndStepBehaviorUI::new);
 
-   private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
+   private final LookAndStepBehaviorParameters lookAndStepParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
 
@@ -54,6 +54,8 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
    public LookAndStepBehaviorUI(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       super(sceneNode, visualizationPane, ros2Node, behaviorMessager, robotModel);
+
+      lookAndStepParameters = robotModel.getLookAndStepParameters();
       ros2Publisher = new ROS2PublisherMap(ros2Node);
 
       View3DFactory view2DFactory = View3DFactory.createSubscene(false, SceneAntialiasing.BALANCED);
@@ -109,7 +111,7 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
    {
       StoredPropertySetMessage storedPropertySetMessage = new StoredPropertySetMessage();
       lookAndStepParameters.getAllAsStrings().forEach(value -> storedPropertySetMessage.getStrings().add(value));
-      ros2Publisher.publish(LOOK_AND_STEP_PARAMETERS, storedPropertySetMessage);
+//      ros2Publisher.publish(LOOK_AND_STEP_PARAMETERS, storedPropertySetMessage);
    }
 
    private void publishFootstepPlanningParameters()

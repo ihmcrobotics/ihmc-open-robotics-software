@@ -11,12 +11,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 

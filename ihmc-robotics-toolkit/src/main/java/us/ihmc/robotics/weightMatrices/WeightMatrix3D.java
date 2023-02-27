@@ -3,6 +3,7 @@ package us.ihmc.robotics.weightMatrices;
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.euclid.interfaces.EuclidGeometry;
 import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -118,6 +119,29 @@ public class WeightMatrix3D implements Tuple3DReadOnly
       xWeight = other.xWeight;
       yWeight = other.yWeight;
       zWeight = other.zWeight;
+   }
+
+   /**
+    * Sets the weights to the same value.
+    * 
+    * @param weightsValue the value for all 3 axes.
+    */
+   public void setWeights(double weightsValue)
+   {
+      setWeights(weightsValue, weightsValue, weightsValue);
+   }
+
+   /**
+    * Sets the weights.
+    * <p>
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
+    * </p>
+    * 
+    * @param weights 3D tuple holding the weight values along each axis. Not modified.
+    */
+   public void setWeights(Tuple3DReadOnly weights)
+   {
+      setWeights(weights.getX(), weights.getY(), weights.getZ());
    }
 
    /**
@@ -496,6 +520,12 @@ public class WeightMatrix3D implements Tuple3DReadOnly
 
          return true;
       }
+   }
+
+   @Override
+   public boolean geometricallyEquals(EuclidGeometry geometry, double epsilon)
+   {
+      return epsilonEquals(geometry, epsilon);
    }
 
    @Override

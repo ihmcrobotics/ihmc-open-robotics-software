@@ -219,7 +219,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          if (estimateWhenControllerIsStanding.getValue())
             hasFootHitGround = isStanding;
          else
-            hasFootHitGround = isStanding && footSwitches.get(foot).hasFootHitGround();
+            hasFootHitGround = isStanding && footSwitches.get(foot).hasFootHitGroundFiltered();
 
          boolean isFootStatic = currentFootLinearVelocities.get(foot).getDoubleValue() < footLinearVelocityThreshold.getValue();
 

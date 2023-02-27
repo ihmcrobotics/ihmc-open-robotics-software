@@ -1,7 +1,10 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
-import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.trajectories.providers.FramePositionProvider;
 
 public interface FixedFramePositionTrajectoryGenerator extends FramePositionProvider, PositionTrajectoryGenerator
@@ -26,8 +29,4 @@ public interface FixedFramePositionTrajectoryGenerator extends FramePositionProv
       velocityToPack.setMatchingFrame(getVelocity());
       accelerationToPack.setMatchingFrame(getAcceleration());
    }
-
-   void showVisualization();
-
-   void hideVisualization();
 }

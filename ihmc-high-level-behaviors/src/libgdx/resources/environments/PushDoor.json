@@ -1,16 +1,16 @@
 {
   "ambientLight" : 0.914,
   "objects" : [ {
-    "type" : "GDXDoorPushHandleRightFiducialStaticHandleObject",
-    "x" : 1.7137600116067575,
-    "y" : 0.49949752631181465,
-    "z" : -1.499858017846393E-17,
+    "type" : "RDXDoorObject",
+    "x" : 2.04309847312537,
+    "y" : -0.018601036729380915,
+    "z" : 0.19166256720200175,
     "qx" : 0.0,
     "qy" : 0.0,
-    "qz" : -0.7130720662067341,
-    "qs" : 0.7010907419126707
+    "qz" : 0.012046886565676316,
+    "qs" : 0.9999274336290978
   }, {
-    "type" : "GDXLabFloorObject",
+    "type" : "RDXLabFloorObject",
     "x" : -2.0776018995116106,
     "y" : -0.09682364592508463,
     "z" : 0.0,
@@ -19,16 +19,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXDoorFrameObject",
-    "x" : 1.7099635045353185,
-    "y" : -0.41444174009333945,
-    "z" : -0.036348907761191235,
-    "qx" : 0.7087531398533888,
-    "qy" : 1.3409993117142457E-30,
-    "qz" : 4.3398613205355526E-17,
-    "qs" : 0.7054565803420766
-  }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : 10.0,
     "y" : 10.0,
     "z" : 10.0,
@@ -37,7 +28,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : -10.0,
     "y" : 10.0,
     "z" : 10.0,
@@ -46,7 +37,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : -10.0,
     "y" : -10.0,
     "z" : 10.0,
@@ -55,7 +46,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPointLightObject",
+    "type" : "RDXPointLightObject",
     "x" : 10.0,
     "y" : -10.0,
     "z" : 10.0,

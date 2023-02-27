@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.jfxvisualizer;
 
 import org.apache.commons.lang3.tuple.Triple;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -15,6 +14,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -26,7 +26,7 @@ import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
  * It allows user to create plans, log and load plans from disk, tune parameters,
  * and debug plans.
  */
-public class ValkyrieFootstepPlannerUI extends Application
+public class ValkyrieFootstepPlannerUI extends ApplicationNoModule
 {
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
@@ -45,17 +45,19 @@ public class ValkyrieFootstepPlannerUI extends Application
 
       messager.startMessager();
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage,
-                                              messager,
-                                              model.getVisibilityGraphsParameters(),
-                                              model.getFootstepPlannerParameters(),
-                                              model.getSwingPlannerParameters(),
-                                              model,
-                                              previewModel,
-                                              model.getJointMap(),
-                                              model.getContactPointParameters(),
-                                              model.getWalkingControllerParameters(),
-                                              new ValkyrieUIAuxiliaryData());
+      ui = FootstepPlannerUI.createUI(primaryStage,
+                                      messager,
+                                      model.getVisibilityGraphsParameters(),
+                                      model.getAStarBodyPathPlannerParameters(),
+                                      model.getFootstepPlannerParameters(),
+                                      model.getSwingPlannerParameters(),
+                                      model,
+                                      previewModel,
+                                      model.getJointMap(),
+                                      model.getContactPointParameters(),
+                                      model.getWalkingControllerParameters(),
+                                      new ValkyrieUIAuxiliaryData(),
+                                      model.getCollisionBoxProvider());
       ui.show();
 
       if(!ValkyrieNetworkProcessor.isFootstepPlanningModuleStarted())
@@ -77,11 +79,7 @@ public class ValkyrieFootstepPlannerUI extends Application
       if (status.getFootstepPlanningResult().terminalResult())
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
-                                Triple.of(planningModule.getEdgeDataMap(), planningModule.getIterationData(), planningModule.getVariableDescriptors()));
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getStartMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getGoalMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getInterRegionVisibilityMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, planningModule.getBodyPathPlanner().getSolution().getVisibilityMapsWithNavigableRegions());
+                                Triple.of(planningModule.getEdgeDataMap(), planningModule.getIterationData(), planningModule.getFootstepPlanVariableDescriptors()));
       }
    }
 

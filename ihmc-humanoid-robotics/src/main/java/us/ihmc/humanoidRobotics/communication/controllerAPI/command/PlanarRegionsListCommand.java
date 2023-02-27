@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -22,6 +22,8 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    public void clear()
    {
       sequenceId = 0;
+      for (int i = 0; i < planarRegions.size(); i++)
+         planarRegions.get(i).clear();
       planarRegions.clear();
    }
 
@@ -40,6 +42,8 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
       for (int regionIndex = 0; regionIndex < message.getRegionId().size(); regionIndex++)
       {
          PlanarRegionCommand planarRegionCommand = planarRegions.add();
+         planarRegionCommand.clear();
+
          int regionId = message.getRegionId().get(regionIndex);
          Point3D origin = message.getRegionOrigin().get(regionIndex);
          Vector3D normal = message.getRegionNormal().get(regionIndex);
@@ -52,9 +56,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
             planarRegionCommand.addConcaveHullVertex().set(vertexBuffer.get(vertexIndex));
          }
 
-         int polygonIndex = 0;
-
-         for (; polygonIndex < message.getNumberOfConvexPolygons().get(regionIndex); polygonIndex++)
+         for ( int polygonIndex = 0; polygonIndex < message.getNumberOfConvexPolygons().get(regionIndex); polygonIndex++)
          {
             upperBound += message.getConvexPolygonsSize().get(convexPolygonIndexStart + polygonIndex);
             ConvexPolygon2D convexPolygon = planarRegionCommand.addConvexPolygon();
@@ -64,7 +66,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
 
             convexPolygon.update();
          }
-         convexPolygonIndexStart += polygonIndex;
+         convexPolygonIndexStart += message.getNumberOfConvexPolygons().get(regionIndex);
       }
    }
 
@@ -95,6 +97,11 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    public PlanarRegionCommand getPlanarRegionCommand(int i)
    {
       return planarRegions.get(i);
+   }
+
+   public void addPlanarRegionCommand(PlanarRegionCommand command)
+   {
+      this.planarRegions.add().set(command);
    }
 
    @Override

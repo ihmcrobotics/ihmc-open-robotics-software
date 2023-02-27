@@ -66,7 +66,7 @@ public class JointTorqueFromForceSensorVisualizer
          FootSwitchInterface footSwitch = footSwitches.get(rigidBody);
          GeometricJacobian jacobian = jacobians.get(rigidBody);
 
-         footSwitch.computeAndPackFootWrench(wrench);
+         footSwitch.getMeasuredWrench(wrench);
          wrench.changeFrame(rigidBody.getBodyFixedFrame());
          wrench.negate();
 

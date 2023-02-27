@@ -33,7 +33,7 @@ public class AbstractLidarScanTest
 
       for (int i = 0; i < ranges.length; i++)
       {
-         EuclidCoreTestTools.assertTuple3DEquals(new Point3D(ranges[i], 0, 0), lidarScan.getPoint(i), eps);
+         EuclidCoreTestTools.assertEquals(new Point3D(ranges[i], 0, 0), lidarScan.getPoint(i), eps);
       }
    }
 
@@ -61,7 +61,7 @@ public class AbstractLidarScanTest
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setRotationYawAndZeroTranslation(params.sweepYawMin + i * sweepPerStep);
          transform.transform(p);
-         EuclidCoreTestTools.assertTuple3DEquals(p, lidarScan.getPoint(i), eps);
+         EuclidCoreTestTools.assertEquals(p, lidarScan.getPoint(i), eps);
       }
    }
 
@@ -94,7 +94,7 @@ public class AbstractLidarScanTest
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setRotationYawAndZeroTranslation(sweepMin + i * sweepPerStep);
          transform.transform(p);
-         EuclidCoreTestTools.assertTuple3DEquals(p, lidarScan.getPoint(i), eps);
+         EuclidCoreTestTools.assertEquals(p, lidarScan.getPoint(i), eps);
       }
    }
 

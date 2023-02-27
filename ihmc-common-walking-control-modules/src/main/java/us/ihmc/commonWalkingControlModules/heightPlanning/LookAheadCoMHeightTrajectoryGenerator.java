@@ -11,8 +11,10 @@ import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -83,7 +85,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final ReferenceFrame frameOfHeight;
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
 
-   private final FramePoint3D com = new FramePoint3D();
+   private final FixedFramePoint3DBasics com = new FramePoint3D();
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
 
@@ -199,10 +201,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
       tempFramePoint.setToZero(frameOfHeight);
       tempFramePoint.changeFrame(frameOfSupportLeg);
       tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
-      desiredCoMHeight.set(nominalHeightAboveGround.getDoubleValue());
-      tempFramePoint.changeFrame(worldFrame);
 
-      desiredCoMPosition.set(tempFramePoint);
+      desiredCoMHeight.set(nominalHeightAboveGround.getDoubleValue());
+      desiredCoMPosition.setMatchingFrame(tempFramePoint);
 
       extraToeOffHeight.set(0.0);
 
@@ -241,16 +242,13 @@ public class LookAheadCoMHeightTrajectoryGenerator
    {
       heightWaypoints.clear();
 
-      transferToPosition.setToZero(soleFrames.get(RobotSide.LEFT));
-      transferFromPosition.setToZero(soleFrames.get(RobotSide.RIGHT));
-
-      transferToPosition.changeFrame(worldFrame);
-      transferFromPosition.changeFrame(worldFrame);
-
-      if (transferToPosition.getZ() > transferFromPosition.getZ())
+      if (soleFrames.get(RobotSide.LEFT).getTransformToRoot().getTranslationZ() > soleFrames.get(RobotSide.RIGHT).getTransformToRoot().getTranslationZ())
          setSupportLeg(RobotSide.RIGHT);
       else
          setSupportLeg(RobotSide.LEFT);
+
+      transferToPosition.setToZero(soleFrames.get(RobotSide.LEFT));
+      transferFromPosition.setToZero(soleFrames.get(RobotSide.RIGHT));
 
       transferToPosition.changeFrame(frameOfSupportLeg);
       transferFromPosition.changeFrame(frameOfSupportLeg);
@@ -546,23 +544,22 @@ public class LookAheadCoMHeightTrajectoryGenerator
                                             double extraHeight)
    {
       double widthDisplacement = queryY - ankleY - Math.signum(queryY - ankleY) * 0.5 * hipWidth;
-      double heightSquared = MathTools.square(desiredDistance) - MathTools.square(queryX - ankleX) - MathTools.square(widthDisplacement);
-      return Math.sqrt(heightSquared) + extraHeight;
+      double height = EuclidCoreTools.squareRoot(MathTools.square(desiredDistance) - MathTools.square(queryX - ankleX) - MathTools.square(widthDisplacement));
+      return height + extraHeight;
    }
 
-   public void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack, boolean isInDoubleSupport)
+   public void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack)
    {
-      com.setToZero(centerOfMassFrame);
-      com.changeFrame(worldFrame);
+      com.setFromReferenceFrame(centerOfMassFrame);
 
-      solve(comHeightPartialDerivativesDataToPack, com, isInDoubleSupport);
+      solve(comHeightPartialDerivativesDataToPack, com);
 
       desiredCoMPosition.set(com.getX(), com.getY(), comHeightPartialDerivativesDataToPack.getComHeight());
    }
 
    private final Point2D point = new Point2D();
 
-   void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, boolean isInDoubleSupport)
+   void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack, FixedFramePoint3DBasics queryPoint)
    {
       this.queryPosition.set(queryPoint);
 

@@ -10,14 +10,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.function.DoubleUnaryOperator;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
@@ -30,13 +34,15 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -47,7 +53,10 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
+import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.yoVariables.multiBodySystem.interfaces.YoOneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
@@ -55,11 +64,11 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.sharedMemory.YoSharedBuffer;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.simulationConstructionSetTools.dataExporter.DataExporterExcelWorkbookCreator;
 import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporterGraphCreator;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -113,8 +122,8 @@ public class EndToEndTestTools
    {
       QuaternionReadOnly desiredOrientation = findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder);
       Vector3DReadOnly desiredAngularVelocity = findFeedbackControllerDesiredAngularVelocity(bodyName, yoVariableHolder);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
+      EuclidCoreTestTools.assertEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
    }
 
    public static void assertWaypointInGeneratorMatches(String bodyName,
@@ -126,16 +135,12 @@ public class EndToEndTestTools
       assertTrue(waypointIndexInController < RigidBodyTaskspaceControlState.maxPointsInGenerator, "Index too high: " + waypointIndexInController);
       SO3TrajectoryPoint actualWaypoint = findSO3TrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
       assertEquals(expectedWaypoint.getTime(), actualWaypoint.getTime(), epsilon, "Time");
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation",
-                                                              expectedWaypoint.getOrientation(),
-                                                              actualWaypoint.getOrientationCopy(),
-                                                              epsilon,
-                                                              FORMAT);
-      EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity",
-                                              expectedWaypoint.getAngularVelocity(),
-                                              actualWaypoint.getAngularVelocityCopy(),
-                                              epsilon,
-                                              FORMAT);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Orientation",
+                                                                 expectedWaypoint.getOrientation(),
+                                                                 actualWaypoint.getOrientation(),
+                                                                 epsilon,
+                                                                 FORMAT);
+      EuclidCoreTestTools.assertEquals("Angular Velocity", expectedWaypoint.getAngularVelocity(), actualWaypoint.getAngularVelocity(), epsilon, FORMAT);
    }
 
    public static void assertOneDoFJointsFeebackControllerDesireds(String[] jointNames,
@@ -289,7 +294,7 @@ public class EndToEndTestTools
       {
          if (!expectedDesiredPosition.containsNaN())
          {
-            EuclidCoreTestTools.assertTuple3DEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
+            EuclidCoreTestTools.assertEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
             assertFalse(statusMessage.getActualEndEffectorPosition().containsNaN());
          }
          else
@@ -346,9 +351,7 @@ public class EndToEndTestTools
 
       if (expectedDesiredOrientation != null)
       {
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(new Quaternion(expectedDesiredOrientation),
-                                                                 statusMessage.getDesiredEndEffectorOrientation(),
-                                                                 epsilon);
+         EuclidCoreTestTools.assertEquals(expectedDesiredOrientation, statusMessage.getDesiredEndEffectorOrientation(), epsilon);
          assertFalse(statusMessage.getActualEndEffectorOrientation().containsNaN());
       }
       else
@@ -389,8 +392,9 @@ public class EndToEndTestTools
       String angularVelocityName = bodyName + "AngularVelocity";
       SO3TrajectoryPoint simpleSO3TrajectoryPoint = new SO3TrajectoryPoint();
       simpleSO3TrajectoryPoint.setTime(yoVariableHolder.findVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
-      simpleSO3TrajectoryPoint.setOrientation(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
-      simpleSO3TrajectoryPoint.setAngularVelocity(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
+      simpleSO3TrajectoryPoint.getOrientation()
+                              .set((Orientation3DReadOnly) findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
+      simpleSO3TrajectoryPoint.getAngularVelocity().set(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
       return simpleSO3TrajectoryPoint;
    }
 
@@ -409,20 +413,20 @@ public class EndToEndTestTools
 
       SE3TrajectoryPoint simpleSE3TrajectoryPoint = new SE3TrajectoryPoint();
       simpleSE3TrajectoryPoint.setTime(yoVariableHolder.findVariable(positionTrajectoryName, timeName + suffix).getValueAsDouble());
-      simpleSE3TrajectoryPoint.setPosition(findPoint3D(positionTrajectoryName, positionName, suffix, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setOrientation(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setLinearVelocity(findVector3D(positionTrajectoryName, linearVelocityName, suffix, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setAngularVelocity(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getPosition().set(findPoint3D(positionTrajectoryName, positionName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getOrientation().set(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getLinearVelocity().set(findVector3D(positionTrajectoryName, linearVelocityName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getAngularVelocity().set(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
       return simpleSE3TrajectoryPoint;
    }
 
    public static SE3TrajectoryPoint findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(String bodyName, YoVariableHolder yoVariableHolder)
    {
       SE3TrajectoryPoint simpleSE3TrajectoryPoint = new SE3TrajectoryPoint();
-      simpleSE3TrajectoryPoint.setPosition(findFeedbackControllerDesiredPosition(bodyName, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setOrientation(findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setLinearVelocity(findFeedbackControllerDesiredLinearVelocity(bodyName, yoVariableHolder));
-      simpleSE3TrajectoryPoint.setAngularVelocity(findFeedbackControllerDesiredAngularVelocity(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getPosition().set(findFeedbackControllerDesiredPosition(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getOrientation().set((Orientation3DReadOnly) findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getLinearVelocity().set(findFeedbackControllerDesiredLinearVelocity(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getAngularVelocity().set(findFeedbackControllerDesiredAngularVelocity(bodyName, yoVariableHolder));
       return simpleSE3TrajectoryPoint;
    }
 
@@ -688,6 +692,78 @@ public class EndToEndTestTools
       return footstepDataListMessage;
    }
 
+   public static FootstepDataListMessage generateForwardSteps(RobotSide initialStepSide,
+                                                              int numberOfSteps,
+                                                              double stepLength,
+                                                              double stepWidth,
+                                                              double swingTime,
+                                                              double transferTime,
+                                                              Pose3DReadOnly startPose,
+                                                              boolean squareUp)
+   {
+      return generateForwardSteps(initialStepSide, numberOfSteps, i -> stepLength, stepWidth, swingTime, transferTime, startPose, squareUp);
+   }
+
+   public static FootstepDataListMessage generateForwardSteps(RobotSide initialStepSide,
+                                                              int numberOfSteps,
+                                                              DoubleUnaryOperator stepLengthFunction,
+                                                              double stepWidth,
+                                                              double swingTime,
+                                                              double transferTime,
+                                                              Pose3DReadOnly startPose,
+                                                              boolean squareUp)
+   {
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      FootstepDataMessage footstep = message.getFootstepDataList().add();
+
+      RobotSide stepSide = initialStepSide;
+      Pose3D stepPose = new Pose3D(startPose);
+      stepPose.appendTranslation(0.5 * stepLengthFunction.applyAsDouble(0.0), stepSide.negateIfRightSide(0.5 * stepWidth), 0.0);
+      footstep.setRobotSide(stepSide.toByte());
+      footstep.getLocation().set(stepPose.getPosition());
+      footstep.getOrientation().set(stepPose.getOrientation());
+      footstep.setSwingDuration(swingTime);
+
+      for (int i = 1; i < numberOfSteps; i++)
+      {
+         stepSide = stepSide.getOppositeSide();
+         stepPose.appendTranslation(stepLengthFunction.applyAsDouble(i / (numberOfSteps - 1.0)), stepSide.negateIfRightSide(stepWidth), 0.0);
+         footstep = message.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getOrientation().set(stepPose.getOrientation());
+         footstep.setTransferDuration(transferTime);
+         footstep.setSwingDuration(swingTime);
+      }
+
+      if (squareUp)
+      {
+         stepSide = stepSide.getOppositeSide();
+         stepPose.appendTranslation(0.0, stepSide.negateIfRightSide(stepWidth), 0.0);
+         footstep = message.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getOrientation().set(stepPose.getOrientation());
+         footstep.setTransferDuration(transferTime);
+         footstep.setSwingDuration(swingTime);
+      }
+
+      return message;
+   }
+
+   public static DoubleUnaryOperator trapezoidFunction(double bottomValue, double plateauValue, double startPlateau, double endPlateau)
+   {
+      return percent ->
+      {
+         if (percent < startPlateau)
+            return EuclidCoreTools.interpolate(bottomValue, plateauValue, percent / startPlateau);
+         else if (percent > endPlateau)
+            return EuclidCoreTools.interpolate(plateauValue, bottomValue, (percent - endPlateau) / (1.0 - endPlateau));
+         else
+            return plateauValue;
+      };
+   }
+
    public static double computeWalkingDuration(FootstepDataListMessage footsteps, WalkingControllerParameters walkingControllerParameters)
    {
       double defaultSwingDuration = getDuration(footsteps.getDefaultSwingDuration(), walkingControllerParameters.getDefaultSwingTime());
@@ -744,46 +820,85 @@ public class EndToEndTestTools
       return message;
    }
 
-   public static void writeJointStatesMatlab(SimulationConstructionSet scs, File destination)
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide, Pose3DReadOnly[] footstepPoses)
    {
-      Robot robot = scs.getRobots()[0];
-      List<OneDegreeOfFreedomJoint> joints = new ArrayList<>();
-      robot.getAllOneDegreeOfFreedomJoints(joints);
-
-      List<String> jointStateVariableNames = new ArrayList<>();
-      joints.forEach(joint -> jointStateVariableNames.add(joint.getQYoVariable().getFullNameString()));
-      joints.forEach(joint -> jointStateVariableNames.add(joint.getQDYoVariable().getFullNameString()));
-      joints.forEach(joint -> jointStateVariableNames.add(joint.getTauYoVariable().getFullNameString()));
-      scs.setupVarGroup("jointState", jointStateVariableNames.toArray(new String[0]));
-
-      scs.writeMatlabData("jointState", destination);
+      return generateFootstepsFromPose3Ds(initialStepSide, footstepPoses, 0, 0);
    }
 
-   public static void exportTorqueSpeedCurves(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix)
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide,
+                                                                      Pose3DReadOnly[] footstepPoses,
+                                                                      double swingTime,
+                                                                      double transferTime)
    {
-      exportTorqueSpeedCurves(scs, dataParentFolder, dataNameSuffix, null);
+      return generateFootstepsFromPose3Ds(initialStepSide, Arrays.asList(footstepPoses), swingTime, transferTime);
+   }
+
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide, List<? extends Pose3DReadOnly> footstepPoses)
+   {
+      return generateFootstepsFromPose3Ds(initialStepSide, footstepPoses, 0, 0);
+   }
+
+   public static FootstepDataListMessage generateFootstepsFromPose3Ds(RobotSide initialStepSide,
+                                                                      List<? extends Pose3DReadOnly> footstepPoses,
+                                                                      double swingTime,
+                                                                      double transferTime)
+   {
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      RobotSide side = initialStepSide;
+
+      Object<FootstepDataMessage> list = footstepDataList.getFootstepDataList();
+
+      for (int i = 0; i < footstepPoses.size(); i++)
+      {
+         list.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footstepPoses.get(i)));
+         side = side.getOppositeSide();
+      }
+
+      return footstepDataList;
+   }
+
+   public static void writeJointStatesMatlab(SCS2AvatarTestingSimulation simulationTestHelper, File destination) throws IOException
+   {
+      Robot robot = simulationTestHelper.getRobot();
+
+      Set<YoVariable> jointStateVariables = new HashSet<>();
+
+      for (SimJointBasics joint : robot.getAllJoints())
+      {
+         if (joint instanceof YoOneDoFJointBasics)
+         {
+            YoOneDoFJointBasics yoOneDoFJoint = (YoOneDoFJointBasics) joint;
+            jointStateVariables.add(yoOneDoFJoint.getYoQ());
+            jointStateVariables.add(yoOneDoFJoint.getYoQd());
+            jointStateVariables.add(yoOneDoFJoint.getYoTau());
+         }
+      }
+
+      simulationTestHelper.getSimulationConstructionSet().getBuffer()
+                          .exportDataMatlab(destination, var -> jointStateVariables.contains(var), reg -> reg == robot.getRegistry());
+   }
+
+   public static void exportTorqueSpeedCurves(SCS2AvatarTestingSimulation simulationTestHelper, File dataParentFolder, String dataNameSuffix)
+   {
+      exportTorqueSpeedCurves(simulationTestHelper, dataParentFolder, dataNameSuffix, null);
    }
 
    // Pattern-matched from TorqueSpeedDataExporter
-   public static void exportTorqueSpeedCurves(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix, String info)
+   public static void exportTorqueSpeedCurves(SCS2AvatarTestingSimulation simulationTestHelper, File dataParentFolder, String dataNameSuffix, String info)
    {
-      Robot robot = scs.getRobots()[0];
-      TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(robot, scs.getDataBuffer());
-      DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(robot, scs.getDataBuffer());
+      YoDouble time = simulationTestHelper.getSimulationConstructionSet().getTime();
+      YoSharedBuffer buffer = simulationTestHelper.getSimulationConstructionSet().getBuffer();
+      us.ihmc.scs2.simulation.robot.Robot robot = simulationTestHelper.getRobot();
+      TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(time, robot, buffer);
+      DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(time, robot, buffer);
 
       // Stop the sim and disable the GUI:
-      scs.stop();
-      scs.disableGUIComponents();
-
-      // Wait till done running:
-      while (scs.isSimulating())
-      {
-         ThreadTools.sleep(1000);
-      }
+      simulationTestHelper.getSimulationConstructionSet().stopSimulationThread();
+      simulationTestHelper.getSimulationConstructionSet().disableGUIControls();
 
       // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
-      scs.cropBuffer();
-      scs.gotoInPointNow();
+      simulationTestHelper.cropBuffer();
+      simulationTestHelper.gotoInPoint();
 
       String timeStamp = FormattingTools.getDateString() + "_" + FormattingTools.getTimeString();
       String tagName;
@@ -797,51 +912,59 @@ public class EndToEndTestTools
 
       if (info != null)
       {
-         System.out.println("Saving ReadMe");
+         LogTools.info("Saving ReadMe");
          writeReadme(new File(dataFolder, tagName + ".txt"), info);
-         System.out.println("Done Saving ReadMe");
+         LogTools.info("Done Saving ReadMe");
       }
 
       try
       {
-         System.out.println("Saving data");
-         scs.writeMatlabData("all", new File(dataFolder, tagName + ".mat"));
-         System.out.println("Done Saving Data");
+         LogTools.info("Saving data");
+         simulationTestHelper.getSimulationConstructionSet().getBuffer().exportDataMatlab(new File(dataFolder, tagName + ".mat"));
+         LogTools.info("Done Saving Data");
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
       }
       catch (OutOfMemoryError exception)
       {
-         System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+         LogTools.error("Ran out of memory while saving to Matlab format. Try again with fewer points.");
          exception.printStackTrace();
       }
 
       try
       {
-         System.out.println("Saving data in Matlab format");
-         writeJointStatesMatlab(scs, new File(dataFolder, tagName + "_jointStates.mat"));
-         System.out.println("Done Saving Data in Matlab format");
+         LogTools.info("Saving data in Matlab format");
+         writeJointStatesMatlab(simulationTestHelper, new File(dataFolder, tagName + "_jointStates.mat"));
+         LogTools.info("Done Saving Data in Matlab format");
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
       }
       catch (OutOfMemoryError exception)
       {
-         System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+         LogTools.error("Ran out of memory while saving to Matlab format. Try again with fewer points.");
          exception.printStackTrace();
       }
 
-      System.out.println("creating torque and speed spreadsheet");
+      LogTools.info("creating torque and speed spreadsheet");
       excelWorkbookCreator.createAndSaveTorqueAndSpeedSpreadSheet(dataFolder, tagName);
-      System.out.println("done creating torque and speed spreadsheet");
+      LogTools.info("done creating torque and speed spreadsheet");
 
-      System.out.println("creating torque and speed graphs");
+      LogTools.info("creating torque and speed graphs");
       // make graph directory inside destination directory
       File graphDirectory = new File(dataFolder, "graphs");
       graphDirectory.mkdir();
       graphCreator.createJointTorqueSpeedGraphs(graphDirectory, tagName, true, false);
-      System.out.println("done creating torque and speed graphs");
+      LogTools.info("done creating torque and speed graphs");
 
-      System.out.println("creating video");
-      scs.getStandardSimulationGUI().getViewportPanel().getStandardGUIActions().createVideo(new File(dataFolder, tagName + "_Video.mov"));
-      System.out.println("done creating video");
+      LogTools.info("creating video");
+      simulationTestHelper.exportVideo(new File(dataFolder, tagName + "_Video.mov"));
+      LogTools.info("done creating video");
 
-      scs.enableGUIComponents();
+      simulationTestHelper.getSimulationConstructionSet().enableGUIControls();
    }
 
    private static void writeReadme(File readmeFile, String info)
@@ -858,7 +981,7 @@ public class EndToEndTestTools
       }
    }
 
-   public static final Path DATA_PATH = Paths.get("D:/DataAndVideos");
+   public static final Path DATA_PATH = Paths.get("/home/val/DataAndVideos");
 
    public static File getDataOutputFolder(String robotName, String folderName) throws IOException
    {
@@ -867,5 +990,79 @@ public class EndToEndTestTools
          path = path.resolve(folderName);
       FileTools.ensureDirectoryExists(path);
       return path.toFile();
+   }
+
+   public static FootstepDataListMessage generateCircleSteps(RobotSide initialStepSide,
+                                                             int numberOfSteps,
+                                                             DoubleUnaryOperator stepLengthFunction,
+                                                             double stepWidth,
+                                                             double swingTime,
+                                                             double transferTime,
+                                                             Pose3DReadOnly startPose,
+                                                             boolean squareUp,
+                                                             RobotSide turnSide,
+                                                             double circleRadius)
+   {
+      if (turnSide == RobotSide.RIGHT)
+         circleRadius = -circleRadius;
+
+      FootstepDataListMessage message = new FootstepDataListMessage();
+      FootstepDataMessage footstep = message.getFootstepDataList().add();
+
+      RobotSide stepSide = initialStepSide;
+      Pose3D circleCenter = new Pose3D(startPose);
+      circleCenter.appendTranslation(0.0, circleRadius, 0.0);
+      Pose3D stepPose = new Pose3D(startPose);
+      double stepLength = 0.5 * stepLengthFunction.applyAsDouble(0.0);
+      double angle = stepLength / circleRadius;
+      stepPose.appendTranslation(yawAboutPoint(angle, circleCenter.getPosition(), 0.0, stepSide.negateIfRightSide(0.5 * stepWidth), 0.0));
+      stepPose.appendYawRotation(angle);
+      footstep.setRobotSide(stepSide.toByte());
+      footstep.getLocation().set(stepPose.getPosition());
+      footstep.getOrientation().set(stepPose.getOrientation());
+      footstep.setSwingDuration(swingTime);
+
+      for (int i = 1; i < numberOfSteps; i++)
+      {
+         stepSide = stepSide.getOppositeSide();
+         stepLength = stepLengthFunction.applyAsDouble(i / (numberOfSteps - 1.0));
+         angle = stepLength / circleRadius;
+         stepPose.appendTranslation(yawAboutPoint(angle, circleCenter.getPosition(), 0.0, stepSide.negateIfRightSide(stepWidth), 0.0));
+         stepPose.getOrientation().appendYawRotation(angle);
+         footstep = message.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getOrientation().set(stepPose.getOrientation());
+         footstep.setTransferDuration(transferTime);
+         footstep.setSwingDuration(swingTime);
+      }
+
+      if (squareUp)
+      {
+         stepSide = stepSide.getOppositeSide();
+         stepPose.appendTranslation(0.0, stepSide.negateIfRightSide(stepWidth), 0.0);
+         footstep = message.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(stepPose.getPosition());
+         footstep.getOrientation().set(stepPose.getOrientation());
+         footstep.setTransferDuration(transferTime);
+         footstep.setSwingDuration(swingTime);
+      }
+
+      return message;
+   }
+
+   public static Point3D yawAboutPoint(double yaw, Point3DReadOnly center, double x, double y, double z)
+   {
+      return yawAboutPoint(yaw, center, new Point3D(x, y, z));
+   }
+
+   public static Point3D yawAboutPoint(double yaw, Point3DReadOnly center, Point3DReadOnly pointToTransform)
+   {
+      Point3D output = new Point3D();
+      output.sub(pointToTransform, center);
+      RotationMatrixTools.applyYawRotation(yaw, output, output);
+      output.add(center);
+      return output;
    }
 }

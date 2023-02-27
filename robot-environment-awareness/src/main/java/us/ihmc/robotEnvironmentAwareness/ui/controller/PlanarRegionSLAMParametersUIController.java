@@ -33,7 +33,7 @@ public class PlanarRegionSLAMParametersUIController extends REABasicUIController
 
    public void bindControls()
    {
-      tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap);
+      tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap, 5);
       tableViewWrapper.setTableUpdatedCallback(() -> uiMessager.submitMessageToModule(LiveMapModuleAPI.PlanarRegionsSLAMParameters, slamParameters.getAllAsStrings()));
 
       // set messager updates to update all stored properties and select JavaFX properties

@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.tools.Timer;

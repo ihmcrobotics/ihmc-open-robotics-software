@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.AvatarDoubleStepTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasDoubleStepTest extends AvatarDoubleStepTest
 {
@@ -17,7 +16,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
    @Tag("humanoid-flat-ground-slow-2")
    @Test
    @Override
-   public void testTwoStepsInARowSameSide() throws SimulationExceededMaximumTimeException
+   public void testTwoStepsInARowSameSide() throws Exception
    {
       super.testTwoStepsInARowSameSide();
    }
@@ -25,7 +24,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
    @Tag("allocation-slow")
    @Test
    @Override
-   public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
+   public void testTwoStepsInARowSameSideAfterFirstSep() throws Exception
    {
       super.testTwoStepsInARowSameSideAfterFirstSep();
    }
@@ -33,7 +32,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
    @Tag("allocation-slow")
    @Test
    @Override
-   public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
+   public void testTwoStepsInARowLongTransferSameSide() throws Exception
    {
       super.testTwoStepsInARowLongTransferSameSide();
    }
@@ -41,7 +40,7 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
    @Tag("humanoid-flat-ground-slow-2")
    @Test
    @Override
-   public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
+   public void testTwoStepsStandingInBetween() throws Exception
    {
       super.testTwoStepsStandingInBetween();
    }

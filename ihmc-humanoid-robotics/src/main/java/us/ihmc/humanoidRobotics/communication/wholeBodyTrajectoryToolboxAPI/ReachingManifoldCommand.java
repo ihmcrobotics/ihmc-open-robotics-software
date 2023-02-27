@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import controller_msgs.msg.dds.ReachingManifoldMessage;
+import toolbox_msgs.msg.dds.ReachingManifoldMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;

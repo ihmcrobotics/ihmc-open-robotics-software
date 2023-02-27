@@ -2,7 +2,7 @@ package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import java.io.IOException;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;

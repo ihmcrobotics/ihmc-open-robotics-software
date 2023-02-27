@@ -6,9 +6,9 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
+import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -754,7 +754,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
 
       initialConfiguration.getDesiredRootOrientation().set(currentRobotConfiguration.getRootOrientation());
-      initialConfiguration.getDesiredRootTranslation().set(currentRobotConfiguration.getRootTranslation());
+      initialConfiguration.getDesiredRootPosition().set(currentRobotConfiguration.getRootPosition());
 
       initialConfiguration.setJointNameHash(currentRobotConfiguration.getJointNameHash());
       int length = currentRobotConfiguration.getJointAngles().size();

@@ -1,0 +1,12 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "Color Byte Order Debugging" : true,
+    "Environment###java.lang.Class:Environment" : true,
+    "L515 Simulator###java.lang.Integer:L515 Simulator" : false,
+    "L515 Color###GlobalWidgetIndex:1:L515 Color" : true,
+    "L515 Depth###GlobalWidgetIndex:0:L515 Depth" : false,
+    "OpenCV Image Panel" : true,
+    "VR Thread Debugger" : false
+  }
+}

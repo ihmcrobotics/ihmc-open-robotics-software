@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.Image32;
+import perception_msgs.msg.dds.Image32;
 import javafx.animation.AnimationTimer;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;

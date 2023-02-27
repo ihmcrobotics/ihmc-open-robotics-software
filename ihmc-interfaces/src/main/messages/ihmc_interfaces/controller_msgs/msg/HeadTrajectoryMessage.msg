@@ -7,4 +7,4 @@
 uint32 sequence_id
 
 # The orientation trajectory information.
-SO3TrajectoryMessage so3_trajectory
+ihmc_common_msgs/SO3TrajectoryMessage so3_trajectory

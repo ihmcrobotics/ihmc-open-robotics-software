@@ -8,20 +8,20 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeSlippingDetectorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -60,12 +60,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private Map<String, Pose3D> bodyHomeConfiguration = null;
 
    private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   private LegConfigurationParameters legConfigurationParameters;
    private ToeOffParameters toeOffParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
-   private ICPOptimizationParameters icpOptimizationParameters;
+   private ICPControllerParameters icpOptimizationParameters;
+   private StepAdjustmentParameters stepAdjustmentParameters;
    private AtlasSteppingParameters steppingParameters;
-   private LeapOfFaithParameters leapOfFaithParameters;
+
+   private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
 
    private final JointLimitParameters spineJointLimitParameters;
    private final JointLimitParameters kneeJointLimitParameters;
@@ -86,13 +87,19 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
-      legConfigurationParameters = new AtlasLegConfigurationParameters(runningOnRealRobot);
       toeOffParameters = new AtlasToeOffParameters(jointMap);
       swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
       steppingParameters = new AtlasSteppingParameters(jointMap);
-      leapOfFaithParameters = new AtlasLeapOfFaithParameters(runningOnRealRobot);
 
-      icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
+      icpOptimizationParameters = new AtlasICPControllerParameters(runningOnRealRobot);
+      stepAdjustmentParameters = new AtlasStepAdjustmentParameters();
+
+      kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
+      kneePrivilegedConfigurationParameters.setConfigurationGain(runningOnRealRobot ? 40.0 : 150.0);
+      kneePrivilegedConfigurationParameters.setVelocityGain(6.0);
+      kneePrivilegedConfigurationParameters.setWeight(5.0);
+      kneePrivilegedConfigurationParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
+      kneePrivilegedConfigurationParameters.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
 
       spineJointLimitParameters = new JointLimitParameters();
       spineJointLimitParameters.setMaxAbsJointVelocity(9.0);
@@ -252,25 +259,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public ICPControlGains createICPControlGains()
-   {
-      ICPControlGains gains = new ICPControlGains();
-
-      double kpParallel = 2.5;
-      double kpOrthogonal = 1.5;
-      double ki = 0.0;
-      double kiBleedOff = 0.0;
-
-      gains.setKpParallelToMotion(kpParallel);
-      gains.setKpOrthogonalToMotion(kpOrthogonal);
-      gains.setKi(ki);
-      gains.setIntegralLeakRatio(kiBleedOff);
-
-      //      if (runningOnRealRobot) gains.setFeedbackPartMaxRate(1.0);
-      return gains;
-   }
-
-   @Override
    public PDGains getCoMHeightControlGains()
    {
       PDGains gains = new PDGains();
@@ -290,7 +278,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getHighLevelJointSpaceControlGains()
    {
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
       jointspaceGains.add(new GroupParameter<>("SpineJoints", jointMap.getSpineJointNamesAsStrings()));
@@ -499,13 +487,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public boolean useCenterOfMassVelocityFromEstimator()
-   {
-      return false;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean usePelvisHeightControllerOnly()
    {
       return false;
@@ -558,9 +539,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public LegConfigurationParameters getLegConfigurationParameters()
+   public OneDoFJointPrivilegedConfigurationParameters getKneePrivilegedConfigurationParameters()
    {
-      return legConfigurationParameters;
+      return kneePrivilegedConfigurationParameters;
    }
 
    /** {@inheritDoc} */
@@ -586,9 +567,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
+   public ICPControllerParameters getICPControllerParameters()
    {
       return icpOptimizationParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public StepAdjustmentParameters getStepAdjustmentParameters()
+   {
+      return stepAdjustmentParameters;
    }
 
    /** {@inheritDoc} */
@@ -596,13 +584,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public SteppingParameters getSteppingParameters()
    {
       return steppingParameters;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public LeapOfFaithParameters getLeapOfFaithParameters()
-   {
-      return leapOfFaithParameters;
    }
 
    @Override
@@ -618,11 +599,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       this.jointPrivilegedConfigurationParameters = jointPrivilegedConfigurationParameters;
    }
 
-   public void setLegConfigurationParameters(LegConfigurationParameters legConfigurationParameters)
-   {
-      this.legConfigurationParameters = legConfigurationParameters;
-   }
-
    public void setToeOffParameters(ToeOffParameters toeOffParameters)
    {
       this.toeOffParameters = toeOffParameters;
@@ -633,7 +609,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       this.swingTrajectoryParameters = swingTrajectoryParameters;
    }
 
-   public void setIcpOptimizationParameters(ICPOptimizationParameters icpOptimizationParameters)
+   public void setIcpOptimizationParameters(ICPControllerParameters icpOptimizationParameters)
    {
       this.icpOptimizationParameters = icpOptimizationParameters;
    }
@@ -641,11 +617,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public void setSteppingParameters(AtlasSteppingParameters steppingParameters)
    {
       this.steppingParameters = steppingParameters;
-   }
-
-   public void setLeapOfFaithParameters(LeapOfFaithParameters leapOfFaithParameters)
-   {
-      this.leapOfFaithParameters = leapOfFaithParameters;
    }
 
    /**

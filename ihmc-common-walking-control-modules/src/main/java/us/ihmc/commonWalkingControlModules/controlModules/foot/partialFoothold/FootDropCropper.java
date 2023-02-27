@@ -21,10 +21,13 @@ public class FootDropCropper
    private final YoEnum<RobotSide> sideOfFootToCrop;
    private final ReferenceFrame soleFrame;
 
-   public FootDropCropper(String namePrefix, ReferenceFrame soleFrame, FootholdRotationParameters rotationParameters, YoRegistry registry)
+   public FootDropCropper(String namePrefix,
+                          ReferenceFrame soleFrame,
+                          YoPartialFootholdModuleParameters.FootholdCroppingParameters croppingParameters,
+                          YoRegistry registry)
    {
       this.soleFrame = soleFrame;
-      footDropThreshold = rotationParameters.getFootDropThresholdForCrop();
+      footDropThreshold = croppingParameters.getFootDropThresholdForCrop();
 
       dropAtStartOfMeasurement = new YoDouble(namePrefix + "CropDropAtStartOfMeasurement", registry);
       footDropOrLift = new YoDouble(namePrefix + "CropFootDropOrLift", registry);

@@ -7,17 +7,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.avatar.testTools.scs2.SCS2BehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -37,16 +36,11 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
    {
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcBehaviorTestHelper != null)
+      if (behaviorTestHelper != null)
       {
-         drcBehaviorTestHelper.closeAndDispose();
-         drcBehaviorTestHelper = null;
+         behaviorTestHelper.finishTest();
+         behaviorTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -58,62 +52,62 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCHighLevelStateBehaviorTest.class + " after class.");
    }
 
-   private DRCBehaviorTestHelper drcBehaviorTestHelper;
+   private SCS2BehaviorTestHelper behaviorTestHelper;
 
    @BeforeEach
    public void setUp()
    {
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
-                                                        simulationTestingParameters, getRobotModel());
+      SCS2AvatarTestingSimulation simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
+                                                                                                                        testEnvironment,
+                                                                                                                        simulationTestingParameters);
+      simulationTestHelper.start();
+      behaviorTestHelper = new SCS2BehaviorTestHelper(simulationTestHelper);
    }
 
    @Test
-   public void testWalkingState() throws SimulationExceededMaximumTimeException
+   public void testWalkingState()
    {
       testState(HighLevelControllerName.WALKING);
    }
 
    @Test
-   public void testDoNothingBahviourState() throws SimulationExceededMaximumTimeException
+   public void testDoNothingBahviourState()
    {
       testState(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
 
-      OneDegreeOfFreedomJoint[] oneDofJoints = drcBehaviorTestHelper.getRobot().getOneDegreeOfFreedomJoints();
-
-      for (OneDegreeOfFreedomJoint joint : oneDofJoints)
+      for (OneDoFJointBasics joint : behaviorTestHelper.getControllerFullRobotModel().getControllableOneDoFJoints())
       {
          String jointName = joint.getName();
-         double tau = joint.getTauYoVariable().getDoubleValue();
 
          if (!jointName.contains("hokuyo"))
          {
-            assertTrue(joint.getName() + " tau : " + tau, tau == 0.0);
+            assertTrue(joint.getName() + " tau : " + joint.getTau(), joint.getTau() == 0.0);
          }
       }
    }
 
    @Test
-   public void testDiagnosticsState() throws SimulationExceededMaximumTimeException
+   public void testDiagnosticsState()
    {
       testState(HighLevelControllerName.DIAGNOSTICS);
    }
 
-   private void testState(HighLevelControllerName desiredState) throws SimulationExceededMaximumTimeException
+   private void testState(HighLevelControllerName desiredState)
    {
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = behaviorTestHelper.simulateNow(1.0);
       assertTrue(success);
 
       double trajectoryTime = 2.0;
 
-      final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getROS2Node());
+      final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(behaviorTestHelper.getRobotName(), behaviorTestHelper.getROS2Node());
 
       highLevelStateBehavior.initialize();
       highLevelStateBehavior.setInput(HumanoidMessageTools.createHighLevelStateMessage(desiredState));
       assertTrue(highLevelStateBehavior.hasInputBeenSet());
 
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(highLevelStateBehavior, trajectoryTime);
+      success = behaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(highLevelStateBehavior, trajectoryTime);
       assertTrue(success);
 
       HighLevelControllerName actualState = getCurrentHighLevelState();
@@ -125,6 +119,6 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
 
    private HighLevelControllerName getCurrentHighLevelState()
    {
-      return drcBehaviorTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getCurrentHighLevelControlState();
+      return behaviorTestHelper.getHighLevelHumanoidControllerFactory().getCurrentHighLevelControlState();
    }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -30,7 +31,7 @@ import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
+public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    protected double initialYaw = 0.0;
    protected double initialGroundHeight = 0.0;
@@ -81,27 +82,37 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
       jointPositions.put(jointName, q);
    }
 
-   public void adjustRootJointHeightUsingLowestSole(RobotDefinition robotDefinition)
+   public double getHeightOfPelvisAboveLowestSoleZ(RobotDefinition robotDefinition)
    {
       RigidBodyBasics rootBody = robotDefinition.newInstance(ReferenceFrameTools.constructARootFrame("temp"));
       initializeRobot(rootBody, false);
       rootBody.updateFramesRecursively();
 
-      double minSoleHeight = Double.POSITIVE_INFINITY;
-      RigidBodyTransform temp = new RigidBodyTransform();
+      double pelvisToLowestSoleZ = Double.NEGATIVE_INFINITY;
+      RigidBodyTransform tempAnkleFrameToTempRootFrame = new RigidBodyTransform();
+      RigidBodyTransform tempSoleFrameToTempRootFrame = new RigidBodyTransform();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = MultiBodySystemTools.findRigidBody(rootBody, jointMap.getFootName(robotSide));
          if (foot == null)
             continue;
-         temp.set(foot.getParentJoint().getFrameAfterJoint().getTransformToRoot());
-         temp.multiply(jointMap.getSoleToParentFrameTransform(robotSide));
-         minSoleHeight = Math.min(temp.getTranslationZ(), minSoleHeight);
+         tempAnkleFrameToTempRootFrame.set(foot.getParentJoint().getFrameAfterJoint().getTransformToRoot());
+         tempSoleFrameToTempRootFrame.set(tempAnkleFrameToTempRootFrame);
+         tempSoleFrameToTempRootFrame.multiply(jointMap.getSoleToParentFrameTransform(robotSide));
+         double pelvisToSoleZ = -tempSoleFrameToTempRootFrame.getTranslationZ();
+         pelvisToLowestSoleZ = Math.max(pelvisToSoleZ, pelvisToLowestSoleZ);
       }
 
-      if (Double.isFinite(minSoleHeight))
-         rootJointPosition.setZ(-minSoleHeight);
+      return pelvisToLowestSoleZ;
+   }
+
+   public void setRootJointHeightSuchThatLowestSoleIsAtZero(RobotDefinition robotDefinition)
+   {
+      double farthestSoleToPelvisDistance = getHeightOfPelvisAboveLowestSoleZ(robotDefinition);
+
+      if (Double.isFinite(farthestSoleToPelvisDistance))
+         rootJointPosition.setZ(farthestSoleToPelvisDistance);
    }
 
    @Override
@@ -122,6 +133,10 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
       robot.getRootJoint().getPosition().addZ(initialGroundHeight);
       robot.getRootJoint().setOrientation(rootJointOrientation);
       robot.getRootJoint().getOrientation().prependYawRotation(initialYaw);
+
+      robot.getRootJoint().setVelocity(rootJointLinearVelocityInWorld);
+      robot.getRootJoint().setAngularVelocityInBody(rootJointAngularVelocityInBody);
+
       robot.update();
    }
 
@@ -152,20 +167,31 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
          }
       }
 
+      /* Root joint position */
       if (applyRootJointPose && rootBody.getChildrenJoints().size() == 1)
       {
          JointBasics rootJoint = rootBody.getChildrenJoints().get(0);
 
-         if (rootJoint instanceof FloatingJointBasics)
+         if (rootJoint instanceof FloatingJointBasics floatingJoint)
          {
-            FloatingJointBasics floatingJoint = (FloatingJointBasics) rootJoint;
             Pose3DBasics jointPose = floatingJoint.getJointPose();
-            FixedFrameTwistBasics jointTwist = floatingJoint.getJointTwist();
             jointPose.getPosition().set(rootJointPosition);
             jointPose.getPosition().add(additionalOffset);
             jointPose.getPosition().addZ(initialGroundHeight);
             jointPose.getOrientation().set(rootJointOrientation);
             jointPose.getOrientation().prependYawRotation(initialYaw);
+         }
+      }
+
+      /* Root joint velocity */
+      if (rootBody.getChildrenJoints().size() == 1)
+      {
+         JointBasics rootJoint = rootBody.getChildrenJoints().get(0);
+
+         if (rootJoint instanceof FloatingJointBasics floatingJoint)
+         {
+            Pose3DBasics jointPose = floatingJoint.getJointPose();
+            FixedFrameTwistBasics jointTwist = floatingJoint.getJointTwist();
             jointTwist.getAngularPart().set(rootJointAngularVelocityInBody);
             jointPose.getOrientation().inverseTransform(rootJointLinearVelocityInWorld, jointTwist.getLinearPart());
          }
@@ -184,6 +210,8 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
          Quaternion orientation = new Quaternion(rootJointOrientation);
          orientation.prependYawRotation(initialYaw);
          SixDoFJointState rootJointState = new SixDoFJointState(orientation, position);
+         rootJointState.setVelocity(EuclidCoreTools.zeroVector3D, EuclidCoreTools.zeroVector3D);
+         rootJointState.setAcceleration(EuclidCoreTools.zeroVector3D, EuclidCoreTools.zeroVector3D);
          rootJoint.setInitialJointState(rootJointState);
       }
 
@@ -192,7 +220,9 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
          Double jointPosition = getJointPosition(jointDefinition.getName());
 
          if (jointPosition != null)
-            jointDefinition.setInitialJointState(new OneDoFJointState(jointPosition));
+            jointDefinition.setInitialJointState(new OneDoFJointState(jointPosition, 0.0, 0.0));
+         else
+            jointDefinition.setInitialJointState(new OneDoFJointState(0.0, 0.0, 0.0));
       });
    }
 
@@ -235,6 +265,11 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
    public Double getJointPosition(String jointName)
    {
       return jointPositions.get(jointName);
+   }
+
+   public boolean hasJointPosition(String jointName)
+   {
+      return jointPositions.containsKey(jointName);
    }
 
    public Map<String, Double> getJointPositions()

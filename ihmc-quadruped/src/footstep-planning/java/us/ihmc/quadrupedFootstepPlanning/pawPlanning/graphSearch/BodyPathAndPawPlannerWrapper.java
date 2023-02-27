@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.commons.math3.util.Precision;
 
-import controller_msgs.msg.dds.GroundPlaneMessage;
+import ihmc_common_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;

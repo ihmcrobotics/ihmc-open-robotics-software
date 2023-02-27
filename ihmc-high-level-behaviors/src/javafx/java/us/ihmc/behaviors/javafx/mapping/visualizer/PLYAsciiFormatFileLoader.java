@@ -2,15 +2,15 @@ package us.ihmc.behaviors.javafx.mapping.visualizer;
 
 import java.io.File;
 
-import javafx.application.Application;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.PLYasciiFormatFormatDataImporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 
-public class PLYAsciiFormatFileLoader extends Application
+public class PLYAsciiFormatFileLoader extends ApplicationNoModule
 {
    @Override
    public void start(Stage primaryStage) throws Exception

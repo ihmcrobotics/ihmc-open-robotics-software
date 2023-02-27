@@ -1,46 +1,134 @@
 package us.ihmc.tools.io;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.log.LogTools;
+
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 public class HybridFile
 {
-   private final Supplier<InputStream> getResourceAsStream;
-   private final Supplier<URL> getResource;
+   private final WorkspaceFile workspaceFile;
    private final Path externalFile;
-   private final Path workspaceFile;
+   private HybridResourceMode mode = HybridResourceMode.WORKSPACE;
 
    public HybridFile(HybridDirectory directory, String subsequentPathToFile)
    {
-      String pathForResourceLoading = Paths.get(directory.getPathNecessaryForClasspathLoading()).resolve(subsequentPathToFile).toString();
-      // Get rid of Windows \ slashes; they don't work with classloader
-      String pathForResourceLoadingPathFiltered = pathForResourceLoading.replaceAll("\\\\", "/");
-      if (directory.getClassForLoading() == null) // TODO: This is broken
+      workspaceFile = new WorkspaceFile(directory.getInternalWorkspaceDirectory(), subsequentPathToFile);
+      externalFile = directory.getExternalDirectory().resolve(subsequentPathToFile);
+   }
+
+   /** If the directory is available for reading/writing using files.
+    *  If not, we are running from a JAR without the resource extracted,
+    *  or the working directory is wrong. */
+   public boolean isWorkspaceFileAccessAvailable()
+   {
+      return workspaceFile.isFileAccessAvailable();
+   }
+
+   public void setMode(HybridResourceMode mode)
+   {
+      this.mode = mode;
+   }
+
+   public HybridResourceMode getMode()
+   {
+      return mode;
+   }
+
+   public Path getFileForWriting()
+   {
+      return mode == HybridResourceMode.WORKSPACE ? workspaceFile.getFilePath() : externalFile;
+   }
+
+   /**
+    * Get this file as an input stream, if possible, and close it afterwards.
+    *
+    * @return if the input stream was consumed successfully
+    */
+   public boolean getInputStream(Consumer<InputStream> inputStreamGetter)
+   {
+      boolean success = false;
+      try (InputStream inputStream = getInputStreamUnsafe())
       {
-         getResourceAsStream = () -> ClassLoader.getSystemResourceAsStream(pathForResourceLoadingPathFiltered);
-         getResource = () -> ClassLoader.getSystemResource(pathForResourceLoadingPathFiltered);
+         if (inputStream != null)
+         {
+            inputStreamGetter.accept(inputStream);
+            success = true;
+         }
+         else
+         {
+            LogTools.error(1, "Input stream is null"); // Print caller info to help identify issues
+         }
+      }
+      catch (IOException ioException)
+      {
+         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(ioException);
+      }
+      return success;
+   }
+
+   private InputStream getInputStreamUnsafe()
+   {
+      return mode == HybridResourceMode.WORKSPACE ?
+            getClasspathResourceAsStream() :
+            ExceptionTools.handle(() -> new FileInputStream(externalFile.toFile()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+   }
+
+   public boolean isInputStreamAvailable()
+   {
+      boolean isInputStreamAvailable;
+      if (mode == HybridResourceMode.WORKSPACE)
+      {
+         isInputStreamAvailable = workspaceFile.getClasspathResource() != null;
       }
       else
       {
-         getResourceAsStream = () -> directory.getClassForLoading().getResourceAsStream(pathForResourceLoadingPathFiltered);
-         getResource = () -> directory.getClassForLoading().getResource(pathForResourceLoadingPathFiltered);
+         isInputStreamAvailable = Files.exists(externalFile);
       }
+      return isInputStreamAvailable;
+   }
 
-      externalFile = directory.getExternalDirectory().resolve(subsequentPathToFile);
-      workspaceFile = directory.getWorkspaceDirectory().resolve(subsequentPathToFile);
+   public boolean isWritingAvailable()
+   {
+      boolean isWritingAvailable;
+      if (mode == HybridResourceMode.WORKSPACE)
+      {
+         isWritingAvailable = isWorkspaceFileAccessAvailable();
+      }
+      else
+      {
+         isWritingAvailable = true; // Can always write externally
+      }
+      return isWritingAvailable;
+   }
+
+   public String getLocationOfResourceForReading()
+   {
+      if (mode == HybridResourceMode.WORKSPACE)
+      {
+         return "Resource: " + getPathForResourceLoadingPathFiltered();
+      }
+      else
+      {
+         return "File: " + externalFile.toString();
+      }
    }
 
    public InputStream getClasspathResourceAsStream()
    {
-      return getResourceAsStream.get();
+      return workspaceFile.getClasspathResourceAsStream();
    }
 
    public URL getClasspathResource()
    {
-      return getResource.get();
+      return workspaceFile.getClasspathResource();
    }
 
    public Path getExternalFile()
@@ -50,6 +138,11 @@ public class HybridFile
 
    public Path getWorkspaceFile()
    {
-      return workspaceFile;
+      return workspaceFile.getFilePath();
+   }
+
+   public String getPathForResourceLoadingPathFiltered()
+   {
+      return workspaceFile.getPathForResourceLoadingPathFiltered();
    }
 }

@@ -20,33 +20,36 @@ ihmc {
    openSource = true
    
    configureDependencyResolution()
+   javaDirectory("main", "generated-java")
    configurePublications()
 }
+
+val javaCPPVersion = "1.5.8"
 
 mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
 
-   api("us.ihmc:euclid-shape:0.17.0")
-   api("us.ihmc:joctomap:1.12.1")
-   api("us.ihmc:ihmc-yovariables:0.9.11")
-   api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
+   api("us.ihmc:euclid-shape:0.19.1")
+   api("us.ihmc:joctomap:1.12.4")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.3")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.22.1")
+   api("us.ihmc:ihmc-robot-data-logger:0.25.0")
+   api("us.ihmc:ihmc-ros-tools:source")
 
-   apiBytedecoNatives("javacpp", "1.5.4")
-   apiBytedecoNatives("openblas", "0.3.10-1.5.4")
-   apiBytedecoNatives("opencv", "4.4.0-1.5.4")
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.21-")
+   apiBytedecoNatives("opencv", "4.6.0-")
 }
 
-fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, version: String)
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
-   apiBytedecoSelective("org.bytedeco:$name:$version")
-   apiBytedecoSelective("org.bytedeco:$name:$version:linux-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$version:windows-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$version:macosx-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
@@ -54,15 +57,12 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
    api(dependencyNotation) {
       exclude(group = "org.bytedeco")
    }
-   api("us.ihmc:ihmc-ros-tools:source")
 }
 
 applicationDependencies {
    api(ihmc.sourceSetProject("main"))
 
    api("us.ihmc:ihmc-ros-tools:source")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
-   api("us.ihmc:simulation-construction-set:0.21.13")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 

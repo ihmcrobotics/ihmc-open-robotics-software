@@ -417,7 +417,7 @@ public class PelvisLinearStateUpdater
          wereFeetTrustedLastTick.get(foot).set(areFeetTrusted.get(foot).getValue());
          haveFeetHitGroundFiltered.get(foot).setWindowSize(windowSize);
 
-         if (footSwitches.get(foot).hasFootHitGround())
+         if (footSwitches.get(foot).hasFootHitGroundFiltered())
             haveFeetHitGroundFiltered.get(foot).update(true);
          else
             haveFeetHitGroundFiltered.get(foot).set(false);
@@ -451,7 +451,7 @@ public class PelvisLinearStateUpdater
          for (int i = 0; i < feet.size(); i++)
          {
             RigidBodyBasics foot = feet.get(i);
-            if (footSwitches.get(foot).getForceMagnitudePastThreshhold())
+            if (footSwitches.get(foot).hasFootHitGroundSensitive())
             {
                trustedFoot = foot;
                numberOfEndEffectorsTrusted = 1;
@@ -553,7 +553,7 @@ public class PelvisLinearStateUpdater
          if (!areFeetTrusted.get(foot).getBooleanValue())
             continue;
          Wrench footWrench = footWrenches.get(foot);
-         footSwitches.get(foot).computeAndPackFootWrench(footWrench);
+         footSwitches.get(foot).getMeasuredWrench(footWrench);
          FixedFrameVector3DBasics footForce = footForces.get(foot);
          footForce.setMatchingFrame(footWrench.getLinearPart());
          totalForceZ += footForce.getZ();

@@ -1,33 +1,46 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
+import java.lang.reflect.Method;
 import java.util.Random;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.euclid.EuclidTestConstants;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.api.EuclidFrameAPITester;
+import us.ihmc.euclid.referenceFrame.api.FrameTypeCopier;
+import us.ihmc.euclid.referenceFrame.api.RandomFramelessTypeBuilder;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -77,11 +90,11 @@ public class FrameSE3TrajectoryPointTest
       FrameSE3TrajectoryPoint expectedFrameSE3TrajectoryPoint = new FrameSE3TrajectoryPoint(poseFrame);
 
       expectedFrameSE3TrajectoryPoint.setTime(time);
-      expectedFrameSE3TrajectoryPoint.setPosition(position);
-      expectedFrameSE3TrajectoryPoint.setOrientation(orientation);
+      expectedFrameSE3TrajectoryPoint.getPosition().set(position);
+      expectedFrameSE3TrajectoryPoint.getOrientation().set((Orientation3DReadOnly) orientation);
 
-      expectedFrameSE3TrajectoryPoint.setLinearVelocity(linearVelocity);
-      expectedFrameSE3TrajectoryPoint.setAngularVelocity(angularVelocity);
+      expectedFrameSE3TrajectoryPoint.getLinearVelocity().set(linearVelocity);
+      expectedFrameSE3TrajectoryPoint.getAngularVelocity().set(angularVelocity);
 
       assertEquals(3.4, frameSE3TrajectoryPoint.getTime(), 1e-7);
       assertEquals(3.4, expectedFrameSE3TrajectoryPoint.getTime(), 1e-7);
@@ -157,10 +170,10 @@ public class FrameSE3TrajectoryPointTest
 
       SE3TrajectoryPoint expectedSE3TrajectoryPoint = new SE3TrajectoryPoint();
       expectedSE3TrajectoryPoint.setTime(expectedFinalTime);
-      expectedSE3TrajectoryPoint.setPosition(expectedFinalPosition);
-      expectedSE3TrajectoryPoint.setOrientation(expectedFinalOrientation);
-      expectedSE3TrajectoryPoint.setLinearVelocity(expectedFinalLinearVelocity);
-      expectedSE3TrajectoryPoint.setAngularVelocity(expectedFinalAngularVelocity);
+      expectedSE3TrajectoryPoint.getPosition().set(expectedFinalPosition);
+      expectedSE3TrajectoryPoint.getOrientation().set((Orientation3DReadOnly) expectedFinalOrientation);
+      expectedSE3TrajectoryPoint.getLinearVelocity().set(expectedFinalLinearVelocity);
+      expectedSE3TrajectoryPoint.getAngularVelocity().set(expectedFinalAngularVelocity);
 
       testedFrameSE3TrajectoryPoint = new FrameSE3TrajectoryPoint(expectedFinalFrame, expectedSE3TrajectoryPoint);
 
@@ -172,7 +185,7 @@ public class FrameSE3TrajectoryPointTest
    @Test
    public void testSetters()
    {
-      double epsilon = 1.0e-20;
+      double epsilon = 1.0e-15;
       Random random = new Random(21651016L);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame aFrame = EuclidFrameRandomTools.nextReferenceFrame("aFrame", random, worldFrame);
@@ -263,10 +276,10 @@ public class FrameSE3TrajectoryPointTest
 
       SE3TrajectoryPoint expectedSE3TrajectoryPoint = new SE3TrajectoryPoint();
       expectedSE3TrajectoryPoint.setTime(expectedFinalTime);
-      expectedSE3TrajectoryPoint.setPosition(expectedFinalPosition);
-      expectedSE3TrajectoryPoint.setOrientation(expectedFinalOrientation);
-      expectedSE3TrajectoryPoint.setLinearVelocity(expectedFinalLinearVelocity);
-      expectedSE3TrajectoryPoint.setAngularVelocity(expectedFinalAngularVelocity);
+      expectedSE3TrajectoryPoint.getPosition().set(expectedFinalPosition);
+      expectedSE3TrajectoryPoint.getOrientation().set((Orientation3DReadOnly) expectedFinalOrientation);
+      expectedSE3TrajectoryPoint.getLinearVelocity().set(expectedFinalLinearVelocity);
+      expectedSE3TrajectoryPoint.getAngularVelocity().set(expectedFinalAngularVelocity);
 
       testedFrameSE3TrajectoryPoint.setIncludingFrame(expectedFinalFrame, expectedSE3TrajectoryPoint);
 
@@ -391,55 +404,55 @@ public class FrameSE3TrajectoryPointTest
    {
       assertTrue(expectedFrame == testedFrameSE3TrajectoryPoint.getReferenceFrame());
       assertEquals(expectedTime, testedFrameSE3TrajectoryPoint.getTime(), epsilon);
-      assertTrue(expectedPosition.epsilonEquals(testedFrameSE3TrajectoryPoint.getPosition(), epsilon));
-      assertTrue(expectedOrientation.geometricallyEquals(testedFrameSE3TrajectoryPoint.getOrientation(), epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getLinearVelocity(), epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(testedFrameSE3TrajectoryPoint.getAngularVelocity(), epsilon));
+      EuclidFrameTestTools.assertEquals(expectedPosition, testedFrameSE3TrajectoryPoint.getPosition(), epsilon);
+      EuclidFrameTestTools.assertEquals(expectedOrientation, testedFrameSE3TrajectoryPoint.getOrientation(), epsilon);
+      EuclidFrameTestTools.assertEquals(expectedLinearVelocity, testedFrameSE3TrajectoryPoint.getLinearVelocity(), epsilon);
+      EuclidFrameTestTools.assertEquals(expectedAngularVelocity, testedFrameSE3TrajectoryPoint.getAngularVelocity(), epsilon);
 
       Point3D actualPosition = new Point3D();
       Quaternion actualOrientation = new Quaternion();
       Vector3D actualLinearVelocity = new Vector3D();
       Vector3D actualAngularVelocity = new Vector3D();
 
-      testedFrameSE3TrajectoryPoint.getPosition(actualPosition);
-      testedFrameSE3TrajectoryPoint.getOrientation(actualOrientation);
-      testedFrameSE3TrajectoryPoint.getLinearVelocity(actualLinearVelocity);
-      testedFrameSE3TrajectoryPoint.getAngularVelocity(actualAngularVelocity);
+      actualPosition.set(testedFrameSE3TrajectoryPoint.getPosition());
+      actualOrientation.set(testedFrameSE3TrajectoryPoint.getOrientation());
+      actualLinearVelocity.set(testedFrameSE3TrajectoryPoint.getLinearVelocity());
+      actualAngularVelocity.set(testedFrameSE3TrajectoryPoint.getAngularVelocity());
 
-      assertTrue(expectedPosition.epsilonEquals(actualPosition, epsilon));
-      assertTrue(expectedOrientation.geometricallyEquals(actualOrientation, epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(actualLinearVelocity, epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, epsilon));
+      EuclidCoreTestTools.assertEquals(expectedPosition, actualPosition, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedOrientation, actualOrientation, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedLinearVelocity, actualLinearVelocity, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, epsilon);
 
       FramePoint3D actualFramePosition = new FramePoint3D();
       FrameQuaternion actualFrameOrientation = new FrameQuaternion();
       FrameVector3D actualFrameLinearVelocity = new FrameVector3D();
       FrameVector3D actualFrameAngularVelocity = new FrameVector3D();
 
-      testedFrameSE3TrajectoryPoint.getPositionIncludingFrame(actualFramePosition);
-      testedFrameSE3TrajectoryPoint.getOrientationIncludingFrame(actualFrameOrientation);
-      testedFrameSE3TrajectoryPoint.getLinearVelocityIncludingFrame(actualFrameLinearVelocity);
-      testedFrameSE3TrajectoryPoint.getAngularVelocityIncludingFrame(actualFrameAngularVelocity);
+      actualFramePosition.setIncludingFrame(testedFrameSE3TrajectoryPoint.getPosition());
+      actualFrameOrientation.setIncludingFrame(testedFrameSE3TrajectoryPoint.getOrientation());
+      actualFrameLinearVelocity.setIncludingFrame(testedFrameSE3TrajectoryPoint.getLinearVelocity());
+      actualFrameAngularVelocity.setIncludingFrame(testedFrameSE3TrajectoryPoint.getAngularVelocity());
 
-      assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
-      assertTrue(expectedOrientation.geometricallyEquals(actualFrameOrientation, epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
+      EuclidFrameTestTools.assertEquals(expectedPosition, actualFramePosition, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedOrientation, actualFrameOrientation, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedLinearVelocity, actualFrameLinearVelocity, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedAngularVelocity, actualFrameAngularVelocity, epsilon);
 
       actualFramePosition = new FramePoint3D(expectedFrame);
       actualFrameOrientation = new FrameQuaternion(expectedFrame);
       actualFrameLinearVelocity = new FrameVector3D(expectedFrame);
       actualFrameAngularVelocity = new FrameVector3D(expectedFrame);
 
-      testedFrameSE3TrajectoryPoint.getPosition(actualFramePosition);
-      testedFrameSE3TrajectoryPoint.getOrientation(actualFrameOrientation);
-      testedFrameSE3TrajectoryPoint.getLinearVelocity(actualFrameLinearVelocity);
-      testedFrameSE3TrajectoryPoint.getAngularVelocity(actualFrameAngularVelocity);
+      actualFramePosition.set(testedFrameSE3TrajectoryPoint.getPosition());
+      actualFrameOrientation.set(testedFrameSE3TrajectoryPoint.getOrientation());
+      actualFrameLinearVelocity.set(testedFrameSE3TrajectoryPoint.getLinearVelocity());
+      actualFrameAngularVelocity.set(testedFrameSE3TrajectoryPoint.getAngularVelocity());
 
-      assertTrue(expectedPosition.epsilonEquals(actualFramePosition, epsilon));
-      assertTrue(expectedOrientation.geometricallyEquals(actualFrameOrientation, epsilon));
-      assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
-      assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
+      EuclidFrameTestTools.assertEquals(expectedPosition, actualFramePosition, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedOrientation, actualFrameOrientation, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedLinearVelocity, actualFrameLinearVelocity, epsilon);
+      EuclidFrameTestTools.assertEquals(expectedAngularVelocity, actualFrameAngularVelocity, epsilon);
    }
 
    @Test
@@ -469,10 +482,10 @@ public class FrameSE3TrajectoryPointTest
       FrameVector3D linearVelocityForVerification = new FrameVector3D(worldFrame);
       FrameVector3D angularVelocityForVerification = new FrameVector3D(worldFrame);
 
-      FrameSE3TrajectoryPoint.getPosition(pointForVerification);
-      FrameSE3TrajectoryPoint.getOrientation(quaternionForVerification);
-      FrameSE3TrajectoryPoint.getLinearVelocity(linearVelocityForVerification);
-      FrameSE3TrajectoryPoint.getAngularVelocity(angularVelocityForVerification);
+      pointForVerification.set(FrameSE3TrajectoryPoint.getPosition());
+      quaternionForVerification.set(FrameSE3TrajectoryPoint.getOrientation());
+      linearVelocityForVerification.set(FrameSE3TrajectoryPoint.getLinearVelocity());
+      angularVelocityForVerification.set(FrameSE3TrajectoryPoint.getAngularVelocity());
 
       assertEquals(time, FrameSE3TrajectoryPoint.getTime(), 1e-10);
       assertTrue(pointForVerification.epsilonEquals(position, 1e-10));
@@ -482,30 +495,30 @@ public class FrameSE3TrajectoryPointTest
 
       // Check NaN calls:
       assertFalse(FrameSE3TrajectoryPoint.containsNaN());
-      FrameSE3TrajectoryPoint.setPositionToNaN();
+      FrameSE3TrajectoryPoint.getPosition().setToNaN();
       assertTrue(FrameSE3TrajectoryPoint.containsNaN());
-      FrameSE3TrajectoryPoint.setPositionToZero();
+      FrameSE3TrajectoryPoint.getPosition().setToZero();
 
       assertFalse(FrameSE3TrajectoryPoint.containsNaN());
-      FrameSE3TrajectoryPoint.setOrientationToNaN();
+      FrameSE3TrajectoryPoint.getOrientation().setToNaN();
       assertTrue(FrameSE3TrajectoryPoint.containsNaN());
-      FrameSE3TrajectoryPoint.setOrientationToZero();
+      FrameSE3TrajectoryPoint.getOrientation().setToZero();
 
       assertFalse(FrameSE3TrajectoryPoint.containsNaN());
-      FrameSE3TrajectoryPoint.setLinearVelocityToNaN();
+      FrameSE3TrajectoryPoint.getLinearVelocity().setToNaN();
       assertTrue(FrameSE3TrajectoryPoint.containsNaN());
-      FrameSE3TrajectoryPoint.setLinearVelocityToZero();
+      FrameSE3TrajectoryPoint.getLinearVelocity().setToZero();
 
       assertFalse(FrameSE3TrajectoryPoint.containsNaN());
-      FrameSE3TrajectoryPoint.setAngularVelocityToNaN();
+      FrameSE3TrajectoryPoint.getAngularVelocity().setToNaN();
       assertTrue(FrameSE3TrajectoryPoint.containsNaN());
-      FrameSE3TrajectoryPoint.setAngularVelocityToZero();
+      FrameSE3TrajectoryPoint.getAngularVelocity().setToZero();
       assertFalse(FrameSE3TrajectoryPoint.containsNaN());
 
-      FrameSE3TrajectoryPoint.getPosition(position);
-      FrameSE3TrajectoryPoint.getOrientation(orientation);
-      FrameSE3TrajectoryPoint.getLinearVelocity(linearVelocity);
-      FrameSE3TrajectoryPoint.getAngularVelocity(angularVelocity);
+      position.set(FrameSE3TrajectoryPoint.getPosition());
+      orientation.set(FrameSE3TrajectoryPoint.getOrientation());
+      linearVelocity.set(FrameSE3TrajectoryPoint.getLinearVelocity());
+      angularVelocity.set(FrameSE3TrajectoryPoint.getAngularVelocity());
 
       // Make sure they are all equal to zero:
       assertTrue(position.epsilonEquals(new Point3D(), 1e-10));
@@ -527,10 +540,10 @@ public class FrameSE3TrajectoryPointTest
 
       FrameSE3TrajectoryPoint.set(time, pointForVerification, quaternionForVerification, linearVelocityForVerification, angularVelocityForVerification);
 
-      FrameSE3TrajectoryPoint.getPosition(position);
-      FrameSE3TrajectoryPoint.getOrientation(orientation);
-      FrameSE3TrajectoryPoint.getLinearVelocity(linearVelocity);
-      FrameSE3TrajectoryPoint.getAngularVelocity(angularVelocity);
+      position.set(FrameSE3TrajectoryPoint.getPosition());
+      orientation.set(FrameSE3TrajectoryPoint.getOrientation());
+      linearVelocity.set(FrameSE3TrajectoryPoint.getLinearVelocity());
+      angularVelocity.set(FrameSE3TrajectoryPoint.getAngularVelocity());
 
       assertEquals(time, FrameSE3TrajectoryPoint.getTime(), 1e-10);
       assertTrue(pointForVerification.epsilonEquals(position, 1e-10));
@@ -550,7 +563,7 @@ public class FrameSE3TrajectoryPointTest
       assertTrue(FrameSE3TrajectoryPoint.epsilonEquals(FrameSE3TrajectoryPointTwo, 1e-7));
 
       SE3TrajectoryPoint simplePoint = new SE3TrajectoryPoint();
-      FrameSE3TrajectoryPoint.get(simplePoint);
+      simplePoint.set(FrameSE3TrajectoryPoint);
 
       FrameSE3TrajectoryPoint.setToNaN();
       assertTrue(FrameSE3TrajectoryPoint.containsNaN());
@@ -582,10 +595,10 @@ public class FrameSE3TrajectoryPointTest
       FrameVector3D angularVelocity = new FrameVector3D(worldFrame, 1.7, 8.4, 2.2);
 
       frameSE3TrajectoryPoint.setTime(time);
-      frameSE3TrajectoryPoint.setPosition(position);
-      frameSE3TrajectoryPoint.setOrientation(orientation);
-      frameSE3TrajectoryPoint.setLinearVelocity(linearVelocity);
-      frameSE3TrajectoryPoint.setAngularVelocity(angularVelocity);
+      frameSE3TrajectoryPoint.getPosition().set((FramePoint3DReadOnly) position);
+      frameSE3TrajectoryPoint.getOrientation().set((FrameOrientation3DReadOnly) orientation);
+      frameSE3TrajectoryPoint.getLinearVelocity().set((FrameVector3DReadOnly) linearVelocity);
+      frameSE3TrajectoryPoint.getAngularVelocity().set((FrameVector3DReadOnly) angularVelocity);
 
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose3D(worldFrame));
 
@@ -597,27 +610,27 @@ public class FrameSE3TrajectoryPointTest
 
       frameSE3TrajectoryPoint.changeFrame(poseFrame);
 
-      assertFalse(position.epsilonEquals(frameSE3TrajectoryPoint.getPositionCopy(), 1e-10));
-      assertFalse(orientation.epsilonEquals(frameSE3TrajectoryPoint.getOrientationCopy(), 1e-10));
-      assertFalse(linearVelocity.epsilonEquals(frameSE3TrajectoryPoint.getLinearVelocityCopy(), 1e-10));
-      assertFalse(angularVelocity.epsilonEquals(frameSE3TrajectoryPoint.getAngularVelocityCopy(), 1e-10));
+      assertFalse(position.epsilonEquals(frameSE3TrajectoryPoint.getPosition(), 1e-10));
+      assertFalse(orientation.epsilonEquals(frameSE3TrajectoryPoint.getOrientation(), 1e-10));
+      assertFalse(linearVelocity.epsilonEquals(frameSE3TrajectoryPoint.getLinearVelocity(), 1e-10));
+      assertFalse(angularVelocity.epsilonEquals(frameSE3TrajectoryPoint.getAngularVelocity(), 1e-10));
 
       position.changeFrame(poseFrame);
       orientation.changeFrame(poseFrame);
       linearVelocity.changeFrame(poseFrame);
       angularVelocity.changeFrame(poseFrame);
 
-      assertTrue(position.epsilonEquals(frameSE3TrajectoryPoint.getPositionCopy(), 1e-10));
-      assertTrue(orientation.epsilonEquals(frameSE3TrajectoryPoint.getOrientationCopy(), 1e-10));
-      assertTrue(linearVelocity.epsilonEquals(frameSE3TrajectoryPoint.getLinearVelocityCopy(), 1e-10));
-      assertTrue(angularVelocity.epsilonEquals(frameSE3TrajectoryPoint.getAngularVelocityCopy(), 1e-10));
+      assertTrue(position.epsilonEquals(frameSE3TrajectoryPoint.getPosition(), 1e-10));
+      assertTrue(orientation.epsilonEquals(frameSE3TrajectoryPoint.getOrientation(), 1e-10));
+      assertTrue(linearVelocity.epsilonEquals(frameSE3TrajectoryPoint.getLinearVelocity(), 1e-10));
+      assertTrue(angularVelocity.epsilonEquals(frameSE3TrajectoryPoint.getAngularVelocity(), 1e-10));
 
       FrameSE3TrajectoryPoint frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(poseFrame);
       frameSE3TrajectoryPointTwo.setTime(time);
-      frameSE3TrajectoryPointTwo.setPosition(position);
-      frameSE3TrajectoryPointTwo.setOrientation(orientation);
-      frameSE3TrajectoryPointTwo.setLinearVelocity(linearVelocity);
-      frameSE3TrajectoryPointTwo.setAngularVelocity(angularVelocity);
+      frameSE3TrajectoryPointTwo.getPosition().set((FramePoint3DReadOnly) position);
+      frameSE3TrajectoryPointTwo.getOrientation().set((FrameOrientation3DReadOnly) orientation);
+      frameSE3TrajectoryPointTwo.getLinearVelocity().set((FrameVector3DReadOnly) linearVelocity);
+      frameSE3TrajectoryPointTwo.getAngularVelocity().set((FrameVector3DReadOnly) angularVelocity);
       assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
 
       frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(worldFrame);
@@ -642,6 +655,36 @@ public class FrameSE3TrajectoryPointTest
       frameSE3TrajectoryPointTwo = new FrameSE3TrajectoryPoint(worldFrame);
       frameSE3TrajectoryPointTwo.setIncludingFrame(time, frameSE3Waypoint);
       assertTrue(frameSE3TrajectoryPointTwo.epsilonEquals(frameSE3TrajectoryPoint, 1e-10));
+   }
 
+   @Test
+   public void testReferenceFrameChecks() throws Throwable
+   {
+      Predicate<Method> methodFilter = m -> !m.getName().equals("equals") && !m.getName().equals("epsilonEquals");
+      EuclidFrameAPITester tester = new EuclidFrameAPITester(new FrameTrajectoryPointAPIDefaultConfiguration());
+      tester.assertMethodsOfReferenceFrameHolderCheckReferenceFrame(TrajectoryPointRandomTools::nextFrameSE3TrajectoryPoint,
+                                                                    methodFilter,
+                                                                    EuclidTestConstants.API_FRAME_CHECKS_ITERATIONS);
+   }
+
+   @Test
+   public void testConsistencyWithSE3TrajectoryPoint() throws Exception
+   {
+      FrameTypeCopier frameTypeBuilder = (frame, TrajectoryPoint) -> new FrameSE3TrajectoryPoint(frame, (SE3TrajectoryPointReadOnly) TrajectoryPoint);
+      RandomFramelessTypeBuilder framelessTypeBuilber = TrajectoryPointRandomTools::nextSE3TrajectoryPoint;
+      Predicate<Method> methodFilter = m -> !m.getName().equals("hashCode") && !m.getName().equals("toString");
+      EuclidFrameAPITester tester = new EuclidFrameAPITester(new FrameTrajectoryPointAPIDefaultConfiguration());
+      tester.assertFrameMethodsOfFrameHolderPreserveFunctionality(frameTypeBuilder,
+                                                                  framelessTypeBuilber,
+                                                                  methodFilter,
+                                                                  EuclidTestConstants.API_FUNCTIONALITY_TEST_ITERATIONS);
+   }
+
+   @Test
+   public void testOverloading() throws Exception
+   {
+      EuclidFrameAPITester tester = new EuclidFrameAPITester(new FrameTrajectoryPointAPIDefaultConfiguration());
+      tester.assertOverloadingWithFrameObjects(FrameSE3TrajectoryPointBasics.class, SE3TrajectoryPointBasics.class, false, 1);
+      tester.assertOverloadingWithFrameObjects(FrameSE3TrajectoryPointReadOnly.class, SE3TrajectoryPointReadOnly.class, false, 1);
    }
 }

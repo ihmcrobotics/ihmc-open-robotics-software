@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -26,19 +26,19 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class WalkingControllerParameters
 {
-   private final LegConfigurationParameters legConfigurationParameters;
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   private final DynamicReachabilityParameters dynamicReachabilityParameters;
-   private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
-   private final LeapOfFaithParameters leapOfFaithParameters;
+   private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
 
    public WalkingControllerParameters()
    {
       jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
-      dynamicReachabilityParameters = new DynamicReachabilityParameters();
-      pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
-      leapOfFaithParameters = new LeapOfFaithParameters();
-      legConfigurationParameters = new LegConfigurationParameters();
+
+      kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
+      kneePrivilegedConfigurationParameters.setConfigurationGain(40.0);
+      kneePrivilegedConfigurationParameters.setVelocityGain(6.0);
+      kneePrivilegedConfigurationParameters.setWeight(5.0);
+      kneePrivilegedConfigurationParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
+      kneePrivilegedConfigurationParameters.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
    }
 
    /**
@@ -152,18 +152,14 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * The desired position of the CMP is computed based on a feedback control law on the ICP. This
-    * method returns the gains used in this controller.
-    */
-   public abstract ICPControlGains createICPControlGains();
-
-   /**
     * This method returns the gains used in the controller to regulate the center of mass height.
     */
    public abstract PDGains getCoMHeightControlGains();
 
    /**
-    * Returns a list of joint control gains for groups of joints.
+    * Gains used to compute desired accelerations: joint acceleration = kp * (q_des - q) + kd * (v_des - v)
+    * The feedback in acceleration-space is used as an objective in the whole-body QP
+    *
     * <p>
     * Each {@link GroupParameter} contains gains for one joint group:</br>
     * - The name of the joint group that the gain is used for (e.g. Arms).</br>
@@ -174,7 +170,23 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing jointspace PID gains and the corresponding joints
     */
-   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getHighLevelJointSpaceControlGains()
+   {
+      return new ArrayList<>();
+   }
+
+   /**
+    * Gains used for low-level joint position control intended to be sent directly to the motor, torque = kp * (q_des - q) + kd * (v_des - v)
+    *
+    * <p>
+    * Each {@link GroupParameter} contains gains for one joint group:</br>
+    * - The name of the joint group that the gain is used for (e.g. Arms).</br>
+    * - The gains for the joint group.</br>
+    * - The names of all rigid bodies in the joint group.
+    * </p>
+    * If a joint is not contained in the list, low-level jointspace control is not supported for that joint.
+    */
+   public List<GroupParameter<PIDGainsReadOnly>> getLowLevelJointSpaceControlGains()
    {
       return new ArrayList<>();
    }
@@ -337,40 +349,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Ramps up the maximum loading of the normal force of the toe contact points over time, if returns
-    * true. If returns false, it simply immediately sets the normal force maximum to infinity.
-    *
-    * @return whether or not to ramp up.
-    */
-   public boolean rampUpAllowableToeLoadAfterContact()
-   {
-      return false;
-   }
-
-   /**
-    * Defines the duration spent ramping up the allowable normal toe contact force if
-    * {@link #rampUpAllowableToeLoadAfterContact()} is true.
-    *
-    * @return duration (s)
-    */
-   public double getToeLoadingDuration()
-   {
-      return 0.2;
-   }
-
-   /**
-    * The maximum normal force allowed in the toe if {@link #rampUpAllowableToeLoadAfterContact()} is
-    * true at the time returned by {@link #getToeLoadingDuration()}. After this time, the maximum
-    * normal force goes to infinity.
-    * 
-    * @return
-    */
-   public double getFullyLoadedToeForce()
-   {
-      return 1.0e3;
-   }
-
-   /**
     * This is the default transfer time used in the walking controller to shift the weight to the
     * initial stance foot when starting to execute a footstep plan.
     */
@@ -394,6 +372,15 @@ public abstract class WalkingControllerParameters
     * Returns a list of joints that will not be used by the controller.
     */
    public abstract String[] getJointsToIgnoreInController();
+
+   /**
+    * Returns a list of joints that cannot be controlled but should still be considered by the
+    * controller.
+    */
+   public String[] getInactiveJoints()
+   {
+      return null;
+   }
 
    /**
     * Returns the {@link MomentumOptimizationSettings} for this robot. These parameters define the
@@ -562,8 +549,6 @@ public abstract class WalkingControllerParameters
     * When true, some of the tracking performance will be degraded to reduce the generated angular
     * momentum rate around the vertical axis during swing only. Useful when the robot has heavy legs
     * and tends to slips during swing.
-    * 
-    * @return
     */
    public boolean minimizeAngularMomentumRateZDuringSwing()
    {
@@ -571,15 +556,6 @@ public abstract class WalkingControllerParameters
    }
 
    public boolean minimizeAngularMomentumRateZDuringTransfer()
-   {
-      return false;
-   }
-
-   /**
-    * Determines whether the robot should use the velocity to be computed in the estimator, or just
-    * compute it from the robot state in the controller (new feature to be tested with Atlas)
-    */
-   public boolean useCenterOfMassVelocityFromEstimator()
    {
       return false;
    }
@@ -665,19 +641,11 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Returns the parameters used for straight leg walking
+    * Returns the parameters used for the knee privileged configuration
     */
-   public LegConfigurationParameters getLegConfigurationParameters()
+   public OneDoFJointPrivilegedConfigurationParameters getKneePrivilegedConfigurationParameters()
    {
-      return legConfigurationParameters;
-   }
-
-   /**
-    * Returns the parameters in the dynamic reachability calculator.
-    */
-   public DynamicReachabilityParameters getDynamicReachabilityParameters()
-   {
-      return dynamicReachabilityParameters;
+      return kneePrivilegedConfigurationParameters;
    }
 
    /**
@@ -696,18 +664,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Sets whether or not the {@link DynamicReachabilityCalculator} will simply check whether or not
-    * the upcoming step is reachable using the given step timing ({@return} is false), or will edit the
-    * step timings to make sure that the step is reachable if ({@return} is true).
-    *
-    * @return whether or not to edit the timing based on the reachability of the step.
-    */
-   public boolean editStepTimingForReachability()
-   {
-      return false;
-   }
-
-   /**
     * Whether or not to use a secondary joint scaling factor during swing, where the secondary joint is
     * any joint located in the kinematic chain between the base and the optional primary base of a
     * SpatialAccelerationCommand and a SpatialVelocityCommand.
@@ -715,26 +671,6 @@ public abstract class WalkingControllerParameters
    public boolean applySecondaryJointScaleDuringSwing()
    {
       return false;
-   }
-
-   /**
-    * Parameters for the {@link PelvisOffsetTrajectoryWhileWalking}. These parameters can be used to
-    * shape the pelvis orientation trajectory while walking to create a more natural motion and improve
-    * foot reachability.
-    */
-   public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
-   {
-      return pelvisOffsetWhileWalkingParameters;
-   }
-
-   /**
-    * Parameters for the 'Leap of Faith' Behavior. This caused the robot to activly fall onto an
-    * upcoming foothold when necessary to reach an upcoming foothold. This method returns the robot
-    * specific implementation of the {@link LeapOfFaithParameters};
-    */
-   public LeapOfFaithParameters getLeapOfFaithParameters()
-   {
-      return leapOfFaithParameters;
    }
 
    /**
@@ -749,7 +685,9 @@ public abstract class WalkingControllerParameters
     */
    public abstract SwingTrajectoryParameters getSwingTrajectoryParameters();
 
-   public abstract ICPOptimizationParameters getICPOptimizationParameters();
+   public abstract ICPControllerParameters getICPControllerParameters();
+
+   public abstract StepAdjustmentParameters getStepAdjustmentParameters();
 
    /**
     * Get the maximum leg length for the singularity avoidance control module.
@@ -783,6 +721,8 @@ public abstract class WalkingControllerParameters
     * Whether the height should be controlled with the rate of change of momentum or using a feedback
     * controller on the pelvis. Note that the height of the pelvis should be controlled to set this
     * flag to {@code false}, i.e. {@code controlPelvisHeightInsteadOfCoMHeight() == true}.
+    *
+    * Fixme does this do what we think it does?
     */
    public boolean controlHeightWithMomentum()
    {
@@ -817,19 +757,6 @@ public abstract class WalkingControllerParameters
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
       return Double.NEGATIVE_INFINITY;
-   }
-
-   /**
-    * A robot can implement an ankle IK solver. Optionally, the walking controller will add desired
-    * joint angles and velocities for the ankle to the output of the controller core. Depending on the
-    * implementation of the robots joint control this can be used to better track the foot pose on a
-    * robot. The desired torque and acceleration computed by the whole body controller will still be
-    * available. Note, that the output of this module might be inconsistent with the output of the
-    * whole body controller as it does not consider other objectives such as balancing.
-    */
-   public AnkleIKSolver getAnkleIKSolver()
-   {
-      return null;
    }
 
    /**

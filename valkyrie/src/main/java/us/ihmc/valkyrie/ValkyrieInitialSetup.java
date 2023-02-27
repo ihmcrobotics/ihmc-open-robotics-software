@@ -27,6 +27,6 @@ public class ValkyrieInitialSetup extends HumanoidRobotInitialSetup
          setJoint(robotSide, ArmJointName.ELBOW_ROLL, 1.3);
       }
 
-      adjustRootJointHeightUsingLowestSole(robotDefinition);
+      setRootJointHeightSuchThatLowestSoleIsAtZero(robotDefinition);
    }
 }

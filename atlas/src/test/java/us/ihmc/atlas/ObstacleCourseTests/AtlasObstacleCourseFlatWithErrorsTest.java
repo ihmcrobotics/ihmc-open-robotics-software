@@ -10,7 +10,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatWithErrorsTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground-slow-3")
 public class AtlasObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseFlatWithErrorsTest
@@ -31,42 +30,42 @@ public class AtlasObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseFlat
 
    @Override
    @Test
-   public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
+   public void testSideStepsWithRandomSlipping()
    {
       super.testSideStepsWithRandomSlipping();
    }
 
    @Override
    @Test
-   public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
+   public void testSideStepsWithSlipping()
    {
       super.testSideStepsWithSlipping();
    }
 
    @Override
    @Test
-   public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
+   public void testSimpleFlatGroundScriptWithOscillatingFeet()
    {
       super.testSimpleFlatGroundScriptWithOscillatingFeet();
    }
 
    @Override
    @Test
-   public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
+   public void testSimpleFlatGroundScriptWithRandomFootSlip()
    {
       super.testSimpleFlatGroundScriptWithRandomFootSlip();
    }
 
    @Override
    @Test
-   public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
+   public void testStandingWithOscillatingFeet()
    {
       super.testStandingWithOscillatingFeet();
    }
-   
+
    @Override
    @Test
-   public void testStandingWithStateEstimatorDrift() throws SimulationExceededMaximumTimeException
+   public void testStandingWithStateEstimatorDrift()
    {
       super.testStandingWithStateEstimatorDrift();
    }

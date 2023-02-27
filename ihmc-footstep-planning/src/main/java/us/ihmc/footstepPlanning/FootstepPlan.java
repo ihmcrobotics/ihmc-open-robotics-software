@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class FootstepPlan implements FootstepPlanReadOnly
       footsteps.add(footstep);
    }
 
-   public PlannedFootstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
+   public PlannedFootstep addFootstep(RobotSide robotSide, FramePose3DReadOnly soleFramePose)
    {
       PlannedFootstep simpleFootstep = new PlannedFootstep(robotSide, soleFramePose);
       footsteps.add(simpleFootstep);

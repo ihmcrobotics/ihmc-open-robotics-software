@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;

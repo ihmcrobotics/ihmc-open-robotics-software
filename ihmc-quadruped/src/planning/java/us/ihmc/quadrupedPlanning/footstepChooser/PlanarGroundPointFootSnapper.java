@@ -2,7 +2,7 @@ package us.ihmc.quadrupedPlanning.footstepChooser;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.GroundPlaneMessage;
+import ihmc_common_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;

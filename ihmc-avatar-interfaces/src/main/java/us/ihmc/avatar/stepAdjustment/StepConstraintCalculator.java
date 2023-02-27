@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.CapturabilityBasedPlanarRegionDecider;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -96,7 +97,7 @@ public class StepConstraintCalculator
       this.soleZUpFrames = soleZUpFrames;
       this.steppableRegionsCalculator = new SteppableRegionsCalculator(kinematicStepRange, registry);
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, graphicsListRegistry);
-      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, graphicsListRegistry);
+      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, () -> true, registry, graphicsListRegistry);
       this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,
                                                                                    footLength,
                                                                                    footWidth,

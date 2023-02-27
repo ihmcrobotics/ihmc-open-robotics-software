@@ -1,0 +1,31 @@
+#ifndef __controller_msgs__msg__ConcaveHullFactoryParametersMessage__idl__
+#define __controller_msgs__msg__ConcaveHullFactoryParametersMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * REA parameters used to create concave hull of region
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::ConcaveHullFactoryParametersMessage_")
+      struct ConcaveHullFactoryParametersMessage
+      {
+        @defaultValue(value=0.1)
+        double edge_length_threshold;
+        @defaultValue(value=True)
+        boolean remove_all_triangles_with_two_border_edges;
+        @defaultValue(value=True)
+        boolean allow_splitting_concave_hull;
+        @defaultValue(value=5000)
+        long max_number_of_iterations;
+        double triangulation_tolerance;
+      };
+    };
+  };
+};
+
+#endif

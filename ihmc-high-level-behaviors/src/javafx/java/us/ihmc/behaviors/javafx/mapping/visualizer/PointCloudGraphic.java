@@ -12,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -23,7 +24,6 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.SegmentedLine3DMeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 
 public class PointCloudGraphic extends Group
 {

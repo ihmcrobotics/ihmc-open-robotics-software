@@ -41,8 +41,8 @@ public class EuclideanTrajectoryPointCalculator
       FrameEuclideanTrajectoryPoint newTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
       newTrajectoryPoint.setToZero(trajectoryPoints.getReferenceFrame());
       newTrajectoryPoint.setTimeToNaN();
-      newTrajectoryPoint.setPosition(position);
-      newTrajectoryPoint.setLinearVelocityToNaN();
+      newTrajectoryPoint.getPosition().set(position);
+      newTrajectoryPoint.getLinearVelocity().setToNaN();
       trajectoryPoints.addTrajectoryPoint(newTrajectoryPoint);
    }
 
@@ -51,8 +51,8 @@ public class EuclideanTrajectoryPointCalculator
       FrameEuclideanTrajectoryPoint newTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
       newTrajectoryPoint.setToZero(trajectoryPoints.getReferenceFrame());
       newTrajectoryPoint.setTime(time);
-      newTrajectoryPoint.setPosition(position);
-      newTrajectoryPoint.setLinearVelocityToNaN();
+      newTrajectoryPoint.getPosition().set(position);
+      newTrajectoryPoint.getLinearVelocity().setToNaN();
       trajectoryPoints.addTrajectoryPoint(newTrajectoryPoint);
       times.add(time);
    }
@@ -62,8 +62,8 @@ public class EuclideanTrajectoryPointCalculator
       FrameEuclideanTrajectoryPoint newTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
       newTrajectoryPoint.setToZero(trajectoryPoints.getReferenceFrame());
       newTrajectoryPoint.setTime(time);
-      newTrajectoryPoint.setPosition(position);
-      newTrajectoryPoint.setLinearVelocity(linearVelocity);
+      newTrajectoryPoint.getPosition().set(position);
+      newTrajectoryPoint.getLinearVelocity().set(linearVelocity);
       trajectoryPoints.addTrajectoryPoint(newTrajectoryPoint);
       times.add(time);
    }
@@ -84,9 +84,9 @@ public class EuclideanTrajectoryPointCalculator
       FrameEuclideanTrajectoryPoint last = trajectoryPoints.getLastTrajectoryPoint();
 
       if (first.getLinearVelocity().containsNaN())
-         first.setLinearVelocity(0.0, 0.0, 0.0);
+         first.getLinearVelocity().set(0.0, 0.0, 0.0);
       if (last.getLinearVelocity().containsNaN())
-         last.setLinearVelocity(0.0, 0.0, 0.0);
+         last.getLinearVelocity().set(0.0, 0.0, 0.0);
 
       for (int i = 0; i < dimension; i++)
       {
@@ -137,7 +137,7 @@ public class EuclideanTrajectoryPointCalculator
          for (int j = 0; j < velocityToPack.size(); j++)
             waypointVelocity.setElement(j, velocityToPack.get(j) / trajectoryTime);
 
-         trajectoryPoints.getTrajectoryPoint(i + 1).setLinearVelocity(waypointVelocity);
+         trajectoryPoints.getTrajectoryPoint(i + 1).getLinearVelocity().set(waypointVelocity);
       }
    }
 

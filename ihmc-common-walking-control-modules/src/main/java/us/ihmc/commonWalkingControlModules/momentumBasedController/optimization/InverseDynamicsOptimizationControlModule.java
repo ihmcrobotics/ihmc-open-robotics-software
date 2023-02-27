@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,7 +8,9 @@ import java.util.Map;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -18,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -25,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -71,8 +76,10 @@ public class InverseDynamicsOptimizationControlModule
 
    private final OneDoFJointBasics[] oneDoFJoints;
    private final DMatrixRMaj qDDotMinMatrix, qDDotMaxMatrix;
+   private final DMatrixRMaj customQDDotMinMatrix, customQDDotMaxMatrix;
 
    private final JointIndexHandler jointIndexHandler;
+   private final TIntArrayList inactiveJointIndices = new TIntArrayList();
    private final YoDouble absoluteMaximumJointAcceleration = new YoDouble("absoluteMaximumJointAcceleration", registry);
    private final Map<OneDoFJointBasics, YoDouble> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJointBasics, YoDouble> jointMinimumAccelerations = new HashMap<>();
@@ -85,14 +92,15 @@ public class InverseDynamicsOptimizationControlModule
    private final YoBoolean useWarmStart = new YoBoolean("useWarmStartInSolver", registry);
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterationsInSolver", registry);
 
-   private final DMatrixRMaj zeroObjective = new DMatrixRMaj(0, 0);
+   private final ArrayList<QPObjectiveCommand> nullspaceQPObjectiveCommands = new ArrayList<>();
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
       this(toolbox, null, parentRegistry);
    }
 
-   public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, DynamicsMatrixCalculator dynamicsMatrixCalculator,
+   public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox,
+                                                   DynamicsMatrixCalculator dynamicsMatrixCalculator,
                                                    YoRegistry parentRegistry)
    {
       jointIndexHandler = toolbox.getJointIndexHandler();
@@ -100,6 +108,9 @@ public class InverseDynamicsOptimizationControlModule
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       kinematicLoopFunctions = toolbox.getKinematicLoopFunctions();
       this.dynamicsMatrixCalculator = dynamicsMatrixCalculator;
+
+      for (OneDoFJointBasics inactiveJoint : toolbox.getInactiveOneDoFJoints())
+         inactiveJointIndices.add(jointIndexHandler.getOneDoFJointIndex(inactiveJoint));
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
@@ -132,6 +143,8 @@ public class InverseDynamicsOptimizationControlModule
       absoluteMaximumJointAcceleration.set(optimizationSettings.getMaximumJointAcceleration());
       qDDotMinMatrix = new DMatrixRMaj(numberOfDoFs, 1);
       qDDotMaxMatrix = new DMatrixRMaj(numberOfDoFs, 1);
+      customQDDotMinMatrix = new DMatrixRMaj(numberOfDoFs, 1);
+      customQDDotMaxMatrix = new DMatrixRMaj(numberOfDoFs, 1);
 
       CommonOps_DDRM.fill(qDDotMinMatrix, Double.NEGATIVE_INFINITY);
       CommonOps_DDRM.fill(qDDotMaxMatrix, Double.POSITIVE_INFINITY);
@@ -160,9 +173,6 @@ public class InverseDynamicsOptimizationControlModule
       useWarmStart.set(optimizationSettings.useWarmStartInSolver());
       maximumNumberOfIterations.set(optimizationSettings.getMaxNumberOfSolverIterations());
 
-      zeroObjective.reshape(wrenchMatrixCalculator.getCopTaskSize(), 1);
-      zeroObjective.zero();
-
       parentRegistry.addChild(registry);
    }
 
@@ -171,6 +181,13 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.reset();
       externalWrenchHandler.reset();
       motionQPInputCalculator.initialize();
+      inactiveJointIndices.clear();
+   }
+
+   public void resetCustomBounds()
+   {
+      CommonOps_DDRM.fill(customQDDotMaxMatrix, Double.POSITIVE_INFINITY);
+      CommonOps_DDRM.fill(customQDDotMinMatrix, Double.NEGATIVE_INFINITY);
    }
 
    public void resetRateRegularization()
@@ -187,11 +204,25 @@ public class InverseDynamicsOptimizationControlModule
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
 
+      for (int i = 0; i < inactiveJointIndices.size(); i++)
+      {
+         qpSolver.setActiveDoF(inactiveJointIndices.get(i), false);
+      }
+
       qpSolver.setMinRho(rhoMin.getDoubleValue());
       qpSolver.setMaxRho(wrenchMatrixCalculator.getRhoMaxMatrix());
       qpSolver.setActiveRhos(wrenchMatrixCalculator.getActiveRhoMatrix());
 
       setupWrenchesEquilibriumConstraint();
+
+      // The Jacobian for all the primary tasks has been computed, so we should now submit the tasks take place in the nullspace.
+      for (int i = 0; i < nullspaceQPObjectiveCommands.size(); i++)
+      {
+         QPObjectiveCommand command = nullspaceQPObjectiveCommands.get(i);
+         submitQPObjectiveCommandNow(command);
+      }
+      nullspaceQPObjectiveCommands.clear();
+
       computePrivilegedJointAccelerations();
 
       if (SETUP_JOINT_LIMIT_CONSTRAINTS)
@@ -243,6 +274,8 @@ public class InverseDynamicsOptimizationControlModule
       momentumModuleSolution.setJointsToOptimizeFor(jointsToOptimizeFor);
       momentumModuleSolution.setRigidBodiesWithExternalWrench(rigidBodiesWithExternalWrench);
 
+      resetCustomBounds();
+
       return hasConverged;
    }
 
@@ -260,10 +293,32 @@ public class InverseDynamicsOptimizationControlModule
          OneDoFJointBasics joint = oneDoFJoints[i];
 
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         boolean hasCustomMin = Double.isFinite(customQDDotMinMatrix.get(jointIndex, 0));
+         boolean hasCustomMax = Double.isFinite(customQDDotMaxMatrix.get(jointIndex, 0));
          double qDDotMin = qDDotMinMatrix.get(jointIndex, 0);
          double qDDotMax = qDDotMaxMatrix.get(jointIndex, 0);
+         double customQDDotMin = MathTools.clamp(customQDDotMinMatrix.get(jointIndex, 0), absoluteMaximumJointAcceleration.getDoubleValue() - 5.0);
+         double customQDDotMax = MathTools.clamp(customQDDotMaxMatrix.get(jointIndex, 0), absoluteMaximumJointAcceleration.getDoubleValue() - 5.0);
+
+         if (hasCustomMin != hasCustomMax)
+         {
+            if (hasCustomMin)
+            {
+               qDDotMin = Math.max(qDDotMin, customQDDotMin);
+               qDDotMax = Math.max(qDDotMax, customQDDotMin + 5.0);
+            }
+            else
+            {
+               qDDotMin = Math.min(qDDotMin, customQDDotMax - 5.0);
+               qDDotMax = Math.min(qDDotMax, customQDDotMax);
+            }
+         }
+
          jointMinimumAccelerations.get(joint).set(qDDotMin);
          jointMaximumAccelerations.get(joint).set(qDDotMax);
+
+         qDDotMinMatrix.set(jointIndex, 0, qDDotMin);
+         qDDotMaxMatrix.set(jointIndex, 0, qDDotMax);
       }
    }
 
@@ -321,6 +376,25 @@ public class InverseDynamicsOptimizationControlModule
                                               dynamicsMatrixCalculator.getTorqueMinimizationObjective());
    }
 
+   public void submitQPObjectiveCommand(QPObjectiveCommand command)
+   {
+      if (command.isNullspaceProjected())
+      {
+         nullspaceQPObjectiveCommands.add(command);
+      }
+      else
+      {
+         submitQPObjectiveCommandNow(command);
+      }
+   }
+
+   private void submitQPObjectiveCommandNow(QPObjectiveCommand command)
+   {
+      boolean success = motionQPInputCalculator.convertQPObjectiveCommand(command, motionQPInput);
+      if (success)
+         qpSolver.addMotionInput(motionQPInput);
+   }
+
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
       boolean success = motionQPInputCalculator.convertSpatialAccelerationCommand(command, motionQPInput);
@@ -330,9 +404,29 @@ public class InverseDynamicsOptimizationControlModule
 
    public void submitJointspaceAccelerationCommand(JointspaceAccelerationCommand command)
    {
-      boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, motionQPInput);
-      if (success)
-         qpSolver.addMotionInput(motionQPInput);
+      if (command.getConstraintType() == ConstraintType.OBJECTIVE || command.getConstraintType() == ConstraintType.EQUALITY)
+      {
+         boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, motionQPInput);
+         if (success)
+            qpSolver.addMotionInput(motionQPInput);
+      }
+      else
+      {
+         DMatrixRMaj matToMod;
+         if (command.getConstraintType() == ConstraintType.GEQ_INEQUALITY)
+            matToMod = customQDDotMinMatrix;
+         else
+            matToMod = customQDDotMaxMatrix;
+
+         for (int jointIdx = 0; jointIdx < command.getNumberOfJoints(); jointIdx++)
+         {
+            JointBasics joint = command.getJoint(jointIdx);
+            if (joint instanceof OneDoFJointBasics)
+            {
+               matToMod.set(jointIndexHandler.getOneDoFJointIndex((OneDoFJointBasics) joint), 0, command.getDesiredAcceleration(jointIdx).get(0, 0));
+            }
+         }
+      }
    }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
@@ -411,5 +505,19 @@ public class InverseDynamicsOptimizationControlModule
          qpSolver.setJerkRegularizationWeight(command.getJointJerkWeight());
       if (command.hasJointTorqueWeight())
          qpSolver.setJointTorqueWeight(command.getJointTorqueWeight());
+      for (int i = 0; i < command.getJointsToActivate().size(); i++)
+      {
+         OneDoFJointBasics joint = command.getJointsToActivate().get(i);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         inactiveJointIndices.remove(jointIndex);
+      }
+      for (int i = 0; i < command.getJointsToDeactivate().size(); i++)
+      {
+         OneDoFJointBasics joint = command.getJointsToDeactivate().get(i);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         // Prevent duplicates in the list.
+         if (!inactiveJointIndices.contains(jointIndex))
+            inactiveJointIndices.add(jointIndex);
+      }
    }
 }

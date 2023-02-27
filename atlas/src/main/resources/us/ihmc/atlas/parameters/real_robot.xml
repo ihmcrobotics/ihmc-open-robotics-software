@@ -58,10 +58,10 @@
                     </registry>
                     <registry name="HighLevelControlManagerFactory">
                         <registry name="FeetManager">
-                            <registry name="ToeOffManager">
-<parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="false"/>
-<parameter name="ankleLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="-0.94"/>
-<parameter name="forceToeOffAtJointLimit" type="BooleanParameter" value="true"/>
+                            <registry name="GeometricToeOffManager">
+                                <registry name="LegJointLimitsInspector">
+                                    <parameter name="ankleLowerLimitToTriggerToeOff" type="DoubleParameter" min="0.0" max="1.0" value="-0.94"/>
+                                </registry>
                             </registry>
                             <registry name="FootRotationDetectorParameters">
 <parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>

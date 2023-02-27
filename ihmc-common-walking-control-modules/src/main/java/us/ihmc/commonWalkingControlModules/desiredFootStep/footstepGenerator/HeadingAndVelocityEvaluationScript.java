@@ -238,12 +238,12 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
    private EventTask createSidestepLeft()
    {
-      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_LEFT, new Vector2D(0.0, 1.0), cruiseVelocity.getValue(), 0.0);
+      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_LEFT, new Vector2D(0.0, 1.0), sidestepVelocity.getValue(), 0.0);
    }
 
    private EventTask createSidestepRight()
    {
-      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_RIGHT, new Vector2D(0.0, -1.0), cruiseVelocity.getValue(), 0.0);
+      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_RIGHT, new Vector2D(0.0, -1.0), sidestepVelocity.getValue(), 0.0);
    }
 
    private EventTask createTurnInPlace180()

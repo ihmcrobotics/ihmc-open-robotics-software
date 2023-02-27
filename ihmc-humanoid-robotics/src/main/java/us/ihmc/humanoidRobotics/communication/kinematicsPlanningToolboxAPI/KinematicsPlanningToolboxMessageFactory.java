@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;

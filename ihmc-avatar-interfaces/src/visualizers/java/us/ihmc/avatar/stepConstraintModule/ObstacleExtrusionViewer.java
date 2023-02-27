@@ -44,7 +44,7 @@ public class ObstacleExtrusionViewer extends AnimationTimer
    private AtomicReference<Boolean> showRawPoints;
    private AtomicReference<Boolean> showExtrusions;
 
-   private AtomicReference<HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>>> newRequestReference;
+   private AtomicReference<HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>>> newRequestReference;
 
    private final Messager messager;
 
@@ -69,7 +69,7 @@ public class ObstacleExtrusionViewer extends AnimationTimer
    }
 
    public void setTopics(Topic<Boolean> resetRequestedTopic, Topic<Boolean> showExtrusionsRawPointsTopic, Topic<Boolean> showObstacleExtrusionsTopic,
-                         Topic<HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>>> obstacleExtrusionsTopic)
+                         Topic<HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>>> obstacleExtrusionsTopic)
    {
 //      resetRequested = messager.createInput(resetRequestedTopic, false);
       showRawPoints = messager.createInput(showExtrusionsRawPointsTopic, false);
@@ -112,25 +112,25 @@ public class ObstacleExtrusionViewer extends AnimationTimer
 
       if (showRawPoints.get()  || showExtrusions.get())
       {
-         HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> newRequest = newRequestReference.getAndSet(null);
+         HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>> newRequest = newRequestReference.getAndSet(null);
 
          if (newRequest != null)
             processNavigableRegionsOnThread(newRequest);
       }
    }
 
-   private void processNavigableRegionsOnThread(HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> obstacleExtrusionsMap)
+   private void processNavigableRegionsOnThread(HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>> obstacleExtrusionsMap)
    {
       executorService.execute(() -> processNavigableRegions(obstacleExtrusionsMap));
    }
 
-   private void processNavigableRegions(HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> obstacleExtrusionsMap)
+   private void processNavigableRegions(HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>> obstacleExtrusionsMap)
    {
       Map<Integer, JavaFXMeshBuilder> rawPointsMeshBuilders = new HashMap<>();
       Map<Integer, JavaFXMeshBuilder> extrusionMeshBuilders = new HashMap<>();
       Map<Integer, Material> navigableMaterials = new HashMap<>();
 
-      for (RegionInWorldInterface constraintRegion : obstacleExtrusionsMap.keySet())
+      for (RegionInWorldInterface<?> constraintRegion : obstacleExtrusionsMap.keySet())
       {
          int regionId = constraintRegion.getRegionId();
          JavaFXMeshBuilder rawPointsMeshBuilder = getOrCreate(rawPointsMeshBuilders, regionId);

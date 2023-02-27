@@ -14,7 +14,6 @@ public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeI
 {
    private static final double defaultWeight = 1.0;
 
-   private final TimeIntervalBasics timeInterval;
    private final Point3DReadOnly position;
    private final Vector3DReadOnly velocity;
    private final Vector3DReadOnly acceleration;
@@ -27,7 +26,6 @@ public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeI
 
    public PolynomialEstimator3D()
    {
-      timeInterval = Trajectory3DFactories.newLinkedTimeInterval(xEstimator, yEstimator, zEstimator);
       position = EuclidCoreFactories.newLinkedPoint3DReadOnly(xEstimator::getPosition, yEstimator::getPosition, zEstimator::getPosition);
       velocity = EuclidCoreFactories.newLinkedVector3DReadOnly(xEstimator::getVelocity, yEstimator::getVelocity, zEstimator::getVelocity);
       acceleration = EuclidCoreFactories.newLinkedVector3DReadOnly(xEstimator::getAcceleration, yEstimator::getAcceleration, zEstimator::getAcceleration);
@@ -52,7 +50,6 @@ public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeI
    @Override
    public void set(PolynomialEstimator3D other)
    {
-      getTimeInterval().set(other.getTimeInterval());
       xEstimator.set(other.xEstimator);
       yEstimator.set(other.yEstimator);
       zEstimator.set(other.zEstimator);
@@ -61,7 +58,7 @@ public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeI
    @Override
    public TimeIntervalBasics getTimeInterval()
    {
-      return timeInterval;
+      return xEstimator.getTimeInterval();
    }
 
    public void addObjectivePosition(double time, Tuple3DReadOnly value)
@@ -113,6 +110,7 @@ public class PolynomialEstimator3D implements PositionTrajectoryGenerator, TimeI
    @Override
    public void compute(double time)
    {
+      currentTime = time;
       xEstimator.compute(time);
       yEstimator.compute(time);
       zEstimator.compute(time);

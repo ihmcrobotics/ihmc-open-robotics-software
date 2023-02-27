@@ -6,14 +6,14 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -66,7 +66,10 @@ public class KinematicsToolboxOutputConverter
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
 
-      neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
+      if (head == null)
+         neckJoints = new OneDoFJointBasics[0];
+      else
+         neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -238,6 +241,7 @@ public class KinematicsToolboxOutputConverter
    {
       computePelvisTrajectoryMessage(worldFrame);
    }
+
    public void computePelvisTrajectoryMessage(ReferenceFrame trajectoryFrame)
    {
       checkIfDataHasBeenSet();

@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.YoPartialFootholdModuleParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -37,7 +36,7 @@ public class FootControlHelper
    private final ToeSlippingDetector toeSlippingDetector;
 
    private final ExplorationParameters explorationParameters;
-   private final FootholdRotationParameters footholdRotationParameters;
+   private final YoPartialFootholdModuleParameters footholdRotationParameters;
    private final SupportStateParameters supportStateParameters;
 
    private final SwingTrajectoryCalculator swingTrajectoryCalculator;
@@ -49,7 +48,7 @@ public class FootControlHelper
                             WorkspaceLimiterParameters workspaceLimiterParameters,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
-                            FootholdRotationParameters footholdRotationParameters,
+                            YoPartialFootholdModuleParameters footholdRotationParameters,
                             SupportStateParameters supportStateParameters,
                             YoRegistry registry)
    {
@@ -197,7 +196,7 @@ public class FootControlHelper
       return explorationParameters;
    }
 
-   public FootholdRotationParameters getFootholdRotationParameters()
+   public YoPartialFootholdModuleParameters getFootholdRotationParameters()
    {
       return footholdRotationParameters;
    }
