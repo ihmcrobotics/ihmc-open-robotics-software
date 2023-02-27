@@ -71,7 +71,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class SwingOverHeightMapTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
    private static final double heightMapResolution = 0.03;
 
    @BeforeEach
