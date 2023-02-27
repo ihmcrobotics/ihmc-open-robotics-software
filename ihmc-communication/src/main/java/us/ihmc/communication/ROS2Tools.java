@@ -9,6 +9,7 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -181,9 +182,9 @@ public class ROS2Tools
                                                                                                  .withSuffix("ouster_lidar");
 
    /** MoCap Topics */
-   public static final ROS2Topic<RigidBodyTransformMessage> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
-                                                                                        .withModule("frame_update")
-                                                                                        .withSuffix("mocap");
+   public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(Pose3D.class)
+                                                                     .withModule("frame_update")
+                                                                     .withSuffix("mocap");
 
    /** Output regions from Lidar (Multisense) from REA */
    public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withTypeName(PlanarRegionsListMessage.class);

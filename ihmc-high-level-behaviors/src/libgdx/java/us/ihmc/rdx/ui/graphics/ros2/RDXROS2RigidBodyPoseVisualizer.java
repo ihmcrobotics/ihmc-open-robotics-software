@@ -5,12 +5,11 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import geometry_msgs.PoseStamped;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -22,7 +21,6 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -37,8 +35,8 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    private PoseStamped pose;
    private final FramePose3D framePose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final ROS2Topic<RigidBodyTransformMessage> topic;
-   private final AtomicReference<RigidBodyTransformMessage> transformMessageReference = new AtomicReference<>();
+   private final ROS2Topic<Pose3D> topic;
+   private final AtomicReference<Pose3D> transformMessageReference = new AtomicReference<>();
    private final SampleInfo sampleInfo = new SampleInfo();
 
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
@@ -50,9 +48,9 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    private final DomainFactory.PubSubImplementation pubSubImplementation;
    private final ImBoolean subscribed = new ImBoolean(false);
    private final Object syncObject = new Object();
-   private final RigidBodyTransformMessage message = new RigidBodyTransformMessage();
+   private final Pose3D message = new Pose3D();
 
-   public RDXROS2RigidBodyPoseVisualizer(String title, DomainFactory.PubSubImplementation pubSubImplementation, ROS2Topic<RigidBodyTransformMessage> topic)
+   public RDXROS2RigidBodyPoseVisualizer(String title, DomainFactory.PubSubImplementation pubSubImplementation, ROS2Topic<Pose3D> topic)
    {
       super(title + " (ROS 2)");
       titleBeforeAdditions = title;
@@ -74,19 +72,19 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    {
       super.update();
 
-      RigidBodyTransformMessage transformMessage = transformMessageReference.getAndSet(null);
+      Pose3D transformMessage = transformMessageReference.getAndSet(null);
 
       if(transformMessage != null)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-         MessageTools.toEuclid(message, transform);
+//         MessageTools.toEuclid(message, transform);
          this.framePose.changeFrame(ReferenceFrame.getWorldFrame());
          poseModel = RDXModelBuilder.createCoordinateFrameInstance(0.1);
          LibGDXTools.toLibGDX(this.framePose, this.tempTransform, poseModel.transform);
       }
    }
 
-   public void queueRenderRigidBodyPose(Subscriber<RigidBodyTransformMessage> subscriber)
+   public void queueRenderRigidBodyPose(Subscriber<Pose3D> subscriber)
    {
       synchronized (syncObject)
       {
