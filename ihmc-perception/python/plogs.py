@@ -48,21 +48,30 @@ def convert_main():
 
 
 
-def play_main():
+def play_main(indices = None):
 
     home = os.path.expanduser('~')
 
     path = home + '/.ihmc/logs/perception/'
 
 
-    data = h5py.File(path + '20230226_003847_PerceptionLog.hdf5', 'r')
+    data = h5py.File(path + '20230226_192147_PerceptionLog.hdf5', 'r')
 
     print(data.keys())
 
-    for i in range(2, 10):
+    if indices is None:
 
-        print("Showing image: ", i)
-        display_image(data, i, 'l515/depth/', 1000)
+        for i in range(2, 10):
+
+            print("Showing image: ", i)
+            display_image(data, i, 'l515/depth/', 20)
+
+    else:
+            
+            for i in indices:
+    
+                print("Showing image: ", i)
+                display_image(data, i, 'l515/depth/', 20)
     
 
 def plot_main():
@@ -113,7 +122,22 @@ def plot_main():
     mocap_position -= mocap_position[0] - sensor_position[0]
     
 
-    plot_position([sensor_position, mocap_position], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]")
+    # Extract frame indices in which there is significant motion, assuming there may be multiple such sections
+    indices = []
+    for i in range(1, mocap_position.shape[0]):
+        if np.linalg.norm(mocap_position[i] - mocap_position[i-1]) > 0.002:
+            indices.append(i)
+
+    # Extract mocap and sensor position and orientation for each index
+    mocap_position = mocap_position[indices]
+    mocap_orientation = mocap_orientation[indices]
+    sensor_position = sensor_position[indices]
+    sensor_orientation = sensor_orientation[indices]
+    
+
+    # plot_position([sensor_position, mocap_position], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]")
+
+    play_main(indices)
 
 
 
