@@ -262,7 +262,7 @@ public class RDXBlackflyCalibrationSuite
                      while (running)
                      {
                         blackflyReader.readBlackflyImage();
-                        calibrationPatternDetectionUI.copyInSourceRGBImage(blackflyReader.getBayerRGImage());
+                        calibrationPatternDetectionUI.copyInSourceImage(blackflyReader.getBayerRGImage());
 
                         if (hdf5ImageLoggingUI != null)
                            hdf5ImageLoggingUI.copyRGBImage(blackflyReader.getBayerRGImage());
