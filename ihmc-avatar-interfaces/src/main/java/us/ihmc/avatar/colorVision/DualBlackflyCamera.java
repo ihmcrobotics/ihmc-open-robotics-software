@@ -117,7 +117,7 @@ public class DualBlackflyCamera
             numberOfBytesInFrame = imageWidth * imageHeight * 4;
             spinImageDataPointer = new BytePointer(numberOfBytesInFrame);
 
-            blackflySourceImage = new BytedecoImage((int) imageWidth, (int) imageHeight, opencv_core.CV_8UC3);
+            blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8U);
 
             // From OpenCV calibrateCamera with Blackfly serial number 17372478 with FE185C086HA-1 fisheye lens
             // Procedure conducted by Bhavyansh Mishra on 12/14/2021
@@ -140,9 +140,9 @@ public class DualBlackflyCamera
             distortionCoefficients = new Mat(-0.1304880574839372, 0.0343337720836711, 0, 0, 0.002347490605947351,
                                              0.163868408051474, -0.02493286434834704, 0.01394671162254435);
             distortionCoefficients.reshape(1, 8);
-            undistortedImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+            undistortedImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
 
-            yuv420Image = new Mat();
+            yuv420Image = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
 
             jpegImageBytePointer = new BytePointer();
             compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
@@ -206,7 +206,11 @@ public class DualBlackflyCamera
             }
 
             convertColorDuration.start();
-            opencv_imgproc.cvtColor(postDistortionMat, yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
+            // Converting BayerRG8 -> BGR -> YUV
+            Mat bgrMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Temporary mat for color conversion
+            opencv_imgproc.cvtColor(postDistortionMat, bgrMat, opencv_imgproc.COLOR_BayerRG2BGR);
+            opencv_imgproc.cvtColor(bgrMat, yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
+            bgrMat.release();
             convertColorDuration.suspend();
 
             encodingDuration.start();
