@@ -59,6 +59,7 @@ public class DualBlackflyCamera
    private BytedecoImage undistortedImage;
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
+   private Mat rgbaMat;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private IntPointer compressionParameters;
    private final Stopwatch getNextImageDuration = new Stopwatch();
@@ -143,6 +144,7 @@ public class DualBlackflyCamera
             undistortedImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
 
             yuv420Image = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
+            rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Mat for color conversion
 
             jpegImageBytePointer = new BytePointer();
             compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
@@ -207,12 +209,10 @@ public class DualBlackflyCamera
 
             convertColorDuration.start();
             // Converting BayerRG8 -> RGBA -> YUV
-            final Mat rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Temporary mat for color conversion
             // Here we use COLOR_BayerBG2RGBA opencv conversion. The Blackfly cameras are set to use BayerRG pixel format.
             // But, for some reason, it's actually BayerBG. Changing to COLOR_BayerRG2RGBA will result in the wrong colors.
             opencv_imgproc.cvtColor(postDistortionMat, rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
             opencv_imgproc.cvtColor(rgbaMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
-            rgbaMat.release();
             convertColorDuration.suspend();
 
             encodingDuration.start();
