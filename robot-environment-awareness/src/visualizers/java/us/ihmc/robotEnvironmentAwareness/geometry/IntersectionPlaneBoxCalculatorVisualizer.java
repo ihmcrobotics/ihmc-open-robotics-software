@@ -2,20 +2,20 @@ package us.ihmc.robotEnvironmentAwareness.geometry;
 
 import java.util.List;
 
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-
 import javafx.application.Application;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
+import us.ihmc.javafx.ApplicationNoModule;
 
-public class IntersectionPlaneBoxCalculatorVisualizer extends Application
+public class IntersectionPlaneBoxCalculatorVisualizer extends ApplicationNoModule
 {
    private final TextureColorPalette1D colorPalette = new TextureColorPalette1D();
    private final JavaFXMultiColorMeshBuilder colorMeshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);

@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 public class PlanarRegionsList
 {
    private final List<PlanarRegion> regions;
+   private transient ArrayList<PlanarRegion> placeholderForRemovingRegions;
 
    public PlanarRegionsList()
    {
@@ -457,6 +458,50 @@ public class PlanarRegionsList
          {
             ids.add(id);
          }
+      }
+   }
+
+   public void removePlanarRegionsWithNaN()
+   {
+      if (placeholderForRemovingRegions == null)
+         placeholderForRemovingRegions = new ArrayList<>();
+
+      placeholderForRemovingRegions.clear();
+
+      for (PlanarRegion region : regions)
+      {
+         if (region.containsNaN())
+         {
+            placeholderForRemovingRegions.add(region);
+         }
+      }
+
+      for (PlanarRegion planarRegionToRemove : placeholderForRemovingRegions)
+      {
+         regions.remove(planarRegionToRemove);
+      }
+
+      placeholderForRemovingRegions.clear();
+   }
+
+   public void queuePlanarRegionForRemoval(PlanarRegion planarRegionToRemove)
+   {
+      if (placeholderForRemovingRegions == null)
+         placeholderForRemovingRegions = new ArrayList<>();
+
+      placeholderForRemovingRegions.add(planarRegionToRemove);
+   }
+
+   public void removeQueuedPlanarRegions()
+   {
+      if (placeholderForRemovingRegions != null)
+      {
+         for (PlanarRegion regionToRemove : placeholderForRemovingRegions)
+         {
+            regions.remove(regionToRemove);
+         }
+
+         placeholderForRemovingRegions.clear();
       }
    }
 

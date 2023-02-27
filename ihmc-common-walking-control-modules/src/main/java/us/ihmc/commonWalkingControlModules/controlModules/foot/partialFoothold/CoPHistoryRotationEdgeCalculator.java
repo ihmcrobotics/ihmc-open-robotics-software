@@ -33,7 +33,7 @@ public class CoPHistoryRotationEdgeCalculator implements RotationEdgeCalculator
 
    public CoPHistoryRotationEdgeCalculator(RobotSide side,
                                            ReferenceFrame soleFrame,
-                                           FootholdRotationParameters rotationParameters,
+                                           YoPartialFootholdModuleParameters rotationParameters,
                                            double dt,
                                            YoRegistry parentRegistry,
                                            Color color,

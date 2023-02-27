@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
@@ -9,12 +10,12 @@ import java.util.List;
 
 public class LookAndStepBodyPathLocalizationResult
 {
-   private final Point3D closestPointAlongPath;
+   private final Pose3D closestPointAlongPath;
    private final int closestSegmentIndex;
    private final Pose3DReadOnly midFeetAlongPath;
    private final List<? extends Pose3DReadOnly> bodyPathPlan;
 
-   public LookAndStepBodyPathLocalizationResult(Point3D closestPointAlongPath,
+   public LookAndStepBodyPathLocalizationResult(Pose3D closestPointAlongPath,
                                                 int closestSegmentIndex,
                                                 Pose3DReadOnly midFeetAlongPath,
                                                 List<? extends Pose3DReadOnly> bodyPathPlan)
@@ -25,7 +26,7 @@ public class LookAndStepBodyPathLocalizationResult
       this.bodyPathPlan = bodyPathPlan;
    }
 
-   public Point3D getClosestPointAlongPath()
+   public Pose3D getClosestPointAlongPath()
    {
       return closestPointAlongPath;
    }

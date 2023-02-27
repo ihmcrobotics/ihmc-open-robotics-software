@@ -1,13 +1,12 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -60,6 +59,11 @@ public class FootstepPlannerRequest
    private boolean planBodyPath;
 
    /**
+    * If true, the planner will plan steps. If false, it will only return the body path.
+    */
+   private boolean planFootsteps;
+
+   /**
     * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
     */
    private boolean performAStarSearch;
@@ -93,6 +97,11 @@ public class FootstepPlannerRequest
     * Planar regions. May be null or empty to enable flat ground mode.
     */
    private PlanarRegionsList planarRegionsList;
+
+   /**
+    * Height map. May be null to enable flat ground mode.
+    */
+   private HeightMapMessage heightMapMessage;
 
    /**
     * If true, will ignore planar regions and plan on flat ground.
@@ -130,6 +139,7 @@ public class FootstepPlannerRequest
       abortIfGoalStepSnappingFails = false;
       abortIfBodyPathPlannerFails = false;
       planBodyPath = false;
+      planFootsteps = true;
       performAStarSearch = true;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
@@ -137,6 +147,7 @@ public class FootstepPlannerRequest
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
       planarRegionsList = null;
+      heightMapMessage = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
@@ -223,6 +234,11 @@ public class FootstepPlannerRequest
       this.planBodyPath = planBodyPath;
    }
 
+   public void setPlanFootsteps(boolean planFootsteps)
+   {
+      this.planFootsteps = planFootsteps;
+   }
+
    public void setPerformAStarSearch(boolean performAStarSearch)
    {
       this.performAStarSearch = performAStarSearch;
@@ -256,6 +272,11 @@ public class FootstepPlannerRequest
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
+   }
+
+   public void setHeightMapMessage(HeightMapMessage heightMapMessage)
+   {
+      this.heightMapMessage = heightMapMessage;
    }
 
    public void setAssumeFlatGround(boolean assumeFlatGround)
@@ -313,6 +334,11 @@ public class FootstepPlannerRequest
       return planBodyPath;
    }
 
+   public boolean getPlanFootsteps()
+   {
+      return planFootsteps;
+   }
+
    public boolean getPerformAStarSearch()
    {
       return performAStarSearch;
@@ -346,6 +372,11 @@ public class FootstepPlannerRequest
    public PlanarRegionsList getPlanarRegionsList()
    {
       return planarRegionsList;
+   }
+
+   public HeightMapMessage getHeightMapMessage()
+   {
+      return heightMapMessage;
    }
 
    public boolean getAssumeFlatGround()
@@ -384,6 +415,7 @@ public class FootstepPlannerRequest
       setAbortIfGoalStepSnappingFails(requestPacket.getAbortIfGoalStepSnappingFails());
       setAbortIfBodyPathPlannerFails(requestPacket.getAbortIfBodyPathPlannerFails());
       setPlanBodyPath(requestPacket.getPlanBodyPath());
+      setPlanFootsteps(requestPacket.getPlanFootsteps());
       setPerformAStarSearch(requestPacket.getPerformAStarSearch());
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
       setGoalYawProximity(requestPacket.getGoalYawProximity());
@@ -405,6 +437,7 @@ public class FootstepPlannerRequest
 
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getPlanarRegionsListMessage());
       setPlanarRegionsList(planarRegionsList);
+      setHeightMapMessage(requestPacket.getHeightMapMessage());
    }
 
    public void setPacket(FootstepPlanningRequestPacket requestPacket)
@@ -420,6 +453,7 @@ public class FootstepPlannerRequest
       requestPacket.setAbortIfGoalStepSnappingFails(getAbortIfGoalStepSnappingFails());
       requestPacket.setAbortIfBodyPathPlannerFails(getAbortIfBodyPathPlannerFails());
       requestPacket.setPlanBodyPath(getPlanBodyPath());
+      requestPacket.setPlanFootsteps(getPlanFootsteps());
       requestPacket.setPerformAStarSearch(getPerformAStarSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
@@ -441,6 +475,11 @@ public class FootstepPlannerRequest
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
          requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
       }
+
+      if (getHeightMapMessage() != null)
+      {
+         requestPacket.getHeightMapMessage().set(getHeightMapMessage());
+      }
    }
 
    public void set(FootstepPlannerRequest other)
@@ -459,6 +498,7 @@ public class FootstepPlannerRequest
       this.abortIfBodyPathPlannerFails = other.abortIfBodyPathPlannerFails;
 
       this.planBodyPath = other.planBodyPath;
+      this.planFootsteps = other.planFootsteps;
       this.performAStarSearch = other.performAStarSearch;
       this.goalDistanceProximity = other.goalDistanceProximity;
       this.goalYawProximity = other.goalYawProximity;
@@ -478,5 +518,7 @@ public class FootstepPlannerRequest
       {
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
       }
+
+      this.heightMapMessage = other.heightMapMessage;
    }
 }

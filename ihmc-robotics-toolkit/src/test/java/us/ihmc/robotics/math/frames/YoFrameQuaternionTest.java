@@ -63,7 +63,7 @@ public class YoFrameQuaternionTest
 
       YawPitchRoll yawPitchRollActual = new YawPitchRoll(yoFrameQuaternion);
       YawPitchRoll yawPitchRollExpected = new YawPitchRoll();
-      EuclidCoreTestTools.assertYawPitchRollEquals(yawPitchRollExpected, yawPitchRollActual, EPS);
+      EuclidCoreTestTools.assertEquals(yawPitchRollExpected, yawPitchRollActual, EPS);
    }
 
    @Test

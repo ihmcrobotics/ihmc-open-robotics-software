@@ -82,7 +82,7 @@ public class ROS2NetworkTest
                {
                   // use SSHJ to remote execute this class with arguments
                   // connect to server at hostname
-                  RemoteSSHTools.session(remoteMachine.getSSHHostname(), remoteMachine.getUsername(), connection ->
+                  SSHJTools.sessionWithSFTP(remoteMachine.getSSHHostname(), remoteMachine.getUsername(), connection ->
                   {
                      // find deploy directory and start the script
                      connection.exec(remoteMachine.getDeployDirectory() + "/ROS2NetworkTest" +

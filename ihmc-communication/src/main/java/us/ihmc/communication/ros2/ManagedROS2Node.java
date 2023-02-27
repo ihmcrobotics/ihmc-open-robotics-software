@@ -1,6 +1,8 @@
 package us.ihmc.communication.ros2;
 
 import us.ihmc.pubsub.TopicDataType;
+import us.ihmc.pubsub.attributes.PublisherAttributes;
+import us.ihmc.pubsub.attributes.SubscriberAttributes;
 import us.ihmc.ros2.*;
 
 import java.io.IOException;
@@ -25,6 +27,18 @@ public class ManagedROS2Node implements ROS2NodeInterface
    }
 
    @Override
+   public <T> PublisherAttributes createPublisherAttributes(TopicDataType<T> topicDataType, String topicName, ROS2QosProfile qosProfile)
+   {
+      return ros2Node.createPublisherAttributes(topicDataType, topicName,qosProfile);
+   }
+
+   @Override
+   public <T> ROS2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, PublisherAttributes publisherAttributes) throws IOException
+   {
+      return createManagedPublisher(ros2Node.createPublisher(topicDataType, publisherAttributes));
+   }
+
+   @Override
    public <T> ROS2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, String topicName) throws IOException
    {
       return createManagedPublisher(ros2Node.createPublisher(topicDataType, topicName));
@@ -39,6 +53,26 @@ public class ManagedROS2Node implements ROS2NodeInterface
    private <T> ManagedROS2Publisher<T> createManagedPublisher(ROS2PublisherBasics<T> publisher)
    {
       return new ManagedROS2Publisher<>(publisher, enabled::get);
+   }
+
+   @Override
+   public <T> SubscriberAttributes createSubscriberAttributes(String topicName, TopicDataType<T> topicDataType, ROS2QosProfile qosProfile)
+   {
+      return ros2Node.createSubscriberAttributes(topicName, topicDataType, qosProfile);
+   }
+
+   @Override
+   public <T> ROS2Subscription<T> createSubscription(TopicDataType<T> topicDataType,
+                                                     NewMessageListener<T> subscriberListener,
+                                                     SubscriberAttributes subscriberAttributes) throws IOException
+   {
+      return ros2Node.createSubscription(topicDataType, subscriberListener, subscriberAttributes);
+   }
+
+   public <T> QueuedROS2Subscription<T> createQueuedSubscription(TopicDataType<T> topicDataType, SubscriberAttributes subscriberAttributes, int queueSize)
+         throws IOException
+   {
+      return ros2Node.createQueuedSubscription(topicDataType, subscriberAttributes, queueSize);
    }
 
    @Override

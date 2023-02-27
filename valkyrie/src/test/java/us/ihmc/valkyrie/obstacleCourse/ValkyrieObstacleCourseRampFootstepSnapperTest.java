@@ -7,7 +7,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseRampFootstepSnapperTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 @Tag("humanoid-obstacle-slow")
@@ -27,7 +26,7 @@ public class ValkyrieObstacleCourseRampFootstepSnapperTest extends DRCObstacleCo
 
    @Override
    @Test
-   public void testWalkingUpRampUsingSnapFootsteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingUpRampUsingSnapFootsteps()
    {
       super.testWalkingUpRampUsingSnapFootsteps();
    }

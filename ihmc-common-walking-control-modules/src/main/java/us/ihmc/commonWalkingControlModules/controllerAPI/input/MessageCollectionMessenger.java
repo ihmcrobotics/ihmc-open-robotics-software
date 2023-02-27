@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import controller_msgs.msg.dds.MessageCollection;
-import controller_msgs.msg.dds.MessageCollectionNotification;
+import ihmc_common_msgs.msg.dds.MessageCollection;
+import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;

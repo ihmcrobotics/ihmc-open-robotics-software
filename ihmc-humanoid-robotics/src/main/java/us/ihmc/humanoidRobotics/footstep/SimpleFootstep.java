@@ -17,6 +17,7 @@ public class SimpleFootstep
    private final FramePose3D soleFramePose = new FramePose3D();
    private final ConvexPolygon2D foothold = new ConvexPolygon2D();
    private boolean isAdjustable;
+   private boolean shouldCheckReachability;
 
 
    public RobotSide getRobotSide()
@@ -72,6 +73,16 @@ public class SimpleFootstep
       return isAdjustable;
    }
 
+   public void setShouldCheckReachability(boolean shouldCheckReachability)
+   {
+      this.shouldCheckReachability = shouldCheckReachability;
+   }
+
+   public boolean getShouldCheckReachability()
+   {
+      return shouldCheckReachability;
+   }
+
    public boolean hasFoothold()
    {
       if (this.foothold.isEmpty())
@@ -99,6 +110,7 @@ public class SimpleFootstep
       this.soleFramePose.setIncludingFrame(other.soleFramePose);
       this.foothold.set(other.foothold);
       this.isAdjustable = other.isAdjustable;
+      this.shouldCheckReachability = other.shouldCheckReachability;
    }
 
    public void set(Footstep other)
@@ -107,6 +119,7 @@ public class SimpleFootstep
       setSoleFramePose(other.getFootstepPose());
       setFoothold(other.getPredictedContactPoints());
       setIsAdjustable(other.getIsAdjustable());
+      setShouldCheckReachability(other.getShouldCheckForReachability());
    }
 
    @Override
@@ -127,6 +140,8 @@ public class SimpleFootstep
             return false;
          if (isAdjustable != other.isAdjustable)
             return false;
+         if (shouldCheckReachability != other.shouldCheckReachability)
+            return false;
          return true;
       }
       else
@@ -142,6 +157,7 @@ public class SimpleFootstep
       message += "\nSole frame pose = " + soleFramePose;
       message += "\nFoothold = " + foothold;
       message += "\nIs adjustable = " + isAdjustable;
+      message += "\nShould check reachability = " + shouldCheckReachability;
 
       return message;
    }

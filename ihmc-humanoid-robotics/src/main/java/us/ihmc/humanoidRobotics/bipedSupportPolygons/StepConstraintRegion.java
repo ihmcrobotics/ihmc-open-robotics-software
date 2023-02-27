@@ -120,7 +120,7 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       return regionId;
    }
 
-   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, List<Point2D> concaveHullVertices)
+   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DReadOnly> concaveHullVertices)
    {
       this(transformToWorld, Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices));
    }

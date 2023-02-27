@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 public class ThrottledRobotStateCallback
 {
    private final double updatePeriod;
-   private final ROS2SyncedRobotModel syncableRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final Timer throttleTimer = new Timer();
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ArrayList<Consumer<ROS2SyncedRobotModel>> consumers = new ArrayList<>();
@@ -29,17 +29,17 @@ public class ThrottledRobotStateCallback
    public ThrottledRobotStateCallback(ROS2NodeInterface ros2Node, DRCRobotModel robotModel, double rateHz)
    {
       updatePeriod = UnitConversions.hertzToSeconds(rateHz);
-      syncableRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
-      syncableRobot.addRobotConfigurationDataReceivedCallback(() -> executor.clearQueueAndExecute(waitThenAct));
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      syncedRobot.addRobotConfigurationDataReceivedCallback(() -> executor.clearQueueAndExecute(waitThenAct));
    }
 
    private void waitThenAct()
    {
       throttleTimer.sleepUntilExpiration(updatePeriod);
-      syncableRobot.update();
+      syncedRobot.update();
       for (Consumer<ROS2SyncedRobotModel> consumer : consumers)
       {
-         consumer.accept(syncableRobot);
+         consumer.accept(syncedRobot);
       }
       throttleTimer.reset();
    }

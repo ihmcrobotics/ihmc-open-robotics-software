@@ -2,10 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import org.apache.commons.math3.util.Precision;
 
-import rcl_interfaces.msg.dds.Log;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -17,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,8 +36,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    private final DoubleProvider minimumTransferTime;
 
-   private final LegConfigurationManager legConfigurationManager;
-   private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
    private final YoBoolean resubmitStepsInTransferEveryTick = new YoBoolean("resubmitStepsInTransferEveryTick", registry);
 
@@ -54,6 +49,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
+
+   // This flag indicates whether or not its the first tick in the transfer state. This is used to avoid double-computing some of the calls.
+   private boolean firstTickInState = true;
 
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum,
                                               WalkingMessageHandler walkingMessageHandler,
@@ -72,9 +70,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       this.minimumTransferTime = minimumTransferTime;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
 
-      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
-
-      fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer",
                                                                         registry,
                                                                         walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
@@ -88,8 +83,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                                                            "minimumSlowTransferDuration",
                                                                            registry,
                                                                            walkingControllerParameters.getMinimumSlowTransferDuration());
-      resubmitStepsInTransferEveryTick.set(walkingControllerParameters.resubmitStepsInSwingEveryTick());
-
+      resubmitStepsInTransferEveryTick.set(walkingControllerParameters.resubmitStepsInTransferEveryTick());
 
       numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
@@ -119,7 +113,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
 
       int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
@@ -149,16 +142,14 @@ public class TransferToWalkingSingleSupportState extends TransferState
       balanceManager.initializeICPPlanForTransfer();
 
       pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
-      pelvisOrientationManager.initializeTransfer(transferToSide, firstTiming.getTransferTime(), firstTiming.getSwingTime());
-
-      legConfigurationManager.beginStraightening(transferToSide);
-      legConfigurationManager.setFullyExtendLeg(transferToSide, false);
+      pelvisOrientationManager.initializeTransfer();
    }
 
    @Override
    public void doAction(double timeInState)
    {
-      if (resubmitStepsInTransferEveryTick.getBooleanValue() && balanceManager.getNumberOfStepsBeingConsidered() < walkingMessageHandler.getCurrentNumberOfFootsteps())
+      if (resubmitStepsInTransferEveryTick.getBooleanValue()
+            && balanceManager.getNumberOfStepsBeingConsidered() < walkingMessageHandler.getCurrentNumberOfFootsteps())
       {
          int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
          for (int i = balanceManager.getNumberOfStepsBeingConsidered() - 1; i < stepsToAdd; i++)
@@ -173,11 +164,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
          }
       }
 
-
       RobotSide swingSide = transferToSide.getOppositeSide();
-      feetManager.updateSwingTrajectoryPreview(swingSide);
+      if (!firstTickInState)
+         feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
+      updateWalkingTrajectoryPath();
 
       if (!doManualLiftOff())
       {
@@ -188,12 +180,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       super.doAction(timeInState);
 
       double transferDuration = currentTransferDuration.getDoubleValue();
-      boolean pastMinimumTime = timeInState > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration;
-      boolean isFootWellPosition = legConfigurationManager.areFeetWellPositionedForCollapse(transferToSide.getOppositeSide());
-      if (pastMinimumTime && isFootWellPosition && !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
-      {
-         legConfigurationManager.collapseLegDuringTransfer(transferToSide);
-      }
 
       updateFootPlanOffset();
 
@@ -209,6 +195,15 @@ public class TransferToWalkingSingleSupportState extends TransferState
          tempAngularVelocity.changeFrame(soleZUpFrame); // The y component is equivalent to the pitch rate since the yaw and roll rate are 0.0
          feetManager.liftOff(transferToSide.getOppositeSide(), tempOrientation.getPitch(), tempAngularVelocity.getY(), toeOffDuration);
       }
+
+      firstTickInState = false;
+   }
+
+   private void updateWalkingTrajectoryPath()
+   {
+      walkingTrajectoryPath.clearFootsteps();
+      walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
+      walkingTrajectoryPath.updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
    }
 
    private boolean doManualLiftOff()
@@ -220,6 +215,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void onEntry()
    {
+      firstTickInState = true;
+
       if (balanceManager.getICPErrorMagnitude() > icpErrorThresholdForSlowTransfer.getValue())
       {
          walkingMessageHandler.peekTiming(0, footstepTimings[0]);
@@ -246,6 +243,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.onExit(timeInState);
 
+      firstTickInState = true;
       balanceManager.minimizeAngularMomentumRateZ(false);
    }
 

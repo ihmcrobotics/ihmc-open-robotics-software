@@ -6,6 +6,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.ICPQPInput;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.robotics.Assert;
 public class ICPQPInputTest

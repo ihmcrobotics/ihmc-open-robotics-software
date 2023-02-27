@@ -34,14 +34,16 @@ public interface RobotCollisionModel
     */
    List<Collidable> getRobotCollidables(MultiBodySystemBasics multiBodySystem);
 
+   @Deprecated
    static RigidBodyBasics findRigidBody(String name, MultiBodySystemBasics multiBodySystem)
    {
-      return multiBodySystem.getRootBody().subtreeStream().filter(body -> body.getName().equals(name)).findAny().orElse(null);
+      return multiBodySystem.findRigidBody(name);
    }
 
+   @Deprecated
    static JointBasics findJoint(String name, MultiBodySystemBasics multiBodySystem)
    {
-      return multiBodySystem.getAllJoints().stream().filter(joint -> joint.getName().equals(name)).findAny().orElse(null);
+      return multiBodySystem.findJoint(name);
    }
 
    public static RobotCollisionModel singleBodyCollisionModel(String bodyName, Function<RigidBodyBasics, Collidable> collidableBuilder)

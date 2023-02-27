@@ -1,6 +1,9 @@
 package us.ihmc.tools.io;
 
+import us.ihmc.commons.nio.BasicPathVisitor;
+
 import java.nio.file.Path;
+import java.util.function.BiConsumer;
 
 /**
  * A hybrid directory defines:
@@ -9,10 +12,9 @@ import java.nio.file.Path;
  */
 public class HybridDirectory
 {
+   private final WorkspaceDirectory workspaceDirectory;
    private final Path externalDirectory;
-   private final Class<?> classForLoading;
-   private final Path workspaceDirectory;
-   private final String pathNecessaryForClasspathLoading;
+   private HybridResourceMode mode = HybridResourceMode.WORKSPACE;
 
    public HybridDirectory(Path externalDirectory,
                           String directoryNameToAssumePresent,
@@ -47,39 +49,48 @@ public class HybridDirectory
                           Class<?> classForResourceDirectory,
                           String subsequentOrAbsoluteResourcePackagePath)
    {
+      this.workspaceDirectory = new WorkspaceDirectory(directoryNameToAssumePresent,
+                                                       subsequentPathToResourceFolder,
+                                                       classForResourceDirectory,
+                                                       subsequentOrAbsoluteResourcePackagePath);
+
       String subsequentExternalPath = subsequentOrAbsoluteResourcePackagePath;
       if (subsequentExternalPath.startsWith("/"))
          subsequentExternalPath = subsequentExternalPath.replaceFirst("/", "");
       this.externalDirectory = externalDirectory.resolve(subsequentExternalPath).toAbsolutePath().normalize();
+   }
 
-      this.classForLoading = classForResourceDirectory;
-      String putTogetherResourcePath = "";
-      boolean isAbsolute = subsequentOrAbsoluteResourcePackagePath.startsWith("/");
-      if (!isAbsolute && classForResourceDirectory != null)
-      {
-         putTogetherResourcePath += classForResourceDirectory.getPackage().getName().replaceAll("\\.", "/");
-         putTogetherResourcePath += "/";
-         putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath;
-         pathNecessaryForClasspathLoading = subsequentOrAbsoluteResourcePackagePath;
-      }
-      else if (isAbsolute)
-      {
-         putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath.replaceFirst("/", "");
-         pathNecessaryForClasspathLoading = subsequentOrAbsoluteResourcePackagePath;
-      }
-      else // class is null & path is relative
-      {
-         pathNecessaryForClasspathLoading = subsequentOrAbsoluteResourcePackagePath;
-      }
+   public void walkResourcesFlat(BiConsumer<String, BasicPathVisitor.PathType> pathVisitor)
+   {
+      workspaceDirectory.walkResourcesFlat(pathVisitor);
+   }
 
-      workspaceDirectory = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent,
-                                                                 subsequentPathToResourceFolder,
-                                                                 putTogetherResourcePath);
+   /** If the directory is available for reading/writing using files.
+    *  If not, we are running from a JAR without the resource extracted,
+    *  or the working directory is wrong. */
+   public boolean isWorkspaceFileAccessAvailable()
+   {
+      return workspaceDirectory.isFileAccessAvailable();
+   }
+
+   public void setMode(HybridResourceMode mode)
+   {
+      this.mode = mode;
+   }
+
+   public HybridResourceMode getMode()
+   {
+      return mode;
+   }
+
+   public Path getDirectoryForWriting()
+   {
+      return mode == HybridResourceMode.WORKSPACE ? workspaceDirectory.getDirectoryPath() : externalDirectory;
    }
 
    public Path getWorkspaceDirectory()
    {
-      return workspaceDirectory;
+      return workspaceDirectory.getDirectoryPath();
    }
 
    public Path getExternalDirectory()
@@ -89,11 +100,21 @@ public class HybridDirectory
 
    public Class<?> getClassForLoading()
    {
-      return classForLoading;
+      return workspaceDirectory.getClassForLoading();
    }
 
    public String getPathNecessaryForClasspathLoading()
    {
-      return pathNecessaryForClasspathLoading;
+      return workspaceDirectory.getPathNecessaryForClasspathLoading();
+   }
+
+   public String getPathNecessaryForResourceExploring()
+   {
+      return workspaceDirectory.getPathNecessaryForResourceExploring();
+   }
+
+   WorkspaceDirectory getInternalWorkspaceDirectory()
+   {
+      return workspaceDirectory;
    }
 }

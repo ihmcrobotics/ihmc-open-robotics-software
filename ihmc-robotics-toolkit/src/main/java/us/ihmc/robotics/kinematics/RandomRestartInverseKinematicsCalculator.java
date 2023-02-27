@@ -5,6 +5,7 @@ import java.util.Random;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
@@ -31,7 +32,7 @@ public class RandomRestartInverseKinematicsCalculator implements InverseKinemati
    }
    
    @Override
-   public boolean solve(RigidBodyTransform desiredTransform)
+   public boolean solve(RigidBodyTransformReadOnly desiredTransform)
    {
       bestErrorScalar = Double.POSITIVE_INFINITY;
       

@@ -143,6 +143,11 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                                                      RobotSide stanceSide = state.getFootstep(0).getRobotSide().getOppositeSide();
                                                                      return state.getFootPose(stanceSide);
                                                                   });
+      positionSplitFractionCalculator.setFirstSwingPoseProvider(() ->
+                                                                {
+                                                                   RobotSide stanceSide = state.getFootstep(0).getRobotSide();
+                                                                   return state.getFootPose(stanceSide);
+                                                                });
       positionSplitFractionCalculator.setStepPoseGetter((i) -> state.getFootstep(i).getFootstepPose());
 
       areaSplitFractionCalculator.setNumberOfStepsProvider(state::getNumberOfFootstep);
@@ -215,11 +220,17 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
    private final FrameConvexPolygon2DBasics nextPolygon = new FrameConvexPolygon2D();
 
+   private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
+   private final FramePoint2D initialCoP = new FramePoint2D();
+   private final FramePoint3D restrictedInitialCoP = new FramePoint3D();
+
    public void compute(CoPTrajectoryGeneratorState state)
    {
       int numberOfUpcomingFootsteps = Math.min(parameters.getNumberOfStepsToConsider(), state.getNumberOfFootstep());
 
       reset(state);
+      supportPolygon.clear(worldFrame);
+
       // Add initial support states of the feet and set the moving polygons
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -231,15 +242,22 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
          movingPolygonsInSole.get(robotSide).setIncludingFrame(state.getFootPolygonInSole(robotSide));
          movingPolygonsInSole.get(robotSide).changeFrameAndProjectToXYPlane(stepFrame);
+         supportPolygon.addVerticesMatchingFrame(movingPolygonsInSole.get(robotSide), false);
       }
+      supportPolygon.update();
 
       positionSplitFractionCalculator.computeSplitFractionsFromPosition();
       areaSplitFractionCalculator.computeSplitFractionsFromArea();
 
+      initialCoP.set(state.getInitialCoP());
+      if (!supportPolygon.isPointInside(initialCoP))
+         supportPolygon.orthogonalProjection(initialCoP);
+      restrictedInitialCoP.set(initialCoP, state.getInitialCoP().getZ());
+
       // compute cop waypoint location
       SettableContactStateProvider contactStateProvider = contactStateProviders.add();
       contactStateProvider.setStartTime(0.0);
-      contactStateProvider.setStartECMPPosition(state.getInitialCoP());
+      contactStateProvider.setStartECMPPosition(restrictedInitialCoP);
 
       // Put first CoP as per chicken support computations in case starting from rest
       if (numberOfUpcomingFootsteps == 0)
@@ -537,7 +555,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
       constrainToPolygon(copInFootFrame, basePolygon, parameters.getMinimumDistanceInsidePolygon());
 
-      copLocationToPack.setMatchingFrame(copInFootFrame, 0.);
+      copLocationToPack.setIncludingFrame(copInFootFrame, 0.0);
       copLocationToPack.changeFrame(worldFrame);
    }
 
@@ -561,7 +579,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
             copInFootFrame.setToZero(supportFootPolygon.getReferenceFrame());
             copInFootFrame.interpolate(supportFootPolygon.getVertex(0), supportFootPolygon.getVertex(1), 0.5);
             copInFootFrame.addY(supportSide.negateIfLeftSide(parameters.getExitCMPOffset().getY()));
-            supportFootPolygon.orthogonalProjection(copInFootFrame);
+            if (!supportFootPolygon.isPointInside(copInFootFrame))
+               supportFootPolygon.orthogonalProjection(copInFootFrame);
          }
          else
          {
@@ -628,12 +647,14 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                    FrameConvexPolygon2DReadOnly constraintPolygon,
                                    double safeDistanceFromSupportPolygonEdges)
    {
+      // TODO this is not very efficient
       // don't need to do anything if it's already inside
       if (constraintPolygon.signedDistance(copPointToConstrain) <= -safeDistanceFromSupportPolygonEdges)
          return;
 
       polygonScaler.scaleConvexPolygon(constraintPolygon, safeDistanceFromSupportPolygonEdges, tempPolygon);
       copPointToConstrain.changeFrame(constraintPolygon.getReferenceFrame());
-      tempPolygon.orthogonalProjection(copPointToConstrain);
+      if (!tempPolygon.isPointInside(copPointToConstrain))
+         tempPolygon.orthogonalProjection(copPointToConstrain);
    }
 }

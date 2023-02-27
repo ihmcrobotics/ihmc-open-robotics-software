@@ -1,6 +1,6 @@
 package us.ihmc.avatar.ros.subscriber;
 
-import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
+import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import std_msgs.Empty;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;

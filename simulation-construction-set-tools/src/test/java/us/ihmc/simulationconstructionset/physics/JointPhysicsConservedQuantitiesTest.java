@@ -167,11 +167,11 @@ public class JointPhysicsConservedQuantitiesTest
 
          robot.computeCOMMomentum(rootJoint, new Point3D(), currentLinearMomentum, currentAngularMomentum);
 
-         EuclidCoreTestTools.assertTuple3DEquals(
+         EuclidCoreTestTools.assertEquals(
                "Linear momentum hasn't been conserved. p(t=0)=" + EuclidCoreIOTools.getTuple3DString("%6.8f", initialLinearMomentum) + ", p(t=" + robot
                      .getTime() + ")=" + EuclidCoreIOTools.getTuple3DString("%6.8f", currentLinearMomentum), initialLinearMomentum, currentLinearMomentum,
                epsilon);
-         EuclidCoreTestTools.assertTuple3DEquals(
+         EuclidCoreTestTools.assertEquals(
                "Angular momentum hasn't been conserved. L(t=0)=" + EuclidCoreIOTools.getTuple3DString("%6.8f", initialAngularMomentum) + ", L(t=" + robot
                      .getTime() + ")=" + EuclidCoreIOTools.getTuple3DString("%6.8f", currentAngularMomentum), initialAngularMomentum, currentAngularMomentum,
                epsilon);

@@ -3,10 +3,14 @@ package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
-import us.ihmc.commonWalkingControlModules.touchdownDetector.*;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.FootVelocityBasedTouchDownDetection;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.ForceBasedTouchDownDetection;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.WeightedAverageWrenchCalculator;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.estimator.footSwitch.JointTorqueBasedWrenchCalculator.JointTorqueProvider;
@@ -16,15 +20,13 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
+import us.ihmc.scs2.simulation.robot.sensors.SimWrenchSensor;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
-import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -52,11 +54,11 @@ public class QuadrupedFootSwitchFactory
    private final OptionalFactoryField<Boolean> useFootVelocityTouchdown = new OptionalFactoryField<>("useFootVelocityTouchdown");
 
    // Used to create the ground contact point based foot switches.
-   private final OptionalFactoryField<FloatingRootJointRobot> simulatedRobot = new OptionalFactoryField<>("simulatedRobot");
+   private final OptionalFactoryField<Robot> simulatedRobot = new OptionalFactoryField<>("simulatedRobot");
 
    protected YoRegistry registry;
 
-   private void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
+   private void setupTouchdownBasedFootSwitches(QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches, double totalRobotWeight)
    {
 
       DoubleParameter estimatedWrenchWeight = new DoubleParameter("estimatedWrenchAverageWeight" + suffix.get(), registry, 1.0);
@@ -140,11 +142,11 @@ public class QuadrupedFootSwitchFactory
       }
    }
 
-   private void setupWrenchBasedPointFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
+   private void setupWrenchBasedPointFootSwitches(QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches, double totalRobotWeight)
    {
       if (!simulatedRobot.hasValue())
       {
-         PrintTools.warn(this, "simulatedRobot is null, creating touchdown based foot switches.");
+         LogTools.warn("simulatedRobot is null, creating touchdown based foot switches.");
          setupTouchdownBasedFootSwitches(footSwitches, totalRobotWeight);
          return;
       }
@@ -155,27 +157,26 @@ public class QuadrupedFootSwitchFactory
          JointBasics parentJoint = contactablePlaneBody.getRigidBody().getParentJoint();
          String jointName = parentJoint.getName();
          String forceSensorName = contactablePlaneBody.getName() + "ForceSensor";
-         FloatingRootJointRobot robot = simulatedRobot.get();
-         OneDegreeOfFreedomJoint forceTorqueSensorJoint = robot.getOneDegreeOfFreedomJoint(jointName);
-         List<GroundContactPoint> contactPoints = forceTorqueSensorJoint.getGroundContactPointGroup().getGroundContactPoints();
+         Robot robot = simulatedRobot.get();
+         SimJointBasics forceTorqueSensorJoint = robot.findJoint(jointName);
          RigidBodyTransform transformToParentJoint = contactablePlaneBody.getSoleFrame().getTransformToDesiredFrame(parentJoint.getFrameAfterJoint());
-         WrenchCalculatorInterface wrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensorName, contactPoints, forceTorqueSensorJoint, transformToParentJoint, robot.getRobotsYoRegistry());
-         WrenchCalculatorWrapper wrenchCalculatorWrapper = new WrenchCalculatorWrapper(wrenchCalculator, contactablePlaneBody.getSoleFrame());
-         FootSwitchInterface footSwitch = new QuadrupedWrenchBasedFootSwitch(wrenchCalculatorWrapper, contactablePlaneBody, totalRobotWeight, registry);
+         SimWrenchSensor wrenchSensor = forceTorqueSensorJoint.getAuxialiryData().addWrenchSensor(new WrenchSensorDefinition(forceSensorName, transformToParentJoint));
+         WrenchCalculatorWrapper wrenchCalculatorWrapper = new WrenchCalculatorWrapper(wrenchSensor, contactablePlaneBody.getSoleFrame());
+         QuadrupedFootSwitchInterface footSwitch = new QuadrupedWrenchBasedFootSwitch(wrenchCalculatorWrapper, contactablePlaneBody, totalRobotWeight, registry);
          footSwitches.set(robotQuadrant, footSwitch);
       }
    }
 
-   private void setupSettableFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
+   private void setupSettableFootSwitches(QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches, double totalRobotWeight)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         SettableFootSwitch footSwitch = new SettableFootSwitch(footContactableBodies.get().get(robotQuadrant), totalRobotWeight, 4, registry);
+         QuadrupedSettableFootSwitch footSwitch = new QuadrupedSettableFootSwitch(footContactableBodies.get().get(robotQuadrant), totalRobotWeight, 4, registry);
          footSwitches.set(robotQuadrant, footSwitch);
       }
    }
 
-   public QuadrantDependentList<FootSwitchInterface> createFootSwitches()
+   public QuadrantDependentList<QuadrupedFootSwitchInterface> createFootSwitches()
    {
       useKneeTorqueTouchdown.setDefaultValue(false);
       useFootVelocityTouchdown.setDefaultValue(false);
@@ -187,7 +188,7 @@ public class QuadrupedFootSwitchFactory
 
       yoVariableRegistry.get().addChild(registry);
 
-      QuadrantDependentList<FootSwitchInterface> footSwitches = new QuadrantDependentList<FootSwitchInterface>();
+      QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches = new QuadrantDependentList<>();
       double gravityMagnitude = Math.abs(gravity.get());
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.get().getElevator()) * gravityMagnitude;
 
@@ -260,7 +261,7 @@ public class QuadrupedFootSwitchFactory
       this.kneeTorqueForSureTouchdownThreshold.set(kneeTouchdownThresholds);
    }
 
-   public void setSimulatedRobot(FloatingRootJointRobot simulatedRobot)
+   public void setSimulatedRobot(Robot simulatedRobot)
    {
       this.simulatedRobot.set(simulatedRobot);
    }

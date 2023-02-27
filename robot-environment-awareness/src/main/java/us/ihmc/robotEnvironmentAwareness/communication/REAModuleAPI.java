@@ -1,9 +1,13 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.StampedPosePacket;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersMessage;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import perception_msgs.msg.dds.PolygonizerParametersMessage;
+import perception_msgs.msg.dds.PolygonizerParametersStringMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -125,8 +129,8 @@ public class REAModuleAPI
    public static final Topic<CustomRegionMergeParameters> CustomRegionsMergingParameters = PlanarRegionsCategory.child(Custom).topic(Parameters);
    public static final Topic<Boolean> PlanarRegionsPolygonizerEnable = PlanarRegionsCategory.child(Polygonizer).topic(Enable);
    public static final Topic<Boolean> PlanarRegionsPolygonizerClear = PlanarRegionsCategory.child(Polygonizer).topic(Clear);
-   public static final Topic<ConcaveHullFactoryParameters> PlanarRegionsConcaveHullParameters = PlanarRegionsCategory.child(ConcaveHull).topic(Parameters);
-   public static final Topic<PolygonizerParameters> PlanarRegionsPolygonizerParameters = PlanarRegionsCategory.child(Polygonizer).topic(Parameters);
+   public static final Topic<ConcaveHullFactoryParametersMessage> PlanarRegionsConcaveHullParameters = PlanarRegionsCategory.child(ConcaveHull).topic(Parameters);
+   public static final Topic<PolygonizerParametersMessage> PlanarRegionsPolygonizerParameters = PlanarRegionsCategory.child(Polygonizer).topic(Parameters);
    public static final Topic<Boolean> PlanarRegionsIntersectionEnable = PlanarRegionsCategory.child(Intersection).topic(Enable);
    public static final Topic<IntersectionEstimationParameters> PlanarRegionsIntersectionParameters = PlanarRegionsCategory.child(Intersection)
                                                                                                                           .topic(Parameters);

@@ -23,8 +23,6 @@ public class FootstepVisualizer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int maxNumberOfContactPoints = 6;
-
    private final YoFramePose3D yoFootstepPose;
    private final YoFrameConvexPolygon2D yoFoothold;
 
@@ -47,7 +45,7 @@ public class FootstepVisualizer
    {
       this.robotSide = robotSide;
       yoFootstepPose = new YoFramePose3D(name + "Pose", worldFrame, registry);
-      yoFoothold = new YoFrameConvexPolygon2D(name + "Foothold", "", worldFrame, maxNumberOfContactPoints, registry);
+      yoFoothold = new YoFrameConvexPolygon2D(name + "Foothold", "", worldFrame, footPolygon.size(), registry);
 
       double coordinateSystemSize = 0.2;
       double footholdScale = 1.0;

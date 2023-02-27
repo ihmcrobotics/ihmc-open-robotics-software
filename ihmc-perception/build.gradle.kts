@@ -13,17 +13,18 @@ plugins {
 
 ihmc {
    loadProductProperties("../product.properties")
-   
    configureDependencyResolution()
+   javaDirectory("main", "generated-java")
+   javaDirectory("slam-wrapper", "generated-java")
    configurePublications()
 }
 
 mainDependencies {
    api(ihmc.sourceSetProject("javacv"))
+   api(ihmc.sourceSetProject("slam-wrapper"))
    // For experimenting with local OpenCV:
    // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
-   api("us.ihmc:ihmc-native-library-loader:1.3.1")
    api("org.georegression:georegression:0.22")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
@@ -36,11 +37,9 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.17.0")
-   api("us.ihmc:ihmc-yovariables:0.9.11")
-   api("us.ihmc:simulation-construction-set:0.21.13")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
-   api("us.ihmc:ihmc-graphics-description:0.19.4")
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:simulation-construction-set:0.22.10")
+   api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -49,48 +48,91 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:robot-environment-awareness:source")
 }
 
 openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCPPVersion = "1.5.6"
+val javaCPPVersion = "1.5.8"
 
 bytedecoDependencies {
-   apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.17-")
-   apiBytedecoNatives("opencv", "4.5.3-")
-   apiBytedecoNatives("opencl", "3.0-")
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:ihmc-commons:0.31.0")
+   apiCommonBytedecoNatives()
 }
 
 javacvDependencies {
    apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
-   apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.17-")
-   apiBytedecoNatives("opencv", "4.5.3-")
-   apiBytedecoNatives("opencl", "3.0-")
+   apiCommonBytedecoNatives()
 }
 
+slamWrapperDependencies {
+   apiBytedecoNatives("javacpp")
+   api("us.ihmc:ihmc-java-toolkit:source")
+}
+
+fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
+{
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.21-")
+   apiBytedecoNatives("opencv", "4.6.0-")
+   apiBytedecoNatives("opencl", "3.0-")
+   apiBytedecoNatives("librealsense2", "2.50.0-")
+   apiBytedecoNatives("spinnaker", "3.0.0.118-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("hdf5", "1.12.2-")
+   apiBytedecoNatives("ffmpeg", "5.1.2-")
+}
+
+// We are trying to avoid downloading binaries that aren't used by anyone
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
+   if (name == "spinnaker")
+   {
+      // We couldn't figure out how to sign a JAR to publish without the "-SNAPSHOT" yet
+      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT")
+      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT:linux-x86_64")
+      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT:windows-x86_64")
+   }
+   else
+   {
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-arm64")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
+   }
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
 {
    api(dependencyNotation) {
-      exclude(group = "org.bytedeco")
+      exclude(group = "org.bytedeco") // This is required in order for the above to work
    }
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.30.5")
-   api("us.ihmc:simulation-construction-set:0.21.13")
+   api("us.ihmc:ihmc-commons-testing:0.32.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
 }
+
+visualizersDependencies {
+   api(ihmc.sourceSetProject("main"))
+
+   api("us.ihmc:simulation-construction-set:0.22.10")
+
+   api("us.ihmc:simulation-construction-set-tools:source")
+   api("us.ihmc:simulation-construction-set-tools-test:source")
+}
+
+tasks.create("generateMappings", Exec::class)
+{
+   workingDir = file("src/slam-wrapper/cpp")
+   commandLine = listOf("./generate-java-mappings-docker.sh")
+}
+
+

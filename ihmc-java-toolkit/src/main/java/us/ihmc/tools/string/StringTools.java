@@ -1,5 +1,6 @@
 package us.ihmc.tools.string;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.message.ParameterizedMessageFactory;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -121,5 +122,48 @@ public class StringTools
       {
          return FormattingTools.getFormattedToSignificantFigures(number, 3);
       }
+   }
+
+   public static String titleToSnakeCase(String titleCased)
+   {
+      return titleCased.trim().replaceAll("\\s+", "_").toLowerCase();
+   }
+
+   public static String titleToKebabCase(String titleCased)
+   {
+      return titleCased.trim().replaceAll("\\s+", "-").toLowerCase();
+   }
+
+   public static String titleToPascalCase(String titleCased)
+   {
+      String[] parts = titleCased.split("\\s+");
+      StringBuilder camelCased = new StringBuilder();
+      for (int i = 0; i < parts.length; i++)
+      {
+         camelCased.append(StringUtils.capitalize(parts[i]));
+      }
+      return camelCased.toString();
+   }
+
+   public static String titleToCamelCase(String titleCased)
+   {
+      String[] parts = titleCased.split("\\s+");
+      StringBuilder camelCased = new StringBuilder();
+      for (int i = 0; i < parts.length; i++)
+      {
+         if (i == 0)
+            camelCased.append(parts[i].toLowerCase());
+         else
+            camelCased.append(StringUtils.capitalize(parts[i]));
+      }
+      return camelCased.toString();
+   }
+
+   /**
+    * Useful for parsing files handling multiple operating systems.
+    */
+   public static String filterOutCRLFLineEndings(String stringToFilter)
+   {
+      return stringToFilter.replaceAll("\\r\\n", "\n");
    }
 }

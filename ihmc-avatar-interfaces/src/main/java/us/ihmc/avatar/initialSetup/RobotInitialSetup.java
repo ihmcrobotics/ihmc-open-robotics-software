@@ -27,7 +27,7 @@ public interface RobotInitialSetup<T extends Robot>
 
    void setOffset(Tuple3DReadOnly additionalOffset);
 
-   Vector3DReadOnly getOffset();
+   Tuple3DReadOnly getOffset();
 
    /**
     * Indicates whether the robot can be reset to its initial sim configuration with the implementation

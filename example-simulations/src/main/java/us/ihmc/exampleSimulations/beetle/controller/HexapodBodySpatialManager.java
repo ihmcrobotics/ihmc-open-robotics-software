@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.beetle.controller;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -112,8 +113,18 @@ public class HexapodBodySpatialManager
 
       desiredAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       desiredLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-      spatialFeedbackCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
-                                                feedForwardAngularAcceleration, feedForwardLinearAcceleration);
+      
+      if(paramaters.getControlMode() == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
+      {
+         spatialFeedbackCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
+                                                   feedForwardAngularAcceleration, feedForwardLinearAcceleration);
+      }
+      
+      if(paramaters.getControlMode() == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+      {
+         spatialFeedbackCommand.setVirtualModelControl(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
+                                                   feedForwardAngularAcceleration, feedForwardLinearAcceleration);
+      }
    }
 
    /**

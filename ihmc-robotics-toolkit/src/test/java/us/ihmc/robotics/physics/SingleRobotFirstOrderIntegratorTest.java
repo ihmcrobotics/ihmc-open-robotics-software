@@ -10,7 +10,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -63,17 +62,17 @@ public class SingleRobotFirstOrderIntegratorTest
             {
                FloatingJointBasics originalFloatingJoint = (FloatingJointBasics) originalJoint;
                FloatingJointBasics cloneFloatingJoint = (FloatingJointBasics) cloneJoint;
-               EuclidGeometryTestTools.assertPose3DEquals(originalFloatingJoint.getJointPose(), cloneFloatingJoint.getJointPose(), EPSILON);
-               EuclidCoreTestTools.assertTuple3DEquals(originalFloatingJoint.getJointTwist().getAngularPart(),
+               EuclidCoreTestTools.assertEquals(originalFloatingJoint.getJointPose(), cloneFloatingJoint.getJointPose(), EPSILON);
+               EuclidCoreTestTools.assertEquals(originalFloatingJoint.getJointTwist().getAngularPart(),
                                                        cloneFloatingJoint.getJointTwist().getAngularPart(),
                                                        EPSILON);
-               EuclidCoreTestTools.assertTuple3DEquals(originalFloatingJoint.getJointTwist().getLinearPart(),
+               EuclidCoreTestTools.assertEquals(originalFloatingJoint.getJointTwist().getLinearPart(),
                                                        cloneFloatingJoint.getJointTwist().getLinearPart(),
                                                        EPSILON);
-               EuclidCoreTestTools.assertTuple3DEquals(originalFloatingJoint.getJointAcceleration().getAngularPart(),
+               EuclidCoreTestTools.assertEquals(originalFloatingJoint.getJointAcceleration().getAngularPart(),
                                                        cloneFloatingJoint.getJointAcceleration().getAngularPart(),
                                                        EPSILON);
-               EuclidCoreTestTools.assertTuple3DEquals(originalFloatingJoint.getJointAcceleration().getLinearPart(),
+               EuclidCoreTestTools.assertEquals(originalFloatingJoint.getJointAcceleration().getLinearPart(),
                                                        cloneFloatingJoint.getJointAcceleration().getLinearPart(),
                                                        EPSILON);
             }
@@ -132,11 +131,11 @@ public class SingleRobotFirstOrderIntegratorTest
             {
                FloatingJointBasics originalFloatingJoint = (FloatingJointBasics) originalJoint;
                FloatingJointBasics cloneFloatingJoint = (FloatingJointBasics) cloneJoint;
-               EuclidGeometryTestTools.assertPose3DEquals(originalFloatingJoint.getJointPose(), cloneFloatingJoint.getJointPose(), EPSILON);
-               EuclidCoreTestTools.assertTuple3DEquals(originalFloatingJoint.getJointTwist().getAngularPart(),
+               EuclidCoreTestTools.assertEquals(originalFloatingJoint.getJointPose(), cloneFloatingJoint.getJointPose(), EPSILON);
+               EuclidCoreTestTools.assertEquals(originalFloatingJoint.getJointTwist().getAngularPart(),
                                                        cloneFloatingJoint.getJointTwist().getAngularPart(),
                                                        EPSILON);
-               EuclidCoreTestTools.assertTuple3DEquals(originalFloatingJoint.getJointTwist().getLinearPart(),
+               EuclidCoreTestTools.assertEquals(originalFloatingJoint.getJointTwist().getLinearPart(),
                                                        cloneFloatingJoint.getJointTwist().getLinearPart(),
                                                        EPSILON);
                // Acceleration will be different as the velocity change does not impact acceleration

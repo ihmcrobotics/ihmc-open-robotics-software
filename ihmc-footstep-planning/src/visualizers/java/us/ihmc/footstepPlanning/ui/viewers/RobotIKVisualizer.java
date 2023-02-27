@@ -242,7 +242,7 @@ public class RobotIKVisualizer
       if (robotConfigurationData.getJointNameHash() != jointNameHash)
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
 
-      newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation()));
+      newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition()));
       newJointConfigurationReference.set(robotConfigurationData.getJointAngles().toArray());
    }
 

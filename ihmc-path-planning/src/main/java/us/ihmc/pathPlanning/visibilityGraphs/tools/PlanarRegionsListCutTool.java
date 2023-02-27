@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHull;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCutter;
@@ -52,9 +53,9 @@ public class PlanarRegionsListCutTool
       cuttingLine2D.getDirection().set(planeNormal2D.getY(), -planeNormal2D.getX()); // make sure left side of line is plane normal
 
       ConcaveHull concaveHull = new ConcaveHull(); // TODO make this one line
-      for (Point2D point2D : region.getConcaveHull())
+      for (Point2DReadOnly point2D : region.getConcaveHull())
       {
-         concaveHull.addVertex(point2D);
+         concaveHull.addVertex(new Point2D(point2D));
       }
 
       List<ConcaveHull> resultingConcaveHulls = ConcaveHullCutter.cutPolygonToLeftOfLine(concaveHull, cuttingLine2D);

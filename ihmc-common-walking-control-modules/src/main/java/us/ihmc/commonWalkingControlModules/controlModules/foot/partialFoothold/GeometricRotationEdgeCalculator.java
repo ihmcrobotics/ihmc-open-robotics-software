@@ -44,7 +44,7 @@ public class GeometricRotationEdgeCalculator implements RotationEdgeCalculator
 
    public GeometricRotationEdgeCalculator(RobotSide side,
                                           MovingReferenceFrame soleFrame,
-                                          FootholdRotationParameters rotationParameters,
+                                          YoPartialFootholdModuleParameters rotationParameters,
                                           double dt,
                                           YoRegistry parentRegistry,
                                           YoGraphicsListRegistry graphicsListRegistry)

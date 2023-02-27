@@ -12,6 +12,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -187,31 +188,25 @@ public class SplinedHeightTrajectory
       }
    }
 
-   private final Point2D tempPoint = new Point2D();
-
    public double solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack,
-                       FramePoint3DBasics queryPoint,
+                       FixedFramePoint3DBasics queryPointToPack,
                        Point2DBasics pointOnSplineToPack)
    {
-      tempPoint.set(queryPoint);
-      EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(tempPoint,
-                                                              contactFrameZeroPosition.getX(),
-                                                              contactFrameZeroPosition.getY(),
-                                                              contactFrameOnePosition.getX(),
-                                                              contactFrameOnePosition.getY(),
-                                                              tempPoint);
-      double percentAlongSegment = EuclidGeometryTools.percentageAlongLineSegment2D(tempPoint.getX(),
-                                                                                    tempPoint.getY(),
+      double percentAlongSegment = EuclidGeometryTools.percentageAlongLineSegment2D(queryPointToPack.getX(),
+                                                                                    queryPointToPack.getY(),
                                                                                     contactFrameZeroPosition.getX(),
                                                                                     contactFrameZeroPosition.getY(),
                                                                                     contactFrameOnePosition.getX(),
                                                                                     contactFrameOnePosition.getY());
-      queryPoint.interpolate(contactFrameZeroPosition, contactFrameOnePosition, percentAlongSegment);
+      percentAlongSegment = MathTools.clamp(percentAlongSegment, 0.0, 1.0);
+      queryPointToPack.interpolate(contactFrameZeroPosition, contactFrameOnePosition, percentAlongSegment);
 
       CoMHeightTrajectoryWaypoint startWaypoint = waypoints.get(0);
       CoMHeightTrajectoryWaypoint endWaypoint = waypoints.get(waypoints.size() - 1);
 
       double xLength = Math.max(1.0, Math.abs(endWaypoint.getX() - startWaypoint.getX()));
+      double x2 = xLength * xLength;
+      double x3 = x2 * xLength;
       double length = contactFrameZeroPosition.distance(contactFrameOnePosition);
 
       double splineQuery = InterpolationTools.linearInterpolate(startWaypoint.getX(), endWaypoint.getX(), percentAlongSegment);
@@ -240,8 +235,8 @@ public class SplinedHeightTrajectory
 
 
       double dzds = trajectoryGenerator.getVelocity() / xLength ;
-      double d2zds2 = trajectoryGenerator.getAcceleration() / MathTools.square(xLength);
-      double d3zds3 = trajectoryGenerator.getJerk() / MathTools.pow(xLength, 3);
+      double d2zds2 = trajectoryGenerator.getAcceleration() / x2;
+      double d3zds3 = trajectoryGenerator.getJerk() / x3;
       partialDzDs.set(dzds);
       partialD2zDs2.set(d2zds2);
       partialD3zDs3.set(d3zds3);

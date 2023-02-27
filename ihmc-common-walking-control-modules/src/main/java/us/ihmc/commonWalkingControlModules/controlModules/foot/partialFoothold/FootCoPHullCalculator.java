@@ -24,7 +24,7 @@ public class FootCoPHullCalculator
 
    public FootCoPHullCalculator(String namePrefix,
                                 OccupancyGrid occupancyGrid,
-                                FootholdRotationParameters rotationParameters,
+                                YoPartialFootholdModuleParameters.FootholdCroppingParameters croppingParameters,
                                 YoRegistry parentRegistry)
    {
       this.occupancyGrid = occupancyGrid;
@@ -33,7 +33,7 @@ public class FootCoPHullCalculator
 
       sideOfFootToCrop = new YoEnum<>(namePrefix + "HullSideOfFootToCrop", registry, RobotSide.class, true);
 
-      areaRatioThreshold = rotationParameters.getCopHullAreaRatioThreshold();
+      areaRatioThreshold = croppingParameters.getCopHullAreaRatioThreshold();
 
       areaOnRightSideOfLine = new YoDouble(namePrefix + "AreaOnRightSideOfLine", registry);
       areaOnLeftSideOfLine = new YoDouble(namePrefix + "AreaOnLeftSideOfLine", registry);
@@ -49,6 +49,7 @@ public class FootCoPHullCalculator
 
    public RobotSide computeSideOfFootholdToCrop(FrameLine2DReadOnly lineOfRotation)
    {
+      // FIXME This call can be very time consuming.
       OccupancyGridTools.computeConvexHullOfOccupancyGrid(occupancyGrid, convexHullOfCoPs);
 
       leftSideCut.setIncludingFrame(convexHullOfCoPs);

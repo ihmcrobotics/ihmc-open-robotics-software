@@ -34,6 +34,8 @@ public class Activator
    /**
     * Must have called {@link #poll()} first! Get activation state.
     *
+    * TODO: Rename to read(). There should be a peek() method added later that returns activated.
+    *
     * @return activated
     */
    public boolean peek()

@@ -7,6 +7,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameTorus3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,7 +21,6 @@ import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
@@ -52,7 +52,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    private double valveMass;
    private Matrix3D inertiaMatrix;
 
-   private FrameTorus3d valveTorus;
+   private FrameTorus3D valveTorus;
    protected ArrayList<FrameCylinder3D> spokesCylinders = new ArrayList<>();
 
    protected Link valveLink;
@@ -147,7 +147,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       invertTransform.set(transform);
       invertTransform.invert();
 
-      valveTorus = new FrameTorus3d(valveFrame, valveRadius - valveThickness / 2.0, valveThickness / 2.0);
+      valveTorus = new FrameTorus3D(valveFrame, valveRadius - valveThickness / 2.0, valveThickness / 2.0);
       valveTorus.applyTransform(transform);
       valveLinkGraphics.transform(transform);
       valveLinkGraphics.addArcTorus(0.0, 2 * Math.PI, valveRadius - valveThickness / 2.0, valveThickness / 2.0, YoAppearance.DarkRed());
@@ -212,7 +212,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       pointToCheck.setIncludingFrame(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       pointToCheck.changeFrame(valveFrame);
 
-      if (valveTorus.isInsideOrOnSurface(pointToCheck))
+      if (valveTorus.isPointInside(pointToCheck))
          return true;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {
@@ -234,7 +234,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       FramePoint3D pointToCheck = new FramePoint3D(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       pointToCheck.changeFrame(valveFrame);
 
-      if (valveTorus.checkIfInside(pointToCheck, intersectionToPack, normalToPack))
+      if (valveTorus.evaluatePoint3DCollision(pointToCheck, intersectionToPack, normalToPack))
          return;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {

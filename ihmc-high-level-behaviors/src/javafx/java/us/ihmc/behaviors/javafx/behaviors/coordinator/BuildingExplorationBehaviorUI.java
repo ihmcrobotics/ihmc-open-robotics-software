@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.javafx.behaviors.coordinator;
 
-import controller_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;

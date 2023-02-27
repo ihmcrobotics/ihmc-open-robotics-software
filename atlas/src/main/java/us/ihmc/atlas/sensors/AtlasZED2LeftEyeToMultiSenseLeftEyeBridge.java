@@ -1,7 +1,7 @@
 package us.ihmc.atlas.sensors;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;

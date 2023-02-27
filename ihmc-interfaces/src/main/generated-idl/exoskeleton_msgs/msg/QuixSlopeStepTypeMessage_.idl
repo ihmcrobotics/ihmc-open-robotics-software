@@ -1,0 +1,37 @@
+#ifndef __exoskeleton_msgs__msg__QuixSlopeStepTypeMessage__idl__
+#define __exoskeleton_msgs__msg__QuixSlopeStepTypeMessage__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet UP =
+      0;
+
+      const octet DOWN =
+      0;
+
+      const octet FLAT =
+      0;
+
+
+      /**
+       * This message is part of the Quix controller API.
+       */
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::QuixSlopeStepTypeMessage_")
+      struct QuixSlopeStepTypeMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet slope_step_type_name;
+      };
+    };
+  };
+};
+
+#endif

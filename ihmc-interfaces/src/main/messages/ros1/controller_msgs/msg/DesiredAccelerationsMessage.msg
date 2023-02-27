@@ -9,6 +9,6 @@ uint32 sequence_id
 float64[] desired_joint_accelerations
 
 # Properties for queueing commands.
-controller_msgs/QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties
 
 

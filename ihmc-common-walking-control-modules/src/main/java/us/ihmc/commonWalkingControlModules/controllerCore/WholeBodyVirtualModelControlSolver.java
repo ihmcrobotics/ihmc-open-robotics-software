@@ -122,7 +122,7 @@ public class WholeBodyVirtualModelControlSolver
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
       wrenchVisualizer = toolbox.getWrenchVisualizer();
 
-      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(toolbox.getControlDT(), registry);
+      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(toolbox.getRootBody(), toolbox.getControlDT(), registry);
       forwardDynamicsCalculator = new ForwardDynamicsCalculator(toolbox.getRootBody());
       forwardDynamicsCalculator.setGravitionalAcceleration(-Math.abs(toolbox.getGravityZ()));
 
@@ -137,6 +137,7 @@ public class WholeBodyVirtualModelControlSolver
       optimizationControlModule.initialize();
       virtualModelController.reset();
 
+      jointAccelerationIntegrationCalculator.resetJointParameters();
       forwardDynamicsCalculator.setExternalWrenchesToZero();
 
       yoDesiredMomentumRateLinear.setToZero();
@@ -242,6 +243,9 @@ public class WholeBodyVirtualModelControlSolver
          VirtualModelControlCommand<?> command = virtualModelControlCommandList.pollCommand();
          switch (command.getCommandType())
          {
+            case QP_INPUT:
+               optimizationControlModule.submitQPObjectiveCommand((QPObjectiveCommand) command);
+               break;
             case MOMENTUM:
                optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
                recordMomentumRate((MomentumRateCommand) command);
@@ -384,7 +388,7 @@ public class WholeBodyVirtualModelControlSolver
    {
       return achievedMomentumRateLinear;
    }
-   
+
    public FrameVector3DReadOnly getAchievedMomentumRateAngular()
    {
       return achievedMomentumRateAngular;

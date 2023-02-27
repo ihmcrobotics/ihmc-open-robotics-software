@@ -107,7 +107,7 @@ public class LevenbergMarquardtICPTest
 
          EuclidCoreTestTools.assertVector3DGeometricallyEquals(transformOriginal.getTranslation(), reconstructedTransform.getTranslation(), 1e-7);
          assertTrue(AngleTools.computeAngleDifferenceMinusPiToPi(transformOriginal.getRotation().getYaw(), reconstructedTransform.getRotation().getYaw()) < 1e-7);
-//         EuclidCoreTestTools.assertRigidBodyTransformEquals(transformOriginal, reconstructedTransform, 1e-7);
+//         EuclidCoreTestTools.assertEquals(transformOriginal, reconstructedTransform, 1e-7);
 
          DMatrixRMaj randomInput = new DMatrixRMaj(4, 1);
          randomInput.set(0, RandomNumbers.nextDouble(random, 100));
@@ -131,7 +131,7 @@ public class LevenbergMarquardtICPTest
          DMatrixRMaj input = inverseSpatialInputFunction.apply(transformOriginal);
          RigidBodyTransform reconstructedTransform = spatialInputFunction.apply(input);
 
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(transformOriginal, reconstructedTransform, 1e-7);
+         EuclidCoreTestTools.assertEquals(transformOriginal, reconstructedTransform, 1e-7);
 
          DMatrixRMaj randomInput = new DMatrixRMaj(6, 1);
          randomInput.set(0, RandomNumbers.nextDouble(random, 100));
@@ -147,7 +147,7 @@ public class LevenbergMarquardtICPTest
          Quaternion orientationA = new Quaternion(randomInput.get(3), randomInput.get(4), randomInput.get(5));
          Quaternion orientationB = new Quaternion(input.get(3), input.get(4), input.get(5));
 
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(orientationA, orientationB, 1e-7);
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(orientationA, orientationB, 1e-7);
       }
    }
 

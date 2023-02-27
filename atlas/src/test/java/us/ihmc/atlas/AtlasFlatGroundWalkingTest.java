@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.TestAbortedException;
 
@@ -9,31 +10,47 @@ import us.ihmc.avatar.DRCFlatGroundWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.ControllerFailureException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 // This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
 public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
+   private boolean doPelvisWarmup;
 
    @Override
    public boolean doPelvisWarmup()
    {
-      return true;
+      return doPelvisWarmup;
+   }
+   
+   public void setDoPelvisWarmup(boolean doPelvisWarmup)
+   {
+      this.doPelvisWarmup = doPelvisWarmup;
    }
 
+   @Tag("fast")
    @Override
    @Test
-   public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testFlatGroundWalking()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      setDoPelvisWarmup(true);
       super.testFlatGroundWalking();
    }
-
+   
    @Override
    @Test
-   public void testReset() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testFlatGroundWalkingBullet()
+   {
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      setDoPelvisWarmup(false);
+      super.testFlatGroundWalkingBullet();
+   }
+
+   @Tag("fast")
+   @Override
+   @Test
+   public void testReset()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
       super.testReset();
@@ -41,15 +58,15 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 
    @Disabled
    @Test
-   public void testAtlasFlatGroundWalkingWithShapeCollision() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testAtlasFlatGroundWalkingWithShapeCollision()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, false, true);
-      runFlatGroundWalking();
+      super.testFlatGroundWalking();
    }
 
    @Test
    @Disabled // Not working because of multithreading. Should be switched over to use the DRCSimulationTestHelper.
-   public void testFlatGroundWalkingRunsSameWayTwice() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testFlatGroundWalkingRunsSameWayTwice()
    {
       try
       {

@@ -52,7 +52,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       this.appearance = appearance;
       this.linkGraphics = setupLinkGraphics();
 
-      createCollisionShapeForPlanarRegion(planarRegion, 0.005);
+      createCollisionShapeForPlanarRegion(planarRegion, allowablePenetrationThickness);
 
       this.planarRegion.setBoundingBoxEpsilon(allowablePenetrationThickness);
 

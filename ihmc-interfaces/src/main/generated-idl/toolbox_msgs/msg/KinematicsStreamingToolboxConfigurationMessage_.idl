@@ -1,0 +1,108 @@
+#ifndef __toolbox_msgs__msg__KinematicsStreamingToolboxConfigurationMessage__idl__
+#define __toolbox_msgs__msg__KinematicsStreamingToolboxConfigurationMessage__idl__
+
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the KinematicsStreamingToolbox API.
+       * Allows to specify the messages the toolbox should stream to the controller.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::KinematicsStreamingToolboxConfigurationMessage_")
+      struct KinematicsStreamingToolboxConfigurationMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Whether the pelvis should pinned or free to move.
+         * Default value is false.
+         */
+        boolean lock_pelvis;
+        /**
+         * Whether the chest should pinned or free to move.
+         * Default value is false.
+         */
+        boolean lock_chest;
+        /**
+         * Whether the left arm should be controller in joint-space.
+         * This is compatible with the hand task-space control.
+         * Default value is true.
+         */
+        @defaultValue(value=True)
+        boolean enable_left_arm_jointspace;
+        /**
+         * Whether the right arm should be controller in joint-space.
+         * This is compatible with the hand task-space control.
+         * Default value is true.
+         */
+        @defaultValue(value=True)
+        boolean enable_right_arm_jointspace;
+        /**
+         * Whether the neck should be controller in joint-space.
+         * Default value is true.
+         * Whether the neck should be controller in joint-space.
+         */
+        @defaultValue(value=True)
+        boolean enable_neck_jointspace;
+        /**
+         * Whether the left hand should be controlled in task-space.
+         * This is compatible with the arm task-space control.
+         * Default value is true.
+         */
+        @defaultValue(value=True)
+        boolean enable_left_hand_taskspace;
+        /**
+         * Whether the right hand should be controlled in task-space.
+         * This is compatible with the arm task-space control.
+         * Default value is true.
+         */
+        @defaultValue(value=True)
+        boolean enable_right_hand_taskspace;
+        /**
+         * Whether the chest orientation should be controlled.
+         * Default value is true.
+         */
+        @defaultValue(value=True)
+        boolean enable_chest_taskspace;
+        /**
+         * Whether the pelvis should be controlled in task-space.
+         * Default value is true.
+         */
+        @defaultValue(value=True)
+        boolean enable_pelvis_taskspace;
+        /**
+         * Reference frame in which the controller should be tracking the pose for the left hand as computed by the whole-body IK.
+         * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+         */
+        @defaultValue(value=83766130)
+        long long left_hand_trajectory_frame_id;
+        /**
+         * Reference frame in which the controller should be tracking the pose for the right hand as computed by the whole-body IK.
+         * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+         */
+        @defaultValue(value=83766130)
+        long long right_hand_trajectory_frame_id;
+        /**
+         * Reference frame in which the controller should be tracking the pose for the chest as computed by the whole-body IK.
+         * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+         */
+        @defaultValue(value=83766130)
+        long long chest_trajectory_frame_id;
+        /**
+         * Reference frame in which the controller should be tracking the pose for the pelvis as computed by the whole-body IK.
+         * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+         */
+        @defaultValue(value=83766130)
+        long long pelvis_trajectory_frame_id;
+      };
+    };
+  };
+};
+
+#endif

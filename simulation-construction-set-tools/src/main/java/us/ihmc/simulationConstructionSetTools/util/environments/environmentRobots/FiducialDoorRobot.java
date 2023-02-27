@@ -1,10 +1,17 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -24,13 +31,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.environments.MultiJointArticulatedContactable;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class FiducialDoorRobot extends Robot implements SelectableObject, SelectedListener, Contactable
 {
@@ -261,13 +269,13 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
       RotationMatrix hingeRotation = new RotationMatrix();
       hingeRotation.setToYawOrientation(getHingeYaw());
       RigidBodyTransform newDoorPose = new RigidBodyTransform(originalDoorPose);
-      newDoorPose.setRotation(hingeRotation);
+      newDoorPose.getRotation().set(hingeRotation);
       doorFrame.setPoseAndUpdate(newDoorPose);
 
       for (RobotSide robotSide : RobotSide.values())
       {
          RigidBodyTransform handlePose = handlePoses.get(robotSide).getTransformToDesiredFrame(doorFrame);
-         handlePose.setRotation(new AxisAngle(0.0, 1.0, 0.0, getHandleAngle()));
+         handlePose.getRotation().set(new AxisAngle(0.0, 1.0, 0.0, getHandleAngle()));
          handlePoses.get(robotSide).setPoseAndUpdate(handlePose);
       }
 

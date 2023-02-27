@@ -1,0 +1,27 @@
+Description contains the discretization details:
+- gridSizeInMeters: the size in meters of the grid along each axis
+- gridSizeInVoxels: the number of voxels along each axis
+- voxelSizeInMeters: the size in meters of 1 voxel along each axis
+- numberOfRays: number of approach directions that are tested per voxel. Each ray constrains the longitude and latitude. See paper "Reachability and Capability Analysis for Manipulation Tasks" for discretization method.
+- numberOfRotationAround: number of rotation angle around each ray. Together with the ray this is used to generate full orientations.
+- jointNames: names and ordering of the joints used in the analysis.
+- controlFramePoseXYZYPR: (x, y, z, yaw, pitch, roll) pose offset w.r.t. the last wrist joint of the control frame. The control frame is located where objects/tools are typically grasped, typically the x-axis of the control frame is oriented such as is relates to the approach direction (typically orthogonal to the hand palm).
+
+
+PositionReachData: data for reachable end-effector positions
+- voxelKey: 3D index referring to the coordinates of the voxel. Each index is in [0, gridSizeInVoxels] mapping to [-gridSizeInMeters/2, gridSizeInMeters/2]. Each row is for one voxel.
+- desiredXYZ: 3D desired position used as target for the end-effector. Each row is for one voxel.
+- jointPositions: joint positions found to reach the target. Each row is for one voxel.
+- jointTorques: joint torques found to reach the target. Typically account for gravity. Each row is for one voxel.
+
+RayReachData: data for reachable end-effector positions + SO(2) directions
+- voxelKey: 3D index referring to the coordinates of the voxel followed by the ray index. Each index is in [0, gridSizeInVoxels] mapping to [-gridSizeInMeters/2, gridSizeInMeters/2]. Each row is for one ray of one voxel.
+- desiredXYZYPR: 3D desired pose used as target for the end-effector. Note that one axis of the orientation is ignored when solving (typically the roll). Each row is for one ray of one voxel.
+- jointPositions: joint positions found to reach the target. Each row is for one ray of one voxel.
+- jointTorques: joint torques found to reach the target. Typically account for gravity. Each row is for one ray of one voxel.
+
+PoseReachData: data for reachable end-effector positions + SO(3) orientations
+- voxelKey: 3D index referring to the coordinates of the voxel followed by the ray index and then the rotation index. Each index is in [0, gridSizeInVoxels] mapping to [-gridSizeInMeters/2, gridSizeInMeters/2]. Each row is for one orientation of one voxel.
+- desiredXYZYPR: 3D desired pose used as target for the end-effector. Each row is for one orientation of one voxel.
+- jointPositions: joint positions found to reach the target. Each row is for one orientation of one voxel.
+- jointTorques: joint torques found to reach the target. Typically account for gravity. Each row is for one orientation of one voxel.

@@ -38,8 +38,8 @@ public class BlendedPoseTrajectoryGeneratorTest
 
    private void assertGeometricEquals(FramePose3D poseA, FramePose3D poseB, double epsilon)
    {
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(poseA.getPosition(), poseB.getPosition(), epsilon);
-      EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(poseA.getOrientation(), poseB.getOrientation(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(poseA.getPosition(), poseB.getPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(poseA.getOrientation(), poseB.getOrientation(), epsilon);
    }
 
    private class PoseTrajectoryState
@@ -111,12 +111,12 @@ public class BlendedPoseTrajectoryGeneratorTest
 
       public void assertEpsilonEquals(PoseTrajectoryState other, double epsilon)
       {
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(position, other.position, epsilon);
-         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(orientation, other.orientation, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(linearVelocity, other.linearVelocity, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity, other.angularVelocity, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(linearAcceleration, other.linearAcceleration, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularAcceleration, other.angularAcceleration, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(position, other.position, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(orientation, other.orientation, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(linearVelocity, other.linearVelocity, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(angularVelocity, other.angularVelocity, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(linearAcceleration, other.linearAcceleration, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(angularAcceleration, other.angularAcceleration, epsilon);
       }
    }
 
@@ -546,8 +546,8 @@ public class BlendedPoseTrajectoryGeneratorTest
       FramePose3D tempPose = new FramePose3D();
       swingTrajectory.compute(trajectoryDuration);
       tempPose.setIncludingFrame(swingTrajectory.getPose());
-      EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(finalOrientation, tempPose.getOrientation(), EPSILON);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalPosition, tempPose.getPosition(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalOrientation, tempPose.getOrientation(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalPosition, tempPose.getPosition(), EPSILON);
 
       blendedTrajectory.compute(trajectoryDuration);
       tempPose.setIncludingFrame(blendedTrajectory.getPose());
@@ -558,7 +558,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       {
          PoseTrajectoryState stateA = new PoseTrajectoryState(swingTrajectory, time, worldFrame, worldFrame, worldFrame);
          PoseTrajectoryState stateB = new PoseTrajectoryState(blendedTrajectory, time, worldFrame, worldFrame, worldFrame);
-         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(stateA.getPose().getOrientation(), stateB.getPose().getOrientation(), 1e-1);
+         EuclidFrameTestTools.assertGeometricallyEquals(stateA.getPose().getOrientation(), stateB.getPose().getOrientation(), 1e-1);
       }
    }
 
@@ -610,7 +610,7 @@ public class BlendedPoseTrajectoryGeneratorTest
          blendedTrajectory.compute(time);
          orientation.setIncludingFrame(blendedTrajectory.getOrientation()); // this doesn't change throughout the trajectory
 
-         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(initialOrientation, orientation, 1e-1);
+         EuclidFrameTestTools.assertGeometricallyEquals(initialOrientation, orientation, 1e-1);
       }
    }
 

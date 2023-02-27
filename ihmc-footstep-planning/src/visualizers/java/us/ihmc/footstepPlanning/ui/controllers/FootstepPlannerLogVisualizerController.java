@@ -15,12 +15,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -289,15 +291,15 @@ public class FootstepPlannerLogVisualizerController
       // publish log name
       messager.submitMessage(FootstepPlannerMessagerAPI.LoadLogStatus, footstepPlannerLog.getLogName());
 
-      // publish body path planner parameters
-      DefaultVisibilityGraphParameters visibilityGraphParameters = new DefaultVisibilityGraphParameters();
-      visibilityGraphParameters.set(footstepPlannerLog.getBodyPathParametersPacket());
-      messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, visibilityGraphParameters);
-
       // publish footstep parameters
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.set(footstepPlannerLog.getFootstepParametersPacket());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
+
+      // publish body path parameteres
+      AStarBodyPathPlannerParameters bodyPathPlannerParameters = new AStarBodyPathPlannerParameters();
+      bodyPathPlannerParameters.setAllFromStrings(Arrays.asList(footstepPlannerLog.getBodyPathParametersPacket().getStrings().toStringArray()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.AStarBodyPathPlannerParameters, bodyPathPlannerParameters);
 
       // publish swing parameters
       DefaultSwingPlannerParameters swingPlannerParameters = new DefaultSwingPlannerParameters();
@@ -315,8 +317,15 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, footstepPlannerLog.getRequestPacket().getHorizonLength());
       messager.submitMessage(FootstepPlannerMessagerAPI.AssumeFlatGround, footstepPlannerLog.getRequestPacket().getAssumeFlatGround());
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, footstepPlannerLog.getRequestPacket().getSnapGoalSteps());
+
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(footstepPlannerLog.getRequestPacket().getPlanarRegionsListMessage());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+
+      if (!footstepPlannerLog.getRequestPacket().getHeightMapMessage().getHeights().isEmpty())
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, footstepPlannerLog.getRequestPacket().getHeightMapMessage());
+      }
+
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, footstepPlannerLog.getRequestPacket().getPlannerRequestId());
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, footstepPlannerLog.getRequestPacket().getStartLeftFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, footstepPlannerLog.getRequestPacket().getStartRightFootPose());
@@ -328,61 +337,29 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, footstepPlannerLog.getStatusPacket().getGoalPose().getPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, footstepPlannerLog.getStatusPacket().getGoalPose().getOrientation());
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepPlannerLog.getStatusPacket().getFootstepDataList());
-
-      // publish visibility graph data
-      VisibilityGraphHolder visibilityGraphHolder = footstepPlannerLog.getVisibilityGraphHolder();
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap,
-                             new VisibilityMapWrapper(visibilityGraphHolder.getStartMapId(), visibilityGraphHolder.getStartVisibilityMap()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap,
-                             new VisibilityMapWrapper(visibilityGraphHolder.getGoalMapId(), visibilityGraphHolder.getGoalVisibilityMap()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap,
-                             new VisibilityMapWrapper(visibilityGraphHolder.getInterRegionsMapId(), visibilityGraphHolder.getInterRegionsVisibilityMap()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, visibilityGraphHolder.getVisibilityMapsWithNavigableRegions());
-      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, footstepPlannerLog.getStatusPacket().getBodyPath());
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, Pair.of(footstepPlannerLog.getStatusPacket().getBodyPath(),
+                                                                              footstepPlannerLog.getStatusPacket().getBodyPathUnsmoothed()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimings, footstepPlannerLog.getStatusPacket().getPlannerTimings());
 
       // set graphics
       messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowRobot, false);
-      messager.submitMessage(FootstepPlannerMessagerAPI.ShowOccupancyMap, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
+      messager.submitMessage(FootstepPlannerMessagerAPI.ShowBodyPathLogGraphics, true);
 
-      // set graph data
+      // set footstep graph data
       updateGraphData(planarRegionsList, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData(), footstepPlannerLog.getVariableDescriptors());
-   }
 
-   private static class VisibilityMapWrapper implements VisibilityMapHolder
-   {
-      private final int id;
-      private final VisibilityMap visibilityMap;
-
-      VisibilityMapWrapper(int id, VisibilityMap visibilityMap)
-      {
-         this.id = id;
-         this.visibilityMap = visibilityMap;
-      }
-
-      @Override
-      public int getMapId()
-      {
-         return id;
-      }
-
-      @Override
-      public VisibilityMap getVisibilityMapInLocal()
-      {
-         throw new NotImplementedException("Local visibility map not implemented by log loader");
-      }
-
-      @Override
-      public VisibilityMap getVisibilityMapInWorld()
-      {
-         return visibilityMap;
-      }
+      // set body path graph data
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathGraphData,
+                             Triple.of(footstepPlannerLog.getBodyPathEdgeDataMap(),
+                                       footstepPlannerLog.getBodyPathIterationData(),
+                                       footstepPlannerLog.getBodyPathVariableDescriptors()));
    }
 
    private void updateGraphData(PlanarRegionsList planarRegionsList,

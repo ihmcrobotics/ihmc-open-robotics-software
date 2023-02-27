@@ -88,6 +88,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       parentRegistry.addChild(registry);
    }
 
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
+
    /**
     * Stores the feedback controllers' output for later access to the user.
     * 
@@ -138,16 +143,20 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * Retrieves and returns the {@code FBPoint3D} for the center of mass associated with the given
     * {@code type}, if it does not exist it is created.
     *
-    * @param type       the type of the data to retrieve.
-    * @param activeFlag boolean provider that should reflect the active state of the controller calling
-    *                   this factory. Used to determine whether the returned data is up-to-date or not
-    *                   at runtime.
+    * @param type               the type of the data to retrieve.
+    * @param activeFlag         boolean provider that should reflect the active state of the controller
+    *                           calling this factory. Used to determine whether the returned data is
+    *                           up-to-date or not at runtime.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code FBPoint3D} matching the search criterion.
     */
-   public FBPoint3D getOrCreateCenterOfMassPositionData(Type type, BooleanProvider activeFlag)
+   public FBPoint3D getOrCreateCenterOfMassPositionData(Type type, BooleanProvider activeFlag, boolean isRequiredVariable)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
-      FBPoint3D positionData = dataPool.getOrCreatePositionData(type);
+      FBPoint3D positionData = dataPool.getOrCreatePositionData(type, isRequiredVariable);
       positionData.addActiveFlag(activeFlag);
       return positionData;
    }
@@ -156,17 +165,21 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * Retrieves and returns the {@code FBVector3D} for the center of mass associated with the given
     * {@code type}, and {@code space}, if it does not exist it is created.
     *
-    * @param type       the type of the data to retrieve.
-    * @param space      the space of the data to retrieve.
-    * @param activeFlag boolean provider that should reflect the active state of the controller calling
-    *                   this factory. Used to determine whether the returned data is up-to-date or not
-    *                   at runtime.
+    * @param type               the type of the data to retrieve.
+    * @param space              the space of the data to retrieve.
+    * @param activeFlag         boolean provider that should reflect the active state of the controller
+    *                           calling this factory. Used to determine whether the returned data is
+    *                           up-to-date or not at runtime.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code FBVector3D} matching the search criteria.
     */
-   public FBVector3D getOrCreateCenterOfMassVectorData(Type type, SpaceData3D space, BooleanProvider activeFlag)
+   public FBVector3D getOrCreateCenterOfMassVectorData(Type type, SpaceData3D space, BooleanProvider activeFlag, boolean isRequiredVariable)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
-      FBVector3D vectorData = dataPool.getOrCreateVectorData3D(type, space);
+      FBVector3D vectorData = dataPool.getOrCreateVectorData3D(type, space, isRequiredVariable);
       vectorData.addActiveFlag(activeFlag);
       return vectorData;
    }
@@ -187,13 +200,25 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param activeFlag             boolean provider that should reflect the active state of the
     *                               controller calling this factory. Used to determine whether the
     *                               returned data is up-to-date or not at runtime.
+    * @param isRequiredVariable     the {@code YoVariable}s do not get attached to this registry when
+    *                               the variable is not a required variable and
+    *                               {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                               {@code true}.
     * @return the unique {@code FBAlphaFilteredVector3D} matching the search criteria.
     */
-   public FBAlphaFilteredVector3D getOrCreateCenterOfMassAlphaFilteredVectorData(Type rawDataType, SpaceData3D space, double dt,
-                                                                                 DoubleProvider breakFrequencyProvider, BooleanProvider activeFlag)
+   public FBAlphaFilteredVector3D getOrCreateCenterOfMassAlphaFilteredVectorData(Type rawDataType,
+                                                                                 SpaceData3D space,
+                                                                                 double dt,
+                                                                                 DoubleProvider breakFrequencyProvider,
+                                                                                 BooleanProvider activeFlag,
+                                                                                 boolean isRequiredVariable)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
-      FBAlphaFilteredVector3D filteredVectorData = dataPool.getOrCreateAlphaFilteredVectorData(rawDataType, space, breakFrequencyProvider, dt);
+      FBAlphaFilteredVector3D filteredVectorData = dataPool.getOrCreateAlphaFilteredVectorData(rawDataType,
+                                                                                               space,
+                                                                                               breakFrequencyProvider,
+                                                                                               dt,
+                                                                                               isRequiredVariable);
       filteredVectorData.addActiveFlag(activeFlag);
       return filteredVectorData;
    }
@@ -206,20 +231,28 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * yet.
     * </p>
     *
-    * @param space       the space of the data to retrieve.
-    * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
-    * @param dt          the duration of a control tick.
-    * @param maximumRate the maximum rate allowed rate. Not modified.
-    * @param activeFlag  boolean provider that should reflect the active state of the controller
-    *                    calling this factory. Used to determine whether the returned data is
-    *                    up-to-date or not at runtime.
+    * @param space              the space of the data to retrieve.
+    * @param rawDataType        the type of the raw vector onto which the rate limit is to be applied.
+    * @param dt                 the duration of a control tick.
+    * @param maximumRate        the maximum rate allowed rate. Not modified.
+    * @param activeFlag         boolean provider that should reflect the active state of the controller
+    *                           calling this factory. Used to determine whether the returned data is
+    *                           up-to-date or not at runtime.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code FBRateLimitedVector3D} matching the search criteria.
     */
-   public FBRateLimitedVector3D getOrCreateCenterOfMassRateLimitedVectorData(Type rawDataType, SpaceData3D space, double dt, YoDouble maximumRate,
-                                                                             BooleanProvider activeFlag)
+   public FBRateLimitedVector3D getOrCreateCenterOfMassRateLimitedVectorData(Type rawDataType,
+                                                                             SpaceData3D space,
+                                                                             double dt,
+                                                                             YoDouble maximumRate,
+                                                                             BooleanProvider activeFlag,
+                                                                             boolean isRequiredVariable)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
-      FBRateLimitedVector3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt);
+      FBRateLimitedVector3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt, isRequiredVariable);
       rateLimitedVectorData.addActiveFlag(activeFlag);
       return rateLimitedVectorData;
    }
@@ -228,13 +261,17 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * Retrieves and returns the set of gains {@code YoPID3DGains} for the center of mass, if it does
     * not exist it is created.
     *
-    * @param useIntegrator whether to create the gains necessary to compute the integral term.
+    * @param useIntegrator      whether to create the gains necessary to compute the integral term.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code YoPID3DGains} for the center of mass.
     */
-   public YoPID3DGains getOrCreateCenterOfMassGains(boolean useIntegrator)
+   public YoPID3DGains getOrCreateCenterOfMassGains(boolean useIntegrator, boolean isRequiredVariable)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
-      return dataPool.getOrCreatePositionGains(useIntegrator);
+      return dataPool.getOrCreatePositionGains(useIntegrator, isRequiredVariable);
    }
 
    private SingleFeedbackControllerDataPool getOrCreateEndEffectorDataPool(RigidBodyBasics endEffector, int controllerIndex)
@@ -270,18 +307,22 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * "rightHandDesiredPosition".
     * </p>
     *
-    * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex the index of the feedback controller requesting the data.
-    * @param type            the type of the data to retrieve.
-    * @param activeFlag      boolean provider that should reflect the active state of the controller
-    *                        calling this factory. Used to determine whether the returned data is
-    *                        up-to-date or not at runtime.
+    * @param endEffector        the end-effector to which the returned data is associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param type               the type of the data to retrieve.
+    * @param activeFlag         boolean provider that should reflect the active state of the controller
+    *                           calling this factory. Used to determine whether the returned data is
+    *                           up-to-date or not at runtime.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code FBPoint3D} matching the search criteria.
     */
-   public FBPoint3D getOrCreatePositionData(RigidBodyBasics endEffector, int controllerIndex, Type type, BooleanProvider activeFlag)
+   public FBPoint3D getOrCreatePositionData(RigidBodyBasics endEffector, int controllerIndex, Type type, BooleanProvider activeFlag, boolean isRequiredVariable)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      FBPoint3D positionData = dataPool.getOrCreatePositionData(type);
+      FBPoint3D positionData = dataPool.getOrCreatePositionData(type, isRequiredVariable);
       positionData.addActiveFlag(activeFlag);
       return positionData;
    }
@@ -300,18 +341,26 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * "rightHandCurrentOrientation".
     * </p>
     *
-    * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex the index of the feedback controller requesting the data.
-    * @param type            the type of the data to retrieve.
-    * @param activeFlag      boolean provider that should reflect the active state of the controller
-    *                        calling this factory. Used to determine whether the returned data is
-    *                        up-to-date or not at runtime.
+    * @param endEffector        the end-effector to which the returned data is associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param type               the type of the data to retrieve.
+    * @param activeFlag         boolean provider that should reflect the active state of the controller
+    *                           calling this factory. Used to determine whether the returned data is
+    *                           up-to-date or not at runtime.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code FBQuaternion3D} matching the search criteria.
     */
-   public FBQuaternion3D getOrCreateOrientationData(RigidBodyBasics endEffector, int controllerIndex, Type type, BooleanProvider activeFlag)
+   public FBQuaternion3D getOrCreateOrientationData(RigidBodyBasics endEffector,
+                                                    int controllerIndex,
+                                                    Type type,
+                                                    BooleanProvider activeFlag,
+                                                    boolean isRequiredVariable)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      FBQuaternion3D orientationData = dataPool.getOrCreateOrientationData(type);
+      FBQuaternion3D orientationData = dataPool.getOrCreateOrientationData(type, isRequiredVariable);
       orientationData.addActiveFlag(activeFlag);
       return orientationData;
    }
@@ -330,19 +379,28 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * "rightHandDesiredLinearVelocity".
     * </p>
     *
-    * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex the index of the feedback controller requesting the data.
-    * @param type            the type of the data to retrieve.
-    * @param space           the space of the data to retrieve.
-    * @param activeFlag      boolean provider that should reflect the active state of the controller
-    *                        calling this factory. Used to determine whether the returned data is
-    *                        up-to-date or not at runtime.
+    * @param endEffector        the end-effector to which the returned data is associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param type               the type of the data to retrieve.
+    * @param space              the space of the data to retrieve.
+    * @param activeFlag         boolean provider that should reflect the active state of the controller
+    *                           calling this factory. Used to determine whether the returned data is
+    *                           up-to-date or not at runtime.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code FBVector3D} matching the search criteria.
     */
-   public FBVector3D getOrCreateVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData3D space, BooleanProvider activeFlag)
+   public FBVector3D getOrCreateVectorData3D(RigidBodyBasics endEffector,
+                                             int controllerIndex,
+                                             Type type,
+                                             SpaceData3D space,
+                                             BooleanProvider activeFlag,
+                                             boolean isRequiredVariable)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      FBVector3D vectorData = dataPool.getOrCreateVectorData3D(type, space);
+      FBVector3D vectorData = dataPool.getOrCreateVectorData3D(type, space, isRequiredVariable);
       vectorData.addActiveFlag(activeFlag);
       return vectorData;
    }
@@ -365,22 +423,32 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * 'rightHand' will have the prefix: "rightHandRateLimitedDesiredLinearAcceleration".
     * </p>
     *
-    * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex the index of the feedback controller requesting the data.
-    * @param rawDataType     the type of the raw vector onto which the rate limit is to be applied.
-    * @param space           the space of the data to retrieve.
-    * @param dt              the duration of a control tick.
-    * @param maximumRate     the maximum rate allowed rate. Not modified.
-    * @param activeFlag      boolean provider that should reflect the active state of the controller
-    *                        calling this factory. Used to determine whether the returned data is
-    *                        up-to-date or not at runtime.
+    * @param endEffector        the end-effector to which the returned data is associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param rawDataType        the type of the raw vector onto which the rate limit is to be applied.
+    * @param space              the space of the data to retrieve.
+    * @param dt                 the duration of a control tick.
+    * @param maximumRate        the maximum rate allowed rate. Not modified.
+    * @param activeFlag         boolean provider that should reflect the active state of the controller
+    *                           calling this factory. Used to determine whether the returned data is
+    *                           up-to-date or not at runtime.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code FBRateLimitedVector3D} matching the search criteria.
     */
-   public FBRateLimitedVector3D getOrCreateRateLimitedVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData3D space,
-                                                                   double dt, YoDouble maximumRate, BooleanProvider activeFlag)
+   public FBRateLimitedVector3D getOrCreateRateLimitedVectorData3D(RigidBodyBasics endEffector,
+                                                                   int controllerIndex,
+                                                                   Type rawDataType,
+                                                                   SpaceData3D space,
+                                                                   double dt,
+                                                                   YoDouble maximumRate,
+                                                                   BooleanProvider activeFlag,
+                                                                   boolean isRequiredVariable)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      FBRateLimitedVector3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt);
+      FBRateLimitedVector3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt, isRequiredVariable);
       rateLimitedVectorData.addActiveFlag(activeFlag);
       return rateLimitedVectorData;
    }
@@ -413,13 +481,27 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param activeFlag             boolean provider that should reflect the active state of the
     *                               controller calling this factory. Used to determine whether the
     *                               returned data is up-to-date or not at runtime.
+    * @param isRequiredVariable     the {@code YoVariable}s do not get attached to this registry when
+    *                               the variable is not a required variable and
+    *                               {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                               {@code true}.
     * @return the unique {@code FBAlphaFilteredVector3D} matching the search criteria.
     */
-   public FBAlphaFilteredVector3D getOrCreateAlphaFilteredVectorData3D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData3D space,
-                                                                       double dt, DoubleProvider breakFrequencyProvider, BooleanProvider activeFlag)
+   public FBAlphaFilteredVector3D getOrCreateAlphaFilteredVectorData3D(RigidBodyBasics endEffector,
+                                                                       int controllerIndex,
+                                                                       Type rawDataType,
+                                                                       SpaceData3D space,
+                                                                       double dt,
+                                                                       DoubleProvider breakFrequencyProvider,
+                                                                       BooleanProvider activeFlag,
+                                                                       boolean isRequiredVariable)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      FBAlphaFilteredVector3D alphaFilteredVectorData = dataPool.getOrCreateAlphaFilteredVectorData(rawDataType, space, breakFrequencyProvider, dt);
+      FBAlphaFilteredVector3D alphaFilteredVectorData = dataPool.getOrCreateAlphaFilteredVectorData(rawDataType,
+                                                                                                    space,
+                                                                                                    breakFrequencyProvider,
+                                                                                                    dt,
+                                                                                                    isRequiredVariable);
       alphaFilteredVectorData.addActiveFlag(activeFlag);
       return alphaFilteredVectorData;
    }
@@ -428,39 +510,52 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * Retrieves and returns the {@code FBPose3D} associated with the given end-effector and
     * {@code type}, if it does not exist it is created.
     *
-    * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex the index of the feedback controller requesting the data.
-    * @param type            the type of the data to retrieve.
-    * @param activeFlag      boolean provider that should reflect the active state of the controller
-    *                        calling this factory. Used to determine whether the returned data is
-    *                        up-to-date or not at runtime.
+    * @param endEffector        the end-effector to which the returned data is associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param type               the type of the data to retrieve.
+    * @param activeFlag         boolean provider that should reflect the active state of the controller
+    *                           calling this factory. Used to determine whether the returned data is
+    *                           up-to-date or not at runtime.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code FBPose3D} matching the search criteria.
     */
-   public FBPose3D getOrCreatePoseData(RigidBodyBasics endEffector, int controllerIndex, Type type, BooleanProvider activeFlag)
+   public FBPose3D getOrCreatePoseData(RigidBodyBasics endEffector, int controllerIndex, Type type, BooleanProvider activeFlag, boolean isRequiredVariable)
    {
-      return new FBPose3D(getOrCreatePositionData(endEffector, controllerIndex, type, activeFlag),
-                          getOrCreateOrientationData(endEffector, controllerIndex, type, activeFlag));
+      return new FBPose3D(getOrCreatePositionData(endEffector, controllerIndex, type, activeFlag, isRequiredVariable),
+                          getOrCreateOrientationData(endEffector, controllerIndex, type, activeFlag, isRequiredVariable));
    }
 
    /**
     * Retrieves and returns the {@code FBVector6D} associated with the given end-effector,
     * {@code type}, and {@code space}, if it does not exist it is created.
     *
-    * @param endEffector     the end-effector to which the returned data is associated.
-    * @param controllerIndex the index of the feedback controller requesting the data.
-    * @param type            the type of the data to retrieve.
-    * @param space           the space of the data to retrieve.
-    * @param activeFlag      boolean provider that should reflect the active state of the controller
-    *                        calling this factory. Used to determine whether the returned data is
-    *                        up-to-date or not at runtime.
+    * @param endEffector        the end-effector to which the returned data is associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param type               the type of the data to retrieve.
+    * @param space              the space of the data to retrieve.
+    * @param activeFlag         boolean provider that should reflect the active state of the controller
+    *                           calling this factory. Used to determine whether the returned data is
+    *                           up-to-date or not at runtime.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code FBVector6D} matching the search criteria.
     */
-   public FBVector6D getOrCreateVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type type, SpaceData6D space, BooleanProvider activeFlag)
+   public FBVector6D getOrCreateVectorData6D(RigidBodyBasics endEffector,
+                                             int controllerIndex,
+                                             Type type,
+                                             SpaceData6D space,
+                                             BooleanProvider activeFlag,
+                                             boolean isRequiredVariable)
    {
       SpaceData3D angularSpace = space == SpaceData6D.POSE ? SpaceData3D.ROTATION_VECTOR : space.getAngular();
       SpaceData3D linearSpace = space.getLinear();
-      return new FBVector6D(getOrCreateVectorData3D(endEffector, controllerIndex, type, angularSpace, activeFlag),
-                            getOrCreateVectorData3D(endEffector, controllerIndex, type, linearSpace, activeFlag));
+      return new FBVector6D(getOrCreateVectorData3D(endEffector, controllerIndex, type, angularSpace, activeFlag, isRequiredVariable),
+                            getOrCreateVectorData3D(endEffector, controllerIndex, type, linearSpace, activeFlag, isRequiredVariable));
    }
 
    /**
@@ -484,11 +579,21 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param activeFlag                boolean provider that should reflect the active state of the
     *                                  controller calling this factory. Used to determine whether the
     *                                  returned data is up-to-date or not at runtime.
+    * @param isRequiredVariable        the {@code YoVariable}s do not get attached to this registry
+    *                                  when the variable is not a required variable and
+    *                                  {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                                  {@code true}.
     * @return the unique {@code FBAlphaFilteredVector6D} matching the search criteria.
     */
-   public FBAlphaFilteredVector6D getOrCreateAlphaFilteredVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData6D space,
-                                                                       double dt, DoubleProvider breakFrequencyAngularPart,
-                                                                       DoubleProvider breakFrequencyLinearPart, BooleanProvider activeFlag)
+   public FBAlphaFilteredVector6D getOrCreateAlphaFilteredVectorData6D(RigidBodyBasics endEffector,
+                                                                       int controllerIndex,
+                                                                       Type rawDataType,
+                                                                       SpaceData6D space,
+                                                                       double dt,
+                                                                       DoubleProvider breakFrequencyAngularPart,
+                                                                       DoubleProvider breakFrequencyLinearPart,
+                                                                       BooleanProvider activeFlag,
+                                                                       boolean isRequiredVariable)
    {
       SpaceData3D angularSpace = space == SpaceData6D.POSE ? SpaceData3D.ROTATION_VECTOR : space.getAngular();
       SpaceData3D linearSpace = space.getLinear();
@@ -498,14 +603,16 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                               angularSpace,
                                                                               dt,
                                                                               breakFrequencyAngularPart,
-                                                                              activeFlag),
+                                                                              activeFlag,
+                                                                              isRequiredVariable),
                                          getOrCreateAlphaFilteredVectorData3D(endEffector,
                                                                               controllerIndex,
                                                                               rawDataType,
                                                                               linearSpace,
                                                                               dt,
                                                                               breakFrequencyLinearPart,
-                                                                              activeFlag));
+                                                                              activeFlag,
+                                                                              isRequiredVariable));
    }
 
    /**
@@ -527,11 +634,21 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * @param activeFlag         boolean provider that should reflect the active state of the controller
     *                           calling this factory. Used to determine whether the returned data is
     *                           up-to-date or not at runtime.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code FBRateLimitedVector6D} matching the search criteria.
     */
-   public FBRateLimitedVector6D getOrCreateRateLimitedVectorData6D(RigidBodyBasics endEffector, int controllerIndex, Type rawDataType, SpaceData6D space,
-                                                                   double dt, YoDouble maximumAngularRate, YoDouble maximumLinearRate,
-                                                                   BooleanProvider activeFlag)
+   public FBRateLimitedVector6D getOrCreateRateLimitedVectorData6D(RigidBodyBasics endEffector,
+                                                                   int controllerIndex,
+                                                                   Type rawDataType,
+                                                                   SpaceData6D space,
+                                                                   double dt,
+                                                                   YoDouble maximumAngularRate,
+                                                                   YoDouble maximumLinearRate,
+                                                                   BooleanProvider activeFlag,
+                                                                   boolean isRequiredVariable)
    {
       SpaceData3D angularSpace = space == SpaceData6D.POSE ? SpaceData3D.ROTATION_VECTOR : space.getAngular();
       SpaceData3D linearSpace = space.getLinear();
@@ -541,57 +658,71 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                           angularSpace,
                                                                           dt,
                                                                           maximumAngularRate,
-                                                                          activeFlag),
+                                                                          activeFlag,
+                                                                          isRequiredVariable),
                                        getOrCreateRateLimitedVectorData3D(endEffector,
                                                                           controllerIndex,
                                                                           rawDataType,
                                                                           linearSpace,
                                                                           dt,
                                                                           maximumLinearRate,
-                                                                          activeFlag));
+                                                                          activeFlag,
+                                                                          isRequiredVariable));
    }
 
    /**
     * Retrieves and returns the set of orientation gains {@code YoPID3DGains} associated to the given
     * end-effector, if it does not exist it is created.
     *
-    * @param endEffector     the end-effector to which the gains are associated.
-    * @param controllerIndex the index of the feedback controller requesting the data.
-    * @param useIntegrator   whether to create the gains necessary to compute the integral term.
+    * @param endEffector        the end-effector to which the gains are associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param useIntegrator      whether to create the gains necessary to compute the integral term.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code YoPID3DGains} associated with the given end-effector.
     */
-   public YoPID3DGains getOrCreateOrientationGains(RigidBodyBasics endEffector, int controllerIndex, boolean useIntegrator)
+   public YoPID3DGains getOrCreateOrientationGains(RigidBodyBasics endEffector, int controllerIndex, boolean useIntegrator, boolean isRequiredVariable)
    {
-      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateOrientationGains(useIntegrator);
+      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateOrientationGains(useIntegrator, isRequiredVariable);
    }
 
    /**
     * Retrieves and returns the set of position gains {@code YoPID3DGains} associated to the given
     * end-effector, if it does not exist it is created.
     *
-    * @param endEffector     the end-effector to which the gains are associated.
-    * @param controllerIndex the index of the feedback controller requesting the data.
-    * @param useIntegrator   whether to create the gains necessary to compute the integral term.
+    * @param endEffector        the end-effector to which the gains are associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param useIntegrator      whether to create the gains necessary to compute the integral term.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code YoPID3DGains} associated with the given end-effector.
     */
-   public YoPID3DGains getOrCreatePositionGains(RigidBodyBasics endEffector, int controllerIndex, boolean useIntegrator)
+   public YoPID3DGains getOrCreatePositionGains(RigidBodyBasics endEffector, int controllerIndex, boolean useIntegrator, boolean isRequiredVariable)
    {
-      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreatePositionGains(useIntegrator);
+      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreatePositionGains(useIntegrator, isRequiredVariable);
    }
 
    /**
     * Retrieves and returns the set of gains {@code YoPIDSE3Gains} associated to the given
     * end-effector, if it does not exist it is created.
     *
-    * @param endEffector     the end-effector to which the gains are associated.
-    * @param controllerIndex the index of the feedback controller requesting the data.
-    * @param useIntegrator   whether to create the gains necessary to compute the integral term.
+    * @param endEffector        the end-effector to which the gains are associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param useIntegrator      whether to create the gains necessary to compute the integral term.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code YoPIDSE3Gains} associated with the given end-effector.
     */
-   public YoPIDSE3Gains getOrCreateSE3PIDGains(RigidBodyBasics endEffector, int controllerIndex, boolean useIntegrator)
+   public YoPIDSE3Gains getOrCreateSE3PIDGains(RigidBodyBasics endEffector, int controllerIndex, boolean useIntegrator, boolean isRequiredVariable)
    {
-      YoPID3DGains positionGains = getOrCreatePositionGains(endEffector, controllerIndex, useIntegrator);
-      YoPID3DGains orientationGains = getOrCreateOrientationGains(endEffector, controllerIndex, useIntegrator);
+      YoPID3DGains positionGains = getOrCreatePositionGains(endEffector, controllerIndex, useIntegrator, isRequiredVariable);
+      YoPID3DGains orientationGains = getOrCreateOrientationGains(endEffector, controllerIndex, useIntegrator, isRequiredVariable);
       return new DefaultYoPIDSE3Gains(positionGains, orientationGains);
    }
 
@@ -599,13 +730,17 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * Retrieves and returns the control frame {@code YoSE3OffsetFrame} associated to the given
     * end-effector, if it does not exist it is created.
     *
-    * @param endEffector     the end-effector to which the control frame is associated.
-    * @param controllerIndex the index of the feedback controller requesting the data.
+    * @param endEffector        the end-effector to which the control frame is associated.
+    * @param controllerIndex    the index of the feedback controller requesting the data.
+    * @param isRequiredVariable the {@code YoVariable}s do not get attached to this registry when the
+    *                           variable is not a required variable and
+    *                           {@link WholeBodyControllerCore#REDUCE_YOVARIABLES} is set to
+    *                           {@code true}.
     * @return the unique {@code YoSE3OffsetFrame} control frame associated with the given end-effector.
     */
-   public YoSE3OffsetFrame getOrCreateControlFrame(RigidBodyBasics endEffector, int controllerIndex)
+   public YoSE3OffsetFrame getOrCreateControlFrame(RigidBodyBasics endEffector, int controllerIndex, boolean isRequiredVariable)
    {
-      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateControlFrame(endEffector.getBodyFixedFrame());
+      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateControlFrame(endEffector.getBodyFixedFrame(), isRequiredVariable);
    }
 
    /**
@@ -752,6 +887,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    private static class SingleFeedbackControllerDataPool
    {
       private final YoRegistry registry;
+      private final YoRegistry debugRegistry;
       private final String namePrefix;
       private final EnumMap<Type, FBPoint3D> positionDataMap = new EnumMap<>(Type.class);
       private final EnumMap<Type, FBQuaternion3D> orientationDataMap = new EnumMap<>(Type.class);
@@ -769,6 +905,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       {
          this.namePrefix = appendIndex(namePrefix, controllerIndex);
          this.registry = registry;
+         debugRegistry = WholeBodyControllerCore.REDUCE_YOVARIABLES ? null : registry;
       }
 
       public void clearIfInactive()
@@ -779,13 +916,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          }
       }
 
-      public FBPoint3D getOrCreatePositionData(Type type)
+      public FBPoint3D getOrCreatePositionData(Type type, boolean isRequiredVariable)
       {
          FBPoint3D positionData = positionDataMap.get(type);
 
          if (positionData == null)
          {
-            positionData = new FBPoint3D(namePrefix, type, registry);
+            positionData = new FBPoint3D(namePrefix, type, isRequiredVariable ? registry : debugRegistry);
             positionDataMap.put(type, positionData);
             clearableData.add(positionData);
          }
@@ -793,13 +930,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return positionData;
       }
 
-      public FBQuaternion3D getOrCreateOrientationData(Type type)
+      public FBQuaternion3D getOrCreateOrientationData(Type type, boolean isRequiredVariable)
       {
          FBQuaternion3D orientationData = orientationDataMap.get(type);
 
          if (orientationData == null)
          {
-            orientationData = new FBQuaternion3D(namePrefix, type, registry);
+            orientationData = new FBQuaternion3D(namePrefix, type, isRequiredVariable ? registry : debugRegistry);
             orientationDataMap.put(type, orientationData);
             clearableData.add(orientationData);
          }
@@ -807,14 +944,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return orientationData;
       }
 
-      public FBVector3D getOrCreateVectorData3D(Type type, SpaceData3D space)
+      public FBVector3D getOrCreateVectorData3D(Type type, SpaceData3D space, boolean isRequiredVariable)
       {
          EnumMap<SpaceData3D, FBVector3D> vectorDataSubMap = getSubEnumMap(vectorDataMap, type, SpaceData3D.class);
          FBVector3D vectorData = vectorDataSubMap.get(space);
 
          if (vectorData == null)
          {
-            vectorData = new FBVector3D(namePrefix, type, space, registry);
+            vectorData = new FBVector3D(namePrefix, type, space, isRequiredVariable ? registry : debugRegistry);
             vectorDataSubMap.put(space, vectorData);
             clearableData.add(vectorData);
          }
@@ -822,15 +959,25 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return vectorData;
       }
 
-      public FBAlphaFilteredVector3D getOrCreateAlphaFilteredVectorData(Type type, SpaceData3D space, DoubleProvider breakFrequency, double dt)
+      public FBAlphaFilteredVector3D getOrCreateAlphaFilteredVectorData(Type type,
+                                                                        SpaceData3D space,
+                                                                        DoubleProvider breakFrequency,
+                                                                        double dt,
+                                                                        boolean isRequiredVariable)
       {
          EnumMap<SpaceData3D, FBAlphaFilteredVector3D> filteredVectorDataSubMap = getSubEnumMap(filteredVectorDataMap, type, SpaceData3D.class);
          FBAlphaFilteredVector3D filteredVectorData = filteredVectorDataSubMap.get(space);
 
          if (filteredVectorData == null)
          {
-            FBVector3D rawVectorData = getOrCreateVectorData3D(type, space);
-            filteredVectorData = new FBAlphaFilteredVector3D(namePrefix, type, space, breakFrequency, dt, rawVectorData, registry);
+            FBVector3D rawVectorData = getOrCreateVectorData3D(type, space, isRequiredVariable);
+            filteredVectorData = new FBAlphaFilteredVector3D(namePrefix,
+                                                             type,
+                                                             space,
+                                                             breakFrequency,
+                                                             dt,
+                                                             rawVectorData,
+                                                             isRequiredVariable ? registry : debugRegistry);
             filteredVectorDataSubMap.put(space, filteredVectorData);
             clearableData.add(filteredVectorData);
          }
@@ -838,15 +985,25 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return filteredVectorData;
       }
 
-      public FBRateLimitedVector3D getOrCreateRateLimitedVectorData(Type type, SpaceData3D space, DoubleProvider maximumRate, double dt)
+      public FBRateLimitedVector3D getOrCreateRateLimitedVectorData(Type type,
+                                                                    SpaceData3D space,
+                                                                    DoubleProvider maximumRate,
+                                                                    double dt,
+                                                                    boolean isRequiredVariable)
       {
          EnumMap<SpaceData3D, FBRateLimitedVector3D> rateLimitedVectorDataSubMap = getSubEnumMap(rateLimitedVectorDataMap, type, SpaceData3D.class);
          FBRateLimitedVector3D rateLimitedVectorData = rateLimitedVectorDataSubMap.get(space);
 
          if (rateLimitedVectorData == null)
          {
-            FBVector3D rawVectorData = getOrCreateVectorData3D(type, space);
-            rateLimitedVectorData = new FBRateLimitedVector3D(namePrefix, type, space, maximumRate, dt, rawVectorData, registry);
+            FBVector3D rawVectorData = getOrCreateVectorData3D(type, space, isRequiredVariable);
+            rateLimitedVectorData = new FBRateLimitedVector3D(namePrefix,
+                                                              type,
+                                                              space,
+                                                              maximumRate,
+                                                              dt,
+                                                              rawVectorData,
+                                                              isRequiredVariable ? registry : debugRegistry);
             rateLimitedVectorDataSubMap.put(space, rateLimitedVectorData);
             clearableData.add(rateLimitedVectorData);
          }
@@ -854,24 +1011,27 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return rateLimitedVectorData;
       }
 
-      public YoPID3DGains getOrCreateOrientationGains(boolean useIntegrator)
+      public YoPID3DGains getOrCreateOrientationGains(boolean useIntegrator, boolean isRequiredVariable)
       {
          if (orientationGains == null)
-            orientationGains = new DefaultYoPID3DGains(namePrefix + "Orientation", GainCoupling.NONE, useIntegrator, registry);
+            orientationGains = new DefaultYoPID3DGains(namePrefix + "Orientation",
+                                                       GainCoupling.NONE,
+                                                       useIntegrator,
+                                                       isRequiredVariable ? registry : debugRegistry);
          return orientationGains;
       }
 
-      public YoPID3DGains getOrCreatePositionGains(boolean useIntegrator)
+      public YoPID3DGains getOrCreatePositionGains(boolean useIntegrator, boolean isRequiredVariable)
       {
          if (positionGains == null)
-            positionGains = new DefaultYoPID3DGains(namePrefix + "Position", GainCoupling.NONE, useIntegrator, registry);
+            positionGains = new DefaultYoPID3DGains(namePrefix + "Position", GainCoupling.NONE, useIntegrator, isRequiredVariable ? registry : debugRegistry);
          return positionGains;
       }
 
-      public YoSE3OffsetFrame getOrCreateControlFrame(ReferenceFrame parentFrame)
+      public YoSE3OffsetFrame getOrCreateControlFrame(ReferenceFrame parentFrame, boolean isRequiredVariable)
       {
          if (controlFrame == null)
-            controlFrame = new YoSE3OffsetFrame(namePrefix + "BodyFixedControlFrame", parentFrame, registry);
+            controlFrame = new YoSE3OffsetFrame(namePrefix + "BodyFixedControlFrame", parentFrame, isRequiredVariable ? registry : debugRegistry);
          return controlFrame;
       }
 

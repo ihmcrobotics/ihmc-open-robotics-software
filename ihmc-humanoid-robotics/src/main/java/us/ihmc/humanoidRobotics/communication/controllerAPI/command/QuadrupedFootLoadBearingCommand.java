@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.QuadrupedFootLoadBearingMessage;
+import quadruped_msgs.msg.dds.QuadrupedFootLoadBearingMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 

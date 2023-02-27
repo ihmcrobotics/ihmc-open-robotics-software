@@ -3,10 +3,12 @@ package us.ihmc.simulationConstructionSetTools.dataExporter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -203,5 +205,103 @@ public class TorqueSpeedDataExporter implements ActionListener
    {
       File video = new File(dataAndVideosTagDirectory, fileHeader + "_Video.mov");
       scs.getStandardSimulationGUI().getViewportPanel().getStandardGUIActions().createVideo(video);
+   }
+
+   // This will ignore the root directory saved by setRootDirectory()
+   public void exportEverything(String fileName, String rootDirectoryName, boolean exportMatlabData)
+   {
+      // Find the root directory
+      File rootDirectory = new File(rootDirectoryName);
+      if (!rootDirectory.exists())
+      {
+         rootDirectory.mkdir();
+         LogTools.info("Root directory does not exist. creating");
+      }
+
+      // Stop the sim and disable the GUI:
+      scs.stop();
+      scs.disableGUIComponents();
+
+      // Wait till done running:
+      while (scs.isSimulating())
+      {
+         ThreadTools.sleep(1000);
+      }
+
+      // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
+      scs.cropBuffer();
+      scs.gotoInPointNow();
+
+      // confirm directory structure is correct
+      File simulationDataAndVideoDirectory = DataExporterDirectoryFinder.findSimulationDataAndVideoRootLocation(rootDirectory, subdirectoryName);
+      if (simulationDataAndVideoDirectory == null)
+      {
+         LogTools.info("Cannot find simulation Data and Video Directory. Aborting");
+         return;
+      }
+
+      // create label
+      String timeStamp = FormattingTools.getDateString() + "_" + FormattingTools.getTimeString();
+      String tagName = timeStamp + "_" + robot.getName() + "_" + fileName;
+
+      // figure out svn revsision number for project
+      long revisionNumber = -1;
+      System.out.println("---- Export process started -----");
+      System.out.println("Saving data using tag: " + tagName);
+
+      // make destination directory
+      File dataAndVideosTagDirectory = new File(rootDirectory, tagName);
+      dataAndVideosTagDirectory.mkdir();
+
+      // make graph directory inside destination directory
+      File graphDirectory = new File(dataAndVideosTagDirectory, "graphs");
+      graphDirectory.mkdir();
+
+      System.out.println("Saving ReadMe");
+//      File file = new File(directory, name + ".txt");
+//      FileWriter out = new FileWriter(file);
+//
+//      out.write(readmeText);
+//      out.close();
+      System.out.println("Done Saving ReadMe");
+
+      System.out.println("Saving data");
+      saveDataFile(dataAndVideosTagDirectory, tagName);
+      System.out.println("Done Saving Data");
+
+      if (exportMatlabData)
+      {
+            System.out.println("Saving data in Matlab format");
+            try
+            {
+               saveMatlabDataFile(dataAndVideosTagDirectory, tagName);
+               System.out.println("Done Saving Data in Matlab format");
+            }
+            catch (OutOfMemoryError exception)
+            {
+               System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+               exception.printStackTrace();
+            }
+      }
+      else
+      {
+         System.out.println("Skipping matlab save...");
+      }
+
+      System.out.println("creating torque and speed spreadsheet");
+      excelWorkbookCreator.createAndSaveTorqueAndSpeedSpreadSheet(dataAndVideosTagDirectory, tagName);
+      System.out.println("done creating torque and speed spreadsheet");
+
+      System.out.println("creating torque and speed graphs");
+      graphCreator.createJointTorqueSpeedGraphs(graphDirectory, tagName, true, true);
+      System.out.println("done creating torque and speed graphs");
+
+      System.out.println("creating video");
+      createVideo(dataAndVideosTagDirectory, tagName);
+      System.out.println("done creating video");
+
+      System.out.println("---- Export process completed -----");
+
+      scs.enableGUIComponents();
    }
 }

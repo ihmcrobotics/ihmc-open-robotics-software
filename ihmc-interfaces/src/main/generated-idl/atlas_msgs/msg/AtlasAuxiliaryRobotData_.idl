@@ -1,0 +1,48 @@
+#ifndef __atlas_msgs__msg__AtlasAuxiliaryRobotData__idl__
+#define __atlas_msgs__msg__AtlasAuxiliaryRobotData__idl__
+
+#include "geometry_msgs/msg/./Vector3_.idl"
+module atlas_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message specific to Atlas, it is reported by the IHMC state estimator.
+       */
+      @TypeCode(type="atlas_msgs::msg::dds_::AtlasAuxiliaryRobotData_")
+      struct AtlasAuxiliaryRobotData
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        sequence<float, 6> electric_joint_temperatures;
+        sequence<float, 6> electric_joint_currents;
+        sequence<boolean, 6> electric_joint_enabled_array;
+        float raw_imu_timestamps[15];
+        float raw_imu_packet_counts[15];
+        geometry_msgs::msg::dds::Vector3 raw_imu_rates[15];
+        geometry_msgs::msg::dds::Vector3 raw_imu_deltas[15];
+        boolean battery_charging;
+        float battery_voltage;
+        float battery_current;
+        float remaining_battery_time;
+        float remaining_amp_hours;
+        float remaining_charge_percentage;
+        long long battery_cycle_count;
+        float pump_inlet_pressure;
+        float pump_supply_pressure;
+        float air_sump_pressure;
+        float pump_supply_temperature;
+        float pump_rpm;
+        float motor_temperature;
+        float motor_driver_temperature;
+      };
+    };
+  };
+};
+
+#endif

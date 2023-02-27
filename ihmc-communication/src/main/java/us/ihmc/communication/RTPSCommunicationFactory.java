@@ -56,8 +56,13 @@ public class RTPSCommunicationFactory
       }
       else
       {
-         LogTools.error("No RTPS Domain ID set in the NetworkParameters file. The entry should look like RTPSDomainID:15, setting the Default RTPS Domain ID to "
-               + rtpsDomainID);
+         LogTools.error("""
+                     Tried to load the RTPS Domain ID from %s, \
+                     but either the key didn't exist or after parsing the string it \
+                     returned a negative number.
+                     It should look like RTPSDomainID=15, if your registered domain ID is 15.
+                     Setting the Default RTPS Domain ID randomly to %s, to avoid interfering with others.\
+                     """.formatted(NetworkParameters.defaultParameterFile, rtpsDomainID));
       }
 
       InetAddress foundAddressRestriction = null;

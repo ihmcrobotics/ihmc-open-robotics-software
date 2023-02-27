@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
@@ -13,19 +12,21 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.commons.lists.ListWrappingIndexTools;
 
-public class PlanarRegionDataImporterVisualizer extends Application
+public class PlanarRegionDataImporterVisualizer extends ApplicationNoModule
 {
    private File defaultFile = null;
 
@@ -72,7 +73,7 @@ public class PlanarRegionDataImporterVisualizer extends Application
       RigidBodyTransform transform = new RigidBodyTransform();
       data.getTransformToWorld(transform);
 
-      List<Point2D> concaveHullVerticesLocal = data.getConcaveHull();
+      List<? extends Point2DReadOnly> concaveHullVerticesLocal = data.getConcaveHull();
       Color regionColor = OcTreeMeshBuilder.getRegionColor(regionId);
 
       List<Point3D> concaveHullVertices = concaveHullVerticesLocal.stream().map(Point3D::new).map(p ->

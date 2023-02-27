@@ -66,7 +66,6 @@ public class ValkyriePositionControlledRobotSimulationEndToEndTest extends Human
       runProcessedScriptTest(testInfo,
                              ValkyrieInitialSetupFactories.newCrawl1(getRobotModel().getJointMap()),
                              new FlatGroundEnvironment(),
-                             1.0,
                              ValkyrieRobotModel.class.getClassLoader().getResourceAsStream("multiContact/scripts/20200930_144631_Crawl1ToDab.json"));
    }
 }

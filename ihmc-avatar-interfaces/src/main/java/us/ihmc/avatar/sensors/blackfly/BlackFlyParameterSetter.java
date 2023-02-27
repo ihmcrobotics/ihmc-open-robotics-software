@@ -3,7 +3,7 @@ package us.ihmc.avatar.sensors.blackfly;
 import java.util.HashMap;
 import java.util.Map;
 
-import controller_msgs.msg.dds.BlackFlyParameterPacket;
+import perception_msgs.msg.dds.BlackFlyParameterPacket;
 import controller_msgs.msg.dds.UIConnectedPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;

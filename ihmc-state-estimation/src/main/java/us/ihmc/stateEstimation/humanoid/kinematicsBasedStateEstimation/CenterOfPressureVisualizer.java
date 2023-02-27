@@ -1,6 +1,10 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -18,7 +22,6 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-
 public class CenterOfPressureVisualizer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -35,7 +38,8 @@ public class CenterOfPressureVisualizer
    private final List<RigidBodyBasics> footList = new ArrayList<>();
 
    public CenterOfPressureVisualizer(Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+                                     YoGraphicsListRegistry yoGraphicsListRegistry,
+                                     YoRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
       footRigidBodies = footSwitches.keySet();
@@ -48,7 +52,8 @@ public class CenterOfPressureVisualizer
          YoFramePoint3D rawCoPPositionInWorld = new YoFramePoint3D("raw" + rigidBodyName + "CoPPositionsInWorld", worldFrame, registry);
          footRawCoPPositionsInWorld.put(rigidBody, rawCoPPositionInWorld);
 
-         YoGraphicPosition copYoGraphic = new YoGraphicPosition("Meas " + rigidBodyName + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+         YoGraphicPosition copYoGraphic = new YoGraphicPosition("Meas " + rigidBodyName
+               + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
          YoArtifactPosition copArtifact = copYoGraphic.createArtifact();
          yoGraphicsListRegistry.registerArtifact("StateEstimator", copArtifact);
 
@@ -56,7 +61,11 @@ public class CenterOfPressureVisualizer
       }
 
       overallRawCoPPositionInWorld = new YoFramePoint3D("overallRawCoPPositionInWorld", worldFrame, registry);
-      YoGraphicPosition overallRawCoPYoGraphic = new YoGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+      YoGraphicPosition overallRawCoPYoGraphic = new YoGraphicPosition("Meas CoP",
+                                                                       overallRawCoPPositionInWorld,
+                                                                       0.015,
+                                                                       YoAppearance.DarkRed(),
+                                                                       GraphicType.DIAMOND);
       YoArtifactPosition overallRawCoPArtifact = overallRawCoPYoGraphic.createArtifact();
       overallRawCoPArtifact.setVisible(false);
       yoGraphicsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
@@ -75,12 +84,12 @@ public class CenterOfPressureVisualizer
          {
             RigidBodyBasics rigidBody = footList.get(i);
 
-            footSwitches.get(rigidBody).computeAndPackCoP(tempRawCoP2d);
+            footSwitches.get(rigidBody).getCenterOfPressure(tempRawCoP2d);
             tempRawCoP.setIncludingFrame(tempRawCoP2d.getReferenceFrame(), tempRawCoP2d.getX(), tempRawCoP2d.getY(), 0.0);
             tempRawCoP.changeFrame(worldFrame);
             footRawCoPPositionsInWorld.get(rigidBody).set(tempRawCoP);
 
-            footSwitches.get(rigidBody).computeAndPackFootWrench(tempWrench);
+            footSwitches.get(rigidBody).getMeasuredWrench(tempWrench);
             double singleFootForce = tempWrench.getLinearPartZ();
             totalFootForce += singleFootForce;
             tempRawCoP.scale(singleFootForce);

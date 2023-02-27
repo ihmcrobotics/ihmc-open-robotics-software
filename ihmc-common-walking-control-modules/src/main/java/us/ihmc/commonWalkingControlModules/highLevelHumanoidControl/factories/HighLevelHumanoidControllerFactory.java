@@ -16,8 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
@@ -25,6 +24,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHigh
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.ROS2Tools;
@@ -35,7 +36,6 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
@@ -59,6 +59,7 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -108,18 +109,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
    private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
+   private final List<HighLevelHumanoidControllerPluginFactory> pluginFactories = new ArrayList<>();
 
    private final SideDependentList<String> footSensorNames;
    private final SideDependentList<String> wristSensorNames;
 
-   private YoGraphicsListRegistry yoGraphicsListRegistry;
-
-   private HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters;
-   private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean createQueuedControllerCommandGenerator = false;
    private boolean createUserDesiredControllerCommandGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
-   private HeightMap heightMapForFootstepZ = null;
 
    private boolean isListeningToHighLevelStatePackets = true;
 
@@ -129,7 +126,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
                                              SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> footContactSensorNames,
                                              SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
@@ -138,7 +134,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    {
       this(contactableBodiesFactory,
            footForceSensorNames,
-           footContactSensorNames,
            wristSensorNames,
            highLevelControllerParameters,
            walkingControllerParameters,
@@ -149,7 +144,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
                                              SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> footContactSensorNames,
                                              SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
@@ -190,59 +184,41 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
    }
 
-   private ContinuousStepGenerator continuousStepGenerator;
+   private ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory;
 
    public void createComponentBasedFootstepDataMessageGenerator()
    {
-      createComponentBasedFootstepDataMessageGenerator(false, null);
+      createComponentBasedFootstepDataMessageGenerator(false, null, null);
    }
 
-   public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript)
+   public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript,
+                                                                HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
    {
-      createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, null);
+      createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, null, headingAndVelocityEvaluationScriptParameters);
    }
 
-   public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript, HeightMap heightMapForFootstepZ)
+   public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript,
+                                                                FootstepAdjustment footstepAdjustment,
+                                                                HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
    {
-      if (continuousStepGenerator != null)
+      if (componentBasedFootstepDataMessageGeneratorFactory != null)
          return;
 
-      if (controllerToolbox != null)
-      {
-         CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-         double controlDT = controllerToolbox.getControlDT();
-         continuousStepGenerator = new ContinuousStepGenerator(registry);
-         continuousStepGenerator.setFootstepStatusListener(statusMessageOutputManager);
-         continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
-         continuousStepGenerator.configureWith(walkingControllerParameters);
-         continuousStepGenerator.setFootstepMessenger(commandInputManager::submitMessage);
-         if (yoGraphicsListRegistry != null)
-            continuousStepGenerator.setupVisualization(controllerToolbox.getContactableFeet(), yoGraphicsListRegistry);
-         if (heightMapForFootstepZ != null)
-            continuousStepGenerator.setHeightMapBasedFootstepAdjustment(heightMapForFootstepZ);
+      componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
+      componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
+      componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
+      componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters);
+      componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(footstepAdjustment);
 
-         if (useHeadingAndVelocityScript)
-         {
-            HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(controlDT,
-                                                                                               controllerToolbox.getYoTime(),
-                                                                                               headingAndVelocityEvaluationScriptParameters,
-                                                                                               registry);
-            continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
-            continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
-            controllerToolbox.addUpdatable(script);
-         }
-         else
-         {
-            continuousStepGenerator.setYoComponentProviders();
-         }
-         controllerToolbox.addUpdatable(continuousStepGenerator);
-      }
+      if (humanoidHighLevelControllerManager != null)
+         humanoidHighLevelControllerManager.addControllerPluginFactory(componentBasedFootstepDataMessageGeneratorFactory);
       else
-      {
-         createComponentBasedFootstepDataMessageGenerator = true;
-         this.useHeadingAndVelocityScript = useHeadingAndVelocityScript;
-         this.heightMapForFootstepZ = heightMapForFootstepZ;
-      }
+         pluginFactories.add(componentBasedFootstepDataMessageGeneratorFactory);
+   }
+
+   public void addControllerPlugin(HighLevelHumanoidControllerPluginFactory pluginFactory)
+   {
+      pluginFactories.add(pluginFactory);
    }
 
    private QueuedControllerCommandGenerator queuedControllerCommandGenerator;
@@ -302,11 +278,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       {
          createUserDesiredControllerCommandGenerator = true;
       }
-   }
-
-   public void setHeadingAndVelocityEvaluationScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
-   {
-      headingAndVelocityEvaluationScriptParameters = walkingScriptParameters;
    }
 
    public void useDefaultDiagnosticControlState()
@@ -472,8 +443,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                         JointDesiredOutputListBasics lowLevelControllerOutput,
                                         JointBasics... jointsToIgnore)
    {
-      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
       YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
 
@@ -547,8 +516,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                  jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
-      if (createComponentBasedFootstepDataMessageGenerator)
-         createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, heightMapForFootstepZ);
       if (createQueuedControllerCommandGenerator)
          createQueuedControllerCommandGenerator(controllerCommands);
       if (createUserDesiredControllerCommandGenerator)
@@ -586,6 +553,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   requestedHighLevelControllerState,
                                                                                   controllerFactoriesMap,
                                                                                   stateTransitionFactories,
+                                                                                  pluginFactories,
                                                                                   managerFactory,
                                                                                   controllerCoreFactory,
                                                                                   controllerToolbox,
@@ -680,6 +648,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          controllerFailureListenersToAttach.add(listener);
    }
 
+   public boolean detachControllerFailureListener(ControllerFailureListener listener)
+   {
+      if (controllerToolbox != null)
+         return controllerToolbox.detachControllerFailureListener(listener);
+      else
+         return controllerFailureListenersToAttach.remove(listener);
+   }
+
    public void attachControllerStateChangedListeners(List<ControllerStateChangedListener> listeners)
    {
       for (int i = 0; i < listeners.size(); i++)
@@ -729,6 +705,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
+   }
+
+   public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
+   {
+      humanoidHighLevelControllerManager.addHighLevelStateChangedListener(stateChangedListener);
    }
 
    public void setListenToHighLevelStatePackets(boolean isListening)

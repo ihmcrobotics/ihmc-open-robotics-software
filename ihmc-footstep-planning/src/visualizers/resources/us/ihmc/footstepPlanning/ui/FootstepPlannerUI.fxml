@@ -34,6 +34,12 @@
                               <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
                           </content>
                       </Tab>
+
+                      <Tab text="A Star Body Path Parameters">
+                          <content>
+                              <fx:include fx:id="aStarBodyPathParametersUI" source="AStarBodyPathParametersUI.fxml" />
+                          </content>
+                      </Tab>
       
                       <Tab text="Footstep Parameters">
                           <content>
@@ -47,12 +53,18 @@
                           </content>
                       </Tab>
       
-                      <Tab text="Log Table">
+                      <Tab text="Footstep Log Table">
                           <content>
                               <fx:include fx:id="footstepPlannerLogVisualizer" source="FootstepPlannerLogVisualizer.fxml" />
                           </content>
                       </Tab>
-      
+
+                      <Tab text="Body Path Log Table">
+                          <content>
+                              <fx:include fx:id="bodyPathLogVisualizer" source="BodyPathLogVisualizer.fxml" />
+                          </content>
+                      </Tab>
+
                       <Tab text="Visualization Control">
                           <content>
                               <fx:include fx:id="visibilityGraphsUI" source="VisualizationDashboard.fxml" />

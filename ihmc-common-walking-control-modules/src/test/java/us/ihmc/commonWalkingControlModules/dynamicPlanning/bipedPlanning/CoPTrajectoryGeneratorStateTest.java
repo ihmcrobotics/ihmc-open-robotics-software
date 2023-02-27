@@ -1,25 +1,23 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.Random;
 
 public class CoPTrajectoryGeneratorStateTest
 {
@@ -71,30 +69,30 @@ public class CoPTrajectoryGeneratorStateTest
 
          stateB.loadValues(YoSaveableModuleStateTools.readSaveableRegistryToDataMap(YoSaveableModuleStateTools.writeStateToSaveableRegistry(stateA)));
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(randomInitialCoP, stateB.getInitialCoP(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(randomInitialCoP, stateB.getInitialCoP(), epsilon);
          CoPTrajectoryGeneratorTestTools.assertTimingsEqual(randomTiming0, stateB.getTiming(0), epsilon);
          CoPTrajectoryGeneratorTestTools.assertTimingsEqual(randomTiming1, stateB.getTiming(1), epsilon);
          CoPTrajectoryGeneratorTestTools.assertFootstepEqual(randomFootstep0, stateB.getFootstep(0), epsilon);
          CoPTrajectoryGeneratorTestTools.assertFootstepEqual(randomFootstep1, stateB.getFootstep(1), epsilon);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(randomLeftFootPose.getPosition(),
+         EuclidFrameTestTools.assertGeometricallyEquals(randomLeftFootPose.getPosition(),
                                                                     stateB.getFootPose(RobotSide.LEFT).getPosition(),
                                                                     epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(randomRightFootPose.getPosition(),
+         EuclidFrameTestTools.assertGeometricallyEquals(randomRightFootPose.getPosition(),
                                                                     stateB.getFootPose(RobotSide.RIGHT).getPosition(),
                                                                     epsilon);
-         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(randomLeftFootPose.getOrientation(),
+         EuclidFrameTestTools.assertGeometricallyEquals(randomLeftFootPose.getOrientation(),
                                                                        stateB.getFootPose(RobotSide.LEFT).getOrientation(),
                                                                        epsilon);
-         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(randomRightFootPose.getOrientation(),
+         EuclidFrameTestTools.assertGeometricallyEquals(randomRightFootPose.getOrientation(),
                                                                        stateB.getFootPose(RobotSide.RIGHT).getOrientation(),
                                                                        epsilon);
-         EuclidGeometryTestTools.assertConvexPolygon2DGeometricallyEquals(randomLeftFootPolygon, stateB.getFootPolygonInSole(RobotSide.LEFT), epsilon);
-         EuclidGeometryTestTools.assertConvexPolygon2DGeometricallyEquals(randomRightFootPolygon, stateB.getFootPolygonInSole(RobotSide.RIGHT), epsilon);
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(randomLeftFootPolygon.getReferenceFrame().getTransformToWorldFrame(),
+         EuclidCoreTestTools.assertGeometricallyEquals(randomLeftFootPolygon, stateB.getFootPolygonInSole(RobotSide.LEFT), epsilon);
+         EuclidCoreTestTools.assertGeometricallyEquals(randomRightFootPolygon, stateB.getFootPolygonInSole(RobotSide.RIGHT), epsilon);
+         EuclidCoreTestTools.assertEquals(randomLeftFootPolygon.getReferenceFrame().getTransformToWorldFrame(),
                                                             stateB.getFootPolygonInSole(RobotSide.LEFT).getReferenceFrame().getTransformToWorldFrame(),
                                                             epsilon);
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(randomRightFootPolygon.getReferenceFrame().getTransformToWorldFrame(),
+         EuclidCoreTestTools.assertEquals(randomRightFootPolygon.getReferenceFrame().getTransformToWorldFrame(),
                                                             stateB.getFootPolygonInSole(RobotSide.RIGHT).getReferenceFrame().getTransformToWorldFrame(),
                                                             epsilon);
       }

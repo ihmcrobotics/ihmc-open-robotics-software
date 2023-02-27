@@ -153,8 +153,7 @@ public class QuadrupedInverseKinematicsController implements RobotController
       }
       controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommand);
 
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
+      controllerCore.compute(controllerCoreCommand);
    }
 
    @Override
