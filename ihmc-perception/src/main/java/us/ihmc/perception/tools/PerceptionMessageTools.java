@@ -35,7 +35,30 @@ public class PerceptionMessageTools
       intrinsicParametersMessage.setCy(sensor.getColorPrincipalOffsetYPixels());
    }
 
-   public static void publishPNGCompressedDepthImage(Mat depth16UC1Image,
+   public static void compressAndPublishDepthImagePNG(Mat depth16UC1Image,
+                                                      ROS2Topic<ImageMessage> topic,
+                                                      ImageMessage depthImageMessage,
+                                                      ROS2Helper helper,
+                                                      FramePose3D cameraPose,
+                                                      Instant aquisitionTime,
+                                                      long sequenceNumber,
+                                                      int height,
+                                                      int width)
+   {
+      BytePointer compressedDepthPointer = new BytePointer();
+      BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
+      BytedecoOpenCVTools.packImageMessage(depthImageMessage,
+                                           compressedDepthPointer,
+                                           cameraPose,
+                                           aquisitionTime,
+                                           sequenceNumber,
+                                           height,
+                                           width,
+                                           ImageMessageFormat.DEPTH_PNG_16UC1);
+      helper.publish(topic, depthImageMessage);
+   }
+
+   public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
                                                      ROS2Topic<ImageMessage> topic,
                                                      ImageMessage depthImageMessage,
                                                      ROS2Helper helper,
@@ -45,8 +68,6 @@ public class PerceptionMessageTools
                                                      int height,
                                                      int width)
    {
-      BytePointer compressedDepthPointer = new BytePointer();
-      BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
       BytedecoOpenCVTools.packImageMessage(depthImageMessage,
                                            compressedDepthPointer,
                                            cameraPose,

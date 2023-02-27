@@ -22,7 +22,6 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
-import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -59,7 +58,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -685,8 +683,8 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             Instant now = Instant.now();
             sensorPose.setToZero(sensorFrame);
             sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
-            PerceptionMessageTools.publishPNGCompressedDepthImage(depthImageMat, ros2DepthTopic, depthImageMessage, ros2Helper, sensorPose, now, depthSequenceNumber++,
-                                                                  depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth());
+            PerceptionMessageTools.compressAndPublishDepthImagePNG(depthImageMat, ros2DepthTopic, depthImageMessage, ros2Helper, sensorPose, now, depthSequenceNumber++,
+                                                                   depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth());
 
          });
       }

@@ -215,15 +215,15 @@ public class TerrainPerceptionProcessWithDriver
 
             // TODO:  Filter out regions that are colliding with the body before publishing
             PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
-            PerceptionMessageTools.publishPNGCompressedDepthImage(depthU16C1Image,
-                                                           depthTopic,
-                                                           depthImageMessage,
-                                                           ros2Helper,
-                                                           cameraPose,
-                                                           now,
-                                                           depthSequenceNumber,
-                                                           depthHeight,
-                                                           depthWidth);
+            PerceptionMessageTools.compressAndPublishDepthImagePNG(depthU16C1Image,
+                                                                   depthTopic,
+                                                                   depthImageMessage,
+                                                                   ros2Helper,
+                                                                   cameraPose,
+                                                                   now,
+                                                                   depthSequenceNumber,
+                                                                   depthHeight,
+                                                                   depthWidth);
             PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3Image,
                                                            yuvColorImage,
                                                            colorTopic,

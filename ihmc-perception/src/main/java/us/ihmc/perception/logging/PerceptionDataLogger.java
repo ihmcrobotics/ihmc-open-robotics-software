@@ -1,6 +1,5 @@
 package us.ihmc.perception.logging;
 
-import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;
@@ -11,8 +10,8 @@ import perception_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -69,7 +68,7 @@ public class PerceptionDataLogger
    private HashMap<String, PerceptionLogChannel> channels = new HashMap<>();
    private HashMap<String, AtomicReference<ImageMessage>> references = new HashMap<>();
    private HashMap<String, AtomicReference<BigVideoPacket>> bigVideoPacketReferences = new HashMap<>();
-   private HashMap<String, AtomicReference<RigidBodyTransformMessage>> transformMessageReferences = new HashMap<>();
+   private HashMap<String, AtomicReference<Pose3D>> transformMessageReferences = new HashMap<>();
 
    public PerceptionDataLogger()
    {
@@ -253,7 +252,7 @@ public class PerceptionDataLogger
          counts.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, 0);
          ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.MOCAP_RIGID_BODY, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
          {
-            RigidBodyTransformMessage transformMessage = new RigidBodyTransformMessage();
+            Pose3D transformMessage = new Pose3D();
             subscriber.takeNextData(transformMessage, new SampleInfo());
 
             transformMessageReferences.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).set(transformMessage);
@@ -319,6 +318,8 @@ public class PerceptionDataLogger
 
       if (channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
       {
+         channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).incrementCount();
+
          storeLongArray(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME, data.getMonotonicTime());
          storeFloatArray(PerceptionLoggerConstants.ROOT_POSITION_NAME, data.getRootPosition());
          storeFloatArray(PerceptionLoggerConstants.ROOT_ORIENTATION_NAME, data.getRootOrientation());
@@ -430,7 +431,7 @@ public class PerceptionDataLogger
       }
    }
 
-   public void logMocapRigidBody(RigidBodyTransformMessage transformMessage)
+   public void logMocapRigidBody(Pose3D pose)
    {
       LogTools.info("Logging Mocap Rigid Body");
 
@@ -439,7 +440,7 @@ public class PerceptionDataLogger
          channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).incrementCount();
 
          RigidBodyTransform transform = new RigidBodyTransform();
-         MessageTools.toEuclid(transformMessage, transform);
+         pose.set(transform);
          Quaternion orientation = new Quaternion(transform.getRotation());
          storeFloatArray(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new Point3D(transform.getTranslation()));
          storeFloatArray(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, orientation);
