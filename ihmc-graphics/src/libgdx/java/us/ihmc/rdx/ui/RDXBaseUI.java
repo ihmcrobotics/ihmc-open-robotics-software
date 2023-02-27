@@ -569,4 +569,16 @@ public class RDXBaseUI
       }
       this.theme = theme;
    }
+
+   public void showGroundTruthEnvironment(boolean show)
+   {
+      if (primaryScene.getSceneLevelsToRender() != null)
+      {
+         boolean rendering = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
+         if (show && !rendering)
+            primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
+         else if (!show && rendering)
+            primaryScene.getSceneLevelsToRender().remove(RDXSceneLevel.GROUND_TRUTH);
+      }
+   }
 }
