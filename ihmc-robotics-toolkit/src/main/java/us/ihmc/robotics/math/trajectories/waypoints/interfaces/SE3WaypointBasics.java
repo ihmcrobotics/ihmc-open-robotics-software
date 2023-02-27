@@ -1,65 +1,43 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface SE3WaypointBasics extends EuclideanWaypointBasics, SO3WaypointBasics
+public interface SE3WaypointBasics extends SE3WaypointReadOnly, EuclideanWaypointBasics, SO3WaypointBasics
 {
-   default void set(Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   @Override
+   EuclideanWaypointBasics getEuclideanWaypoint();
+
+   @Override
+   SO3WaypointBasics getSO3Waypoint();
+
+   @Override
+   default Point3DBasics getPosition()
    {
-      setPosition(position);
-      setOrientation(orientation);
-      setLinearVelocity(linearVelocity);
-      setAngularVelocity(angularVelocity);
+      return getEuclideanWaypoint().getPosition();
    }
 
-   default void get(Point3DBasics positionToPack, QuaternionBasics orientationToPack, Vector3DBasics linearVelocityToPack, Vector3DBasics angularVelocityToPack)
+   @Override
+   default QuaternionBasics getOrientation()
    {
-      getPosition(positionToPack);
-      getOrientation(orientationToPack);
-      getLinearVelocity(linearVelocityToPack);
-      getAngularVelocity(angularVelocityToPack);
+      return getSO3Waypoint().getOrientation();
    }
 
-   default void get(SE3WaypointBasics otherToPack)
+   @Override
+   default Vector3DBasics getLinearVelocity()
    {
-      otherToPack.set(this);
+      return getEuclideanWaypoint().getLinearVelocity();
    }
 
-   default void get(EuclideanWaypointBasics euclideanWaypointToPack, SO3WaypointBasics so3WaypointToPack)
+   @Override
+   default Vector3DBasics getAngularVelocity()
    {
-      get(euclideanWaypointToPack);
-      get(so3WaypointToPack);
-   }
-
-   default void getPose(Pose3DBasics poseToPack)
-   {
-      poseToPack.set(getPosition(), getOrientation());
-   }
-
-   default boolean epsilonEquals(SE3WaypointBasics other, double epsilon)
-   {
-      boolean euclideanMatch = EuclideanWaypointBasics.super.epsilonEquals(other, epsilon);
-      boolean so3Match = SO3WaypointBasics.super.epsilonEquals(other, epsilon);
-      return euclideanMatch && so3Match;
-   }
-
-   default boolean geometricallyEquals(SE3WaypointBasics other, double epsilon)
-   {
-      boolean euclideanMatch = EuclideanWaypointBasics.super.geometricallyEquals(other, epsilon);
-      boolean so3Match = SO3WaypointBasics.super.geometricallyEquals(other, epsilon);
-      return euclideanMatch && so3Match;
-   }
-
-   default void set(SE3WaypointBasics other)
-   {
-      EuclideanWaypointBasics.super.set(other);
-      SO3WaypointBasics.super.set(other);
+      return getSO3Waypoint().getAngularVelocity();
    }
 
    @Override
@@ -79,6 +57,32 @@ public interface SE3WaypointBasics extends EuclideanWaypointBasics, SO3WaypointB
    @Override
    default boolean containsNaN()
    {
-      return EuclideanWaypointBasics.super.containsNaN() || SO3WaypointBasics.super.containsNaN();
+      return SE3WaypointReadOnly.super.containsNaN();
+   }
+
+   default void set(Point3DReadOnly position, Orientation3DReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   {
+      getEuclideanWaypoint().set(position, linearVelocity);
+      getSO3Waypoint().set(orientation, angularVelocity);
+   }
+
+   default void set(SE3WaypointReadOnly other)
+   {
+      EuclideanWaypointBasics.super.set(other);
+      SO3WaypointBasics.super.set(other);
+   }
+
+   @Override
+   default void applyTransform(Transform transform)
+   {
+      getEuclideanWaypoint().applyTransform(transform);
+      getSO3Waypoint().applyTransform(transform);
+   }
+
+   @Override
+   default void applyInverseTransform(Transform transform)
+   {
+      getEuclideanWaypoint().applyInverseTransform(transform);
+      getSO3Waypoint().applyInverseTransform(transform);
    }
 }

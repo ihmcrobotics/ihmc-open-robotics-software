@@ -45,13 +45,13 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.WrenchTrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += controller_msgs.msg.dds.FrameInformationPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.FrameInformationPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -74,14 +74,14 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       {
           current_alignment += controller_msgs.msg.dds.WrenchTrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getWrenchTrajectoryPoints().get(i0), current_alignment);}
 
-      current_alignment += controller_msgs.msg.dds.FrameInformationPubSubType.getCdrSerializedSize(data.getFrameInformation(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.FrameInformationPubSubType.getCdrSerializedSize(data.getFrameInformation(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getControlFramePose(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -95,11 +95,11 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       cdr.write_type_e(data.getWrenchTrajectoryPoints());else
           throw new RuntimeException("wrench_trajectory_points field exceeds the maximum length");
 
-      controller_msgs.msg.dds.FrameInformationPubSubType.write(data.getFrameInformation(), cdr);
+      ihmc_common_msgs.msg.dds.FrameInformationPubSubType.write(data.getFrameInformation(), cdr);
       cdr.write_type_7(data.getUseCustomControlFrame());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getControlFramePose(), cdr);
-      controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.WrenchTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -107,11 +107,11 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setSequenceId(cdr.read_type_4());
       	
       cdr.read_type_e(data.getWrenchTrajectoryPoints());	
-      controller_msgs.msg.dds.FrameInformationPubSubType.read(data.getFrameInformation(), cdr);	
+      ihmc_common_msgs.msg.dds.FrameInformationPubSubType.read(data.getFrameInformation(), cdr);	
       data.setUseCustomControlFrame(cdr.read_type_7());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getControlFramePose(), cdr);	
-      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
 
    }
 
@@ -120,12 +120,12 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("wrench_trajectory_points", data.getWrenchTrajectoryPoints());
-      ser.write_type_a("frame_information", new controller_msgs.msg.dds.FrameInformationPubSubType(), data.getFrameInformation());
+      ser.write_type_a("frame_information", new ihmc_common_msgs.msg.dds.FrameInformationPubSubType(), data.getFrameInformation());
 
       ser.write_type_7("use_custom_control_frame", data.getUseCustomControlFrame());
       ser.write_type_a("control_frame_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getControlFramePose());
 
-      ser.write_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+      ser.write_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
    }
 
@@ -134,12 +134,12 @@ public class WrenchTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("wrench_trajectory_points", data.getWrenchTrajectoryPoints());
-      ser.read_type_a("frame_information", new controller_msgs.msg.dds.FrameInformationPubSubType(), data.getFrameInformation());
+      ser.read_type_a("frame_information", new ihmc_common_msgs.msg.dds.FrameInformationPubSubType(), data.getFrameInformation());
 
       data.setUseCustomControlFrame(ser.read_type_7("use_custom_control_frame"));
       ser.read_type_a("control_frame_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getControlFramePose());
 
-      ser.read_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+      ser.read_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
    }
 

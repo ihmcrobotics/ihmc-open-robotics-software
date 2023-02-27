@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
-import controller_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.communication.IHMCROS2Publisher;

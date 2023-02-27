@@ -108,6 +108,11 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       createFootContactPoints(new DefaultFootContactPoints<>(robotSegments));
    }
 
+   protected void createDefaultFootContactPoints(int nSimContactPointsX, int nSimContactPointsY)
+   {
+      createFootContactPoints(new DefaultFootContactPoints<>(robotSegments, nSimContactPointsX, nSimContactPointsY));
+   }
+
    protected final void clearSimulationContactPoints()
    {
       simulationGroundContactPoints.clear();

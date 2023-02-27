@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -134,7 +135,7 @@ public class WholeBodyInverseDynamicsSolver
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
       wrenchVisualizer = toolbox.getWrenchVisualizer();
 
-      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(controlDT, registry);
+      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(toolbox.getRootBody(), controlDT, registry);
 
       yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
       yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
@@ -155,6 +156,7 @@ public class WholeBodyInverseDynamicsSolver
    public void reset()
    {
       optimizationControlModule.initialize();
+      jointAccelerationIntegrationCalculator.resetJointParameters();
 
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {
@@ -348,6 +350,9 @@ public class WholeBodyInverseDynamicsSolver
 
          switch (command.getCommandType())
          {
+            case QP_INPUT:
+               optimizationControlModule.submitQPObjectiveCommand((QPObjectiveCommand) command);
+               break;
             case TASKSPACE:
                optimizationControlModule.submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
                break;

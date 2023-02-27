@@ -548,6 +548,7 @@ public class ConvexPolygonToolsTest
          assertTrue(polygonWithOnePoint.getVertex(0).equals(pointThatDefinesThePolygon));
 
          assertFalse(convexPolygonTools.computeIntersectionOfPolygons(polygonWithOnePoint, sparePolygon, intersectionPolygon));
+         assertFalse(convexPolygonTools.doPolygonsIntersect(polygonWithOnePoint, sparePolygon));
          assertTrue(polygonWithOnePoint.intersectionWith(arbitraryLine) == null);
          assertFalse(polygonWithOnePoint.isPointInside(arbitraryPoint0));
          assertFalse(ConvexPolygon2dCalculator.isPolygonInside(sparePolygon, polygonWithOnePoint));
@@ -576,7 +577,8 @@ public class ConvexPolygonToolsTest
          point1 = combinedPolygon.getVertex(1);
          assertEqualsInEitherOrder(pointThatDefinesThePolygon, pointThatDefinesAnotherPolygon, point0, point1);
 
-         assertTrue(convexPolygonTools.computeIntersectionOfPolygons(polygonWithOnePoint, anotherPolygonWithOnePoint, new ConvexPolygon2D()) == false);
+         assertFalse(convexPolygonTools.computeIntersectionOfPolygons(polygonWithOnePoint, anotherPolygonWithOnePoint, new ConvexPolygon2D()));
+         assertFalse(convexPolygonTools.doPolygonsIntersect(polygonWithOnePoint, anotherPolygonWithOnePoint));
          ConvexPolygon2D intersection = new ConvexPolygon2D();
          convexPolygonTools.computeIntersectionOfPolygons(polygonWithOnePoint, polygonWithOnePoint, intersection);
          assertEquals(1, intersection.getNumberOfVertices());
@@ -727,6 +729,7 @@ public class ConvexPolygonToolsTest
                                                                                                                 pointThatDefinesThePolygon1));
          ConvexPolygon2D actualIntersectionWithSparePolygon = new ConvexPolygon2D();
          boolean success = convexPolygonTools.computeIntersectionOfPolygons(sparePolygon, polygonWithTwoPoints, actualIntersectionWithSparePolygon);
+         assertEquals(convexPolygonTools.doPolygonsIntersect(sparePolygon, polygonWithTwoPoints), success);
 
          if (expectedIntersectionWithSparePolygon == null)
          {
@@ -780,15 +783,22 @@ public class ConvexPolygonToolsTest
          // computeIntersectionOfPolygons
          ConvexPolygon2D polygonIntersection = new ConvexPolygon2D();
          success = convexPolygonTools.computeIntersectionOfPolygons(polygonWithTwoPoints, sparePolygon, polygonIntersection);
+         assertEquals(convexPolygonTools.doPolygonsIntersect(sparePolygon, polygonWithTwoPoints), success);
 
          if (!success)
+         {
             assertTrue(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon) == null);
+         }
          else if (polygonIntersection.getNumberOfVertices() == 1)
+         {
             assertTrue(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[0].epsilonEquals(polygonIntersection.getVertex(0), epsilon));
+         }
          else if (polygonIntersection.getNumberOfVertices() == 2)
+         {
             assertEqualsInEitherOrder(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[0],
                                       sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[1], polygonIntersection.getVertex(0),
                                       polygonIntersection.getVertex(1));
+         }
          else
             fail();
 
@@ -845,11 +855,13 @@ public class ConvexPolygonToolsTest
       ConvexPolygon2D convexPolygon2dB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
 
       ConvexPolygon2D intersection = new ConvexPolygon2D();
-      convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dA, convexPolygon2dB, intersection);
+      boolean success = convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dA, convexPolygon2dB, intersection);
+      assertEquals(convexPolygonTools.doPolygonsIntersect(convexPolygon2dA, convexPolygon2dB), success);
       boolean epsilonEquals = intersection.epsilonEquals(convexPolygon2dA, 1e-7);
       assertTrue(epsilonEquals);
 
-      convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dB, convexPolygon2dA, intersection);
+      success = convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dB, convexPolygon2dA, intersection);
+      assertEquals(convexPolygonTools.doPolygonsIntersect(convexPolygon2dA, convexPolygon2dB), success);
       epsilonEquals = intersection.epsilonEquals(convexPolygon2dA, 1e-7);
       assertTrue(epsilonEquals);
 
@@ -900,11 +912,15 @@ public class ConvexPolygonToolsTest
       listOfPoints.add(new Point2D(0.0, 0.06));
       convexPolygon2dB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
 
-      convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dB, convexPolygon2dA, intersection);
+      success = convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dB, convexPolygon2dA, intersection);
+      assertEquals(convexPolygonTools.doPolygonsIntersect(convexPolygon2dA, convexPolygon2dB), success);
+
       epsilonEquals = intersection.epsilonEquals(convexPolygon2dA, 1e-14);
       assertTrue(epsilonEquals);
 
-      convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dA, convexPolygon2dB, intersection);
+      success = convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dA, convexPolygon2dB, intersection);
+      assertEquals(convexPolygonTools.doPolygonsIntersect(convexPolygon2dA, convexPolygon2dB), success);
+
       epsilonEquals = intersection.epsilonEquals(convexPolygon2dA, 1e-14);
       assertTrue(epsilonEquals);
    }
@@ -929,11 +945,15 @@ public class ConvexPolygonToolsTest
       ConvexPolygon2D convexPolygon2dB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
 
       ConvexPolygon2D intersection = new ConvexPolygon2D();
-      convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dA, convexPolygon2dB, intersection);
+      boolean success = convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dA, convexPolygon2dB, intersection);
+      assertEquals(convexPolygonTools.doPolygonsIntersect(convexPolygon2dA, convexPolygon2dB), success);
+
       boolean epsilonEquals = intersection.epsilonEquals(convexPolygon2dA, 1e-14);
       assertTrue(epsilonEquals);
 
-      convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dB, convexPolygon2dA, intersection);
+      success = convexPolygonTools.computeIntersectionOfPolygons(convexPolygon2dB, convexPolygon2dA, intersection);
+      assertEquals(convexPolygonTools.doPolygonsIntersect(convexPolygon2dA, convexPolygon2dB), success);
+
       epsilonEquals = intersection.epsilonEquals(convexPolygon2dA, 1e-14);
       assertTrue(epsilonEquals);
    }
@@ -1268,6 +1288,8 @@ public class ConvexPolygonToolsTest
 
             ConvexPolygon2D intersectingPolygon = new ConvexPolygon2D();
             boolean success = convexPolygonTools.computeIntersectionOfPolygons(convexPolygon1, convexPolygon2, intersectingPolygon);
+            assertEquals(convexPolygonTools.doPolygonsIntersect(convexPolygon1, convexPolygon2), success);
+
             if (!success)
                intersectingPolygon = null;
             intersectingPolygons[i][j] = intersectingPolygon;
@@ -1355,6 +1377,9 @@ public class ConvexPolygonToolsTest
    @Test
    public void testComputeMinimumDistancePointsBug()
    {
+      Point2D polygon1MinPoint = new Point2D();
+      Point2D polygon2MinPoint = new Point2D();
+
       ConvexPolygon2D polygon1 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new Point2D(-0.964173902597, 0.063152759605),
                                                                                          new Point2D(1.035825870746, 0.062200589754),
                                                                                          new Point2D(0.742755947614, -0.308890986251),
@@ -1365,7 +1390,12 @@ public class ConvexPolygonToolsTest
                                                                                          new Point2D(-0.542724054207, -0.508121359902 ),
                                                                                          new Point2D(-0.543220683369, -1.558597793958 )));
       double epsilon = 0.01;
-      new ConvexPolygonTools().computeMinimumDistancePoints(polygon1, polygon2, epsilon, new Point2D(), new Point2D());
+
+      new ConvexPolygonTools().computeMinimumDistancePoints(polygon1, polygon2, epsilon, polygon1MinPoint, polygon2MinPoint);
+
+      assertTrue(polygon1.pointIsOnPerimeter(polygon1MinPoint));
+      assertTrue(polygon2.pointIsOnPerimeter(polygon2MinPoint));
+      assertTrue(polygon1MinPoint.distance(polygon2MinPoint) < polygon1.getVertex(0).distance(polygon2.getVertex(0)));
    }
 
    private void assertEqualsInEitherOrder(double expected0, double expected1, double actual0, double actual1)

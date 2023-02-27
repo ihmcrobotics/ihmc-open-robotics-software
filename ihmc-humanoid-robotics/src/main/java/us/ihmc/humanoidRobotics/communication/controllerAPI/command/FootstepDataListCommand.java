@@ -4,6 +4,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.StepConstraintsListMessage;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,6 +18,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    private double finalTransferDuration;
    private ExecutionTiming executionTiming = ExecutionTiming.CONTROL_DURATIONS;
    private final RecyclingArrayList<FootstepDataCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataCommand.class);
+   private final StepConstraintsListCommand defaultStepConstraints = new StepConstraintsListCommand();
 
    /** If {@code false} the controller adjust each footstep height to be at the support sole height. */
    private boolean trustHeightOfFootsteps = true;
@@ -26,6 +28,8 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    private boolean offsetFootstepsWithExecutionError = false;
    /** If {@code true} the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps. */
    private boolean offsetFootstepsHeightWithExecutionError = false;
+
+   private boolean shouldCheckForReachability = false;
 
    public FootstepDataListCommand()
    {
@@ -40,7 +44,9 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       defaultTransferDuration = 0.0;
       finalTransferDuration = 0.0;
       footsteps.clear();
+      defaultStepConstraints.clear();
       clearQueuableCommandVariables();
+      shouldCheckForReachability = false;
    }
 
    @Override
@@ -57,12 +63,18 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       areFootstepsAdjustable = message.getAreFootstepsAdjustable();
       offsetFootstepsWithExecutionError = message.getOffsetFootstepsWithExecutionError();
       offsetFootstepsHeightWithExecutionError = message.getOffsetFootstepsHeightWithExecutionError();
+      shouldCheckForReachability = message.getShouldCheckForReachability();
       List<FootstepDataMessage> dataList = message.getFootstepDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       if (dataList != null)
       {
          for (int i = 0; i < dataList.size(); i++)
             footsteps.add().set(worldFrame, dataList.get(i));
+      }
+      StepConstraintsListMessage stepConstraints = message.getDefaultStepConstraints();
+      if (stepConstraints != null)
+      {
+         defaultStepConstraints.setFromMessage(stepConstraints);
       }
       setQueueableCommandVariables(message.getQueueingProperties());
    }
@@ -82,12 +94,14 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       areFootstepsAdjustable = other.areFootstepsAdjustable;
       offsetFootstepsWithExecutionError = other.offsetFootstepsWithExecutionError;
       offsetFootstepsHeightWithExecutionError = other.offsetFootstepsHeightWithExecutionError;
+      shouldCheckForReachability = other.shouldCheckForReachability;
       RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
          for (int i = 0; i < otherFootsteps.size(); i++)
             footsteps.add().set(otherFootsteps.get(i));
       }
+      defaultStepConstraints.set(other.getDefaultStepConstraints());
       setQueueableCommandVariables(other);
    }
 
@@ -126,6 +140,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       return finalTransferDuration;
    }
 
+   public StepConstraintsListCommand getDefaultStepConstraints()
+   {
+      return defaultStepConstraints;
+   }
+
    public ExecutionTiming getExecutionTiming()
    {
       return executionTiming;
@@ -151,6 +170,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       return footsteps.size();
    }
 
+   public boolean getShouldCheckForReachability()
+   {
+      return shouldCheckForReachability;
+   }
+
    @Override
    public Class<FootstepDataListMessage> getMessageClass()
    {
@@ -166,6 +190,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    public boolean isTrustHeightOfFootsteps()
    {
       return trustHeightOfFootsteps;
+   }
+
+   public void setAreFootstepsAdjustable(boolean areFootstepsAdjustable)
+   {
+      this.areFootstepsAdjustable= areFootstepsAdjustable ;
    }
 
    public boolean areFootstepsAdjustable()
@@ -191,6 +220,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    public boolean isOffsetFootstepsHeightWithExecutionError()
    {
       return offsetFootstepsHeightWithExecutionError;
+   }
+
+   public void setShouldCheckForReachability(boolean shouldCheckForReachability)
+   {
+      this.shouldCheckForReachability = shouldCheckForReachability;
    }
 
    @Override

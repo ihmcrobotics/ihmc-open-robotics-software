@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI;
 
 import java.util.Map;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;

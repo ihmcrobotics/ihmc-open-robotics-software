@@ -69,7 +69,7 @@ public class CenterOfMassReferenceFrameTest
       FramePoint3D centerOfMassFromFrame = new FramePoint3D(centerOfMassReferenceFrame);
       centerOfMassFromFrame.changeFrame(elevator.getBodyFixedFrame());
 
-      EuclidCoreTestTools.assertTuple3DEquals(centerOfMass, centerOfMassFromFrame, 1e-12);
+      EuclidCoreTestTools.assertEquals(centerOfMass, centerOfMassFromFrame, 1e-12);
 
       RotationMatrix rotation = new RotationMatrix();
       RigidBodyTransform transform = centerOfMassReferenceFrame.getTransformToDesiredFrame(elevator.getBodyFixedFrame());

@@ -1,0 +1,9 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "Example Application 1 Log" : true,
+    "Example Application 2 Log" : true,
+    "Main Panel" : true,
+    "Raspberry Pi Mission Control Service Log" : false
+  }
+}

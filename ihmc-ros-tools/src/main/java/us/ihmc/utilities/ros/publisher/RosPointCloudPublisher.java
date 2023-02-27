@@ -43,7 +43,7 @@ public class RosPointCloudPublisher extends RosTopicPublisher<PointCloud2>
          buffer.writeFloat((float)points[i].getX());
          buffer.writeFloat((float)points[i].getY());
          buffer.writeFloat((float)points[i].getZ());
-         buffer.writeFloat(intensities[i]);
+//         buffer.writeFloat(intensities[i]);
       }
       message.setData(buffer);
       

@@ -18,24 +18,29 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
 
    default void reset()
    {
-      setInterval(Double.NaN, Double.NaN);
+      setIntervalUnsafe(Double.NaN, Double.NaN);
    }
 
    default void setInterval(double startTime, double endTime)
    {
+      setIntervalUnsafe(startTime, endTime);
+      checkInterval();
+   }
+
+   default void setIntervalUnsafe(double startTime, double endTime)
+   {
       setStartTime(startTime);
       setEndTime(endTime);
-      checkInterval();
    }
 
    default void set(TimeIntervalReadOnly timeInterval)
    {
-      setInterval(timeInterval.getStartTime(), timeInterval.getEndTime());
+      setIntervalUnsafe(timeInterval.getStartTime(), timeInterval.getEndTime());
    }
 
    default TimeIntervalBasics shiftInterval(double shiftTime)
    {
-      setInterval(getStartTime() + shiftTime, getEndTime() + shiftTime);
+      setIntervalUnsafe(getStartTime() + shiftTime, getEndTime() + shiftTime);
       return this;
    }
 

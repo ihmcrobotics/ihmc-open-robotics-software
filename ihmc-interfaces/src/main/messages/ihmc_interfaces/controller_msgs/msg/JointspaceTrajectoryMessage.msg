@@ -10,4 +10,4 @@ uint32 sequence_id
 # Trajectory for each joint.
 OneDoFJointTrajectoryMessage[] joint_trajectory_messages
 # Properties for queueing trajectories.
-QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties

@@ -6,11 +6,10 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,18 +17,18 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class HumanoidControllerWarumupTools
 {
    public static void warmup(HumanoidControllerWarmup controllerWarmup)
    {
-      PrintTools.info("Starting to warm up...");
+      LogTools.info("Starting to warm up...");
       long startTime = System.currentTimeMillis();
       try
       {
@@ -37,11 +36,11 @@ public class HumanoidControllerWarumupTools
       }
       catch (Exception e)
       {
-         PrintTools.info("Warmup failed with an exception.");
+         LogTools.info("Warmup failed with an exception.");
          e.printStackTrace();
       }
       double duration = 0.001 * (System.currentTimeMillis() - startTime);
-      PrintTools.info("Warmup took " + duration + "s.");
+      LogTools.info("Warmup took " + duration + "s.");
    }
 
    public static FootstepDataListMessage createStepsInPlace(HumanoidReferenceFrames referenceFrames)
@@ -61,10 +60,11 @@ public class HumanoidControllerWarumupTools
          footPose.setZ(z);
          step.getLocation().set(footPose.getPosition());
          step.getOrientation().set(footPose.getOrientation());
-         step.setSwingDuration(0.2);
+         step.setSwingDuration(0.4);
          step.setTransferDuration(0.2);
       }
       message.setFinalTransferDuration(0.2);
+      message.setAreFootstepsAdjustable(true);
       return message;
    }
 

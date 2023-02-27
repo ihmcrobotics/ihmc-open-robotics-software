@@ -1,7 +1,9 @@
 package us.ihmc.footstepPlanning.log;
 
-import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessagePubSubType;
 import org.apache.commons.lang3.tuple.Pair;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -44,7 +47,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
-   /** package-private */ static final String defaultLogsDirectory;
+   private static final int RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP = 500;
+   public static final String defaultLogsDirectory;
    static
    {
       String incomingLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator;
@@ -60,18 +64,18 @@ public class FootstepPlannerLogger
       }
       defaultLogsDirectory = incomingLogsDirectory;
    }
-   /** package-private */ static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
+   public static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
    // File names
    static final String requestPacketFileName = "RequestPacket.json";
-   static final String bodyPathParametersFileName = "BodyPathParametersPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
+   static final String bodyPathParametersFileName = "BodyPathParametersPacket.json";
    static final String swingParametersFileName = "SwingParametersPacket.json";
-   static final String splitFractionParametersFileName = "SplitFractionParametersPacket.json";
    static final String statusPacketFileName = "StatusPacket.json";
-   static final String bodyPathPlanFileName = "BodyPathPlanData.log";
    static final String headerFileName = "Header.txt";
+   static final String bodyPathHeaderFileName = "BodyPathHeader.txt";
    static final String dataFileName = "PlannerIterationData.log";
+   static final String astarBodyPathPlanFileName = "AStarBodyPathPlanData.log";
 
    private final FootstepPlanningModule planner;
    private final AtomicBoolean generatingLog = new AtomicBoolean();
@@ -82,13 +86,13 @@ public class FootstepPlannerLogger
 
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
-   private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
+   private final StoredPropertySetMessage bodyPathParametersPacket = new StoredPropertySetMessage();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
    private final FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
 
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
-   private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersPacketSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersPacketSerializer = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
+   private final JSONSerializer<StoredPropertySetMessage> bodyPathParametersPacketSerializer = new JSONSerializer<>(new StoredPropertySetMessagePubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingPlannerParametersPacketSerializer = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
@@ -117,11 +121,19 @@ public class FootstepPlannerLogger
       return logSession(defaultLogsDirectory);
    }
 
-   public static void deleteOldLogs(int numberOflogsToKeep)
+   /** Keeps around the recommended number of logs. */
+   public static void deleteOldLogs()
    {
-      deleteOldLogs(numberOflogsToKeep, defaultLogsDirectory);
+      deleteOldLogs(RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP, defaultLogsDirectory);
    }
 
+   /** Keeps around the recommended number of logs. */
+   public static void deleteOldLogs(String directory)
+   {
+      deleteOldLogs(RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP, directory);
+   }
+
+   /** It's recommended to leave quite a few logs around, otherwise, we diminish the usefulness of the logging. */
    public static void deleteOldLogs(int numberOflogsToKeep, String directory)
    {
       SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
@@ -151,12 +163,12 @@ public class FootstepPlannerLogger
     */
    public boolean logSession(String logDirectory)
    {
-      if (!logDirectory.endsWith(File.separator))
-      {
-         logDirectory += File.separator;
-      }
+      String sessionDirectory = generateALogFolderName(logDirectory);
+      return logSessionWithExactFolderName(sessionDirectory);
+   }
 
-      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
+   public boolean logSessionWithExactFolderName(String sessionDirectory)
+   {
       latestLogDirectory = sessionDirectory;
 
       try
@@ -167,17 +179,17 @@ public class FootstepPlannerLogger
          byte[] serializedRequest = requestPacketSerializer.serializeToBytes(requestPacket);
          writeToFile(requestPacketFile, serializedRequest);
 
-         // log body path parameters packet
-         String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
-         FootstepPlannerMessageTools.copyParametersToPacket(bodyPathParametersPacket, planner.getVisibilityGraphParameters());
-         byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
-         writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
-
          // log footstep planner parameters packet
          String footstepParametersPacketFile = sessionDirectory + footstepParametersFileName;
          FootstepPlannerMessageTools.copyParametersToPacket(footstepParametersPacket, planner.getFootstepPlannerParameters());
          byte[] serializedFootstepParameters = footstepParametersPacketSerializer.serializeToBytes(footstepParametersPacket);
          writeToFile(footstepParametersPacketFile, serializedFootstepParameters);
+
+         // log body path planner parameters packet
+         String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
+         planner.getAStarBodyPathPlannerParameters().getAllAsStrings().forEach(value -> bodyPathParametersPacket.getStrings().add(value));
+         byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
+         writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
 
          // log swing parameters packet
          String swingParametersPacketFile = sessionDirectory + swingParametersFileName;
@@ -199,114 +211,15 @@ public class FootstepPlannerLogger
          e.printStackTrace();
          return false;
       }
-
-      // log body path data
-      String bodyPathPlannerDataFileName = sessionDirectory + bodyPathPlanFileName;
-      try
-      {
-         File bodyPathPlannerDataFile = new File(bodyPathPlannerDataFileName);
-         FileTools.ensureFileExists(bodyPathPlannerDataFile.toPath());
-         fileWriter = new FileWriter(bodyPathPlannerDataFile);
-
-         VisibilityGraphHolder visibilityGraphHolder = planner.getBodyPathPlanner().getVisibilityGraphHolder();
-         writeLine(0, "startMapId:" + visibilityGraphHolder.getStartMapId());
-         writeLine(0, "goalMapId:" + visibilityGraphHolder.getGoalMapId());
-         writeLine(0, "interRegionsMapId:" + visibilityGraphHolder.getInterRegionsMapId());
-         writeVisibilityMap("startMap", 0, visibilityGraphHolder.getStartVisibilityMap());
-         writeVisibilityMap("goalMap", 0, visibilityGraphHolder.getGoalVisibilityMap());
-         writeVisibilityMap("interRegionMap", 0, visibilityGraphHolder.getInterRegionsVisibilityMap());
-
-         int numberOfNavigableRegions = visibilityGraphHolder.getNumberOfNavigableRegions();
-         writeLine(0, "navigableRegions:" + numberOfNavigableRegions);
-         for (int i = 0; i < numberOfNavigableRegions; i++)
-         {
-            VisibilityMapWithNavigableRegion navigableRegion = visibilityGraphHolder.getNavigableRegion(i);
-            writeNavigableRegion(1, i, navigableRegion);
-         }
-
-         fileWriter.flush();
-      }
-      catch (Exception e)
-      {
-         LogTools.error("Error logging body path planner data");
-         fileWriter = null;
-         outputStream = null;
-         printStream = null;
-         e.printStackTrace();
-         return false;
-      }
-
+      
       // log planner iteration header file
-      String plannerHeaderFileName = sessionDirectory + headerFileName;
-      Map<Class<?>, Integer> enumIndexMap = new HashMap<>();
-
       try
       {
-         File plannerHeaderFile = new File(plannerHeaderFileName);
+         File plannerHeaderFile = new File(sessionDirectory + headerFileName);
          FileTools.ensureFileExists(plannerHeaderFile.toPath());
          fileWriter = new FileWriter(plannerHeaderFile);
 
-         YoRegistry registry = planner.getAStarPlannerRegistry();
-         List<YoVariable> allVariables = registry.collectSubtreeVariables();
-
-         List<Pair<Class<?>, Enum<?>[]>> enumDescriptions = new ArrayList<>();
-
-         for (int i = 0; i < allVariables.size(); i++)
-         {
-            YoVariable yoVariable = allVariables.get(i);
-            if (yoVariable.getType() == YoVariableType.ENUM)
-            {
-               YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
-               Class<?> enumType = yoEnum.getEnumType();
-               Enum<?>[] enumValues = yoEnum.getEnumValues();
-
-               if (!enumIndexMap.containsKey(enumType))
-               {
-                  enumIndexMap.put(enumType, enumDescriptions.size());
-                  enumDescriptions.add(Pair.of(enumType, enumValues));
-               }
-            }
-         }
-
-         fileWriter.write("enums:" + enumDescriptions.size() + newLine);
-         for (int i = 0; i < enumDescriptions.size(); i++)
-         {
-            fileWriter.write(tab);
-            fileWriter.write(enumDescriptions.get(i).getKey().getSimpleName() + ":");
-
-            Enum<?>[] enumValues = enumDescriptions.get(i).getRight();
-            for (int j = 0; j < enumValues.length; j++)
-            {
-               fileWriter.write(enumValues[j] + (j == enumValues.length - 1 ? "" : ","));
-            }
-
-            fileWriter.write(newLine);
-         }
-
-         fileWriter.write("variables:" + allVariables.size() + newLine);
-         for (int i = 0; i < allVariables.size(); i++)
-         {
-            YoVariable yoVariable = allVariables.get(i);
-            String name = yoVariable.getName();
-            YoVariableType type = yoVariable.getType();
-            String registryName = yoVariable.getRegistry().getName();
-
-            fileWriter.write(tab);
-            fileWriter.write(name + ",");
-            fileWriter.write(type + ",");
-            fileWriter.write(registryName);
-
-            if (type == YoVariableType.ENUM)
-            {
-               YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
-               Class<?> enumType = yoEnum.getEnumType();
-               fileWriter.write( "," + enumIndexMap.get(enumType));
-               fileWriter.write( "," + yoEnum.isNullAllowed());
-            }
-
-            fileWriter.write(newLine);
-         }
-
+         logVariableDescriptors(planner.getAStarPlannerRegistry());
          SideDependentList<ConvexPolygon2D> footPolygons = planner.getFootPolygons();
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -325,7 +238,27 @@ public class FootstepPlannerLogger
          return false;
       }
 
-      // log planner iteration data
+      // log body path planner iteration header file
+      try
+      {
+         File plannerHeaderFile = new File(sessionDirectory + bodyPathHeaderFileName);
+         FileTools.ensureFileExists(plannerHeaderFile.toPath());
+         fileWriter = new FileWriter(plannerHeaderFile);
+
+         logVariableDescriptors(planner.getBodyPathPlannerRegistry());
+         fileWriter.flush();
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Error logging header file");
+         fileWriter = null;
+         outputStream = null;
+         printStream = null;
+         e.printStackTrace();
+         return false;
+      }
+
+      // Log footstep planner iteration data
       String plannerIterationDataFileName = sessionDirectory + dataFileName;
       try
       {
@@ -377,7 +310,125 @@ public class FootstepPlannerLogger
          return false;
       }
 
+      // Log body path planner iteration data
+      try
+      {
+         File plannerDataFile = new File(sessionDirectory + astarBodyPathPlanFileName);
+         FileTools.ensureFileExists(plannerDataFile.toPath());
+         fileWriter = new FileWriter(sessionDirectory + astarBodyPathPlanFileName);
+
+         List<AStarBodyPathIterationData> iterationDataList = planner.getBodyPathIterationData();
+         for (int i = 0; i < iterationDataList.size(); i++)
+         {
+            AStarBodyPathIterationData iterationData = iterationDataList.get(i);
+            fileWriter.write("Iteration " + i + newLine);
+            writeNode(1, "parentNode", iterationData.getParentNode());
+            writeLine(1, "edges:" + iterationData.getChildNodes().size());
+            writeLine(1, "height:" + iterationData.getParentNodeHeight());
+
+            for (int j = 0; j < iterationData.getChildNodes().size(); j++)
+            {
+               AStarBodyPathEdgeData edgeData = planner.getBodyPathEdgeDataMap().get(new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j)));
+               if (edgeData == null)
+               {
+                  System.out.println();
+                  throw new RuntimeException("No edge data!" + "\n Parent: " + iterationData.getParentNode() + "\n Child: " + iterationData.getChildNodes().get(j));
+               }
+
+               // indicate start of data
+               writeLine(1, "Edge:");
+               writeNode(2, "candidateNode", edgeData.getChildNode());
+               writeLine(2, "solutionEdge:" + edgeData.isSolutionEdge());
+               writeLine(2, "height:" + edgeData.getChildSnapHeight());
+
+               // write additional data as doubles
+               fileWriter.write(tab + tab + "data:");
+               long[] dataBuffer = edgeData.getDataBuffer();
+               for (int k = 0; k < dataBuffer.length; k++)
+               {
+                  fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
+               }
+               fileWriter.write(newLine);
+            }
+         }
+
+         fileWriter.flush();
+      }
+      catch (Exception e)
+      {
+         LogTools.error("Error logging body path planner data");
+         fileWriter = null;
+         outputStream = null;
+         printStream = null;
+         e.printStackTrace();
+         return false;
+      }
+
       return true;
+   }
+
+   private void logVariableDescriptors(YoRegistry registry) throws IOException
+   {
+      Map<Class<?>, Integer> enumIndexMap = new HashMap<>();
+      List<YoVariable> allVariables = registry.collectSubtreeVariables();
+
+      List<Pair<Class<?>, Enum<?>[]>> enumDescriptions = new ArrayList<>();
+
+      for (int i = 0; i < allVariables.size(); i++)
+      {
+         YoVariable yoVariable = allVariables.get(i);
+         if (yoVariable.getType() == YoVariableType.ENUM)
+         {
+            YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
+            Class<?> enumType = yoEnum.getEnumType();
+            Enum<?>[] enumValues = yoEnum.getEnumValues();
+
+            if (!enumIndexMap.containsKey(enumType))
+            {
+               enumIndexMap.put(enumType, enumDescriptions.size());
+               enumDescriptions.add(Pair.of(enumType, enumValues));
+            }
+         }
+      }
+
+      fileWriter.write("enums:" + enumDescriptions.size() + newLine);
+      for (int i = 0; i < enumDescriptions.size(); i++)
+      {
+         fileWriter.write(tab);
+         fileWriter.write(enumDescriptions.get(i).getKey().getSimpleName() + ":");
+
+         Enum<?>[] enumValues = enumDescriptions.get(i).getRight();
+         for (int j = 0; j < enumValues.length; j++)
+         {
+            fileWriter.write(enumValues[j] + (j == enumValues.length - 1 ? "" : ","));
+         }
+
+         fileWriter.write(newLine);
+      }
+
+      fileWriter.write("variables:" + allVariables.size() + newLine);
+      for (int i = 0; i < allVariables.size(); i++)
+      {
+         YoVariable yoVariable = allVariables.get(i);
+         String name = yoVariable.getName();
+         YoVariableType type = yoVariable.getType();
+         String registryName = yoVariable.getRegistry().getName();
+
+         fileWriter.write(tab);
+         fileWriter.write(name + ",");
+         fileWriter.write(type + ",");
+         fileWriter.write(registryName);
+
+         if (type == YoVariableType.ENUM)
+         {
+            YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
+            Class<?> enumType = yoEnum.getEnumType();
+            fileWriter.write("," + enumIndexMap.get(enumType));
+            fileWriter.write( "," + yoEnum.isNullAllowed());
+         }
+
+         fileWriter.write(newLine);
+      }
    }
 
    private void writeToFile(String file, byte[] fileContents) throws Exception
@@ -392,6 +443,20 @@ public class FootstepPlannerLogger
       printStream.flush();
       outputStream.close();
       printStream.close();
+   }
+
+   private void writeNode(int numTabs, String name, BodyPathLatticePoint node) throws IOException
+   {
+      if (node == null)
+      {
+         writeLine(numTabs, name + ":null");
+      }
+      else
+      {
+         writeLine(numTabs, name + ":" +
+                            node.getXIndex() + "," +
+                            node.getYIndex());
+      }
    }
 
    private void writeNode(int numTabs, String name, FootstepGraphNode node) throws IOException
@@ -543,5 +608,20 @@ public class FootstepPlannerLogger
    public static String getDefaultLogsDirectory()
    {
       return defaultLogsDirectory;
+   }
+
+   public static String generateALogFolderName()
+   {
+      return generateALogFolderName(defaultLogsDirectory);
+   }
+
+   public static String generateALogFolderName(String logDirectory)
+   {
+      if (!logDirectory.endsWith(File.separator))
+      {
+         logDirectory += File.separator;
+      }
+
+      return logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
    }
 }

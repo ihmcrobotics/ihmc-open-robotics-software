@@ -1,0 +1,28 @@
+{
+  "title" : "Stored property set generator test",
+  "The first boolean property" : false,
+  "The first double property" : 0.5,
+  "The first integer property" : 3,
+  "Boolean property with a description" : [ true, "The first boolean description." ],
+  "Double property with a description" : [ -1.2, "The first integer description." ],
+  "Integer property with a description" : [ 87, "The first integer description." ],
+  "Double property with more stuff" : {
+    "value" : 92.1,
+    "lowerBound" : 2.4,
+    "upperBound" : 200.0,
+    "description" : "The double property with more stuff."
+  },
+  "Integer property with more stuff" : {
+    "value" : 21,
+    "lowerBound" : 4,
+    "upperBound" : 30,
+    "description" : "The integer property with more stuff."
+  },
+  "Integer property with discrete valid values" : {
+    "value" : 4,
+    "lowerBound" : 1,
+    "upperBound" : 32,
+    "validValues" : [ 1, 2, 4, 8, 16, 32 ],
+    "description" : "The integer property with discrete valid values."
+  }
+}

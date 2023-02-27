@@ -1,14 +1,14 @@
 package us.ihmc.behaviors.lookAndStep;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.StoredPropertySetMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -20,10 +20,12 @@ import java.util.List;
 
 public class LookAndStepBehaviorAPI
 {
-   private static final ROS2Topic<?> LOOK_AND_STEP_BEHAVIOR = ROS2Tools.IHMC_ROOT.withModule(ROS2Tools.BEHAVIOR_MODULE_NAME + "/look_and_step");
+   private static final String MODULE_NAME = ROS2Tools.BEHAVIOR_MODULE_NAME + "/look_and_step";
+   private static final ROS2Topic<?> LOOK_AND_STEP_BEHAVIOR = ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME);
 
    public static final String REGIONS_FOR_FOOTSTEP_PLANNING = RosTools.MAPSENSE_REGIONS;
-   public static final ROS2Topic<PlanarRegionsListMessage> ROS2_REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.MAPSENSE_REGIONS;
+   public static final ROS2Topic<PlanarRegionsListMessage> ROS2_REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.PERSPECTIVE_RAPID_REGIONS;
+   public static final ROS2Topic<HeightMapMessage> ROS2_HEIGHT_MAP = ROS2Tools.HEIGHT_MAP_OUTPUT;
 
    /**
     * Starts the look and step behavior pursuing a goal if not already pursiung a goal.
@@ -39,8 +41,11 @@ public class LookAndStepBehaviorAPI
     */
    public static final ROS2Topic<Empty> REACHED_GOAL = LOOK_AND_STEP_BEHAVIOR.withOutput().withTypeName(Empty.class);
    /** Look and step behavior parameters */
-   public static final ROS2Topic<StoredPropertySetMessage> LOOK_AND_STEP_PARAMETERS
-         = LOOK_AND_STEP_BEHAVIOR.withType(StoredPropertySetMessage.class).withSuffix("parameters");
+   public static final StoredPropertySetROS2TopicPair PARAMETERS = new StoredPropertySetROS2TopicPair(MODULE_NAME, "parameters");
+   public static final StoredPropertySetROS2TopicPair FOOTSTEP_PLANNING_PARAMETERS = new StoredPropertySetROS2TopicPair(MODULE_NAME,
+                                                                                                                        "footstep_planning_parameters");
+   public static final StoredPropertySetROS2TopicPair SWING_PLANNER_PARAMETERS = new StoredPropertySetROS2TopicPair(MODULE_NAME, "swing_planner_parameters");
+   public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_FOR_UI = LOOK_AND_STEP_BEHAVIOR.withType(HeightMapMessage.class).withSuffix("height_map_for_ui");
 
    /*
     * TODO: Add PAUSE and RESUME that work in any state.
@@ -76,7 +81,9 @@ public class LookAndStepBehaviorAPI
    public static final MessagerAPIFactory.Topic<Pose3D> GoalForUI = topic("GoalForUI");
    public static final MessagerAPIFactory.Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");
+   public static final MessagerAPIFactory.Topic<PlanarRegionsList> ReceivedPlanarRegionsForUI = topic("ReceivedlanarRegionsForUI");
    public static final MessagerAPIFactory.Topic<Boolean> ImpassibilityDetected = topic("ImpassibilityDetected");
+   public static final MessagerAPIFactory.Topic<Boolean> PlanningFailed = topic("PlanningFailed");
    public static final MessagerAPIFactory.Topic<MutablePair<Pose3D, Vector3D>> Obstacle = topic("Obstacle");
    public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
    public static final MessagerAPIFactory.Topic<Object> ResetForUI = topic("ResetForUI");

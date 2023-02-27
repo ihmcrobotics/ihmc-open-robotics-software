@@ -3,17 +3,19 @@ package us.ihmc.valkyrie;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.Consumer;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -25,7 +27,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
+import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -39,11 +41,15 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.robot.urdf.URDFTools;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.tools.io.WorkspacePathTools;
+import us.ihmc.valkyrie.behaviors.ValkyrieLookAndStepParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerControlThread;
@@ -56,6 +62,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieSwingPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
@@ -67,8 +74,9 @@ import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 public class ValkyrieRobotModel implements DRCRobotModel
 {
    private static final boolean PRINT_MODEL = false;
+   public static final String CUSTOM_ROBOT_PATH_ENVIRONMENT_VARIABLE_NAME = "IHMC_CUSTOM_VALKYRIE_ROBOT_PATH";
 
-   private final String[] resourceDirectories = {"models/", "models/gazebo/", "models/val_description/", "models/val_description/sdf/"};
+   private final String[] resourceDirectories = {"models/", "models/gazebo/", "models/val_description/", "models/val_description/urdf/"};
 
    private final ValkyrieRobotVersion robotVersion;
    private final RobotTarget target;
@@ -115,7 +123,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.target = target;
       this.robotVersion = robotVersion;
 
-      controllerDT = target == RobotTarget.SCS ? 0.004 : 0.006;
+      controllerDT = 0.004;
       estimatorDT = 0.002;
       simulateDT = estimatorDT / 3.0;
    }
@@ -247,8 +255,23 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public void setCustomModel(String customModel)
    {
       if (robotDefinition != null)
-         throw new IllegalArgumentException("Cannot set customModel once generalizedRobotModel has been created.");
+         throw new IllegalArgumentException("Cannot set customModel once robotDefinition has been created.");
       this.customModel = customModel;
+   }
+
+   public void setCustomModelFromEnvironment()
+   {
+      String valueFromEnvironment = System.getenv(CUSTOM_ROBOT_PATH_ENVIRONMENT_VARIABLE_NAME);
+
+      if (valueFromEnvironment == null)
+      {
+         LogTools.warn("No custom robot was set via environment variable.");
+      }
+      else
+      {
+         LogTools.info("Loading custom robot from environment: {}", valueFromEnvironment);
+         setCustomModel(valueFromEnvironment);
+      }
    }
 
    /**
@@ -273,6 +296,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (robotPhysicalProperties != null)
          throw new IllegalArgumentException("Cannot set modelSizeScale once robotPhysicalProperties has been created.");
       this.modelSizeScale = modelSizeScale;
+   }
+
+   public void disableOneDoFJointDamping()
+   {
+      setRobotDefinitionMutator(getRobotDefinitionMutator().andThen(def -> def.forEachOneDoFJointDefinition(joint -> joint.setDamping(0.0))));
    }
 
    public void setRobotDefinitionMutator(Consumer<RobotDefinition> robotDefinitionMutator)
@@ -301,13 +329,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if (robotDefinition == null)
       {
-         robotDefinition = RobotDefinitionTools.loadSDFModel(getSDFModelInputStream(),
-                                                             Arrays.asList(getResourceDirectories()),
-                                                             getClass().getClassLoader(),
-                                                             getJointMap().getModelName(),
-                                                             getContactPointParameters(),
-                                                             getJointMap(),
-                                                             true);
+         robotDefinition = RobotDefinitionTools.loadURDFModel(getURDFModelInputStream(),
+                                                              Arrays.asList(getResourceDirectories()),
+                                                              getClass().getClassLoader(),
+                                                              getJointMap().getModelName(),
+                                                              getContactPointParameters(),
+                                                              getJointMap(),
+                                                              true);
+         // For backward compatibility w.r.t. when we were using SDF file.
+         // The URDF to SDF conversion appeared to sort the joints by alphabetical order.
+         // The ordering matters when serializing messages such as RobotConfigurationData.
+         robotDefinition.forEachRigidBodyDefinition(body -> Collections.sort(body.getChildrenJoints(), (j1, j2) -> j1.getName().compareTo(j2.getName())));
+
          if (robotMaterial != null)
             RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
          getRobotDefinitionMutator().accept(robotDefinition);
@@ -316,18 +349,17 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return robotDefinition;
    }
 
-   private String[] getResourceDirectories()
+   public String[] getResourceDirectories()
    {
       return resourceDirectories;
    }
 
-   private InputStream getSDFModelInputStream()
+   private InputStream getURDFModelInputStream()
    {
       InputStream inputStream = null;
 
       if (customModel != null)
       {
-
          System.out.println("Loading robot model from: '" + customModel + "'");
          inputStream = getClass().getClassLoader().getResourceAsStream(customModel);
 
@@ -348,9 +380,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
          String sdfFile = null;
 
          if (target == RobotTarget.REAL_ROBOT)
-            sdfFile = robotVersion.getRealRobotSdfFile();
+            sdfFile = robotVersion.getRealRobotURDFFile();
          else
-            sdfFile = robotVersion.getSimSdfFile();
+            sdfFile = robotVersion.getSimURDFFile();
 
          inputStream = getClass().getClassLoader().getResourceAsStream(sdfFile);
       }
@@ -366,8 +398,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return valkyrieInitialSetup;
    }
 
-   @Override
    public ValkyrieHandModel getHandModel()
+   {
+      return getHandModel(null);
+   }
+
+   public ValkyrieHandModel getHandModel(RobotSide side)
    {
       return new ValkyrieHandModel();
    }
@@ -467,7 +503,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public LogModelProvider getLogModelProvider()
    {
-      return new DefaultLogModelProvider<>(SDFModelLoader.class, getJointMap().getModelName(), getSDFModelInputStream(), getResourceDirectories());
+      return new DefaultLogModelProvider<>(URDFTools.class, getJointMap().getModelName(), getURDFModelInputStream(), getResourceDirectories());
    }
 
    @Override
@@ -521,6 +557,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
+   {
+      return new ValkyrieFootstepPlannerParameters(fileNameSuffix);
+   }
+
+   @Override
+   public LookAndStepBehaviorParameters getLookAndStepParameters()
+   {
+      return new ValkyrieLookAndStepParameters();
+   }
+
+   @Override
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return new DefaultVisibilityGraphParameters();
@@ -530,6 +578,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public SwingPlannerParametersBasics getSwingPlannerParameters()
    {
       return new DefaultSwingPlannerParameters();
+   }
+
+   @Override
+   public SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
+   {
+      return new ValkyrieSwingPlannerParameters(fileNameSuffix);
    }
 
    @Override
@@ -693,5 +747,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
    {
       return new ValkyrieDirectRobotInterface(ros2Node, this);
+   }
+
+   @Override
+   public Path getMultiContactScriptPath()
+   {
+      Path folderPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      return folderPath.resolve("valkyrie/src/main/resources/multiContact/scripts").toAbsolutePath().normalize();
    }
 }

@@ -12,7 +12,10 @@ public interface JointDesiredOutputListReadOnly
 
    OneDoFJointReadOnly getOneDoFJoint(int index);
 
-   JointDesiredOutputReadOnly getJointDesiredOutput(OneDoFJointReadOnly joint);
+   default JointDesiredOutputReadOnly getJointDesiredOutput(OneDoFJointReadOnly joint)
+   {
+      return getJointDesiredOutputFromHash(joint.hashCode());
+   }
 
    JointDesiredOutputReadOnly getJointDesiredOutputFromHash(int jointHashCode);
 

@@ -1,59 +1,60 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointBasics;
-import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointReadOnly;
 
 public class SO3Waypoint implements SO3WaypointBasics
 {
    private final Quaternion orientation = new Quaternion();
    private final Vector3D angularVelocity = new Vector3D();
 
+   public SO3Waypoint()
+   {
+   }
+
+   public SO3Waypoint(Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity)
+   {
+      set(orientation, angularVelocity);
+   }
+
    @Override
-   public QuaternionReadOnly getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }
 
    @Override
-   public Vector3DReadOnly getAngularVelocity()
+   public Vector3D getAngularVelocity()
    {
       return angularVelocity;
    }
 
    @Override
-   public void setOrientation(double x, double y, double z, double s)
+   public int hashCode()
    {
-      orientation.set(x, y, z, s);
+      return EuclidHashCodeTools.toIntHashCode(getOrientation(), getAngularVelocity());
    }
 
    @Override
-   public void setAngularVelocity(double x, double y, double z)
+   public boolean equals(Object object)
    {
-      angularVelocity.set(x, y, z);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      orientation.applyTransform(transform);
-      angularVelocity.applyTransform(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      orientation.applyInverseTransform(transform);
-      angularVelocity.applyInverseTransform(transform);
+      if (object == this)
+         return true;
+      else if (object instanceof SO3WaypointReadOnly)
+         return equals((SO3WaypointReadOnly) object);
+      else
+         return false;
    }
 
    @Override
    public String toString()
    {
-      return WaypointToStringTools.waypointToString(this);
+      return toString(EuclidCoreIOTools.DEFAULT_FORMAT);
    }
 }

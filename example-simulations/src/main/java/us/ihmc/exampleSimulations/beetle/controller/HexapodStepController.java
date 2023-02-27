@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.beetle.controller;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
@@ -171,7 +172,7 @@ public class HexapodStepController
          for (RobotSextant robotSextant : legsSwinging)
          {
             replanTrajectories(desiredBodyLinearVelocity, desiredAngularVelocity);
-            swingFoot(robotSextant);
+            swingFoot(parameters.getControlMode(), robotSextant);
          }
 
          for (RobotSextant robotSextant : legsSupporting)
@@ -260,7 +261,7 @@ public class HexapodStepController
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
 
-   private void swingFoot(RobotSextant robotSextant)
+   private void swingFoot(WholeBodyControllerCoreMode wholeBodyControllerCoreMode, RobotSextant robotSextant)
    {
       TwoWaypointSwingGenerator footSwingController = swingTrajectoryGenerators.get(robotSextant);
       timeInSwing.add(controllerDt);
@@ -276,7 +277,16 @@ public class HexapodStepController
       currentPositions.get(robotSextant).set(currentPosition);
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = spatialFeedbackControlCommands.get(robotSextant);
-      spatialFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      
+      if(wholeBodyControllerCoreMode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
+      {
+         spatialFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      }
+      if(wholeBodyControllerCoreMode == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+      {
+         spatialFeedbackControlCommand.setVirtualModelControl(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      }
+      
       feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
 
       PlaneContactStateCommand contactState = contactStateUpdaters.get(robotSextant).getNotInContactState();

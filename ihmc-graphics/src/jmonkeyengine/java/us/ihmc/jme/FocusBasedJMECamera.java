@@ -155,7 +155,7 @@ public class FocusBasedJMECamera extends Camera
       rollAxisAngle.set(Axis3D.Z, roll);
 
       focusPointPose.changeFrame(ReferenceFrame.getWorldFrame());
-      focusPointPose.setOrientation(longitudeAxisAngle);
+      focusPointPose.getOrientation().set(longitudeAxisAngle);
       focusPointPose.changeFrame(zUpFrame);
 
       focusPointSphere.setLocalTranslation((float) focusPointPose.getX(), (float) focusPointPose.getY(), (float) focusPointPose.getZ());

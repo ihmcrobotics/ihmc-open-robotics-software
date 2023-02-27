@@ -175,7 +175,7 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
       {
          RigidBodyBasics foot = feet.get(i);
          Wrench footWrench = footWrenches.get(foot);
-         footSwitches.get(foot).computeAndPackFootWrench(footWrench);
+         footSwitches.get(foot).getMeasuredWrench(footWrench);
          tempFootForce.setIncludingFrame(footWrench.getLinearPart());
          tempFootForce.changeFrame(worldFrame);
 

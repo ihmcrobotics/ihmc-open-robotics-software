@@ -14,11 +14,11 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class PlanarRegionsListPolygonSnapper
 {
    /** If two regions have snaps within this height threshold, take the flatter one */
-   private static final double heightEpsilonToTakeFlatterRegion = 0.003;
+   static final double heightEpsilonToTakeFlatterRegion = 0.003;
 
    /** Return null snap if region has this (or higher) incline. 0 if flat and half-pi is vertical surface */
-   private static final double maximumInclineToConsider = Math.toRadians(75.0);
-   private static final double minimumNormalZToConsider = Math.cos(maximumInclineToConsider);
+   static final double maximumInclineToConsider = Math.toRadians(75.0);
+   static final double minimumNormalZToConsider = Math.cos(maximumInclineToConsider);
 
    /**
     * Snaps an XY polygon down onto a PlanarRegionsList. Returns the RigidBodyTransform required to perform the snap.
@@ -56,8 +56,6 @@ public class PlanarRegionsListPolygonSnapper
 
       int numberOfIntersectingRegions = intersectingRegions.size();
 
-      Vector3D surfaceNormal = new Vector3D();
-      Vector3D highestSurfaceNormal = new Vector3D();
       RigidBodyTransform highestTransform = null;
       double highestZ = Double.NEGATIVE_INFINITY;
       Point3D highestVertexInWorld = new Point3D();
@@ -82,10 +80,8 @@ public class PlanarRegionsListPolygonSnapper
          else if (highestVertexInWorld.getZ() > highestZ - heightEpsilonToTakeFlatterRegion)
          {
             // Tie. Let's take the one with the flatter surface normal.
-            planarRegion.getNormal(surfaceNormal);
-            highestPlanarRegion.getNormal(highestSurfaceNormal);
 
-            if (Math.abs(surfaceNormal.getZ()) > Math.abs(highestSurfaceNormal.getZ()))
+            if (Math.abs(planarRegion.getNormal().getZ()) > Math.abs(highestPlanarRegion.getNormal().getZ()))
             {
                highestZ = highestVertexInWorld.getZ();
                highestTransform = snapTransform;
@@ -99,8 +95,7 @@ public class PlanarRegionsListPolygonSnapper
          return null;
       }
 
-      highestPlanarRegion.getNormal(highestSurfaceNormal);
-      if (Math.abs(highestSurfaceNormal.getZ()) < minimumNormalZToConsider)
+      if (Math.abs(highestPlanarRegion.getNormal().getZ()) < minimumNormalZToConsider)
       {
          return null;
       }

@@ -1,0 +1,47 @@
+#ifndef __quadruped_msgs__msg__QuadrupedTimedStepListMessage__idl__
+#define __quadruped_msgs__msg__QuadrupedTimedStepListMessage__idl__
+
+#include "ihmc_common_msgs/msg/./QueueableMessage_.idl"
+#include "quadruped_msgs/msg/./QuadrupedTimedStepMessage_.idl"
+module quadruped_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="quadruped_msgs::msg::dds_::QuadrupedTimedStepListMessage_")
+      struct QuadrupedTimedStepListMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Defines the list of steps to perform
+         */
+        sequence<quadruped_msgs::msg::dds::QuadrupedTimedStepMessage> quadruped_step_list;
+        /**
+         * If true, the times are expressed in absolute time relative to the robot start
+         */
+        @defaultValue(value=True)
+        boolean is_expressed_in_absolute_time;
+        /**
+         * Properties for queueing footstep lists.
+         */
+        ihmc_common_msgs::msg::dds::QueueableMessage queueing_properties;
+        /**
+         * Defines if the step list is adjustable
+         */
+        @defaultValue(value=True)
+        boolean are_steps_adjustable;
+        /**
+         * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
+         */
+        boolean offset_steps_height_with_execution_error;
+      };
+    };
+  };
+};
+
+#endif

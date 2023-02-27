@@ -1,17 +1,17 @@
 package us.ihmc.behaviors.javafx.simulation;
 
-import javafx.application.Application;
+import java.util.function.Supplier;
+
 import javafx.stage.Stage;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
+import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-import java.util.function.Supplier;
-
-public class PlanarRegionsFromCodeViewer extends Application
+public class PlanarRegionsFromCodeViewer extends ApplicationNoModule
 {
    public static final Supplier<PlanarRegionsList> PLANNER_ENVIRONMENT = PlannerTestEnvironments::getMazeCorridor;
    public static final Supplier<PlanarRegionsList> BEHAVIOR_ENVIRONMENT = BehaviorPlanarRegionEnvironments::generateTriplePalletCinderBlockAngledStepsUpAndDown;

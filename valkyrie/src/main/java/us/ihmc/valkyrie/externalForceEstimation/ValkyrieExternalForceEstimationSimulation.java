@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JButton;
 
-import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
-import controller_msgs.msg.dds.ExternalForceEstimationOutputStatus;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
+import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;

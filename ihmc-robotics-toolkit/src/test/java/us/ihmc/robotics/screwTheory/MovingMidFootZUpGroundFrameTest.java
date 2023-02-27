@@ -134,7 +134,7 @@ public class MovingMidFootZUpGroundFrameTest
             expectedTransform.set(entry.getKey().getTransformToRoot());
             actualTransform.set(entry.getValue().getTransformToRoot());
 
-            EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, actualTransform, 1.0e-12);
+            EuclidCoreTestTools.assertEquals(expectedTransform, actualTransform, 1.0e-12);
          }
       }
    }

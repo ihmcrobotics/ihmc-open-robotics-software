@@ -45,7 +45,8 @@ public enum XBoxOneMapping implements JoystickMapping
    /** @deprecated Only works on Mac */
    DPAD_LEFT,
    /** @deprecated Only works on Mac */
-   DPAD_RIGHT;
+   DPAD_RIGHT,
+   SLIDER;
 
    public static final XBoxOneMapping[] values = values();
 
@@ -77,6 +78,7 @@ public enum XBoxOneMapping implements JoystickMapping
       mapValues(DPAD_DOWN, Identifier.Button.UNKNOWN, Identifier.Button._12, Identifier.Button.UNKNOWN);
       mapValues(DPAD_LEFT, Identifier.Button.UNKNOWN, Identifier.Button._13, Identifier.Button.UNKNOWN);
       mapValues(DPAD_RIGHT, Identifier.Button.UNKNOWN, Identifier.Button._14, Identifier.Button.UNKNOWN);
+      mapValues(SLIDER, Identifier.Axis.SLIDER, Identifier.Axis.SLIDER, Identifier.Axis.SLIDER);
    }
 
    private static void mapValues(XBoxOneMapping mapping, Identifier windowsIdentifier, Identifier macIdentifier, Identifier linuxIdentifier)

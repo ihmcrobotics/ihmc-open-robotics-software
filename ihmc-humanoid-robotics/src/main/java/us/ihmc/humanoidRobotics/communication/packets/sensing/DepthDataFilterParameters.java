@@ -23,7 +23,7 @@ public class DepthDataFilterParameters
    // near scan config
    public float nearScanResolution = .01f;
    public int nearScanDecayMillis = 30000; // -1 to turn off decay
-   public int nearScanCapacity = 100000; // -1 to turn off capacity
+   public int nearScanCapacity = 800000; // -1 to turn off capacity
 
    public float nearScanRadius = 4.0f;
    public float nearScanZMinAboveFeet = -1.0f;

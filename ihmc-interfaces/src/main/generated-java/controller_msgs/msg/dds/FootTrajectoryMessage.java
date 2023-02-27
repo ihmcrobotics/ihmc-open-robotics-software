@@ -27,11 +27,11 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
    /**
             * The position/orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
+   public ihmc_common_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
 
    public FootTrajectoryMessage()
    {
-      se3_trajectory_ = new controller_msgs.msg.dds.SE3TrajectoryMessage();
+      se3_trajectory_ = new ihmc_common_msgs.msg.dds.SE3TrajectoryMessage();
    }
 
    public FootTrajectoryMessage(FootTrajectoryMessage other)
@@ -46,7 +46,7 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
 
       robot_side_ = other.robot_side_;
 
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
+      ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
    }
 
    /**
@@ -83,7 +83,7 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
    /**
             * The position/orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SE3TrajectoryMessage getSe3Trajectory()
+   public ihmc_common_msgs.msg.dds.SE3TrajectoryMessage getSe3Trajectory()
    {
       return se3_trajectory_;
    }

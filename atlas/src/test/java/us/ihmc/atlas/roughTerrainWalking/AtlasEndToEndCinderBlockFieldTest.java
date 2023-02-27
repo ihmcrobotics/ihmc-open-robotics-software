@@ -39,6 +39,7 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
    }
 
    @Override
+   @Tag("humanoid-rough-terrain")
    @Test
    public void testWalkingOverCinderBlockField() throws Exception
    {

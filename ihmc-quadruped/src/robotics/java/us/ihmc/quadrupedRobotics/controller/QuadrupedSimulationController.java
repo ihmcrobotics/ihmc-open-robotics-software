@@ -3,22 +3,24 @@ package us.ihmc.quadrupedRobotics.controller;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.OutputWriter;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimFloatingJointBasics;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class QuadrupedSimulationController implements RobotController
+public class QuadrupedSimulationController implements Controller
 {
    private static final boolean PIN_ROBOT_IN_AIR = false;
    private static final Vector3D pinPosition = new Vector3D(0.0, 0.0, 1.0);
    private static final Vector3D zeroAngularVelocity = new Vector3D();
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
-   private final FloatingRootJointRobot sdfRobot;
+   private final Robot sdfRobot;
    private final SensorReader sensorReader;
    private final OutputWriter outputWriter;
    private final RobotController gaitControlManager;
@@ -30,13 +32,13 @@ public class QuadrupedSimulationController implements RobotController
 
    private final SensorDataContext sensorDataContext = new SensorDataContext();
 
-   public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
+   public QuadrupedSimulationController(Robot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
                                         RobotConfigurationDataPublisher robotConfigurationDataPublisher)
    {
       this(simulationRobot, sensorReader, outputWriter, gaitControlManager, stateEstimator, robotConfigurationDataPublisher, null);
    }
 
-   public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
+   public QuadrupedSimulationController(Robot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
                                         RobotConfigurationDataPublisher robotConfigurationDataPublisher, RobotVisualizer robotVisualizer)
    {
       this.sdfRobot = simulationRobot;
@@ -73,12 +75,6 @@ public class QuadrupedSimulationController implements RobotController
    }
 
    @Override
-   public String getDescription()
-   {
-      return name;
-   }
-
-   @Override
    public void doControl()
    {
       long timestamp = sensorReader.read(sensorDataContext);
@@ -107,12 +103,12 @@ public class QuadrupedSimulationController implements RobotController
 
       if(PIN_ROBOT_IN_AIR)
       {
-         sdfRobot.setPositionInWorld(pinPosition);
-         sdfRobot.setOrientation(0.0, 0.0,0.0);
-         sdfRobot.setLinearVelocity(zeroAngularVelocity);
-         sdfRobot.setAngularVelocity(zeroAngularVelocity);
-         sdfRobot.getRootJoint().setAcceleration(zeroAngularVelocity);
-         sdfRobot.getRootJoint().setAngularAccelerationInBody(zeroAngularVelocity);
+         SimFloatingJointBasics rootJoint = sdfRobot.getFloatingRootJoint();
+         rootJoint.getJointPose().getPosition().set(pinPosition);
+         rootJoint.getJointPose().getOrientation().setToZero();
+         rootJoint.getJointTwist().setToZero();
+         rootJoint.getJointAcceleration().setToZero();
+         rootJoint.setPinned(true);
       }
    }
 }

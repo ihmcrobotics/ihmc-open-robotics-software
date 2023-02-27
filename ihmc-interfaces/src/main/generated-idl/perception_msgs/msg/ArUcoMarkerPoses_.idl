@@ -1,0 +1,27 @@
+#ifndef __perception_msgs__msg__ArUcoMarkerPoses__idl__
+#define __perception_msgs__msg__ArUcoMarkerPoses__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::ArUcoMarkerPoses_")
+      struct ArUcoMarkerPoses
+      {
+        /**
+         * ID of arUco marker
+         */
+        sequence<unsigned long> marker_id;
+        sequence<geometry_msgs::msg::dds::Point> position;
+        sequence<geometry_msgs::msg::dds::Quaternion> orientation;
+      };
+    };
+  };
+};
+
+#endif

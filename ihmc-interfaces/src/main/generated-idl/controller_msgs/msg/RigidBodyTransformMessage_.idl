@@ -1,0 +1,70 @@
+#ifndef __controller_msgs__msg__RigidBodyTransformMessage__idl__
+#define __controller_msgs__msg__RigidBodyTransformMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message represents a rigid body transform as a translation and rotation matrix
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::RigidBodyTransformMessage_")
+      struct RigidBodyTransformMessage
+      {
+        /**
+         * Translation X
+         */
+        double x;
+        /**
+         * Translation Y
+         */
+        double y;
+        /**
+         * Translation Z
+         */
+        double z;
+        /**
+         * Rotation matrix
+         */
+        double m00;
+        /**
+         * Rotation matrix
+         */
+        double m01;
+        /**
+         * Rotation matrix
+         */
+        double m02;
+        /**
+         * Rotation matrix
+         */
+        double m10;
+        /**
+         * Rotation matrix
+         */
+        double m11;
+        /**
+         * Rotation matrix
+         */
+        double m12;
+        /**
+         * Rotation matrix
+         */
+        double m20;
+        /**
+         * Rotation matrix
+         */
+        double m21;
+        /**
+         * Rotation matrix
+         */
+        double m22;
+      };
+    };
+  };
+};
+
+#endif

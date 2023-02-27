@@ -270,7 +270,7 @@ public class TouchDownState extends AbstractFootControlState
     */
    private Comparator<YoContactPoint> getComparatorBasedOnCoPPosition()
    {
-      footSwitch.computeAndPackCoP(sensedCoP);
+      footSwitch.getCenterOfPressure(sensedCoP);
       sensedCoP.changeFrame(soleFrame);
       copDistanceComparator.setCoP(sensedCoP);
       return copDistanceComparator;

@@ -31,6 +31,6 @@ public class AtlasSimInitialSetup extends HumanoidRobotInitialSetup
          setJoint(robotSide, ArmJointName.SECOND_WRIST_PITCH, -0.026599);
       }
 
-      adjustRootJointHeightUsingLowestSole(robotDefinition);
+      setRootJointHeightSuchThatLowestSoleIsAtZero(robotDefinition);
    }
 }

@@ -6,9 +6,9 @@ import java.util.Collection;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.NormOps_DDRM;
 
-import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
-import controller_msgs.msg.dds.SelectionMatrix3DMessage;
-import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
+import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
+import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;

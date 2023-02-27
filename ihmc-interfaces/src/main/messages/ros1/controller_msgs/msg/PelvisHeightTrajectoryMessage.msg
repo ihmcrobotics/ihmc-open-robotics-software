@@ -15,6 +15,6 @@ bool enable_user_pelvis_control
 bool enable_user_pelvis_control_during_walking
 
 # The position trajectory information.
-controller_msgs/EuclideanTrajectoryMessage euclidean_trajectory
+ihmc_common_msgs/EuclideanTrajectoryMessage euclidean_trajectory
 
 

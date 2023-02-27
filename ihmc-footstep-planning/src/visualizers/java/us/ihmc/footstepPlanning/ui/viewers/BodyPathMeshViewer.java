@@ -18,29 +18,24 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 
 public class BodyPathMeshViewer extends AnimationTimer
 {
    private static final boolean VERBOSE = false;
 
-   private final double startColorHue = Color.GREEN.getHue();
-   private final double goalColorHue = Color.RED.getHue();
+   private final Color unsmoothedColor = Color.DARKGREEN;
+   private final Color smoothedColor = Color.RED;
 
    private final boolean isExecutorServiceProvided;
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
@@ -100,25 +95,33 @@ public class BodyPathMeshViewer extends AnimationTimer
       if (newMesh != null)
       {
          if (VERBOSE)
-            PrintTools.info(this, "Rendering body path line.");
+            LogTools.info(this, "Rendering body path line.");
          bodyPathMeshView.setMesh(newMesh.getKey());
          bodyPathMeshView.setMaterial(newMesh.getValue());
       }
    }
 
-   private void processBodyPathOnThread(List<? extends Pose3DReadOnly> bodyPath)
+   private void processBodyPathOnThread(org.apache.commons.lang3.tuple.Pair<List<? extends Pose3DReadOnly>, List<? extends Point3DReadOnly>> bodyPathData)
    {
-      executorService.execute(() -> processBodyPath(bodyPath));
+      executorService.execute(() -> processBodyPath(bodyPathData));
    }
 
-   private void processBodyPath(List<? extends Pose3DReadOnly> bodyPath)
+   private void processBodyPath(org.apache.commons.lang3.tuple.Pair<List<? extends Pose3DReadOnly>, List<? extends Point3DReadOnly>> bodyPathData)
    {
+      if (bodyPathData == null)
+      {
+         return;
+      }
+
+      List<? extends Pose3DReadOnly> bodyPath = bodyPathData.getKey();
+      List<? extends Point3DReadOnly> bodyPathUnsmoothed = bodyPathData.getValue();
+
       if (bodyPath == null || bodyPath.isEmpty())
       {
          bodyPathMeshToRender.set(new Pair<>(null, null));
          activeBodyPathReference.set(null);
          if (VERBOSE)
-            PrintTools.warn("Received body path that is null.");
+            LogTools.warn("Received body path that is null.");
          return;
       }
 
@@ -126,10 +129,7 @@ public class BodyPathMeshViewer extends AnimationTimer
       bodyPath = bodyPath.stream().map(Pose3D::new).collect(Collectors.toList());
 
       if (VERBOSE)
-         PrintTools.info(this, "Building mesh for body path.");
-
-      double totalPathLength = PathTools.computePosePathLength(bodyPath);
-      double currentLength = 0.0;
+         LogTools.info(this, "Building mesh for body path.");
 
       palette.clearPalette();
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
@@ -139,15 +139,19 @@ public class BodyPathMeshViewer extends AnimationTimer
          Point3DReadOnly lineStart = bodyPath.get(segmentIndex).getPosition();
          Point3DReadOnly lineEnd = bodyPath.get(segmentIndex + 1).getPosition();
 
-         double lineStartHue = EuclidCoreTools.interpolate(startColorHue, goalColorHue, currentLength / totalPathLength);
-         currentLength += lineStart.distance(lineEnd);
-         double lineEndHue = EuclidCoreTools.interpolate(startColorHue, goalColorHue, currentLength / totalPathLength);
-         meshBuilder.addLine(lineStart, lineEnd, BODYPATH_LINE_THICKNESS, Color.hsb(lineStartHue, 1.0, 0.5), Color.hsb(lineEndHue, 1.0, 1.0));
-
+         meshBuilder.addLine(lineStart, lineEnd, 1.5 * BODYPATH_LINE_THICKNESS, smoothedColor);
          Pose3DReadOnly waypoint = bodyPath.get(segmentIndex);
          Quaternion waypointOrientation = new Quaternion(waypoint.getYaw(), Math.toRadians(90), 0);
          meshBuilder.addCylinder(0.2, 0.01, waypoint.getPosition(), waypointOrientation, Color.PURPLE);
+
+         if (bodyPathUnsmoothed != null && bodyPathUnsmoothed.size() > segmentIndex + 1)
+         {
+            lineStart = bodyPathUnsmoothed.get(segmentIndex);
+            lineEnd = bodyPathUnsmoothed.get(segmentIndex + 1);
+            meshBuilder.addLine(lineStart, lineEnd, 1.5 * BODYPATH_LINE_THICKNESS, unsmoothedColor);
+         }
       }
+
       bodyPathMeshToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
       activeBodyPathReference.set(bodyPath);
    }

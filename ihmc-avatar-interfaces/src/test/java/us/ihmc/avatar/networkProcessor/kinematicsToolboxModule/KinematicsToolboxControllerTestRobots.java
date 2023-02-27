@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -7,31 +9,23 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
-import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
-import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.robotDescription.FloatingJointDescription;
-import us.ihmc.robotics.robotDescription.JointDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
-import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
-import us.ihmc.robotics.robotDescription.PinJointDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 
 public class KinematicsToolboxControllerTestRobots
 {
-   public static class SevenDoFArm extends RobotDescription
+   public static class SevenDoFArm extends RobotDefinition
    {
       private final Vector3D shoulderYawOffset = new Vector3D(0.0, 0.0, 0.3);
       private final Vector3D shoulderRollOffset = new Vector3D(0.0, 0.0, 0.0);
@@ -53,71 +47,74 @@ public class KinematicsToolboxControllerTestRobots
       {
          super("7DoFArm");
 
-         PinJointDescription scsShoulderYaw = new PinJointDescription("shoulderYaw", shoulderYawOffset, Axis3D.Z);
-         PinJointDescription scsShoulderRoll = new PinJointDescription("shoulderRoll", shoulderRollOffset, Axis3D.X);
-         PinJointDescription scsShoulderPitch = new PinJointDescription("shoulderPitch", shoulderPitchOffset, Axis3D.Y);
-         PinJointDescription scsElbowPitch = new PinJointDescription("elbowPitch", elbowPitchOffset, Axis3D.Y);
-         PinJointDescription scsWristPitch = new PinJointDescription("wristPitch", wristPitchOffset, Axis3D.Y);
-         PinJointDescription scsWristRoll = new PinJointDescription("wristRoll", wristRollOffset, Axis3D.X);
-         PinJointDescription scsWristYaw = new PinJointDescription("wristYaw", wristYawOffset, Axis3D.Z);
+         RevoluteJointDefinition scsShoulderYaw = new RevoluteJointDefinition("shoulderYaw", shoulderYawOffset, Axis3D.Z);
+         RevoluteJointDefinition scsShoulderRoll = new RevoluteJointDefinition("shoulderRoll", shoulderRollOffset, Axis3D.X);
+         RevoluteJointDefinition scsShoulderPitch = new RevoluteJointDefinition("shoulderPitch", shoulderPitchOffset, Axis3D.Y);
+         RevoluteJointDefinition scsElbowPitch = new RevoluteJointDefinition("elbowPitch", elbowPitchOffset, Axis3D.Y);
+         RevoluteJointDefinition scsWristPitch = new RevoluteJointDefinition("wristPitch", wristPitchOffset, Axis3D.Y);
+         RevoluteJointDefinition scsWristRoll = new RevoluteJointDefinition("wristRoll", wristRollOffset, Axis3D.X);
+         RevoluteJointDefinition scsWristYaw = new RevoluteJointDefinition("wristYaw", wristYawOffset, Axis3D.Z);
 
-         scsShoulderYaw.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
-         scsShoulderRoll.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
-         scsShoulderPitch.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
-         scsElbowPitch.setLimitStops(0.0, 2.0 / 3.0 * Math.PI, 0.0, 0.0);
-         scsWristPitch.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
-         scsWristRoll.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
-         scsWristYaw.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
+         scsShoulderYaw.setPositionLimits(-Math.PI, Math.PI);
+         scsShoulderRoll.setPositionLimits(-Math.PI, Math.PI);
+         scsShoulderPitch.setPositionLimits(-Math.PI, Math.PI);
+         scsElbowPitch.setPositionLimits(0.0, 2.0 / 3.0 * Math.PI);
+         scsWristPitch.setPositionLimits(-Math.PI, Math.PI);
+         scsWristRoll.setPositionLimits(-Math.PI, Math.PI);
+         scsWristYaw.setPositionLimits(-Math.PI, Math.PI);
 
-         LinkDescription scsShoulderYawLink = new LinkDescription("shoulderYawLink");
+         RigidBodyDefinition rootBody = new RigidBodyDefinition("root");
+
+         RigidBodyDefinition scsShoulderYawLink = new RigidBodyDefinition("shoulderYawLink");
          scsShoulderYawLink.setMass(0.1);
          scsShoulderYawLink.setMomentOfInertia(createNullMOI());
 
-         LinkDescription scsShoulderRollLink = new LinkDescription("shoulderRollLink");
+         RigidBodyDefinition scsShoulderRollLink = new RigidBodyDefinition("shoulderRollLink");
          scsShoulderRollLink.setMass(0.1);
          scsShoulderRollLink.setMomentOfInertia(createNullMOI());
 
-         LinkDescription scsUpperArmLink = new LinkDescription("upperArmLink");
+         RigidBodyDefinition scsUpperArmLink = new RigidBodyDefinition("upperArmLink");
          scsUpperArmLink.setMass(1.0);
          scsUpperArmLink.setMomentOfInertia(createNullMOI());
-         scsUpperArmLink.setLinkGraphics(createArmGraphic(upperArmLength, upperArmRadius, YoAppearance.Red()));
+         scsUpperArmLink.setVisualDefinitions(createArmVisuals(upperArmLength, upperArmRadius, ColorDefinitions.Red()));
 
-         LinkDescription scsLowerArmLink = new LinkDescription("lowerArmLink");
+         RigidBodyDefinition scsLowerArmLink = new RigidBodyDefinition("lowerArmLink");
          scsLowerArmLink.setMass(1.0);
          scsLowerArmLink.setMomentOfInertia(createNullMOI());
-         scsLowerArmLink.setLinkGraphics(createArmGraphic(lowerArmLength, lowerArmRadius, YoAppearance.Green()));
+         scsLowerArmLink.setVisualDefinitions(createArmVisuals(lowerArmLength, lowerArmRadius, ColorDefinitions.Green()));
 
-         LinkDescription scsWristPitchLink = new LinkDescription("wristPitchLink");
+         RigidBodyDefinition scsWristPitchLink = new RigidBodyDefinition("wristPitchLink");
          scsWristPitchLink.setMass(0.1);
          scsWristPitchLink.setMomentOfInertia(createNullMOI());
 
-         LinkDescription scsWristRollLink = new LinkDescription("wristRollLink");
+         RigidBodyDefinition scsWristRollLink = new RigidBodyDefinition("wristRollLink");
          scsWristRollLink.setMass(0.1);
          scsWristRollLink.setMomentOfInertia(createNullMOI());
 
-         LinkDescription scsHandLink = new LinkDescription("handLink");
+         RigidBodyDefinition scsHandLink = new RigidBodyDefinition("handLink");
          scsHandLink.setMass(1.0);
          scsHandLink.setMomentOfInertia(createNullMOI());
-         scsHandLink.setLinkGraphics(createHandGraphics());
+         scsHandLink.setVisualDefinitions(createHandVisuals());
 
-         addRootJoint(scsShoulderYaw);
-         scsShoulderYaw.setLink(scsShoulderYawLink);
-         scsShoulderYaw.addJoint(scsShoulderRoll);
-         scsShoulderRoll.setLink(scsShoulderRollLink);
-         scsShoulderRoll.addJoint(scsShoulderPitch);
-         scsShoulderPitch.setLink(scsUpperArmLink);
-         scsShoulderPitch.addJoint(scsElbowPitch);
-         scsElbowPitch.setLink(scsLowerArmLink);
-         scsElbowPitch.addJoint(scsWristPitch);
-         scsWristPitch.setLink(scsWristPitchLink);
-         scsWristPitch.addJoint(scsWristRoll);
-         scsWristRoll.setLink(scsWristRollLink);
-         scsWristRoll.addJoint(scsWristYaw);
-         scsWristYaw.setLink(scsHandLink);
+         setRootBodyDefinition(rootBody);
+         rootBody.addChildJoint(scsShoulderYaw);
+         scsShoulderYaw.setSuccessor(scsShoulderYawLink);
+         scsShoulderYawLink.addChildJoint(scsShoulderRoll);
+         scsShoulderRoll.setSuccessor(scsShoulderRollLink);
+         scsShoulderRollLink.addChildJoint(scsShoulderPitch);
+         scsShoulderPitch.setSuccessor(scsUpperArmLink);
+         scsUpperArmLink.addChildJoint(scsElbowPitch);
+         scsElbowPitch.setSuccessor(scsLowerArmLink);
+         scsLowerArmLink.addChildJoint(scsWristPitch);
+         scsWristPitch.setSuccessor(scsWristPitchLink);
+         scsWristPitchLink.addChildJoint(scsWristRoll);
+         scsWristRoll.setSuccessor(scsWristRollLink);
+         scsWristRollLink.addChildJoint(scsWristYaw);
+         scsWristYaw.setSuccessor(scsHandLink);
       }
    }
 
-   public static class UpperBodyWithTwoManipulators extends RobotDescription
+   public static class UpperBodyWithTwoManipulators extends RobotDefinition
    {
       private final Vector3D torsoYawOffset = new Vector3D(0.0, 0.0, 0.0);
       private final double torsoHeight = 0.5;
@@ -141,205 +138,139 @@ public class KinematicsToolboxControllerTestRobots
       private final SideDependentList<Vector3D> wristRollOffset = new SideDependentList<>(side -> new Vector3D(0.0, 0.0, 0.0));
       private final SideDependentList<Vector3D> wristYawOffset = new SideDependentList<>(side -> new Vector3D(0.0, 0.0, 0.0));
 
-      private final SideDependentList<AppearanceDefinition> armAppearances = new SideDependentList<>(YoAppearance.DarkRed(), YoAppearance.DarkMagenta());
+      private final SideDependentList<ColorDefinition> armColors = new SideDependentList<>(ColorDefinitions.DarkRed(), ColorDefinitions.DarkMagenta());
 
       public UpperBodyWithTwoManipulators()
       {
          super("UpperBodyWithTwoManipulators");
 
-         PinJointDescription torsoYaw = new PinJointDescription("torsoYaw", torsoYawOffset, Axis3D.Z);
-         torsoYaw.setLimitStops(-Math.PI / 3.0, Math.PI / 3.0, 0.0, 0.0);
+         RigidBodyDefinition rootBody = new RigidBodyDefinition("root");
+         setRootBodyDefinition(rootBody);
+         RevoluteJointDefinition torsoYaw = new RevoluteJointDefinition("torsoYaw", torsoYawOffset, Axis3D.Z);
+         torsoYaw.setPositionLimits(-Math.PI / 3.0, Math.PI / 3.0);
 
-         LinkDescription torsoLink = new LinkDescription("torsoLink");
+         RigidBodyDefinition torsoLink = new RigidBodyDefinition("torsoLink");
          torsoLink.setMass(5.0);
          torsoLink.setMomentOfInertia(createNullMOI());
-         torsoLink.setLinkGraphics(createTorsoGraphics(torsoHeight, torsoWidth, 0.3 * torsoWidth, YoAppearance.AluminumMaterial()));
+         torsoLink.setVisualDefinitions(createTorsoVisuals(torsoHeight, torsoWidth, 0.3 * torsoWidth, ColorDefinitions.Grey()));
 
-         addRootJoint(torsoYaw);
-         torsoYaw.setLink(torsoLink);
+         rootBody.addChildJoint(torsoYaw);
+         torsoYaw.setSuccessor(torsoLink);
 
          for (RobotSide robotSide : RobotSide.values)
          {
             String sidePrefix = robotSide.getCamelCaseName();
-            PinJointDescription shoulderYaw = new PinJointDescription(sidePrefix + "ShoulderYaw", shoulderYawOffset.get(robotSide), Axis3D.Z);
-            PinJointDescription shoulderRoll = new PinJointDescription(sidePrefix + "ShoulderRoll", shoulderRollOffset.get(robotSide), Axis3D.X);
-            PinJointDescription shoulderPitch = new PinJointDescription(sidePrefix + "ShoulderPitch", shoulderPitchOffset.get(robotSide), Axis3D.Y);
-            PinJointDescription elbowPitch = new PinJointDescription(sidePrefix + "ElbowPitch", elbowPitchOffset.get(robotSide), Axis3D.Y);
-            PinJointDescription wristPitch = new PinJointDescription(sidePrefix + "WristPitch", wristPitchOffset.get(robotSide), Axis3D.Y);
-            PinJointDescription wristRoll = new PinJointDescription(sidePrefix + "WristRoll", wristRollOffset.get(robotSide), Axis3D.X);
-            PinJointDescription wristYaw = new PinJointDescription(sidePrefix + "WristYaw", wristYawOffset.get(robotSide), Axis3D.Z);
+            RevoluteJointDefinition shoulderYaw = new RevoluteJointDefinition(sidePrefix + "ShoulderYaw", shoulderYawOffset.get(robotSide), Axis3D.Z);
+            RevoluteJointDefinition shoulderRoll = new RevoluteJointDefinition(sidePrefix + "ShoulderRoll", shoulderRollOffset.get(robotSide), Axis3D.X);
+            RevoluteJointDefinition shoulderPitch = new RevoluteJointDefinition(sidePrefix + "ShoulderPitch", shoulderPitchOffset.get(robotSide), Axis3D.Y);
+            RevoluteJointDefinition elbowPitch = new RevoluteJointDefinition(sidePrefix + "ElbowPitch", elbowPitchOffset.get(robotSide), Axis3D.Y);
+            RevoluteJointDefinition wristPitch = new RevoluteJointDefinition(sidePrefix + "WristPitch", wristPitchOffset.get(robotSide), Axis3D.Y);
+            RevoluteJointDefinition wristRoll = new RevoluteJointDefinition(sidePrefix + "WristRoll", wristRollOffset.get(robotSide), Axis3D.X);
+            RevoluteJointDefinition wristYaw = new RevoluteJointDefinition(sidePrefix + "WristYaw", wristYawOffset.get(robotSide), Axis3D.Z);
 
-            shoulderYaw.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
-            shoulderRoll.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
-            shoulderPitch.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
-            elbowPitch.setLimitStops(0.0, 2.0 / 3.0 * Math.PI, 0.0, 0.0);
-            wristPitch.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
-            wristRoll.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
-            wristYaw.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
+            shoulderYaw.setPositionLimits(-Math.PI, Math.PI);
+            shoulderRoll.setPositionLimits(-Math.PI, Math.PI);
+            shoulderPitch.setPositionLimits(-Math.PI, Math.PI);
+            elbowPitch.setPositionLimits(0.0, 2.0 / 3.0 * Math.PI);
+            wristPitch.setPositionLimits(-Math.PI, Math.PI);
+            wristRoll.setPositionLimits(-Math.PI, Math.PI);
+            wristYaw.setPositionLimits(-Math.PI, Math.PI);
 
-            LinkDescription shoulderYawLink = new LinkDescription(sidePrefix + "ShoulderYawLink");
+            RigidBodyDefinition shoulderYawLink = new RigidBodyDefinition(sidePrefix + "ShoulderYawLink");
             shoulderYawLink.setMass(0.1);
             shoulderYawLink.setMomentOfInertia(createNullMOI());
 
-            LinkDescription shoulderRollLink = new LinkDescription(sidePrefix + "ShoulderRollLink");
+            RigidBodyDefinition shoulderRollLink = new RigidBodyDefinition(sidePrefix + "ShoulderRollLink");
             shoulderRollLink.setMass(0.1);
             shoulderRollLink.setMomentOfInertia(createNullMOI());
 
-            LinkDescription upperArmLink = new LinkDescription(sidePrefix + "UpperArmLink");
+            RigidBodyDefinition upperArmLink = new RigidBodyDefinition(sidePrefix + "UpperArmLink");
             upperArmLink.setMass(1.0);
             upperArmLink.setMomentOfInertia(createNullMOI());
-            upperArmLink.setLinkGraphics(createArmGraphic(upperArmLength, upperArmRadius, armAppearances.get(robotSide)));
+            upperArmLink.setVisualDefinitions(createArmVisuals(upperArmLength, upperArmRadius, armColors.get(robotSide)));
 
-            LinkDescription lowerArmLink = new LinkDescription(sidePrefix + "LowerArmLink");
+            RigidBodyDefinition lowerArmLink = new RigidBodyDefinition(sidePrefix + "LowerArmLink");
             lowerArmLink.setMass(1.0);
             lowerArmLink.setMomentOfInertia(createNullMOI());
-            lowerArmLink.setLinkGraphics(createArmGraphic(lowerArmLength,
-                                                          lowerArmRadius,
-                                                          new YoAppearanceRGBColor(armAppearances.get(robotSide).getAwtColor().brighter().brighter().brighter(),
-                                                                                   0.0)));
+            lowerArmLink.setVisualDefinitions(createArmVisuals(lowerArmLength, lowerArmRadius, armColors.get(robotSide).brighter().brighter().brighter()));
 
-            LinkDescription wristPitchLink = new LinkDescription(sidePrefix + "WristPitchLink");
+            RigidBodyDefinition wristPitchLink = new RigidBodyDefinition(sidePrefix + "WristPitchLink");
             wristPitchLink.setMass(0.1);
             wristPitchLink.setMomentOfInertia(createNullMOI());
 
-            LinkDescription wristRollLink = new LinkDescription(sidePrefix + "WristRollLink");
+            RigidBodyDefinition wristRollLink = new RigidBodyDefinition(sidePrefix + "WristRollLink");
             wristRollLink.setMass(0.1);
             wristRollLink.setMomentOfInertia(createNullMOI());
 
-            LinkDescription handLink = new LinkDescription(sidePrefix + "HandLink");
+            RigidBodyDefinition handLink = new RigidBodyDefinition(sidePrefix + "HandLink");
             handLink.setMass(1.0);
             handLink.setMomentOfInertia(createNullMOI());
-            handLink.setLinkGraphics(createHandGraphics());
+            handLink.setVisualDefinitions(createHandVisuals());
 
-            torsoYaw.addJoint(shoulderYaw);
-            shoulderYaw.setLink(shoulderYawLink);
-            shoulderYaw.addJoint(shoulderRoll);
-            shoulderRoll.setLink(shoulderRollLink);
-            shoulderRoll.addJoint(shoulderPitch);
-            shoulderPitch.setLink(upperArmLink);
-            shoulderPitch.addJoint(elbowPitch);
-            elbowPitch.setLink(lowerArmLink);
-            elbowPitch.addJoint(wristPitch);
-            wristPitch.setLink(wristPitchLink);
-            wristPitch.addJoint(wristRoll);
-            wristRoll.setLink(wristRollLink);
-            wristRoll.addJoint(wristYaw);
-            wristYaw.setLink(handLink);
+            torsoLink.addChildJoint(shoulderYaw);
+            shoulderYaw.setSuccessor(shoulderYawLink);
+            shoulderYawLink.addChildJoint(shoulderRoll);
+            shoulderRoll.setSuccessor(shoulderRollLink);
+            shoulderRollLink.addChildJoint(shoulderPitch);
+            shoulderPitch.setSuccessor(upperArmLink);
+            upperArmLink.addChildJoint(elbowPitch);
+            elbowPitch.setSuccessor(lowerArmLink);
+            lowerArmLink.addChildJoint(wristPitch);
+            wristPitch.setSuccessor(wristPitchLink);
+            wristPitchLink.addChildJoint(wristRoll);
+            wristRoll.setSuccessor(wristRollLink);
+            wristRollLink.addChildJoint(wristYaw);
+            wristYaw.setSuccessor(handLink);
          }
       }
    }
 
-   public static Pair<FloatingJointBasics, OneDoFJointBasics[]> createInverseDynamicsRobot(RobotDescription robotDescription)
+   public static Pair<FloatingJointBasics, OneDoFJointBasics[]> createInverseDynamicsRobot(RobotDefinition robotDefinition)
    {
-      RigidBodyBasics predecessor;
+      RigidBodyBasics rootBody = robotDefinition.newInstance(ReferenceFrame.getWorldFrame());
 
-      RigidBodyBasics rootBody = new RigidBody("rootBody", ReferenceFrame.getWorldFrame());
       FloatingJointBasics rootJoint;
-
-      if (robotDescription.getRootJoints().get(0) instanceof FloatingJointBasics)
-      {
-         FloatingJointDescription rootJointDescription = (FloatingJointDescription) robotDescription.getRootJoints().get(0);
-         rootJoint = new SixDoFJoint(rootJointDescription.getName(), rootBody);
-
-         LinkDescription linkDescription = rootJointDescription.getLink();
-         predecessor = new RigidBody(rootJointDescription.getName(),
-                                     rootJoint,
-                                     linkDescription.getMomentOfInertiaCopy(),
-                                     linkDescription.getMass(),
-                                     linkDescription.getCenterOfMassOffset());
-
-         for (JointDescription jointDescription : rootJointDescription.getChildrenJoints())
-         {
-            addJointsRecursively((OneDoFJointDescription) jointDescription, predecessor);
-         }
-      }
+      if (rootBody.getChildrenJoints().get(0) instanceof FloatingJointBasics)
+         rootJoint = (FloatingJointBasics) rootBody.getChildrenJoints().get(0);
       else
-      {
          rootJoint = null;
-         predecessor = rootBody;
-         addJointsRecursively((OneDoFJointDescription) robotDescription.getRootJoints().get(0), predecessor);
-      }
-
-      return new ImmutablePair<>(rootJoint, MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(predecessor), OneDoFJointBasics.class));
+      return new ImmutablePair<>(rootJoint, MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(rootBody), OneDoFJointBasics.class));
    }
 
-   protected static void addJointsRecursively(OneDoFJointDescription joint, RigidBodyBasics parentBody)
+   private static List<VisualDefinition> createTorsoVisuals(double torsoHeight, double torsoWidth, double torsoThickness, ColorDefinition color)
    {
-      Vector3D jointAxis = new Vector3D();
-      joint.getJointAxis(jointAxis);
-
-      Vector3D offset = new Vector3D();
-      joint.getOffsetFromParentJoint(offset);
-
-      OneDoFJointBasics inverseDynamicsJoint;
-
-      if (joint instanceof PinJointDescription)
-      {
-         inverseDynamicsJoint = new RevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
-      }
-      else if (joint instanceof SliderJointDescription)
-      {
-         inverseDynamicsJoint = new PrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
-      }
-      else
-      {
-         throw new RuntimeException("Must be either Pin or Slider here!");
-      }
-
-      if (joint.containsLimitStops())
-      {
-         double[] limitStopParameters = joint.getLimitStopParameters();
-         inverseDynamicsJoint.setJointLimitLower(limitStopParameters[0]);
-         inverseDynamicsJoint.setJointLimitUpper(limitStopParameters[1]);
-      }
-
-      LinkDescription childLink = joint.getLink();
-
-      double mass = childLink.getMass();
-      Vector3D comOffset = new Vector3D(childLink.getCenterOfMassOffset());
-      Matrix3D inertia = childLink.getMomentOfInertiaCopy();
-
-      RigidBodyBasics rigidBody = new RigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass, comOffset);
-
-      for (JointDescription sdfJoint : joint.getChildrenJoints())
-      {
-         addJointsRecursively((OneDoFJointDescription) sdfJoint, rigidBody);
-      }
-   }
-
-   private static LinkGraphicsDescription createTorsoGraphics(double torsoHeight, double torsoWidth, double torsoThickness, AppearanceDefinition appearance)
-   {
-      LinkGraphicsDescription graphics = new LinkGraphicsDescription();
-      graphics.addGenTruncatedCone(torsoHeight, torsoThickness, 0.7 * torsoWidth, 0.7 * torsoThickness, 0.5 * torsoWidth, appearance);
-      graphics.translate(0.0, 0.0, torsoHeight);
+      VisualDefinitionFactory factory = new VisualDefinitionFactory();
+      factory.addTruncatedCone(torsoHeight, torsoThickness, 0.7 * torsoWidth, 0.7 * torsoThickness, 0.5 * torsoWidth, color);
+      factory.appendTranslation(0.0, 0.0, torsoHeight);
       double eyeBigRadius = 0.35 * torsoWidth;
-      graphics.translate(0.0, 0.25 * torsoWidth, 1.1  * eyeBigRadius);
-      graphics.addEllipsoid(0.01, eyeBigRadius, eyeBigRadius, YoAppearance.White());
-      graphics.translate(0.0, -0.5 * torsoWidth, 0.0);
-      graphics.addEllipsoid(0.01, eyeBigRadius, eyeBigRadius, YoAppearance.White());
+      factory.appendTranslation(0.0, 0.25 * torsoWidth, 1.1 * eyeBigRadius);
+      factory.addEllipsoid(0.01, eyeBigRadius, eyeBigRadius, ColorDefinitions.White());
+      factory.appendTranslation(0.0, -0.5 * torsoWidth, 0.0);
+      factory.addEllipsoid(0.01, eyeBigRadius, eyeBigRadius, ColorDefinitions.White());
       double eyeSmallRadius = 0.3 * eyeBigRadius;
-      graphics.translate(0.01, 0.5 * eyeSmallRadius, -eyeSmallRadius);
-      graphics.addEllipsoid(0.01, eyeSmallRadius, eyeSmallRadius, YoAppearance.Black());
-      graphics.translate(0.0, - eyeSmallRadius + 0.5 * torsoWidth, 0.0);
-      graphics.addEllipsoid(0.01, eyeSmallRadius, eyeSmallRadius, YoAppearance.Black());
-      return graphics;
+      factory.appendTranslation(0.01, 0.5 * eyeSmallRadius, -eyeSmallRadius);
+      factory.addEllipsoid(0.01, eyeSmallRadius, eyeSmallRadius, ColorDefinitions.Black());
+      factory.appendTranslation(0.0, -eyeSmallRadius + 0.5 * torsoWidth, 0.0);
+      factory.addEllipsoid(0.01, eyeSmallRadius, eyeSmallRadius, ColorDefinitions.Black());
+      return factory.getVisualDefinitions();
    }
 
-   private static LinkGraphicsDescription createHandGraphics()
+   private static List<VisualDefinition> createHandVisuals()
    {
-      LinkGraphicsDescription graphics = new LinkGraphicsDescription();
-      graphics.addSphere(0.025, YoAppearance.Grey());
-      graphics.translate(0.0, 0.0, 0.05);
-      graphics.addEllipsoid(0.04, 0.01, 0.1);
-      return graphics;
+      VisualDefinitionFactory factory = new VisualDefinitionFactory();
+      factory.addSphere(0.025, ColorDefinitions.Grey());
+      factory.appendTranslation(0.0, 0.0, 0.05);
+      factory.addEllipsoid(0.04, 0.01, 0.1);
+      return factory.getVisualDefinitions();
    }
 
-   private static LinkGraphicsDescription createArmGraphic(double length, double radius, AppearanceDefinition appearance)
+   private static List<VisualDefinition> createArmVisuals(double length, double radius, ColorDefinition color)
    {
-      LinkGraphicsDescription graphics = new LinkGraphicsDescription();
-      graphics.addSphere(1.2 * radius, YoAppearance.Grey());
-      graphics.addCylinder(length, radius, appearance);
-      return graphics;
+      VisualDefinitionFactory factory = new VisualDefinitionFactory();
+      factory.addSphere(1.2 * radius, ColorDefinitions.Grey());
+      factory.appendTranslation(0, 0, 0.5 * length);
+      factory.addCylinder(length, radius, color);
+      return factory.getVisualDefinitions();
    }
 
    private static Matrix3D createNullMOI()

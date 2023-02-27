@@ -1,0 +1,32 @@
+#ifndef __ihmc_common_msgs__msg__MessageCollectionNotification__idl__
+#define __ihmc_common_msgs__msg__MessageCollectionNotification__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This is part of the IHMC Common message package.
+       * Notifies the user that a MessageCollection has been received.
+       * This is used to know when the controller is ready to start collecting the actual collection of messages.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::MessageCollectionNotification_")
+      struct MessageCollectionNotification
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * This is the sequence ID of the MessageCollection that has just been received.
+         */
+        unsigned long message_collection_sequence_id;
+      };
+    };
+  };
+};
+
+#endif

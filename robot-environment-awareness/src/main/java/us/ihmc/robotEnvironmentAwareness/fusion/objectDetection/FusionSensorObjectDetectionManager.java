@@ -16,7 +16,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.DoorParameterPacket;
+import perception_msgs.msg.dds.DoorParameterPacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.commons.Conversions;

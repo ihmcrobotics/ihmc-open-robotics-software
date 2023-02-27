@@ -1,19 +1,19 @@
 package us.ihmc.behaviors.javafx.graphics;
 
-import javafx.application.Application;
+import java.util.ArrayList;
+
 import javafx.stage.Stage;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.ArrayList;
-
-public class FootstepPlanerWithTextGraphicDemo extends Application
+public class FootstepPlanerWithTextGraphicDemo extends ApplicationNoModule
 {
    private FootstepPlanGraphic footstepPlanGraphic;
 

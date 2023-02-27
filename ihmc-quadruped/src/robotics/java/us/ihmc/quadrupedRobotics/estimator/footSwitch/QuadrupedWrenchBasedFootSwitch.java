@@ -1,16 +1,15 @@
 package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
+public class QuadrupedWrenchBasedFootSwitch implements QuadrupedFootSwitchInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -24,7 +23,10 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
 
    private final double totalRobotWeight;
 
-   public QuadrupedWrenchBasedFootSwitch(WrenchCalculatorWrapper wrenchCalculator, ContactablePlaneBody contactablePlaneBody, double totalRobotWeight, YoRegistry registry)
+   public QuadrupedWrenchBasedFootSwitch(WrenchCalculatorWrapper wrenchCalculator,
+                                         ContactablePlaneBody contactablePlaneBody,
+                                         double totalRobotWeight,
+                                         YoRegistry registry)
    {
       this.wrenchCalculator = wrenchCalculator;
       this.totalRobotWeight = totalRobotWeight;
@@ -37,40 +39,35 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public void updateMeasurement()
+   public void update()
    {
       wrenchCalculator.calculate();
       yoMeasuredForceWorld.setMatchingFrame(wrenchCalculator.getWrench().getLinearPart());
    }
 
    @Override
-   public boolean hasFootHitGround()
+   public boolean hasFootHitGroundSensitive()
    {
       hasFootHitGround.set(Math.abs(yoMeasuredForceWorld.getZ()) > forceThreshold.getValue());
       return hasFootHitGround.getBooleanValue();
    }
 
    @Override
-   public double computeFootLoadPercentage()
+   public double getFootLoadPercentage()
    {
       return Math.abs(yoMeasuredForceWorld.getZ()) / totalRobotWeight;
    }
 
    @Override
-   public void computeAndPackCoP(FramePoint2D copToPack)
+   public FramePoint2DReadOnly getCenterOfPressure()
    {
-      copToPack.setToNaN(getMeasurementFrame());
+      return null;
    }
 
    @Override
-   public void updateCoP()
+   public WrenchReadOnly getMeasuredWrench()
    {
-   }
-
-   @Override
-   public void computeAndPackFootWrench(Wrench footWrenchToPack)
-   {
-      footWrenchToPack.setIncludingFrame(wrenchCalculator.getWrench());
+      return wrenchCalculator.getWrench();
    }
 
    @Override
@@ -82,13 +79,6 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
    @Override
    public void reset()
    {
-   }
-
-   @Override
-   public boolean getForceMagnitudePastThreshhold()
-   {
-      hasFootHitGround.set(Math.abs(yoMeasuredForceWorld.getZ()) > forceThreshold.getValue());
-      return hasFootHitGround.getBooleanValue();
    }
 
    @Override

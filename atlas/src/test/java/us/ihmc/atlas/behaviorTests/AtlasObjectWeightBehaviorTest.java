@@ -10,7 +10,6 @@ import us.ihmc.avatar.behaviorTests.DRCObjectWeightBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-behaviors-slow")
 public class AtlasObjectWeightBehaviorTest extends DRCObjectWeightBehaviorTest
@@ -38,7 +37,7 @@ public class AtlasObjectWeightBehaviorTest extends DRCObjectWeightBehaviorTest
    @Override
    @Disabled("Needs to be reimplemented")
    @Test
-   public void testSettingWeight() throws SimulationExceededMaximumTimeException
+   public void testSettingWeight()
    {
       super.testSettingWeight();
    }

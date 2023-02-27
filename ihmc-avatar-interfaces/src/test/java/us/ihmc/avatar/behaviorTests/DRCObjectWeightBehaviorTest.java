@@ -7,17 +7,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.avatar.testTools.scs2.SCS2BehaviorTestHelper;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ObjectWeightBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -26,7 +25,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double epsilon = 10e-8;
-   private DRCBehaviorTestHelper drcBehaviorTestHelper;
+   private SCS2BehaviorTestHelper behaviorTestHelper;
 
    @BeforeEach
    public void setUp()
@@ -35,23 +34,21 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
-                                                        simulationTestingParameters, getRobotModel());
+      SCS2AvatarTestingSimulation simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(),
+                                                                                                                        testEnvironment,
+                                                                                                                        simulationTestingParameters);
+      simulationTestHelper.start();
+      behaviorTestHelper = new SCS2BehaviorTestHelper(simulationTestHelper);
    }
 
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcBehaviorTestHelper != null)
+      if (behaviorTestHelper != null)
       {
-         drcBehaviorTestHelper.destroySimulation();
-         drcBehaviorTestHelper = null;
+         behaviorTestHelper.finishTest();
+         behaviorTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -60,26 +57,26 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
    @Test
    public void testConstructorAndSetInput()
    {
-      ObjectWeightBehavior behavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getROS2Node());
+      ObjectWeightBehavior behavior = new ObjectWeightBehavior(behaviorTestHelper.getRobotName(), behaviorTestHelper.getROS2Node());
       behavior.setInput(HumanoidMessageTools.createObjectWeightPacket(RobotSide.LEFT, 0.0));
       assertTrue(behavior.hasInputBeenSet());
    }
 
    @Disabled("Needs to be reimplemented")
    @Test
-   public void testSettingWeight() throws SimulationExceededMaximumTimeException
+   public void testSettingWeight()
    {
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = behaviorTestHelper.simulateNow(1.0);
       assertTrue(success);
 
-      ObjectWeightBehavior objectWeightBehavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getROS2Node());
-      YoDouble rightMass = (YoDouble) drcBehaviorTestHelper.getSimulationConstructionSet().findVariable("rightTool", "rightToolObjectMass");
-      YoDouble leftMass = (YoDouble) drcBehaviorTestHelper.getSimulationConstructionSet().findVariable("leftTool", "leftToolObjectMass");
+      ObjectWeightBehavior objectWeightBehavior = new ObjectWeightBehavior(behaviorTestHelper.getRobotName(), behaviorTestHelper.getROS2Node());
+      YoDouble rightMass = (YoDouble) behaviorTestHelper.findVariable("rightTool", "rightToolObjectMass");
+      YoDouble leftMass = (YoDouble) behaviorTestHelper.findVariable("leftTool", "leftToolObjectMass");
 
       double weightLeft = 1.5;
       objectWeightBehavior.initialize();
       objectWeightBehavior.setInput(HumanoidMessageTools.createObjectWeightPacket(RobotSide.LEFT, weightLeft));
-      success = drcBehaviorTestHelper.executeBehaviorUntilDone(objectWeightBehavior);
+      success = behaviorTestHelper.executeBehaviorUntilDone(objectWeightBehavior);
       assertTrue(success);
       assertTrue(MathTools.epsilonEquals(leftMass.getDoubleValue(), weightLeft, epsilon));
       assertTrue(MathTools.epsilonEquals(rightMass.getDoubleValue(), 0.0, epsilon));
@@ -87,7 +84,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       double weightRight = 0.8;
       objectWeightBehavior.initialize();
       objectWeightBehavior.setInput(HumanoidMessageTools.createObjectWeightPacket(RobotSide.RIGHT, weightRight));
-      success = drcBehaviorTestHelper.executeBehaviorUntilDone(objectWeightBehavior);
+      success = behaviorTestHelper.executeBehaviorUntilDone(objectWeightBehavior);
       assertTrue(success);
       assertTrue(MathTools.epsilonEquals(leftMass.getDoubleValue(), weightLeft, epsilon));
       assertTrue(MathTools.epsilonEquals(rightMass.getDoubleValue(), weightRight, epsilon));

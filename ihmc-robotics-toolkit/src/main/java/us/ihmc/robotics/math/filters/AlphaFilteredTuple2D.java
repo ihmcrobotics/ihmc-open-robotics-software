@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import us.ihmc.euclid.interfaces.EuclidGeometry;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -94,4 +95,9 @@ public class AlphaFilteredTuple2D implements Tuple2DBasics
       throw new NotImplementedException("Not supported by " + getClass().getSimpleName() + ".");
    }
 
+   @Override
+   public boolean geometricallyEquals(EuclidGeometry geometry, double epsilon)
+   {
+      return epsilonEquals(geometry, epsilon);
+   }
 }

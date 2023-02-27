@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -16,12 +16,13 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxContactStateCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -72,13 +73,13 @@ public class KinematicsToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
+   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
       ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
          {
@@ -89,7 +90,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
          {
@@ -100,7 +101,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
       MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, MultiContactBalanceStatus.class, controllerOutputTopic, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, MultiContactBalanceStatus.class, controllerOutputTopic, s ->
       {
          if (kinematicsToolBoxController != null)
          {
@@ -131,7 +132,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       commands.add(KinematicsToolboxRigidBodyCommand.class);
       commands.add(KinematicsToolboxOneDoFJointCommand.class);
       commands.add(KinematicsToolboxConfigurationCommand.class);
-      commands.add(KinematicsToolboxContactStateCommand.class);
+      commands.add(KinematicsToolboxSupportRegionCommand.class);
       commands.add(KinematicsToolboxPrivilegedConfigurationCommand.class);
       commands.add(KinematicsToolboxInputCollectionCommand.class);
       commands.add(HumanoidKinematicsToolboxConfigurationCommand.class);

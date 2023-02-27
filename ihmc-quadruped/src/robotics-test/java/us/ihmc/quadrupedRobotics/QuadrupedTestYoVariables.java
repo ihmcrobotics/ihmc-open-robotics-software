@@ -7,6 +7,7 @@ import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedFallDetector.FallDetectionType;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -39,7 +40,7 @@ public class QuadrupedTestYoVariables
 
    private final YoDouble stanceHeight;
    private final YoDouble groundPlanePointZ;
-   
+
    // Step
    private final YoEnum<RobotQuadrant> timedStepQuadrant;
    private final YoDouble timedStepDuration;
@@ -71,21 +72,24 @@ public class QuadrupedTestYoVariables
    private final Quaternion bodyOrientation = new Quaternion();
 
    @SuppressWarnings("unchecked")
-   public QuadrupedTestYoVariables(SimulationConstructionSet scs)
+   public QuadrupedTestYoVariables(SimulationConstructionSet2 scs)
    {
-      yoTime = (YoDouble) scs.findVariable("t");
+      yoTime = (YoDouble) scs.getTime();
 
-      robotBodyX = (YoDouble) scs.findVariable("q_x");
-      robotBodyY = (YoDouble) scs.findVariable("q_y");
-      robotBodyZ = (YoDouble) scs.findVariable("q_z");
-      robotBodyYaw = (YoDouble) scs.findVariable("q_yaw");
+      String rootJointName = scs.getRobots().get(0).getFloatingRootJoint().getName();
+      robotBodyX = (YoDouble) scs.findVariable("q_" + rootJointName + "_x");
+      robotBodyY = (YoDouble) scs.findVariable("q_" + rootJointName + "_y");
+      robotBodyZ = (YoDouble) scs.findVariable("q_" + rootJointName + "_z");
+      robotBodyYaw = (YoDouble) scs.findVariable("q_" + rootJointName + "_yaw");
 
       isFallDetected = (YoBoolean) scs.findVariable("isFallDetected");
       fallDetectionType = (YoEnum<FallDetectionType>) scs.findVariable("fallDetectionReason");
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         controllerFootSwitches.set(robotQuadrant, (YoBoolean) scs.findVariable(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch_controllerThinksHasTouchedDown"));
+         controllerFootSwitches.set(robotQuadrant,
+                                    (YoBoolean) scs.findVariable(robotQuadrant.getCamelCaseName()
+                                          + "QuadrupedTouchdownFootSwitch_controllerThinksHasTouchedDown"));
          footSwitches.set(robotQuadrant, (YoBoolean) scs.findVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected"));
          solePositionXs.set(robotQuadrant, (YoDouble) scs.findVariable(robotQuadrant.getCamelCaseName() + "SolePositionX"));
          solePositionYs.set(robotQuadrant, (YoDouble) scs.findVariable(robotQuadrant.getCamelCaseName() + "SolePositionY"));
@@ -93,7 +97,7 @@ public class QuadrupedTestYoVariables
       }
 
       limitJointTorques = (YoBoolean) scs.findVariable("limitJointTorques");
-      
+
       userTrigger = (YoEnum<HighLevelControllerName>) scs.findVariable("requestedControllerState");
       stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.findVariable("stepTrigger");
       controllerState = (YoEnum<HighLevelControllerName>) scs.findVariable("controllerCurrentState");
@@ -101,11 +105,11 @@ public class QuadrupedTestYoVariables
 
       stanceHeight = (YoDouble) scs.findVariable("stanceHeight");
       groundPlanePointZ = (YoDouble) scs.findVariable("groundPlanePointZ");
-      
+
       comPositionEstimateX = (YoDouble) scs.findVariable("comPositionEstimateX");
       comPositionEstimateY = (YoDouble) scs.findVariable("comPositionEstimateY");
       currentHeightInWorld = (YoDouble) scs.findVariable("currentHeightInWorld");
-      
+
       timedStepQuadrant = (YoEnum<RobotQuadrant>) scs.findVariable("timedStepQuadrant");
       timedStepDuration = (YoDouble) scs.findVariable("timedStepDuration");
       timedStepGroundClearance = (YoDouble) scs.findVariable("timedStepGroundClearance");
@@ -237,7 +241,7 @@ public class QuadrupedTestYoVariables
    {
       return currentHeightInWorld;
    }
-   
+
    public YoEnum<RobotQuadrant> getTimedStepQuadrant()
    {
       return timedStepQuadrant;
@@ -270,21 +274,27 @@ public class QuadrupedTestYoVariables
 
    public double getBodyEstimateYaw()
    {
-      bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(), bodyCurrentOrientationQy.getDoubleValue(), bodyCurrentOrientationQz.getDoubleValue(),
+      bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(),
+                          bodyCurrentOrientationQy.getDoubleValue(),
+                          bodyCurrentOrientationQz.getDoubleValue(),
                           bodyCurrentOrientationQs.getDoubleValue());
       return bodyOrientation.getYaw();
    }
 
    public double getBodyEstimatePitch()
    {
-       bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(), bodyCurrentOrientationQy.getDoubleValue(), bodyCurrentOrientationQz.getDoubleValue(),
-                                 bodyCurrentOrientationQs.getDoubleValue());
+      bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(),
+                          bodyCurrentOrientationQy.getDoubleValue(),
+                          bodyCurrentOrientationQz.getDoubleValue(),
+                          bodyCurrentOrientationQs.getDoubleValue());
       return bodyOrientation.getPitch();
    }
 
    public double getBodyEstimateRoll()
    {
-      bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(), bodyCurrentOrientationQy.getDoubleValue(), bodyCurrentOrientationQz.getDoubleValue(),
+      bodyOrientation.set(bodyCurrentOrientationQx.getDoubleValue(),
+                          bodyCurrentOrientationQy.getDoubleValue(),
+                          bodyCurrentOrientationQz.getDoubleValue(),
                           bodyCurrentOrientationQs.getDoubleValue());
       return bodyOrientation.getRoll();
    }

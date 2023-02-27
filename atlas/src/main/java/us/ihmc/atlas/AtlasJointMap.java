@@ -54,6 +54,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class AtlasJointMap implements HumanoidJointNameMap
@@ -348,10 +349,13 @@ public class AtlasJointMap implements HumanoidJointNameMap
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
 
-      if (!atlasVersion.getHandModel().isHandSimulated())
+      for (RobotSide robotSide : RobotSide.values)
       {
-         for (RobotSide robotSide : RobotSide.values)
+         DRCHandType handModel = atlasVersion.getHandModel(robotSide);
+         if (handModel != null && !handModel.isHandSimulated())
+         {
             lastSimulatedJoints.add(armJointStrings.get(robotSide).get(SECOND_WRIST_PITCH));
+         }
       }
 
       return lastSimulatedJoints;
@@ -480,7 +484,7 @@ public class AtlasJointMap implements HumanoidJointNameMap
    {
       double defaultValue = HumanoidJointNameMap.super.getJointBLimit(jointName);
 
-      if (!atlasVersion.hasRobotiqHands())
+      if (!atlasVersion.hasRobotiqHands(jointName.startsWith("l_") ? RobotSide.LEFT : RobotSide.RIGHT))
       {
          ImmutablePair<RobotSide, ArmJointName> pair = getArmJointName(jointName);
 

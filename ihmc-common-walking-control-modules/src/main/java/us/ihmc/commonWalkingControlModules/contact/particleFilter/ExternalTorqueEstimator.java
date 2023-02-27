@@ -108,8 +108,8 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
    public void initialize()
    {
       firstTick = true;
-      CommonOps_DDRM.fill(estimatedExternalTorque, 0.0);
-      CommonOps_DDRM.fill(currentIntegratedValue, 0.0);
+      estimatedExternalTorque.zero();
+      currentIntegratedValue.zero();
    }
 
    @Override

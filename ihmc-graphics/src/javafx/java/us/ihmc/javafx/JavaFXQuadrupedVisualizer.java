@@ -117,7 +117,7 @@ public class JavaFXQuadrupedVisualizer
       if (robotConfigurationData.getJointNameHash() != jointNameHash)
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
 
-      RigidBodyTransform newRootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+      RigidBodyTransform newRootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
       fullRobotModel.getRootJoint().setJointConfiguration(newRootJointPose);
 
       float[] newJointConfiguration = robotConfigurationData.getJointAngles().toArray();

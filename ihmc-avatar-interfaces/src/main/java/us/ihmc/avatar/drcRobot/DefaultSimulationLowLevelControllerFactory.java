@@ -5,10 +5,9 @@ import java.util.List;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.simulationToolkit.controllers.JointLowLevelJointControlSimulator;
+import us.ihmc.simulationToolkit.controllers.JointLowLevelControlSimulator;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -41,29 +40,15 @@ public class DefaultSimulationLowLevelControllerFactory implements SimulationLow
       for (String positionControlledJointName : positionControlledJointNames)
       {
          Joint simulatedJoint = simulatedRobot.getJoint(positionControlledJointName);
-         if (!(simulatedJoint instanceof OneDegreeOfFreedomJoint))
+         if (!(simulatedJoint instanceof OneDegreeOfFreedomJoint simulatedOneDoFJoint))
             continue;
 
-         OneDegreeOfFreedomJoint simulatedOneDoFJoint = (OneDegreeOfFreedomJoint) simulatedJoint;
          OneDoFJointBasics controllerOneDoFJoint = controllerRobot.getOneDoFJointByName(positionControlledJointName);
-
-         if (simulatedOneDoFJoint == null || controllerOneDoFJoint == null)
+         if (controllerOneDoFJoint == null)
             continue;
 
          JointDesiredOutputReadOnly controllerDesiredOutput = controllerDesiredOutputList.getJointDesiredOutput(controllerOneDoFJoint);
-
-         JointRole jointRole = jointMap.getJointRole(positionControlledJointName);
-         boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
-         boolean isBackJoint = jointRole == JointRole.SPINE;
-
-         jointControllers.add(new JointLowLevelJointControlSimulator(simulatedOneDoFJoint,
-                                                                     controllerOneDoFJoint,
-                                                                     controllerDesiredOutput,
-                                                                     isUpperBodyJoint,
-                                                                     isBackJoint,
-                                                                     false,
-                                                                     controllerRobot.getTotalMass(),
-                                                                     simulateDT));
+         jointControllers.add(new JointLowLevelControlSimulator(simulatedOneDoFJoint, controllerDesiredOutput, simulateDT));
       }
 
       YoRegistry lowLevelRegistry = new YoRegistry("DefaultSimulationLowLevelController");

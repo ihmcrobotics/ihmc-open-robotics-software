@@ -13,4 +13,4 @@ bool enable_user_pelvis_control false
 # If this is false the height manager will switch back to controller mode when walking.
 bool enable_user_pelvis_control_during_walking false
 # The position trajectory information.
-EuclideanTrajectoryMessage euclidean_trajectory
+ihmc_common_msgs/EuclideanTrajectoryMessage euclidean_trajectory

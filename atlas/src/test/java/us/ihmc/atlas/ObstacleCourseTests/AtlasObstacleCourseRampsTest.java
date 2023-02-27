@@ -9,7 +9,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseRampsTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 {
@@ -30,7 +29,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    @Tag("humanoid-obstacle")
    @Override
    @Test
-   public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingDownRampWithMediumSteps()
    {
       super.testWalkingDownRampWithMediumSteps();
    }
@@ -38,7 +37,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    @Tag("humanoid-obstacle")
    @Override
    @Test
-   public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingUpRampWithMediumSteps()
    {
       super.testWalkingUpRampWithMediumSteps();
    }
@@ -46,7 +45,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    @Tag("humanoid-obstacle-slow")
    @Override
    @Test
-   public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingUpRampWithShortSteps()
    {
       super.testWalkingUpRampWithShortSteps();
    }
@@ -54,7 +53,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    @Tag("humanoid-obstacle-slow")
    @Override
    @Test
-   public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
+   public void testWalkingUpRampWithShortStepsALittleTooHigh()
    {
       super.testWalkingUpRampWithShortStepsALittleTooHigh();
    }
@@ -62,7 +61,7 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    @Tag("humanoid-obstacle-slow")
    @Override
    @Test
-   public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
+   public void testWalkingUpRampWithShortStepsALittleTooLow()
    {
       super.testWalkingUpRampWithShortStepsALittleTooLow();
    }

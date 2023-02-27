@@ -43,7 +43,7 @@ public class PlanarRegionsListPointSnapperTest
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       expectedTransform.getTranslation().set(0.0, 0.0, 0.7);
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, snapTransform, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedTransform, snapTransform, epsilon);
    }
 
    @Test
@@ -156,7 +156,7 @@ public class PlanarRegionsListPointSnapperTest
       RigidBodyTransform polygonSnappingTransform = PlanarRegionsListPointSnapper.snapPointToPlanarRegionsList(pointToSnap, planarRegionList, planarRegion);
 
       RigidBodyTransform identityTransform = new RigidBodyTransform();
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(identityTransform, polygonSnappingTransform, epsilon);
+      EuclidCoreTestTools.assertEquals(identityTransform, polygonSnappingTransform, epsilon);
 
       planarRegionTransformToWorld = new RigidBodyTransform();
       planarRegionTransformToWorld.getTranslation().set(1.2, 3.4, 7.6);
@@ -168,7 +168,7 @@ public class PlanarRegionsListPointSnapperTest
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       expectedTransform.getTranslation().set(0.0, 0.0, 7.6);
-      EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, polygonSnappingTransform, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedTransform, polygonSnappingTransform, epsilon);
    }
 
    @Test
@@ -257,7 +257,7 @@ public class PlanarRegionsListPointSnapperTest
 
       Vector3D actualSurfaceNormal = new Vector3D(0.0, 0.0, 1.0);
       snapTransform.transform(actualSurfaceNormal);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedSurfaceNormal, actualSurfaceNormal, epsilon);
+      EuclidCoreTestTools.assertEquals(expectedSurfaceNormal, actualSurfaceNormal, epsilon);
 
       Vector3D xAxis = new Vector3D(1.0, 0.0, 0.0);
       snapTransform.transform(xAxis);

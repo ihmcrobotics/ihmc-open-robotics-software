@@ -1,6 +1,6 @@
 package us.ihmc.avatar.sensors.realsense;
 
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import sensor_msgs.msg.dds.CompressedImage;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.JPEGEncoder;

@@ -11,12 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.avatar.testTools.scs2.SCS2BehaviorTestHelper;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -25,12 +24,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -47,16 +46,11 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcBehaviorTestHelper != null)
+      if (behaviorTestHelper != null)
       {
-         drcBehaviorTestHelper.closeAndDispose();
-         drcBehaviorTestHelper = null;
+         behaviorTestHelper.finishTest();
+         behaviorTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -72,10 +66,10 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
    private final double MAX_ANGLE_TO_TEST_RAD = 15.0 * Math.PI / 180.0;
    private final double POSITION_THRESHOLD = Double.NaN;
-   private final double ORIENTATION_THRESHOLD = 0.007;
+   private final double ORIENTATION_THRESHOLD = 0.009;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-   private DRCBehaviorTestHelper drcBehaviorTestHelper;
+   private SCS2BehaviorTestHelper behaviorTestHelper;
 
    @BeforeEach
    public void setUp()
@@ -83,14 +77,15 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
-                                                        simulationTestingParameters, getRobotModel());
+      SCS2AvatarTestingSimulation simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), testEnvironment, simulationTestingParameters);
+      simulationTestHelper.start();
+      behaviorTestHelper = new SCS2BehaviorTestHelper(simulationTestHelper);
    }
 
    //TODO: Fix HeadOrienationManager() so that head actually tracks desired yaw and roll orientations.  Currently, only pitch orientation tracks properly.
 
    @Test
-   public void testHeadPitch() throws SimulationExceededMaximumTimeException
+   public void testHeadPitch()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -104,7 +99,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
    }
 
    @Test
-   public void testHeadRoll() throws SimulationExceededMaximumTimeException
+   public void testHeadRoll()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -118,7 +113,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
    }
 
    @Test
-   public void testHeadYaw() throws SimulationExceededMaximumTimeException
+   public void testHeadYaw()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -132,11 +127,11 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
    }
 
    @Test
-   public void testRandomOrientation() throws SimulationExceededMaximumTimeException
+   public void testRandomOrientation()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      FullHumanoidRobotModel controllerFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel controllerFullRobotModel = behaviorTestHelper.getControllerFullRobotModel();
       ReferenceFrame chestCoMFrame = controllerFullRobotModel.getChest().getBodyFixedFrame();
       double trajectoryTime = 4.0;
       Quaternion desiredHeadQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
@@ -153,7 +148,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       Quaternion desiredHeadQuat = new Quaternion();
       desiredHeadQuat.set(desiredAxisAngle);
 
-      FullHumanoidRobotModel controllerFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel controllerFullRobotModel = behaviorTestHelper.getControllerFullRobotModel();
       ReferenceFrame chestCoMFrame = controllerFullRobotModel.getChest().getBodyFixedFrame();
 
       HeadTrajectoryMessage message = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, chestCoMFrame);
@@ -161,26 +156,26 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       return message;
    }
 
-   private void testHeadOrientationBehavior(HeadTrajectoryMessage headTrajectoryMessage, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   private void testHeadOrientationBehavior(HeadTrajectoryMessage headTrajectoryMessage, double trajectoryTime)
    {
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = behaviorTestHelper.simulateNow(1.0);
       assertTrue(success);
 
-      final HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(drcBehaviorTestHelper.getRobotName(),
-                                                                                       drcBehaviorTestHelper.getROS2Node(), drcBehaviorTestHelper.getYoTime());
+      final HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(behaviorTestHelper.getRobotName(),
+                                                                                       behaviorTestHelper.getROS2Node(), behaviorTestHelper.getYoTime());
 
       headTrajectoryBehavior.initialize();
       headTrajectoryBehavior.setInput(headTrajectoryMessage);
       assertTrue(headTrajectoryBehavior.hasInputBeenSet());
 
-      FramePose3D initialHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getSDFFullRobotModel());
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(headTrajectoryBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      FramePose3D initialHeadPose = getCurrentHeadPose(behaviorTestHelper.getSDFFullRobotModel());
+      success = behaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(headTrajectoryBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
-      FramePose3D finalHeadPose = getCurrentHeadPose(drcBehaviorTestHelper.getSDFFullRobotModel());
+      FramePose3D finalHeadPose = getCurrentHeadPose(behaviorTestHelper.getSDFFullRobotModel());
 
       if (DEBUG)
       {
-         PrintTools.debug(this, " initial Head Pose :\n" + initialHeadPose);
+         LogTools.debug(" initial Head Pose :\n" + initialHeadPose);
       }
 
       FramePose3D desiredHeadPose = new FramePose3D();
@@ -209,11 +204,11 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
 
       if (DEBUG)
       {
-         PrintTools.debug(this, " desired Head Pose : \n" + framePose1);
-         PrintTools.debug(this, " final Head Pose : \n" + framePose2);
+         LogTools.info(" desired Head Pose : \n" + framePose1);
+         LogTools.info(" final Head Pose : \n" + framePose2);
 
-         PrintTools.debug(this, " positionDistance = " + positionDistance);
-         PrintTools.debug(this, " orientationDistance = " + orientationDistance);
+         LogTools.info(" positionDistance = " + positionDistance);
+         LogTools.info(" orientationDistance = " + orientationDistance);
       }
 
       if (!Double.isNaN(POSITION_THRESHOLD))

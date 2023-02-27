@@ -8,9 +8,7 @@ import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -30,8 +28,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class ReachabilitySphereMapVisualizers
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    public static void visualizeSphereVoxelShape()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
@@ -41,23 +37,19 @@ public class ReachabilitySphereMapVisualizers
       double voxelSize = 0.10;
       int numberOfRays = 20;
       int numberOfRotationsAroundRay = 10;
-      SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(worldFrame, voxelSize, numberOfRays, numberOfRotationsAroundRay,
-            SphereVoxelType.graspAroundSphere);
+      SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(voxelSize, numberOfRays, numberOfRotationsAroundRay, SphereVoxelType.graspAroundSphere);
 
       for (int i = 0; i < sphereVoxelShape.getNumberOfRays(); i++)
       {
          for (int j = 0; j < sphereVoxelShape.getNumberOfRotationsAroundRay(); j++)
          {
-            FrameVector3D translationFromVoxelOrigin = new FrameVector3D();
-            FrameQuaternion orientation = new FrameQuaternion();
-            sphereVoxelShape.getPose(translationFromVoxelOrigin, orientation, i, j);
+            FramePose3D pose = new FramePose3D();
+            sphereVoxelShape.getPose(pose, i, j);
 
             Graphics3DObject staticLinkGraphics = new Graphics3DObject();
             staticLinkGraphics.translate(sphereOrigin);
-            staticLinkGraphics.translate(translationFromVoxelOrigin);
-            RotationMatrix rotationMatrix = new RotationMatrix();
-            rotationMatrix.set(orientation);
-            staticLinkGraphics.rotate(rotationMatrix);
+            staticLinkGraphics.translate(pose.getPosition());
+            staticLinkGraphics.rotate(pose.getOrientation());
             staticLinkGraphics.addCoordinateSystem(0.05);
             scs.addStaticLinkGraphics(staticLinkGraphics);
          }

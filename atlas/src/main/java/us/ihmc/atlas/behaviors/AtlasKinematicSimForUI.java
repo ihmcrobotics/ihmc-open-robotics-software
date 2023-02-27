@@ -1,6 +1,6 @@
 package us.ihmc.atlas.behaviors;
 
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;

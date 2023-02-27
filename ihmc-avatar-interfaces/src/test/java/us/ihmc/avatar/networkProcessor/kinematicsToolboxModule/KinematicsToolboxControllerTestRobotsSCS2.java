@@ -279,25 +279,25 @@ public class KinematicsToolboxControllerTestRobotsSCS2
    private static List<VisualDefinition> createTorsoGraphics(double torsoHeight, double torsoWidth, double torsoThickness, MaterialDefinition appearance)
    {
       VisualDefinitionFactory graphics = new VisualDefinitionFactory();
-      graphics.addGenTruncatedCone(torsoHeight, torsoThickness, 0.7 * torsoWidth, 0.7 * torsoThickness, 0.5 * torsoWidth, appearance);
+      graphics.addTruncatedCone(torsoHeight, torsoThickness, 0.7 * torsoWidth, 0.7 * torsoThickness, 0.5 * torsoWidth, appearance);
       graphics.appendTranslation(0.0, 0.0, torsoHeight);
       double eyeBigRadius = 0.35 * torsoWidth;
       graphics.appendTranslation(0.0, 0.25 * torsoWidth, 1.1 * eyeBigRadius);
-      graphics.addEllipsoid(0.01, eyeBigRadius, eyeBigRadius, new MaterialDefinition(ColorDefinitions.White()));
+      graphics.addEllipsoid(0.01, eyeBigRadius, eyeBigRadius, ColorDefinitions.White());
       graphics.appendTranslation(0.0, -0.5 * torsoWidth, 0.0);
-      graphics.addEllipsoid(0.01, eyeBigRadius, eyeBigRadius, new MaterialDefinition(ColorDefinitions.White()));
+      graphics.addEllipsoid(0.01, eyeBigRadius, eyeBigRadius, ColorDefinitions.White());
       double eyeSmallRadius = 0.3 * eyeBigRadius;
       graphics.appendTranslation(0.01, 0.5 * eyeSmallRadius, -eyeSmallRadius);
-      graphics.addEllipsoid(0.01, eyeSmallRadius, eyeSmallRadius, new MaterialDefinition(ColorDefinitions.Black()));
+      graphics.addEllipsoid(0.01, eyeSmallRadius, eyeSmallRadius, ColorDefinitions.Black());
       graphics.appendTranslation(0.0, -eyeSmallRadius + 0.5 * torsoWidth, 0.0);
-      graphics.addEllipsoid(0.01, eyeSmallRadius, eyeSmallRadius, new MaterialDefinition(ColorDefinitions.Black()));
+      graphics.addEllipsoid(0.01, eyeSmallRadius, eyeSmallRadius, ColorDefinitions.Black());
       return graphics.getVisualDefinitions();
    }
 
    private static List<VisualDefinition> createHandGraphics()
    {
       VisualDefinitionFactory graphics = new VisualDefinitionFactory();
-      graphics.addSphere(0.025, new MaterialDefinition(ColorDefinitions.Gray()));
+      graphics.addSphere(0.025, ColorDefinitions.Gray());
       graphics.appendTranslation(0.0, 0.0, 0.05);
       graphics.addEllipsoid(0.04, 0.01, 0.1);
       return graphics.getVisualDefinitions();
@@ -306,7 +306,7 @@ public class KinematicsToolboxControllerTestRobotsSCS2
    private static List<VisualDefinition> createArmGraphic(double length, double radius, MaterialDefinition appearance)
    {
       VisualDefinitionFactory graphics = new VisualDefinitionFactory();
-      graphics.addSphere(1.2 * radius, new MaterialDefinition(ColorDefinitions.Gray()));
+      graphics.addSphere(1.2 * radius, ColorDefinitions.Gray());
       graphics.appendTranslation(0.0, 0.0, 0.5 * length);
       graphics.addCylinder(length, radius, appearance);
       return graphics.getVisualDefinitions();
