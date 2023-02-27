@@ -11,7 +11,8 @@ import us.ihmc.tools.thread.Activator;
  */
 public class RDXBlackflyDisplayDemo
 {
-   private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
+//   private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "22206798");
+   private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "22206798");
 
    private final RDXBaseUI baseUI = new RDXBaseUI("Blackfly Display Demo");
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
@@ -46,7 +47,16 @@ public class RDXBlackflyDisplayDemo
                   {
                      while (running)
                      {
-                        blackflyReader.readBlackflyImage();
+                        try
+                        {
+                           blackflyReader.readBlackflyImage();
+                        }
+                        catch (Exception e)
+                        {
+                           e.printStackTrace();
+                           running = false;
+                           return;
+                        }
                      }
                   }, "CameraRead");
                }
