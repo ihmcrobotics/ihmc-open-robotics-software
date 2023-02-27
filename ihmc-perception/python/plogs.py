@@ -5,6 +5,7 @@ import os
 from hdf5_reader import *
 from hdf5_converter import *
 import argparse
+from transform_utils import *
 
 def convert_main():
 
@@ -64,5 +65,57 @@ def play_main():
         display_image(data, i, 'l515/depth/', 1000)
     
 
+def plot_main():
+
+    home = os.path.expanduser('~')
+
+    path = home + '/.ihmc/logs/perception/'
+
+
+    data = h5py.File(path + '20230226_192147_PerceptionLog.hdf5', 'r')
+
+
+    mocap_position = get_data(data, 'mocap/rigid_body/position/')
+    mocap_orientation = get_data(data, 'mocap/rigid_body/orientation/')
+    sensor_position = get_data(data, 'l515/sensor/position/')
+    sensor_orientation = np.zeros(shape=(4110, 4))
+    sensor_orientation[:, 3] = 1.0
+
+    transform = get_relative_transform_se3(mocap_position[0], mocap_orientation[0], sensor_position[0], sensor_orientation[0])
+
+    print("Shapes Mocap Position: ", mocap_position.shape, " Sensor Position: ", sensor_position.shape, " Mocap Orientation: ", mocap_orientation.shape, " Sensor Orientation: ", sensor_orientation.shape)
+
+    print("Transform: ", transform)
+
+    #  Perform inverse transform on mocap position and orientation to bring it to sensor frame
+    #  transform is in SE(3) and mocap_position is in R^3, and mocap_orientation is in R^4 with ordering (X, Y, Z, W)
+
+    positions = mocap_position.T
+
+    # Append a row of ones to the end of the position vector
+    ones = np.ones(shape=(1, positions.shape[1]))
+    positions = np.vstack((positions, ones))
+
+    
+    # Transform the position vector
+    positions = np.matmul(transform, positions)
+
+    # Apply another rotation to invert X and Z phases
+    rotation = np.eye(4)
+    rotation[0, 0] = -1
+    rotation[2, 2] = -1
+    positions = np.matmul(rotation, positions)
+
+    # Put first three rows back into mocap_position
+    mocap_position = positions[:3, :].T
+    
+    # Remove offset in first position between sensor_position and mocap_position (fix to sensor_position)
+    mocap_position -= mocap_position[0] - sensor_position[0]
+    
+
+    plot_position([sensor_position, mocap_position], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]")
+
+
+
 if __name__ == '__main__':
-    play_main()
+    plot_main()
