@@ -341,6 +341,7 @@ public class BytedecoOpenCVTools
       Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
       Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
 
+      displayDepth.convertTo(displayDepth, opencv_core.CV_8UC1, 0.8, 50);
       BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 

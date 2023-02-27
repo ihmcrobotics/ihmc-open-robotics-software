@@ -157,7 +157,7 @@ public class PlanarRegionMappingHandler
       //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
       //createOuster(128, 1024, smoothing);
-      createL515(768, 1024, smoothing, true);
+      createL515(768, 1024, smoothing, false);
    }
 
    private void createL515(int depthHeight, int depthWidth, boolean smoothing, boolean simulation)
