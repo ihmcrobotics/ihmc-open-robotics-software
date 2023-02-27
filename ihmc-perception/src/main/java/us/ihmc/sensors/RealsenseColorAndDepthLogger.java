@@ -18,6 +18,7 @@ import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.UnitConversions;
@@ -66,23 +67,17 @@ public class RealsenseColorAndDepthLogger
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
-   public RealsenseColorAndDepthLogger(String serialNumber,
-                                          int depthWidth,
-                                          int depthHeight,
-                                          int depthFPS,
-                                          int colorWidth,
-                                          int colorHeight,
-                                          int colorFPS,
+   public RealsenseColorAndDepthLogger(RealsenseConfiguration realsenseConfiguration,
                                           String depthChannelName,
                                           String colorChannelName)
    {
-      this.serialNumber = serialNumber;
-      this.depthWidth = depthWidth;
-      this.depthHeight = depthHeight;
-      this.colorWidth = colorWidth;
-      this.colorHeight = colorHeight;
-      this.depthFPS = depthFPS;
-      this.colorFPS = colorFPS;
+      this.serialNumber = realsenseConfiguration.getSerialNumber();
+      this.depthWidth = realsenseConfiguration.getDepthWidth();
+      this.depthHeight = realsenseConfiguration.getDepthHeight();
+      this.colorWidth = realsenseConfiguration.getColorWidth();
+      this.colorHeight = realsenseConfiguration.getColorHeight();
+      this.depthFPS = realsenseConfiguration.getDepthFPS();
+      this.colorFPS = realsenseConfiguration.getColorFPS();
       this.colorChannelName = colorChannelName;
       this.depthChannelName = depthChannelName;
 
@@ -128,22 +123,6 @@ public class RealsenseColorAndDepthLogger
 
             depthWidth = sensor.getDepthWidth();
             depthHeight = sensor.getDepthHeight();
-
-            LogTools.info(String.format("Color: [fx:%.4f, fy:%.4f, cx:%.4f, cy:%.4f, h:%d, w:%d]",
-                                        sensor.getColorFocalLengthPixelsX(),
-                                        sensor.getColorFocalLengthPixelsY(),
-                                        sensor.getColorPrincipalOffsetXPixels(),
-                                        sensor.getColorPrincipalOffsetYPixels(),
-                                        colorHeight,
-                                        colorWidth));
-
-            LogTools.info(String.format("Depth: [fx:%.4f, fy:%.4f, cx:%.4f, cy:%.4f, h:%d, w:%d]",
-                                        sensor.getDepthFocalLengthPixelsX(),
-                                        sensor.getDepthFocalLengthPixelsY(),
-                                        sensor.getDepthPrincipalOffsetXPixels(),
-                                        sensor.getDepthPrincipalOffsetYPixels(),
-                                        depthHeight,
-                                        depthWidth));
          }
 
          if (sensor.readFrameData())
@@ -192,15 +171,12 @@ public class RealsenseColorAndDepthLogger
       */
 
       // L515: [F1121365, F0245563], D455: [215122254074]
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
-      new RealsenseColorAndDepthLogger(l515SerialNumber,
-                                          1024,
-                                          768,
-                                          30,
-                                          1280,
-                                          720,
-                                          30,
-                                          PerceptionLoggerConstants.L515_DEPTH_NAME,
-                                          PerceptionLoggerConstants.L515_DEPTH_NAME);
+      String serialNumber = System.getProperty("l515.serial.number", "F1121365");
+      RealsenseConfiguration realsenseConfiguration = new RealsenseConfiguration(serialNumber,768, 1024,30,true,
+                                                                                 720, 1280,30);
+
+      new RealsenseColorAndDepthLogger(realsenseConfiguration,
+                                       PerceptionLoggerConstants.L515_DEPTH_NAME,
+                                       PerceptionLoggerConstants.L515_DEPTH_NAME);
    }
 }

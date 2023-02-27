@@ -12,6 +12,9 @@ public class RealsenseConfiguration
    private int colorWidth;
    private int colorFPS;
 
+   public static RealsenseConfiguration L515_CONFIG_640_480_30FPS = new RealsenseConfiguration("L515", 480, 640, 30, true, 480, 640, 30);
+   public static RealsenseConfiguration D455_CONFIG_640_480_30FPS = new RealsenseConfiguration("D455", 480, 640, 30, true, 480, 640, 30);
+
    public RealsenseConfiguration(String serialNumber, int depthHeight, int depthWidth, int depthFPS, boolean useColor, int colorHeight, int colorWidth, int colorFPS)
    {
       this.serialNumber = serialNumber;

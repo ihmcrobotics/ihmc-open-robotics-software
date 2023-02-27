@@ -51,7 +51,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    //20230117_162417_PerceptionLog.hdf5 (231 MB)
    //20230117_162825_PerceptionLog.hdf5 (328 MB)
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230226_192147_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230227_134236_PerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
@@ -116,7 +116,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createL515(768, 1024, true);
+            createL515(720, 1280, false); // Real D455
+//            createL515(768, 1280, false); // Real L515
+//            createL515(768, 1280, true); // Simulated L515
+
             //            createOuster(128, 1024);
          }
 
@@ -159,7 +162,15 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
             String version = simulation ? "Simulation" : "";
 
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 730.7891, 731.0859, 528.6094, 408.1602, version);
+            // D455 Depth Intrinsics: 392.57, 392.57, 326.69, 241.13 (640 x 480 @ 60)
+            // D455 Color Intrinsics: 387.42, 386.89, 321.83, 240.61 (640 x 480 @ 60)
+
+            // D455 Depth Intrinsics: 654.29, 654.29, 651.14, 361.89 (1280 x 720 @ 30)
+            // D455 Color Intrinsics: 645.69, 644.81, 643.05, 361.02 (1280 x 720 @ 30)
+
+            // L515 Depth Intrinsics: 730.7891, 731.0859, 528.6094, 408.1602
+
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
             rapidPlanarRegionsExtractor.getDebugger().setEnabled(true);
 
             pointCloudRenderer.create(depthHeight * depthWidth);

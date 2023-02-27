@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import geometry_msgs.PoseStamped;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,13 +16,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
-import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
@@ -43,7 +43,7 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    private final ImGuiPlot numberOfRegionsPlot = new ImGuiPlot("# Regions", 1000, 230, 20);
    private int numberOfPlanarRegions = 0;
 
-   private RealtimeROS2Node realtimeROS2Node;
+   private ROS2Node ros2Node;
    private final String titleBeforeAdditions;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
    private final ImBoolean subscribed = new ImBoolean(false);
@@ -84,33 +84,30 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
       }
    }
 
-   public void queueRenderRigidBodyPose(Subscriber<Pose3D> subscriber)
+   public void queueRenderRigidBodyPose(Pose3D message)
    {
-      synchronized (syncObject)
-      {
-         subscriber.takeNextData(message, sampleInfo);
-
          transformMessageReference.set(message);
-
-      }
-
    }
 
    private void subscribe()
    {
       subscribed.set(true);
-      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT(), this::queueRenderRigidBodyPose);
-      realtimeROS2Node.spin();
+
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
+
+      new IHMCROS2Callback<>(ros2Node, ROS2Tools.MOCAP_RIGID_BODY, (message) ->
+      {
+         queueRenderRigidBodyPose(message);
+      });
    }
 
    public void setSubscribed(boolean subscribed)
    {
-      if (subscribed && realtimeROS2Node == null)
+      if (subscribed && ros2Node == null)
       {
          subscribe();
       }
-      else if (!subscribed && realtimeROS2Node != null)
+      else if (!subscribed && ros2Node != null)
       {
          unsubscribe();
       }
@@ -119,10 +116,10 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    private void unsubscribe()
    {
       subscribed.set(false);
-      if (realtimeROS2Node != null)
+      if (ros2Node != null)
       {
-         realtimeROS2Node.destroy();
-         realtimeROS2Node = null;
+         ros2Node.destroy();
+         ros2Node = null;
       }
    }
 

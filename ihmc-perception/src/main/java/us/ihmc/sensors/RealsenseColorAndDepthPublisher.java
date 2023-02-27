@@ -27,6 +27,7 @@ import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -97,6 +98,22 @@ public class RealsenseColorAndDepthPublisher
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
+   public RealsenseColorAndDepthPublisher(RealsenseConfiguration realsenseConfiguration, ROS2Topic<ImageMessage> depthTopic,
+                                          ROS2Topic<ImageMessage> colorTopic,
+                                          Supplier<ReferenceFrame> sensorFrameUpdater)
+   {
+      this(realsenseConfiguration.getSerialNumber(),
+           realsenseConfiguration.getDepthWidth(),
+           realsenseConfiguration.getDepthHeight(),
+           realsenseConfiguration.getDepthFPS(),
+           realsenseConfiguration.getColorWidth(),
+           realsenseConfiguration.getColorHeight(),
+           realsenseConfiguration.getColorFPS(),
+           depthTopic,
+           colorTopic,
+           sensorFrameUpdater);
+   }
+
    public RealsenseColorAndDepthPublisher(String serialNumber,
                                           int depthWidth,
                                           int depthHeight,
@@ -163,22 +180,6 @@ public class RealsenseColorAndDepthPublisher
 
             depthWidth = sensor.getDepthWidth();
             depthHeight = sensor.getDepthHeight();
-
-            LogTools.info(String.format("Color: [fx:%.4f, fy:%.4f, cx:%.4f, cy:%.4f, h:%d, w:%d]",
-                                        sensor.getColorFocalLengthPixelsX(),
-                                        sensor.getColorFocalLengthPixelsY(),
-                                        sensor.getColorPrincipalOffsetXPixels(),
-                                        sensor.getColorPrincipalOffsetYPixels(),
-                                        colorHeight,
-                                        colorWidth));
-
-            LogTools.info(String.format("Depth: [fx:%.4f, fy:%.4f, cx:%.4f, cy:%.4f, h:%d, w:%d]",
-                                        sensor.getDepthFocalLengthPixelsX(),
-                                        sensor.getDepthFocalLengthPixelsY(),
-                                        sensor.getDepthPrincipalOffsetXPixels(),
-                                        sensor.getDepthPrincipalOffsetYPixels(),
-                                        depthHeight,
-                                        depthWidth));
 
             ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
