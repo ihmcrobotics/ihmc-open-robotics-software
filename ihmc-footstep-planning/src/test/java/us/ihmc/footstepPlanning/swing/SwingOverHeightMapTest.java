@@ -381,7 +381,7 @@ public class SwingOverHeightMapTest
 //         Conver();
 //         environment.getTerrainObject3D().getLinkGraphics();
          scs.addTerrainObject(environment.getTerrainObjectDefinition());
-         scs.startSimulationThread();
+//         scs.startSimulationThread();
       }
       else
       {
@@ -389,7 +389,8 @@ public class SwingOverHeightMapTest
       }
 
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-      expander.setHeightMapData(heightMapData);
+//      expander.setHeightMapData(heightMapData);
+      expander.setPlanarRegionsList(planarRegionsList);
       expander.computeSwingTrajectories(request.getStartFootPoses(), footstepPlan);
 
 //      boolean wasAdjusted = expander.wereWaypointsAdjusted();
@@ -417,8 +418,7 @@ public class SwingOverHeightMapTest
 
       if (visualize)
       {
-
-         //         scs.cropBuffer();
+         scs.startSimulationThread();
          ThreadTools.sleepForever();
       }
 

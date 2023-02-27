@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -75,9 +76,8 @@ public class HeightMapCollisionDetector
 
    private static void computeCollisionDataAtPoint(Point3DReadOnly groundPoint, FrameBox3DReadOnly collisionBox, HeightMapData heightMap, EuclidShape3DCollisionResult collisionResult)
    {
-      Point3D pointOnBox = new Point3D();
+      Point3DReadOnly pointOnBox = getPointOnBox(groundPoint, collisionBox);
 
-      collisionBox.orthogonalProjection(groundPoint, pointOnBox);
       Vector3D normalAtBox = new Vector3D();
       normalAtBox.sub(pointOnBox, groundPoint);
       normalAtBox.normalize();
@@ -94,6 +94,51 @@ public class HeightMapCollisionDetector
       Vector3DReadOnly groundNormal = approximateSurfaceNormalAtPoint(groundPoint, heightMap);
       collisionResult.getNormalOnB().set(groundNormal);
    }
+
+   private static Point3DReadOnly getPointOnBox(Point3DReadOnly groundPoint, FrameBox3DReadOnly collisionBox)
+   {
+      Point3DBasics pointToProjectInLocal = new Point3D();
+      collisionBox.getPose().inverseTransform(groundPoint, pointToProjectInLocal);
+
+      double boxLength = collisionBox.getSizeX() / 2.0;
+      double boxWidth = collisionBox.getSizeY() / 2.0;
+      double boxHeight = collisionBox.getSizeZ() / 2.0;
+
+
+      boolean isWithinX = Math.abs(pointToProjectInLocal.getX()) < boxLength;
+      boolean isWithinY = Math.abs(pointToProjectInLocal.getY()) < boxWidth;
+      double xPosition = 0.0;
+      double yPosition = 0.0;
+      if (isWithinX != isWithinY)
+      {
+         xPosition = Math.signum(pointToProjectInLocal.getX()) * Math.min(boxLength, Math.abs(pointToProjectInLocal.getX()));
+         yPosition = Math.signum(pointToProjectInLocal.getY()) * Math.min(boxWidth, Math.abs(pointToProjectInLocal.getY()));
+      }
+      else if (isWithinX)
+      { // completely within
+         if ((boxLength - Math.abs(pointToProjectInLocal.getX())) < (boxWidth - Math.abs(pointToProjectInLocal.getY())))
+         {
+            xPosition = Math.signum(pointToProjectInLocal.getX()) * boxLength;
+         }
+         else
+         {
+            yPosition = Math.signum(pointToProjectInLocal.getY()) * boxWidth;
+         }
+      }
+      else
+      {
+         // completely outside
+         xPosition = Math.signum(pointToProjectInLocal.getX()) * boxLength;
+         yPosition = Math.signum(pointToProjectInLocal.getY()) * boxWidth;
+      }
+      pointToProjectInLocal.set(xPosition, yPosition, -boxHeight);
+
+      Point3D projectedPointInWorld = new Point3D(pointToProjectInLocal);
+      collisionBox.transformToWorld(projectedPointInWorld);
+
+      return projectedPointInWorld;
+   }
+
 
    /**
     * Computes the average normal using the four neighboring vertices.
