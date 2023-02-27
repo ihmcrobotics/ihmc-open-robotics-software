@@ -51,7 +51,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    //20230117_162417_PerceptionLog.hdf5 (231 MB)
    //20230117_162825_PerceptionLog.hdf5 (328 MB)
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230227_140700_D455_RoughTerrain.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("L515_RoughTerrain_PerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
@@ -116,8 +116,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createL515(720, 1280, false); // Real D455
-//            createL515(768, 1280, false); // Real L515
+//            createL515(720, 1280, false); // Real D455
+            createL515(768, 1024, false); // Real L515
 //            createL515(768, 1280, true); // Simulated L515
 
             //            createOuster(128, 1024);
@@ -170,7 +170,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
             // L515 Depth Intrinsics: 730.7891, 731.0859, 528.6094, 408.1602
 
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 730.7891, 731.0859, 528.6094, 408.1602, version);
             rapidPlanarRegionsExtractor.getDebugger().setEnabled(true);
 
             pointCloudRenderer.create(depthHeight * depthWidth);

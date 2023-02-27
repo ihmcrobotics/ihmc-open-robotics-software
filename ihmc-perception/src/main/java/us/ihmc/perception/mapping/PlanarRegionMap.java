@@ -656,8 +656,17 @@ public class PlanarRegionMap
       return idToReturn;
    }
 
-   public RigidBodyTransform registerRegions(PlanarRegionsList regions)
+   public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions)
    {
+      PlanarRegionsList regions = new PlanarRegionsList();
+
+      // Remove all regions that are too small
+      for (PlanarRegion region : incomingRegions.getPlanarRegionsAsList())
+      {
+         if (region.getArea() > parameters.getMinimumPlanarRegionArea())
+            regions.addPlanarRegion(region);
+      }
+
       currentTimeIndex++;
       boolean isKeyframe = false;
       RigidBodyTransform transformToPrevious = new RigidBodyTransform();

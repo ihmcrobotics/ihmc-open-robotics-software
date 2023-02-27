@@ -46,7 +46,7 @@ public class RDXPlanarRegionMappingDemo
    // L515_CinderBlocks_PerceptionLog.hdf5 -> L515_CinderBlocks
    // L515_RoughTerrain_PerceptionLog.hdf5 -> L515_RoughTerrain
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230226_192147_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("L515_RoughTerrain_PerceptionLog.hdf5").toString();
 
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
