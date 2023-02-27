@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 import os
 from h5py import Group, Dataset
+import matplotlib.pyplot as plt
+
 
 
 def get_data(data, namespace):
@@ -148,3 +150,26 @@ def load_file(file_name):
         print("File:", i, files[i])
 
     data = h5py.File(path + files[0], 'r')
+
+def plot_position(data_list, style_list, tag):
+
+
+    fig, axs = plt.subplots(3, figsize=(30,10))
+    fig.suptitle(tag + ' Position Plots')
+
+    axs[0].set_title(tag + 'Position (X)')
+    axs[1].set_title(tag + 'Position (Y)')
+    axs[2].set_title(tag + 'Position (Z)')
+
+    # axs[0].set_ylim(-4, 4)
+    # axs[1].set_ylim(-4, 4)
+    # axs[2].set_ylim(-4, 4)
+
+    for i, data in enumerate(data_list):
+        
+        t = np.linspace(0, data.shape[0], data.shape[0])
+        axs[0].plot(t, data[:,0], style_list[i], markersize=1)
+        axs[1].plot(t, data[:,1], style_list[i], markersize=1)
+        axs[2].plot(t, data[:,2], style_list[i], markersize=1)
+
+    plt.show()
