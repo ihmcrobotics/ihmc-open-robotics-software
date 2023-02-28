@@ -99,13 +99,6 @@ public class RDXInteractableFootstep
          footstepIndexText = textRenderablesMap.get(txt);
       }
    }
-//
-//   public RDXInteractableFootstep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex, SideDependentList<ConvexPolygon2D> defaultPolygons)
-//   {
-//      this.defaultPolygons = defaultPolygons;
-//      plannedFootstepInternal = new PlannedFootstep(plannedFootstep);
-//      updateFromPlannedStep(baseUI, plannedFootstep, footstepIndex);
-//   }
 
    public PlannedFootstepReadOnly getPlannedFootstep()
    {
