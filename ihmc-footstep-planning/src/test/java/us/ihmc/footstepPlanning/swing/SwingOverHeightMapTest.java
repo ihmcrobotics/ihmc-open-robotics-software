@@ -26,6 +26,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -55,14 +56,19 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicBox3DDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
+import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -75,13 +81,20 @@ public class SwingOverHeightMapTest
 {
    private static boolean visualize = false;
    private static final double heightMapResolution = 0.03;
+
    private SimulationConstructionSet2 scs;
+   private YoFramePoint3D collisionPosition;
+   private YoFramePoseUsingYawPitchRoll boxCenterPose;
+   private YoVector3D boxSize;
 
    @BeforeEach
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
       scs = null;
+      collisionPosition = null;
+      boxCenterPose = null;
+      boxSize = null;
    }
 
    @AfterEach
@@ -93,6 +106,10 @@ public class SwingOverHeightMapTest
          scs.shutdownSession();
          scs = null;
       }
+
+      boxCenterPose = null;
+      collisionPosition = null;
+      boxSize = null;
    }
 
    @Test
@@ -293,7 +310,6 @@ public class SwingOverHeightMapTest
       checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
-   @Disabled
    @Test
    public void testTrickyStep2FullTrajectory()
    {
@@ -343,6 +359,18 @@ public class SwingOverHeightMapTest
       YoFramePoint3D firstWaypoint = new YoFramePoint3D("firstWaypoint", ReferenceFrame.getWorldFrame(), registry);
       YoFramePoint3D secondWaypoint = new YoFramePoint3D("secondWaypoint", ReferenceFrame.getWorldFrame(), registry);
 
+      collisionPosition = new YoFramePoint3D("collisionPosition", ReferenceFrame.getWorldFrame(), registry);
+      collisionPosition.setToNaN();
+
+      boxCenterPose = new YoFramePoseUsingYawPitchRoll("boxCenterPose", ReferenceFrame.getWorldFrame(), registry);
+      boxCenterPose.setToNaN();
+      boxSize = new YoVector3D("boxSize", registry);
+
+      FrameBox3DBasics collisionBox = new FrameBox3D();
+      SwingKnotPoint.initializeBoxParameters(walkingControllerParameters, swingPlannerParameters, 0.0, collisionBox, new Vector3D());
+      Graphics3DObject collisionBoxGraphics = new Graphics3DObject();
+      collisionBoxGraphics.addCube(collisionBox.getSizeX(), collisionBox.getSizeY(), collisionBox.getSizeZ(), YoAppearance.Color(Color.GREEN));
+
       YoFramePoseUsingYawPitchRoll yoStartFoot = new YoFramePoseUsingYawPitchRoll("start", ReferenceFrame.getWorldFrame(), registry);
       YoFramePoseUsingYawPitchRoll yoEndFoot = new YoFramePoseUsingYawPitchRoll("end", ReferenceFrame.getWorldFrame(), registry);
       yoStartFoot.set(startFoot);
@@ -352,6 +380,17 @@ public class SwingOverHeightMapTest
       yoGraphicsListRegistry.registerYoGraphic("footsteps", new YoGraphicShape("endFootstep", endGraphics, yoEndFoot, 1.0));
       yoGraphicsListRegistry.registerYoGraphic("outputWaypoints", new YoGraphicPosition("firstWaypoint", firstWaypoint, 0.02, YoAppearance.White()));
       yoGraphicsListRegistry.registerYoGraphic("outputWaypoints", new YoGraphicPosition("secondWaypoint", secondWaypoint, 0.02, YoAppearance.White()));
+
+      yoGraphicsListRegistry.registerYoGraphic("collisionPosition", new YoGraphicPosition("collisionPosition", collisionPosition, 0.02, YoAppearance.Red()));
+
+      YoGraphicBox3DDefinition sylviasBox = new YoGraphicBox3DDefinition();
+      sylviasBox.setName("blop" );
+      sylviasBox.setVisible(true);
+      sylviasBox.setPosition(YoGraphicDefinitionFactory.newYoTuple3DDefinition(boxCenterPose.getPosition()));
+      sylviasBox.setOrientation(YoGraphicDefinitionFactory.newYoYawPitchRollDefinition(boxCenterPose.getYawPitchRoll()));
+      sylviasBox.setSize(YoGraphicDefinitionFactory.newYoTuple3DDefinition(boxSize));
+      sylviasBox.setColor(ColorDefinition.rgb(Color.GREEN.getRGB()));
+
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       FootstepPlan footstepPlan = new FootstepPlan();
@@ -392,6 +431,7 @@ public class SwingOverHeightMapTest
 
          scs.setDT(1.0);
          scs.addRegistry(registry);
+         scs.addYoGraphic(sylviasBox);
          scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 //         scs.setGroundVisible(false);
 //         Conver();
@@ -402,37 +442,8 @@ public class SwingOverHeightMapTest
 
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       expander.setHeightMapData(heightMapData);
-//      expander.setPlanarRegionsList(planarRegionsList);
+      expander.setPlanarRegionsList(planarRegionsList);
       expander.computeSwingTrajectories(request.getStartFootPoses(), footstepPlan);
-
-//      boolean wasAdjusted = expander.wereWaypointsAdjusted();
-//      if (wasAdjusted)
-//         assertTrue(footstepPlan.getFootstep(0).getCustomWaypointPositions().size() > 0);
-
-//      if (wasAdjusted)
-//      {
-//         firstWaypoint.set(footstepPlan.getFootstep(0).getCustomWaypointPositions().get(0));
-//         secondWaypoint.set(footstepPlan.getFootstep(0).getCustomWaypointPositions().get(1));
-//
-//         List<FramePoint3D> expandedWaypoints = expander.getExpandegdWaypoints();
-//         for (int i = 0; i < expandedWaypoints.size(); i++)
-//         {
-//            EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expandedWaypoints.get(i),
-//                                                                 footstepPlan.getFootstep(0).getCustomWaypointPositions().get(i),
-//                                                                 1e-8);
-//         }
-//      }
-//      else
-//      {
-//         firstWaypoint.setToNaN();
-//         secondWaypoint.setToNaN();
-//      }
-
-      if (visualize)
-      {
-         scs.startSimulationThread();
-         ThreadTools.sleepForever();
-      }
 
       return Pair.of(request, footstepPlan);
    }
@@ -503,6 +514,8 @@ public class SwingOverHeightMapTest
       WalkingControllerParameters walkingControllerParameters = getWalkingControllerParameters();
       SwingPlannerParametersReadOnly swingPlannerParameters = getParameters();
 
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(request.getHeightMapMessage());
+
       for (double time = 0.0; time <= 1.0; time += dt)
       {
          twoWaypointSwingGenerator.compute(time);
@@ -510,7 +523,6 @@ public class SwingOverHeightMapTest
 
          FrameQuaternion desiredOrientation = new FrameQuaternion();
          desiredOrientation.interpolate(swingStartOrientation, swingEndOrientation, time);
-
 
          FrameBox3DBasics collisionBox = new FrameBox3D();
          Vector3D boxCenterInSoleFrame = new Vector3D();
@@ -522,10 +534,15 @@ public class SwingOverHeightMapTest
 
          desiredOrientation.transform(boxCenterInSoleFrame);
 
-         FramePose3D boxCenterPose = new FramePose3D();
          boxCenterPose.getPosition().set(desiredPosition);
          boxCenterPose.getPosition().add(boxCenterInSoleFrame);
-         boxCenterPose.getOrientation().set(desiredOrientation);
+         boxCenterPose.getYawPitchRoll().set(desiredOrientation);
+         boxSize.set(collisionBox.getSizeX(), collisionBox.getSizeY(), collisionBox.getSizeZ());
+
+         if (visualize)
+         {
+            scs.simulateNow(1);
+         }
 
          collisionBox.getPose().set(boxCenterPose);
 
@@ -541,7 +558,6 @@ public class SwingOverHeightMapTest
             collisionRelativeToEndFoot.changeFrame(endFootPoseFrame);
             collisionRelativeToStartFoot.changeFrame(startFootPoseFrame);
 
-
             double distanceToCollision = collisionBox.distance(collision);
             if (distanceToCollision < closestDistance)
             {
@@ -549,7 +565,33 @@ public class SwingOverHeightMapTest
                closestCollision = collision;
             }
          }
+
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData);
+         if (collisionResult.getSignedDistance() < closestDistance)
+         {
+            closestDistance = collisionResult.getSignedDistance();
+            closestCollision = new Point3D(collisionResult.getPointOnB());
+         }
+
+         boolean colliding = (closestDistance + 1.5e-2) < 0.0;
+         if (colliding)
+         {
+            collisionPosition.set(closestCollision);
+            if (visualize)
+            {
+               scs.simulateNow(1);
+               scs.startSimulationThread();
+               ThreadTools.sleepForever();
+            }
+         }
+
          Assert.assertFalse("have to be " + 0.0 + " away, am actually " + closestDistance, (closestDistance + 1.5e-2) < 0.0);
+      }
+
+      if (visualize)
+      {
+         scs.startSimulationThread();
+         ThreadTools.sleepForever();
       }
    }
 
