@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.swing;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -73,11 +75,24 @@ public class SwingOverHeightMapTest
 {
    private static boolean visualize = false;
    private static final double heightMapResolution = 0.03;
+   private SimulationConstructionSet2 scs;
 
    @BeforeEach
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+      scs = null;
+   }
+
+   @AfterEach
+   public void destroy()
+   {
+      if (scs != null)
+      {
+         scs.stopSimulationThread();
+         scs.shutdownSession();
+         scs = null;
+      }
    }
 
    @Test
@@ -101,7 +116,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
    @Test
@@ -129,7 +144,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-//      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
    @Test
@@ -151,7 +166,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(0.2, -width / 2.0, 0.1);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
    @Test
@@ -169,6 +184,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(0.6, 0.0, 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
    @Test
@@ -194,6 +210,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(1.0, 0.0, 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
    @Test
@@ -216,7 +233,7 @@ public class SwingOverHeightMapTest
       endFoot.getPosition().set(1.0, 0.0, 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), false);
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
    @Test
@@ -235,7 +252,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().set(0.0, 0.0, 0.174, 0.985);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), false);
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
    @Test
@@ -254,7 +271,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().set(0.0, 0.0, 0.087, 0.996);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), false);
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
    @Test
@@ -273,7 +290,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().set(0.0, 0.0, 0.174, 0.985);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
    @Disabled
@@ -293,7 +310,7 @@ public class SwingOverHeightMapTest
       endFoot.getOrientation().set(0.0, 0.0, 0.087, 0.996);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
    }
 
    private Pair<FootstepPlannerRequest, FootstepPlan> runTest(FramePose3DReadOnly startFoot, FramePose3DReadOnly endFoot, PlanarRegionsList planarRegionsList)
@@ -353,7 +370,6 @@ public class SwingOverHeightMapTest
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
-      final SimulationConstructionSet2 scs;
       if (visualize)
       {
          scs = new SimulationConstructionSet2();
@@ -383,14 +399,10 @@ public class SwingOverHeightMapTest
          scs.addTerrainObject(environment.getTerrainObjectDefinition());
 //         scs.startSimulationThread();
       }
-      else
-      {
-         scs = null;
-      }
 
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-//      expander.setHeightMapData(heightMapData);
-      expander.setPlanarRegionsList(planarRegionsList);
+      expander.setHeightMapData(heightMapData);
+//      expander.setPlanarRegionsList(planarRegionsList);
       expander.computeSwingTrajectories(request.getStartFootPoses(), footstepPlan);
 
 //      boolean wasAdjusted = expander.wereWaypointsAdjusted();
@@ -425,7 +437,7 @@ public class SwingOverHeightMapTest
       return Pair.of(request, footstepPlan);
    }
 
-   private void checkForCollisions(FootstepPlannerRequest request, FootstepPlan footstepPlan, boolean ignoreGroundSegments)
+   private void checkForCollisions(FootstepPlannerRequest request, FootstepPlan footstepPlan)
    {
       SteppingParameters steppingParameters = getWalkingControllerParameters().getSteppingParameters();
       TwoWaypointSwingGenerator twoWaypointSwingGenerator = new TwoWaypointSwingGenerator("",
@@ -441,8 +453,8 @@ public class SwingOverHeightMapTest
       FramePoint3D stanceFootPosition = new FramePoint3D();
       FramePoint3D swingStartPosition = new FramePoint3D();
       FramePoint3D swingEndPosition = new FramePoint3D();
-      FrameOrientation3DBasics swingStartOrientation = new FrameQuaternion();
-      FrameOrientation3DBasics swingEndOrientation = new FrameQuaternion();
+      FrameQuaternion swingStartOrientation = new FrameQuaternion();
+      FrameQuaternion swingEndOrientation = new FrameQuaternion();
       FrameVector3D initialVelocity = new FrameVector3D();
       FrameVector3D touchdownVelocity = new FrameVector3D();
       touchdownVelocity.setZ(getWalkingControllerParameters().getSwingTrajectoryParameters().getDesiredTouchdownVelocity());
@@ -486,61 +498,58 @@ public class SwingOverHeightMapTest
       while (twoWaypointSwingGenerator.doOptimizationUpdate())
          twoWaypointSwingGenerator.compute(0.0);
 
-      double minDistance = getParameters().getMinimumSwingFootClearance();
-
       double dt = 1e-3;
 
-      double footLength = getWalkingControllerParameters().getSteppingParameters().getFootLength();
-      double toeLength = getWalkingControllerParameters().getSteppingParameters().getFootForwardOffset();
-      double heelLength = getWalkingControllerParameters().getSteppingParameters().getFootBackwardOffset();
-      double distance = Math.max(Math.max(footLength / 2.0, toeLength), heelLength);
-
-      Box3D foot = new Box3D();
-      foot.getSize().set(getWalkingControllerParameters().getSteppingParameters().getActualFootLength(),
-                         getWalkingControllerParameters().getSteppingParameters().getActualFootWidth(),
-                         0.1);
+      WalkingControllerParameters walkingControllerParameters = getWalkingControllerParameters();
+      SwingPlannerParametersReadOnly swingPlannerParameters = getParameters();
 
       for (double time = 0.0; time <= 1.0; time += dt)
       {
          twoWaypointSwingGenerator.compute(time);
          FramePoint3DReadOnly desiredPosition = twoWaypointSwingGenerator.getPosition();
 
-         foot.getPosition().set(desiredPosition);
-         foot.getPosition().addX(0.5 * (heelLength - toeLength));
+         FrameQuaternion desiredOrientation = new FrameQuaternion();
+         desiredOrientation.interpolate(swingStartOrientation, swingEndOrientation, time);
 
-         boolean isInFirstSegment = time < twoWaypointSwingGenerator.getWaypointTime(0);
-         boolean isInLastSegment = time > twoWaypointSwingGenerator.getWaypointTime(1);
-         boolean highEnoughAboveGround = desiredPosition.getZ() - swingEndPosition.getZ() > distance;
-         boolean endingShouldntCheck = isInLastSegment && !highEnoughAboveGround;
 
-         if (!ignoreGroundSegments || (!isInFirstSegment && !endingShouldntCheck))
+         FrameBox3DBasics collisionBox = new FrameBox3D();
+         Vector3D boxCenterInSoleFrame = new Vector3D();
+         SwingKnotPoint.initializeBoxParameters(walkingControllerParameters,
+                                                swingPlannerParameters,
+                                                time,
+                                                collisionBox,
+                                                boxCenterInSoleFrame);
+
+         desiredOrientation.transform(boxCenterInSoleFrame);
+
+         FramePose3D boxCenterPose = new FramePose3D();
+         boxCenterPose.getPosition().set(desiredPosition);
+         boxCenterPose.getPosition().add(boxCenterInSoleFrame);
+         boxCenterPose.getOrientation().set(desiredOrientation);
+
+         collisionBox.getPose().set(boxCenterPose);
+
+
+         double closestDistance = Double.MAX_VALUE;
+         Point3DReadOnly closestCollision = null;
+
+         for (PlanarRegion planarRegion : request.getPlanarRegionsList().getPlanarRegionsAsList())
          {
-            double closestDistance = Double.MAX_VALUE;
-            Point3DReadOnly closestCollision = null;
+            Point3DReadOnly collision = PlanarRegionTools.closestPointOnPlanarRegion(desiredPosition, planarRegion);
+            FramePoint3D collisionRelativeToEndFoot = new FramePoint3D(ReferenceFrame.getWorldFrame(), collision);
+            FramePoint3D collisionRelativeToStartFoot = new FramePoint3D(ReferenceFrame.getWorldFrame(), collision);
+            collisionRelativeToEndFoot.changeFrame(endFootPoseFrame);
+            collisionRelativeToStartFoot.changeFrame(startFootPoseFrame);
 
-            for (PlanarRegion planarRegion : request.getPlanarRegionsList().getPlanarRegionsAsList())
+
+            double distanceToCollision = collisionBox.distance(collision);
+            if (distanceToCollision < closestDistance)
             {
-               Point3DReadOnly collision = PlanarRegionTools.closestPointOnPlanarRegion(desiredPosition, planarRegion);
-               FramePoint3D collisionRelativeToEndFoot = new FramePoint3D(ReferenceFrame.getWorldFrame(), collision);
-               FramePoint3D collisionRelativeToStartFoot = new FramePoint3D(ReferenceFrame.getWorldFrame(), collision);
-               collisionRelativeToEndFoot.changeFrame(endFootPoseFrame);
-               collisionRelativeToStartFoot.changeFrame(startFootPoseFrame);
-
-               boolean hittingEndGoal = footPolygon.isPointInside(collisionRelativeToEndFoot.getX(), collisionRelativeToEndFoot.getY()) && Math.abs(collisionRelativeToEndFoot.getZ()) < 0.01;
-               boolean hittingStartGoal = footPolygon.isPointInside(collisionRelativeToStartFoot.getX(), collisionRelativeToStartFoot.getY()) && Math.abs(collisionRelativeToStartFoot.getZ()) < 0.01;
-
-               hittingEndGoal |= endFootPolygon.getMinX() < desiredPosition.getX();
-               hittingStartGoal |= desiredPosition.getX() < startFootPolygon.getMaxX();
-
-               double distanceToCollision = foot.distance(collision);
-               if ((!hittingEndGoal && !hittingStartGoal && ignoreGroundSegments) && distanceToCollision < closestDistance)
-               {
-                  closestDistance = distanceToCollision;
-                  closestCollision = collision;
-               }
+               closestDistance = distanceToCollision;
+               closestCollision = collision;
             }
-            Assert.assertFalse("have to be " + minDistance + " away, am actually " + closestDistance, (closestDistance + 1.5e-2) < minDistance);
          }
+         Assert.assertFalse("have to be " + 0.0 + " away, am actually " + closestDistance, (closestDistance + 1.5e-2) < 0.0);
       }
    }
 
