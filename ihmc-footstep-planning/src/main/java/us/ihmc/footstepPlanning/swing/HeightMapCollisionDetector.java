@@ -95,7 +95,7 @@ public class HeightMapCollisionDetector
       collisionResult.getNormalOnB().set(groundNormal);
    }
 
-   private static Point3DReadOnly getPointOnBox(Point3DReadOnly groundPoint, FrameBox3DReadOnly collisionBox)
+   static Point3DReadOnly getPointOnBox(Point3DReadOnly groundPoint, FrameBox3DReadOnly collisionBox)
    {
       Point3DBasics pointToProjectInLocal = new Point3D();
       collisionBox.getPose().inverseTransform(groundPoint, pointToProjectInLocal);
