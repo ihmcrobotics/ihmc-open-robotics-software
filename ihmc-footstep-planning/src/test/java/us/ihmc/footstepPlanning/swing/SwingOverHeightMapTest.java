@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerato
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
@@ -79,7 +80,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class SwingOverHeightMapTest
 {
-   private static boolean visualize = false;
+   private static boolean visualize = true;
    private static final double heightMapResolution = 0.03;
 
    private SimulationConstructionSet2 scs;
@@ -221,7 +222,7 @@ public class SwingOverHeightMapTest
       generator.addCubeReferencedAtCenter(cubeDepth, 0.4, cubeHeight);
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.getPosition().set(0.0, 0.0, 0.0);
+      startFoot.getPosition().set(-0.05, 0.0, 0.0);
 
       FramePose3D endFoot = new FramePose3D();
       endFoot.getPosition().set(1.0, 0.0, 0.0);
@@ -442,7 +443,7 @@ public class SwingOverHeightMapTest
 
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       expander.setHeightMapData(heightMapData);
-      expander.setPlanarRegionsList(planarRegionsList);
+//      expander.setPlanarRegionsList(planarRegionsList);
       expander.computeSwingTrajectories(request.getStartFootPoses(), footstepPlan);
 
       return Pair.of(request, footstepPlan);
@@ -509,10 +510,25 @@ public class SwingOverHeightMapTest
       while (twoWaypointSwingGenerator.doOptimizationUpdate())
          twoWaypointSwingGenerator.compute(0.0);
 
-      double dt = 1e-3;
+      double dt = 0.01;//1.0 / 11.0;
 
       WalkingControllerParameters walkingControllerParameters = getWalkingControllerParameters();
-      SwingPlannerParametersReadOnly swingPlannerParameters = getParameters();
+      SwingPlannerParametersBasics originalSwingPlannerParameters = getParameters();
+      SwingPlannerParametersBasics swingPlannerParameters = new DefaultSwingPlannerParameters()
+      {
+         @Override
+         public double getExtraSizeLow(Axis3D axis)
+         {
+            return 0.5 * originalSwingPlannerParameters.getExtraSizeLow(axis);
+         }
+
+         @Override
+         public double getExtraSizeHigh(Axis3D axis)
+         {
+            return 0.5 * originalSwingPlannerParameters.getExtraSizeHigh(axis);
+         }
+      };
+      swingPlannerParameters.set(originalSwingPlannerParameters);
 
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(request.getHeightMapMessage());
 
