@@ -155,7 +155,7 @@ public class PerceptionDataLoader
    {
       String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
       String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20230227_193535_PerceptionLog.hdf5";
+      String logFileName = "20230228_145121_PerceptionLog.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(Paths.get(logDirectory, logFileName).toString());
@@ -227,7 +227,7 @@ public class PerceptionDataLoader
          BytePointer bytePointer = new BytePointer(1000000);
 
          Mat colorImage = new Mat();
-         Mat depthImage = new Mat(768, 1024, opencv_core.CV_16UC1);
+         Mat depthImage = new Mat(768, 1280, opencv_core.CV_16UC1);
             LogTools.info("Total Images: {}", total);
 
             for (int i = 0; i < total; i++)
