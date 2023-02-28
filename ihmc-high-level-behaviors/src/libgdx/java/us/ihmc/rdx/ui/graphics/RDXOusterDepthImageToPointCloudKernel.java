@@ -39,10 +39,9 @@ public class RDXOusterDepthImageToPointCloudKernel
 
    public int calculateNumberOfPointsForLevelOfColorDetail(int ousterImageWidth, int ousterImageHeight, int levelOfColorDetail)
    {
-      int totalVerticalPointsForColorDetail = 1 + 2 * levelOfColorDetail;
-      int heightWithVerticalPointsForColorDetail = ousterImageHeight * totalVerticalPointsForColorDetail;
       this.levelOfColorDetail = levelOfColorDetail;
-      this.heightWithVerticalPointsForColorDetail = ousterImageHeight * (1 + 2 * levelOfColorDetail);
+      int totalVerticalPointsForColorDetail = 1 + 2 * levelOfColorDetail;
+      this.heightWithVerticalPointsForColorDetail = ousterImageHeight * totalVerticalPointsForColorDetail;
       return ousterImageWidth * heightWithVerticalPointsForColorDetail;
    }
 
@@ -64,15 +63,33 @@ public class RDXOusterDepthImageToPointCloudKernel
    public void runKernel(float horizontalFieldOfView,
                          float verticalFieldOfView,
                          float pointSize,
+                         boolean useSensorColor,
+                         int gradientMode,
+                         boolean useSinusoidalGradientPattern,
                          BytedecoImage ousterDepthImage,
                          OpenCLFloatBuffer pointCloudVertexBuffer)
    {
-      runKernel(horizontalFieldOfView, verticalFieldOfView, pointSize, ousterDepthImage, 0.0, 0.0, 0.0, 0.0, null, pointCloudVertexBuffer);
+      runKernel(horizontalFieldOfView,
+                verticalFieldOfView,
+                pointSize,
+                useSensorColor,
+                gradientMode,
+                useSinusoidalGradientPattern,
+                ousterDepthImage,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                null,
+                pointCloudVertexBuffer);
    }
 
    public void runKernel(float horizontalFieldOfView,
                          float verticalFieldOfView,
                          float pointSize,
+                         boolean useSensorColor,
+                         int gradientMode,
+                         boolean useSinusoidalGradientPattern,
                          BytedecoImage ousterDepthImage,
                          double fisheyeFocalLengthPixelsX,
                          double fisheyeFocalLengthPixelsY,
@@ -85,8 +102,11 @@ public class RDXOusterDepthImageToPointCloudKernel
       floatParameters.setParameter(verticalFieldOfView);
       floatParameters.setParameter(ousterDepthImage.getImageWidth());
       floatParameters.setParameter(ousterDepthImage.getImageHeight());
+      floatParameters.setParameter(gradientMode);
+      floatParameters.setParameter(useSinusoidalGradientPattern);
       floatParameters.setParameter(pointSize);
       floatParameters.setParameter((float) levelOfColorDetail);
+      floatParameters.setParameter(useSensorColor && fisheyeImage != null);
       ousterToWorldTransformParameter.setParameter(ousterToWorldTransform);
 
       // It appears you've got to write something to the OpenCL argument even if you don't use it,
@@ -99,7 +119,6 @@ public class RDXOusterDepthImageToPointCloudKernel
       fisheyeFloatParameters.setParameter((float) fisheyeFocalLengthPixelsY);
       fisheyeFloatParameters.setParameter((float) fisheyePrincipalPointPixelsX);
       fisheyeFloatParameters.setParameter((float) fisheyePrincipalPointPixelsY);
-      fisheyeFloatParameters.setParameter(fisheyeImage != null);
       ousterToFisheyeTransformParameter.setParameter(ousterToFisheyeTransform);
 
       floatParameters.writeOpenCLBufferObject(openCLManager);

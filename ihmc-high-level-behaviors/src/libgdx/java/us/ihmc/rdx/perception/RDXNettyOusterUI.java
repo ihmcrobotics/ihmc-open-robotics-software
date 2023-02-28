@@ -25,6 +25,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
+import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
@@ -189,6 +190,9 @@ public class RDXNettyOusterUI
          depthImageToPointCloudKernel.runKernel(horizontalFieldOfView.get(),
                                                 verticalFieldOfView.get(),
                                                 pointSize.get(),
+                                                true,
+                                                RDXColorGradientMode.WORLD_Z.ordinal(),
+                                                false,
                                                 depthExtractionKernel.getExtractedDepthImage(),
                                                 fisheyeFocalLengthPixelsX,
                                                 fisheyeFocalLengthPixelsY,
