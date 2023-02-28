@@ -58,7 +58,7 @@ public class CollisionFreeSwingCalculator
    private static final FrameVector3D zeroVector = new FrameVector3D();
    private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private static final double collisionGradientScale = 0.5;
-   private static final double minCollisionAdjustment = 0.02;
+   private static final double minCollisionAdjustment = 0.01;
    private static final double collisionDistanceEpsilon = 1e-4;
    private static final int numberOfKnotPoints = 12;
    private static final double downSamplePercentage = 0.3;
@@ -227,7 +227,7 @@ public class CollisionFreeSwingCalculator
       for (int i = 0; i < swingKnotPoints.size(); i++)
       {
          swingKnotPoints.get(i).initializeBoxParameters();
-         convolutionWeights.add(exp(swingPlannerParameters.getMotionCorrelationAlpha(), i));
+         convolutionWeights.add(MathTools.pow(swingPlannerParameters.getMotionCorrelationAlpha(), i));
       }
 
       initializeGraphics(initialStanceFootPoses, footstepPlan);
@@ -375,8 +375,6 @@ public class CollisionFreeSwingCalculator
                {
                   collisionGradients.get(j).scale(minCollisionAdjustment / length);
                }
-//               if (collisionGradients.get(j).getZ() < 0.0)
-//                  collisionGradients.get(j).setZ(0.0);
                swingKnotPoints.get(j).project(collisionGradients.get(j));
                maxCollisionDistance.set(Math.max(maxCollisionDistance.getDoubleValue(), collisionResult.getDistance()));
                intersectionFound = true;
@@ -439,30 +437,13 @@ public class CollisionFreeSwingCalculator
       }
    }
 
-   /* exponent function assuming non-negative positive exponent */
-   static double exp(double base, int exponent)
-   {
-      double value = 1.0;
-      int i = 0;
-
-      while (i < exponent)
-      {
-         value *= base;
-         i++;
-      }
-
-      return value;
-   }
-
    /*
     * Different from the Vector3DBasics.scaleAdd, which scales the mutated vector
     * a = a + alpha * b
     */
    static void scaleAdd(Vector3DBasics vectorA, double alpha, Vector3DReadOnly vectorB)
    {
-      vectorA.addX(alpha * vectorB.getX());
-      vectorA.addY(alpha * vectorB.getY());
-      vectorA.addZ(alpha * vectorB.getZ());
+      vectorA.scaleAdd(alpha, vectorB, vectorA);
    }
 
    /*
