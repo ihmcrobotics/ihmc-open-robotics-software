@@ -136,7 +136,7 @@ public class RealsenseColorAndDepthPublisher
       this.depthTopic = depthTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
-      outputPeriod = UnitConversions.hertzToSeconds(15.0);
+      outputPeriod = UnitConversions.hertzToSeconds(20.0);
 
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
@@ -209,26 +209,33 @@ public class RealsenseColorAndDepthPublisher
 
             compressedDepthPointer = new BytePointer();
             BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-            PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
-                                                               depthTopic,
-                                                               depthImageMessage,
-                                                               ros2Helper,
-                                                               cameraPose,
-                                                               now,
-                                                               depthSequenceNumber++,
-                                                               sensor.getDepthHeight(),
-                                                               sensor.getDepthWidth());
 
-            PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3Image,
-                                                                  yuvColorImage,
-                                                                  colorTopic,
-                                                                  colorImageMessage,
+            if(parameters.getPublishDepth())
+            {
+               PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
+                                                                  depthTopic,
+                                                                  depthImageMessage,
                                                                   ros2Helper,
                                                                   cameraPose,
                                                                   now,
-                                                                  colorSequenceNumber++,
-                                                                  colorHeight,
-                                                                  colorWidth);
+                                                                  depthSequenceNumber++,
+                                                                  sensor.getDepthHeight(),
+                                                                  sensor.getDepthWidth());
+            }
+
+            if(parameters.getPublishColor())
+            {
+               PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3Image,
+                                                                     yuvColorImage,
+                                                                     colorTopic,
+                                                                     colorImageMessage,
+                                                                     ros2Helper,
+                                                                     cameraPose,
+                                                                     now,
+                                                                     colorSequenceNumber++,
+                                                                     colorHeight,
+                                                                     colorWidth);
+            }
 
             if (parameters.getLoggingEnabled())
             {
