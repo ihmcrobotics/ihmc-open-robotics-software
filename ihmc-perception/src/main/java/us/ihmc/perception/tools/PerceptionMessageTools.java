@@ -138,6 +138,7 @@ public class PerceptionMessageTools
       }
 
    }
+
    public static void packImageMessageData(BytePointer dataBytePointer, ImageMessage imageMessage)
    {
       imageMessage.getData().resetQuick();

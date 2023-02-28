@@ -27,6 +27,7 @@ import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
+import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -60,10 +61,11 @@ public class DualBlackflyCamera
    private CameraPinholeBrown cameraPinholeBrown;
    private Mat undistortedImageMat;
    private BytedecoImage undistortedImage;
-   private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
    private Mat rgbaMat;
    private final ImageMessage imageMessage = new ImageMessage();
+   private final BytePointer jpegImageBytePointer = new BytePointer(imageMessage.getData().capacity());
+   private final ImageMessageDataPacker compressedImageDataPacker = new ImageMessageDataPacker(jpegImageBytePointer.capacity());
    private IntPointer compressionParameters;
    private final Stopwatch getNextImageDuration = new Stopwatch();
    private final Stopwatch convertColorDuration = new Stopwatch();
@@ -150,7 +152,6 @@ public class DualBlackflyCamera
             yuv420Image = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
             rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Mat for color conversion
 
-            jpegImageBytePointer = new BytePointer();
             compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
 
             ROS2Topic<ImageMessage> imageTopic = ROS2Tools.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
@@ -224,10 +225,7 @@ public class DualBlackflyCamera
             encodingDuration.suspend();
 
             copyDuration.start();
-            byte[] heapByteArrayData = new byte[jpegImageBytePointer.asBuffer().remaining()];
-            jpegImageBytePointer.asBuffer().get(heapByteArrayData);
-            imageMessage.getData().resetQuick();
-            imageMessage.getData().add(heapByteArrayData);
+            compressedImageDataPacker.pack(imageMessage, jpegImageBytePointer);
             copyDuration.suspend();
             MessageTools.toMessage(now, imageMessage.getAcquisitionTime());
             imageMessage.setImageWidth(imageWidth);
