@@ -6,6 +6,7 @@ from hdf5_reader import *
 from hdf5_converter import *
 import argparse
 from transform_utils import *
+import math
 
 def convert_main():
 
@@ -55,7 +56,7 @@ def play_main(indices = None):
     path = home + '/.ihmc/logs/perception/'
 
 
-    data = h5py.File(path + '20230226_192147_PerceptionLog.hdf5', 'r')
+    data = h5py.File(path + '20230227_193535_PerceptionLog.hdf5', 'r')
 
     print(data.keys())
 
@@ -81,16 +82,46 @@ def plot_main():
     path = home + '/.ihmc/logs/perception/'
 
 
-    data = h5py.File(path + '20230226_192147_PerceptionLog.hdf5', 'r')
+    data = h5py.File(path + '20230227_193535_PerceptionLog.hdf5', 'r')
 
 
     mocap_position = get_data(data, 'mocap/rigid_body/position/')
     mocap_orientation = get_data(data, 'mocap/rigid_body/orientation/')
     sensor_position = get_data(data, 'l515/sensor/position/')
-    sensor_orientation = np.zeros(shape=(4110, 4))
-    sensor_orientation[:, 3] = 1.0
+    sensor_orientation = get_data(data, 'l515/sensor/orientation/')
 
-    transform = get_relative_transform_se3(mocap_position[0], mocap_orientation[0], sensor_position[0], sensor_orientation[0])
+    mocap_euler = convert_quaternions_to_euler_angles(mocap_orientation)
+    sensor_euler = convert_quaternions_to_euler_angles(sensor_orientation)
+
+
+    # Subtract PI if greater than 0 and add PI if less than 0 to both euler angle arrays
+    mocap_euler[:,0] = -mocap_euler[:,0]
+    for i in range(mocap_euler.shape[0]):
+            if mocap_euler[i, 0] > 0:
+                mocap_euler[i, 0] -= np.pi / 2
+            else:
+                mocap_euler[i, 0] += np.pi / 2
+
+    mocap_euler[:,2] = -mocap_euler[:,2]
+    for i in range(mocap_euler.shape[0]):
+            if mocap_euler[i, 2] > 0:
+                mocap_euler[i, 2] -= np.pi * 2
+
+    # Filter out spikes in Z-euler
+    for i in range(1, mocap_euler.shape[0]):
+        if math.fabs(mocap_euler[i, 2] - mocap_euler[i-1, 2]) > 0.5:
+            mocap_euler[i, 2] = mocap_euler[i - 1, 2]
+        
+
+    # Remove offset in Y angles, align mocap to sensor, after reversing mocap phase
+    mocap_euler[:, 1] = -mocap_euler[:, 1]
+    mocap_euler[:, 1] -= mocap_euler[0, 1] - sensor_euler[0, 1]
+
+    
+
+    transform = compute_icp_transform(mocap_position[:200, :3], sensor_position[:200, :3])
+
+    # transform = get_relative_transform_se3(mocap_position[0], mocap_orientation[0], sensor_position[0], sensor_orientation[0])
 
     print("Shapes Mocap Position: ", mocap_position.shape, " Sensor Position: ", sensor_position.shape, " Mocap Orientation: ", mocap_orientation.shape, " Sensor Orientation: ", sensor_orientation.shape)
 
@@ -109,11 +140,12 @@ def plot_main():
     # Transform the position vector
     positions = np.matmul(transform, positions)
 
-    # Apply another rotation to invert X and Z phases
-    rotation = np.eye(4)
-    rotation[0, 0] = -1
-    rotation[2, 2] = -1
-    positions = np.matmul(rotation, positions)
+
+    # # Apply another rotation to invert X and Z phases
+    # rotation = np.eye(4)
+    # rotation[0, 0] = -1
+    # rotation[2, 2] = -1
+    # positions = np.matmul(rotation, positions)
 
     # Put first three rows back into mocap_position
     mocap_position = positions[:3, :].T
@@ -122,22 +154,23 @@ def plot_main():
     mocap_position -= mocap_position[0] - sensor_position[0]
     
 
-    # Extract frame indices in which there is significant motion, assuming there may be multiple such sections
-    indices = []
-    for i in range(1, mocap_position.shape[0]):
-        if np.linalg.norm(mocap_position[i] - mocap_position[i-1]) > 0.002:
-            indices.append(i)
+    # # Extract frame indices in which there is significant motion, assuming there may be multiple such sections
+    # indices = []
+    # for i in range(1, mocap_position.shape[0]):
+    #     if np.linalg.norm(mocap_position[i] - mocap_position[i-1]) > 0.002:
+    #         indices.append(i)
 
-    # Extract mocap and sensor position and orientation for each index
-    mocap_position = mocap_position[indices]
-    mocap_orientation = mocap_orientation[indices]
-    sensor_position = sensor_position[indices]
-    sensor_orientation = sensor_orientation[indices]
+    # # Extract mocap and sensor position and orientation for each index
+    # mocap_position = mocap_position[indices]
+    # mocap_orientation = mocap_orientation[indices]
+    # sensor_position = sensor_position[indices]
+    # sensor_orientation = sensor_orientation[indices]
     
 
-    # plot_position([sensor_position, mocap_position], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]")
+    plot_position([sensor_position, mocap_position], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]", "Position")
+    plot_position([sensor_euler, mocap_euler], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]", "Euler")
 
-    play_main(indices)
+    # play_main(indices)
 
 
 

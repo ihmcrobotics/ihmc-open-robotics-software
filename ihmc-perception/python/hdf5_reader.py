@@ -151,15 +151,15 @@ def load_file(file_name):
 
     data = h5py.File(path + files[0], 'r')
 
-def plot_position(data_list, style_list, tag):
+def plot_position(data_list, style_list, tag, type_string):
 
 
     fig, axs = plt.subplots(3, figsize=(30,10))
-    fig.suptitle(tag + ' Position Plots')
+    fig.suptitle(tag + ' ' + type_string + ' Plots')
 
-    axs[0].set_title(tag + 'Position (X)')
-    axs[1].set_title(tag + 'Position (Y)')
-    axs[2].set_title(tag + 'Position (Z)')
+    axs[0].set_title(tag + ' ' + type_string + ' (X)')
+    axs[1].set_title(tag + ' ' + type_string + ' (Y)')
+    axs[2].set_title(tag + ' ' + type_string + ' (Z)')
 
     # axs[0].set_ylim(-4, 4)
     # axs[1].set_ylim(-4, 4)
