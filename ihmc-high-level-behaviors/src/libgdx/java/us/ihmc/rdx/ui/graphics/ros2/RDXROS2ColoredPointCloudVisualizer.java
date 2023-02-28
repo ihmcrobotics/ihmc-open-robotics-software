@@ -32,7 +32,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    private final ImBoolean subscribed = new ImBoolean(false);
    private final ImBoolean useSensorColor = new ImBoolean(true);
    private RDXColorGradientMode gradientMode = RDXColorGradientMode.WORLD_Z;
-   private final ImBoolean useSinusoidalGradientPattern = new ImBoolean(false);
+   private final ImBoolean useSinusoidalGradientPattern = new ImBoolean(true);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImInt levelOfColorDetail = new ImInt(0);
 
@@ -109,11 +109,12 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
             boolean usingColor = colorReceptionTimer.isRunning(2.0);
 
             int totalNumberOfPoints = depthChannel.getTotalNumberOfPixels();
-            if (depthChannel.getIsOusterCameraModel() && usingColor && colorChannel.getIsEquidistantFisheyeCameraModel())
+            if (depthChannel.getIsOusterCameraModel())
             {
+               int sanitizedLevelOfColorDetail = usingColor && colorChannel.getIsEquidistantFisheyeCameraModel() ? levelOfColorDetail.get() : 0;
                totalNumberOfPoints = depthImageToPointCloudKernel.calculateNumberOfPointsForLevelOfColorDetail(depthChannel.getImageWidth(),
                                                                                                                depthChannel.getImageHeight(),
-                                                                                                               levelOfColorDetail.get());
+                                                                                                               sanitizedLevelOfColorDetail);
             }
 
             if (pointCloudVertexBuffer == null || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX < totalNumberOfPoints)
@@ -147,6 +148,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
                depthImageToPointCloudKernel.runKernel(depthChannel.getOusterHorizontalFieldOfView(),
                                                       depthChannel.getOusterVerticalFieldOfView(),
                                                       pointSize.get(),
+                                                      usingColor && useSensorColor.get(),
+                                                      gradientMode.ordinal(),
+                                                      useSinusoidalGradientPattern.get(),
                                                       depthChannel.getDepth16UC1Image(),
                                                       colorChannel.getFx(),
                                                       colorChannel.getFy(),

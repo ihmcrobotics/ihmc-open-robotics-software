@@ -2,9 +2,11 @@
 #define VERTICAL_FIELD_OF_VIEW 1
 #define DEPTH_IMAGE_WIDTH 2
 #define DEPTH_IMAGE_HEIGHT 3
-#define POINT_SIZE 4
-#define LEVEL_OF_COLOR_DETAIL 5
-#define USE_FISHEYE_COLOR 6
+#define GRADIENT_MODE 4
+#define USE_SINUSOIDAL_GRADIENT 5
+#define POINT_SIZE 6
+#define LEVEL_OF_COLOR_DETAIL 7
+#define USE_FISHEYE_COLOR 8
 
 #define FISHEYE_IMAGE_WIDTH 0
 #define FISHEYE_IMAGE_HEIGHT 1
@@ -12,6 +14,9 @@
 #define FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y 3
 #define FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X 4
 #define FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y 5
+
+#define GRADIENT_MODE_WORLD_Z 0
+#define GRADIENT_MODE_SENSOR_X 1
 
 kernel void imageToPointCloud(global float* parameters,
                               global float* ousterToWorldTransform,
@@ -81,7 +86,7 @@ kernel void imageToPointCloud(global float* parameters,
 
    float4 pointColor = (float4) (1.0f, 1.0f, 1.0f, 1.0f);
    bool appliedColorFromSensor = false;
-   if (fisheyeParameters[USE_FISHEYE_COLOR])
+   if (parameters[USE_FISHEYE_COLOR])
    {
       float3 fisheyeFramePoint = transformPoint3D32(ousterFramePoint, ousterToFisheyeTransform);
 
@@ -116,7 +121,14 @@ kernel void imageToPointCloud(global float* parameters,
    }
    if (!appliedColorFromSensor)
    {
-      pointColor = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
+      if (parameters[GRADIENT_MODE] == GRADIENT_MODE_WORLD_Z)
+      {
+         pointColor = calculateGradientColorOptionFloat4(worldFramePoint.z, parameters[USE_SINUSOIDAL_GRADIENT]);
+      }
+      else // GRADIENT_MODE_SENSOR_X
+      {
+         pointColor = calculateGradientColorOptionFloat4(eyeDepthInMeters, parameters[USE_SINUSOIDAL_GRADIENT]);
+      }
    }
 
    pointCloudVertexBuffer[pointStartIndex + 3] = pointColor.x;

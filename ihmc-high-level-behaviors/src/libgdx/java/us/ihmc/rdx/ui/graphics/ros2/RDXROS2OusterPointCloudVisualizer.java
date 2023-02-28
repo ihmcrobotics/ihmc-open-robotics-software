@@ -25,6 +25,7 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
@@ -173,7 +174,14 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
          pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
 
          depthImageToPointCloudKernel.getOusterToWorldTransformToPack().set(imageMessage.getOrientation(), imageMessage.getPosition());
-         depthImageToPointCloudKernel.runKernel(horizontalFieldOfView, verticalFieldOfView, pointSize.get(), depth16UC1Image, pointCloudVertexBuffer);
+         depthImageToPointCloudKernel.runKernel(horizontalFieldOfView,
+                                                verticalFieldOfView,
+                                                pointSize.get(),
+                                                false,
+                                                RDXColorGradientMode.WORLD_Z.ordinal(),
+                                                false,
+                                                depth16UC1Image,
+                                                pointCloudVertexBuffer);
 
          pointCloudRenderer.updateMeshFastestAfterKernel();
 
