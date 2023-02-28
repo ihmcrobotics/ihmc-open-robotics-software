@@ -145,6 +145,11 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
             }
             else if (depthChannel.getIsOusterCameraModel()) // Assuming color is equidistant fisheye if using it
             {
+
+               depthImageToPointCloudKernel.getOusterToWorldTransformToPack().set(depthChannel.getRotationMatrixToWorld(),
+                                                                                  depthChannel.getTranslationToWorld());
+               depthImageToPointCloudKernel.getOusterToFisheyeTransformToPack().set(colorChannel.getRotationMatrixToWorld(),
+                                                                                    colorChannel.getTranslationToWorld());
                depthImageToPointCloudKernel.runKernel(depthChannel.getOusterHorizontalFieldOfView(),
                                                       depthChannel.getOusterVerticalFieldOfView(),
                                                       pointSize.get(),

@@ -20,6 +20,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCVArUcoMarker;
@@ -63,6 +64,7 @@ public class DualBlackflyCamera
    private BytedecoImage undistortedImage;
    private Mat yuv420Image;
    private Mat rgbaMat;
+   private final RigidBodyTransform ousterToBlackflyTransfrom = new RigidBodyTransform();
    private final ImageMessage imageMessage = new ImageMessage();
    private final BytePointer jpegImageBytePointer = new BytePointer(imageMessage.getData().capacity());
    private final ImageMessageDataPacker compressedImageDataPacker = new ImageMessageDataPacker(jpegImageBytePointer.capacity());
@@ -171,18 +173,20 @@ public class DualBlackflyCamera
 
             if (side == RobotSide.RIGHT)
             {
-               ReferenceFrame cameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
+               ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
+               ReferenceFrame ousterLidarFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
                if (arUcoMarkerDetection == null)
                {
                   undistortedImage = new BytedecoImage(postDistortionMat);
 
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-                  arUcoMarkerDetection.create(cameraFrame);
+                  arUcoMarkerDetection.create(blackflyCameraFrame);
                   arUcoMarkerDetection.setSourceImageForDetection(undistortedImage);
                   arUcoMarkerDetection.setCameraInstrinsics(cameraPinholeBrown);
                }
 
                syncedRobot.update();
+               ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
 
                arUcoMarkerDetection.update();
 
@@ -200,7 +204,7 @@ public class DualBlackflyCamera
 
                   if (markerToTrack != null)
                   {
-                     framePoseOfMarker.setIncludingFrame(cameraFrame, arUcoMarkerDetection.getPose(markerToTrack));
+                     framePoseOfMarker.setIncludingFrame(blackflyCameraFrame, arUcoMarkerDetection.getPose(markerToTrack));
                      framePoseOfMarker.changeFrame(ReferenceFrame.getWorldFrame());
 
                      arUcoMarkerPoses.getMarkerId().add(markerID);
@@ -237,6 +241,8 @@ public class DualBlackflyCamera
             imageMessage.setIsEquidistantFisheyeCameraModel(true);
             imageMessage.setSequenceNumber(sequenceNumber++);
             ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(imageMessage);
+            imageMessage.getPosition().set(ousterToBlackflyTransfrom.getTranslation());
+            imageMessage.getOrientation().set(ousterToBlackflyTransfrom.getRotation());
             ros2ImagePublisher.publish(imageMessage);
 
             imagePublishRateCalculator.ping();
