@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.swing;
 
+import org.ejml.data.DMatrixRMaj;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
@@ -17,64 +19,105 @@ public class HeightMapCollisionDetector
    {
       EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
 
+      double resolution = heightMap.getGridResolutionXY();
+      int centerIndex = heightMap.getCenterIndex();
       // get the indices of the corners of the box drawn on the ground
       FramePoint3DReadOnly minPoint = collisionBox.getBoundingBox().getMinPoint();
       FramePoint3DReadOnly maxPoint = collisionBox.getBoundingBox().getMaxPoint();
-      int minXIndex = HeightMapTools.coordinateToIndex(minPoint.getX(), heightMap.getGridCenter().getX(), heightMap.getGridResolutionXY(), heightMap.getCenterIndex());
-      int minYIndex = HeightMapTools.coordinateToIndex(minPoint.getY(), heightMap.getGridCenter().getY(), heightMap.getGridResolutionXY(), heightMap.getCenterIndex());
-      int maxXIndex = HeightMapTools.coordinateToIndex(maxPoint.getX(), heightMap.getGridCenter().getX(), heightMap.getGridResolutionXY(), heightMap.getCenterIndex());
-      int maxYIndex = HeightMapTools.coordinateToIndex(maxPoint.getY(), heightMap.getGridCenter().getY(), heightMap.getGridResolutionXY(), heightMap.getCenterIndex());
+      int minXIndex = HeightMapTools.coordinateToIndex(minPoint.getX(), heightMap.getGridCenter().getX(), resolution, centerIndex);
+      int minYIndex = HeightMapTools.coordinateToIndex(minPoint.getY(), heightMap.getGridCenter().getY(), resolution, centerIndex);
+      int maxXIndex = HeightMapTools.coordinateToIndex(maxPoint.getX(), heightMap.getGridCenter().getX(), resolution, centerIndex);
+      int maxYIndex = HeightMapTools.coordinateToIndex(maxPoint.getY(), heightMap.getGridCenter().getY(), resolution, centerIndex);
 
-      double x = HeightMapTools.indexToCoordinate(minXIndex, heightMap.getGridCenter().getX(), heightMap.getGridResolutionXY(), heightMap.getCenterIndex());
-      double yStart = HeightMapTools.indexToCoordinate(minYIndex, heightMap.getGridCenter().getY(), heightMap.getGridResolutionXY(), heightMap.getCenterIndex());
+      int middleX = (int) Math.ceil((maxXIndex + minXIndex) / 2.0);
+      int middleY = (int) Math.ceil((maxYIndex + minYIndex) / 2.0);
+      int xSpan = Math.max(middleX - minXIndex, maxXIndex - middleX);
+      int ySpan = Math.max(middleY - minYIndex, maxYIndex - middleY);
 
-      Point3D collision1 = new Point3D();
-      Point3D collision2 = new Point3D();
+      DMatrixRMaj penetrationDepth = new DMatrixRMaj(2 * xSpan + 1, 2 * ySpan + 1);
 
       Point3D maxGroundCollisionPoint = new Point3D();
-      double maxPentrationDistance = Double.POSITIVE_INFINITY;
+      double maxPentrationDistance = 1e-4;
+      double deepestPointDistanceFromCenter = Double.POSITIVE_INFINITY;
+      int worstXKey = -1;
+      int worstYKey = -1;
 
-      for (int xIndex = minXIndex; xIndex <= maxXIndex; xIndex++)
+      // do it for the middle
+      double groundHeight = heightMap.getHeightAt(middleX, middleY);
+      double x = HeightMapTools.indexToCoordinate(middleX, heightMap.getGridCenter().getX(), resolution, centerIndex);
+      double y = HeightMapTools.indexToCoordinate(middleY, heightMap.getGridCenter().getY(), resolution, centerIndex);
+
+      Point3D pointQuery = new Point3D(x, y, groundHeight);
+      double penetrationDistance = collisionBox.signedDistance(pointQuery);
+      penetrationDepth.set(xSpan, ySpan, penetrationDistance);
+      if (penetrationDistance < maxPentrationDistance)
       {
-         double y = yStart;
-         for (int yIndex = minYIndex; yIndex <= maxYIndex; yIndex++)
-         {
-            double groundHeight = heightMap.getHeightAt(xIndex, yIndex);
-            // check what the vertical collisions are at this point if we were to draw a line completely vertically
-            int collisions = collisionBox.intersectionWith(new Point3D(x, y, -20.0), new Vector3D(0.0, 0.0, 1.0), collision1, collision2);
-            if (collisions > 0)
-            {
-               // we have a collision at this point!
-               Point3D lowestCollisionAtPoint;
-               if (collisions == 1)
-                  lowestCollisionAtPoint = collision1;
-               else
-                  lowestCollisionAtPoint = collision1.getZ() > collision2.getZ() ? collision2 : collision1;
-
-               double pentrationDistance = lowestCollisionAtPoint.getZ() - groundHeight;
-               if (pentrationDistance < maxPentrationDistance)
-               {
-                  maxPentrationDistance = pentrationDistance;
-                  maxGroundCollisionPoint.set(x, y, groundHeight);
-               }
-            }
-
-            y += heightMap.getGridResolutionXY();
-         }
-
-         x += heightMap.getGridResolutionXY();
+         worstXKey = xSpan;
+         worstYKey = ySpan;
+         maxPentrationDistance = penetrationDistance;
+         maxGroundCollisionPoint.set(pointQuery);
+         deepestPointDistanceFromCenter = maxGroundCollisionPoint.distance(collisionBox.getPosition());
       }
 
-      if (maxPentrationDistance < 0.0)
+      for (int yOffset = 1; yOffset <= ySpan; yOffset++)
+      {
+         for (int xOffset = 1; xOffset <= xSpan; xOffset++)
+         {
+            for (int xSign : new int[] {-1, 1})
+            {
+               for (int ySign : new int[] {-1, 1})
+               {
+                  int xIndex = middleX + xSign * xOffset;
+                  int yIndex = middleY + ySign * yOffset;
+
+                  groundHeight = heightMap.getHeightAt(xIndex, yIndex);
+                  x = HeightMapTools.indexToCoordinate(xIndex, heightMap.getGridCenter().getX(), resolution, centerIndex);
+                  y = HeightMapTools.indexToCoordinate(yIndex, heightMap.getGridCenter().getY(), resolution, centerIndex);
+
+                  pointQuery = new Point3D(x, y, groundHeight);
+                  penetrationDistance = collisionBox.signedDistance(pointQuery);
+                  int xKey = xSpan + xSign * xOffset;
+                  int yKey = ySpan + ySign * yOffset;
+                  penetrationDepth.set(xKey, yKey, penetrationDistance);
+                  if (penetrationDistance < maxPentrationDistance - 1e-4)
+                  {
+                     worstXKey = xKey;
+                     worstYKey = yKey;
+                     maxPentrationDistance = penetrationDistance;
+                     maxGroundCollisionPoint.set(pointQuery);
+                     deepestPointDistanceFromCenter = maxGroundCollisionPoint.distance(collisionBox.getPosition());
+                  }
+                  else if (penetrationDistance < maxPentrationDistance + 1e-4)
+                  {
+                     double queryDistanceFromCenter = pointQuery.distance(collisionBox.getPosition());
+                     if (queryDistanceFromCenter <  deepestPointDistanceFromCenter)
+                     {
+                        worstXKey = xKey;
+                        worstYKey = yKey;
+                        maxPentrationDistance = penetrationDistance;
+                        maxGroundCollisionPoint.set(pointQuery);
+                        deepestPointDistanceFromCenter = queryDistanceFromCenter;
+                     }
+                  }
+               }
+            }
+         }
+      }
+
+      if (maxPentrationDistance < -1e-4)
       {
          collisionResult.setSignedDistance(maxPentrationDistance);
-         computeCollisionDataAtPoint(maxGroundCollisionPoint, collisionBox, heightMap, collisionResult);
+         computeCollisionDataAtPoint(worstXKey, worstYKey, penetrationDepth, maxGroundCollisionPoint, collisionBox, heightMap, collisionResult);
       }
 
       return collisionResult;
    }
 
-   private static void computeCollisionDataAtPoint(Point3DReadOnly groundPoint, FrameBox3DReadOnly collisionBox, HeightMapData heightMap, EuclidShape3DCollisionResult collisionResult)
+   private static void computeCollisionDataAtPoint(int xIndex, int yIndex, DMatrixRMaj penetrationMap,
+                                                   Point3DReadOnly groundPoint,
+                                                   FrameBox3DReadOnly collisionBox,
+                                                   HeightMapData heightMap,
+                                                   EuclidShape3DCollisionResult collisionResult)
    {
       Point3DReadOnly pointOnBox = getPointOnBox(groundPoint, collisionBox);
 
@@ -100,53 +143,31 @@ public class HeightMapCollisionDetector
       Point3DBasics pointToProjectInLocal = new Point3D();
       collisionBox.getPose().inverseTransform(groundPoint, pointToProjectInLocal);
 
-      double boxLength = collisionBox.getSizeX() / 2.0;
-      double boxWidth = collisionBox.getSizeY() / 2.0;
-      double boxHeight = collisionBox.getSizeZ() / 2.0;
+      Point3D intersection1 = new Point3D();
+      Point3D intersection2 = new Point3D();
 
+      int intersections = collisionBox.intersectionWith(groundPoint, new Vector3D(0.0, 0.0, 1.0), intersection1, intersection2);
+      if (intersections < 1)
+         return null;
+      if (intersections == 1)
+         return intersection1;
 
-      boolean isWithinX = Math.abs(pointToProjectInLocal.getX()) < boxLength;
-      boolean isWithinY = Math.abs(pointToProjectInLocal.getY()) < boxWidth;
-      double xPosition = 0.0;
-      double yPosition = 0.0;
-      if (isWithinX != isWithinY)
-      {
-         xPosition = Math.signum(pointToProjectInLocal.getX()) * Math.min(boxLength, Math.abs(pointToProjectInLocal.getX()));
-         yPosition = Math.signum(pointToProjectInLocal.getY()) * Math.min(boxWidth, Math.abs(pointToProjectInLocal.getY()));
-      }
-      else if (isWithinX)
-      { // completely within
-         if ((boxLength - Math.abs(pointToProjectInLocal.getX())) < (boxWidth - Math.abs(pointToProjectInLocal.getY())))
-         {
-            xPosition = Math.signum(pointToProjectInLocal.getX()) * boxLength;
-         }
-         else
-         {
-            yPosition = Math.signum(pointToProjectInLocal.getY()) * boxWidth;
-         }
-      }
-      else
-      {
-         // completely outside
-         xPosition = Math.signum(pointToProjectInLocal.getX()) * boxLength;
-         yPosition = Math.signum(pointToProjectInLocal.getY()) * boxWidth;
-      }
-      pointToProjectInLocal.set(xPosition, yPosition, -boxHeight);
-
-      Point3D projectedPointInWorld = new Point3D(pointToProjectInLocal);
-      collisionBox.transformToWorld(projectedPointInWorld);
-
-      return projectedPointInWorld;
+      return intersection1.getZ() < intersection2.getZ() ? intersection1 : intersection2;
    }
-
 
    /**
     * Computes the average normal using the four neighboring vertices.
     */
    private static Vector3DReadOnly approximateSurfaceNormalAtPoint(Point3DReadOnly point, HeightMapData heightMap)
    {
-      int xIndex = HeightMapTools.coordinateToIndex(point.getX(), heightMap.getGridCenter().getX(), heightMap.getGridResolutionXY(), heightMap.getCenterIndex());
-      int yIndex = HeightMapTools.coordinateToIndex(point.getY(), heightMap.getGridCenter().getY(), heightMap.getGridResolutionXY(), heightMap.getCenterIndex());
+      int xIndex = HeightMapTools.coordinateToIndex(point.getX(),
+                                                    heightMap.getGridCenter().getX(),
+                                                    heightMap.getGridResolutionXY(),
+                                                    heightMap.getCenterIndex());
+      int yIndex = HeightMapTools.coordinateToIndex(point.getY(),
+                                                    heightMap.getGridCenter().getY(),
+                                                    heightMap.getGridResolutionXY(),
+                                                    heightMap.getCenterIndex());
 
       Vector3D normalSum = new Vector3D();
       Vector3D firstNeighbor = new Vector3D();
@@ -154,21 +175,27 @@ public class HeightMapCollisionDetector
       int neighborSumCount = 0;
 
       int cellWidth = 2 * heightMap.getCenterIndex() + 1;
-      for (int xOffset : new int[]{-1, 0, 0, 1})
+      for (int xOffset : new int[] {-1, 0, 0, 1})
       {
          int neighborXIndex = xIndex + xOffset;
          if (neighborXIndex < 0 || neighborXIndex >= cellWidth)
             continue;
 
-         for (int yOffset : new int[]{0, -1, 1, 0})
+         for (int yOffset : new int[] {0, -1, 1, 0})
          {
             int neighborYIndex = yIndex + yOffset;
 
             if (neighborYIndex < 0 || neighborYIndex >= cellWidth)
                continue;
 
-            double neighborx = HeightMapTools.indexToCoordinate(neighborXIndex, heightMap.getGridCenter().getX(), heightMap.getGridResolutionXY(), heightMap.getCenterIndex());
-            double neighbory = HeightMapTools.indexToCoordinate(neighborYIndex, heightMap.getGridCenter().getY(), heightMap.getGridResolutionXY(), heightMap.getCenterIndex());
+            double neighborx = HeightMapTools.indexToCoordinate(neighborXIndex,
+                                                                heightMap.getGridCenter().getX(),
+                                                                heightMap.getGridResolutionXY(),
+                                                                heightMap.getCenterIndex());
+            double neighbory = HeightMapTools.indexToCoordinate(neighborYIndex,
+                                                                heightMap.getGridCenter().getY(),
+                                                                heightMap.getGridResolutionXY(),
+                                                                heightMap.getCenterIndex());
             double neighborZ = heightMap.getHeightAt(neighborXIndex, neighborYIndex);
 
             Point3D neighbor = new Point3D(neighborx, neighbory, neighborZ);
@@ -197,5 +224,4 @@ public class HeightMapCollisionDetector
 
       return normalSum;
    }
-
 }
