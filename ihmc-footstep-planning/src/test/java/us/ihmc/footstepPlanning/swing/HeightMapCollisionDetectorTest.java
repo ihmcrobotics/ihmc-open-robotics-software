@@ -19,7 +19,7 @@ public class HeightMapCollisionDetectorTest
       box.getSize().set(0.2, 0.1, 0.5);
 
       Point3D point = new Point3D(0.05, 0.0, 0.05);
-      Point3DReadOnly pointOnBox = HeightMapCollisionDetector.getPointOnBox(point, box);
+      Point3DReadOnly pointOnBox = HeightMapCollisionDetector.getPointOnBoxWhenTheWholeBottomPenetrates(point, box);
 
       assertEquals(0.0, box.distance(pointOnBox), 1e-5);
 
@@ -35,7 +35,7 @@ public class HeightMapCollisionDetectorTest
       box.getSize().set(0.2915384615384616, 0.15076923076923077, 0.3966666666666667);
 
       FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.15, -0.06, 0.05);
-      Point3DReadOnly pointOnBox = HeightMapCollisionDetector.getPointOnBox(point, box);
+      Point3DReadOnly pointOnBox = HeightMapCollisionDetector.getPointOnBoxWhenTheWholeBottomPenetrates(point, box);
 
       assertEquals(0.0, box.distance(pointOnBox), 1e-5);
 
