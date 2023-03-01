@@ -54,29 +54,17 @@ def play_main(indices = None):
 
     home = os.path.expanduser('~')
 
-<<<<<<< HEAD
     path = home + '/.ihmc/logs/perception/Final/'
-=======
-    # path = home + '/.ihmc/logs/perception/'
->>>>>>> 2be31d5317e (Tune parameters.)
 
     path = '/home/bmishra/Workspace/Data/LogData/Perception/'
 
-<<<<<<< HEAD
     data = h5py.File(path + '20230228_204753_PerceptionLog.hdf5', 'r')
-=======
-    data = h5py.File(path + '20230228_144720_PerceptionLog.hdf5', 'r')
->>>>>>> 2be31d5317e (Tune parameters.)
 
     print(data.keys())
 
     if indices is None:
 
-<<<<<<< HEAD
         for i in range(len(data['l515/depth/'])):
-=======
-        for i in range(len(data['/l515/depth/'].keys())):
->>>>>>> 2be31d5317e (Tune parameters.)
 
             print("Showing image: ", i)
             display_image(data, i, 'l515/depth/', 20)
@@ -93,20 +81,13 @@ def plot_main():
 
     home = os.path.expanduser('~')
 
-<<<<<<< HEAD
     path = home + '/.ihmc/logs/perception/Final/'
-=======
-    # path = home + '/.ihmc/logs/perception/'
->>>>>>> 2be31d5317e (Tune parameters.)
 
     path = '/home/bmishra/Workspace/Data/LogData/Perception/'
 
     data = h5py.File(path + '20230228_144720_PerceptionLog.hdf5', 'r')
 
-<<<<<<< HEAD
     data = h5py.File(path + '20230228_204753_PerceptionLog.hdf5', 'r')
-=======
->>>>>>> 2be31d5317e (Tune parameters.)
 
 
     mocap_position = get_data(data, 'mocap/rigid_body/position/')
