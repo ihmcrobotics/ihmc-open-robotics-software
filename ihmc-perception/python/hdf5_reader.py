@@ -122,7 +122,7 @@ def get_data(data, namespace):
 def display_image(data, index, namespace, delay):
     buffer = data[namespace + str(index)][:].byteswap().view('uint8')
     buffer_image = np.asarray(buffer, dtype=np.uint8)
-    buffer_image = cv2.imdecode(buffer_image, cv2.IMREAD_COLOR)
+    buffer_image = cv2.imdecode(buffer_image, cv2.IMREAD_GRAYSCALE)
     cv2.imshow("Depth Image", buffer_image)
     code = cv2.waitKeyEx(delay)
 
