@@ -8,6 +8,9 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.ros2.ROS2Topic;
 
+/**
+ * Channel used for the depth part. Handles decompression.
+ */
 public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2ColoredPointCloudVisualizerChannel
 {
    private BytedecoImage depth16UC1Image;

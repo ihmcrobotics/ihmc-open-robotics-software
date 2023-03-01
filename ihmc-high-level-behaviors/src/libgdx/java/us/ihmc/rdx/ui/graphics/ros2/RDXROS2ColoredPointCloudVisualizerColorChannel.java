@@ -10,6 +10,9 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.ros2.ROS2Topic;
 
+/**
+ * Channel used for the color part. Handles decompression and conversion.
+ */
 public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2ColoredPointCloudVisualizerChannel
 {
    private Mat yuv1420Image;
