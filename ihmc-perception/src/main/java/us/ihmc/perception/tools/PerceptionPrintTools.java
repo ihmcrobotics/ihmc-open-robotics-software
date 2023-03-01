@@ -71,6 +71,6 @@ public class PerceptionPrintTools
       Point3D euler = new Point3D();
       transform.getRotation().getEuler(euler);
 
-      LogTools.info("[{}] Translation: {}, Rotation: {}\n", tag, transform.getTranslation(), euler);
+      LogTools.info("[{}] Translation: {}, Rotation: {}", tag, transform.getTranslation(), euler);
    }
 }
