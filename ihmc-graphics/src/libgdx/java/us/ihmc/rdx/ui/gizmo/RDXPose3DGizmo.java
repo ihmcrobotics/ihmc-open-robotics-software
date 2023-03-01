@@ -500,7 +500,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          else
             proportionsChanged |= ImGui.dragFloat(labels.get("Torus radius"), torusRadius.getData(), 0.001f);
          ImGui.popItemWidth();
-
+         ImGui.separator();
          ImGui.pushItemWidth(100.00f);
          proportionsChanged |= ImGui.dragFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio.getData(), 0.001f);
          proportionsChanged |= ImGui.dragFloat(labels.get("Arrow length ratio"), arrowLengthRatio.getData(), 0.05f);
