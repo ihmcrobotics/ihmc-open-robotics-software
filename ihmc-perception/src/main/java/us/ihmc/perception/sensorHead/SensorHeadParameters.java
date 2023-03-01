@@ -7,6 +7,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
+/**
+ * These parameters are specific to the sensor head setup we've designed for Nadia.
+ * We have them here because they are used to develop and test robot agnostic algorithms,
+ * which we use an off-board version of the head for.
+ *
+ * TODO: Possibly store different versions as StoredPropertySet and/or move to robot specific repository.
+ */
 public class SensorHeadParameters
 {
    public static final double FOCAL_LENGTH_X_FOR_COLORING = 472.44896;   // These were tuned with sliders on the benchtop
