@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
@@ -98,6 +99,13 @@ public class RDXInteractableFootstep
       {
          footstepIndexText = textRenderablesMap.get(txt);
       }
+   }
+
+   public void reset()
+   {
+      getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
+      plannedFootstepInternal.reset();
+      plannedFootstepTrajectory.clear();
    }
 
    public PlannedFootstepReadOnly getPlannedFootstep()
