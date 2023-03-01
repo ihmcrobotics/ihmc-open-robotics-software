@@ -26,7 +26,6 @@ public class OusterDriverAndDepthPublisher
 {
    private final Activator nativesLoadedActivator;
    private final ROS2HeartbeatMonitor publishLidarScanMonitor;
-   private final ROS2HeartbeatMonitor publishHeightMapMonitor;
    private final Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier;
    private final Runnable asynchronousCompressAndPublish = this::asynchronousCompressAndPublish;
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;
@@ -48,20 +47,13 @@ public class OusterDriverAndDepthPublisher
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
       publishLidarScanMonitor = new ROS2HeartbeatMonitor(ros2, ROS2Tools.PUBLISH_LIDAR_SCAN);
-      publishHeightMapMonitor = new ROS2HeartbeatMonitor(ros2, ROS2Tools.PUBLISH_HEIGHT_MAP);
 
       ouster = new NettyOuster();
       ouster.bind();
 
       depthPublisher = new OusterDepthPublisher(imageMessageTopic, lidarScanTopic, publishLidarScanMonitor::isAlive);
       heightMapUpdater = new OusterHeightMapUpdater(ros2);
-      publishHeightMapMonitor.setAlivenessChangedCallback(isAlive ->
-      {
-         if (isAlive)
-            heightMapUpdater.start();
-         else
-            heightMapUpdater.stop();
-      });
+      heightMapUpdater.start();
 
       extractCompressAndPublishThread = MissingThreadTools.newSingleThreadExecutor("CopyAndPublish", true, 1);
       // Using incoming Ouster UDP Netty events as the thread scheduler. Only called on last datagram of frame.
@@ -70,7 +62,6 @@ public class OusterDriverAndDepthPublisher
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
          publishLidarScanMonitor.destroy();
-         publishHeightMapMonitor.destroy();
          depthPublisher.destroy();
          heightMapUpdater.stop();
          heightMapUpdater.destroy();
@@ -89,7 +80,7 @@ public class OusterDriverAndDepthPublisher
          if (openCLManager == null)
          {
             openCLManager = new OpenCLManager();
-            depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, publishLidarScanMonitor::isAlive, publishHeightMapMonitor::isAlive);
+            depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, publishLidarScanMonitor::isAlive, () -> true);
             depthPublisher.initialize(ouster.getImageWidth(), ouster.getImageHeight());
          }
 
@@ -102,14 +93,11 @@ public class OusterDriverAndDepthPublisher
          depthExtractionKernel.copyLidarFrameBuffer();
          extractCompressAndPublishThread.clearQueueAndExecute(asynchronousCompressAndPublish);
 
-         if (publishHeightMapMonitor.isAlive())
-         {
             heightMapUpdater.updateWithDataBuffer(humanoidReferenceFrames.getOusterLidarFrame(),
                                                   humanoidReferenceFrames.getMidFeetZUpFrame(),
                                                   depthExtractionKernel.getPointCloudInSensorFrame(),
                                                   ouster.getImageHeight() * ouster.getImageWidth(),
                                                   ouster.getAquisitionInstant());
-         }
       }
    }
 

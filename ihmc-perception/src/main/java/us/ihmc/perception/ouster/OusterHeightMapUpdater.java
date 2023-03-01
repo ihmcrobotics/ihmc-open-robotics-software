@@ -16,8 +16,8 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
@@ -46,7 +46,7 @@ public class OusterHeightMapUpdater
    public OusterHeightMapUpdater(ROS2ControllerPublishSubscribeAPI ros2)
    {
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_height_map_publisher");
-      heightMapPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.HEIGHT_MAP_OUTPUT, ROS2QosProfile.BEST_EFFORT());
+      heightMapPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
       ros2.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_STATE_REQUEST, this::consumeStateRequestMessage);
       ros2.subscribeToControllerViaCallback(HighLevelStateChangeStatusMessage.class, this::consumeStateChangedMessage);
 
