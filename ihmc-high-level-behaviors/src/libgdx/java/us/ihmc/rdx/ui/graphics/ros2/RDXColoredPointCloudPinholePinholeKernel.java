@@ -10,6 +10,10 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 
+/**
+ * This class is for rendering colored point clouds when the depth camera
+ * and the color camera are both pinhole model.
+ */
 public class RDXColoredPointCloudPinholePinholeKernel
 {
    private final OpenCLManager openCLManager;

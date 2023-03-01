@@ -12,6 +12,10 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 
+/**
+ * This class is for renedering the Ouster point cloud with optional coloring
+ * from a fisheye camera with an equidistant camera model.
+ */
 public class RDXOusterDepthImageToPointCloudKernel
 {
    private final OpenCLManager openCLManager;
