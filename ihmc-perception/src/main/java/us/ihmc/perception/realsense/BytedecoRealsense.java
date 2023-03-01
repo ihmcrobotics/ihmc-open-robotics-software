@@ -70,6 +70,8 @@ public class BytedecoRealsense
 
       depthToMeterConversion = realsense2.rs2_get_depth_scale(sensor, error);
 
+      LogTools.info("Depth to meter conversion: {}", depthToMeterConversion);
+
       LogTools.info("Configured Depth Stream of L515 Device. Serial number: {}", serialNumber);
    }
 
