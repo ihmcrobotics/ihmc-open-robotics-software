@@ -53,16 +53,16 @@ def play_main(indices = None):
 
     home = os.path.expanduser('~')
 
-    path = home + '/.ihmc/logs/perception/'
+    path = home + '/.ihmc/logs/perception/Final/'
 
 
-    data = h5py.File(path + '20230227_193535_PerceptionLog.hdf5', 'r')
+    data = h5py.File(path + '20230228_204753_PerceptionLog.hdf5', 'r')
 
     print(data.keys())
 
     if indices is None:
 
-        for i in range(2, 10):
+        for i in range(len(data['l515/depth/'])):
 
             print("Showing image: ", i)
             display_image(data, i, 'l515/depth/', 20)
@@ -79,10 +79,10 @@ def plot_main():
 
     home = os.path.expanduser('~')
 
-    path = home + '/.ihmc/logs/perception/'
+    path = home + '/.ihmc/logs/perception/Final/'
 
 
-    data = h5py.File(path + '20230227_193535_PerceptionLog.hdf5', 'r')
+    data = h5py.File(path + '20230228_204753_PerceptionLog.hdf5', 'r')
 
 
     mocap_position = get_data(data, 'mocap/rigid_body/position/')
@@ -120,6 +120,7 @@ def plot_main():
     
 
     transform = compute_icp_transform(mocap_position[:200, :3], sensor_position[:200, :3])
+#     transform = np.eye(4)
 
     # transform = get_relative_transform_se3(mocap_position[0], mocap_orientation[0], sensor_position[0], sensor_orientation[0])
 
@@ -170,7 +171,7 @@ def plot_main():
     plot_position([sensor_position, mocap_position], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]", "Position")
     plot_position([sensor_euler, mocap_euler], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]", "Euler")
 
-    # play_main(indices)
+    play_main()
 
 
 
