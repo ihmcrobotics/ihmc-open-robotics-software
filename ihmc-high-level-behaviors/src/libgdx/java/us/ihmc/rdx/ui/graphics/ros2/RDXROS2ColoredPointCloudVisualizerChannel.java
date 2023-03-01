@@ -19,6 +19,11 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.SwapReference;
 
+/**
+ * The common part of the depth and color channels.
+ * A channel is image data coming in from ROS 2 and making it's
+ * way into a kernel for point cloud rendering.
+ */
 public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 {
    protected final ImageMessage imageMessage = new ImageMessage();

@@ -25,6 +25,13 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.string.StringTools;
 
+/**
+ * Supports Realsenses and Ouster and Fisheye colored point clouds.
+ * This visualizer is designed to automatically resize and adapt to changing
+ * parameters, such as focal length, principal points, etc.
+ * It provides our full set of analytics as plots, such as message size,
+ * delay, sequence discontinuities, etc. and coloring options.
+ */
 public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements RenderableProvider
 {
    private final String titleBeforeAdditions;
