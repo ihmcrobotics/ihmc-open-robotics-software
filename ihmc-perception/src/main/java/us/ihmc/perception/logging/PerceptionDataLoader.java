@@ -125,10 +125,10 @@ public class PerceptionDataLoader
 
    public void loadCompressedDepth(String namespace, int index, BytePointer bytePointer, Mat mat)
    {
-      Group group = hdf5Manager.getGroup(namespace);
-      hdf5Tools.loadBytes(group, index, bytePointer);
+         Group group = hdf5Manager.getGroup(namespace);
+         hdf5Tools.loadBytes(group, index, bytePointer);
 
-      BytedecoOpenCVTools.decompressDepthPNG(bytePointer, mat);
+         BytedecoOpenCVTools.decompressDepthPNG(bytePointer, mat);
    }
 
    public String getFilePath()

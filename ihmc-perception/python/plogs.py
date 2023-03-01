@@ -85,7 +85,14 @@ def filter_by_motion(mocap_position, mocap_orientation, sensor_position, sensor_
 
     return (mocap_position, mocap_orientation, sensor_position, sensor_orientation)
 
-def plotter_main(data):
+def plotter_main(data, output_file):
+
+    final_positions, final_rotations = extract_trajectory_from_output(output_file)
+
+    # Concate the 100 rows zero 3-vectors on top of the final positions and rotations
+    total_zero_rows = 150
+    final_positions = np.concatenate((np.zeros((total_zero_rows, 3)), final_positions), axis=0)
+    final_rotations = np.concatenate((np.zeros((total_zero_rows, 3)), final_rotations), axis=0)
 
     mocap_position = get_data(data, 'mocap/rigid_body/position/')
     mocap_orientation = get_data(data, 'mocap/rigid_body/orientation/')
@@ -136,9 +143,40 @@ def plotter_main(data):
     mocap_position = positions[:3, :].T
     mocap_position -= mocap_position[0] - sensor_position[0]
     
-    plot_position([sensor_position, mocap_position], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]", "Position")
-    plot_position([sensor_euler, mocap_euler], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]", "Euler")
+    plot_position(150, 640, [mocap_position, final_positions], ['-r', '-b', '-g'], "Estimated State [RED] - Ground Truth [BLUE]", "Position")
+    plot_position(150, 640, [mocap_euler, final_rotations], ['-r', '-b', '-g'], "Estimated State [RED] - Ground Truth [BLUE]", "Euler")
 
+
+def extract_trajectory_from_output(file):
+    
+    # Given a line in the following format, extract the position and rotation as separate three vectors, and stack them into two lists:
+    # 230301 15:16:28:643 [INFO] (PerceptionPrintTools.java:74): [499] Translation: ( 1.976,  1.221,  1.209 ), Rotation: ( 0.251,  1.340,  1.394 )
+
+    positions = []
+    rotations = []
+
+    with open(file, 'r') as f:
+        for line in f:
+            if "Translation" in line:
+                position = line.split('Translation: (')[1].split(')')[0].split(',')
+                position = [float(p) for p in position]
+                positions.append(position)
+
+            if "Rotation" in line:
+                rotation = line.split('Rotation: (')[1].split(')')[0].split(',')
+                rotation = [float(r) for r in rotation]
+                rotations.append(rotation)
+
+    # Stack them as rows in matrices
+    positions = np.vstack(positions)
+    rotations = np.vstack(rotations)
+
+    return (positions, rotations)
+    
+    
+    
+        
+     
 
 if __name__ == '__main__':
 
@@ -162,7 +200,7 @@ if __name__ == '__main__':
 
     # INDEX TO LOAD ----------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    index_to_load = 4
+    index_to_load = 5
 
     # INDEX TO LOAD -----------------------------------------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -170,8 +208,9 @@ if __name__ == '__main__':
     print('\nLoading file: ', index_to_load, '\tName: ', filename, '\tTitle: ', titles[index_to_load], '\n')
 
     data = h5py.File(path + filename, 'r')
+    output_file = '/home/bmishra/Workspace/Code/Resources/IROS_2023/' + titles[index_to_load] + '.txt'
+
+    # player_main(data)
     
+    plotter_main(data, output_file)
 
-    plotter_main(data)
-
-    player_main(data)

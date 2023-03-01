@@ -174,7 +174,7 @@ public class PlaneRegistrationTools
 
          if (matches.size() < parameters.getICPMinMatches())
          {
-            LogTools.info("Not Enough Matches: {}", matches.size());
+//            LogTools.info("Not Enough Matches: {}", matches.size());
             return false;
          }
 
@@ -184,7 +184,7 @@ public class PlaneRegistrationTools
          double error = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
          double ratio = (previousError - error) / previousError;
 
-         LogTools.info(String.format("Iteration: %d, Matches: %d, Previous Error: %.5f, Error: %.5f, Ratio: %.5f", i, matches.size(), previousError, error, ratio));
+//         LogTools.info(String.format("Iteration: %d, Matches: %d, Previous Error: %.5f, Error: %.5f, Ratio: %.5f", i, matches.size(), previousError, error, ratio));
 
          if ( (Math.abs(ratio) < parameters.getICPTerminationRatio()) || (matches.size() < parameters.getICPMinMatches()))
          {
@@ -195,13 +195,13 @@ public class PlaneRegistrationTools
          previousError = error + 1e-7;
       }
 
-      LogTools.info("Size: {}", (int) ( (float)previousError / 0.0002f));
+//      LogTools.info("Size: {}", (int) ( (float)previousError / 0.0002f));
 
-      LogTools.info("[{}]", ">".repeat(Math.abs((int) ((float) previousError / 0.0002f))) + ".".repeat(Math.max((int) ((0.03f - (float) previousError) / 0.0002f), 0)));
+//      LogTools.info("[{}]", ">".repeat(Math.abs((int) ((float) previousError / 0.0002f))) + ".".repeat(Math.max((int) ((0.03f - (float) previousError) / 0.0002f), 0)));
 
       if(previousError > parameters.getICPErrorCutoff())
       {
-         LogTools.warn("ICP failed to converge, error: {}", previousError);
+//         LogTools.warn("ICP failed to converge, error: {}", previousError);
          return false;
       }
 
@@ -233,8 +233,8 @@ public class PlaneRegistrationTools
 
       //LogTools.info("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
       //
-      LogTools.info("[SVD] Rotation({}, {}, {})", solution.get(0), solution.get(1), solution.get(2));
-      LogTools.info("[SVD] Translation({}, {}, {})", solution.get(3), solution.get(4), solution.get(5));
+//      LogTools.info("[SVD] Rotation({}, {}, {})", solution.get(0), solution.get(1), solution.get(2));
+//      LogTools.info("[SVD] Translation({}, {}, {})", solution.get(3), solution.get(4), solution.get(5));
       //
       //LogTools.info("[QR] Rotation({}, {}, {})", solutionQR.get(0), solutionQR.get(1), solutionQR.get(2));
       //LogTools.info("[QR] Translation({}, {}, {})", solutionQR.get(3), solutionQR.get(4), solutionQR.get(5));

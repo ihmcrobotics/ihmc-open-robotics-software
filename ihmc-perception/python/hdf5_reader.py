@@ -166,7 +166,7 @@ def load_file(file_name):
 
     data = h5py.File(path + files[0], 'r')
 
-def plot_position(data_list, style_list, tag, type_string):
+def plot_position(start_index, end_index, data_list, style_list, tag, type_string):
 
 
     fig, axs = plt.subplots(3, figsize=(30,10))
@@ -182,9 +182,15 @@ def plot_position(data_list, style_list, tag, type_string):
 
     for i, data in enumerate(data_list):
         
-        t = np.linspace(0, data.shape[0], data.shape[0])
-        axs[0].plot(t, data[:,0], style_list[i], markersize=1)
-        axs[1].plot(t, data[:,1], style_list[i], markersize=1)
-        axs[2].plot(t, data[:,2], style_list[i], markersize=1)
+        if not(end_index == -1):
+            t = np.linspace(start_index, end_index, end_index - start_index)
+        else:
+            t = np.linspace(start_index, data.shape[0], data.shape[0] - start_index -1)
+
+        axs[0].plot(t, data[start_index : end_index,0], style_list[i], markersize=1)
+        axs[1].plot(t, data[start_index : end_index,1], style_list[i], markersize=1)
+        axs[2].plot(t, data[start_index : end_index,2], style_list[i], markersize=1)
+
+
 
     plt.show()

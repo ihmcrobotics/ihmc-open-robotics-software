@@ -10,6 +10,7 @@ import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -32,6 +33,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,6 +98,11 @@ public class PlanarRegionMappingHandler
 
    private final BytePointer depthPointer = new BytePointer(1000000);
    private BytedecoImage depth16UC1Image;
+
+   private final Notification dataAvailable = new Notification();
+   private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
+                                                                                                                                         true,
+                                                                                                                                         1);
 
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("l515ReferenceFrame",
@@ -225,7 +233,7 @@ public class PlanarRegionMappingHandler
             planarRegionsListLogger.start();
          }
          framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(framePlanarRegionsListMessage);
-         LogTools.info("Regions Captured: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
+         LogTools.debug("Regions Captured: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
 
          planarRegionsListLogger.update(System.currentTimeMillis(), framePlanarRegionsList);
          enableCapture = false;
@@ -268,7 +276,7 @@ public class PlanarRegionMappingHandler
       if (source == DataSource.PLANAR_REGIONS_LOG && (planarRegionListIndex < planarRegionsListBuffer.getBufferLength()))
       {
          framePlanarRegionsList = (FramePlanarRegionsList) planarRegionsListBuffer.get(planarRegionListIndex);
-         LogTools.info("Transform: {}", framePlanarRegionsList.getSensorToWorldFrameTransform());
+         LogTools.debug("Transform: {}", framePlanarRegionsList.getSensorToWorldFrameTransform());
 
          updateMapWithNewRegions(framePlanarRegionsList);
          planarRegionListIndex++;
@@ -278,14 +286,26 @@ public class PlanarRegionMappingHandler
       {
 //         if (perceptionLogIndex % HDF5Manager.MAX_BUFFER_SIZE != (HDF5Manager.MAX_BUFFER_SIZE - 1))
          {
-            LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
+            LogTools.debug("Loading Perception Log: {}", perceptionLogIndex);
 
             loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
+
+            while(!dataAvailable.poll())
+            {
+               try
+               {
+                  Thread.sleep(10);
+               }
+               catch (InterruptedException e)
+               {
+                  e.printStackTrace();
+               }
+            }
 
             framePlanarRegionsList = new FramePlanarRegionsList();
             rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, framePlanarRegionsList);
 
-            LogTools.info("Regions Found: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
+            LogTools.debug("Regions Found: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
 
             //rapidPatchesBasedICP.update(rapidRegionsExtractor.getPreviousFeatureGrid(), rapidRegionsExtractor.getCurrentFeatureGrid());
             //rapidRegionsExtractor.copyFeatureGridMapUsingOpenCL();
@@ -297,7 +317,7 @@ public class PlanarRegionMappingHandler
             }
          }
 
-         perceptionLogIndex += 2;
+         perceptionLogIndex += 1;
          rapidRegionsExtractor.setProcessing(false);
       }
    }
@@ -311,10 +331,13 @@ public class PlanarRegionMappingHandler
 
    private void loadDataFromPerceptionLog(PerceptionDataLoader loader, int index)
    {
-      loader.loadCompressedDepth(sensorLogChannelName, index, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
-      sensorTransformToWorld.getTranslation().set(sensorPositionBuffer.get(index));
-      sensorTransformToWorld.getRotation().set(sensorOrientationBuffer.get(index));
-      cameraFrame.update();
+      loadAndDecompressThreadExecutor.clearQueueAndExecute(() -> {
+         loader.loadCompressedDepth(sensorLogChannelName, index, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
+         sensorTransformToWorld.getTranslation().set(sensorPositionBuffer.get(index));
+         sensorTransformToWorld.getRotation().set(sensorOrientationBuffer.get(index));
+         cameraFrame.update();
+         dataAvailable.set();
+      });
    }
 
    public PlanarRegionsList pollMapRegions()
@@ -324,7 +347,7 @@ public class PlanarRegionMappingHandler
 
    public RigidBodyTransform pollKeyframePose()
    {
-      LogTools.info("Polling Keyframe Pose: {}", latestKeyframePoseForRendering.get());
+      LogTools.debug("Polling Keyframe Pose: {}", latestKeyframePoseForRendering.get());
       return latestKeyframePoseForRendering.getAndSet(null);
    }
 
@@ -342,7 +365,7 @@ public class PlanarRegionMappingHandler
 
    public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
-      LogTools.info("Adding Regions to Map.");
+      LogTools.debug("Adding Regions to Map.");
 
       RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
 
@@ -387,24 +410,24 @@ public class PlanarRegionMappingHandler
 
    public void loadRegionsFromLogIntoPrevious(int index)
    {
-      LogTools.info("[Previous] Loading Perception Log: {}", index);
+      LogTools.debug("[Previous] Loading Perception Log: {}", index);
       loadDataFromPerceptionLog(perceptionDataLoader, index);
 
       previousRegions = new FramePlanarRegionsList();
       rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, previousRegions);
       rapidRegionsExtractor.setProcessing(false);
-      LogTools.info("[Previous] Regions Found: {}", previousRegions.getPlanarRegionsList().getNumberOfPlanarRegions());
+      LogTools.debug("[Previous] Regions Found: {}", previousRegions.getPlanarRegionsList().getNumberOfPlanarRegions());
    }
 
    public void loadRegionsFromLogIntoCurrent(int index)
    {
-      LogTools.info("[Current] Loading Perception Log: {}", index);
+      LogTools.debug("[Current] Loading Perception Log: {}", index);
       loadDataFromPerceptionLog(perceptionDataLoader, index);
 
       currentRegions = new FramePlanarRegionsList();
       rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, currentRegions);
       rapidRegionsExtractor.setProcessing(false);
-      LogTools.info("[Current] Regions Found: {}", currentRegions.getPlanarRegionsList().getNumberOfPlanarRegions());
+      LogTools.debug("[Current] Regions Found: {}", currentRegions.getPlanarRegionsList().getNumberOfPlanarRegions());
    }
 
    public void computeICP()

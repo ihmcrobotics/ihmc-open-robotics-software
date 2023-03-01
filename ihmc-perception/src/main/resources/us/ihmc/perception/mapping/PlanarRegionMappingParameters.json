@@ -1,7 +1,7 @@
 {
   "title" : "PlanarRegionMappingParameters",
   "Update Alpha towards match" : 0.01,
-  "Similarity threshold between normals" : 0.9,
+  "Similarity threshold between normals" : 0.95,
   "Orthogonal distance threshold" : 0.05,
   "Max Inter Region Distance" : 0.03,
   "Minimum overlap threshold" : 0.6,

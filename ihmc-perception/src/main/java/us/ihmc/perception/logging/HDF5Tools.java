@@ -142,7 +142,7 @@ public class HDF5Tools
     */
    public void storeIntArray(Group group, long index, int[] data, long size)
    {
-      LogTools.info("Store Int Array: Index: {} Size: {}", index, size);
+      LogTools.debug("Store Int Array: Index: {} Size: {}", index, size);
       long[] dimensions = {size};
 
       DataSpace dataSpace = new DataSpace(1, dimensions);
@@ -368,9 +368,9 @@ public class HDF5Tools
    // TODO: Does not work yet. Needs to be fixed.
    public void storeRawByteArray(Group group, long index, byte[] data, long size)
    {
-      LogTools.info("Store Byte Array: {} {}", index, size);
+      LogTools.debug("Store Byte Array: {} {}", index, size);
       long[] dimensions = {size};
-      LogTools.info("Creating Dataset: {} {}", group.toString(), String.valueOf(index));
+      LogTools.debug("Creating Dataset: {} {}", group.toString(), String.valueOf(index));
 
       DataSpace dataSpace = new DataSpace(1, dimensions);
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_UCHAR()), dataSpace);
@@ -385,7 +385,7 @@ public class HDF5Tools
    {
       long size = srcBytePointer.limit();
 
-      LogTools.info("Store Byte Array: Index: {} Size: {}", index, size);
+      LogTools.debug("Store Byte Array: Index: {} Size: {}", index, size);
       long[] dims = {size};
 
       DataType dataType = new DataType(PredType.NATIVE_UINT8());
@@ -409,7 +409,7 @@ public class HDF5Tools
       }
 
       long dtype = DataType.getHDFObjType(dataSet.getId());
-      LogTools.info("Index: {} Size: {}", index, size);
+      LogTools.debug("Index: {} Size: {}", index, size);
 
       DataType dataType = new DataType(PredType.NATIVE_UINT8());
       dataSet.read((Pointer) bytePointer, dataType);
