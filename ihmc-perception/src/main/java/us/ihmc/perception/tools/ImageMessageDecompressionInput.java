@@ -7,6 +7,11 @@ import perception_msgs.msg.dds.ImageMessage;
 
 import java.nio.ByteBuffer;
 
+/**
+ * This class is used to streamline feeding image data from ROS 2
+ * into OpenCV. Since it's got some state to prevent allocations,
+ * we use a class instead of a static tool method.
+ */
 public class ImageMessageDecompressionInput
 {
    private ByteBuffer decompressionInputBuffer;
