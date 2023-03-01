@@ -203,7 +203,7 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
 
-      if (isGizmoHovered && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
+      if (isGizmoHovered && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
       {
          queuePopupToOpen = true;
       }
@@ -484,6 +484,11 @@ public class RDXPose3DGizmo implements RenderableProvider
          transformToParent.setToZero();
       }
 
+      if (ImGui.collapsingHeader(labels.get("Controls")))
+      {
+         ImGui.text("Drag using the left mouse button to manipulate the gizmo.");
+      }
+
       if (ImGui.collapsingHeader(labels.get("Visual options")))
       {
          boolean proportionsChanged = false;
@@ -507,8 +512,6 @@ public class RDXPose3DGizmo implements RenderableProvider
          if (proportionsChanged)
             recreateGraphics();
       }
-
-      ImGui.text("Drag using the left mouse button to manipulate the gizmo.");
 
       updateTransforms();
    }
