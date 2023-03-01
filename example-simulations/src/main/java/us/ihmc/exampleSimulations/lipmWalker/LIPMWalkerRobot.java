@@ -272,7 +272,8 @@ public class LIPMWalkerRobot
       bodyLink.setMassAndRadiiOfGyration(bodyMass, bodyRadiusOfGyrationX, bodyRadiusOfGyrationY, bodyRadiusOfGyrationZ);
       bodyJoint.setLink(bodyLink);
       LinkGraphicsDescription bodyLinkGraphics = new LinkGraphicsDescription();
-      bodyLinkGraphics.addEllipsoid(bodyXRadius, bodyYRadius, bodyZRadius, YoAppearance.AluminumMaterial());
+//      bodyLinkGraphics.addEllipsoid(bodyXRadius, bodyYRadius, bodyZRadius, YoAppearance.AluminumMaterial());
+      bodyLinkGraphics.addCapsule(bodyXRadius, 2 * bodyZRadius, YoAppearance.AntiqueWhite());
       bodyLink.setLinkGraphics(bodyLinkGraphics);
 
       PinJointDescription leftHipJoint = new PinJointDescription("leftHip", new Vector3D(0.0, hipWidth / 2.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
@@ -328,7 +329,7 @@ public class LIPMWalkerRobot
       thighLinkDescription.setMassAndRadiiOfGyration(thighMass, thighRadiusOfGyrationX, thighRadiusOfGyrationY, thighRadiusOfGyrationZ);
       LinkGraphicsDescription thighGraphics = new LinkGraphicsDescription();
       thighGraphics.rotate(Math.PI, Axis3D.Y);
-      thighGraphics.addCylinder(thighLength, thighRadius, YoAppearance.AluminumMaterial());
+      thighGraphics.addCylinder(thighLength, thighRadius, YoAppearance.BlanchedAlmond());
       thighLinkDescription.setLinkGraphics(thighGraphics);
       return thighLinkDescription;
    }

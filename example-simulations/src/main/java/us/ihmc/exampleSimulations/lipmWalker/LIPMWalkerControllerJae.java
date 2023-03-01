@@ -52,6 +52,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -65,7 +66,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class LIPMWalkerControllerRG implements RobotController
+public class LIPMWalkerControllerJae implements RobotController
 {
    private final LIPMWalkerRobot robot;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -132,11 +133,24 @@ public class LIPMWalkerControllerRG implements RobotController
 
    private final SideDependentList<Polynomial> swingLegLengthTrajectories = new SideDependentList<>();
 
-   // For logging & debugging:
-   private final SideDependentList<YoDouble> predictedTouchdownLocation = new SideDependentList<>();
-   private final LIPMWalkerStateEstimator stateEstimator;
 
-   public LIPMWalkerControllerRG(LIPMWalkerRobot robot, double controlDT)
+   // For logging & debugging:
+   private final LIPMWalkerStateEstimator stateEstimator;
+   private final SideDependentList<YoDouble> predictedTouchdownLocation = new SideDependentList<>();
+
+   // jae
+   private final SideDependentList<Polynomial> swingLegForwardTrajectories = new SideDependentList<>();
+   private final YoDouble xSupportSwitchLocation = new YoDouble("xSupportSwitchLocation", registry);
+   private final YoDouble vxDesired = new YoDouble("vxDesired", registry);
+   private boolean changeSupport = false;
+   private double strideLength = 0;
+   private double maxStrideLength;
+   private final YoDouble desiredFootXInSwing = new YoDouble("desiredFootXInSwing", registry);
+   private final YoDouble desiredFootXVelocity = new YoDouble("desiredFootXVelocity", registry);
+   private RobotSide supportSide;
+
+
+   public LIPMWalkerControllerJae(LIPMWalkerRobot robot, double controlDT)
    {
       this.controlDT = controlDT;
       this.robot = robot;
@@ -172,6 +186,7 @@ public class LIPMWalkerControllerRG implements RobotController
          timeInStanceState.put(robotSide, new YoDouble(robotSide.getLowerCaseName() + "TimeInStanceState", registry));
 
          swingLegLengthTrajectories.put(robotSide, new Polynomial(4));
+         swingLegForwardTrajectories.put(robotSide, new Polynomial(4));
       }
 
       heightServoStiffness.set(500.0);
@@ -192,6 +207,12 @@ public class LIPMWalkerControllerRG implements RobotController
       initialize();
 
       stateMachines = setupStateMachines();
+
+      // jae
+      vxDesired.set(0.0001);
+      xSupportSwitchLocation.set(0.2);
+      maxStrideLength = desiredBodyHeight.getDoubleValue() * 3;
+      supportSide = RobotSide.LEFT;
    }
 
    @Override
@@ -245,16 +266,18 @@ public class LIPMWalkerControllerRG implements RobotController
 
    private void controlSwingLeg(RobotSide side, double timeInSwing, double dT)
    {
+      // get x foot:
+      swingLegForwardTrajectories.get(side).compute(timeInSwing);
+      desiredFootXInSwing.set(swingLegForwardTrajectories.get(side).getValue());
+      desiredFootXVelocity.set(swingLegForwardTrajectories.get(side).getVelocity());
+
       double thd_body = robot.getBodyPitchAngularVelocity();
 
       // Dead-reckoning on foot x pos to desired:
       double dt_denom = Math.max((stepDuration.getDoubleValue() - 0.1) - timeInSwing, 0.001); // GMN: Added 0.1 sec arrive early...
-      //      double dt_denom = stepTime - timeInSwing; // GMN: Added 0.1 sec arrive early...
 
       desiredSwingFootVelocities.get(side).set(0.0);
-      //      if (timeInSwing > 0.05) // GMN: try to prevent dragging while lifting; refactor so this happens in LIFT only; also really needs to be r.t. world
-      //      {
-      desiredSwingFootVelocities.get(side).set((predictedTouchdownLocation.get(side).getValue() - desiredSwingFootPositions.get(side).getValue()) / dt_denom); // GMN
+      desiredSwingFootVelocities.get(side).set(desiredFootXVelocity.getValue());
       //      }
       double desiredSwingFootVelocity = desiredSwingFootVelocities.get(side).getDoubleValue();
       desiredSwingFootPositions.get(side).add(desiredSwingFootVelocity * dT);
@@ -458,13 +481,23 @@ public class LIPMWalkerControllerRG implements RobotController
          // Build the z-spline:
          Point3DReadOnly pos_foot = robot.getFootPosition(side);
          swingLegLengthTrajectories.get(side)
-                                   .setCubicWithIntermediatePositionAndFinalVelocityConstraint(0.0,
-                                                                                               midSwingFraction.getDoubleValue() * stepDuration.getValue(),
-                                                                                               stepDuration.getDoubleValue(),
-                                                                                               pos_foot.getZ(),
-                                                                                               swingHeight.getDoubleValue(),
-                                                                                               touchdownHeight.getDoubleValue(),
-                                                                                               touchdownVelocity.getDoubleValue());
+                 .setCubicWithIntermediatePositionAndFinalVelocityConstraint(0.0,
+                                                                             midSwingFraction.getDoubleValue() * stepDuration.getValue(),
+                                                                             stepDuration.getDoubleValue(),
+                                                                             pos_foot.getZ(),
+                                                                             swingHeight.getDoubleValue(),
+                                                                             touchdownHeight.getDoubleValue(),
+                                                                             touchdownVelocity.getDoubleValue());
+
+         // build x - way point:
+         swingLegForwardTrajectories.get(side)
+               .setCubicWithIntermediatePositionAndFinalVelocityConstraint(0.0,
+                                                                           midSwingFraction.getDoubleValue() * stepDuration.getValue(),
+                                                                           stepDuration.getDoubleValue(),
+                                                                           pos_foot.getX(),
+                                                                           pos_foot.getX() + strideLength / 2,
+                                                                           pos_foot.getX() + strideLength,
+                                                                           0);
 
          // Initialize the diff IK:
          desiredSwingHipAngles.get(side).set(robot.getHipAngle(side));
@@ -553,7 +586,31 @@ public class LIPMWalkerControllerRG implements RobotController
       {
          // GMN: Is there a way to find & look at the contact state of the OTHER side of the robot???
          // GMN: Make the state transition simply be when the OTHER side is on the ground:
-         return ((robot.getFootZForce(this.side.getOppositeSide()) > 10) && (stateMachines.get(side.getOppositeSide()).getCurrentStateKey() != States.LIFT));
+         changeSupport = changeSupport(robot.getCenterOfMassXDistanceFromSupportFoot(), xSupportSwitchLocation.getDoubleValue(), vxDesired.getDoubleValue());
+         if (changeSupport)
+         {
+            double frequency = Math.sqrt(g / robot.getBodyZPosition());
+            double comFromSup = robot.getCenterOfMassXDistanceFromSupportFoot();
+            double com_vx = robot.getCenterOfMassVelocity().getX();
+            double currentEnergy = calculateOrbitalEnergy(comFromSup, com_vx, frequency);
+            LogTools.info("current Energy: {}", currentEnergy);
+            double destinationEnergy = calculateOrbitalEnergy(0, vxDesired.getValue(), frequency);
+            LogTools.info("desired Energy: {}", destinationEnergy);
+            double[] sol = calculateStrideLength(currentEnergy, destinationEnergy, robot.getCenterOfMassXDistanceFromSupportFoot(), frequency);
+            LogTools.info("quadratic sol: {}, {}", sol[0], sol[1]);
+
+            if (vxDesired.getValue() >=0)
+               strideLength = sol[0];
+            else
+               strideLength = sol[1];
+            strideLength = Math.min(strideLength, maxStrideLength);
+            LogTools.info("desired stride length: {}", strideLength);
+
+            supportSide = supportSide.getOppositeSide();
+         }
+
+         return ((robot.getFootZForce(this.side.getOppositeSide()) > 10) && (stateMachines.get(side.getOppositeSide()).getCurrentStateKey() != States.LIFT))
+                && changeSupport;
       }
    }
 
@@ -572,5 +629,50 @@ public class LIPMWalkerControllerRG implements RobotController
       {
          return (robot.getFootZForce(this.side) > 10);
       }
+   }
+
+   public static double[] calculateStrideLength(double currentEnergy, double destinationEnergy, double locationFromSupportFoot, double frequency)
+   {
+      double a = 1;
+      double b = -2 * locationFromSupportFoot;
+      double c = 2 * (destinationEnergy - currentEnergy) / Math.pow(frequency, 2);
+      return solveQuadratic(a, b, c);
+   }
+
+   public static double calculateOrbitalEnergy(double comXFromSupport, double velocity, double frequency)
+   {
+      return 0.5 * Math.pow(velocity, 2) - 0.5 * Math.pow(frequency, 2) * Math.pow(comXFromSupport, 2);
+   }
+
+   private boolean changeSupport(double comXFromSupport, double switchXLocationFromSupport, double vxDesired)
+   {
+      if (vxDesired >= 0)
+      {
+         return comXFromSupport >  switchXLocationFromSupport;
+      }
+      else
+      {
+         return comXFromSupport < -switchXLocationFromSupport;
+      }
+   }
+
+   public static double[] solveQuadratic(double a, double b, double c)
+   {
+      double[] sol = new double[2];
+      double b2_4ac = Math.pow(b, 2) - 4 * a * c;
+
+      if (b2_4ac < 0)
+      {
+         LogTools.info("b2_4ac : {}", b2_4ac);
+         sol[0] = -b / (2 * a);
+         sol[1] = -b / (2 * a);
+      }
+      else
+      {
+         sol[0] = (-b + Math.sqrt(b2_4ac)) / (2 * a);
+         sol[1] = (-b - Math.sqrt(b2_4ac)) / (2 * a);
+      }
+
+      return sol;
    }
 }
