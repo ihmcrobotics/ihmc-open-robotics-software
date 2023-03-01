@@ -41,6 +41,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
@@ -76,6 +77,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.awt.*;
 import java.util.List;
 
+import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public class SwingOverHeightMapTest
@@ -206,6 +208,32 @@ public class SwingOverHeightMapTest
    }
 
    @Test
+   public void testFlatGround()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      ConvexPolygon2D foot = getFootPolygon();
+
+      generator.translate(0.6, 0.0, 0.0);
+      generator.addRectangle(1.75, 0.4);
+
+      FramePose3D startFoot = new FramePose3D();
+      startFoot.getPosition().set(-0.05, 0.0, 0.0);
+
+      FramePose3D endFoot = new FramePose3D();
+      endFoot.getPosition().set(1.0, 0.0, 0.0);
+
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+
+      for (int i = 0; i < footstepPlan.getRight().getNumberOfSteps(); i++)
+      {
+         PlannedFootstep footstep = footstepPlan.getRight().getFootstep(i);
+         assertEquals(0, footstep.getCustomWaypointPositions().size());
+      }
+   }
+
+   @Test
    public void testFlatClearanceOfCurb()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -226,6 +254,58 @@ public class SwingOverHeightMapTest
 
       FramePose3D endFoot = new FramePose3D();
       endFoot.getPosition().set(1.0, 0.0, 0.0);
+
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+   }
+
+   @Test
+   public void testBigIntermediateObstacle()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      ConvexPolygon2D foot = getFootPolygon();
+
+      generator.translate(0.6, 0.0, 0.0);
+      generator.addRectangle(1.75, 0.4);
+
+      double cubeDepth = 0.2;
+      double cubeHeight = 0.15;
+      generator.identity();
+      generator.translate(0.3, 0.0, cubeHeight / 2.0);
+      generator.addCubeReferencedAtCenter(cubeDepth, 0.4, cubeHeight);
+
+      FramePose3D startFoot = new FramePose3D();
+      startFoot.getPosition().set(0.0, 0.0, 0.0);
+
+      FramePose3D endFoot = new FramePose3D();
+      endFoot.getPosition().set(0.6, 0.0, 0.0);
+
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
+   }
+
+   @Test
+   public void testBigIntermediateObstacleOnOneSide()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      ConvexPolygon2D foot = getFootPolygon();
+
+      generator.translate(0.6, 0.0, 0.0);
+      generator.addRectangle(1.75, 0.4);
+
+      double cubeDepth = 0.2;
+      double cubeHeight = 0.15;
+      generator.identity();
+      generator.translate(0.3, 0.22, cubeHeight / 2.0);
+      generator.addCubeReferencedAtCenter(cubeDepth, 0.4, cubeHeight);
+
+      FramePose3D startFoot = new FramePose3D();
+      startFoot.getPosition().set(0.0, 0.0, 0.0);
+
+      FramePose3D endFoot = new FramePose3D();
+      endFoot.getPosition().set(0.6, 0.0, 0.0);
 
       Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
       checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight());
@@ -510,7 +590,7 @@ public class SwingOverHeightMapTest
       while (twoWaypointSwingGenerator.doOptimizationUpdate())
          twoWaypointSwingGenerator.compute(0.0);
 
-      double dt = 0.01;//1.0 / 11.0;
+      double dt = 1.0 / 19.0;
 
       WalkingControllerParameters walkingControllerParameters = getWalkingControllerParameters();
       SwingPlannerParametersBasics originalSwingPlannerParameters = getParameters();
