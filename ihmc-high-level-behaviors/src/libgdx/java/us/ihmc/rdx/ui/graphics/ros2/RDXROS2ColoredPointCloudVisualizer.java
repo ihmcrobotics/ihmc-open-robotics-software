@@ -117,7 +117,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
                                                                                                                sanitizedLevelOfColorDetail);
             }
 
-            if (pointCloudVertexBuffer == null || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX < totalNumberOfPoints)
+            if (pointCloudVertexBuffer == null
+             || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX != totalNumberOfPoints)
             {
                LogTools.info("Allocating new buffers. {} total points", totalNumberOfPoints);
 
