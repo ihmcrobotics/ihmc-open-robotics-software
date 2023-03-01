@@ -53,6 +53,11 @@ public interface PlanarRegionMappingParametersBasics extends PlanarRegionMapping
       set(PlanarRegionMappingParameters.odometryNoiseVariance, odometryNoiseVariance);
    }
 
+   default void setStateEstimatorNoiseVariance(double stateEstimatorNoiseVariance)
+   {
+      set(PlanarRegionMappingParameters.stateEstimatorNoiseVariance, stateEstimatorNoiseVariance);
+   }
+
    default void setBestMatchAngularThreshold(double bestMatchAngularThreshold)
    {
       set(PlanarRegionMappingParameters.bestMatchAngularThreshold, bestMatchAngularThreshold);

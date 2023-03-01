@@ -50,15 +50,7 @@ def convert_main():
 
 
 
-def play_main(indices = None):
-
-    home = os.path.expanduser('~')
-
-    path = home + '/.ihmc/logs/perception/Final/'
-
-    path = '/home/bmishra/Workspace/Data/LogData/Perception/'
-
-    data = h5py.File(path + '20230228_204753_PerceptionLog.hdf5', 'r')
+def player_main(data, indices = None):
 
     print(data.keys())
 
@@ -66,29 +58,34 @@ def play_main(indices = None):
 
         for i in range(len(data['l515/depth/'])):
 
-            print("Showing image: ", i)
+            # print("Showing image: ", i)
             display_image(data, i, 'l515/depth/', 20)
 
     else:
             
             for i in indices:
     
-                print("Showing image: ", i)
+                # print("Showing image: ", i)
                 display_image(data, i, 'l515/depth/', 20)
     
 
-def plot_main():
+def filter_by_motion(mocap_position, mocap_orientation, sensor_position, sensor_orientation):
 
-    home = os.path.expanduser('~')
+    # Extract frame indices in which there is significant motion, assuming there may be multiple such sections
+    indices = []
+    for i in range(1, mocap_position.shape[0]):
+        if np.linalg.norm(mocap_position[i] - mocap_position[i-1]) > 0.002:
+            indices.append(i)
 
-    path = home + '/.ihmc/logs/perception/Final/'
+    # Extract mocap and sensor position and orientation for each index
+    mocap_position = mocap_position[indices]
+    mocap_orientation = mocap_orientation[indices]
+    sensor_position = sensor_position[indices]
+    sensor_orientation = sensor_orientation[indices]
 
-    path = '/home/bmishra/Workspace/Data/LogData/Perception/'
+    return (mocap_position, mocap_orientation, sensor_position, sensor_orientation)
 
-    data = h5py.File(path + '20230228_144720_PerceptionLog.hdf5', 'r')
-
-    data = h5py.File(path + '20230228_204753_PerceptionLog.hdf5', 'r')
-
+def plotter_main(data):
 
     mocap_position = get_data(data, 'mocap/rigid_body/position/')
     mocap_orientation = get_data(data, 'mocap/rigid_body/orientation/')
@@ -123,62 +120,58 @@ def plot_main():
     mocap_euler[:, 1] -= mocap_euler[0, 1] - sensor_euler[0, 1]
 
     
-
     transform = compute_icp_transform(mocap_position[:200, :3], sensor_position[:200, :3])
-#     transform = np.eye(4)
-
     # transform = get_relative_transform_se3(mocap_position[0], mocap_orientation[0], sensor_position[0], sensor_orientation[0])
 
     print("Shapes Mocap Position: ", mocap_position.shape, " Sensor Position: ", sensor_position.shape, " Mocap Orientation: ", mocap_orientation.shape, " Sensor Orientation: ", sensor_orientation.shape)
 
     print("Transform: ", transform)
 
-    #  Perform inverse transform on mocap position and orientation to bring it to sensor frame
+    #  Transform mocap position and orientation to bring them to sensor frame
     #  transform is in SE(3) and mocap_position is in R^3, and mocap_orientation is in R^4 with ordering (X, Y, Z, W)
-
     positions = mocap_position.T
-
-    # Append a row of ones to the end of the position vector
     ones = np.ones(shape=(1, positions.shape[1]))
     positions = np.vstack((positions, ones))
-
-    
-    # Transform the position vector
     positions = np.matmul(transform, positions)
-
-
-    # # Apply another rotation to invert X and Z phases
-    # rotation = np.eye(4)
-    # rotation[0, 0] = -1
-    # rotation[2, 2] = -1
-    # positions = np.matmul(rotation, positions)
-
-    # Put first three rows back into mocap_position
     mocap_position = positions[:3, :].T
-    
-    # Remove offset in first position between sensor_position and mocap_position (fix to sensor_position)
     mocap_position -= mocap_position[0] - sensor_position[0]
     
-
-    # # Extract frame indices in which there is significant motion, assuming there may be multiple such sections
-    # indices = []
-    # for i in range(1, mocap_position.shape[0]):
-    #     if np.linalg.norm(mocap_position[i] - mocap_position[i-1]) > 0.002:
-    #         indices.append(i)
-
-    # # Extract mocap and sensor position and orientation for each index
-    # mocap_position = mocap_position[indices]
-    # mocap_orientation = mocap_orientation[indices]
-    # sensor_position = sensor_position[indices]
-    # sensor_orientation = sensor_orientation[indices]
-    
-
     plot_position([sensor_position, mocap_position], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]", "Position")
     plot_position([sensor_euler, mocap_euler], ['-r', '-b'], "Estimated State [RED] - Ground Truth [BLUE]", "Euler")
 
-    play_main()
-
-
 
 if __name__ == '__main__':
-    plot_main()
+
+    home = os.path.expanduser('~')
+    path = home + '/.ihmc/logs/perception/IROS_2023/'
+    files = sorted(os.listdir(path))
+    
+    titles = [  'WalkForward_FallAtTheEnd', # 20230228_191411_PerceptionLog.hdf5
+                'Circular_Inward',          # 20230228_195802_PerceptionLog.hdf5
+                'Circular_Turn',            # 20230228_195937_PerceptionLog.hdf5
+                'Circular_Outward_Fall',    # 20230228_200243_PerceptionLog.hdf5
+                'Circular_Outward',         # 20230228_201455_PerceptionLog.hdf5
+                'WalkForward_Rough',        # 20230228_201947_PerceptionLog.hdf5
+                'Turn_Rough',               # 20230228_202104_PerceptionLog.hdf5
+                'WalkBack_Rough',           # 20230228_202456_PerceptionLog.hdf5
+                'Stairs_ClimbUp',           # 20230228_204753_PerceptionLog.hdf5
+              ]
+
+    for i, file in enumerate(files):
+        print('Index: ', i, ' File: ', file, '\tTitle: ', titles[i])
+
+    # INDEX TO LOAD ----------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    index_to_load = 4
+
+    # INDEX TO LOAD -----------------------------------------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    filename = files[index_to_load]
+    print('\nLoading file: ', index_to_load, '\tName: ', filename, '\tTitle: ', titles[index_to_load], '\n')
+
+    data = h5py.File(path + filename, 'r')
+    
+
+    plotter_main(data)
+
+    player_main(data)

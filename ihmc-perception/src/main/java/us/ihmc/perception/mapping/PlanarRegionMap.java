@@ -47,6 +47,10 @@ public class PlanarRegionMap
 
    float planeNoise = 0.001f;
    float odomNoise = 0.00001f;
+   float IQANoise = 0.00001f;
+
+   private float[] IQANoiseArray;
+   private float[] odomNoiseArray;
 
    private MergingMode merger;
    private MatchingMode matcher;
@@ -68,6 +72,8 @@ public class PlanarRegionMap
    private int uniqueIDtracker = 1;
 
    RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
+   RigidBodyTransform previousTransformToWorld = new RigidBodyTransform();
+   RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
 
    private final ArrayList<PlanarRegionKeyframe> keyframes = new ArrayList<>();
    private PlanarRegionsList previousRegions = new PlanarRegionsList();
@@ -210,6 +216,7 @@ public class PlanarRegionMap
             applyFactorGraphBasedSmoothing(finalMap,
                                            regionsInSensorFrame.copy(),
                                            sensorToWorldTransformPrior,
+                                           currentToPreviousSensorTransform,
                                            currentToPreviousSensorTransform,
                                            incomingToMapMatches,
                                            sensorPoseIndex);
@@ -507,13 +514,19 @@ public class PlanarRegionMap
                                                PlanarRegionsList incomingRegionList,
                                                RigidBodyTransform sensorToWorldTransformPrior,
                                                RigidBodyTransform currentToPreviousTransform,
+                                               RigidBodyTransform estimatedTransformToPrevious,
                                                HashMap<Integer, TIntArrayList> matches,
                                                int poseIndex)
    {
       LogTools.info("------------------------------- Performing Factor Graph Based Smoothing ---------------------------------");
 
       LogTools.info("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
+      factorGraph.createOdometryNoiseModel(IQANoiseArray);
       factorGraph.addOdometryFactorSE3(poseIndex, PerceptionEuclidTools.toArray(currentToPreviousTransform));
+
+      LogTools.info("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
+      factorGraph.createOdometryNoiseModel(odomNoiseArray);
+      factorGraph.addOdometryFactorSE3(poseIndex, PerceptionEuclidTools.toArray(estimatedTransformToPrevious));
 
       LogTools.info("Adding Pose Initial Value: {}", poseIndex);
       factorGraph.setPoseInitialValueSE3(poseIndex, PerceptionEuclidTools.toArray(sensorToWorldTransformPrior));
@@ -577,10 +590,14 @@ public class PlanarRegionMap
       LogTools.info("------------------------------- Initializing Factor Graph ---------------------------------");
 
       // Set up the factor graph noise models
-      odomNoise = (float) parameters.getOdometryNoiseVariance();
+      IQANoise = (float) parameters.getOdometryNoiseVariance();
+      odomNoise = (float) parameters.getStateEstimatorNoiseVariance();
       planeNoise = (float) parameters.getPlaneNoiseVariance();
 
-      factorGraph.createOdometryNoiseModel(new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise});
+      IQANoiseArray = new float[] {IQANoise, IQANoise, IQANoise, IQANoise, IQANoise, IQANoise};
+      odomNoiseArray = new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise};
+
+      factorGraph.createOdometryNoiseModel(IQANoiseArray);
       factorGraph.createOrientedPlaneNoiseModel(new float[] {planeNoise, planeNoise, planeNoise});
 
       factorGraph.addPriorPoseFactorSE3(sensorPoseIndex, PerceptionEuclidTools.toArray(transform));
@@ -656,7 +673,7 @@ public class PlanarRegionMap
       return idToReturn;
    }
 
-   public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions)
+   public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions, RigidBodyTransform estimatedTransformToWorld)
    {
       PlanarRegionsList regions = new PlanarRegionsList();
 
@@ -684,7 +701,9 @@ public class PlanarRegionMap
       if(!initialized)
       {
          // L515-only
-         initialTransformToWorld.set(new RigidBodyTransform(new Quaternion(0.0, Math.toRadians(60.0), 0.0), new Point3D()));
+         //initialTransformToWorld.set(new RigidBodyTransform(new Quaternion(0.0, Math.toRadians(60.0), 0.0), new Point3D()));
+         initialTransformToWorld.set(estimatedTransformToWorld);
+         previousTransformToWorld.set(initialTransformToWorld);
 
          previousRegions.addPlanarRegionsList(regions.copy());
 
@@ -758,10 +777,19 @@ public class PlanarRegionMap
          PlanarRegionsList graphRegions = regions.copy();
          graphRegions.applyTransform(transformToSensor);
 
+         // Compute state estimator based odometry
+         previousTransformToWorld.invert();
+         estimatedTransformToPrevious.set(previousTransformToWorld);
+         estimatedTransformToPrevious.multiply(estimatedTransformToWorld);
+
+         LogTools.info("Estimated Transform to previous: {}", estimatedTransformToPrevious);
+         LogTools.info("Transform to previous: {}", transformToPrevious);
+
          applyFactorGraphBasedSmoothing(finalMap,
                                         graphRegions,
                                         transformToWorld,
                                         transformToPrevious,
+                                        estimatedTransformToPrevious,
                                         incomingToMapMatches,
                                         sensorPoseIndex);
 
@@ -789,6 +817,8 @@ public class PlanarRegionMap
          sensorPoseIndex++;
 
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
+
+         previousTransformToWorld.set(estimatedTransformToWorld);
 
          PerceptionPrintTools.printTransform("Transform to World", transformToWorld);
 

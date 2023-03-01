@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 def get_data(data, namespace):
     ds = []
 
-    print(data[namespace].keys())
+    # print(data[namespace].keys())
 
     keys = list(map(str, sorted(list(map(int, data[namespace].keys())))))
 
     for key in keys:
-        print('Appending: {}'.format(namespace + key))
+        # print('Appending: {}'.format(namespace + key))
         array = data[namespace + key][:]
         ds.append(array)
 
@@ -107,12 +107,12 @@ def print_group_info(data, group):
 def get_data(data, namespace):
     ds = []
 
-    print(data[namespace].keys())
+    # print(data[namespace].keys())
 
     keys = list(map(str, sorted(list(map(int, data[namespace].keys())))))
 
     for key in keys:
-        print('Appending: {}'.format(namespace + key))
+        # print('Appending: {}'.format(namespace + key))
         array = data[namespace + key][:]
         ds.append(array)
 
@@ -123,10 +123,25 @@ def display_image(data, index, namespace, delay):
     buffer = data[namespace + str(index)][:].byteswap().view('uint8')
     buffer_image = np.asarray(buffer, dtype=np.uint8)
     buffer_image = cv2.imdecode(buffer_image, cv2.IMREAD_GRAYSCALE)
+    
+    # print('Image: ', buffer_image.dtype, buffer_image.shape)
+
+    # Make the image brighter
+    buffer_image = np.minimum(buffer_image * 10, 255)
+
+    # # Remove spikes from image by thresholding
+    # buffer_image[buffer_image > 80] = 0
+
+    # # Normalize image using OpenCV
+    # buffer_image = cv2.normalize(buffer_image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+
+
     cv2.imshow("Depth Image", buffer_image)
     code = cv2.waitKeyEx(delay)
 
-    if code == 113:
+    # print("Code: ", code)
+
+    if code == 113 or code == 1048689:
         exit()
 
 def playback_images(data, channels):
@@ -137,7 +152,7 @@ def playback_images(data, channels):
             display_image(data, channel)
         
         code = cv2.waitKeyEx(30)
-        if code == 113:
+        if code == 113 or code == 1048689:
             exit()
 
 def load_file(file_name):

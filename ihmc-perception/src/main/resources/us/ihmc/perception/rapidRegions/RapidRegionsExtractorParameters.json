@@ -11,7 +11,7 @@
     "upperBound" : 10
   },
   "Merge range" : {
-    "value" : 2,
+    "value" : 3,
     "lowerBound" : 1,
     "upperBound" : 10
   },
@@ -26,7 +26,7 @@
     "upperBound" : 1.0
   },
   "Merge angular threshold" : {
-    "value" : 0.912621,
+    "value" : 0.796117,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },

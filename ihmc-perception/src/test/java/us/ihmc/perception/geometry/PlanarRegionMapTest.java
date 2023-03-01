@@ -184,12 +184,12 @@ public class PlanarRegionMapTest
       PlanarRegionMap planarRegionMap = new PlanarRegionMap(true);
 
       planarRegionMap.setInitialSensorPose(sensorToWorldOne);
-      planarRegionMap.registerRegions(planarRegionsListOne);
+      planarRegionMap.registerRegions(planarRegionsListOne, sensorToWorldOne);
 
-      RigidBodyTransform keyframePoseThree = planarRegionMap.registerRegions(planarRegionsListTwo);
+      RigidBodyTransform keyframePoseThree = planarRegionMap.registerRegions(planarRegionsListTwo, sensorToWorldTwo);
       PerceptionPrintTools.printTransform("Keyframe Pose Two", keyframePoseThree);
 
-      RigidBodyTransform keyframePoseTwo = planarRegionMap.registerRegions(planarRegionsListThree);
+      RigidBodyTransform keyframePoseTwo = planarRegionMap.registerRegions(planarRegionsListThree, sensorToWorldThree);
       PerceptionPrintTools.printTransform("Keyframe Pose Three", keyframePoseTwo);
 
       PerceptionPrintTools.printPlanarRegionsListVertices("Final Map", planarRegionMap.getMapRegions());
