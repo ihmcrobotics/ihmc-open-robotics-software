@@ -179,7 +179,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    {
       for (RDXInteractableFootstep step : footsteps)
       {
-         step.getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
+         step.reset();
       }
       footsteps.clear();
 
@@ -187,11 +187,19 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          PlannedFootstep plannedStep = footstepPlan.getFootstep(i);
          RDXInteractableFootstep addedStep = footsteps.add();
+         addedStep.reset();
          EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory;
          if (swingTrajectories == null)
+         {
             swingTrajectory = null;
+         }
          else
-            swingTrajectory = swingTrajectories.get(i);
+         {
+            if (i < swingTrajectories.size())
+               swingTrajectory = swingTrajectories.get(i);
+            else
+               swingTrajectory = null;
+         }
          addedStep.updateFromPlannedStep(baseUI, plannedStep, swingTrajectory, i);
       }
 
