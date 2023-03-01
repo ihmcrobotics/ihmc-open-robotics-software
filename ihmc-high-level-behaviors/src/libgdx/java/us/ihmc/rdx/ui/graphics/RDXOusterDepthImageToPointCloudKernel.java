@@ -9,7 +9,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.opencl.OpenCLBooleanParameter;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -23,7 +22,6 @@ public class RDXOusterDepthImageToPointCloudKernel
    private _cl_kernel unpackPointCloudKernel;
    private final OpenCLFloatParameters floatParameters = new OpenCLFloatParameters();
    private final OpenCLFloatParameters fisheyeFloatParameters = new OpenCLFloatParameters();
-   private final OpenCLBooleanParameter useFisheyeColorImageParameter = new OpenCLBooleanParameter();
    private final OpenCLRigidBodyTransformParameter ousterToWorldTransformParameter = new OpenCLRigidBodyTransformParameter();
    private final OpenCLRigidBodyTransformParameter ousterToFisheyeTransformParameter = new OpenCLRigidBodyTransformParameter();
    private OpenCLFloatBuffer pointCloudVertexBuffer;
@@ -116,14 +114,13 @@ public class RDXOusterDepthImageToPointCloudKernel
       floatParameters.setParameter((float) levelOfColorDetail);
       ousterToWorldTransformParameter.setParameter(ousterToWorldTransform);
 
-      useFisheyeColorImageParameter.setParameter(useFisheyeColorImage);
-
       fisheyeFloatParameters.setParameter(fisheyeImage.getImageWidth());
       fisheyeFloatParameters.setParameter(fisheyeImage.getImageHeight());
       fisheyeFloatParameters.setParameter((float) fisheyeFocalLengthPixelsX);
       fisheyeFloatParameters.setParameter((float) fisheyeFocalLengthPixelsY);
       fisheyeFloatParameters.setParameter((float) fisheyePrincipalPointPixelsX);
       fisheyeFloatParameters.setParameter((float) fisheyePrincipalPointPixelsY);
+      fisheyeFloatParameters.setParameter(useFisheyeColorImage);
       ousterToFisheyeTransformParameter.setParameter(ousterToFisheyeTransform);
 
       floatParameters.writeOpenCLBufferObject(openCLManager);
@@ -139,11 +136,10 @@ public class RDXOusterDepthImageToPointCloudKernel
       openCLManager.setKernelArgument(unpackPointCloudKernel, 0, floatParameters.getOpenCLBufferObject());
       openCLManager.setKernelArgument(unpackPointCloudKernel, 1, ousterToWorldTransformParameter.getOpenCLBufferObject());
       openCLManager.setKernelArgument(unpackPointCloudKernel, 2, depthImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 3, useFisheyeColorImageParameter);
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 4, fisheyeFloatParameters.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 5, fisheyeImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 6, ousterToFisheyeTransformParameter.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 7, pointCloudVertexBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 3, fisheyeFloatParameters.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 4, fisheyeImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 5, ousterToFisheyeTransformParameter.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 6, pointCloudVertexBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(unpackPointCloudKernel, depthImage.getImageWidth(), heightWithVerticalPointsForColorDetail);
       pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
 

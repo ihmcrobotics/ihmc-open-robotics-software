@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -31,7 +31,7 @@ mainDependencies {
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.25.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.26.0")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:ihmc-java-toolkit:source")
