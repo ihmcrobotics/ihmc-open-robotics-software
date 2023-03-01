@@ -55,6 +55,11 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
       return get(odometryNoiseVariance);
    }
 
+   default double getStateEstimatorNoiseVariance()
+   {
+      return get(stateEstimatorNoiseVariance);
+   }
+
    default double getBestMatchAngularThreshold()
    {
       return get(bestMatchAngularThreshold);

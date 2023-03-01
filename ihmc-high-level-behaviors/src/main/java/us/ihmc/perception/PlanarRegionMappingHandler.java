@@ -88,7 +88,7 @@ public class PlanarRegionMappingHandler
    private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
 
    private int planarRegionListIndex = 0;
-   private int perceptionLogIndex = 0;
+   private int perceptionLogIndex = 150;
    private int totalDepthCount = 0;
 
    private String sensorLogChannelName;
@@ -157,23 +157,23 @@ public class PlanarRegionMappingHandler
       //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
 
       //createOuster(128, 1024, smoothing);
-      createL515(768, 1024, smoothing, false);
+      createTerrain(720, 1280, smoothing, false);
    }
 
-   private void createL515(int depthHeight, int depthWidth, boolean smoothing, boolean simulation)
+   private void createTerrain(int depthHeight, int depthWidth, boolean smoothing, boolean simulation)
    {
       planarRegionMap = new PlanarRegionMap(smoothing);
       sensorLogChannelName = PerceptionLoggerConstants.L515_DEPTH_NAME;
 
       String version = simulation ? "Simulation" : "";
 
-      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 730.7891, 731.0859, 528.6094, 408.1602, version);
+      rapidRegionsExtractor.create(openCLManager, openCLProgram, depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89, version);
       rapidPatchesBasedICP.create(openCLManager, openCLProgram, depthHeight, depthWidth);
       depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
       perceptionDataLoader.loadCompressedDepth(sensorLogChannelName, perceptionLogIndex, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
-      //perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
-      //perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
+      perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
+      perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
 
       totalDepthCount = perceptionDataLoader.getHDF5Manager().getCount(sensorLogChannelName);
    }
@@ -297,7 +297,7 @@ public class PlanarRegionMappingHandler
             }
          }
 
-         perceptionLogIndex += 3;
+         perceptionLogIndex += 2;
          rapidRegionsExtractor.setProcessing(false);
       }
    }
@@ -312,8 +312,8 @@ public class PlanarRegionMappingHandler
    private void loadDataFromPerceptionLog(PerceptionDataLoader loader, int index)
    {
       loader.loadCompressedDepth(sensorLogChannelName, index, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
-      //sensorTransformToWorld.getTranslation().set(sensorPositionBuffer.get(index));
-      //sensorTransformToWorld.getRotation().set(sensorOrientationBuffer.get(index));
+      sensorTransformToWorld.getTranslation().set(sensorPositionBuffer.get(index));
+      sensorTransformToWorld.getRotation().set(sensorOrientationBuffer.get(index));
       cameraFrame.update();
    }
 
@@ -344,7 +344,7 @@ public class PlanarRegionMappingHandler
    {
       LogTools.info("Adding Regions to Map.");
 
-      RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList());
+      RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
 
       //planarRegionMap.submitRegionsUsingIterativeReduction(regions);
 
