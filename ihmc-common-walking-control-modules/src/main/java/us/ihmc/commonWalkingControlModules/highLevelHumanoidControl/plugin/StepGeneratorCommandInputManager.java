@@ -39,6 +39,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    private ContinuousStepGenerator continuousStepGenerator;
 
    private final List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
+   private final List<Consumer<ContinuousStepGeneratorInputCommand>> continuousStepGeneratorInputCommandConsumers = new ArrayList<>();
    private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<FootstepStatus> previousFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsListCommand> latestPlanarRegions = new AtomicReference<>(null);
@@ -59,6 +60,11 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer)
    {
       planarRegionsListCommandConsumers.add(planarRegionsListCommandConsumer);
+   }
+
+   public void addContinuousStepGeneratorInputCommandConsumer(Consumer<ContinuousStepGeneratorInputCommand> continuousStepGeneratorInputCommandConsumer)
+   {
+      continuousStepGeneratorInputCommandConsumers.add(continuousStepGeneratorInputCommandConsumer);
    }
 
    public CommandInputManager getCommandInputManager()
@@ -126,6 +132,11 @@ public class StepGeneratorCommandInputManager implements Updatable
          turningVelocity = command.getTurnVelocity();
          isUnitVelocities = command.isUnitVelocities();
          walk = command.isWalk();
+
+         for (int i = 0; i < continuousStepGeneratorInputCommandConsumers.size(); i++)
+            continuousStepGeneratorInputCommandConsumers.get(i).accept(command);
+
+         ticksSinceUpdatingTheEnvironment.set(0);
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorInputCommand.class);
 

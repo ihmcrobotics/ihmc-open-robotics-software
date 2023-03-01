@@ -10,6 +10,7 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
    private double forwardVelocity;
    private double lateralVelocity;
    private double turnVelocity;
+   private double walkingModeSwitchValue;
    private boolean unitVelocities;
 
    @Override
@@ -20,6 +21,7 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
       forwardVelocity = 0.0;
       lateralVelocity = 0.0;
       turnVelocity = 0.0;
+      walkingModeSwitchValue = -1.0;
    }
 
    @Override
@@ -76,6 +78,11 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
       this.turnVelocity = turnVelocity;
    }
 
+   public void setWalkingModeSwitchValue(double walkingModeSwitchValue)
+   {
+      this.walkingModeSwitchValue = walkingModeSwitchValue;
+   }
+
    public void setUnitVelocities(boolean unitVelocities)
    {
       this.unitVelocities = unitVelocities;
@@ -105,6 +112,11 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
    public double getTurnVelocity()
    {
       return turnVelocity;
+   }
+
+   public double getWalkingModeSwitchValue()
+   {
+      return walkingModeSwitchValue;
    }
 
    public boolean isUnitVelocities()
