@@ -373,7 +373,7 @@ public class RDXPose3DGizmo implements RenderableProvider
       if (ImGui.beginPopup(labels.get("Popup")))
       {
          renderImGuiTuner();
-         if (ImGui.menuItem("Cancel"))
+         if (ImGui.menuItem("Close"))
             ImGui.closeCurrentPopup();
          ImGui.endPopup();
       }
@@ -479,22 +479,22 @@ public class RDXPose3DGizmo implements RenderableProvider
    {
       ImGui.text("Parent frame: " + parentReferenceFrame.getName());
 
-      ImGui.checkbox("Resize based on camera distance", resizeAutomatically);
-
-      boolean proportionsChanged = false;
-      ImGui.pushItemWidth(100.00f);
-      if (resizeAutomatically.get())
-         proportionsChanged |= ImGui.dragFloat(labels.get("Torus camera size"), torusCameraSize.getData(), 0.001f);
-      else
-         proportionsChanged |= ImGui.dragFloat(labels.get("Torus radius"), torusRadius.getData(), 0.001f);
-      ImGui.popItemWidth();
-
-      if (ImGui.collapsingHeader(labels.get("Advanced")))
+      if (ImGui.button("Set to zero in parent frame"))
       {
-         if (ImGui.button("Set to zero in parent frame"))
-         {
-            transformToParent.setToZero();
-         }
+         transformToParent.setToZero();
+      }
+
+      if (ImGui.collapsingHeader(labels.get("Visual options")))
+      {
+         boolean proportionsChanged = false;
+         ImGui.checkbox("Resize based on camera distance", resizeAutomatically);
+
+         ImGui.pushItemWidth(100.00f);
+         if (resizeAutomatically.get())
+            proportionsChanged |= ImGui.dragFloat(labels.get("Torus camera size"), torusCameraSize.getData(), 0.001f);
+         else
+            proportionsChanged |= ImGui.dragFloat(labels.get("Torus radius"), torusRadius.getData(), 0.001f);
+         ImGui.popItemWidth();
 
          ImGui.pushItemWidth(100.00f);
          proportionsChanged |= ImGui.dragFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio.getData(), 0.001f);
@@ -503,10 +503,10 @@ public class RDXPose3DGizmo implements RenderableProvider
          proportionsChanged |= ImGui.dragFloat(labels.get("Arrow head body radius ratio"), arrowHeadBodyRadiusRatio.getData(), 0.05f);
          proportionsChanged |= ImGui.dragFloat(labels.get("Arrow spacing factor"), arrowSpacingFactor.getData(), 0.05f);
          ImGui.popItemWidth();
-      }
 
-      if (proportionsChanged)
-         recreateGraphics();
+         if (proportionsChanged)
+            recreateGraphics();
+      }
 
       ImGui.text("Drag using the left mouse button to manipulate the gizmo.");
 
