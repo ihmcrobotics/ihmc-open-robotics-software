@@ -20,7 +20,7 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.ApplicationNoModule;
-import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
@@ -39,7 +39,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
    private ROS2SyncedRobotModel syncedRobot;
    private RealtimeROS2Node ros2Node;
    private BorderPane mainPane;
-   private final PerceptionMessageTools perceptionMessageTools;
+   private final HeightMapKernel heightMapKernel;
 
    @FXML
    private HeightMapParametersUIController heightMapParametersUIController;
@@ -49,7 +49,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
 
    public HeightMapUI()
    {
-      this.perceptionMessageTools = new PerceptionMessageTools();
+      heightMapKernel = new HeightMapKernel();
    }
 
    public abstract DRCRobotModel getRobotModel();
@@ -173,7 +173,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
 
    public void stop()
    {
-      perceptionMessageTools.destroy();
+      heightMapKernel.destroy();
       ros2Node.destroy();
       if (SHOW_HEIGHT_MAP)
          heightMapVisualizer.stop();
