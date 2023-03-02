@@ -46,7 +46,7 @@ public class RDXPlanarRegionMappingDemo
    // L515_CinderBlocks_PerceptionLog.hdf5 -> L515_CinderBlocks
    // L515_RoughTerrain_PerceptionLog.hdf5 -> L515_RoughTerrain
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201455_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_204753_PerceptionLog.hdf5").toString();
 
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
@@ -110,7 +110,7 @@ public class RDXPlanarRegionMappingDemo
                if (transform != null)
                {
                   framePose.set(transform);
-                  modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.25, Color.GREEN);
+                  modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.04, Color.GREEN);
 
 //                  keyframeTrajectoryGraphic.generateMeshes();
 
@@ -143,19 +143,19 @@ public class RDXPlanarRegionMappingDemo
                   baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
                }
 
-               if (!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
-               {
-                  MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
-
-                  mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
-                  mocapGraphic.update();
-               }
-
-               if (!mappingManager.getSensorPositionBuffer().isEmpty())
-               {
-                  rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
-                  rootJointGraphic.update();
-               }
+               //if (!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
+               //{
+               //   MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
+               //
+               //   mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
+               //   mocapGraphic.update();
+               //}
+               //
+               //if (!mappingManager.getSensorPositionBuffer().isEmpty())
+               //{
+               //   rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
+               //   rootJointGraphic.update();
+               //}
 
                graphicsInitialized = true;
 

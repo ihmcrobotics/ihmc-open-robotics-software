@@ -127,7 +127,7 @@ def plotter_main(data, output_file):
     mocap_euler[:, 1] -= mocap_euler[0, 1] - sensor_euler[0, 1]
 
     
-    transform = compute_icp_transform(mocap_position[:200, :3], sensor_position[:200, :3])
+    transform = compute_icp_transform(mocap_position, sensor_position)
     # transform = get_relative_transform_se3(mocap_position[0], mocap_orientation[0], sensor_position[0], sensor_orientation[0])
 
     print("Shapes Mocap Position: ", mocap_position.shape, " Sensor Position: ", sensor_position.shape, " Mocap Orientation: ", mocap_orientation.shape, " Sensor Orientation: ", sensor_orientation.shape)
@@ -143,8 +143,20 @@ def plotter_main(data, output_file):
     mocap_position = positions[:3, :].T
     mocap_position -= mocap_position[0] - sensor_position[0]
     
-    plot_position(150, 640, [mocap_position, final_positions], ['-r', '-b', '-g'], "Estimated State [RED] - Ground Truth [BLUE]", "Position")
-    plot_position(150, 640, [mocap_euler, final_rotations], ['-r', '-b', '-g'], "Estimated State [RED] - Ground Truth [BLUE]", "Euler")
+
+    sum_of_squares = 0
+    for i in range(150, mocap_position.shape[0]):
+        print('Mocap Position: ', mocap_position[i], ' Sensor Position: ', sensor_position[i], ' Euclidean Distance: ', np.linalg.norm(mocap_position[i] - sensor_position[i]))
+        sum_of_squares += np.linalg.norm(mocap_position[i] - sensor_position[i]) ** 2
+
+    mean = sum_of_squares / (mocap_position.shape[0] - 150)
+    rmse = math.sqrt(mean)
+
+    print("RMSE: ", rmse)
+
+    plot_position(150, -1, [mocap_position, final_positions], ['-b', '-r', '-y'], "Estimated State [RED] - Ground Truth [BLUE]", "Position")
+
+    # plot_position(150, 640, [mocap_euler, final_rotations, sensor_orientation], ['-b', '-r', '-y'], "Estimated State [RED] - Ground Truth [BLUE]", "Euler")
 
 
 def extract_trajectory_from_output(file):
@@ -200,7 +212,7 @@ if __name__ == '__main__':
 
     # INDEX TO LOAD ----------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    index_to_load = 5
+    index_to_load = 4
 
     # INDEX TO LOAD -----------------------------------------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -208,7 +220,7 @@ if __name__ == '__main__':
     print('\nLoading file: ', index_to_load, '\tName: ', filename, '\tTitle: ', titles[index_to_load], '\n')
 
     data = h5py.File(path + filename, 'r')
-    output_file = '/home/bmishra/Workspace/Code/Resources/IROS_2023/' + titles[index_to_load] + '.txt'
+    output_file = '/home/quantum/Workspace/Code/Resources/IROS_2023/' + titles[index_to_load] + '.txt'
 
     # player_main(data)
     

@@ -1,7 +1,7 @@
 {
   "title" : "Rapid region extractor parameters",
   "Normal pack range" : {
-    "value" : 4,
+    "value" : 9,
     "lowerBound" : 1,
     "upperBound" : 10
   },
@@ -11,7 +11,7 @@
     "upperBound" : 10
   },
   "Merge range" : {
-    "value" : 3,
+    "value" : 1,
     "lowerBound" : 1,
     "upperBound" : 10
   },
@@ -26,12 +26,12 @@
     "upperBound" : 1.0
   },
   "Merge angular threshold" : {
-    "value" : 0.796117,
+    "value" : 0.970874,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Connection threshold" : {
-    "value" : 5,
+    "value" : 6,
     "lowerBound" : 0,
     "upperBound" : 8
   },

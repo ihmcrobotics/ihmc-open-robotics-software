@@ -169,16 +169,36 @@ def load_file(file_name):
 def plot_position(start_index, end_index, data_list, style_list, tag, type_string):
 
 
-    fig, axs = plt.subplots(3, figsize=(30,10))
-    fig.suptitle(tag + ' ' + type_string + ' Plots')
+    # Compute RMSE between data_list[0] and data_list[1] with Eucledian distance between start index and end index
+    
+    
 
-    axs[0].set_title(tag + ' ' + type_string + ' (X)')
-    axs[1].set_title(tag + ' ' + type_string + ' (Y)')
-    axs[2].set_title(tag + ' ' + type_string + ' (Z)')
+    fig3 = plt.figure(constrained_layout=True, figsize=(17,7))
+    gs = fig3.add_gridspec(3, 7)
+    xt_ax = fig3.add_subplot(gs[0, :4])
+    xt_ax.set_title('Position (X) vs Keyframe Index')
+    yt_ax = fig3.add_subplot(gs[1, :4])
+    yt_ax.set_title('Position (Y) vs Keyframe Index')
+    zt_ax = fig3.add_subplot(gs[2, :4])
+    zt_ax.set_title('Position (Y) vs Keyframe Index')
+    xy_ax = fig3.add_subplot(gs[:3, 4:7])
+    xy_ax.set_title('Position (X) vs Position (Y)')
 
-    # axs[0].set_ylim(-4, 4)
-    # axs[1].set_ylim(-4, 4)
-    # axs[2].set_ylim(-4, 4)
+
+    # xt_ax.set_title(tag + ' ' + type_string + ' (X)')
+    # yt_ax.set_title(tag + ' ' + type_string + ' (Y)')
+    # zt_ax.set_title(tag + ' ' + type_string + ' (Z)')
+    # xy_ax.set_title(tag + ' ' + type_string + ' (X-Y)')
+
+    xt_ax.set_xlabel('Keyframe Index')
+    yt_ax.set_xlabel('Keyframe Index')
+    zt_ax.set_xlabel('Keyframe Index')
+    xy_ax.set_xlabel('X-Position (m)')
+
+    xt_ax.set_ylabel('X-Position (m)')
+    yt_ax.set_ylabel('Y-Position (m)')
+    zt_ax.set_ylabel('Z-Position (m)')
+    xy_ax.set_ylabel('Y-Position (m)')
 
     for i, data in enumerate(data_list):
         
@@ -187,10 +207,17 @@ def plot_position(start_index, end_index, data_list, style_list, tag, type_strin
         else:
             t = np.linspace(start_index, data.shape[0], data.shape[0] - start_index -1)
 
-        axs[0].plot(t, data[start_index : end_index,0], style_list[i], markersize=1)
-        axs[1].plot(t, data[start_index : end_index,1], style_list[i], markersize=1)
-        axs[2].plot(t, data[start_index : end_index,2], style_list[i], markersize=1)
+        xt_ax.plot(t, data[start_index : end_index,0], style_list[i], markersize=1)
+        yt_ax.plot(t, data[start_index : end_index,1], style_list[i], markersize=1)
+        zt_ax.plot(t, data[start_index : end_index,2], style_list[i], markersize=1)
+        xy_ax.plot(data[start_index : end_index,0], data[start_index : end_index,1], style_list[i], markersize=1)
 
+
+    # Add a legend on the top-left corner with blue being Ground Truth and Red being the estimated position
+    xt_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
+    yt_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
+    zt_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
+    xy_ax.legend(['Ground Truth', 'SKIPR Position'], loc='upper left')
 
 
     plt.show()
