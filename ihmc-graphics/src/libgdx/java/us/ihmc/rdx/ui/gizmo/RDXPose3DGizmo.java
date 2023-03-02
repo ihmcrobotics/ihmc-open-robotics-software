@@ -17,7 +17,9 @@ import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -86,6 +88,8 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final FramePose3D framePose3D = new FramePose3D();
    /** Pose used for making adjustments. */
    private final FramePose3D adjustmentPose3D = new FramePose3D();
+   /** Used for adjusting orientation with respect to different frames. */
+   private final FrameQuaternion rotationAdjustmentQuaternion = new FrameQuaternion();
    private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
    /** Gizmo transform to world so it can be calculated once. */
@@ -538,18 +542,24 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       switch (rotationAdjustmentFrame)
       {
-         case WORLD -> adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
-         case PARENT -> adjustmentPose3D.changeFrame(parentReferenceFrame);
-         case LOCAL -> adjustmentPose3D.changeFrame(gizmoFrame);
-      }
+         case WORLD, PARENT ->
+         {
+            if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.WORLD)
+               rotationAdjustmentQuaternion.setToZero(ReferenceFrame.getWorldFrame());
+            else
+               rotationAdjustmentQuaternion.setToZero(parentReferenceFrame);
 
-      yaw.set(adjustmentPose3D.getRotation().getYaw());
-      pitch.set(adjustmentPose3D.getRotation().getPitch());
-      roll.set(adjustmentPose3D.getRotation().getRoll());
-      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Yaw"), yaw, 0.01, 0.1, "%.5f");
-      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Pitch"), pitch, 0.01, 0.1, "%.5f");
-      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Roll"), roll, 0.01, 0.1, "%.5f");
-      adjustmentPose3D.getRotation().setYawPitchRoll(yaw.get(), pitch.get(), roll.get());
+            runOrientationThroughImGuiWidgets(rotationAdjustmentQuaternion);
+            rotationAdjustmentQuaternion.changeFrame(parentReferenceFrame);
+            adjustmentPose3D.changeFrame(parentReferenceFrame);
+            adjustmentPose3D.getOrientation().prepend(rotationAdjustmentQuaternion);
+         }
+         case LOCAL ->
+         {
+            adjustmentPose3D.changeFrame(gizmoFrame);
+            runOrientationThroughImGuiWidgets(adjustmentPose3D.getOrientation());
+         }
+      }
 
       ImGui.text("Set to zero in:");
       ImGui.sameLine();
@@ -590,6 +600,17 @@ public class RDXPose3DGizmo implements RenderableProvider
          proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow spacing factor"), arrowSpacingFactor.getData(), 0.05f);
          ImGui.popItemWidth();
       }
+   }
+
+   private void runOrientationThroughImGuiWidgets(Orientation3DBasics orientation)
+   {
+      yaw.set(orientation.getYaw());
+      pitch.set(orientation.getPitch());
+      roll.set(orientation.getRoll());
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Yaw"), yaw, 0.01, 0.1, "%.5f");
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Pitch"), pitch, 0.01, 0.1, "%.5f");
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Roll"), roll, 0.01, 0.1, "%.5f");
+      orientation.setYawPitchRoll(yaw.get(), pitch.get(), roll.get());
    }
 
    private void recreateGraphics()
