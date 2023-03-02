@@ -379,6 +379,9 @@ public class RDXPointCloudRenderer implements RenderableProvider
    {
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
+
+      if (renderable.shader != null)
+         renderable.shader.dispose();
    }
 
    public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender)
