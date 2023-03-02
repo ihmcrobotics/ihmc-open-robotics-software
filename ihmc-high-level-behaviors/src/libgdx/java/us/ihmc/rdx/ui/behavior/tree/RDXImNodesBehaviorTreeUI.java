@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
+import com.esotericsoftware.minlog.Log;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImColor;
@@ -29,12 +30,23 @@ public class RDXImNodesBehaviorTreeUI
    private final ArrayList<RDXImNodesTreeNode> allNodesList = new ArrayList<>();
    private int linkIndex = 0;
    private boolean firstRun = true;
-   private static final Path configurationsPath = PathTools.findDirectoryInline("ihmc-open-robotics-software")
-                                                           .resolve("ihmc-high-level-behaviors/src/libgdx/resources/imnodeTrees");
+//   private static final Path configurationsPath = PathTools.findDirectoryInline("ihmc-open-robotics-software")
+//                                                           .resolve("ihmc-high-level-behaviors/src/libgdx/resources/imnodeTrees");
+   private static Path configurationsPath;
    private final MutableInt pinIndex = new MutableInt(0);
+   public boolean drawWidget = true;
 
    public void create()
    {
+      try
+      {
+         configurationsPath = PathTools.findDirectoryInline("ihmc-open-robotics-software");
+      }
+      catch (NullPointerException e)
+      {
+         LogTools.info("return value of PathTools.findDirectoryInline(\"ihmc-open-robotics-software\") is null");
+         configurationsPath = null;
+      }
       ImNodesTools.initialize();
 
       float backgroundColor;
@@ -116,48 +128,64 @@ public class RDXImNodesBehaviorTreeUI
 
    private void loadLayoutNodesFromFile()
    {
-      Path file = configurationsPath.resolve(rootNode.getBehaviorNodeUI().getUIChildren().get(0).getName() + ".json");
-      if (Files.exists(file))
+      if (configurationsPath != null)
       {
-         LogTools.info("Loading imnodes layout from {}", file);
-         JSONFileTools.load(file, jsonNode ->
+         Path file = configurationsPath.resolve(rootNode.getBehaviorNodeUI().getUIChildren().get(0).getName() + ".json");
+         if (Files.exists(file))
          {
-            JsonNode treeNodesNode = jsonNode.get("treeNodes");
-            Iterator<Map.Entry<String, JsonNode>> it = treeNodesNode.fields();
-            while (it.hasNext())
+            LogTools.info("Loading imnodes layout from {}", file);
+            JSONFileTools.load(file, jsonNode ->
             {
-               Map.Entry<String, JsonNode> entry = it.next();
-
-               for (RDXImNodesTreeNode node : allNodesList)
+               JsonNode treeNodesNode = jsonNode.get("treeNodes");
+               Iterator<Map.Entry<String, JsonNode>> it = treeNodesNode.fields();
+               while (it.hasNext())
                {
-                  if (node.getBehaviorNodeUI().getName().equals(entry.getKey()))
-                  {
-                     String[] pos = entry.getValue().asText().split(",");
-                     float x = Float.parseFloat(pos[0]);
-                     float y = Float.parseFloat(pos[1]);
+                  Map.Entry<String, JsonNode> entry = it.next();
 
-                     ImNodes.setNodeGridSpacePos(node.getNodeID(), x, y);
+                  for (RDXImNodesTreeNode node : allNodesList)
+                  {
+                     if (node.getBehaviorNodeUI().getName().equals(entry.getKey()))
+                     {
+                        String[] pos = entry.getValue().asText().split(",");
+                        float x = Float.parseFloat(pos[0]);
+                        float y = Float.parseFloat(pos[1]);
+
+                        ImNodes.setNodeGridSpacePos(node.getNodeID(), x, y);
+                     }
                   }
                }
-            }
-         });
+            });
+         }
       }
    }
 
    public void saveLayoutToFile()
    {
-      Path file = configurationsPath.resolve(rootNode.getBehaviorNodeUI().getUIChildren().get(0).getName() + ".json");
-      LogTools.info("Saving imnodes layout to {}", file);
-      JSONFileTools.save(file, root ->
+      if (configurationsPath != null)
       {
-         ObjectNode treeNodesNode = root.putObject("treeNodes");
-         for (RDXImNodesTreeNode node : allNodesList)
+         Path file = configurationsPath.resolve(rootNode.getBehaviorNodeUI().getUIChildren().get(0).getName() + ".json");
+         LogTools.info("Saving imnodes layout to {}", file);
+         JSONFileTools.save(file, root ->
          {
-            treeNodesNode.put(node.getBehaviorNodeUI().getName(),
-                              ImNodes.getNodeGridSpacePosX(node.getNodeID()) + "," + ImNodes.getNodeGridSpacePosY(node.getNodeID()));
+            ObjectNode treeNodesNode = root.putObject("treeNodes");
+            for (RDXImNodesTreeNode node : allNodesList)
+            {
+               treeNodesNode.put(node.getBehaviorNodeUI().getName(),
+                                 ImNodes.getNodeGridSpacePosX(node.getNodeID()) + "," + ImNodes.getNodeGridSpacePosY(node.getNodeID()));
 
-         }
-      });
+            }
+         });
+      }
+   }
+
+   public boolean isDrawWidget()
+   {
+      return drawWidget;
+   }
+
+   public void setDrawWidget(boolean drawWidget)
+   {
+      this.drawWidget = drawWidget;
    }
 
    public void destroy()
