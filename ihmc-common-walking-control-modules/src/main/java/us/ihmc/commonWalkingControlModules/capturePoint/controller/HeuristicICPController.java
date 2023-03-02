@@ -220,11 +220,11 @@ public class HeuristicICPController implements ICPControllerInterface
       unconstrainedFeedback.scaleAdd(1.0 - feedbackFeedforwardAlpha.getValue(), pureFeedforwardControl, pureFeedbackControl);
 
       unconstrainedFeedbackCMP.add(currentICP, unconstrainedFeedback);
-      unconstrainedFeedbackCoP.sub(unconstrainedFeedbackCMP, perfectCMPOffset);
+      unconstrainedFeedbackCoP.sub(unconstrainedFeedbackCMP, this.perfectCMPOffset);
 
       if (feedbackProjectionOperator != null)
       {
-         feedbackProjectionOperator.projectFeedback(currentICP, unconstrainedFeedbackCMP, perfectCMPOffset, supportPolygonInWorld, feedbackCoP, feedbackCMP);
+         feedbackProjectionOperator.projectFeedback(currentICP, unconstrainedFeedbackCMP, this.perfectCMPOffset, supportPolygonInWorld, feedbackCoP, feedbackCMP);
       }
 
       expectedControlICPVelocity.sub(currentICP, feedbackCMP);
