@@ -16,7 +16,7 @@ import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
  * This class is for renedering the Ouster point cloud with optional coloring
  * from a fisheye camera with an equidistant camera model.
  */
-public class RDXOusterDepthImageToPointCloudKernel
+public class RDXOusterFisheyeColoredPointCloudKernel
 {
    private final OpenCLManager openCLManager;
    private final _cl_program openCLProgram;
@@ -31,12 +31,12 @@ public class RDXOusterDepthImageToPointCloudKernel
    private int levelOfColorDetail;
    private int heightWithVerticalPointsForColorDetail;
 
-   public RDXOusterDepthImageToPointCloudKernel(OpenCLManager openCLManager)
+   public RDXOusterFisheyeColoredPointCloudKernel(OpenCLManager openCLManager)
    {
       this.openCLManager = openCLManager;
 
-      openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer", "PerceptionCommon.cl");
-      unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
+      openCLProgram = openCLManager.loadProgram("OusterFisheyeColoredPointCloud", "PerceptionCommon.cl");
+      unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "computeVertexBuffer");
       placeholderColorImage = new BytedecoImage(1, 1, opencv_core.CV_8UC4);
       placeholderColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
    }

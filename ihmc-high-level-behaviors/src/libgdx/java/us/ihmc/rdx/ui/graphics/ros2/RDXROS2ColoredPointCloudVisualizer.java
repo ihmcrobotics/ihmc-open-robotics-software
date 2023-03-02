@@ -18,7 +18,7 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
-import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
+import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -54,8 +54,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    private RDXPointCloudRenderer pointCloudRenderer;
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer pointCloudVertexBuffer;
-   private RDXColoredPointCloudPinholePinholeKernel pinholePinholeKernel;
-   private RDXOusterDepthImageToPointCloudKernel depthImageToPointCloudKernel;
+   private RDXPinholePinholeColoredPointCloudKernel pinholePinholeKernel;
+   private RDXOusterFisheyeColoredPointCloudKernel depthImageToPointCloudKernel;
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
                                              PubSubImplementation pubSubImplementation,
@@ -84,8 +84,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
       super.create();
 
       openCLManager = new OpenCLManager();
-      pinholePinholeKernel = new RDXColoredPointCloudPinholePinholeKernel(openCLManager);
-      depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(openCLManager);
+      pinholePinholeKernel = new RDXPinholePinholeColoredPointCloudKernel(openCLManager);
+      depthImageToPointCloudKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
    }
 
    @Override
@@ -143,13 +143,13 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
 
             if (depthChannel.getIsPinholeCameraModel()) // Assuming color camera is also pinhole if using it
             {
-               pinholePinholeKernel.runKernel(colorChannel,
-                                              depthChannel,
-                                              usingColor && useSensorColor.get(),
-                                              gradientMode.ordinal(),
-                                              useSinusoidalGradientPattern.get(),
-                                              pointSize.get(),
-                                              pointCloudVertexBuffer);
+               pinholePinholeKernel.computeVertexBuffer(colorChannel,
+                                                        depthChannel,
+                                                        usingColor && useSensorColor.get(),
+                                                        gradientMode.ordinal(),
+                                                        useSinusoidalGradientPattern.get(),
+                                                        pointSize.get(),
+                                                        pointCloudVertexBuffer);
             }
             else if (depthChannel.getIsOusterCameraModel()) // Assuming color is equidistant fisheye if using it
             {

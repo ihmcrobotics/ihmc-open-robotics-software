@@ -26,7 +26,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
-import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
+import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
@@ -42,7 +42,7 @@ public class RDXNettyOusterUI
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OusterDepthExtractionKernel depthExtractionKernel;
-   private RDXOusterDepthImageToPointCloudKernel depthImageToPointCloudKernel;
+   private RDXOusterFisheyeColoredPointCloudKernel depthImageToPointCloudKernel;
    private RDXPointCloudRenderer pointCloudRenderer;
    private final ImFloat verticalFieldOfView = new ImFloat((float) Math.toRadians(90.0));
    private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
@@ -90,7 +90,7 @@ public class RDXNettyOusterUI
    public void createAfterNativesLoaded()
    {
       openCLManager = new OpenCLManager();
-      depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(openCLManager);
+      depthImageToPointCloudKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
    }
 
    public boolean isOusterInitialized()
@@ -265,7 +265,7 @@ public class RDXNettyOusterUI
       return ousterInteractable;
    }
 
-   public RDXOusterDepthImageToPointCloudKernel getDepthImageToPointCloudKernel()
+   public RDXOusterFisheyeColoredPointCloudKernel getDepthImageToPointCloudKernel()
    {
       return depthImageToPointCloudKernel;
    }

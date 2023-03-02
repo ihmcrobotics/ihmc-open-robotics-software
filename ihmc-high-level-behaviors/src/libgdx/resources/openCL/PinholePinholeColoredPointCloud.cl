@@ -19,12 +19,12 @@
 #define GRADIENT_MODE_WORLD_Z 0
 #define GRADIENT_MODE_SENSOR_X 1
 
-kernel void createPointCloud(read_only image2d_t depthImageDiscretized,
-                             read_only image2d_t colorRGBAImage,
-                             global float* pointCloudVertexBuffer,
-                             global float* parameters,
-                             global float* depthToWorldTransform,
-                             global float* depthToColorTransform)
+kernel void computeVertexBuffer(read_only image2d_t depthImageDiscretized,
+                                read_only image2d_t colorRGBAImage,
+                                global float* pointCloudVertexBuffer,
+                                global float* parameters,
+                                global float* depthToWorldTransform,
+                                global float* depthToColorTransform)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);

@@ -26,7 +26,7 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
-import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
+import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
@@ -58,7 +58,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private int totalNumberOfPoints;
    private OpenCLManager openCLManager;
-   private RDXOusterDepthImageToPointCloudKernel depthImageToPointCloudKernel;
+   private RDXOusterFisheyeColoredPointCloudKernel depthImageToPointCloudKernel;
    private ByteBuffer decompressionInputBuffer;
    private BytePointer decompressionInputBytePointer;
    private Mat decompressionInputMat;
@@ -134,7 +134,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
                decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
 
-               depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(openCLManager);
+               depthImageToPointCloudKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
                depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
                depth16UC1Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
                LogTools.info("Allocated new buffers. {} points.", totalNumberOfPoints);

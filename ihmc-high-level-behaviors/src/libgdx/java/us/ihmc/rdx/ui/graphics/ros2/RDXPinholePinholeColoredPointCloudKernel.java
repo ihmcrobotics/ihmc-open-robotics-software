@@ -14,7 +14,7 @@ import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
  * This class is for rendering colored point clouds when the depth camera
  * and the color camera are both pinhole model.
  */
-public class RDXColoredPointCloudPinholePinholeKernel
+public class RDXPinholePinholeColoredPointCloudKernel
 {
    private final OpenCLManager openCLManager;
    private final _cl_program openCLProgram;
@@ -24,22 +24,22 @@ public class RDXColoredPointCloudPinholePinholeKernel
    private final OpenCLRigidBodyTransformParameter depthToColorTransformParameter = new OpenCLRigidBodyTransformParameter();
    private final BytedecoImage placeholderColorImage;
 
-   public RDXColoredPointCloudPinholePinholeKernel(OpenCLManager openCLManager)
+   public RDXPinholePinholeColoredPointCloudKernel(OpenCLManager openCLManager)
    {
       this.openCLManager = openCLManager;
-      openCLProgram = openCLManager.loadProgram("PinholePinholeColoredPointCloudVisualizer", "PerceptionCommon.cl");
-      kernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
+      openCLProgram = openCLManager.loadProgram("PinholePinholeColoredPointCloud", "PerceptionCommon.cl");
+      kernel = openCLManager.createKernel(openCLProgram, "computeVertexBuffer");
       placeholderColorImage = new BytedecoImage(1, 1, opencv_core.CV_8UC4);
       placeholderColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
    }
 
-   public void runKernel(RDXROS2ColoredPointCloudVisualizerColorChannel colorChannel,
-                         RDXROS2ColoredPointCloudVisualizerDepthChannel depthChannel,
-                         boolean useSensorColor,
-                         int gradientMode,
-                         boolean useSinusoidalGradientPattern,
-                         float pointSize,
-                         OpenCLFloatBuffer pointCloudVertexBuffer)
+   public void computeVertexBuffer(RDXROS2ColoredPointCloudVisualizerColorChannel colorChannel,
+                                   RDXROS2ColoredPointCloudVisualizerDepthChannel depthChannel,
+                                   boolean useSensorColor,
+                                   int gradientMode,
+                                   boolean useSinusoidalGradientPattern,
+                                   float pointSize,
+                                   OpenCLFloatBuffer pointCloudVertexBuffer)
    {
       parametersBuffer.setParameter(colorChannel.getFx());
       parametersBuffer.setParameter(colorChannel.getFy());
