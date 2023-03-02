@@ -58,7 +58,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private int totalNumberOfPoints;
    private OpenCLManager openCLManager;
-   private RDXOusterFisheyeColoredPointCloudKernel depthImageToPointCloudKernel;
+   private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
    private ByteBuffer decompressionInputBuffer;
    private BytePointer decompressionInputBytePointer;
    private Mat decompressionInputMat;
@@ -134,7 +134,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
                decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
 
-               depthImageToPointCloudKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
+               ousterFisheyeKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
                depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
                depth16UC1Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
                LogTools.info("Allocated new buffers. {} points.", totalNumberOfPoints);
@@ -173,15 +173,15 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
          pointCloudRenderer.updateMeshFastestBeforeKernel();
          pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
 
-         depthImageToPointCloudKernel.getOusterToWorldTransformToPack().set(imageMessage.getOrientation(), imageMessage.getPosition());
-         depthImageToPointCloudKernel.runKernel(horizontalFieldOfView,
-                                                verticalFieldOfView,
-                                                pointSize.get(),
-                                                false,
-                                                RDXColorGradientMode.WORLD_Z.ordinal(),
-                                                false,
-                                                depth16UC1Image,
-                                                pointCloudVertexBuffer);
+         ousterFisheyeKernel.getOusterToWorldTransformToPack().set(imageMessage.getOrientation(), imageMessage.getPosition());
+         ousterFisheyeKernel.runKernel(horizontalFieldOfView,
+                                       verticalFieldOfView,
+                                       pointSize.get(),
+                                       false,
+                                       RDXColorGradientMode.WORLD_Z.ordinal(),
+                                       false,
+                                       depth16UC1Image,
+                                       pointCloudVertexBuffer);
 
          pointCloudRenderer.updateMeshFastestAfterKernel();
 
