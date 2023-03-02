@@ -42,7 +42,7 @@ public class PerceptionMessageTools
       imageMessage.setPrincipalPointYPixels((float) sensor.getColorPrincipalOffsetYPixels());
    }
 
-   public static void toMessage(CameraPinhole cameraPinhole, ImageMessage imageMessage)
+   public static void copyToMessage(CameraPinhole cameraPinhole, ImageMessage imageMessage)
    {
       imageMessage.setFocalLengthXPixels((float) cameraPinhole.getFx());
       imageMessage.setFocalLengthYPixels((float) cameraPinhole.getFy());
