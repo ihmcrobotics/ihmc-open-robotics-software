@@ -3,12 +3,12 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.ImageMessageDecompressionInput;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
@@ -114,7 +114,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 
          messageSizeReadout.update(imageMessage.getData().size());
          sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
-         delayPlot.addValue(PerceptionMessageTools.calculateDelay(imageMessage));
+         delayPlot.addValue(MessageTools.calculateDelay(imageMessage));
 
          isPinholeCameraModel = imageMessage.getIsPinholeCameraModel();
          isEquidistantFisheyeCameraModel = imageMessage.getIsEquidistantFisheyeCameraModel();

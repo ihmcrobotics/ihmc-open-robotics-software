@@ -18,7 +18,6 @@ import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.nio.ByteBuffer;
@@ -146,12 +145,6 @@ public class PerceptionMessageTools
       {
          imageMessage.getData().add(dataBytePointer.get(i));
       }
-   }
-
-   public static double calculateDelay(ImageMessage imageMessage)
-   {
-      return TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
-                                      imageMessage.getAcquisitionTime().getAdditionalNanos());
    }
 
    public static void packImageMessage(ImageMessage imageMessage,
