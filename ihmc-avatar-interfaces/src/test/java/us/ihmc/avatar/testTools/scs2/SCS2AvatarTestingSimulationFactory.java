@@ -21,6 +21,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
+import us.ihmc.scs2.session.Session;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -113,7 +114,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       boolean createVideo = this.createVideo.get();
       boolean keepSCSUp = this.keepSCSUp.get();
 
-      setSimulationName(simulationName != null ? simulationName : retrieveCallingTestName());
+      setSimulationName(simulationName != null ? simulationName : Session.retrieveCallingTestName());
       SCS2AvatarTestingSimulation avatarTestingSimulation = new SCS2AvatarTestingSimulation(super.createAvatarSimulation());
       avatarTestingSimulation.setROS2Node(ros2Node);
       avatarTestingSimulation.setDefaultControllerPublishers(defaultControllerPublishers);
@@ -122,36 +123,6 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       // TODO This guy needs to be created before the robot is completely standing. Should cleanup QueuedControllerCommandGenerator, quite a mess.
       avatarTestingSimulation.getQueuedControllerCommands();
       return avatarTestingSimulation;
-   }
-
-   public static String retrieveCallingTestName()
-   {
-      StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-
-      StackTraceElement callingElement = null;
-
-      for (StackTraceElement candidate : stackTrace)
-      {
-         if (candidate.getClassName().startsWith("sun.reflect"))
-            break;
-         else if (candidate.getClassName().startsWith("java.lang"))
-            break;
-         else if (candidate.getClassName().startsWith("org.junit"))
-            break;
-         callingElement = candidate;
-      }
-
-      if (callingElement == null)
-      {
-         return "Unknown test simulation";
-      }
-      else
-      {
-         String className = callingElement.getClassName();
-         String methodName = callingElement.getMethodName();
-         String classSimpleName = className.substring(className.lastIndexOf(".") + 1);
-         return classSimpleName + "-" + methodName;
-      }
    }
 
    @Override
