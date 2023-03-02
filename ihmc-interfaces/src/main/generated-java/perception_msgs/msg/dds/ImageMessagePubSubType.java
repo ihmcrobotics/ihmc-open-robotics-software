@@ -48,6 +48,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (25000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -61,8 +63,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -98,6 +98,9 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -138,9 +141,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -153,6 +153,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       cdr.write_type_3(data.getImageWidth());
 
       cdr.write_type_3(data.getImageHeight());
+
+      cdr.write_type_5(data.getDepthDiscretization());
 
       if(data.getData().size() <= 25000000)
       cdr.write_type_e(data.getData());else
@@ -176,8 +178,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       cdr.write_type_5(data.getPrincipalPointYPixels());
 
-      cdr.write_type_5(data.getDepthDiscretization());
-
       cdr.write_type_5(data.getOusterVerticalFieldOfView());
 
       cdr.write_type_5(data.getOusterHorizontalFieldOfView());
@@ -192,6 +192,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       data.setImageWidth(cdr.read_type_3());
       	
       data.setImageHeight(cdr.read_type_3());
+      	
+      data.setDepthDiscretization(cdr.read_type_5());
       	
       cdr.read_type_e(data.getData());	
       data.setFormat(cdr.read_type_3());
@@ -212,8 +214,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       	
       data.setPrincipalPointYPixels(cdr.read_type_5());
       	
-      data.setDepthDiscretization(cdr.read_type_5());
-      	
       data.setOusterVerticalFieldOfView(cdr.read_type_5());
       	
       data.setOusterHorizontalFieldOfView(cdr.read_type_5());
@@ -229,6 +229,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       ser.write_type_3("image_width", data.getImageWidth());
       ser.write_type_3("image_height", data.getImageHeight());
+      ser.write_type_5("depth_discretization", data.getDepthDiscretization());
       ser.write_type_e("data", data.getData());
       ser.write_type_3("format", data.getFormat());
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
@@ -242,7 +243,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       ser.write_type_5("focal_length_y_pixels", data.getFocalLengthYPixels());
       ser.write_type_5("principal_point_x_pixels", data.getPrincipalPointXPixels());
       ser.write_type_5("principal_point_y_pixels", data.getPrincipalPointYPixels());
-      ser.write_type_5("depth_discretization", data.getDepthDiscretization());
       ser.write_type_5("ouster_vertical_field_of_view", data.getOusterVerticalFieldOfView());
       ser.write_type_5("ouster_horizontal_field_of_view", data.getOusterHorizontalFieldOfView());
    }
@@ -255,6 +255,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       data.setImageWidth(ser.read_type_3("image_width"));
       data.setImageHeight(ser.read_type_3("image_height"));
+      data.setDepthDiscretization(ser.read_type_5("depth_discretization"));
       ser.read_type_e("data", data.getData());
       data.setFormat(ser.read_type_3("format"));
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
@@ -268,7 +269,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       data.setFocalLengthYPixels(ser.read_type_5("focal_length_y_pixels"));
       data.setPrincipalPointXPixels(ser.read_type_5("principal_point_x_pixels"));
       data.setPrincipalPointYPixels(ser.read_type_5("principal_point_y_pixels"));
-      data.setDepthDiscretization(ser.read_type_5("depth_discretization"));
       data.setOusterVerticalFieldOfView(ser.read_type_5("ouster_vertical_field_of_view"));
       data.setOusterHorizontalFieldOfView(ser.read_type_5("ouster_horizontal_field_of_view"));
    }

@@ -35,6 +35,14 @@ module perception_msgs
          */
         unsigned short image_height;
         /**
+         * Depth discretization unit length.
+         * This is used when this image is a depth image. The image will be represented
+         * in data as unsigned integers where the units are this distance.
+         * For instance a depth pixel value of 2 and discretization value of 0.1 would
+         * indicate a depth of 0.2 meters.
+         */
+        float depth_discretization;
+        /**
          * The raw data for the image
          */
         sequence<octet, 25000000> data;
@@ -59,7 +67,9 @@ module perception_msgs
          */
         boolean is_equidistant_fisheye_camera_model;
         /**
-         * Is Ouster camera model
+         * If the camera model is the Ouster camera model.
+         * With the Ouster camera model, the vertical and horizonal fields of view
+         * are used instead of the focal length and principal point parameters.
          */
         boolean is_ouster_camera_model;
         /**
@@ -78,11 +88,6 @@ module perception_msgs
          * Principal point Y in units of pixels (Cy)
          */
         float principal_point_y_pixels;
-        /**
-         * Depth discretization, if a depth image. Depth images are sent as unsigned 16 bit integers
-         * in units of this value
-         */
-        float depth_discretization;
         /**
          * If Ouster camera model, the vertical field of view in radians
          */
