@@ -18,13 +18,13 @@
 #define GRADIENT_MODE_WORLD_Z 0
 #define GRADIENT_MODE_SENSOR_X 1
 
-kernel void imageToPointCloud(global float* parameters,
-                              global float* ousterToWorldTransform,
-                              read_only image2d_t discretizedDepthImage,
-                              global float* fisheyeParameters,
-                              read_only image2d_t fThetaFisheyeRGBA8Image,
-                              global float* ousterToFisheyeTransform,
-                              global float* pointCloudVertexBuffer)
+kernel void computeVertexBuffer(global float* parameters,
+                                global float* ousterToWorldTransform,
+                                read_only image2d_t discretizedDepthImage,
+                                global float* fisheyeParameters,
+                                read_only image2d_t fThetaFisheyeRGBA8Image,
+                                global float* ousterToFisheyeTransform,
+                                global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
