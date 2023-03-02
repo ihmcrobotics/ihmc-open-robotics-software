@@ -58,8 +58,7 @@ float4 calculateSinusoidalGradientFloat4(double input)
 {
    // maximum depth value
    float m = 3.0f;
-   float PI = 3.141592f;
-   float a = 5.0f * input * PI / (3.0f * m) + PI / 2.0f;
+   float a = 5.0f * input * M_PI_F / (3.0f * m) + M_PI_F / 2.0f;
    float r = sin(a) * 192.0f + 128.0f;
    float alpha = 255.0f;
 
@@ -68,13 +67,13 @@ float4 calculateSinusoidalGradientFloat4(double input)
    else if (r > 255.0f)
       r = 255.0f;
       // r = max(0.0f, min(255.0f, r));
-   float g = sin(a - 2.0f * PI / 3.0f) * 192.0f + 128.0f;
+   float g = sin(a - 2.0f * M_PI_F / 3.0f) * 192.0f + 128.0f;
    if (g < 0.0f)
       g = 0.0f;
    else if (g > 255.0f)
       g = 255.0f;
       // g = max(0.0f, min(255.0f, g));
-   float b = sin(a - 4.0f * PI / 3.0f) * 192.0f + 128.0f;
+   float b = sin(a - 4.0f * M_PI_F / 3.0f) * 192.0f + 128.0f;
    if (b < 0.0f)
       b = 0.0f;
    else if (b > 255.0f)
