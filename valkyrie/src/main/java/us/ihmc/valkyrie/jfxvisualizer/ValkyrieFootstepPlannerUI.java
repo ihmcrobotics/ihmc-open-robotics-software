@@ -48,6 +48,7 @@ public class ValkyrieFootstepPlannerUI extends ApplicationNoModule
       ui = FootstepPlannerUI.createUI(primaryStage,
                                       messager,
                                       model.getVisibilityGraphsParameters(),
+                                      model.getAStarBodyPathPlannerParameters(),
                                       model.getFootstepPlannerParameters(),
                                       model.getSwingPlannerParameters(),
                                       model,

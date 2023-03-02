@@ -23,6 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -267,23 +268,34 @@ public class SwingKnotPoint
       return percentage;
    }
 
-   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList)
+   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList, HeightMapData heightMapData)
    {
       this.collisionResult.setToZero();
       this.collisionResult.setSignedDistance(Double.POSITIVE_INFINITY);
 
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      if (planarRegionsList != null)
       {
-         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-         if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(collisionBox.getBoundingBox()))
+         for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
          {
-            EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
-            collisionDetector.evaluateCollision(collisionBox, planarRegion, collisionResult);
-
-            if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
+            PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
+            if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(collisionBox.getBoundingBox()))
             {
-               this.collisionResult.set(collisionResult);
+               EuclidShape3DCollisionResult collisionResult = collisionDetector.evaluateCollision(collisionBox, planarRegion);
+
+               if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
+               {
+                  this.collisionResult.set(collisionResult);
+               }
             }
+         }
+      }
+      if (heightMapData != null)
+      {
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData);
+
+         if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
+         {
+            this.collisionResult.set(collisionResult);
          }
       }
 

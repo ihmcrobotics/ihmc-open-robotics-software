@@ -15,6 +15,13 @@ import static us.ihmc.perception.spinnaker.SpinnakerTools.assertNoError;
 
 /**
  * Good reference: http://softwareservices.flir.com/BFS-U3-04S2/latest/Model/public/
+ *
+ * If you don't have it set on boot (didn't use official Spinnaker installation procedure) then
+ * you need to run the following command before using this class. It will make sure the USB
+ * buffers are large enough to handle the Blackfly stably.
+ * <pre>sudo sh -c 'echo 2047 > /sys/module/usbcore/parameters/usbfs_memory_mb'</pre>
+ *
+ * Confluence page: https://confluence.ihmc.us/display/PER/Blackfly+Cameras
  */
 public class SpinnakerBlackfly
 {
@@ -117,6 +124,11 @@ public class SpinnakerBlackfly
    public void setBytedecoPointerToSpinImageData(spinImage spinImage, Pointer pointer)
    {
       Spinnaker_C.spinImageGetData(spinImage, pointer);
+   }
+
+   public void stopAcquiringImages()
+   {
+      assertNoError(Spinnaker_C.spinCameraEndAcquisition(spinCamera), "Ending camera acquisition");
    }
 
    public void destroy()

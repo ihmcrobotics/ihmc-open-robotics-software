@@ -2,12 +2,15 @@ package us.ihmc.tools.io;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.log.LogTools;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 public class HybridFile
 {
@@ -44,7 +47,34 @@ public class HybridFile
       return mode == HybridResourceMode.WORKSPACE ? workspaceFile.getFilePath() : externalFile;
    }
 
-   public InputStream getInputStream()
+   /**
+    * Get this file as an input stream, if possible, and close it afterwards.
+    *
+    * @return if the input stream was consumed successfully
+    */
+   public boolean getInputStream(Consumer<InputStream> inputStreamGetter)
+   {
+      boolean success = false;
+      try (InputStream inputStream = getInputStreamUnsafe())
+      {
+         if (inputStream != null)
+         {
+            inputStreamGetter.accept(inputStream);
+            success = true;
+         }
+         else
+         {
+            LogTools.error(1, "Input stream is null"); // Print caller info to help identify issues
+         }
+      }
+      catch (IOException ioException)
+      {
+         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(ioException);
+      }
+      return success;
+   }
+
+   private InputStream getInputStreamUnsafe()
    {
       return mode == HybridResourceMode.WORKSPACE ?
             getClasspathResourceAsStream() :

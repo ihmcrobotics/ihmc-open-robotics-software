@@ -6,11 +6,16 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXSpatialVectorArrows;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoSpatialVector;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,7 +27,8 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
 {
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
-   private RDXSpatialVectorArrows wristWrenchArrows;
+   private RDXSpatialVectorArrows sensorWristWrenchArrows;
+   private RDXSpatialVectorArrows estimatedHandWrenchArrows;
    private String contextMenuName;
 
    public static boolean robotCollidableIsHand(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
@@ -62,12 +68,13 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
          if (wristForceSensorNames.containsKey(side) && wristForceSensorNames.get(side).equals(forceSensorDefinitions[i].getSensorName()))
          {
             // wristWrenchArrows.put(side, new RDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(), i));
-            wristWrenchArrows = new RDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(),
-                                                           yoVariableClientHelper,
-                                                           side.getLowerCaseName() + "WristSensor");
+            sensorWristWrenchArrows = new RDXSpatialVectorArrows(forceSensorDefinitions[i].getSensorFrame(),
+                                                                 yoVariableClientHelper,
+                                                                 side.getLowerCaseName() + "WristSensor");
          }
       }
-
+      estimatedHandWrenchArrows = new RDXSpatialVectorArrows(handFrame);
+      estimatedHandWrenchArrows.setAngularPartScale(0.05);
       contextMenuName = side + " Hand Context Menu";
    }
 
@@ -76,7 +83,7 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    {
       super.update();
 
-      if (wristWrenchArrows != null)
+      if (sensorWristWrenchArrows != null)
       {
          // RDXSpatialVectorArrows wristArrows = wristWrenchArrows.get(side);
          // if (syncedRobot.getForceSensorData().size() > wristArrows.getIndexOfSensor())
@@ -84,8 +91,13 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
          //    SpatialVectorMessage forceSensorData = syncedRobot.getForceSensorData().get(wristArrows.getIndexOfSensor());
          //    wristArrows.update(forceSensorData.getLinearPart(), forceSensorData.getAngularPart());
          // }
-         wristWrenchArrows.updateFromYoVariables();
+         sensorWristWrenchArrows.updateFromYoVariables();
       }
+   }
+
+   public void updateEstimatedWrench(SpatialVectorReadOnly spatialVector)
+   {
+      estimatedHandWrenchArrows.update(spatialVector);
    }
 
    @Override
@@ -93,17 +105,23 @@ public class RDXInteractableHand extends RDXInteractableRobotLink
    {
       super.getVirtualRenderables(renderables, pool);
 
-      if (wristWrenchArrows != null)
+      if (sensorWristWrenchArrows != null)
       {
-         if (syncedRobot.getForceSensorData().size() > wristWrenchArrows.getIndexOfSensor())
+         if (syncedRobot.getForceSensorData().size() > sensorWristWrenchArrows.getIndexOfSensor())
          {
-            wristWrenchArrows.getRenderables(renderables, pool);
+            sensorWristWrenchArrows.getRenderables(renderables, pool);
          }
       }
+      estimatedHandWrenchArrows.getRenderables(renderables, pool);
    }
 
    public String getContextMenuName()
    {
       return contextMenuName;
+   }
+
+   public RDXSpatialVectorArrows getEstimatedHandWrenchArrows()
+   {
+      return estimatedHandWrenchArrows;
    }
 }

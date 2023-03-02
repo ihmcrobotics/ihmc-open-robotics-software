@@ -13,9 +13,7 @@ import us.ihmc.tools.UnitConversions;
 
 public class RDXSCS2BulletPhysicsDoorDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXSCS2BulletSimulationSession scs2SimulationSession = new RDXSCS2BulletSimulationSession();
 
    public RDXSCS2BulletPhysicsDoorDemo()

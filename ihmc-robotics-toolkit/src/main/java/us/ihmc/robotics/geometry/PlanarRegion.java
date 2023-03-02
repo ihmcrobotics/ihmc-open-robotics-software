@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -37,6 +38,9 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
    private int regionId = NO_REGION_ID;
    private int numberOfTimesMatched = 0;
+   private int tickOfLastMeasurement = 0;
+
+   private double area = 0;
 
    /**
     * This transform also represents the pose of the PlanarRegion.
@@ -133,6 +137,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       convexPolygons.add().set(convexPolygon);
       updateBoundingBox();
       updateConvexHull();
+      updateArea();
    }
 
    public void set(RigidBodyTransformReadOnly transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
@@ -152,6 +157,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateBoundingBox();
       updateConvexHull();
       updateConcaveHull();
+      updateArea();
 
       regionId = newRegionId;
    }
@@ -171,6 +177,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       updateConvexHull();
       updateBoundingBox();
+      updateArea();
 
       regionId = newRegionId;
    }
@@ -1174,6 +1181,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       updateBoundingBox();
       convexHull.set(other.convexHull);
+
+      updateArea();
    }
 
    public void setTransformOnly(PlanarRegion other)
@@ -1600,6 +1609,27 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       return ret;
    }
 
+   public void projectOntoPlane(Vector4D plane)
+   {
+      // Update Map Region Normal and Origin
+      UnitVector3DReadOnly futureNormal = new UnitVector3D(plane.getX(), plane.getY(), plane.getZ());
+      Point3DReadOnly futureOrigin = GeometryTools.projectPointOntoPlane(plane, getPoint());
+
+      Vector3D axis = new Vector3D();
+      axis.cross(getNormal(), futureNormal);
+      double angle = getNormal().angle(futureNormal);
+
+      AxisAngle rotationToFutureRegion = new AxisAngle(axis, angle);
+      Vector3D translationToFutureRegion = new Vector3D();
+      translationToFutureRegion.sub(futureOrigin, getPoint());
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.appendOrientation(rotationToFutureRegion);
+      transform.appendTranslation(translationToFutureRegion);
+
+      applyTransform(transform);
+   }
+
    /**
     * Transforms the given object in the local coordinates of this planar region.
     * <p>
@@ -1624,6 +1654,11 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    public void transformFromLocalToWorld(Transformable objectToTransform)
    {
       objectToTransform.applyTransform(fromLocalToWorldTransform);
+   }
+
+   public void updateArea()
+   {
+      area = PlanarRegionTools.computePlanarRegionArea(this);
    }
 
    public ConvexPolygonTools getConvexPolygonTools()
@@ -1654,6 +1689,18 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       return buffer.toString();
    }
 
+   public String getTooltipString()
+   {
+      return String.format("Regions ID: %d\nArea: %.2f\nConcave Hull Size: %d\nMatched: %d\nOrigin: %s\nNormal: %s\nTime: %d",
+                    regionId,
+                    getArea(),
+                    getConcaveHullSize(),
+                    getNumberOfTimesMatched(),
+                    String.format("%.2f, %.2f, %.2f", origin.getX(), origin.getY(), origin.getZ()),
+                    String.format("%.2f, %.2f, %.2f", normal.getX(), normal.getY(), normal.getZ()),
+                    getTickOfLastMeasurement());
+   }
+
    public int getNumberOfTimesMatched()
    {
       return numberOfTimesMatched;
@@ -1662,5 +1709,25 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    public void incrementNumberOfTimesMatched()
    {
       numberOfTimesMatched++;
+   }
+
+   public double getArea()
+   {
+      return area;
+   }
+
+   public void setArea(double area)
+   {
+      this.area = area;
+   }
+
+   public int getTickOfLastMeasurement()
+   {
+      return tickOfLastMeasurement;
+   }
+
+   public void setTickOfLastMeasurement(int tickOfLastMeasurement)
+   {
+      this.tickOfLastMeasurement = tickOfLastMeasurement;
    }
 }
