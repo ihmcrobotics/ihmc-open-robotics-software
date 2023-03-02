@@ -250,9 +250,6 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
          meshPath = "file://media/materials/scripts/gazebo.material";
       }
 
-      if (meshPath.contains("models/silverspine_roll.obj"))
-         System.out.println();
-
       if (resourceDirectories.size() == 0)
       {
          String id = tryConversion(meshPath, "", resourceClassLoader);
