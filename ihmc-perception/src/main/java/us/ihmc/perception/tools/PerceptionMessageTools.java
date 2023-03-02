@@ -25,36 +25,36 @@ import java.time.Instant;
 
 public class PerceptionMessageTools
 {
-   public static void setDepthExtrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessage)
+   public static void setDepthExtrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessageToPack)
    {
-      imageMessage.setFocalLengthXPixels((float) sensor.getDepthFocalLengthPixelsX());
-      imageMessage.setFocalLengthYPixels((float) sensor.getDepthFocalLengthPixelsY());
-      imageMessage.setPrincipalPointXPixels((float) sensor.getDepthPrincipalOffsetXPixels());
-      imageMessage.setPrincipalPointYPixels((float) sensor.getDepthPrincipalOffsetYPixels());
+      imageMessageToPack.setFocalLengthXPixels((float) sensor.getDepthFocalLengthPixelsX());
+      imageMessageToPack.setFocalLengthYPixels((float) sensor.getDepthFocalLengthPixelsY());
+      imageMessageToPack.setPrincipalPointXPixels((float) sensor.getDepthPrincipalOffsetXPixels());
+      imageMessageToPack.setPrincipalPointYPixels((float) sensor.getDepthPrincipalOffsetYPixels());
    }
 
-   public static void setColorExtrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessage)
+   public static void setColorExtrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessageToPack)
    {
-      imageMessage.setFocalLengthXPixels((float) sensor.getColorFocalLengthPixelsX());
-      imageMessage.setFocalLengthYPixels((float) sensor.getColorFocalLengthPixelsY());
-      imageMessage.setPrincipalPointXPixels((float) sensor.getColorPrincipalOffsetXPixels());
-      imageMessage.setPrincipalPointYPixels((float) sensor.getColorPrincipalOffsetYPixels());
+      imageMessageToPack.setFocalLengthXPixels((float) sensor.getColorFocalLengthPixelsX());
+      imageMessageToPack.setFocalLengthYPixels((float) sensor.getColorFocalLengthPixelsY());
+      imageMessageToPack.setPrincipalPointXPixels((float) sensor.getColorPrincipalOffsetXPixels());
+      imageMessageToPack.setPrincipalPointYPixels((float) sensor.getColorPrincipalOffsetYPixels());
    }
 
-   public static void copyToMessage(CameraPinhole cameraPinhole, ImageMessage imageMessage)
+   public static void copyToMessage(CameraPinhole cameraPinhole, ImageMessage imageMessageToPack)
    {
-      imageMessage.setFocalLengthXPixels((float) cameraPinhole.getFx());
-      imageMessage.setFocalLengthYPixels((float) cameraPinhole.getFy());
-      imageMessage.setPrincipalPointXPixels((float) cameraPinhole.getCx());
-      imageMessage.setPrincipalPointYPixels((float) cameraPinhole.getCy());
+      imageMessageToPack.setFocalLengthXPixels((float) cameraPinhole.getFx());
+      imageMessageToPack.setFocalLengthYPixels((float) cameraPinhole.getFy());
+      imageMessageToPack.setPrincipalPointXPixels((float) cameraPinhole.getCx());
+      imageMessageToPack.setPrincipalPointYPixels((float) cameraPinhole.getCy());
    }
 
-   public static void toBoofCV(ImageMessage imageMessage, CameraPinhole cameraPinhole)
+   public static void toBoofCV(ImageMessage imageMessage, CameraPinhole cameraPinholeToPack)
    {
-      cameraPinhole.setFx(imageMessage.getFocalLengthXPixels());
-      cameraPinhole.setFy(imageMessage.getFocalLengthYPixels());
-      cameraPinhole.setCx(imageMessage.getPrincipalPointXPixels());
-      cameraPinhole.setCy(imageMessage.getPrincipalPointYPixels());
+      cameraPinholeToPack.setFx(imageMessage.getFocalLengthXPixels());
+      cameraPinholeToPack.setFy(imageMessage.getFocalLengthYPixels());
+      cameraPinholeToPack.setCx(imageMessage.getPrincipalPointXPixels());
+      cameraPinholeToPack.setCy(imageMessage.getPrincipalPointYPixels());
    }
 
    public static void publishPNGCompressedDepthImage(Mat depth16UC1Image,
