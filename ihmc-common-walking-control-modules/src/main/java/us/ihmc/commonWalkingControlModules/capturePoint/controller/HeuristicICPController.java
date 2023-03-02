@@ -9,20 +9,15 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLine2d;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -129,22 +124,6 @@ public class HeuristicICPController implements ICPControllerInterface
       return feedbackGains;
    }
 
-   private final FrameVector2D desiredCMPOffsetToThrowAway = new FrameVector2D();
-
-   @Override
-   public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
-                       FramePoint2DReadOnly desiredICP,
-                       FrameVector2DReadOnly desiredICPVelocity,
-                       FramePoint2DReadOnly finalICP,
-                       FramePoint2DReadOnly perfectCoP,
-                       FramePoint2DReadOnly currentICP,
-                       FramePoint2DReadOnly currentCoMPosition,
-                       double omega0)
-   {
-      desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
-   }
-
    @Override
    public void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
                        FramePoint2DReadOnly desiredICP,
@@ -166,7 +145,10 @@ public class HeuristicICPController implements ICPControllerInterface
 
       this.desiredICP.setMatchingFrame(desiredICP);
       this.desiredICPVelocity.setMatchingFrame(desiredICPVelocity);
-      this.perfectCMPOffset.setMatchingFrame(perfectCMPOffset);
+      if (perfectCMPOffset == null)
+         this.perfectCMPOffset.setToZero();
+      else
+         this.perfectCMPOffset.setMatchingFrame(perfectCMPOffset);
       this.currentICP.setMatchingFrame(currentICP);
       this.currentCoMPosition.setMatchingFrame(currentCoMPosition);
 
@@ -223,7 +205,12 @@ public class HeuristicICPController implements ICPControllerInterface
       feedbackFeedforwardAlpha.set(0.0);
       if (feedForwardAlphaCalculator != null)
       {
-         feedbackFeedforwardAlpha.set(feedForwardAlphaCalculator.computeAlpha(currentICP, desiredICP, finalICP, perfectCMP, unconstrainedFeedbackCMP, supportPolygonInWorld));
+         feedbackFeedforwardAlpha.set(feedForwardAlphaCalculator.computeAlpha(currentICP,
+                                                                              desiredICP,
+                                                                              finalICP,
+                                                                              perfectCMP,
+                                                                              unconstrainedFeedbackCMP,
+                                                                              supportPolygonInWorld));
       }
 
       icpParallelFeedback.set(MathTools.clamp(icpParallelFeedback.getValue(), feedbackGains.getFeedbackPartMaxValueParallelToMotion()));
@@ -280,21 +267,21 @@ public class HeuristicICPController implements ICPControllerInterface
    }
 
    @Override
-   public void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack)
+   public FramePoint2DReadOnly getDesiredCMP()
    {
-      desiredCMPToPack.set(feedbackCMP);
+      return feedbackCMP;
    }
 
    @Override
-   public void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack)
+   public FramePoint2DReadOnly getDesiredCoP()
    {
-      desiredCoPToPack.set(feedbackCoP);
+      return feedbackCoP;
    }
 
    @Override
-   public void getExpectedControlICPVelocity(FixedFrameVector2DBasics expectedControlICPVelocityToPack)
+   public FrameVector2DReadOnly getExpectedControlICPVelocity()
    {
-      expectedControlICPVelocityToPack.set(expectedControlICPVelocity);
+      return expectedControlICPVelocity;
    }
 
    @Override
