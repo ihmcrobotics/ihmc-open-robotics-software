@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -104,6 +105,14 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final Random random = new Random();
    private boolean proportionsNeedUpdate = false;
    private boolean adjustmentNeedsToBeApplied = false;
+   private RDXPose3DGizmoAdjustmentFrame translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.WORLD;
+   private RDXPose3DGizmoAdjustmentFrame rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.LOCAL;
+   private final ImDouble positionX = new ImDouble();
+   private final ImDouble positionY = new ImDouble();
+   private final ImDouble positionZ = new ImDouble();
+   private final ImDouble yaw = new ImDouble();
+   private final ImDouble pitch = new ImDouble();
+   private final ImDouble roll = new ImDouble();
 
    public RDXPose3DGizmo()
    {
@@ -491,11 +500,71 @@ public class RDXPose3DGizmo implements RenderableProvider
    {
       ImGui.text("Parent frame: " + parentReferenceFrame.getName());
 
-      if (ImGui.button("Set to zero in parent frame"))
+      ImGui.text("Translation adjustment frame:");
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("World", 0), translationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.WORLD))
+         translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.WORLD;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Parent", 0), translationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.PARENT))
+         translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.PARENT;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Local", 0), translationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.LOCAL))
+         translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.LOCAL;
+      ImGui.text("Rotation adjustment frame:");
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("World", 1), rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.WORLD))
+         rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.WORLD;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Parent", 1), rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.PARENT))
+         rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.PARENT;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Local", 2), rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.LOCAL))
+         rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.LOCAL;
+
+      adjustmentPose3D.setToZero(gizmoFrame);
+      switch (translationAdjustmentFrame)
+      {
+         case WORLD -> adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         case PARENT -> adjustmentPose3D.changeFrame(parentReferenceFrame);
+      }
+
+      positionX.set(adjustmentPose3D.getPosition().getX());
+      positionY.set(adjustmentPose3D.getPosition().getY());
+      positionZ.set(adjustmentPose3D.getPosition().getZ());
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("X"), positionX, 0.01, 0.1, "%.5f");
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Y"), positionY, 0.01, 0.1, "%.5f");
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Z"), positionZ, 0.01, 0.1, "%.5f");
+      adjustmentPose3D.getPosition().set(positionX.get(), positionY.get(), positionZ.get());
+
+      switch (rotationAdjustmentFrame)
+      {
+         case WORLD -> adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         case PARENT -> adjustmentPose3D.changeFrame(parentReferenceFrame);
+         case LOCAL -> adjustmentPose3D.changeFrame(gizmoFrame);
+      }
+
+      yaw.set(adjustmentPose3D.getRotation().getYaw());
+      pitch.set(adjustmentPose3D.getRotation().getPitch());
+      roll.set(adjustmentPose3D.getRotation().getRoll());
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Yaw"), yaw, 0.01, 0.1, "%.5f");
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Pitch"), pitch, 0.01, 0.1, "%.5f");
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Roll"), roll, 0.01, 0.1, "%.5f");
+      adjustmentPose3D.getRotation().setYawPitchRoll(yaw.get(), pitch.get(), roll.get());
+
+      ImGui.text("Set to zero in:");
+      ImGui.sameLine();
+      if (ImGui.button("World"))
+      {
+         adjustmentPose3D.setToZero(ReferenceFrame.getWorldFrame());
+         adjustmentNeedsToBeApplied = true;
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Parent"))
       {
          adjustmentPose3D.setToZero(parentReferenceFrame);
          adjustmentNeedsToBeApplied = true;
       }
+
 
       if (ImGui.collapsingHeader(labels.get("Controls")))
       {
