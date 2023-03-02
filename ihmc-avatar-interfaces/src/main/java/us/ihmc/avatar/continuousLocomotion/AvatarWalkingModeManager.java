@@ -1,6 +1,7 @@
 package us.ihmc.avatar.continuousLocomotion;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
@@ -11,9 +12,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -23,9 +22,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class AvatarContinuousLocomotionManager implements Updatable
+public class AvatarWalkingModeManager implements Updatable
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -37,7 +35,7 @@ public class AvatarContinuousLocomotionManager implements Updatable
    private final YoEnum<JoystickRequestedWalkingMode> yoJoystickRequestedWalkingMode;
    private final YoEnum<HighLevelControllerName> locomotionManagerRequestedWalkingState;
 
-   private final AvatarTerrainIdentifier terrainIdentifier;
+   private final AvatarFlatGroundDetector terrainIdentifier;
    private final ConcurrentMessageInputBuffer messageListener;
 
    private final CommandInputManager walkingCommandInputManager;
@@ -48,21 +46,21 @@ public class AvatarContinuousLocomotionManager implements Updatable
    private final HumanoidRobotContextData humanoidRobotContextData;
    private final HumanoidReferenceFrames referenceFrames;
 
-   private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
-   private final FootstepStatusMessage currentFootstepStatusMessage = new FootstepStatusMessage();
+   //private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
    private final WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
    private final PauseWalkingMessage walkingMessageBeforeTransition = new PauseWalkingMessage();
 
    private HighLevelControllerName currentController = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
    private WalkingStatus walkingStatusBeforeTransition = WalkingStatus.PAUSED;
 
-   public AvatarContinuousLocomotionManager(FullHumanoidRobotModel robotModel,
-                                            StatusMessageOutputManager statusMessageOutputManager,
-                                            CommandInputManager walkingCommandInputManager,
-                                            StepGeneratorCommandInputManager csgCommandInputManager,
-                                            HumanoidReferenceFrames referenceFrames,
-                                            HumanoidRobotContextData humanoidRobotContextData,
-                                            YoRegistry parentRegistry)
+   public AvatarWalkingModeManager(DRCRobotModel robotModel,
+                                   FullHumanoidRobotModel fullRobotModel,
+                                   StatusMessageOutputManager statusMessageOutputManager,
+                                   CommandInputManager walkingCommandInputManager,
+                                   StepGeneratorCommandInputManager csgCommandInputManager,
+                                   HumanoidReferenceFrames referenceFrames,
+                                   HumanoidRobotContextData humanoidRobotContextData,
+                                   YoRegistry parentRegistry)
    {
       rcValueThreshold = new YoDouble("rcWalkingModeValueThreshold", registry);
       rcValueThreshold.set(1.0);
@@ -84,22 +82,19 @@ public class AvatarContinuousLocomotionManager implements Updatable
       this.referenceFrames = referenceFrames;
 
       List<Class<? extends Settable<?>>> messagesToRegister = new ArrayList<>();
-      //messagesToRegister.add(PlanarRegionsListCommand.class);// TODO does this need to be part of message listener since it is already thread safe through command input manager?
       messagesToRegister.add(CapturabilityBasedStatus.class);
-      messagesToRegister.add(RobotConfigurationData.class);
       messagesToRegister.add(HighLevelStateChangeStatusMessage.class);
       messagesToRegister.add(FootstepStatusMessage.class);
       messagesToRegister.add(WalkingStatusMessage.class);
       messagesToRegister.add(PauseWalkingMessage.class);
 
       messageListener = new ConcurrentMessageInputBuffer(messagesToRegister);
-      terrainIdentifier = new AvatarTerrainIdentifier(robotModel, referenceFrames, messageListener, registry);
+      terrainIdentifier = new AvatarFlatGroundDetector(robotModel, fullRobotModel, referenceFrames, messageListener, registry);
 
       csgCommandInputManager.addPlanarRegionsListCommandConsumer(terrainIdentifier::acceptPlanarRegionsListCommand);
       csgCommandInputManager.addContinuousStepGeneratorInputCommandConsumer(this::acceptContinuousStepGeneratorInputCommand);
 
       statusMessageOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, messageListener::submitMessage);
-      statusMessageOutputManager.attachStatusMessageListener(RobotConfigurationData.class, messageListener::submitMessage); //TODO make this actually do something, RobotConfigurationData not defined in Controller API
       statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, messageListener::submitMessage);
       statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, messageListener::submitMessage);
       statusMessageOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, messageListener::submitMessage);
@@ -131,11 +126,6 @@ public class AvatarContinuousLocomotionManager implements Updatable
       if (messageListener.isNewMessageAvailable(HighLevelStateChangeStatusMessage.class))
       {
          currentController = HighLevelControllerName.fromByte(messageListener.pollNewestMessage(HighLevelStateChangeStatusMessage.class).getEndHighLevelControllerName());
-      }
-
-      if (messageListener.isNewMessageAvailable(FootstepStatusMessage.class))
-      {
-         currentFootstepStatusMessage.set(messageListener.pollNewestMessage(FootstepStatusMessage.class));
       }
 
       if (messageListener.isNewMessageAvailable(WalkingStatusMessage.class))

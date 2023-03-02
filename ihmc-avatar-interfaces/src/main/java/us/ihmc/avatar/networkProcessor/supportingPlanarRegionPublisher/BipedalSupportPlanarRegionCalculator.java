@@ -34,19 +34,20 @@ public class BipedalSupportPlanarRegionCalculator
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] allJointsExcludingHands;
-   private final HumanoidReferenceFrames referenceFrames;
    private final SideDependentList<ContactablePlaneBody> contactableFeet;
    private final SideDependentList<List<FramePoint2D>> scaledContactPointList = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
    public BipedalSupportPlanarRegionCalculator(DRCRobotModel robotModel)
    {
-      String robotName = robotModel.getSimpleRobotName();
-      fullRobotModel = robotModel.createFullRobotModel();
+      this (robotModel, robotModel.createFullRobotModel());
+   }
+
+   public BipedalSupportPlanarRegionCalculator(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel)
+   {
+      this.fullRobotModel = fullRobotModel;
       allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
-      contactableBodiesFactory.setReferenceFrames(referenceFrames);
       contactableBodiesFactory.setFootContactPoints(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       contactableFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
 
@@ -78,9 +79,9 @@ public class BipedalSupportPlanarRegionCalculator
          }
       }
 
-      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, fullRobotModel.getRootJoint(), allJointsExcludingHands);
+      if (robotConfigurationData !=null)
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, fullRobotModel.getRootJoint(), allJointsExcludingHands);
 
-      referenceFrames.updateFrames();
 
       SideDependentList<Boolean> isInSupport = new SideDependentList<Boolean>(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty(),
                                                                               !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty());

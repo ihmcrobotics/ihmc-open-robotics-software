@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import us.ihmc.avatar.continuousLocomotion.AvatarContinuousLocomotionManager;
+import us.ihmc.avatar.continuousLocomotion.AvatarWalkingModeManager;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -98,6 +98,13 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
          pluginFactory.createStepGeneratorNetworkSubscriber(drcRobotModel.getSimpleRobotName(), ros2Node);
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+
+      // set up walking mode manager
+      pluginFactory.addUpdatable(new AvatarWalkingModeManager(drcRobotModel, fullRobotModel,
+                                                              walkingOutputManager, walkingCommandInputManager,
+                                                              csgCommandInputManager, humanoidReferenceFrames,
+                                                              humanoidRobotContextData, csgRegistry));
+
       continuousStepGeneratorPlugin = pluginFactory.buildPlugin(humanoidReferenceFrames,
                                                                    drcRobotModel.getStepGeneratorDT(),
                                                                    drcRobotModel.getWalkingControllerParameters(),
@@ -117,9 +124,6 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
          environmentalConstraints.getGraphicsListRegistry().getRegisteredArtifactLists(artifactLists);
          csgGraphics.registerArtifactLists(artifactLists);
       }
-
-      // Setup thingy
-      AvatarContinuousLocomotionManager continuousLocomotionManager = new AvatarContinuousLocomotionManager(fullRobotModel, walkingOutputManager, walkingCommandInputManager, csgCommandInputManager, humanoidReferenceFrames, humanoidRobotContextData, csgRegistry);
 
       ParameterLoaderHelper.loadParameters(this, drcRobotModel, csgRegistry);
    }
