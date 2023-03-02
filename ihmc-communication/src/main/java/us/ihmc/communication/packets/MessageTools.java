@@ -33,6 +33,7 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 import java.time.Instant;
@@ -1270,5 +1271,11 @@ public class MessageTools
    public static Instant toInstant(InstantMessage instantMessage)
    {
       return Instant.ofEpochSecond(instantMessage.getSecondsSinceEpoch(), instantMessage.getAdditionalNanos());
+   }
+
+   public static double calculateDelay(ImageMessage imageMessage)
+   {
+      return TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
+                                      imageMessage.getAcquisitionTime().getAdditionalNanos());
    }
 }

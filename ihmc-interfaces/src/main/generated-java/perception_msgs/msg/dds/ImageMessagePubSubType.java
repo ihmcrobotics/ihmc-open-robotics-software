@@ -48,6 +48,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (25000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -56,7 +58,23 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -83,6 +101,9 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -93,7 +114,32 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
-      current_alignment += perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.getCdrSerializedSize(data.getIntrinsicParameters(), current_alignment);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       return current_alignment - initial_alignment;
@@ -108,6 +154,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       cdr.write_type_3(data.getImageHeight());
 
+      cdr.write_type_5(data.getDepthDiscretization());
+
       if(data.getData().size() <= 25000000)
       cdr.write_type_e(data.getData());else
           throw new RuntimeException("data field exceeds the maximum length");
@@ -116,7 +164,24 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
-      perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.write(data.getIntrinsicParameters(), cdr);
+      cdr.write_type_7(data.getIsPinholeCameraModel());
+
+      cdr.write_type_7(data.getIsEquidistantFisheyeCameraModel());
+
+      cdr.write_type_7(data.getIsOusterCameraModel());
+
+      cdr.write_type_5(data.getFocalLengthXPixels());
+
+      cdr.write_type_5(data.getFocalLengthYPixels());
+
+      cdr.write_type_5(data.getPrincipalPointXPixels());
+
+      cdr.write_type_5(data.getPrincipalPointYPixels());
+
+      cdr.write_type_5(data.getOusterVerticalFieldOfView());
+
+      cdr.write_type_5(data.getOusterHorizontalFieldOfView());
+
    }
 
    public static void read(perception_msgs.msg.dds.ImageMessage data, us.ihmc.idl.CDR cdr)
@@ -128,12 +193,31 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       	
       data.setImageHeight(cdr.read_type_3());
       	
+      data.setDepthDiscretization(cdr.read_type_5());
+      	
       cdr.read_type_e(data.getData());	
       data.setFormat(cdr.read_type_3());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
-      perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.read(data.getIntrinsicParameters(), cdr);	
+      data.setIsPinholeCameraModel(cdr.read_type_7());
+      	
+      data.setIsEquidistantFisheyeCameraModel(cdr.read_type_7());
+      	
+      data.setIsOusterCameraModel(cdr.read_type_7());
+      	
+      data.setFocalLengthXPixels(cdr.read_type_5());
+      	
+      data.setFocalLengthYPixels(cdr.read_type_5());
+      	
+      data.setPrincipalPointXPixels(cdr.read_type_5());
+      	
+      data.setPrincipalPointYPixels(cdr.read_type_5());
+      	
+      data.setOusterVerticalFieldOfView(cdr.read_type_5());
+      	
+      data.setOusterHorizontalFieldOfView(cdr.read_type_5());
+      	
 
    }
 
@@ -145,14 +229,22 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       ser.write_type_3("image_width", data.getImageWidth());
       ser.write_type_3("image_height", data.getImageHeight());
+      ser.write_type_5("depth_discretization", data.getDepthDiscretization());
       ser.write_type_e("data", data.getData());
       ser.write_type_3("format", data.getFormat());
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.write_type_a("intrinsic_parameters", new perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType(), data.getIntrinsicParameters());
-
+      ser.write_type_7("is_pinhole_camera_model", data.getIsPinholeCameraModel());
+      ser.write_type_7("is_equidistant_fisheye_camera_model", data.getIsEquidistantFisheyeCameraModel());
+      ser.write_type_7("is_ouster_camera_model", data.getIsOusterCameraModel());
+      ser.write_type_5("focal_length_x_pixels", data.getFocalLengthXPixels());
+      ser.write_type_5("focal_length_y_pixels", data.getFocalLengthYPixels());
+      ser.write_type_5("principal_point_x_pixels", data.getPrincipalPointXPixels());
+      ser.write_type_5("principal_point_y_pixels", data.getPrincipalPointYPixels());
+      ser.write_type_5("ouster_vertical_field_of_view", data.getOusterVerticalFieldOfView());
+      ser.write_type_5("ouster_horizontal_field_of_view", data.getOusterHorizontalFieldOfView());
    }
 
    @Override
@@ -163,14 +255,22 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       data.setImageWidth(ser.read_type_3("image_width"));
       data.setImageHeight(ser.read_type_3("image_height"));
+      data.setDepthDiscretization(ser.read_type_5("depth_discretization"));
       ser.read_type_e("data", data.getData());
       data.setFormat(ser.read_type_3("format"));
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.read_type_a("intrinsic_parameters", new perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType(), data.getIntrinsicParameters());
-
+      data.setIsPinholeCameraModel(ser.read_type_7("is_pinhole_camera_model"));
+      data.setIsEquidistantFisheyeCameraModel(ser.read_type_7("is_equidistant_fisheye_camera_model"));
+      data.setIsOusterCameraModel(ser.read_type_7("is_ouster_camera_model"));
+      data.setFocalLengthXPixels(ser.read_type_5("focal_length_x_pixels"));
+      data.setFocalLengthYPixels(ser.read_type_5("focal_length_y_pixels"));
+      data.setPrincipalPointXPixels(ser.read_type_5("principal_point_x_pixels"));
+      data.setPrincipalPointYPixels(ser.read_type_5("principal_point_y_pixels"));
+      data.setOusterVerticalFieldOfView(ser.read_type_5("ouster_vertical_field_of_view"));
+      data.setOusterHorizontalFieldOfView(ser.read_type_5("ouster_horizontal_field_of_view"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.ImageMessage src, perception_msgs.msg.dds.ImageMessage dest)

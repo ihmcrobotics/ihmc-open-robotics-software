@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCVImageFormat;
+import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -81,13 +82,7 @@ public class OusterDepthPublisher
       compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
    }
 
-   /**
-    * Synchronized to make sure it's only running ever once at a time.
-    * This should also be guaranteed by the ResettableExceptionHandlingExecutorService.
-    */
-   public void extractCompressAndPublish(ReferenceFrame ousterSensorFrame,
-                                         OusterDepthExtractionKernel depthExtractionKernel,
-                                         Instant acquisitionInstant)
+   public void extractCompressAndPublish(ReferenceFrame ousterSensorFrame, OusterDepthExtractionKernel depthExtractionKernel, Instant acquisitionInstant)
    {
       // Important not to store as a field, as update() needs to be called each frame
       cameraPose.setToZero(ousterSensorFrame);
@@ -109,11 +104,13 @@ public class OusterDepthPublisher
       {
          outputImageMessage.getData().add(pngImageBytePointer.get(i));
       }
-      outputImageMessage.setFormat(OpenCVImageFormat.PNG.ordinal());
+      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(outputImageMessage);
       outputImageMessage.setSequenceNumber(sequenceNumber++);
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);
-
+      outputImageMessage.setIsOusterCameraModel(true);
+      outputImageMessage.setOusterVerticalFieldOfView((float) (Math.PI / 2.0));
+      outputImageMessage.setOusterHorizontalFieldOfView((float) (2.0 * Math.PI));
       imagePublisher.publish(outputImageMessage);
 
       if (lidarScanPublisher != null && publishLidarScan.get())
@@ -123,9 +120,9 @@ public class OusterDepthPublisher
          lidarScanMessage.getLidarOrientation().set(cameraPose.getOrientation());
          lidarScanMessage.setRobotTimestamp(Conversions.secondsToNanoseconds(acquisitionInstant.getEpochSecond()) + acquisitionInstant.getNano());
          lidarScanMessage.getScan().reset();
-         LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan, lidarScanMessage,
+         LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan,
+                                                       lidarScanMessage,
                                                        (i, j) -> depthExtractionKernel.getPointCloudInSensorFrame().get(3 * i + j));
-
          lidarScanPublisher.publish(lidarScanMessage);
       }
    }
