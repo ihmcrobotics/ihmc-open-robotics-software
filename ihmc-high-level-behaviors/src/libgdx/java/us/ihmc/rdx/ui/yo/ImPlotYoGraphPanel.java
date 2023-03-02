@@ -237,7 +237,7 @@ public class ImPlotYoGraphPanel
    {
       yoClientHelper.disconnect();
       graphs.clear();
-      ImPlot.destroyContext(context);
+      ImPlotTools.destroy();
    }
 
    public String getWindowName()
