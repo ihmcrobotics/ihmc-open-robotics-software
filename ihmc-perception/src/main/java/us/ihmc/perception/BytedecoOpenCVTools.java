@@ -8,16 +8,9 @@ import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.VideoPacket;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
 
 import java.awt.image.BufferedImage;
-import java.time.Instant;
-
 
 public class BytedecoOpenCVTools
 {
@@ -313,14 +306,6 @@ public class BytedecoOpenCVTools
       return matString.toString();
    }
 
-   public static void displayVideoPacketColor(VideoPacket videoPacket)
-   {
-      Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
-      byte[] compressedByteArray = videoPacket.getData().toArray();
-      BytedecoOpenCVTools.decompressJPG(compressedByteArray, colorImage);
-      display("Color Image", colorImage, 1);
-   }
-
    public static void display(String tag, Mat image, int delay)
    {
       opencv_highgui.imshow(tag, image);
@@ -350,44 +335,8 @@ public class BytedecoOpenCVTools
 
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
-
-
       opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
       display(tag, finalDisplayDepth, delay);
-   }
-
-   public static void packVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)
-   {
-      compressedBytes.asBuffer().get(heapArray, 0, compressedBytes.asBuffer().remaining());
-      packet.setTimestamp(nanoTime);
-      packet.getData().resetQuick();
-      packet.getData().add(heapArray);
-      packet.setImageHeight(height);
-      packet.setImageWidth(width);
-      packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
-   }
-
-   public static void packImageMessage(ImageMessage imageMessage,
-                                       BytePointer data,
-                                       FramePose3D cameraPose,
-                                       Instant aquisitionTime,
-                                       long sequenceNumber,
-                                       int height,
-                                       int width,
-                                       int format)
-   {
-      imageMessage.getData().resetQuick();
-      for (int i = 0; i < data.limit(); i++)
-      {
-         imageMessage.getData().add(data.get(i));
-      }
-      imageMessage.setFormat(format);
-      imageMessage.setImageHeight(height);
-      imageMessage.setImageWidth(width);
-      imageMessage.getPosition().set(cameraPose.getPosition());
-      imageMessage.getOrientation().set(cameraPose.getOrientation());
-      imageMessage.setSequenceNumber(sequenceNumber);
-      MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
    }
 
    public static Mat decompressImageJPGUsingYUV(byte[] dataArray)
