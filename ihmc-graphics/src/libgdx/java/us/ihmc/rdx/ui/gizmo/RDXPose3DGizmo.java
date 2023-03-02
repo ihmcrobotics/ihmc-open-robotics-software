@@ -111,7 +111,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private boolean proportionsNeedUpdate = false;
    private boolean adjustmentNeedsToBeApplied = false;
    private RDXPose3DGizmoAdjustmentFrame translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP;
-   private RDXPose3DGizmoAdjustmentFrame rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA;
+   private RDXPose3DGizmoAdjustmentFrame rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP;
    private final ImDouble positionX = new ImDouble();
    private final ImDouble positionY = new ImDouble();
    private final ImDouble positionZ = new ImDouble();
