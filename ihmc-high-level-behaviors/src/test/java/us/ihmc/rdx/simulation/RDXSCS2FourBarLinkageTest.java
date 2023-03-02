@@ -16,7 +16,7 @@ import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
  */
 public class RDXSCS2FourBarLinkageTest
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXSCS2BulletSimulationSession scs2SimulationSession;
 
    public RDXSCS2FourBarLinkageTest()

@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -11,6 +12,7 @@ import imgui.type.ImInt;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.time.Stopwatch;
@@ -27,9 +29,11 @@ import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkingDirectoryPathComponents;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.nio.file.Files;
@@ -37,7 +41,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -110,7 +113,7 @@ public class RDXBaseUI
    private final ImFloat backgroundShade = new ImFloat(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
-   private final RDXImGuiPerspectiveManager perspectiveManager;
+   private final RDXImGuiLayoutManager layoutManager;
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
    private enum Theme
@@ -121,14 +124,51 @@ public class RDXBaseUI
    private Path themeFilePath;
    private final String shadePrefix = "shade=";
 
-   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public RDXBaseUI()
    {
-      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+      this(0, null, null, null);
    }
 
-   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public RDXBaseUI(String windowTitle)
    {
-      this.windowTitle = windowTitle;
+      this(0, null, null, windowTitle);
+   }
+
+   /**
+    * Typically you won't need this method. It's package private unless we find a use for it.
+    *
+    * @param additionalStackHeightForFindingCaller This is if you have something that sets up a RDXBaseUI for another class.
+    *                                              We want the highest level calling class to be the one used for loading resources.
+    * @param directoryNameToAssumePresent Directory that's either a part present in the working directory of an immediate child.
+    * @param subsequentPathToResourceFolder The subsequent path to the resources folder from the directory assumed to be present.
+    */
+   /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller,
+                                  String directoryNameToAssumePresent,
+                                  String subsequentPathToResourceFolder,
+                                  String windowTitle)
+   {
+      StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+      Class<?> classForLoading = ExceptionTools.handle(() -> Class.forName(stackTraceElements[3 + additionalStackHeightForFindingCaller].getClassName()),
+                                                       DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      LogTools.info("Using class for loading resources: {}", classForLoading.getName());
+
+      this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
+
+      // Try to figure out where the resources for this class are
+      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
+      {
+         WorkingDirectoryPathComponents inferredPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForLoading);
+         if (inferredPathComponents != null)
+         {
+            directoryNameToAssumePresent = inferredPathComponents.getDirectoryNameToAssumePresent();
+            subsequentPathToResourceFolder = inferredPathComponents.getSubsequentPathToResourceFolder();
+         }
+      }
+
+      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
+      {
+         LogTools.warn("We won't be able to write files to version controlled resources, because we probably aren't in a workspace.");
+      }
 
       configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
@@ -138,30 +178,27 @@ public class RDXBaseUI
                                                        configurationExtraPath);
 
       imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
-      perspectiveManager = new RDXImGuiPerspectiveManager(classForLoading,
-                                                          directoryNameToAssumePresent,
-                                                          subsequentPathToResourceFolder,
-                                                          configurationExtraPath,
-                                                          configurationBaseDirectory);
-      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
-      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(updatedPerspectiveDirectory ->
+      layoutManager = new RDXImGuiLayoutManager(classForLoading,
+                                                directoryNameToAssumePresent,
+                                                subsequentPathToResourceFolder,
+                                                configurationExtraPath,
+                                                configurationBaseDirectory);
+      layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
+      layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
       {
-         libGDXSettingsFile = new HybridFile(updatedPerspectiveDirectory, "GDXSettings.json");
+         libGDXSettingsFile = new HybridFile(updatedLayoutDirectory, "GDXSettings.json");
       });
-      perspectiveManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
-      perspectiveManager.getLoadListeners().add(loadConfigurationLocation ->
+      layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
+      layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
-         libGDXSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         LogTools.info("Loading libGDX settings from {}", libGDXSettingsFile.getLocationOfResourceForReading());
-         JSONFileTools.load(libGDXSettingsFile.getInputStream(), jsonNode ->
-         {
-            int width = jsonNode.get("windowWidth").asInt();
-            int height = jsonNode.get("windowHeight").asInt();
-            Gdx.graphics.setWindowedMode(width, height);
-         });
+         Gdx.graphics.setWindowedMode(imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getWidth(),
+                                      imGuiWindowAndDockSystem.getCalculatedPrimaryWindowSize().getHeight());
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setPosition(imGuiWindowAndDockSystem.getPrimaryWindowPosition().getX(),
+                                                                 imGuiWindowAndDockSystem.getPrimaryWindowPosition().getY());
+         return true;
       });
-      perspectiveManager.getSaveListeners().add(this::saveApplicationSettings);
-      perspectiveManager.applyPerspectiveDirectory();
+      layoutManager.getSaveListeners().add(this::saveApplicationSettings);
+      layoutManager.applyLayoutDirectory();
 
 //      guiRecorder = new RDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
 //      onCloseRequestListeners.add(guiRecorder::stop);
@@ -178,16 +215,16 @@ public class RDXBaseUI
 
    public void launchRDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
    {
-      AtomicReference<Integer> windowWidth = new AtomicReference<>(800);
-      AtomicReference<Integer> windowHeight = new AtomicReference<>(600);
-      JSONFileTools.loadUserWithClasspathDefaultFallback(libGDXSettingsFile, jsonNode ->
-      {
-         windowWidth.set(jsonNode.get("windowWidth").asInt());
-         windowHeight.set(jsonNode.get("windowHeight").asInt());
-      });
-
-      LogTools.info("Launching GDX application");
-      LibGDXApplicationCreator.launchGDXApplication(applicationAdapter, windowTitle, windowWidth.get(), windowHeight.get());
+      LogTools.info("Launching RDX application");
+      // TODO: We could show a splash screen here until the app shows up
+      Lwjgl3ApplicationConfiguration applicationConfiguration = LibGDXApplicationCreator.getDefaultConfiguration(windowTitle);
+      // Hide the window at the beginning. If you don't do this, you get a window frame
+      // with the contents behind the window displayed for a few seconds, which is really
+      // consifusing and error-prone.
+      applicationConfiguration.setInitialVisible(false);
+      LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration,
+                                                    applicationAdapter,
+                                                    windowTitle);
    }
 
    public void create()
@@ -214,7 +251,7 @@ public class RDXBaseUI
       primary3DPanel.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
       primaryScene.addCoordinateFrame(0.3);
 
-      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), layoutManager);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
@@ -270,12 +307,20 @@ public class RDXBaseUI
    {
       imGuiWindowAndDockSystem.afterWindowManagement();
       ++renderIndex;
+
+      // Show the window now that it's been loaded; we started it while it wasn't visible.
+      // Some heavyweight applications still will show an unrendered window after the first
+      // render, so let's show it after the second render.
+      if (renderIndex == 2)
+      {
+         ((Lwjgl3Graphics) Gdx.graphics).getWindow().setVisible(true);
+      }
    }
 
    private void renderMenuBar()
    {
       ImGui.beginMainMenuBar();
-      perspectiveManager.renderImGuiPerspectiveMenu();
+      layoutManager.renderImGuiLayoutMenu();
       if (ImGui.beginMenu("Panels"))
       {
          imGuiWindowAndDockSystem.renderMenuDockPanelItems();
@@ -389,7 +434,7 @@ public class RDXBaseUI
          root.put("windowWidth", Gdx.graphics.getWidth());
          root.put("windowHeight", Gdx.graphics.getHeight());
       };
-      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
+      if (saveConfigurationLocation.isVersionControl())
       {
          LogTools.info("Saving libGDX settings to {}", libGDXSettingsFile.getWorkspaceFile().toString());
          JSONFileTools.save(libGDXSettingsFile.getWorkspaceFile(), rootConsumer);
@@ -449,9 +494,9 @@ public class RDXBaseUI
       return imGuiWindowAndDockSystem.getPanelManager();
    }
 
-   public RDXImGuiPerspectiveManager getPerspectiveManager()
+   public RDXImGuiLayoutManager getLayoutManager()
    {
-      return perspectiveManager;
+      return layoutManager;
    }
 
    public RDX3DScene getPrimaryScene()

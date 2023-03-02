@@ -10,13 +10,27 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXMeshGraphicTools;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
+import us.ihmc.rdx.tools.RDXModelInstance;
+import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -28,18 +42,25 @@ import java.util.function.Function;
 
 public class RDXPlanarRegionsGraphic implements RenderableProvider
 {
+   private PlanarRegionsList planarRegionsList;
    private final ModelBuilder modelBuilder = new ModelBuilder();
 
    // visualization options
    private Function<Integer, Color> colorFunction = new RDXIDMappedColorFunction();
    private boolean drawAreaText = false;
-   private boolean drawBoundingBox = false;
+   private boolean drawBoundingBox = true;
    private boolean drawNormal;
+   boolean mouseHovering = false;
 
    private volatile Runnable buildMeshAndCreateModelInstance = null;
 
-   private ModelInstance modelInstance;
+   private String tooltipText = "";
+   private RDX3DPanelTooltip tooltip;
+   private RDXModelInstance modelInstance;
    private Model lastModel;
+   private Texture paletteTexture = null;
+
+   private int selectedRegionId = -1;
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
@@ -67,10 +88,15 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
       executorService.clearQueueAndExecute(() -> generateMeshes(planarRegionsList));
    }
 
-   public synchronized void generateMeshes(PlanarRegionsList planarRegionsList)
+   public synchronized void generateMeshes(PlanarRegionsList incomingPlanarRegionsList)
    {
+      planarRegionsList = incomingPlanarRegionsList;
+      // if we're passing in null, make an empty list
+      if (incomingPlanarRegionsList == null)
+         incomingPlanarRegionsList = new PlanarRegionsList();
+
       ArrayList<RDXMultiColorMeshBuilder> meshBuilders = new ArrayList<>();
-      for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+      for (PlanarRegion planarRegion : incomingPlanarRegionsList.getPlanarRegionsAsList())
       {
          RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
          meshBuilders.add(meshBuilder);
@@ -80,7 +106,8 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
       {
          modelBuilder.begin();
          Material material = new Material();
-         Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+         if (paletteTexture == null)
+            paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
 
@@ -95,7 +122,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
             lastModel.dispose();
 
          lastModel = modelBuilder.end();
-         modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
+         modelInstance = new RDXModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
       };
    }
 
@@ -124,7 +151,11 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
       if (drawBoundingBox)
       {
-         RDXMeshGraphicTools.drawBoxEdges(meshBuilder, PlanarRegionTools.getLocalBoundingBox3DInWorld(planarRegion, 0.1), 0.005, color);
+//         RDXMeshGraphicTools.drawBoxEdges(meshBuilder, PlanarRegionTools.getLocalBoundingBox3DInWorld(planarRegion, 0.1), 0.005, color);
+
+         BoundingBox3D boundingBox3D = planarRegion.getBoundingBox3dInWorld();
+         Box3D box = GeometryTools.convertBoundingBox3DToBox3D(boundingBox3D);
+         RDXMeshGraphicTools.drawBoxEdges(meshBuilder, box, 0.005, color);
       }
 
       if (drawNormal)
@@ -145,6 +176,51 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
       }
 
 
+   }
+
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
+
+      if (pickRayInWorld != null)
+      {
+         if (planarRegionsList != null)
+         {
+            ImmutablePair<Point3D, PlanarRegion> regionsWithRay = PlanarRegionTools.intersectRegionsWithRay(planarRegionsList,
+                                                                                                            pickRayInWorld.getPoint(),
+                                                                                                            new Vector3D(pickRayInWorld.getDirection()));
+
+            if (regionsWithRay != null)
+            {
+               mouseHovering = true;
+               selectedRegionId = regionsWithRay.getRight().getRegionId();
+
+               tooltipText = regionsWithRay.getRight().getTooltipString();
+               return;
+            }
+
+         }
+      }
+
+      selectedRegionId = -1;
+      mouseHovering = false;
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+//      modelInstance.setOpacity(mouseHovering ? 0.5f : 1.0f);
+      if (tooltip != null)
+         tooltip.setInput(input);
+   }
+
+   public void setupTooltip(RDX3DPanel panel3D, String text)
+   {
+      tooltip = new RDX3DPanelTooltip(panel3D);
+      panel3D.addImGuiOverlayAddition(() ->
+                                      {
+                                         if (mouseHovering)
+                                            tooltip.render(tooltipText);
+                                      });
    }
 
    @Override

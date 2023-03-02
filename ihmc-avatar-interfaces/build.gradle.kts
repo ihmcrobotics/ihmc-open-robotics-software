@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -51,10 +51,10 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:scs2-simulation:17-0.11.1")
-   api("us.ihmc:scs2-bullet-simulation:17-0.11.1")
-   api("us.ihmc:scs2-session-visualizer-jfx:17-0.11.1")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.11.1")
+   api("us.ihmc:scs2-definition:17-0.12.4")
+   api("us.ihmc:scs2-bullet-simulation:17-0.12.4")
+   api("us.ihmc:scs2-session-visualizer-jfx:17-0.12.4")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.12.4")
 }
 
 testDependencies {

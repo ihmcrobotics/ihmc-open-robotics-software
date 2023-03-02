@@ -6,6 +6,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -40,7 +41,7 @@ public class AStarBodyPathSmootherVisualizer
    {
       scs = new SimulationConstructionSet(new Robot("Dummy"));
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      smoother = new AStarBodyPathSmoother(scs, graphicsListRegistry, scs.getRootRegistry());
+      smoother = new AStarBodyPathSmoother(new AStarBodyPathPlannerParameters(), scs, graphicsListRegistry, scs.getRootRegistry());
 
       if (heightMapData != null)
       {
@@ -273,8 +274,8 @@ public class AStarBodyPathSmootherVisualizer
       HeightMapData[] heightMapData = new HeightMapData[datasets.length];
       FootstepPlannerOutput output = new FootstepPlannerOutput();
 
-      AStarBodyPathPlanner planner = new AStarBodyPathPlanner(new DefaultFootstepPlannerParameters(), PlannerTools.createDefaultFootPolygons());
-      AStarBodyPathSmoother smoother = new AStarBodyPathSmoother();
+      AStarBodyPathPlanner planner = new AStarBodyPathPlanner(new DefaultFootstepPlannerParameters(), new AStarBodyPathPlannerParameters(), PlannerTools.createDefaultFootPolygons());
+      AStarBodyPathSmoother smoother = new AStarBodyPathSmoother(new AStarBodyPathPlannerParameters());
 
       for (int i = 0; i < datasets.length; i++)
       {
