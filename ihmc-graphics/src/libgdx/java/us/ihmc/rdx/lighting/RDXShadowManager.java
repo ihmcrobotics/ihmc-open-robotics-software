@@ -174,6 +174,11 @@ public class RDXShadowManager
 
    public void dispose()
    {
+      directionalLights.forEach(RDXDirectionalLight::dispose);
+      additionalOffscreenLights.forEach(RDXPointLight::dispose);
+      pointLights.forEach(RDXPointLight::dispose);
+      shadowSceneShaderProgram.dispose();
+      shadowMapBatch.dispose();
       shadowSceneBatch.dispose();
    }
 

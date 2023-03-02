@@ -96,6 +96,13 @@ public class RDXDirectionalLight
       shader.end();
    }
 
+   public void dispose()
+   {
+      modelBatch.dispose();
+      framebuffer.dispose();
+      depthMap.dispose();
+   }
+
    public Point3D getPosition()
    {
       return position;
