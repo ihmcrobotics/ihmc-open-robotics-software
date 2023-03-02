@@ -339,7 +339,7 @@ public class RDXBlackflyCalibrationSuite
                                                           manuallyTunedCxForColoring.get(),
                                                           manuallyTunedCyForColoring.get());
                nettyOusterUI.getSensorFrame().getReferenceFrame()
-                            .getTransformToDesiredFrame(nettyOusterUI.getDepthImageToPointCloudKernel().getOusterToFisheyeTransformToPack(),
+                            .getTransformToDesiredFrame(nettyOusterUI.getOusterFisheyeKernel().getOusterToFisheyeTransformToPack(),
                                                         blackflySensorFrame);
             }
 

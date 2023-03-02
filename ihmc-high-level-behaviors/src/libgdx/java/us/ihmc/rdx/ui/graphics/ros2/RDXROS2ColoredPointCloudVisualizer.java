@@ -55,7 +55,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private RDXPinholePinholeColoredPointCloudKernel pinholePinholeKernel;
-   private RDXOusterFisheyeColoredPointCloudKernel depthImageToPointCloudKernel;
+   private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
                                              PubSubImplementation pubSubImplementation,
@@ -85,7 +85,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
 
       openCLManager = new OpenCLManager();
       pinholePinholeKernel = new RDXPinholePinholeColoredPointCloudKernel(openCLManager);
-      depthImageToPointCloudKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
+      ousterFisheyeKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
    }
 
    @Override
@@ -119,9 +119,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
             if (depthChannel.getIsOusterCameraModel())
             {
                int sanitizedLevelOfColorDetail = usingColor && colorChannel.getIsEquidistantFisheyeCameraModel() ? levelOfColorDetail.get() : 0;
-               totalNumberOfPoints = depthImageToPointCloudKernel.calculateNumberOfPointsForLevelOfColorDetail(depthChannel.getImageWidth(),
-                                                                                                               depthChannel.getImageHeight(),
-                                                                                                               sanitizedLevelOfColorDetail);
+               totalNumberOfPoints = ousterFisheyeKernel.calculateNumberOfPointsForLevelOfColorDetail(depthChannel.getImageWidth(),
+                                                                                                      depthChannel.getImageHeight(),
+                                                                                                      sanitizedLevelOfColorDetail);
             }
 
             if (pointCloudVertexBuffer == null
@@ -154,23 +154,23 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
             else if (depthChannel.getIsOusterCameraModel()) // Assuming color is equidistant fisheye if using it
             {
 
-               depthImageToPointCloudKernel.getOusterToWorldTransformToPack().set(depthChannel.getRotationMatrixToWorld(),
-                                                                                  depthChannel.getTranslationToWorld());
-               depthImageToPointCloudKernel.getOusterToFisheyeTransformToPack().set(colorChannel.getRotationMatrixToWorld(),
-                                                                                    colorChannel.getTranslationToWorld());
-               depthImageToPointCloudKernel.runKernel(depthChannel.getOusterHorizontalFieldOfView(),
-                                                      depthChannel.getOusterVerticalFieldOfView(),
-                                                      pointSize.get(),
-                                                      usingColor && useSensorColor.get(),
-                                                      gradientMode.ordinal(),
-                                                      useSinusoidalGradientPattern.get(),
-                                                      depthChannel.getDepth16UC1Image(),
-                                                      colorChannel.getFx(),
-                                                      colorChannel.getFy(),
-                                                      colorChannel.getCx(),
-                                                      colorChannel.getCy(),
-                                                      usingColor ? colorChannel.getColor8UC4Image() : null,
-                                                      pointCloudVertexBuffer);
+               ousterFisheyeKernel.getOusterToWorldTransformToPack().set(depthChannel.getRotationMatrixToWorld(),
+                                                                         depthChannel.getTranslationToWorld());
+               ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(colorChannel.getRotationMatrixToWorld(),
+                                                                           colorChannel.getTranslationToWorld());
+               ousterFisheyeKernel.runKernel(depthChannel.getOusterHorizontalFieldOfView(),
+                                             depthChannel.getOusterVerticalFieldOfView(),
+                                             pointSize.get(),
+                                             usingColor && useSensorColor.get(),
+                                             gradientMode.ordinal(),
+                                             useSinusoidalGradientPattern.get(),
+                                             depthChannel.getDepth16UC1Image(),
+                                             colorChannel.getFx(),
+                                             colorChannel.getFy(),
+                                             colorChannel.getCx(),
+                                             colorChannel.getCy(),
+                                             usingColor ? colorChannel.getColor8UC4Image() : null,
+                                             pointCloudVertexBuffer);
             }
 
             pointCloudRenderer.updateMeshFastestAfterKernel();

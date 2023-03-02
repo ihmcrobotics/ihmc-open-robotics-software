@@ -79,7 +79,7 @@ public class RDXNettyOusterFisheyeColorDemo
                                                                    coloringCy.get());
                         nettyOusterUI.getSensorFrame()
                                      .getReferenceFrame()
-                                     .getTransformToDesiredFrame(nettyOusterUI.getDepthImageToPointCloudKernel().getOusterToFisheyeTransformToPack(),
+                                     .getTransformToDesiredFrame(nettyOusterUI.getOusterFisheyeKernel().getOusterToFisheyeTransformToPack(),
                                                                  interactableBlackflyFujinon.getInteractableFrameModel().getReferenceFrame());
                      }
                   });
