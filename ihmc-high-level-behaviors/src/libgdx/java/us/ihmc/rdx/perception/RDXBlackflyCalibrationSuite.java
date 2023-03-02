@@ -85,14 +85,14 @@ public class RDXBlackflyCalibrationSuite
    private final ImBoolean fixSkew = new ImBoolean(false);
    private final ImBoolean fixPrincipalPoint = new ImBoolean(false);
    private final ImBoolean fixFocalLength = new ImBoolean(false);
-   private final ImDouble calibratedFx = new ImDouble(fxGuess.get());
-   private final ImDouble calibratedFy = new ImDouble(fyGuess.get());
-   private final ImDouble calibratedCx = new ImDouble(cxGuess.get());
-   private final ImDouble calibratedCy = new ImDouble(cyGuess.get());
-   private final ImDouble coloringFx = new ImDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_COLORING);
-   private final ImDouble coloringFy = new ImDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_COLORING);
-   private final ImDouble coloringCx = new ImDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_COLORING);
-   private final ImDouble coloringCy = new ImDouble(SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_COLORING);
+   private final ImDouble calibratedFxForUndistortion = new ImDouble(fxGuess.get());
+   private final ImDouble calibratedFyForUndistortion = new ImDouble(fyGuess.get());
+   private final ImDouble calibratedCxForUndistortion = new ImDouble(cxGuess.get());
+   private final ImDouble calibratedCyForUndistortion = new ImDouble(cyGuess.get());
+   private final ImDouble manuallyTunedFxForColoring = new ImDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_COLORING);
+   private final ImDouble manuallyTunedFyForColoring = new ImDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_COLORING);
+   private final ImDouble manuallyTunedCxForColoring = new ImDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_COLORING);
+   private final ImDouble manuallyTunedCyForColoring = new ImDouble(SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_COLORING);
    private final ImString coloringCameraMatrixAsText = new ImString(512);
    private final ImString cameraMatrixAsText = new ImString(512);
    private final ImString newCameraMatrixAsText = new ImString(512);
@@ -199,16 +199,16 @@ public class RDXBlackflyCalibrationSuite
                   distortionCoefficientsForUndistortion.initializeBoth(distortionCoefficients::copyTo);
                   cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
                   opencv_core.setIdentity(cameraMatrix);
-                  cameraMatrix.ptr(0, 0).putDouble(calibratedFx.get());
-                  cameraMatrix.ptr(1, 1).putDouble(calibratedFy.get());
-                  cameraMatrix.ptr(0, 2).putDouble(calibratedCx.get());
-                  cameraMatrix.ptr(1, 2).putDouble(calibratedCy.get());
+                  cameraMatrix.ptr(0, 0).putDouble(calibratedFxForUndistortion.get());
+                  cameraMatrix.ptr(1, 1).putDouble(calibratedFyForUndistortion.get());
+                  cameraMatrix.ptr(0, 2).putDouble(calibratedCxForUndistortion.get());
+                  cameraMatrix.ptr(1, 2).putDouble(calibratedCyForUndistortion.get());
                   coloringCameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
                   opencv_core.setIdentity(coloringCameraMatrix);
-                  coloringCameraMatrix.ptr(0, 0).putDouble(coloringFx.get());
-                  coloringCameraMatrix.ptr(1, 1).putDouble(coloringFy.get());
-                  coloringCameraMatrix.ptr(0, 2).putDouble(coloringCx.get());
-                  coloringCameraMatrix.ptr(1, 2).putDouble(coloringCy.get());
+                  coloringCameraMatrix.ptr(0, 0).putDouble(manuallyTunedFxForColoring.get());
+                  coloringCameraMatrix.ptr(1, 1).putDouble(manuallyTunedFyForColoring.get());
+                  coloringCameraMatrix.ptr(0, 2).putDouble(manuallyTunedCxForColoring.get());
+                  coloringCameraMatrix.ptr(1, 2).putDouble(manuallyTunedCyForColoring.get());
                   cameraMatrixForUndistortion = new SwapReference<>(Mat::new);
                   cameraMatrixForUndistortion.initializeBoth(cameraMatrix::copyTo);
                   rectificationTransformation = new Mat(3, 3, opencv_core.CV_64F);
@@ -254,10 +254,10 @@ public class RDXBlackflyCalibrationSuite
                synchronized (cameraMatrixForUndistortion)
                {
                   cameraMatrix.copyTo(cameraMatrixForUndistortion.getForThreadOne());
-                  cameraMatrixForUndistortion.getForThreadOne().ptr(0, 0).putDouble(calibratedFx.get());
-                  cameraMatrixForUndistortion.getForThreadOne().ptr(1, 1).putDouble(calibratedFy.get());
-                  cameraMatrixForUndistortion.getForThreadOne().ptr(0, 2).putDouble(calibratedCx.get());
-                  cameraMatrixForUndistortion.getForThreadOne().ptr(1, 2).putDouble(calibratedCy.get());
+                  cameraMatrixForUndistortion.getForThreadOne().ptr(0, 0).putDouble(calibratedFxForUndistortion.get());
+                  cameraMatrixForUndistortion.getForThreadOne().ptr(1, 1).putDouble(calibratedFyForUndistortion.get());
+                  cameraMatrixForUndistortion.getForThreadOne().ptr(0, 2).putDouble(calibratedCxForUndistortion.get());
+                  cameraMatrixForUndistortion.getForThreadOne().ptr(1, 2).putDouble(calibratedCyForUndistortion.get());
 
                   StringBuilder stringBuilder = new StringBuilder();
                   stringBuilder.append("Camera matrix:\n");
@@ -334,10 +334,10 @@ public class RDXBlackflyCalibrationSuite
             if (nettyOusterUI.getIsReady())
             {
                nettyOusterUI.setFisheyeImageToColorPoints(texture.getRGBA8Image(),
-                                                          coloringFx.get(),
-                                                          coloringFy.get(),
-                                                          coloringCx.get(),
-                                                          coloringCy.get());
+                                                          manuallyTunedFxForColoring.get(),
+                                                          manuallyTunedFyForColoring.get(),
+                                                          manuallyTunedCxForColoring.get(),
+                                                          manuallyTunedCyForColoring.get());
                nettyOusterUI.getSensorFrame().getReferenceFrame()
                             .getTransformToDesiredFrame(nettyOusterUI.getDepthImageToPointCloudKernel().getOusterToFisheyeTransformToPack(),
                                                         blackflySensorFrame);
@@ -478,10 +478,10 @@ public class RDXBlackflyCalibrationSuite
       //   These should affect the live undistorted preview
 
       boolean userChangedUndistortParameters = false;
-      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Fx (px)"), calibratedFx, 100.0, 500.0, "%.5f");
-      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Fy (px)"), calibratedFy, 100.0, 500.0, "%.5f");
-      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Cx (px)"), calibratedCx, 100.0, 500.0, "%.5f");
-      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Cy (px)"), calibratedCy, 100.0, 500.0, "%.5f");
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Fx (px)"), calibratedFxForUndistortion, 100.0, 500.0, "%.5f");
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Fy (px)"), calibratedFyForUndistortion, 100.0, 500.0, "%.5f");
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Cx (px)"), calibratedCxForUndistortion, 100.0, 500.0, "%.5f");
+      userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Calibrate Cy (px)"), calibratedCyForUndistortion, 100.0, 500.0, "%.5f");
 
       userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Distortion K1"), distortionCoefficientK1, 0.0001, 0.001, "%.7f");
       userChangedUndistortParameters |= ImGuiTools.volatileInputDouble(labels.get("Distortion K2"), distortionCoefficientK2, 0.0001, 0.001, "%.7f");
@@ -494,16 +494,16 @@ public class RDXBlackflyCalibrationSuite
       ImGuiTools.volatileInputInt(labels.get("Undistorted image height"), undistortedImageHeight);
 
       boolean userChangedColoringMatrixParameters = false;
-      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Fx (px)"), coloringFx, -100.0,  800.0 , "%.5f");
-      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Fy (px)"), coloringFy, -100.0,  800.0 , "%.5f");
-      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Cx (px)"), coloringCx, -100.0, 1200.0, "%.5f");
-      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Cy (px)"), coloringCy, -1000.0, 1200.0, "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Fx (px)"), manuallyTunedFxForColoring, -100.0, 800.0 , "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Fy (px)"), manuallyTunedFyForColoring, -100.0, 800.0 , "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Cx (px)"), manuallyTunedCxForColoring, -100.0, 1200.0, "%.5f");
+      userChangedColoringMatrixParameters |= ImGuiTools.sliderDouble(labels.get("Coloring Cy (px)"), manuallyTunedCyForColoring, -1000.0, 1200.0, "%.5f");
       if (userChangedColoringMatrixParameters)
       {
-         coloringCameraMatrix.ptr(0, 0).putDouble(coloringFx.get());
-         coloringCameraMatrix.ptr(1, 1).putDouble(coloringFy.get());
-         coloringCameraMatrix.ptr(0, 2).putDouble(coloringCx.get());
-         coloringCameraMatrix.ptr(1, 2).putDouble(coloringCy.get());
+         coloringCameraMatrix.ptr(0, 0).putDouble(manuallyTunedFxForColoring.get());
+         coloringCameraMatrix.ptr(1, 1).putDouble(manuallyTunedFyForColoring.get());
+         coloringCameraMatrix.ptr(0, 2).putDouble(manuallyTunedCxForColoring.get());
+         coloringCameraMatrix.ptr(1, 2).putDouble(manuallyTunedCyForColoring.get());
       }
       StringBuilder stringBuilder = new StringBuilder();
       stringBuilder.append("Fisheye camera matrix for point coloring:\n");
@@ -673,10 +673,10 @@ public class RDXBlackflyCalibrationSuite
       LogTools.info("Number of estimated rotation vectors: {}", estimatedRotationVectors.size());
       LogTools.info("Number of estimated translation vectors: {}", estimatedTranslationVectors.size());
 
-      calibratedFx.set(cameraMatrix.ptr(0, 0).getDouble());
-      calibratedFy.set(cameraMatrix.ptr(1, 1).getDouble());
-      calibratedCx.set(cameraMatrix.ptr(0, 2).getDouble());
-      calibratedCy.set(cameraMatrix.ptr(1, 2).getDouble());
+      calibratedFxForUndistortion.set(cameraMatrix.ptr(0, 0).getDouble());
+      calibratedFyForUndistortion.set(cameraMatrix.ptr(1, 1).getDouble());
+      calibratedCxForUndistortion.set(cameraMatrix.ptr(0, 2).getDouble());
+      calibratedCyForUndistortion.set(cameraMatrix.ptr(1, 2).getDouble());
 
       distortionCoefficientK1.set(distortionCoefficients.ptr(0, 0).getDouble());
       distortionCoefficientK2.set(distortionCoefficients.ptr(1, 0).getDouble());

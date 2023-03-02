@@ -16,6 +16,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
  */
 public class SensorHeadParameters
 {
+   // These "for coloring" parameters are tuned by hand so the coloring on the
+   // Ouster point cloud look better. It's probably not the correct model for doing
+   // so, since the Ouster and Fisheye do not share the same origin. TODO Improve it
    public static final double FOCAL_LENGTH_X_FOR_COLORING = 472.44896;   // These were tuned with sliders on the benchtop
    public static final double FOCAL_LENGTH_Y_FOR_COLORING = 475.51022;   // by Bhavyansh and Duncan and copied here
    public static final double PRINCIPAL_POINT_X_FOR_COLORING = 970.06801;// by hand.
