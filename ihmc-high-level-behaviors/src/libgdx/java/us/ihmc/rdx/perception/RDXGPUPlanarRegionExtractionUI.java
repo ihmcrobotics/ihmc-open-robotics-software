@@ -100,6 +100,7 @@ public class RDXGPUPlanarRegionExtractionUI
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
    private RDXHeightMapGraphic heightMapGraphic;
    private GuidedSwapReference<RDXPointCloudRenderer> boundaryPointCloudSwap;
+   private Runnable pointCloudRendererShutdown;
    private Array<Renderable> latestRenderables;
    private Pool<Renderable> latestPool;
    private ReferenceFrame cameraFrame;
@@ -160,8 +161,10 @@ public class RDXGPUPlanarRegionExtractionUI
       heightMapGraphic = new RDXHeightMapGraphic();
       boundaryPointCloudSwap = new GuidedSwapReference<>(() ->
       {
+
          RDXPointCloudRenderer boundaryPointCloud = new RDXPointCloudRenderer();
          boundaryPointCloud.create(2000000);
+         pointCloudRendererShutdown = boundaryPointCloud::dispose;
          return boundaryPointCloud;
       }, this::boundaryPointCloudUpdateOnLowPriorityThread, this::boundaryPointCloudUpdateOnHighPriorityThread);
 
@@ -489,8 +492,13 @@ public class RDXGPUPlanarRegionExtractionUI
 
    public void destroy()
    {
+      if (pointCloudRendererShutdown != null)
+         pointCloudRendererShutdown.run();
       gpuPlanarRegionExtraction.destroy();
       simpleGPUHeightMapUpdater.destroy();
+
+      if (planarRegionsGraphic != null)
+         planarRegionsGraphic.destroy();
       // TODO: Destroy the rest
    }
 
