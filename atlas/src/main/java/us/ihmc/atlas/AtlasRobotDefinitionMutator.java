@@ -14,7 +14,7 @@ import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
-import us.ihmc.simulationConstructionSetTools.tools.RobotDefinitionTools;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 
 public class AtlasRobotDefinitionMutator implements Consumer<RobotDefinition>
 {
