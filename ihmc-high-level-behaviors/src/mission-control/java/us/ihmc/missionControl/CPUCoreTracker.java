@@ -14,7 +14,7 @@ public class CPUCoreTracker
 
    boolean firstUpdate = true;
 
-   double percentUsage;
+   float percentUsage;
 
    public void update(double timeInUserMode, double timeNiceUserMode, double timeInKernelCode, double idleTime, double ioWaitTime,
                       double interruptTime, double softIRQTime)
@@ -31,22 +31,22 @@ public class CPUCoreTracker
       if (firstUpdate)
       {
          firstUpdate = false;
-         percentUsage = 0.0;
+         percentUsage = 0.0f;
       }
       else
       {
-         double idleTimeAverage = idleTimeTracker.getAverage();
-         double everythingButIdle = timeInUserModeTracker.getAverage()
-                                  + timeNiceUserModeTracker.getAverage()
-                                  + timeInKernelCodeTracker.getAverage()
-                                  + ioWaitTimeTracker.getAverage()
-                                  + interruptTimeTracker.getAverage()
-                                  + softIRQTimeTracker.getAverage();
-         percentUsage = 100.0 * (everythingButIdle / (idleTimeAverage + everythingButIdle));
+         float idleTimeAverage = (float) idleTimeTracker.getAverage();
+         float everythingButIdle = (float) (timeInUserModeTracker.getAverage()
+                                                     + timeNiceUserModeTracker.getAverage()
+                                                     + timeInKernelCodeTracker.getAverage()
+                                                     + ioWaitTimeTracker.getAverage()
+                                                     + interruptTimeTracker.getAverage()
+                                                     + softIRQTimeTracker.getAverage());
+         percentUsage = (float) (100.0 * (everythingButIdle / (idleTimeAverage + everythingButIdle)));
       }
    }
 
-   public double getPercentUsage()
+   public float getPercentUsage()
    {
       return percentUsage;
    }
