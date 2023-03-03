@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.yawPitchRoll.interfaces.YawPitchRollReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -60,7 +61,6 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicPolygonExtruded3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicPolynomial3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoListDefinition;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
 import us.ihmc.yoVariables.euclid.YoTuple2D;
 import us.ihmc.yoVariables.euclid.YoTuple3D;
@@ -83,132 +83,132 @@ public class YoGraphicDefinitionTools
 
    public static List<YoGraphicDefinition> toYoGraphicDefinitions(YoGraphicsListRegistry registry)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinitions(registry);
+      return YoGraphicConversionTools.toYoGraphicDefinitions(registry);
    }
 
    public static YoGraphicGroupDefinition toYoGraphicGroupDefinition(YoGraphicsList yoGraphicsList)
    {
-      return SCS1GraphicConversionTools.toYoGraphicGroupDefinition(yoGraphicsList);
+      return YoGraphicConversionTools.toYoGraphicGroupDefinition(yoGraphicsList);
    }
 
    public static YoGraphicGroupDefinition toYoGraphicGroupDefinition(ArtifactList artifactList)
    {
-      return SCS1GraphicConversionTools.toYoGraphicGroupDefinition(artifactList);
+      return YoGraphicConversionTools.toYoGraphicGroupDefinition(artifactList);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphic yoGraphic)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphic);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphic);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicPolygon yoGraphicPolygon)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicPolygon);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicPolygon);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicShape yoGraphicShape)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicShape);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicShape);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicText yoGraphicText)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicText);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicText);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicText3D yoGraphicText3D)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicText3D);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicText3D);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicCoordinateSystem yoGraphicCoordinateSystem)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicCoordinateSystem);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicCoordinateSystem);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicEllipsoid yoGraphicEllipsoid)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicEllipsoid);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicEllipsoid);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicReferenceFrame yoGraphicReferenceFrame)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicReferenceFrame);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicReferenceFrame);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicVRML yoGraphicVRML)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicVRML);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicVRML);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicCylinder yoGraphicCylinder)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicCylinder);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicCylinder);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicPolygon3D yoGraphicPolygon3D)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicPolygon3D);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicPolygon3D);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicPolynomial3D yoGraphicPolynomial3D)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicPolynomial3D);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicPolynomial3D);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicPosition yoGraphicPosition)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicPosition);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicPosition);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicTriangle yoGraphicTriangle)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicTriangle);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicTriangle);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicVector yoGraphicVector)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicVector);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicVector);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoGraphicLineSegment yoGraphicLineSegment)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphicLineSegment);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoGraphicLineSegment);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(Artifact artifact)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(artifact);
+      return YoGraphicConversionTools.toYoGraphicDefinition(artifact);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoArtifactLine2d yoArtifactLine2d)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoArtifactLine2d);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoArtifactLine2d);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoArtifactLineSegment2d yoArtifactLineSegment2d)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoArtifactLineSegment2d);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoArtifactLineSegment2d);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoArtifactOval yoArtifactOval)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoArtifactOval);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoArtifactOval);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoArtifactPolygon yoArtifactPolygon)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoArtifactPolygon);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoArtifactPolygon);
    }
 
    public static YoGraphicDefinition toYoGraphicDefinition(YoArtifactPosition yoArtifactPosition)
    {
-      return SCS1GraphicConversionTools.toYoGraphicDefinition(yoArtifactPosition);
+      return YoGraphicConversionTools.toYoGraphicDefinition(yoArtifactPosition);
    }
 
    public static ColorDefinition toColorDefinition(AppearanceDefinition appearanceDefinition)
    {
-      return SCS1GraphicConversionTools.toColorDefinition(appearanceDefinition);
+      return YoGraphicConversionTools.toColorDefinition(appearanceDefinition);
    }
 
    //////////////////////////////////////////////////////////////////////////////////

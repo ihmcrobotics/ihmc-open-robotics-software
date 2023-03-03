@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.color.MutableColor;
+import us.ihmc.graphicsDescription.conversion.VisualsConversionTools;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.tools.JointStateType;
@@ -284,22 +285,22 @@ public class RobotDefinitionTools
 
    public static Graphics3DObject toGraphics3DObject(Collection<? extends VisualDefinition> source)
    {
-      return RobotDefinitionConverter.toGraphics3DObject(source);
+      return VisualsConversionTools.toGraphics3DObject(source);
    }
 
    public static Graphics3DObject toGraphics3DObject(VisualDefinition source)
    {
-      return RobotDefinitionConverter.toGraphics3DObject(source);
+      return VisualsConversionTools.toGraphics3DObject(source);
    }
 
    public static List<Graphics3DPrimitiveInstruction> toGraphics3DPrimitiveInstruction(GeometryDefinition source)
    {
-      return RobotDefinitionConverter.toGraphics3DPrimitiveInstruction(source);
+      return VisualsConversionTools.toGraphics3DPrimitiveInstruction(source);
    }
 
    public static AppearanceDefinition toAppearanceDefinition(MaterialDefinition source)
    {
-      return RobotDefinitionConverter.toAppearanceDefinition(source);
+      return VisualsConversionTools.toAppearanceDefinition(source);
    }
 
    public static List<CollisionMeshDescription> toCollisionMeshDescriptions(Collection<? extends CollisionShapeDefinition> source)
@@ -323,16 +324,16 @@ public class RobotDefinitionTools
 
    public static List<VisualDefinition> toVisualDefinitions(Graphics3DObject graphics3DObject)
    {
-      return RobotDescriptionConverter.toVisualDefinitions(graphics3DObject);
+      return VisualsConversionTools.toVisualDefinitions(graphics3DObject);
    }
 
    public static MaterialDefinition toMaterialDefinition(AppearanceDefinition appearanceDefinition)
    {
-      return RobotDescriptionConverter.toMaterialDefinition(appearanceDefinition);
+      return VisualsConversionTools.toMaterialDefinition(appearanceDefinition);
    }
 
    public static ColorDefinition toColorDefinition(MutableColor mutableColor, double transparency)
    {
-      return RobotDescriptionConverter.toColorDefinition(mutableColor, transparency);
+      return VisualsConversionTools.toColorDefinition(mutableColor, transparency);
    }
 }
