@@ -678,7 +678,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
-      
+      {
          desiredRobot.getRenderables(renderables, pool, sceneLevels);
 
          if (showGraphics.get())

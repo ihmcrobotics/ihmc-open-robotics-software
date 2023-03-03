@@ -102,7 +102,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      poseGizmo.updateTransforms();
+      poseGizmo.update();
       highlightModel.setPose(graphicFrame.getReferenceFrame());
       actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getName());
    }

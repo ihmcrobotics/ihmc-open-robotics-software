@@ -26,13 +26,14 @@ import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -45,7 +46,7 @@ import java.nio.ByteOrder;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXROS2PointCloudVisualizer
+public class RDXROS2PointCloudVisualizer extends RDXVisualizer
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;

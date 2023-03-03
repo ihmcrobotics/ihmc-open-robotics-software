@@ -10,7 +10,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.PerceptionManager;
+import us.ihmc.perception.BehaviorSequencePerceptionManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -53,7 +53,7 @@ public class RDXRemoteBlackflyArUcoDetectionUI
       copyDurationInput = ros2Helper.subscribe(DualBlackflyComms.COPY_DURATION);
       copyDurationPlot = new ImPlotDoublePlot("Copy duration", 30);
 
-      ros2Helper.subscribeViaCallback(PerceptionManager.ARUCO_MARKER_POSES, arUcoPoseROS2Notification::set);
+      ros2Helper.subscribeViaCallback(BehaviorSequencePerceptionManager.ARUCO_MARKER_POSES, arUcoPoseROS2Notification::set);
    }
 
    public void update()

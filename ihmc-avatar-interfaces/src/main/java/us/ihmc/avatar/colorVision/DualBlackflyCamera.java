@@ -35,9 +35,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 
 public class DualBlackflyCamera
@@ -74,12 +76,9 @@ public class DualBlackflyCamera
    private final Stopwatch copyDuration = new Stopwatch();
    private long sequenceNumber = 0;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-
-   private final ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
    private final FramePose3D framePoseOfMarker = new FramePose3D();
    private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
    private final HashMap<Integer, OpenCVArUcoMarker> arUcoMarkersToTrack = new HashMap<>();
-   private final OpenCVArUcoMarkerDetection arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
 
    public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot)
@@ -191,7 +190,7 @@ public class DualBlackflyCamera
                arUcoMarkerDetection.update();
                arUcoMarkerDetection.drawDetectedMarkers(postDistortionMat);
                arUcoMarkerDetection.drawRejectedPoints(postDistortionMat);
-               arUcoMarkerPublisher.update()
+               arUcoMarkerPublisher.update();
 
                SwapReference<Mat> ids = arUcoMarkerDetection.getIds();
                arUcoMarkerPoses.getMarkerId().clear();

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
-public class PerceptionManager
+public class BehaviorSequencePerceptionManager
 {
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("perception_manager");
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
@@ -76,7 +76,7 @@ public class PerceptionManager
 
    private final ArrayList<DetectedObjectPublisher> detectedObjectPublishers = new ArrayList<>();
 
-   public PerceptionManager(ReferenceFrame cameraFrame)
+   public BehaviorSequencePerceptionManager(ReferenceFrame cameraFrame)
    {
       ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_manager");
 

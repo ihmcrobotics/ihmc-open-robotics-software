@@ -26,8 +26,10 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
+import java.util.Set;
+
 @Deprecated
-public class RDXROS1BoxVisualizer extends RDXROS1Visualizer implements RenderableProvider
+public class RDXROS1BoxVisualizer extends RDXROS1Visualizer
 {
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ModelBuilder modelBuilder = new ModelBuilder();
@@ -44,7 +46,7 @@ public class RDXROS1BoxVisualizer extends RDXROS1Visualizer implements Renderabl
    private final Point3D center = new Point3D();
    private final Quaternion zeroOrientation = new Quaternion();
    private final Point3D[] vertices = new Point3D[8];
-   private Color color = new Color(0.7f, 0.7f, 0.7f, 1.0f);
+   private final Color color = new Color(0.7f, 0.7f, 0.7f, 1.0f);
 
    public RDXROS1BoxVisualizer(String title, String ros1BoxTopic)
    {

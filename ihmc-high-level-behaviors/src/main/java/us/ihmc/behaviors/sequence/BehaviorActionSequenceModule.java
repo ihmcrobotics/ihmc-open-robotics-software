@@ -5,7 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.perception.PerceptionManager;
+import us.ihmc.perception.BehaviorSequencePerceptionManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.tools.thread.Throttler;
 
@@ -15,7 +15,7 @@ public class BehaviorActionSequenceModule
    private volatile boolean running = true;
    private final Throttler throttler = new Throttler();
    private final double PERIOD = Conversions.hertzToSeconds(30.0);
-   private final PerceptionManager perceptionManager;
+   private final BehaviorSequencePerceptionManager behaviorSequencePerceptionManager;
    private final BehaviorActionSequence sequence;
 
    public BehaviorActionSequenceModule(DRCRobotModel robotModel)
@@ -25,13 +25,13 @@ public class BehaviorActionSequenceModule
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
 
-      perceptionManager = new PerceptionManager(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame());
+      behaviorSequencePerceptionManager = new BehaviorSequencePerceptionManager(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame());
 
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
-      referenceFrameLibrary.add(perceptionManager.getPullDoorManager().getDoorPanel().getObjectFrame());
-      referenceFrameLibrary.add(perceptionManager.getPullDoorManager().getDoorFrame().getObjectFrame());
-      referenceFrameLibrary.add(perceptionManager.getPushDoorManager().getDoorPanel().getObjectFrame());
-      referenceFrameLibrary.add(perceptionManager.getPushDoorManager().getDoorFrame().getObjectFrame());
+      referenceFrameLibrary.add(behaviorSequencePerceptionManager.getPullDoorManager().getDoorPanel().getObjectFrame());
+      referenceFrameLibrary.add(behaviorSequencePerceptionManager.getPullDoorManager().getDoorFrame().getObjectFrame());
+      referenceFrameLibrary.add(behaviorSequencePerceptionManager.getPushDoorManager().getDoorPanel().getObjectFrame());
+      referenceFrameLibrary.add(behaviorSequencePerceptionManager.getPushDoorManager().getDoorFrame().getObjectFrame());
 
       sequence = new BehaviorActionSequence(robotModel, ros2, referenceFrameLibrary);
 
@@ -46,7 +46,7 @@ public class BehaviorActionSequenceModule
          throttler.waitAndRun(PERIOD);
 
          syncedRobot.update();
-         perceptionManager.update();
+         behaviorSequencePerceptionManager.update();
          sequence.update();
       }
    }

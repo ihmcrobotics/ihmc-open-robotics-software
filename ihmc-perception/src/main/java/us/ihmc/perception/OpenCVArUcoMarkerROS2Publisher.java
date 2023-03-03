@@ -56,6 +56,6 @@ public class OpenCVArUcoMarkerROS2Publisher
          }
       }
 
-      ros2.publish(PerceptionManager.ARUCO_MARKER_POSES, arUcoMarkerPoses);
+      ros2.publish(BehaviorSequencePerceptionManager.ARUCO_MARKER_POSES, arUcoMarkerPoses);
    }
 }
