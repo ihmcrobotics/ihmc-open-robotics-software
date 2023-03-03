@@ -56,9 +56,6 @@ public class AvatarFlatGroundDetector
    private final BipedalSupportPlanarRegionCalculator bipedalSupportPlanarRegionCalculator;
 
    private final ConcurrentMessageInputBuffer messageListener;
-//   private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
-//   private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
-//   private final TypedInput<RobotConfigurationData> robotConfigurationDataInput = new TypedInput<>();
 
    private PlanarRegionsList planarRegions;
    private final FootstepStatusMessage latestFootstepStatusMessage = new FootstepStatusMessage();
