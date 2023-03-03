@@ -92,26 +92,6 @@ public class YoVariableConnectionBurstTest
 
          updateVariables(server, jitteryTimestamp);
 
-      /*
-         This is an interesting idea that might work to keep the rates of the server and client the same
-         if (iter < 50)
-         {
-            sleep.set(5);
-         }
-         else
-         {
-            if (iter % 10 != 0)
-            {
-               sleep.set(5);
-            }
-            else
-            {
-               sleep.set(0);
-            }
-         }
-      */
-      }
-
       YoBuffer buffer = scsYoVariablesUpdatedListener.getDataBuffer();
       YoLong seq =  (YoLong)buffer.findVariable("seq_id");
 
