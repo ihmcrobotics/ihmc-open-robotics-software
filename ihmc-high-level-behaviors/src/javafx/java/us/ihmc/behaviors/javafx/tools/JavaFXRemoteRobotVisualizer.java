@@ -16,7 +16,7 @@ import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
-import us.ihmc.simulationConstructionSetTools.tools.RobotDefinitionTools;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
 

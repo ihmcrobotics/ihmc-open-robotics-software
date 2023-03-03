@@ -23,8 +23,6 @@ mainDependencies {
    api("us.ihmc:scs2-simulation-construction-set:17-0.12.4")
    api("us.ihmc:ihmc-parameter-optimization:source")
    api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-robot-models:source")
-   api("us.ihmc:ihmc-model-file-loader:source")
 }
 
 testDependencies {
