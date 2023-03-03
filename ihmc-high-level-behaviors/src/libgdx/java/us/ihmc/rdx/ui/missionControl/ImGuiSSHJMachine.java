@@ -1,39 +1,38 @@
 package us.ihmc.rdx.ui.missionControl;
 
+import ihmc_common_msgs.msg.dds.SystemResourceUsageMessage;
 import imgui.ImGui;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
-import org.apache.commons.lang3.tuple.MutablePair;
-import us.ihmc.behaviors.tools.MessagerHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.common.MatchingInfo;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
-import us.ihmc.missionControl.MissionControlDaemon;
+import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ImGuiSSHJMachine
+public class ImGuiSSHJMachine implements NewMessageListener<SystemResourceUsageMessage>
 {
    private final String machineName;
-//   private final MessagerHelper messagerHelper;
+   //   private final MessagerHelper messagerHelper;
    private final ROS2Node ros2Node;
-//
-//   private final ImGuiMessagerManagerWidget messagerManagerWidget;
-//   private final AtomicReference<ArrayList<String>> serviceStatusSubscription;
-//   private final AtomicReference<MutablePair<Double, Double>> ramUsageSubscription;
-//   private final AtomicReference<ArrayList<Double>> cpuUsagesSubscription;
-//   private final AtomicReference<MutablePair<Double, Double>> networkUsageSubscription;
-//   private final AtomicReference<String> chronySourceStatusSubscription;
-//   private final AtomicReference<Double> gpuUsageSubscription;
+   //
+   //   private final ImGuiMessagerManagerWidget messagerManagerWidget;
+   //   private final AtomicReference<ArrayList<String>> serviceStatusSubscription;
+   //   private final AtomicReference<MutablePair<Double, Double>> ramUsageSubscription;
+   //   private final AtomicReference<ArrayList<Double>> cpuUsagesSubscription;
+   //   private final AtomicReference<MutablePair<Double, Double>> networkUsageSubscription;
+   //   private final AtomicReference<String> chronySourceStatusSubscription;
+   //   private final AtomicReference<Double> gpuUsageSubscription;
 
    private final ImPlotPlot ramPlot = new ImPlotPlot();
    private final ImPlotDoublePlotLine ramUsagePlotLine = new ImPlotDoublePlotLine("RAM Usage GiB", 30 * 5, 30.0, new DecimalFormat("0.0"));
@@ -70,9 +69,9 @@ public class ImGuiSSHJMachine
       ramPlot.setXFlags(xFlags);
       ramPlot.setYFlags(yFlags);
       ramPlot.setCustomBeforePlotLogic(() ->
-      {
-         ImPlot.setNextPlotLimitsY(0.0, totalRAM, ImGuiCond.Always);
-      });
+                                       {
+                                          ImPlot.setNextPlotLimitsY(0.0, totalRAM, ImGuiCond.Always);
+                                       });
       ramPlot.getPlotLines().add(ramUsagePlotLine);
       ramPlot.getPlotLines().add(ramTotalPlotLine);
 
@@ -80,17 +79,17 @@ public class ImGuiSSHJMachine
       cpuPlot.setXFlags(xFlags);
       cpuPlot.setYFlags(yFlags);
       cpuPlot.setCustomBeforePlotLogic(() ->
-      {
-         ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always);
-      });
+                                       {
+                                          ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always);
+                                       });
 
       networkPlot.setFlags(flags);
       networkPlot.setXFlags(xFlags);
       networkPlot.setYFlags(yFlags);
       networkPlot.setCustomBeforePlotLogic(() ->
-      {
-         ImPlot.setNextPlotLimitsY(-3000.0, 103000.0, ImGuiCond.Always);
-      });
+                                           {
+                                              ImPlot.setNextPlotLimitsY(-3000.0, 103000.0, ImGuiCond.Always);
+                                           });
       networkPlot.getPlotLines().add(networkSentPlotLine);
       networkPlot.getPlotLines().add(networkReceivedPlotLine);
 
@@ -98,26 +97,31 @@ public class ImGuiSSHJMachine
       gpuPlot.setXFlags(xFlags);
       gpuPlot.setYFlags(yFlags);
       gpuPlot.setCustomBeforePlotLogic(() ->
-      {
-         ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always);
-      });
+                                       {
+                                          ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always);
+                                       });
       gpuPlot.getPlotLines().add(gpuUsagePlotLine);
 
-//      messagerHelper = new MessagerHelper(MissionControlDaemon.API.create());
+      //      messagerHelper = new MessagerHelper(MissionControlDaemon.API.create());
 
-      ArrayList<String> initialStatuses = new ArrayList<>();
-      initialStatuses.add("mission-control-2:Status not yet received.");
-//      serviceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.ServiceStatuses, initialStatuses);
-//      ramUsageSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.RAMUsage, MutablePair.of(0.0, 1.0));
-//      cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.CPUUsages, new ArrayList<>());
-//      networkUsageSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.NetworkUsage, MutablePair.of(0.0, 0.0));
-//      chronySourceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.ChronySelectedServerStatus,
-//                                                                            "Chrony status not yet received.");
-//      gpuUsageSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.GPUUsage, Double.NaN);
-//
-//      messagerManagerWidget = new ImGuiMessagerManagerWidget(messagerHelper, () -> hostname, MissionControlDaemon.API.PORT);
+      //      ArrayList<String> initialStatuses = new ArrayList<>();
+      //      initialStatuses.add("mission-control-2:Status not yet received.");
+      //      serviceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.ServiceStatuses, initialStatuses);
+      //      ramUsageSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.RAMUsage, MutablePair.of(0.0, 1.0));
+      //      cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.CPUUsages, new ArrayList<>());
+      //      networkUsageSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.NetworkUsage, MutablePair.of(0.0, 0.0));
+      //      chronySourceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.ChronySelectedServerStatus,
+      //                                                                            "Chrony status not yet received.");
+      //      gpuUsageSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.GPUUsage, Double.NaN);
+      //
+      //      messagerManagerWidget = new ImGuiMessagerManagerWidget(messagerHelper, () -> hostname, MissionControlDaemon.API.PORT);
 
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia-mission-control");
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_mission_control");
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.SYSTEM_RESOURCE_USAGE, subscriber ->
+      {
+         SystemResourceUsageMessage message = subscriber.takeNextData();
+         System.out.println(message);
+      });
    }
 
    public void renderImGuiWidgets(boolean condensedView)
@@ -129,86 +133,86 @@ public class ImGuiSSHJMachine
       if (!condensedView)
       {
          systemdServiceManager.renderImGuiWidgets();
-//         messagerManagerWidget.renderImGuiWidgets();
+         //         messagerManagerWidget.renderImGuiWidgets();
       }
 
-//      ArrayList<String> statuses = serviceStatusSubscription.get();
-//      for (String status : statuses)
-//      {
-//         String[] split = status.split(":", 2);
-//         if (split[0].equals("mission-control-2"))
-//         {
-//            if (!condensedView)
-//            {
-//               ImGui.text(split[1]);
-//            }
-//         }
-//         else
-//         {
-//            AtomicReference<String> statusAtomicReference = serviceStatuses.get(split[0]);
-//            if (statusAtomicReference != null)
-//            {
-//               statusAtomicReference.set(split[1]);
-//            }
-//         }
-//      }
-//
-//      Double gpuUsage = gpuUsageSubscription.get();
-//      boolean gpuUsageEnabled = !Double.isNaN(gpuUsage);
-//      float plotWidth = gpuUsageEnabled ? 4.0f : 3.0f;
-//
-//      MutablePair<Double, Double> ramUsage = ramUsageSubscription.getAndSet(null);
-//      if (ramUsage != null)
-//      {
-//         double used = ramUsage.getLeft();
-//         totalRAM = ramUsage.getRight();
-//         ramUsagePlotLine.addValue(used);
-//         ramTotalPlotLine.addValue(totalRAM);
-//      }
-//      ramPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
-//      plotWidth -= 1.0f;
-//
-//      ImGui.sameLine();
-//
-//      ArrayList<Double> cpuUsages = cpuUsagesSubscription.getAndSet(null);
-//      if (cpuUsages != null)
-//      {
-//         for (int i = 0; i < cpuUsages.size(); i++)
-//         {
-//            if (cpuPlot.getPlotLines().size() == i)
-//            {
-//               cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("Core " + i, 30 * 5, 30.0, new DecimalFormat("0.0")));
-//            }
-//
-//            ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(cpuUsages.get(i));
-//         }
-//      }
-//      cpuPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
-//      plotWidth -= 1.0f;
-//
-//      ImGui.sameLine();
-//
-//      MutablePair<Double, Double> networkUsage = networkUsageSubscription.getAndSet(null);
-//      if (networkUsage != null)
-//      {
-//         double sent = networkUsage.getLeft();
-//         double received = networkUsage.getRight();
-//         networkSentPlotLine.addValue(sent);
-//         networkReceivedPlotLine.addValue(received);
-//      }
-//      networkPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
-//      plotWidth -= 1.0f;
-//
-//      if (gpuUsageEnabled)
-//      {
-//         ImGui.sameLine();
-//
-//         gpuUsagePlotLine.addValue(gpuUsage);
-//         gpuPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
-//         plotWidth -= 1.0f;
-//      }
-//
-//      ImGui.text("Chrony status: " + chronySourceStatusSubscription.get());
+      //      ArrayList<String> statuses = serviceStatusSubscription.get();
+      //      for (String status : statuses)
+      //      {
+      //         String[] split = status.split(":", 2);
+      //         if (split[0].equals("mission-control-2"))
+      //         {
+      //            if (!condensedView)
+      //            {
+      //               ImGui.text(split[1]);
+      //            }
+      //         }
+      //         else
+      //         {
+      //            AtomicReference<String> statusAtomicReference = serviceStatuses.get(split[0]);
+      //            if (statusAtomicReference != null)
+      //            {
+      //               statusAtomicReference.set(split[1]);
+      //            }
+      //         }
+      //      }
+      //
+      //      Double gpuUsage = gpuUsageSubscription.get();
+      //      boolean gpuUsageEnabled = !Double.isNaN(gpuUsage);
+      //      float plotWidth = gpuUsageEnabled ? 4.0f : 3.0f;
+      //
+      //      MutablePair<Double, Double> ramUsage = ramUsageSubscription.getAndSet(null);
+      //      if (ramUsage != null)
+      //      {
+      //         double used = ramUsage.getLeft();
+      //         totalRAM = ramUsage.getRight();
+      //         ramUsagePlotLine.addValue(used);
+      //         ramTotalPlotLine.addValue(totalRAM);
+      //      }
+      //      ramPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
+      //      plotWidth -= 1.0f;
+      //
+      //      ImGui.sameLine();
+      //
+      //      ArrayList<Double> cpuUsages = cpuUsagesSubscription.getAndSet(null);
+      //      if (cpuUsages != null)
+      //      {
+      //         for (int i = 0; i < cpuUsages.size(); i++)
+      //         {
+      //            if (cpuPlot.getPlotLines().size() == i)
+      //            {
+      //               cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("Core " + i, 30 * 5, 30.0, new DecimalFormat("0.0")));
+      //            }
+      //
+      //            ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(cpuUsages.get(i));
+      //         }
+      //      }
+      //      cpuPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
+      //      plotWidth -= 1.0f;
+      //
+      //      ImGui.sameLine();
+      //
+      //      MutablePair<Double, Double> networkUsage = networkUsageSubscription.getAndSet(null);
+      //      if (networkUsage != null)
+      //      {
+      //         double sent = networkUsage.getLeft();
+      //         double received = networkUsage.getRight();
+      //         networkSentPlotLine.addValue(sent);
+      //         networkReceivedPlotLine.addValue(received);
+      //      }
+      //      networkPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
+      //      plotWidth -= 1.0f;
+      //
+      //      if (gpuUsageEnabled)
+      //      {
+      //         ImGui.sameLine();
+      //
+      //         gpuUsagePlotLine.addValue(gpuUsage);
+      //         gpuPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
+      //         plotWidth -= 1.0f;
+      //      }
+      //
+      //      ImGui.text("Chrony status: " + chronySourceStatusSubscription.get());
    }
 
    public ImGuiSSHJSystemdServiceManager getSystemdServiceManager()
@@ -223,13 +227,25 @@ public class ImGuiSSHJMachine
       return atomicReference;
    }
 
-//   public ImGuiMessagerManagerWidget getMessagerManagerWidget()
-//   {
-//      return messagerManagerWidget;
-//   }
-//
-//   public MessagerHelper getMessagerHelper()
-//   {
-//      return messagerHelper;
-//   }
+   @Override
+   public void onNewDataMessage(Subscriber<SystemResourceUsageMessage> subscriber)
+   {
+      System.out.println("recv");
+   }
+
+   @Override
+   public void onSubscriptionMatched(Subscriber<SystemResourceUsageMessage> subscriber, MatchingInfo info)
+   {
+      NewMessageListener.super.onSubscriptionMatched(subscriber, info);
+   }
+
+   //   public ImGuiMessagerManagerWidget getMessagerManagerWidget()
+   //   {
+   //      return messagerManagerWidget;
+   //   }
+   //
+   //   public MessagerHelper getMessagerHelper()
+   //   {
+   //      return messagerHelper;
+   //   }
 }
