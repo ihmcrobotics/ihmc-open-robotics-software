@@ -14,8 +14,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.PlannedFootstep;
@@ -370,7 +368,7 @@ public class RDXInteractableFootstep
    public void updatePose(RigidBodyTransformReadOnly footstepPose)
    {
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(footstepPose);
-      selectablePose3DGizmo.getPoseGizmo().updateTransforms();
+      selectablePose3DGizmo.getPoseGizmo().update();
       plannedFootstepInternal.getFootstepPose().set(footstepPose);
       wasPoseUpdated = true;
    }
