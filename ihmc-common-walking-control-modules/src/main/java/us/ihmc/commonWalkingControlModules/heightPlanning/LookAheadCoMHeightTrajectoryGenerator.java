@@ -12,7 +12,6 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -26,6 +25,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -321,9 +325,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
          double percentExchange = EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, endCoMPosition);
 
-         percentExchange = MathTools.clamp(percentExchange,
-                                     nominalDoubleSupportExchange.getDoubleValue(),
-                                     1.0 - nominalDoubleSupportExchange.getDoubleValue());
+         percentExchange = MathTools.clamp(percentExchange, nominalDoubleSupportExchange.getDoubleValue(), 1.0 - nominalDoubleSupportExchange.getDoubleValue());
          doubleSupportExchange.set(percentExchange);
       }
       else
@@ -407,13 +409,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
                                                  startWaypointX,
                                                  startWaypointY,
                                                  startGroundHeight);
-      double startMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
-                                                 hipWidth.getDoubleValue(),
-                                                 startAnkleX,
-                                                 startAnkleY,
-                                                 startWaypointX,
-                                                 startWaypointY,
-                                                 startGroundHeight);
+      double startMaxHeight = findWaypointHeight(maximumHeight
+            + extraToeOffHeight, hipWidth.getDoubleValue(), startAnkleX, startAnkleY, startWaypointX, startWaypointY, startGroundHeight);
       startMinHeight = Math.min(startMinHeight, startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
       startMaxHeight = Math.max(startMaxHeight, startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
       double firstMinHeight = findWaypointHeight(minimumHeight,
@@ -434,84 +431,74 @@ public class LookAheadCoMHeightTrajectoryGenerator
       firstMaxHeight = Math.min(firstMaxHeight, startMaxHeight);
 
       double exchangeInFromMinHeight = findWaypointHeight(minimumHeight,
-                                                        hipWidth.getDoubleValue(),
-                                                        startAnkleX,
-                                                        startAnkleY,
-                                                        secondMidpointX,
-                                                        secondMidpointY,
-                                                        startGroundHeight);
+                                                          hipWidth.getDoubleValue(),
+                                                          startAnkleX,
+                                                          startAnkleY,
+                                                          secondMidpointX,
+                                                          secondMidpointY,
+                                                          startGroundHeight);
       double exchangeInToMinHeight = findWaypointHeight(minimumHeight,
-                                                      hipWidth.getDoubleValue(),
-                                                      endAnkleX,
-                                                      endAnkleY,
-                                                      secondMidpointX,
-                                                      secondMidpointY,
-                                                      endGroundHeight);
-      double exchangeInFromMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
                                                         hipWidth.getDoubleValue(),
-                                                        startAnkleX,
-                                                        startAnkleY,
+                                                        endAnkleX,
+                                                        endAnkleY,
                                                         secondMidpointX,
                                                         secondMidpointY,
-                                                        startGroundHeight);
+                                                        endGroundHeight);
+      double exchangeInFromMaxHeight = findWaypointHeight(maximumHeight
+            + extraToeOffHeight, hipWidth.getDoubleValue(), startAnkleX, startAnkleY, secondMidpointX, secondMidpointY, startGroundHeight);
       double exchangeInToMaxHeight = findWaypointHeight(maximumHeight,
-                                                      hipWidth.getDoubleValue(),
-                                                      endAnkleX,
-                                                      endAnkleY,
-                                                      secondMidpointX,
-                                                      secondMidpointY,
-                                                      endGroundHeight);
+                                                        hipWidth.getDoubleValue(),
+                                                        endAnkleX,
+                                                        endAnkleY,
+                                                        secondMidpointX,
+                                                        secondMidpointY,
+                                                        endGroundHeight);
       double secondMinHeight = Math.min(Math.max(exchangeInFromMinHeight, exchangeInToMinHeight), Math.min(exchangeInFromMaxHeight, exchangeInToMaxHeight));
       double secondMaxHeight = Math.min(exchangeInFromMaxHeight, exchangeInToMaxHeight);
 
       double exchangeOutFromMinHeight = findWaypointHeight(minimumHeight,
-                                                          hipWidth.getDoubleValue(),
-                                                          startAnkleX,
-                                                          startAnkleY,
-                                                          thirdMidpointX,
-                                                          thirdMidpointY,
-                                                          startGroundHeight);
+                                                           hipWidth.getDoubleValue(),
+                                                           startAnkleX,
+                                                           startAnkleY,
+                                                           thirdMidpointX,
+                                                           thirdMidpointY,
+                                                           startGroundHeight);
       double exchangeOutToMinHeight = findWaypointHeight(minimumHeight,
-                                                        hipWidth.getDoubleValue(),
-                                                        endAnkleX,
-                                                        endAnkleY,
-                                                        thirdMidpointX,
-                                                        thirdMidpointY,
-                                                        endGroundHeight);
-      double exchangeOutFromMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
-                                                          hipWidth.getDoubleValue(),
-                                                          startAnkleX,
-                                                          startAnkleY,
-                                                          thirdMidpointX,
-                                                          thirdMidpointY,
-                                                          startGroundHeight);
+                                                         hipWidth.getDoubleValue(),
+                                                         endAnkleX,
+                                                         endAnkleY,
+                                                         thirdMidpointX,
+                                                         thirdMidpointY,
+                                                         endGroundHeight);
+      double exchangeOutFromMaxHeight = findWaypointHeight(maximumHeight
+            + extraToeOffHeight, hipWidth.getDoubleValue(), startAnkleX, startAnkleY, thirdMidpointX, thirdMidpointY, startGroundHeight);
       double exchangeOutToMaxHeight = findWaypointHeight(maximumHeight,
-                                                        hipWidth.getDoubleValue(),
-                                                        endAnkleX,
-                                                        endAnkleY,
-                                                        thirdMidpointX,
-                                                        thirdMidpointY,
-                                                        endGroundHeight);
+                                                         hipWidth.getDoubleValue(),
+                                                         endAnkleX,
+                                                         endAnkleY,
+                                                         thirdMidpointX,
+                                                         thirdMidpointY,
+                                                         endGroundHeight);
       double thirdMinHeight = Math.min(Math.max(exchangeOutFromMinHeight, exchangeOutToMinHeight), Math.min(exchangeOutFromMaxHeight, exchangeOutToMaxHeight));
       double thirdMaxHeight = Math.min(exchangeOutFromMaxHeight, exchangeOutToMaxHeight);
 
       double fourthMinHeight = findWaypointHeight(minimumHeight,
-                                                 hipWidth.getDoubleValue(),
-                                                 endAnkleX,
-                                                 endAnkleY,
-                                                 fourthMidpointX,
-                                                 fourthMidpointY,
-                                                 endGroundHeight);
+                                                  hipWidth.getDoubleValue(),
+                                                  endAnkleX,
+                                                  endAnkleY,
+                                                  fourthMidpointX,
+                                                  fourthMidpointY,
+                                                  endGroundHeight);
       double fourthMaxHeight = findWaypointHeight(maximumHeight,
-                                                 hipWidth.getDoubleValue(),
-                                                 endAnkleX,
-                                                 endAnkleY,
-                                                 fourthMidpointX,
-                                                 fourthMidpointY,
-                                                 endGroundHeight);
+                                                  hipWidth.getDoubleValue(),
+                                                  endAnkleX,
+                                                  endAnkleY,
+                                                  fourthMidpointX,
+                                                  fourthMidpointY,
+                                                  endGroundHeight);
       double endMinHeight = minimumHeight + endGroundHeight;
       double endMaxHeight = maximumHeight + endGroundHeight;
-      
+
       fourthMinHeight = Math.min(fourthMinHeight, endMinHeight);
       fourthMaxHeight = Math.min(fourthMaxHeight, endMaxHeight);
 
@@ -571,7 +558,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       point.addY(heightOffsetHandler.getOffsetHeightAboveGround());
       comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame,
-                                                         comHeightPartialDerivativesDataToPack.getComHeight() + heightOffsetHandler.getOffsetHeightAboveGround());
+                                                         comHeightPartialDerivativesDataToPack.getComHeight()
+                                                               + heightOffsetHandler.getOffsetHeightAboveGround());
 
       this.splineQuery.set(point.getX());
       this.desiredCoMHeight.set(point.getY());
@@ -638,5 +626,32 @@ public class LookAheadCoMHeightTrajectoryGenerator
    public double getOffsetHeightTimeInTrajectory()
    {
       return yoTime.getValue() - heightOffsetHandler.getOffsetHeightAboveGroundChangedTime();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(splinedHeightTrajectory.getSCS2YoGraphics());
+
+      if (visualize)
+      {
+         List<ColorDefinition> colors = new ArrayList<>();
+         colors.add(ColorDefinitions.CadetBlue());
+         colors.add(ColorDefinitions.Chartreuse());
+         colors.add(ColorDefinitions.Yellow());
+         colors.add(ColorDefinitions.Yellow());
+         colors.add(ColorDefinitions.BlueViolet());
+         colors.add(ColorDefinitions.Azure());
+
+         heightWaypoints.clear();
+         for (int i = 0; i < colors.size(); i++)
+         {
+            group.addChild(heightWaypoints.add().createSCS2YoGraphics("HeightWaypoint" + i, colors.get(i)));
+         }
+         heightWaypoints.clear();
+
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredCoMPosition", desiredCoMPosition, 0.035, ColorDefinitions.Gold()));
+      }
+      return group;
    }
 }

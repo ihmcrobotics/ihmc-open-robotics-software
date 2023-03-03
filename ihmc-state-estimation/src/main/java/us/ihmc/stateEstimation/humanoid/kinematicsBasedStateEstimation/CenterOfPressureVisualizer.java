@@ -19,6 +19,11 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -107,5 +112,21 @@ public class CenterOfPressureVisualizer
          footRawCoPPositionsInWorld.get(rigidBody).setToNaN();
       }
       overallRawCoPPositionInWorld.setToNaN();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      for (RigidBodyBasics rigidBody : footRigidBodies)
+      {
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Meas " + rigidBody.getName()
+               + "CoP", footRawCoPPositionsInWorld.get(rigidBody), 0.008, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.DIAMOND));
+      }
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Meas CoP",
+                                                                    overallRawCoPPositionInWorld,
+                                                                    0.015,
+                                                                    ColorDefinitions.DarkRed(),
+                                                                    DefaultPoint2DGraphic.DIAMOND));
+      return group;
    }
 }

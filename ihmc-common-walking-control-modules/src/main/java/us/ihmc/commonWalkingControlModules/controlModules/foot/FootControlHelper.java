@@ -15,6 +15,8 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -60,7 +62,9 @@ public class FootControlHelper
       this.supportStateParameters = supportStateParameters;
 
       this.swingTrajectoryParameters = swingTrajectoryParameters;
-      this.swingTrajectoryCalculator = new SwingTrajectoryCalculator(robotSide.getCamelCaseNameForStartOfExpression(), robotSide, controllerToolbox,
+      this.swingTrajectoryCalculator = new SwingTrajectoryCalculator(robotSide.getCamelCaseNameForStartOfExpression(),
+                                                                     robotSide,
+                                                                     controllerToolbox,
                                                                      walkingControllerParameters,
                                                                      swingTrajectoryParameters,
                                                                      registry);
@@ -72,14 +76,17 @@ public class FootControlHelper
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       if (walkingControllerParameters.createFootholdExplorationTools() && explorationParameters != null)
       {
-         partialFootholdControlModule = new PartialFootholdControlModule(robotSide, controllerToolbox,
-               walkingControllerParameters, explorationParameters, registry, yoGraphicsListRegistry);
+         partialFootholdControlModule = new PartialFootholdControlModule(robotSide,
+                                                                         controllerToolbox,
+                                                                         walkingControllerParameters,
+                                                                         explorationParameters,
+                                                                         registry,
+                                                                         yoGraphicsListRegistry);
       }
       else
       {
          partialFootholdControlModule = null;
       }
-
 
       isDesiredCoPOnEdge = new YoBoolean(namePrefix + "IsDesiredCoPOnEdge", registry);
 
@@ -125,9 +132,8 @@ public class FootControlHelper
          isDesiredCoPOnEdge.set(false);
       else
       {
-         double epsilon = isDesiredCoPOnEdge.getBooleanValue() ?
-               supportStateParameters.getCopOnEdgeEpsilonWithHysteresis() :
-               supportStateParameters.getCopOnEdgeEpsilon();
+         double epsilon = isDesiredCoPOnEdge.getBooleanValue() ? supportStateParameters.getCopOnEdgeEpsilonWithHysteresis()
+               : supportStateParameters.getCopOnEdgeEpsilon();
          FrameConvexPolygon2DReadOnly footSupportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
          isDesiredCoPOnEdge.set(!footSupportPolygon.isPointInside(desiredCoP, -epsilon)); // Minus means that the check is done with a smaller polygon
       }
@@ -214,5 +220,16 @@ public class FootControlHelper
    public SwingTrajectoryCalculator getSwingTrajectoryCalculator()
    {
       return swingTrajectoryCalculator;
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(robotSide.getPascalCaseName() + getClass().getSimpleName());
+      group.addChild(swingTrajectoryCalculator.getSCS2YoGraphics());
+      if (partialFootholdControlModule != null)
+         group.addChild(partialFootholdControlModule.getSCS2YoGraphics());
+      if (workspaceLimiterControlModule != null)
+         group.addChild(workspaceLimiterControlModule.getSCS2YoGraphics());
+      return group;
    }
 }

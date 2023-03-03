@@ -66,8 +66,15 @@ public class WalkingCommandConsumer
                                  WalkingControllerParameters walkingControllerParameters,
                                  YoRegistry parentRegistry)
    {
-      this(commandInputManager, statusMessageOutputManager, controllerToolbox.getWalkingMessageHandler(), controllerToolbox.getYoTime(),
-           controllerToolbox.getFullRobotModel(), controllerToolbox.getPelvisZUpFrame(), managerFactory, walkingControllerParameters, parentRegistry);
+      this(commandInputManager,
+           statusMessageOutputManager,
+           controllerToolbox.getWalkingMessageHandler(),
+           controllerToolbox.getYoTime(),
+           controllerToolbox.getFullRobotModel(),
+           controllerToolbox.getPelvisZUpFrame(),
+           managerFactory,
+           walkingControllerParameters,
+           parentRegistry);
    }
 
    public WalkingCommandConsumer(CommandInputManager commandInputManager,
@@ -552,7 +559,7 @@ public class WalkingCommandConsumer
          walkingMessageHandler.handleStepConstraintsListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(StepConstraintsListCommand.class));
       }
    }
-   
+
    public void consumePrepareForLocomotionCommands()
    {
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(PrepareForLocomotionCommand.class))

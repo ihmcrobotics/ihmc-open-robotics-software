@@ -109,6 +109,11 @@ public class WholeBodyControllerCoreFactory
       return toolbox;
    }
 
+   public WholeBodyControllerCore getWholeBodyControllerCore()
+   {
+      return controllerCore;
+   }
+
    public WholeBodyControllerCore getOrCreateWholeBodyControllerCore()
    {
       if (controllerCore != null)

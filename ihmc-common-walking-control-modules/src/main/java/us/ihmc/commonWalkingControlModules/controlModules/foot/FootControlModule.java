@@ -33,6 +33,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -590,5 +592,16 @@ public class FootControlModule
    public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
    {
       return footControlHelper.getSwingTrajectoryCalculator().getSwingTrajectory();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(footControlHelper.getSCS2YoGraphics());
+      group.addChild(swingState.getSCS2YoGraphics());
+      group.addChild(moveViaWaypointsState.getSCS2YoGraphics());
+      group.addChild(onToesState.getSCS2YoGraphics());
+      group.addChild(supportState.getSCS2YoGraphics());
+      return group;
    }
 }

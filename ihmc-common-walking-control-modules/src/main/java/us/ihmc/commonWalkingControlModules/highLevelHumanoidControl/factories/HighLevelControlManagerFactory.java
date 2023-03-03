@@ -34,6 +34,8 @@ import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGai
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDSE3Gains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -309,9 +311,7 @@ public class HighLevelControlManagerFactory
       PID3DGainsReadOnly pelvisGains = taskspaceOrientationGainMap.get(pelvisName);
       Vector3DReadOnly pelvisAngularWeight = taskspaceAngularWeightMap.get(pelvisName);
 
-      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains,
-                                                              controllerToolbox,
-                                                              registry);
+      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, controllerToolbox, registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       return pelvisOrientationManager;
@@ -397,5 +397,24 @@ public class HighLevelControlManagerFactory
       }
 
       return new FeedbackControllerTemplate(ret);
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (balanceManager != null)
+         group.addChild(balanceManager.getSCS2YoGraphics());
+      if (centerOfMassHeightManager != null)
+         group.addChild(centerOfMassHeightManager.getSCS2YoGraphics());
+      if (feetManager != null)
+         group.addChild(feetManager.getSCS2YoGraphics());
+      if (pelvisOrientationManager != null)
+         group.addChild(pelvisOrientationManager.getSCS2YoGraphics());
+      if (rigidBodyManagerMapByBodyName != null)
+      {
+         for (RigidBodyControlManager rigidBodyControlManager : rigidBodyManagerMapByBodyName.values())
+            group.addChild(rigidBodyControlManager.getSCS2YoGraphics());
+      }
+      return group;
    }
 }

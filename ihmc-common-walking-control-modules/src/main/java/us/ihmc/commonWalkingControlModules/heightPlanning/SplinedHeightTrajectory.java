@@ -20,6 +20,10 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.StringStretcher2d;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.tools.lists.ListSorter;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -233,8 +237,7 @@ public class SplinedHeightTrajectory
          return percentAlongSegment;
       }
 
-
-      double dzds = trajectoryGenerator.getVelocity() / xLength ;
+      double dzds = trajectoryGenerator.getVelocity() / xLength;
       double d2zds2 = trajectoryGenerator.getAcceleration() / x2;
       double d3zds3 = trajectoryGenerator.getJerk() / x3;
       partialDzDs.set(dzds);
@@ -283,5 +286,14 @@ public class SplinedHeightTrajectory
    public double getHeightSplineSetpoint()
    {
       return trajectoryGenerator.getPosition();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (bagOfBalls == null)
+         return null;
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("height", bagOfBalls.getPositions(), 0.01, ColorDefinitions.Black()));
+      return group;
    }
 }

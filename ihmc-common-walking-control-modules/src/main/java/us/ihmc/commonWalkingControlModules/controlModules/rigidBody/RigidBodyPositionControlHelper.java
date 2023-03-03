@@ -29,6 +29,10 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTraject
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -88,9 +92,16 @@ public class RigidBodyPositionControlHelper
 
    private final DoubleProvider time;
 
-   public RigidBodyPositionControlHelper(String warningPrefix, RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
-                                         ReferenceFrame controlFrame, ReferenceFrame baseFrame, BooleanProvider useBaseFrameForControl,
-                                         BooleanProvider useWeightFromMessage, DoubleProvider time, YoRegistry registry,
+   public RigidBodyPositionControlHelper(String warningPrefix,
+                                         RigidBodyBasics bodyToControl,
+                                         RigidBodyBasics baseBody,
+                                         RigidBodyBasics elevator,
+                                         ReferenceFrame controlFrame,
+                                         ReferenceFrame baseFrame,
+                                         BooleanProvider useBaseFrameForControl,
+                                         BooleanProvider useWeightFromMessage,
+                                         DoubleProvider time,
+                                         YoRegistry registry,
                                          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.warningPrefix = warningPrefix;
@@ -177,8 +188,10 @@ public class RigidBodyPositionControlHelper
       feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
    }
 
-   public static void modifyControlFrame(FixedFramePoint3DBasics desiredPositionToModify, FrameQuaternionBasics desiredOrientationOfPreviousControlFrame,
-                                         RigidBodyTransform previousControlFramePose, RigidBodyTransform newControlFramePose)
+   public static void modifyControlFrame(FixedFramePoint3DBasics desiredPositionToModify,
+                                         FrameQuaternionBasics desiredOrientationOfPreviousControlFrame,
+                                         RigidBodyTransform previousControlFramePose,
+                                         RigidBodyTransform newControlFramePose)
    {
       // We may skip this if there is no change in control frame.
       if (previousControlFramePose.equals(newControlFramePose))
@@ -433,7 +446,7 @@ public class RigidBodyPositionControlHelper
       {
          this.streamTimestampOffset.set(streamTimestampOffset);
          this.streamTimestampSource.set(streamTimestampSource);
-      
+
          if (trajectoryPoints.getNumberOfTrajectoryPoints() != 1)
          {
             LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
@@ -463,9 +476,7 @@ public class RigidBodyPositionControlHelper
             return false;
 
          integratedPoint.setIncludingFrame(trajectoryPoint);
-         integratedPosition.scaleAdd(command.getStreamIntegrationDuration(),
-                                     integratedPoint.getLinearVelocity(),
-                                     integratedPoint.getPosition());
+         integratedPosition.scaleAdd(command.getStreamIntegrationDuration(), integratedPoint.getLinearVelocity(), integratedPoint.getPosition());
          integratedPoint.getPosition().set(integratedPosition);
          integratedPoint.setTime(command.getStreamIntegrationDuration() + initialPoint.getTime());
       }
@@ -588,5 +599,15 @@ public class RigidBodyPositionControlHelper
       clear();
       holdCurrent();
       selectionMatrix.clearSelection();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (yoCurrentPosition != null)
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(yoCurrentPosition.getNamePrefix(), yoCurrentPosition, 0.005, ColorDefinitions.Red()));
+      if (yoDesiredPosition != null)
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D(yoDesiredPosition.getNamePrefix(), yoDesiredPosition, 0.005, ColorDefinitions.Blue()));
+      return group;
    }
 }

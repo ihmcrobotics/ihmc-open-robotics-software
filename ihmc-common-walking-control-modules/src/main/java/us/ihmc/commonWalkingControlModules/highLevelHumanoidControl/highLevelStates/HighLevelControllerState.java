@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -20,13 +21,14 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    protected final OneDoFJointBasics[] controlledJoints;
    private HighLevelControllerName previousHighLevelControllerName = null;
 
-   public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
-                                   OneDoFJointBasics[] controlledJoints)
+   public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters, OneDoFJointBasics[] controlledJoints)
    {
       this("", stateEnum, parameters, controlledJoints);
    }
 
-   public HighLevelControllerState(String namePrefix, HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
+   public HighLevelControllerState(String namePrefix,
+                                   HighLevelControllerName stateEnum,
+                                   HighLevelControllerParameters parameters,
                                    OneDoFJointBasics[] controlledJoints)
    {
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
@@ -77,8 +79,8 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    }
 
    /**
-    * Override this if you are using a controller that has contact switching and you would like to switch
-    * the joint behavior based on whether a joint is loaded or not.
+    * Override this if you are using a controller that has contact switching and you would like to
+    * switch the joint behavior based on whether a joint is loaded or not.
     */
    @Override
    public boolean isJointLoadBearing(String jointName)
@@ -99,5 +101,10 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    public HighLevelControllerName getPreviousHighLevelControllerName()
    {
       return previousHighLevelControllerName;
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

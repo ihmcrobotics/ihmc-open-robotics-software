@@ -10,6 +10,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -97,5 +101,18 @@ public class ContactPointVisualizer implements Updatable
 
       yoGraphicPositions.get(i).update();
       yoGraphicVectors.get(i).update();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+
+      for (int i = 0; i < maxNumberOfYoGraphicPositions; i++)
+      {
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("contactPoint" + i, contactPointsWorld.get(i), 0.01, ColorDefinitions.Crimson()));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("contactNormal"
+               + i, contactPointsWorld.get(i), normalVectors.get(i), 1.0, ColorDefinitions.Crimson()));
+      }
+      return group;
    }
 }

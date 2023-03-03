@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.visualizer;
 
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicArrow3D;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -19,6 +21,10 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicListDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -41,7 +47,7 @@ public class WrenchVisualizer
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final List<RigidBodyBasics> rigidBodies = new ArrayList<>();
-   private final Map<RigidBodyBasics, Consumer<WrenchReadOnly>> visualizerMap = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, SingleWrenchVisualizer> visualizerMap = new LinkedHashMap<>();
 
    public WrenchVisualizer(String name, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
@@ -115,10 +121,15 @@ public class WrenchVisualizer
       }
    }
 
+   private interface SingleWrenchVisualizer extends Consumer<WrenchReadOnly>
+   {
+      YoGraphicDefinition getSCS2YoGraphics();
+   }
+
    private final Wrench tempWrench = new Wrench();
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 
-   private class ContactablePlaneBodyWrenchVisualizer implements Consumer<WrenchReadOnly>
+   private class ContactablePlaneBodyWrenchVisualizer implements SingleWrenchVisualizer
    {
       private final YoFrameVector3D force;
       private final YoFrameVector3D torque;
@@ -163,9 +174,23 @@ public class WrenchVisualizer
             centerOfPressure.set(Double.NaN, Double.NaN, Double.NaN);
          }
       }
+
+      public YoGraphicDefinition getSCS2YoGraphics()
+      {
+         return new YoGraphicListDefinition(newYoGraphicArrow3D(force.getNamePrefix(),
+                                                                centerOfPressure,
+                                                                force,
+                                                                FORCE_VECTOR_SCALE * vizScaling,
+                                                                ColorDefinitions.OrangeRed()),
+                                            newYoGraphicArrow3D(torque.getNamePrefix(),
+                                                                centerOfPressure,
+                                                                torque,
+                                                                TORQUE_VECTOR_SCALE * vizScaling,
+                                                                ColorDefinitions.CornflowerBlue()));
+      }
    }
 
-   private class RigidBodyWrenchVisualizer implements Consumer<WrenchReadOnly>
+   private class RigidBodyWrenchVisualizer implements SingleWrenchVisualizer
    {
       private final YoFrameVector3D force;
       private final YoFrameVector3D torque;
@@ -206,5 +231,29 @@ public class WrenchVisualizer
             pointOfApplication.set(Double.NaN, Double.NaN, Double.NaN);
          }
       }
+
+      public YoGraphicDefinition getSCS2YoGraphics()
+      {
+         return new YoGraphicListDefinition(newYoGraphicArrow3D(force.getNamePrefix(),
+                                                                pointOfApplication,
+                                                                force,
+                                                                FORCE_VECTOR_SCALE * vizScaling,
+                                                                ColorDefinitions.OrangeRed()),
+                                            newYoGraphicArrow3D(torque.getNamePrefix(),
+                                                                pointOfApplication,
+                                                                torque,
+                                                                TORQUE_VECTOR_SCALE * vizScaling,
+                                                                ColorDefinitions.CornflowerBlue()));
+      }
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      for (SingleWrenchVisualizer visualizer : visualizerMap.values())
+      {
+         group.addChild(visualizer.getSCS2YoGraphics());
+      }
+      return group;
    }
 }

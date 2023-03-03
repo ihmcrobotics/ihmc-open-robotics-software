@@ -9,6 +9,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -58,10 +60,15 @@ public class PelvisIMUBasedLinearStateCalculator
    private final IMUSensorReadOnly imuProcessedOutput;
    private final IMUBiasProvider imuBiasProvider;
 
-   public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-                                              IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, double estimatorDT,
-                                              double gravitationalAcceleration, StateEstimatorParameters stateEstimatorParameters,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure,
+                                              List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+                                              IMUBiasProvider imuBiasProvider,
+                                              BooleanProvider cancelGravityFromAccelerationMeasurement,
+                                              double estimatorDT,
+                                              double gravitationalAcceleration,
+                                              StateEstimatorParameters stateEstimatorParameters,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
       this.estimatorDT = estimatorDT;
@@ -88,7 +95,8 @@ public class PelvisIMUBasedLinearStateCalculator
       else
       {
          if (imuProcessedOutputs.size() > 1)
-            System.out.println(getClass().getSimpleName() + ": More than 1 IMU sensor, using only the first one: " + imuProcessedOutputs.get(0).getSensorName());
+            System.out.println(getClass().getSimpleName() + ": More than 1 IMU sensor, using only the first one: "
+                  + imuProcessedOutputs.get(0).getSensorName());
          imuProcessedOutput = imuProcessedOutputs.get(0);
          measurementFrame = imuProcessedOutput.getMeasurementFrame();
       }
@@ -201,7 +209,7 @@ public class PelvisIMUBasedLinearStateCalculator
       tempRootJointVelocityIntegrated.setIncludingFrame(rootJointLinearVelocity);
       tempRootJointVelocityIntegrated.scale(estimatorDT);
 
-      if(setRootJointPositionImuOnlyToCurrent.getBooleanValue())
+      if (setRootJointPositionImuOnlyToCurrent.getBooleanValue())
       {
          rootJointPositionImuOnly.set(rootJointPositionPrevValue);
          setRootJointPositionImuOnlyToCurrent.set(false);
@@ -227,5 +235,10 @@ public class PelvisIMUBasedLinearStateCalculator
 
       correctionTermToPack.setToZero(tempRootJointAngularVelocity.getReferenceFrame());
       correctionTermToPack.cross(tempRootJointAngularVelocity, measurementOffset);
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }
