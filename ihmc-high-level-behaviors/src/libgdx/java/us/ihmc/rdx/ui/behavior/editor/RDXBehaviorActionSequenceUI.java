@@ -21,7 +21,7 @@ import us.ihmc.tools.io.WorkspaceFile;
 import java.util.Comparator;
 import java.util.TreeSet;
 
-public class RDXBehaviorActionSequenceManager
+public class RDXBehaviorActionSequenceUI
 {
    private final ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());

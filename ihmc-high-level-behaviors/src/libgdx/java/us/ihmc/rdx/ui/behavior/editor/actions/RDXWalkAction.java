@@ -83,7 +83,7 @@ public class RDXWalkAction extends RDXBehaviorAction
       footstepPlannerGoalGizmo.updateTransforms();
       for (RobotSide side : RobotSide.values)
       {
-         editGoalFootGizmos.get(side).updateTransforms();
+         editGoalFootGizmos.get(side).update();
 
          FramePose3D goalFootPose = goalFeetPoses.get(side);
          goalFootPose.setToZero(editGoalFootGizmos.get(side).getGizmoFrame());

@@ -22,6 +22,8 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
+import java.util.Set;
+
 @Deprecated
 public class RDXROS1PointCloudVisualizer extends RDXROS1Visualizer
 {
