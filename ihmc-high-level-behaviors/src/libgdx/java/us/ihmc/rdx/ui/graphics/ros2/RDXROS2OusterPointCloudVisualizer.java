@@ -4,16 +4,19 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -22,7 +25,8 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
+import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
+import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
@@ -51,16 +55,20 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(false);
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+   private OpenCLFloatBuffer pointCloudVertexBuffer;
    private int totalNumberOfPoints;
    private OpenCLManager openCLManager;
-   private RDXOusterDepthImageToPointCloudKernel depthImageToPointCloudKernel;
+   private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
    private ByteBuffer decompressionInputBuffer;
    private BytePointer decompressionInputBytePointer;
    private Mat decompressionInputMat;
+   private BytedecoImage depth16UC1Image;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    private int depthWidth;
    private int depthHeight;
+   private float horizontalFieldOfView;
+   private float verticalFieldOfView;
 
    public RDXROS2OusterPointCloudVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
    {
@@ -115,13 +123,20 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
             {
                depthWidth = imageMessage.getImageWidth();
                depthHeight = imageMessage.getImageHeight();
+               horizontalFieldOfView = imageMessage.getOusterHorizontalFieldOfView();
+               verticalFieldOfView = imageMessage.getOusterVerticalFieldOfView();
                totalNumberOfPoints = depthWidth * depthHeight;
                pointCloudRenderer.create(totalNumberOfPoints);
+               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
+                                                              pointCloudRenderer.getVertexBuffer());
+               pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
                decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * Short.BYTES);
                decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
                decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
 
-               depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(pointCloudRenderer, openCLManager, depthWidth, depthHeight);
+               ousterFisheyeKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
+               depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+               depth16UC1Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
                LogTools.info("Allocated new buffers. {} points.", totalNumberOfPoints);
             }
 
@@ -148,17 +163,27 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
          decompressionInputMat.cols(numberOfBytes);
          decompressionInputMat.data(decompressionInputBytePointer);
 
-         depthImageToPointCloudKernel.getDepthImage().getBackingDirectByteBuffer().rewind();
+         depth16UC1Image.getBackingDirectByteBuffer().rewind();
          opencv_imgcodecs.imdecode(decompressionInputMat,
                                    opencv_imgcodecs.IMREAD_UNCHANGED,
-                                   depthImageToPointCloudKernel.getDepthImage().getBytedecoOpenCVMat());
-         depthImageToPointCloudKernel.getDepthImage().getBackingDirectByteBuffer().rewind();
+                                   depth16UC1Image.getBytedecoOpenCVMat());
+         depth16UC1Image.getBackingDirectByteBuffer().rewind();
 
-         // TODO: Create tuners for these
-         double verticalFieldOfView = Math.PI / 2.0;
-         double horizontalFieldOfView = 2.0 * Math.PI;
-         depthImageToPointCloudKernel.getOusterToWorldTransform().set(imageMessage.getOrientation(), imageMessage.getPosition());
-         depthImageToPointCloudKernel.runKernel((float) horizontalFieldOfView, (float) verticalFieldOfView, pointSize.get());
+
+         pointCloudRenderer.updateMeshFastestBeforeKernel();
+         pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
+
+         ousterFisheyeKernel.getOusterToWorldTransformToPack().set(imageMessage.getOrientation(), imageMessage.getPosition());
+         ousterFisheyeKernel.runKernel(horizontalFieldOfView,
+                                       verticalFieldOfView,
+                                       pointSize.get(),
+                                       false,
+                                       RDXColorGradientMode.WORLD_Z.ordinal(),
+                                       false,
+                                       depth16UC1Image,
+                                       pointCloudVertexBuffer);
+
+         pointCloudRenderer.updateMeshFastestAfterKernel();
 
          delayPlot.addValue(TimeTools.calculateDelay(acquisitionTimeSecondsSinceEpoch, acquisitionTimeAdditionalNanos));
       }

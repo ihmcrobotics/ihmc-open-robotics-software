@@ -56,9 +56,9 @@ public class RDXRealsenseL515UI
    private RDXPointCloudRenderer pointCloudRenderer;
    private OpenCLManager openCLManager;
    private final FramePoint3D framePoint = new FramePoint3D();
-   private final ImFloat focalLength = new ImFloat(0.00254f); // should be 1.88mm, but tuned it;
-   private final ImFloat cmosWidth = new ImFloat(0.0036894f); // 1/6" format
-   private final ImFloat cmosHeight = new ImFloat(0.0020753f); // 1/6" format
+   private final ImFloat focalLength = new ImFloat();
+   private final ImFloat cmosWidth = new ImFloat();
+   private final ImFloat cmosHeight = new ImFloat();
    private OpenCLFloatBuffer parametersBuffer;
    private _cl_program openCLProgram;
    private _cl_kernel createPointCloudKernel;
@@ -136,10 +136,14 @@ public class RDXRealsenseL515UI
                      colorImagePanel.getBytedecoImage().createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
                      pointCloudRenderingBuffer.createOpenCLBufferObject(openCLManager);
                      parametersBuffer.createOpenCLBufferObject(openCLManager);
+
+                     focalLength.set((float) l515.getDepthFocalLengthPixelsX());
+                     cmosWidth.set((float) l515.getDepthPrincipalOffsetXPixels());
+                     cmosHeight.set((float) l515.getDepthPrincipalOffsetYPixels());
                   }
 
                   frameReadFrequency.ping();
-                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
+                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthDiscretization(), 0.0);
 
                   depthImagePanel.drawDepthImage(depth32FC1Image.getBytedecoOpenCVMat());
 
@@ -222,7 +226,7 @@ public class RDXRealsenseL515UI
             {
                ImGui.text("Depth frame data size: " + l515.getDepthFrameDataSize());
                ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
-               ImGui.text("Depth to meters conversion: " + l515.getDepthToMeterConversion());
+               ImGui.text("Depth to meters conversion: " + l515.getDepthDiscretization());
 
                volatileInputFloat(labels.get("Focal length"), focalLength, 0.00001f);
                volatileInputFloat(labels.get("CMOS width"), cmosWidth, 0.00001f);

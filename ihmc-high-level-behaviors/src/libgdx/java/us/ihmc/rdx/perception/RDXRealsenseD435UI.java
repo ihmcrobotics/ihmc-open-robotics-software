@@ -83,7 +83,7 @@ public class RDXRealsenseD435UI
                   }
 
                   frameReadFrequency.ping();
-                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, d435.getDepthToMeterConversion(), 0.0);
+                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, d435.getDepthDiscretization(), 0.0);
 
                   depthImagePanel.drawDepthImage(depth32FC1Image.getBytedecoOpenCVMat());
                }
@@ -101,7 +101,7 @@ public class RDXRealsenseD435UI
             {
                ImGui.text("Depth frame data size: " + d435.getDepthFrameDataSize());
                ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
-               ImGui.text("Depth to meters conversion: " + d435.getDepthToMeterConversion());
+               ImGui.text("Depth to meters conversion: " + d435.getDepthDiscretization());
 
                ImGui.text("Unsigned 16 Depth:");
 
