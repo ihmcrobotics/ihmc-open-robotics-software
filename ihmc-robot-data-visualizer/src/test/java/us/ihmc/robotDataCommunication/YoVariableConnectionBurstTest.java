@@ -32,7 +32,7 @@ public class YoVariableConnectionBurstTest
    private final YoLong seq_id = new YoLong("seq_id", registry);
    private final YoEnum<TestEnum> var3 = new YoEnum<>("var3", "", registry, TestEnum.class, true);
 
-   public void ensureServerClientConnection(YoVariableServer server, long jitteryTimestamp)
+   private void ensureServerClientConnection(YoVariableServer server, long jitteryTimestamp)
    {
       //This amount of updates and sleep prevents any loss in data being lost in the initial connection
       ThreadTools.sleepSeconds(10);
@@ -45,7 +45,7 @@ public class YoVariableConnectionBurstTest
       ThreadTools.sleepSeconds(10);
    }
 
-   public void updateVariables(YoVariableServer server, long jitteryTimestamp)
+   private void updateVariables(YoVariableServer server, long jitteryTimestamp)
    {
       for (int i = 0; i < 6; i++)
       {
