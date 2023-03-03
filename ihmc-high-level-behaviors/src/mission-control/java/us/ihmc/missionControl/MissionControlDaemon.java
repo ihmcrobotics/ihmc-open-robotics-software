@@ -1,11 +1,16 @@
 package us.ihmc.missionControl;
 
+import ihmc_common_msgs.msg.dds.SystemResourceUsageMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.kryo.KryoMessager;
+import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
@@ -14,12 +19,12 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
 
-import static us.ihmc.missionControl.MissionControlService.API.*;
+import static us.ihmc.missionControl.MissionControlDaemon.API.*;
 
-public class MissionControlService
+public class MissionControlDaemon
 {
    private final LinuxResourceMonitor linuxResourceMonitor = new LinuxResourceMonitor();
-   private final NethogsNetworkMonitor nethogsNetworkMonitor = new NethogsNetworkMonitor();
+   private final SysstatNetworkMonitor nloadNetworkMonitor = new SysstatNetworkMonitor();
    private final ChronyStatusMonitor chronyStatusMonitor = new ChronyStatusMonitor();
    private final GPUUsageMonitor gpuUsageMonitor = new GPUUsageMonitor();
 
@@ -30,7 +35,10 @@ public class MissionControlService
    private boolean firstConnectedTick = true;
    private final ConcurrentLinkedQueue<String> servicesToTrackQueue = new ConcurrentLinkedQueue<>();
 
-   public MissionControlService()
+   private final ROS2Node ros2Node;
+   private final IHMCROS2Publisher<SystemResourceUsageMessage> systemResourceUsagePublisher;
+
+   public MissionControlDaemon()
    {
       kryoMessagerServer = KryoMessager.createServer(API.create(), PORT, "mission_control_service", 100);
       kryoMessagerServer.startMessagerAsyncronously();
@@ -39,25 +47,41 @@ public class MissionControlService
 
       servicesToTrack.add("mission-control-2");
 
-      nethogsNetworkMonitor.start();
+      nloadNetworkMonitor.start();
       chronyStatusMonitor.start();
+
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission-control");
+      systemResourceUsagePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SYSTEM_RESOURCE_USAGE);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
 
    private void update()
    {
+      if (ros2Node == null) return;
+
       linuxResourceMonitor.update();
 
-//      LogTools.info("RAM: " + FormattingTools.getFormattedDecimal1D(linuxResourceMonitor.getUsedRAMGiB()) + " / " + FormattingTools.getFormattedDecimal1D(linuxResourceMonitor.getTotalRAMGiB()) + " GiB");
-//      ArrayList<CPUCoreTracker> cpuCoreTrackers = linuxResourceMonitor.getCpuCoreTrackers();
-//      for (int i = 0; i < cpuCoreTrackers.size(); i++)
-//      {
-//         CPUCoreTracker cpuCoreTracker = cpuCoreTrackers.get(i);
-//         LogTools.info("CPU Core {}: {} %", i, FormattingTools.getFormattedDecimal1D(cpuCoreTracker.getPercentUsage()));
-//      }
+      SystemResourceUsageMessage systemResourceUsageMessage = new SystemResourceUsageMessage();
 
-//      ProcessTools.execSimpleCommand()
+      // Set memory statistics
+      systemResourceUsageMessage.setMemoryUsed(linuxResourceMonitor.getUsedRAMGiB());
+      systemResourceUsageMessage.setTotalMemory(linuxResourceMonitor.getTotalRAMGiB());
+
+      // Set CPU statistics
+      ArrayList<CPUCoreTracker> cpuCoreTrackers = linuxResourceMonitor.getCpuCoreTrackers();
+      int cpuCount = cpuCoreTrackers.size();
+      systemResourceUsageMessage.setCpuCount(cpuCount);
+      for (int i = 0; i < cpuCount; i++)
+      {
+         float cpuUsage = systemResourceUsageMessage.getCpuUsages().get(i);
+         systemResourceUsageMessage.getCpuUsages().set(i, cpuUsage);
+      }
+
+      // Set network statistics
+
+
+      // Set GPU statistics
 
 
       if (kryoMessagerServer.isMessagerOpen())
@@ -80,7 +104,7 @@ public class MissionControlService
          }
          kryoMessagerServer.submitMessage(ServiceStatuses, statuses);
 
-         kryoMessagerServer.submitMessage(RAMUsage, MutablePair.of(linuxResourceMonitor.getUsedRAMGiB(), linuxResourceMonitor.getTotalRAMGiB()));
+//         kryoMessagerServer.submitMessage(RAMUsage, MutablePair.of(linuxResourceMonitor.getUsedRAMGiB(), linuxResourceMonitor.getTotalRAMGiB()));
          ArrayList<Double> cpuUsages = new ArrayList<>();
          for (CPUCoreTracker cpuCoreTracker : linuxResourceMonitor.getCpuCoreTrackers())
          {
@@ -88,9 +112,9 @@ public class MissionControlService
          }
          kryoMessagerServer.submitMessage(API.CPUUsages, cpuUsages);
 
-         kryoMessagerServer.submitMessage(API.NetworkUsage,
-                                          MutablePair.of(nethogsNetworkMonitor.getKilobytesPerSecondSent(),
-                                                         nethogsNetworkMonitor.getKilobytesPerSecondReceived()));
+//         kryoMessagerServer.submitMessage(API.NetworkUsage,
+//                                          MutablePair.of(nloadNetworkMonitor.getKilobytesPerSecondSent(),
+//                                                         nloadNetworkMonitor.getKilobytesPerSecondReceived()));
 
          kryoMessagerServer.submitMessage(ChronySelectedServerStatus, chronyStatusMonitor.getChronycBestSourceStatus());
 
@@ -120,8 +144,9 @@ public class MissionControlService
    {
       scheduledFuture.cancel(false);
       updateThreadScheduler.shutdown();
-      nethogsNetworkMonitor.stop();
+//      nloadNetworkMonitor.stop();
       chronyStatusMonitor.stop();
+      ros2Node.destroy();
       ExceptionTools.handle(kryoMessagerServer::closeMessager, DefaultExceptionHandler.PRINT_MESSAGE);
    }
 
@@ -153,6 +178,6 @@ public class MissionControlService
 
    public static void main(String[] args)
    {
-      new MissionControlService();
+      new MissionControlDaemon();
    }
 }
