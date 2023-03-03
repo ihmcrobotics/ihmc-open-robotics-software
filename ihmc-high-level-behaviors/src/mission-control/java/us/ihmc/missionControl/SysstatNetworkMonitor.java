@@ -20,6 +20,8 @@ public class SysstatNetworkMonitor
    private Map<String, Float> ifaceRxKbps = new ConcurrentHashMap<>();
    private Map<String, Float> ifaceTxKbps = new ConcurrentHashMap<>();
 
+   private volatile boolean running = true;
+
    public SysstatNetworkMonitor()
    {
       sarReaderThread = new PausablePeriodicThread("sar-reader", 0.2, true, this::processSarOutput);
@@ -36,6 +38,11 @@ public class SysstatNetworkMonitor
       return ifaceTxKbps;
    }
 
+   public void stop()
+   {
+      running = false;
+   }
+
    public void start()
    {
       ThreadTools.startAsDaemon(() ->
@@ -48,10 +55,12 @@ public class SysstatNetworkMonitor
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
             int read;
-            while ((read = bufferedReader.read()) > -1)
+            while ((read = bufferedReader.read()) > -1 && running)
             {
                characterQueue.add(read);
             }
+
+            process.destroy();
 
             process.waitFor();
          }

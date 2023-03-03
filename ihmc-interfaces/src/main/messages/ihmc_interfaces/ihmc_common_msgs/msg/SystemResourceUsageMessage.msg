@@ -10,8 +10,13 @@ int32 cpu_count
 float32[] cpu_usages
 
 # ======== Network statistics ========
-float32 net_bytes_in
-float32 net_bytes_out
+int32 iface_count
+#   [n] : name for nth iface
+string[] iface_names
+#   [n] : current rx (kbps) for nth iface
+float32[] iface_rx_kbps
+#   [n] : current tx (kbps) for nth iface
+float32[] iface_tx_kbps
 
 # ======== NVIDIA GPU statistics ========
 int32 nvidia_gpu_count

@@ -30,8 +30,19 @@ module ihmc_common_msgs
         /**
          * ======== Network statistics ========
          */
-        float net_bytes_in;
-        float net_bytes_out;
+        long iface_count;
+        /**
+         * [n] : name for nth iface
+         */
+        sequence<string> iface_names;
+        /**
+         * [n] : current rx (kbps) for nth iface
+         */
+        sequence<float> iface_rx_kbps;
+        /**
+         * [n] : current tx (kbps) for nth iface
+         */
+        sequence<float> iface_tx_kbps;
         /**
          * ======== NVIDIA GPU statistics ========
          */
