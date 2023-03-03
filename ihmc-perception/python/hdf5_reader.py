@@ -180,7 +180,7 @@ def plot_position(start_index, end_index, data_list, style_list, tag, type_strin
     yt_ax = fig3.add_subplot(gs[1, :4])
     yt_ax.set_title('Position (Y) vs Keyframe Index')
     zt_ax = fig3.add_subplot(gs[2, :4])
-    zt_ax.set_title('Position (Y) vs Keyframe Index')
+    zt_ax.set_title('Position (Z) vs Keyframe Index')
     xy_ax = fig3.add_subplot(gs[:3, 4:7])
     xy_ax.set_title('Position (X) vs Position (Y)')
 
