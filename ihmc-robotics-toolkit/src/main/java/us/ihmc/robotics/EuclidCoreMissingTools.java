@@ -1350,4 +1350,15 @@ public class EuclidCoreMissingTools
                                                      Math.toDegrees(orientation3DBasics.getPitch()),
                                                      Math.toDegrees(orientation3DBasics.getRoll())) + degreeSymbol;
    }
+
+   public static String getYawPitchRollValuesStringDegrees(Orientation3DBasics orientation3DBasics)
+   {
+      String degreeSymbol = "\u00B0";
+      // Degree symbol placed at the end so you don't have to remove it when copy and pasting
+      return EuclidCoreIOTools.getStringOf("(", ")", ", ",
+                                           EuclidCoreIOTools.DEFAULT_FORMAT,
+                                           Math.toDegrees(orientation3DBasics.getYaw()),
+                                           Math.toDegrees(orientation3DBasics.getPitch()),
+                                           Math.toDegrees(orientation3DBasics.getRoll())) + degreeSymbol;
+   }
 }
