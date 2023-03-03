@@ -40,6 +40,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -673,5 +675,15 @@ public class WholeBodyControlCoreToolbox
    public List<OneDoFJointBasics> getInactiveOneDoFJoints()
    {
       return inactiveOneDoFJoints;
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (planeContactWrenchProcessor != null)
+         group.addChild(planeContactWrenchProcessor.getSCS2YoGraphics());
+      if (wrenchVisualizer != null)
+         group.addChild(wrenchVisualizer.getSCS2YoGraphics());
+      return group;
    }
 }

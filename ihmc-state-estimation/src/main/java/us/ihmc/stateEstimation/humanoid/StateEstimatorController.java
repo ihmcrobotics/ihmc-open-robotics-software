@@ -3,6 +3,7 @@ package us.ihmc.stateEstimation.humanoid;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
 /**
@@ -31,5 +32,10 @@ public interface StateEstimatorController extends RobotController, StateEstimato
    public default void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform)
    {
       initializeEstimator(rootJointTransform, EMPTY_JOINT_POSITION_MAP);
+   }
+
+   default YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

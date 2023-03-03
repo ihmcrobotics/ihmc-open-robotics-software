@@ -17,6 +17,8 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeIntervalProvider;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -110,5 +112,12 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
    public FrameVector3DReadOnly getDesiredAngularMomentumRate()
    {
       return angularMomentumCalculator.getDesiredAngularMomentumRate();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(angularMomentumCalculator.getSCS2YoGraphics());
+      return group.isEmpty() ? null : group;
    }
 }

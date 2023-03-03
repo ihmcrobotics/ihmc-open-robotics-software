@@ -26,6 +26,8 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
 import us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoFrameVector3D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -701,5 +703,13 @@ public class PelvisLinearStateUpdater
    public List<RigidBodyBasics> getCurrentListOfTrustedFeet()
    {
       return listOfTrustedFeet;
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(kinematicsBasedLinearStateCalculator.getSCS2YoGraphics());
+      group.addChild(imuBasedLinearStateCalculator.getSCS2YoGraphics());
+      return group;
    }
 }

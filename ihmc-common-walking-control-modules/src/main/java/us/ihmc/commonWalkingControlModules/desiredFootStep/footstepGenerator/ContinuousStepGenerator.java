@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -28,21 +27,16 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -893,12 +887,11 @@ public class ContinuousStepGenerator implements Updatable
          for (int i = 0; i < MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE; i++)
          {
             String name = robotSide.getCamelCaseNameForStartOfExpression() + "PlannedFootstep" + i;
-            AppearanceDefinition footstepColor = new YoAppearanceRGBColor(defaultFeetColors.get(robotSide), 0.0);
             visualizers.add(new FootstepVisualizer(name,
                                                    graphicListName,
                                                    robotSide,
                                                    footPolygons.get(robotSide),
-                                                   footstepColor,
+                                                   defaultFeetColors.get(robotSide),
                                                    yoGraphicsListRegistry,
                                                    registry));
          }
@@ -960,5 +953,24 @@ public class ContinuousStepGenerator implements Updatable
       alternateStepPose2D.appendTranslation(0.0, swingSide.negateIfRightSide(parameters.getDefaultStepWidth()));
       for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
          footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, alternateStepPose2D, swingSide, touchdownPoseToPack);
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<FootstepVisualizer> visualizers = footstepSideDependentVisualizers.get(robotSide);
+         if (visualizers == null || visualizers.isEmpty())
+            return null;
+
+         for (int i = 0; i < visualizers.size(); i++)
+         {
+            group.addChild(visualizers.get(i).getSCS2YoGraphics());
+         }
+      }
+
+      return group;
    }
 }

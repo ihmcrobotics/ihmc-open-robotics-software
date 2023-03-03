@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
@@ -42,6 +43,9 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicListDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -370,5 +374,32 @@ public class HumanoidHighLevelControllerManager implements RobotController
    public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
    {
       stateMachine.addStateChangedListener(stateChangedListener);
+   }
+
+   private final YoGraphicListDefinition scs2AdditionalYoGraphics = new YoGraphicListDefinition();
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(scs2AdditionalYoGraphics);
+      WholeBodyControllerCore wholeBodyControllerCore = controllerFactoryHelper.getWholeBodyControllerCoreFactory().getWholeBodyControllerCore();
+      if (wholeBodyControllerCore != null)
+         group.addChild(wholeBodyControllerCore.getSCS2YoGraphics());
+      group.addChild(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getSCS2YoGraphics());
+      group.addChild(controllerFactoryHelper.getManagerFactory().getSCS2YoGraphics());
+      for (HighLevelControllerState controllerState : highLevelControllerStates.values())
+      {
+         group.addChild(controllerState.getSCS2YoGraphics());
+      }
+      for (HighLevelHumanoidControllerPlugin controllerPlugin : controllerPlugins)
+      {
+         group.addChild(controllerPlugin.getSCS2YoGraphics());
+      }
+      return group;
+   }
+
+   public void addYoGraphics(YoGraphicDefinition scs2AdditionalYoGraphic)
+   {
+      scs2AdditionalYoGraphics.addYoGraphic(scs2AdditionalYoGraphic);
    }
 }

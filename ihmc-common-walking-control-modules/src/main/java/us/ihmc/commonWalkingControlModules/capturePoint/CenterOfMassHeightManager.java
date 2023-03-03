@@ -18,6 +18,8 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -309,5 +311,14 @@ public class CenterOfMassHeightManager
    public TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {
       return stateMachine.getCurrentState().pollStatusToReport();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(centerOfMassHeightControlState.getSCS2YoGraphics());
+      group.addChild(heightControlThroughKneesState.getSCS2YoGraphics());
+      group.addChild(pelvisHeightControlState.getSCS2YoGraphics());
+      return group;
    }
 }

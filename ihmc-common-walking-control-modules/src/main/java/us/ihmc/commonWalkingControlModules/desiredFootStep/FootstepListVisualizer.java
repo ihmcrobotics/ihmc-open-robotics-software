@@ -14,6 +14,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 
 public class FootstepListVisualizer
 {
@@ -26,8 +29,9 @@ public class FootstepListVisualizer
 
    private final SideDependentList<List<FootstepVisualizer>> footstepVisualizers = new SideDependentList<>();
 
-   public FootstepListVisualizer(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoRegistry parentRegistry)
+   public FootstepListVisualizer(SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                 YoGraphicsListRegistry yoGraphicsListRegistry,
+                                 YoRegistry parentRegistry)
    {
       String graphicListName = "FootstepVisualizer";
 
@@ -39,8 +43,13 @@ public class FootstepListVisualizer
          for (int i = 0; i < maxNumberOfFootstepsToVisualizePerSide; i++)
          {
             String name = robotSide.getCamelCaseNameForStartOfExpression() + "Footstep" + i;
-            AppearanceDefinition footstepColor = new YoAppearanceRGBColor(defaultFeetColors.get(robotSide).darker(), 0.0);
-            FootstepVisualizer footstepVisualizer = new FootstepVisualizer(name, graphicListName, robotSide, contactableFoot, footstepColor, yoGraphicsListRegistry, registry);
+            FootstepVisualizer footstepVisualizer = new FootstepVisualizer(name,
+                                                                           graphicListName,
+                                                                           robotSide,
+                                                                           contactableFoot,
+                                                                           defaultFeetColors.get(robotSide).darker(),
+                                                                           yoGraphicsListRegistry,
+                                                                           registry);
             footstepVisualizers.get(robotSide).add(footstepVisualizer);
          }
       }
@@ -82,5 +91,20 @@ public class FootstepListVisualizer
          for (int i = counters.get(robotside).intValue(); i < maxNumberOfFootstepsToVisualizePerSide; i++)
             footstepVisualizers.get(robotside).get(i).hide();
       }
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (int i = 0; i < maxNumberOfFootstepsToVisualizePerSide; i++)
+         {
+            group.addChild(footstepVisualizers.get(robotSide).get(i).getSCS2YoGraphics());
+         }
+      }
+
+      return group;
    }
 }

@@ -17,6 +17,8 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -32,6 +34,7 @@ public class WholeBodyControllerCore
    private final YoEnum<WholeBodyControllerCoreMode> currentMode = new YoEnum<>("currentControllerCoreMode", registry, WholeBodyControllerCoreMode.class);
    private final YoInteger numberOfFBControllerEnabled = new YoInteger("numberOfFBControllerEnabled", registry);
 
+   private final WholeBodyControlCoreToolbox toolbox;
    private final WholeBodyFeedbackController feedbackController;
    private final WholeBodyInverseDynamicsSolver inverseDynamicsSolver;
    private final WholeBodyInverseKinematicsSolver inverseKinematicsSolver;
@@ -71,6 +74,7 @@ public class WholeBodyControllerCore
                                   JointDesiredOutputList lowLevelControllerOutput,
                                   YoRegistry parentRegistry)
    {
+      this.toolbox = toolbox;
       feedbackController = new WholeBodyFeedbackController(toolbox, feedbackControllerTemplate, registry);
 
       if (toolbox.isEnableInverseDynamicsModule())
@@ -350,5 +354,19 @@ public class WholeBodyControllerCore
    public FeedbackControllerDataHolderReadOnly getWholeBodyFeedbackControllerDataHolder()
    {
       return feedbackController.getWholeBodyFeedbackControllerDataHolder();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(toolbox.getSCS2YoGraphics());
+      group.addChild(feedbackController.getSCS2YoGraphics());
+      if (inverseDynamicsSolver != null)
+         group.addChild(inverseDynamicsSolver.getSCS2YoGraphics());
+      if (inverseKinematicsSolver != null)
+         group.addChild(inverseKinematicsSolver.getSCS2YoGraphics());
+      if (virtualModelControlSolver != null)
+         group.addChild(virtualModelControlSolver.getSCS2YoGraphics());
+      return group;
    }
 }

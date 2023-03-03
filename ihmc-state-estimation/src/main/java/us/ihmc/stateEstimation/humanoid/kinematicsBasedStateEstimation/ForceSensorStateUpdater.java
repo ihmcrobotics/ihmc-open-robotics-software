@@ -24,6 +24,8 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -459,5 +461,13 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    public void requestFootForceSensorCalibrationAtomic()
    {
       calibrateFootForceSensorsAtomic.set(true);
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (wrenchVisualizer != null)
+         group.addChild(wrenchVisualizer.getSCS2YoGraphics());
+      return group.isEmpty() ? null : group;
    }
 }

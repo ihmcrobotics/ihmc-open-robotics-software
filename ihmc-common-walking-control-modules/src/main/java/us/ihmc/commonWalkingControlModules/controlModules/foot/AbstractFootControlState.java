@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -14,6 +13,7 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 
 public abstract class AbstractFootControlState implements State
 {
@@ -81,4 +81,6 @@ public abstract class AbstractFootControlState implements State
    {
       return null;
    }
+
+   public abstract YoGraphicDefinition getSCS2YoGraphics();
 }

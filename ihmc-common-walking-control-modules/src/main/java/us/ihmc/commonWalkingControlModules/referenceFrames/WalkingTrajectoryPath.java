@@ -36,6 +36,10 @@ import us.ihmc.robotics.math.trajectories.generators.MultiCubicSpline1DSolver;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -636,5 +640,17 @@ public class WalkingTrajectoryPath
    {
       output.interpolate(firstPose.getPosition(), secondPose.getPosition(), 0.5);
       return AngleTools.computeAngleAverage(firstPose.getYaw(), secondPose.getYaw());
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      if (currentZUpViz == null)
+         return null;
+
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("CurrentZUp", currentPosition, currentZUpViz, 0.25, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("CurrentHeading", currentPosition, currentHeadingViz, 0.35, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("walkingPath", trajectoryPositionViz.getPositions(), 0.005, ColorDefinitions.Red()));
+      return group;
    }
 }

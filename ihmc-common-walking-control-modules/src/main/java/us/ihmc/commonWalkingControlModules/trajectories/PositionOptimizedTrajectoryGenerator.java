@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPolynomial3D;
+
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -20,11 +22,15 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
-import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoListDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -651,7 +657,7 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
       {
          compute(time);
          tempVelocity.setIncludingFrame(getVelocity());
-         double speed = tempVelocity.length();
+         double speed = tempVelocity.norm();
          if (speed > maxSpeed.getDoubleValue())
          {
             maxSpeed.set(speed);
@@ -668,5 +674,27 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
    public double getMaxSpeedTime()
    {
       return maxSpeedTime.getDoubleValue();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(namePrefix + getClass().getSimpleName());
+      for (int i = 0; i < trajectories.get(Axis3D.X).size(); i++)
+      {
+         YoPolynomial xPolynomial = trajectories.get(Axis3D.X).get(i);
+         YoPolynomial yPolynomial = trajectories.get(Axis3D.Y).get(i);
+         YoPolynomial zPolynomial = trajectories.get(Axis3D.Z).get(i);
+         YoListDefinition coefficientsX = YoGraphicDefinitionFactory.toYoListDefinition(xPolynomial.getYoCoefficients(),
+                                                                                        xPolynomial.getYoNumberOfCoefficients());
+         YoListDefinition coefficientsY = YoGraphicDefinitionFactory.toYoListDefinition(yPolynomial.getYoCoefficients(),
+                                                                                        yPolynomial.getYoNumberOfCoefficients());
+         YoListDefinition coefficientsZ = YoGraphicDefinitionFactory.toYoListDefinition(zPolynomial.getYoCoefficients(),
+                                                                                        zPolynomial.getYoNumberOfCoefficients());
+         YoDouble startTime = i == 0 ? null : waypointTimes.get(i - 1); // null will be considered as 0
+         YoDouble endTime = waypointTimes.get(i);
+         group.addChild(newYoGraphicPolynomial3D(namePrefix + "Trajectory"
+               + i, coefficientsX, coefficientsY, coefficientsZ, startTime, 0, endTime, 0, 0.01, ColorDefinitions.DodgerBlue()));
+      }
+      return group;
    }
 }

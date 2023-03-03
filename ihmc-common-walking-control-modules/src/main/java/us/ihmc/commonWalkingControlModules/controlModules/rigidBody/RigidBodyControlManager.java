@@ -20,6 +20,8 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -604,5 +606,15 @@ public class RigidBodyControlManager
    public Object pollStatusToReport()
    {
       return stateMachine.getCurrentState().pollStatusToReport();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(bodyName + "-" + getClass().getSimpleName());
+      group.addChild(taskspaceControlState.getSCS2YoGraphics());
+      if (loadBearingControlState != null)
+         group.addChild(loadBearingControlState.getSCS2YoGraphics());
+      group.addChild(externalWrenchManager.getSCS2YoGraphics());
+      return group.isEmpty() ? null : group;
    }
 }
