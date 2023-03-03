@@ -1,14 +1,15 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
    loadProductProperties("../product.properties")
-   
+
    configureDependencyResolution()
+   javaDirectory("main", "generated-java")
    configurePublications()
 }
 
@@ -21,6 +22,7 @@ mainDependencies {
    api("us.ihmc:ihmc-convex-optimization:0.17.14")
    api("us.ihmc:ihmc-path-planning:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:ihmc-perception:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-path-planning-data-sets:source")
    api("us.ihmc:ihmc-pub-sub-serializers-extra:0.18.1")
@@ -47,6 +49,5 @@ visualizersDependencies {
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
-   api("us.ihmc:ihmc-perception:source")
 
 }

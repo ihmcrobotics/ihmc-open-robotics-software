@@ -11,7 +11,7 @@ import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletFlyingBallSimulationTe
 
 public class RDXSCS2BulletSimulationDemos
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXSCS2SimulationSession scs2SimulationSession;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 

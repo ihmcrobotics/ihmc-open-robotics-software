@@ -44,6 +44,11 @@ public class RDXVRTeleporter
    private final Color color = Color.WHITE;
    private double lastTouchpadY = Double.NaN;
 
+   // Reference frame of mid-feet to be set from syncedRobot (used for teleporting vr viewPoint to robot position)
+   private ReferenceFrame robotMidFeetZUpReferenceFrame = null;
+   // Click delay calculator for double-clicking
+   private final ClickDelayCalculator bButtonClickDelayCalculator = new ClickDelayCalculator();
+
    public void create(RDXVRContext context)
    {
       double ringThickness = 0.005;
@@ -76,12 +81,30 @@ public class RDXVRTeleporter
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
+         preparingToTeleport = false;
          InputDigitalActionData bButton = controller.getBButtonActionData();
-         preparingToTeleport = bButton.bState();
-         boolean bChanged = bButton.bChanged();
+         InputDigitalActionData bButtonDoubleClick = controller.getBButtonDoubleClickActionData();
+         boolean bButtonDown = bButton.bState() && bButtonClickDelayCalculator.resume();
+         // button released just now
+         boolean released = !bButtonDown && bButton.bChanged();
+         // button clicked just now
+         boolean bJustPushed = bButtonDown && bButton.bChanged();
 
-         if (preparingToTeleport || bChanged)
+         if (bJustPushed)
          {
+            bButtonClickDelayCalculator.delay();
+         }
+
+         // Double-clicked
+         if (robotMidFeetZUpReferenceFrame != null && bButtonDoubleClick.bChanged() && !bButtonDoubleClick.bState())
+         {
+            snapToMidFeetZUp(vrContext);
+         }
+         else if (bButtonDown && bButtonClickDelayCalculator.resume())
+         {
+            // This needs to be set here, otherwise it will render the ray even when double-clicking
+            preparingToTeleport = true;
+            // Ray teleport
             pickRay.setToZero(controller.getXForwardZUpControllerFrame());
             pickRay.getDirection().set(Axis3D.X);
             pickRay.changeFrame(ReferenceFrame.getWorldFrame());
@@ -121,8 +144,7 @@ public class RDXVRTeleporter
             LibGDXTools.toLibGDX(tempTransform, ring.transform);
             LibGDXTools.toLibGDX(tempTransform, arrow.transform);
          }
-
-         if (!preparingToTeleport && bChanged)
+         else if (released && bButtonClickDelayCalculator.resume())
          {
             vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
             {
@@ -157,6 +179,25 @@ public class RDXVRTeleporter
       });
    }
 
+   private void snapToMidFeetZUp(RDXVRContext vrContext)
+   {
+      vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+      {
+         xyYawHeadsetToTeleportTransform.setIdentity();
+         vrContext.getHeadset().runIfConnected(headset -> // teleport such that your headset ends up where you're trying to go
+         {
+            headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+            xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+            xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+      });
+      teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+      teleportIHMCZUpToIHMCZUpWorld.invert();
+      // set tempTransform to incoming rigidbodyTransform.
+      tempTransform.set(robotMidFeetZUpReferenceFrame.getTransformToWorldFrame());
+      tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+      });
+   }
+
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (preparingToTeleport)
@@ -166,5 +207,10 @@ public class RDXVRTeleporter
          ring.getRenderables(renderables, pool);
          arrow.getRenderables(renderables, pool);
       }
+   }
+
+   public void setRobotMidFeetZUpReferenceFrame(ReferenceFrame robotMidFeetZUpReferenceFrame)
+   {
+      this.robotMidFeetZUpReferenceFrame = robotMidFeetZUpReferenceFrame;
    }
 }

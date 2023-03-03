@@ -10,9 +10,7 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
 public class RDXFocusBasedCameraDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXFocusBasedCamera focusBasedCamera;
    private final Vector3D tempVector = new Vector3D();
    private RDXReferenceFrameGraphic cameraFrameGraphic;

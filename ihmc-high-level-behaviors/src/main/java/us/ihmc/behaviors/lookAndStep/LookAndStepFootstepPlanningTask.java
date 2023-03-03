@@ -2,6 +2,7 @@ package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -27,6 +28,8 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -99,10 +102,12 @@ public class LookAndStepFootstepPlanningTask
 
       private final TypedInput<LookAndStepBodyPathLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> lidarREAPlanarRegionsInput = new TypedInput<>();
+      private final TypedInput<HeightMapData> heightMapInput = new TypedInput<>();
       private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
       private final TypedInput<RobotConfigurationData> robotConfigurationDataInput = new TypedInput<>();
       private final Input footstepCompletedInput = new Input();
       private final Timer planarRegionsExpirationTimer = new Timer();
+      private final Timer heightMapExpirationTimer = new Timer();
       private final Timer lidarREAPlanarRegionsExpirationTimer = new Timer();
       private final Timer capturabilityBasedStatusExpirationTimer = new Timer();
       private final Timer robotConfigurationDataExpirationTimer = new Timer();
@@ -150,9 +155,11 @@ public class LookAndStepFootstepPlanningTask
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
-         suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + planarRegionReceptionTimerSnapshot.hasBeenSet() + " timeSinceLastUpdate: "
-                                       + planarRegionReceptionTimerSnapshot.getTimePassedSinceReset(),
-                                 () -> !lookAndStepParameters.getAssumeFlatGround() && planarRegionReceptionTimerSnapshot.isExpired());
+         suppressor.addCondition(() -> "Environment model expired. haveReceivedAnyRegions: " + planarRegionReceptionTimerSnapshot.hasBeenSet() +
+                                       " haveReceivedHeightMap: " + heightMapReceptionTimerSnapshot.hasBeenSet() +
+                                       " timeSinceLastRegionsUpdate: " + planarRegionReceptionTimerSnapshot.getTimePassedSinceReset() +
+                                       " timeSinceLastHeightMap: " + heightMapReceptionTimerSnapshot.getTimePassedSinceReset(),
+                                 () -> !lookAndStepParameters.getAssumeFlatGround() && planarRegionReceptionTimerSnapshot.isExpired() && heightMapReceptionTimerSnapshot.isExpired());
          suppressor.addCondition(() -> "No regions. " + (planarRegionsManager.getReceivedPlanarRegions() == null ?
                                        null :
                                        (" isEmpty: " + planarRegionsManager.getReceivedPlanarRegions().isEmpty())),
@@ -188,6 +195,12 @@ public class LookAndStepFootstepPlanningTask
       public void acceptFootstepStarted(FootstepStatusMessage footstepStatusMessage)
       {
          stepsStartedWhilePlanning.add(footstepStatusMessage);
+      }
+
+      public void acceptHeightMap(HeightMapMessage heightMapMessage)
+      {
+         heightMapExpirationTimer.reset();
+         heightMapInput.set(HeightMapMessageTools.unpackMessage(heightMapMessage));
       }
 
       public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
@@ -253,7 +266,9 @@ public class LookAndStepFootstepPlanningTask
          ros2FootstepPlannerParameters.update();
          ros2SwingPlannerParameters.update();
          lidarREAPlanarRegions = lidarREAPlanarRegionsInput.getLatest();
+         heightMapData = heightMapInput.getLatest();
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
+         heightMapReceptionTimerSnapshot = heightMapExpirationTimer.createSnapshot(lookAndStepParameters.getHeightMapExpiration());
          lidarREAPlanarRegionReceptionTimerSnapshot = lidarREAPlanarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          capturabilityBasedStatusReceptionTimerSnapshot
@@ -291,10 +306,12 @@ public class LookAndStepFootstepPlanningTask
    // snapshot data
    protected LookAndStepBodyPathLocalizationResult localizationResult;
    protected PlanarRegionsList lidarREAPlanarRegions;
+   protected HeightMapData heightMapData;
    protected LookAndStepPlanarRegionsManager planarRegionsManager;
    protected CapturabilityBasedStatus capturabilityBasedStatus;
    protected RobotConfigurationData robotConfigurationData;
    protected TimerSnapshotWithExpiration planarRegionReceptionTimerSnapshot;
+   protected TimerSnapshotWithExpiration heightMapReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration lidarREAPlanarRegionReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration capturabilityBasedStatusReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration robotConfigurationDataReceptionTimerSnapshot;

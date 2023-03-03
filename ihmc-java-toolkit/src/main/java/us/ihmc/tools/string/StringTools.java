@@ -158,4 +158,12 @@ public class StringTools
       }
       return camelCased.toString();
    }
+
+   /**
+    * Useful for parsing files handling multiple operating systems.
+    */
+   public static String filterOutCRLFLineEndings(String stringToFilter)
+   {
+      return stringToFilter.replaceAll("\\r\\n", "\n");
+   }
 }

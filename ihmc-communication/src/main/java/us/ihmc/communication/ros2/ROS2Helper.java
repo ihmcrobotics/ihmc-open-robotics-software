@@ -5,7 +5,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
@@ -22,7 +22,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    protected final ManagedROS2Node managedROS2Node;
    protected final ROS2PublisherMap ros2PublisherMap;
 
-   public ROS2Helper(DomainFactory.PubSubImplementation pubSubImplementation, String nodeName)
+   public ROS2Helper(PubSubImplementation pubSubImplementation, String nodeName)
    {
       this(ROS2Tools.createROS2Node(pubSubImplementation, nodeName));
    }

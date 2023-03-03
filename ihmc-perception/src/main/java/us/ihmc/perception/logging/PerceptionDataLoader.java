@@ -2,27 +2,59 @@ package us.ihmc.perception.logging;
 
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 
-import java.io.File;
-import java.nio.FloatBuffer;
-
-import static org.bytedeco.opencv.global.opencv_highgui.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class PerceptionDataLoader
 {
+   private HashMap<String, PerceptionLogChannel> channels;
+
    private HDF5Manager hdf5Manager;
    private String filePath;
 
-   public PerceptionDataLoader(String filePath)
+   public PerceptionDataLoader()
    {
-      this.filePath = filePath;
-      hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
+      channels = new HashMap<>();
+   }
+
+   private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
+                                                                                                        getClass(),
+                                                                                                        ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+
+   public void openLogFile(String filePath)
+   {
+      LogTools.info("Loading Perception Log: {}", filePath);
+      if (Files.exists(Paths.get(filePath)))
+      {
+         this.filePath = filePath;
+         hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
+         channels.clear();
+
+         ArrayList<String> topicNames = HDF5Tools.findTopicNames(hdf5Manager.getFile());
+         for (String topic : topicNames)
+         {
+            LogTools.info("[Count: {}]\t Channel Found: {}", hdf5Manager.getCount(topic), topic);
+            channels.put(topic, new PerceptionLogChannel(topic, (int) hdf5Manager.getCount(topic), 0));
+         }
+      }
+      else
+      {
+         LogTools.warn("Log file does not exist: {}", filePath);
+      }
    }
 
    public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points, int rows, int cols)
@@ -30,42 +62,71 @@ public class PerceptionDataLoader
       HDF5Tools.loadPointCloud(hdf5Manager.getGroup(namespace), index, points, rows, cols);
    }
 
-   public FloatBuffer loadCompressedPointCloud(String namespace, int index)
+   public void loadPoint3DList(String namespace, ArrayList<Point3D> points)
    {
-      Group group = hdf5Manager.getGroup(namespace);
-      byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
+//      executorService.submit(() ->
+//      {
+         int count = (int) hdf5Manager.getCount(namespace);
+         for (int index = 0; index < count; index++)
+         {
+            float[] pointFloatArray = new float[3 * HDF5Manager.MAX_BUFFER_SIZE];
+            loadFloatArray(namespace, index, pointFloatArray);
 
-      LogTools.info("Byte Array: {} {} {}", compressedByteArray[0], compressedByteArray[1], compressedByteArray[2]);
+            for (int i = 0; i < pointFloatArray.length / 3; i++)
+            {
+               points.add(new Point3D(pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]));
+            }
+         }
 
-      return null;
+         LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
+//      });
    }
 
-   public void loadImage(String namespace, int index, Mat mat)
+   public void loadQuaternionList(String namespace, ArrayList<Quaternion> quaternions)
    {
-      //      ThreadTools.startAThread(()->{
-      LogTools.info("Loading Image: {} {}", namespace, index);
+//      executorService.submit(() ->
+//        {
+           int count = (int) hdf5Manager.getCount(namespace);
+           for (int index = 0; index < count; index++)
+           {
+              float[] pointFloatArray = new float[4 * HDF5Manager.MAX_BUFFER_SIZE];
+              loadFloatArray(namespace, index, pointFloatArray);
 
+              for (int i = 0; i < pointFloatArray.length / 4; i++)
+              {
+                 quaternions.add(new Quaternion(pointFloatArray[i * 4],
+                                                pointFloatArray[i * 4 + 1],
+                                                pointFloatArray[i * 4 + 2],
+                                                pointFloatArray[i * 4 + 3]));
+              }
+           }
+
+           LogTools.info("[{}] Total Quaternions Loaded: {}", namespace, quaternions.size());
+//        });
+   }
+
+   public void loadFloatArray(String namespace, int index, float[] array)
+   {
+      Group group = hdf5Manager.getGroup(namespace);
+      HDF5Tools.loadFloatArray(group, index, array);
+   }
+
+   public void loadCompressedImage(String namespace, int index, Mat mat)
+   {
       Group group = hdf5Manager.getGroup(namespace);
       byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
-
       mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(compressedByteArray));
-
-      LogTools.info("Completed Loading Image: {} {} {}", index, compressedByteArray.length);
-      //      }, "perception_data_loader -> " + namespace);
    }
 
-   public void loadDepth(String namespace, int index, Mat mat)
+   public void loadCompressedDepth(String namespace, int index, Mat mat)
    {
-      LogTools.info("Loading Image: {} {}", namespace, index);
-
+      byte[] compressedByteArray;
       Group group = hdf5Manager.getGroup(namespace);
-      byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
-
-//      LogTools.info("Depth: {}", Arrays.toString(compressedByteArray));
-
-      BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
-
-      LogTools.info("Completed Loading Image: {} {}", index, compressedByteArray.length);
+      compressedByteArray = HDF5Tools.loadByteArray(group, index);
+      synchronized (mat)
+      {
+         BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
+      }
    }
 
    public String getFilePath()
@@ -73,55 +134,133 @@ public class PerceptionDataLoader
       return filePath;
    }
 
+   public HashMap<String, PerceptionLogChannel> getChannels()
+   {
+      return channels;
+   }
+
    public HDF5Manager getHDF5Manager()
    {
       return hdf5Manager;
    }
 
+   public void destroy()
+   {
+      hdf5Manager.closeFile();
+   }
+
    public static void main(String[] args)
    {
-      String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
-      String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "experimental.hdf5";
+      String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
+      String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
+      String logFileName = "20230117_161540_PerceptionLog.hdf5";
 
-      PerceptionDataLoader loader = new PerceptionDataLoader(LOG_DIRECTORY + logFileName);
+      PerceptionDataLoader loader = new PerceptionDataLoader();
+      loader.openLogFile(Paths.get(logDirectory, logFileName).toString());
 
-      long totalColor = loader.getHDF5Manager().getCount("/l515/color/");
+      //long total = loader.getHDF5Manager().getCount("/image/");
+      //      long total = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.OUSTER_DEPTH_NAME);
 
-      Mat colorImage = new Mat();
-      Mat depthImage = new Mat(720, 1280, opencv_core.CV_16UC1);
-      LogTools.info("Total Images: {}", totalColor);
+      //      long total = Math.min(totalColor, totalDepth);
 
-      for (int i = 0; i < totalColor; i++)
+      //ArrayList<Point3D> l515PositionList = new ArrayList<>();
+      //loader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, l515PositionList);
+      //
+      //ArrayList<Quaternion> l515OrientationList = new ArrayList<>();
+      //loader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, l515OrientationList);
+
+      //ArrayList<Point3D> ousterPositionList = new ArrayList<>();
+      //loader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, ousterPositionList);
+      //
+      //ArrayList<Quaternion> ousterOrientationList = new ArrayList<>();
+      //loader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, ousterOrientationList);
+
+      ArrayList<Point3D> mocapPositionList = new ArrayList<>();
+      loader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionList);
+
+      ArrayList<Quaternion> mocapOrientationList = new ArrayList<>();
+      loader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationList);
+
+      for (int i = 0; i < mocapPositionList.size(); i++)
       {
-         LogTools.info("Loading Index: {}/{}", i, totalColor);
-         loader.loadImage("/l515/color/", i, colorImage);
-
-
-         long begin_load = System.nanoTime();
-         loader.loadDepth("/l515/depth/", i, depthImage);
-         long end_load = System.nanoTime();
-
-         LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
-
-         long begin_decompress = System.nanoTime();
-         Mat displayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC1);
-         Mat finalDisplayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC3);
-
-         BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
-         BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
-         long end_decompress = System.nanoTime();
-
-         LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
-         LogTools.info("Decompression Time: {} ms",(end_decompress - begin_decompress) / 1e6f);
-
-         imshow("/l515/color", colorImage);
-         imshow("/l515/depth", finalDisplayDepth);
-         int code = waitKeyEx(300);
-         if (code == 113)
+         if ((i % HDF5Manager.MAX_BUFFER_SIZE) == HDF5Manager.MAX_BUFFER_SIZE - 1)
          {
-            System.exit(0);
+            if (i == mocapPositionList.size() - 1)
+            {
+               mocapPositionList.get(i).set(mocapPositionList.get(i - 1));
+            }
+            else
+            {
+               Point3D point1 = mocapPositionList.get(i - 1);
+               Point3D point2 = mocapPositionList.get(i + 1);
+               mocapPositionList.get(i)
+                                .set(EuclidCoreTools.interpolate(point1.getX(), point2.getX(), 0.5f),
+                                     EuclidCoreTools.interpolate(point1.getY(), point2.getY(), 0.5f),
+                                     EuclidCoreTools.interpolate(point1.getZ(), point2.getZ(), 0.5f));
+            }
          }
+         LogTools.info("[{}] Point3D: {}", i, mocapPositionList.get(i));
       }
+
+      for (int i = 0; i < mocapOrientationList.size(); i++)
+      {
+         if ((i % HDF5Manager.MAX_BUFFER_SIZE) == HDF5Manager.MAX_BUFFER_SIZE - 1)
+         {
+            if (i == mocapOrientationList.size() - 1)
+            {
+               mocapOrientationList.get(i).set(mocapOrientationList.get(i - 1));
+            }
+            else
+            {
+               Quaternion point1 = mocapOrientationList.get(i - 1);
+               Quaternion point2 = mocapOrientationList.get(i + 1);
+               mocapOrientationList.get(i)
+                                   .set(EuclidCoreTools.interpolate(point1.getX(), point2.getX(), 0.5f),
+                                        EuclidCoreTools.interpolate(point1.getY(), point2.getY(), 0.5f),
+                                        EuclidCoreTools.interpolate(point1.getZ(), point2.getZ(), 0.5f),
+                                        EuclidCoreTools.interpolate(point1.getS(), point2.getS(), 0.5f));
+            }
+         }
+         LogTools.info("[{}] Quaternion: {}", i, mocapOrientationList.get(i));
+      }
+
+      //Mat colorImage = new Mat();
+      //Mat depthImage = new Mat(128, 2048, opencv_core.CV_16UC1);
+      //      LogTools.info("Total Images: {}", totalDepth);
+
+      //      for (int i = 0; i < total; i++)
+      //      {
+      //         //         points.clear();
+      //         //         loader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, i, points);
+      //
+      //         LogTools.info("Loading Index: {}/{}", i, 10);
+      //         //         loader.loadCompressedImage(PerceptionLoggerConstants.L515_COLOR_NAME, i, colorImage);
+      //
+      //         long begin_load = System.nanoTime();
+      //         loader.loadCompressedImage("/image/", i, colorImage);
+      ////         loader.loadCompressedDepth("/image/", i, colorImage);
+      //         long end_load = System.nanoTime();
+      //
+      ////         LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
+      ////
+      ////         long begin_decompress = System.nanoTime();
+      ////         Mat displayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC1);
+      ////         Mat finalDisplayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC3);
+      ////
+      ////         BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
+      ////         BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
+      //         //         long end_decompress = System.nanoTime();
+      //
+      //         //         LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
+      //         //         LogTools.info("Decompression Time: {} ms", (end_decompress - begin_decompress) / 1e6f);
+      //
+      //                  imshow("/l515/color", colorImage);
+      ////         imshow(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, finalDisplayDepth);
+      //         int code = waitKeyEx(100);
+      //         if (code == 113)
+      //         {
+      //            System.exit(0);
+      //         }
+      //      }
    }
 }

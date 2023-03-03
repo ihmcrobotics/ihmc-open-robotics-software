@@ -229,7 +229,7 @@ public class CaptureRegionSafetyHeuristicsTest
 
       if (PLOT_RESULTS)
       {
-         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-5, 5, -5, 5);
+         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-2, 2, -2, 2);
          FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
          plotter.setDrawPointsLarge();
          plotter.addPolygon(supportFootPolygon, Color.black);
