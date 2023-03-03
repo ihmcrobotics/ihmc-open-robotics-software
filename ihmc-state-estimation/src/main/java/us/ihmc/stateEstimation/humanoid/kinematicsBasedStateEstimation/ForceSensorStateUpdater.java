@@ -17,6 +17,7 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -36,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
+public class ForceSensorStateUpdater implements ForceSensorCalibrationModule, SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -463,6 +464,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
       calibrateFootForceSensorsAtomic.set(true);
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

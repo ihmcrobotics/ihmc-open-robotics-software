@@ -282,6 +282,7 @@ public class HeightThroughKneeControlState implements PelvisAndCenterOfMassHeigh
       this.pelvisTaskpaceFeedbackWeight = weight;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       return null;

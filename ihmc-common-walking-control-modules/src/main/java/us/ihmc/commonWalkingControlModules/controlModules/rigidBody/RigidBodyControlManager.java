@@ -15,6 +15,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -32,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.Map;
 
-public class RigidBodyControlManager
+public class RigidBodyControlManager implements SCS2YoGraphicHolder
 {
    public static final double INITIAL_GO_HOME_TIME = 2.0;
 
@@ -608,6 +609,7 @@ public class RigidBodyControlManager
       return stateMachine.getCurrentState().pollStatusToReport();
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(bodyName + "-" + getClass().getSimpleName());

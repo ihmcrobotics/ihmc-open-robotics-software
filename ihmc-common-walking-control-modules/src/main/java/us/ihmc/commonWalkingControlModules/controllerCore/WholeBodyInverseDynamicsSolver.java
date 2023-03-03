@@ -46,6 +46,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
@@ -57,7 +58,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class WholeBodyInverseDynamicsSolver
+public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 {
    /**
     * Switch to using the {@link DynamicsMatrixCalculator} instead of the
@@ -458,6 +459,7 @@ public class WholeBodyInverseDynamicsSolver
       return jointsToOptimizeFor;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

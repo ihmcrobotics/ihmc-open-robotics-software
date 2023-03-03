@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -24,7 +25,7 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class AngularMomentumHandler<T extends ContactStateBasics<T>>
+public class AngularMomentumHandler<T extends ContactStateBasics<T>> implements SCS2YoGraphicHolder
 {
    private final ECMPTrajectoryCalculator<T> ecmpTrajectoryCalculator;
    private final ThreePotatoAngularMomentumCalculator angularMomentumCalculator;
@@ -114,6 +115,7 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
       return angularMomentumCalculator.getDesiredAngularMomentumRate();
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

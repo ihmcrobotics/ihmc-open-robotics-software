@@ -34,6 +34,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -56,7 +57,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class HumanoidHighLevelControllerManager implements RobotController
+public class HumanoidHighLevelControllerManager implements RobotController, SCS2YoGraphicHolder
 {
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -378,6 +379,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
    private final YoGraphicListDefinition scs2AdditionalYoGraphics = new YoGraphicListDefinition();
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
@@ -398,7 +400,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
       return group;
    }
 
-   public void addYoGraphics(YoGraphicDefinition scs2AdditionalYoGraphic)
+   public void addYoGraphic(YoGraphicDefinition scs2AdditionalYoGraphic)
    {
       scs2AdditionalYoGraphics.addYoGraphic(scs2AdditionalYoGraphic);
    }

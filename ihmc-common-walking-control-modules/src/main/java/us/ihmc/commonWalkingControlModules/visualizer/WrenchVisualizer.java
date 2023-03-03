@@ -19,6 +19,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -121,9 +122,8 @@ public class WrenchVisualizer
       }
    }
 
-   private interface SingleWrenchVisualizer extends Consumer<WrenchReadOnly>
+   private interface SingleWrenchVisualizer extends Consumer<WrenchReadOnly>, SCS2YoGraphicHolder
    {
-      YoGraphicDefinition getSCS2YoGraphics();
    }
 
    private final Wrench tempWrench = new Wrench();

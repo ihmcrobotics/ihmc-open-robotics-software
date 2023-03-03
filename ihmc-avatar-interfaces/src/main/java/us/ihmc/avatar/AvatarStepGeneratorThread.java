@@ -180,6 +180,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       return csgGraphics;
    }
 
+   @Override
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

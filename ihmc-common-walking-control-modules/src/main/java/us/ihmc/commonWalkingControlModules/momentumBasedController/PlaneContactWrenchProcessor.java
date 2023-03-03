@@ -18,6 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -33,7 +34,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 /**
  * @author twan Date: 5/11/13
  */
-public class PlaneContactWrenchProcessor
+public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
 {
    private final static boolean VISUALIZE = false;
 
@@ -169,6 +170,7 @@ public class PlaneContactWrenchProcessor
       return desiredExternalWrenchHolder;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

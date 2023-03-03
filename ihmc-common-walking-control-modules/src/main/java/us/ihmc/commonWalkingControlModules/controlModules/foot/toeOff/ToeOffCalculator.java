@@ -4,10 +4,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameLineSegment2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 
-public interface ToeOffCalculator
+public interface ToeOffCalculator extends SCS2YoGraphicHolder
 {
    void clear();
 
@@ -23,6 +24,7 @@ public interface ToeOffCalculator
 
    void getToeOffContactLine(FrameLineSegment2DBasics contactLineToPack, RobotSide trailingLeg);
 
+   @Override
    default YoGraphicDefinition getSCS2YoGraphics()
    {
       return null;

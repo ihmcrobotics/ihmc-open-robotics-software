@@ -26,6 +26,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
@@ -57,7 +58,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  *
  * @author Sylvain
  */
-public class PelvisKinematicsBasedLinearStateCalculator
+public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphicHolder
 {
    private static final boolean VISUALIZE = true;
 
@@ -301,7 +302,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       return footEstimatorMap.get(foot).footVelocityInWorld;
    }
 
-   private static class SingleFootEstimator
+   private static class SingleFootEstimator implements SCS2YoGraphicHolder
    {
       private final RigidBodyBasics foot;
 
@@ -369,6 +370,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          yoGraphicsListRegistry.registerArtifact("StateEstimator", artifact);
       }
 
+      @Override
       public YoGraphicDefinition getSCS2YoGraphics()
       {
          YoGraphicPoint2DDefinition copVisual = YoGraphicDefinitionFactory.newYoGraphicPoint2D(foot.getName()
@@ -560,6 +562,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       }
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       if (!VISUALIZE)

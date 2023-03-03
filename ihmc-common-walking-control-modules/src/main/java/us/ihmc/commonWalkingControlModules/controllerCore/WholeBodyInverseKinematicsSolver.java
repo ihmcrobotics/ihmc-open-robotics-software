@@ -31,6 +31,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
@@ -39,7 +40,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class WholeBodyInverseKinematicsSolver
+public class WholeBodyInverseKinematicsSolver implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -251,6 +252,7 @@ public class WholeBodyInverseKinematicsSolver
       return rootJointDesiredConfiguration;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

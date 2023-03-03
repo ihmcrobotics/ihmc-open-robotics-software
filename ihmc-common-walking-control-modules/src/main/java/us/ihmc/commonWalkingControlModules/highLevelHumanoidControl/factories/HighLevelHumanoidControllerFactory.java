@@ -124,8 +124,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    private HumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
 
-   private final YoGraphicListDefinition scs2YoGraphicControllerList = new YoGraphicListDefinition();
-
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
                                              SideDependentList<String> footForceSensorNames,
                                              SideDependentList<String> wristSensorNames,
@@ -497,8 +495,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double totalRobotWeight = totalMass * gravityZ;
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, totalRobotWeight, yoGraphicsListRegistry, registry);
-      for (RobotSide robotSide : RobotSide.values)
-         scs2YoGraphicControllerList.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -566,7 +562,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
-      humanoidHighLevelControllerManager.addYoGraphics(scs2YoGraphicControllerList);
+      for (RobotSide robotSide : RobotSide.values)
+         humanoidHighLevelControllerManager.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
       return humanoidHighLevelControllerManager;
    }
 

@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -27,7 +28,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  * 
  * @author
  */
-public class FootstepAdjustor
+public class FootstepAdjustor implements SCS2YoGraphicHolder
 {
    private static final boolean VISUALIZE = true;
    private static final double SHRINK_TOUCHDOWN_POLYGON_FACTOR = 0.5;
@@ -203,6 +204,7 @@ public class FootstepAdjustor
       }
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

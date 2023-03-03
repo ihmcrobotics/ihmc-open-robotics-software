@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -20,7 +21,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class FootControlHelper
+public class FootControlHelper implements SCS2YoGraphicHolder
 {
    private final RobotSide robotSide;
    private final ContactableFoot contactableFoot;
@@ -222,6 +223,7 @@ public class FootControlHelper
       return swingTrajectoryCalculator;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(robotSide.getPascalCaseName() + getClass().getSimpleName());

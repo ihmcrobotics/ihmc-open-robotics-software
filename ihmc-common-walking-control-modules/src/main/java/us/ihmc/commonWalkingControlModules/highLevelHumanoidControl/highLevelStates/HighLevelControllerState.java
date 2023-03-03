@@ -5,13 +5,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public abstract class HighLevelControllerState implements State, JointLoadStatusProvider
+public abstract class HighLevelControllerState implements State, JointLoadStatusProvider, SCS2YoGraphicHolder
 {
    protected final YoRegistry registry;
 
@@ -103,6 +104,7 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
       return previousHighLevelControllerName;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       return null;

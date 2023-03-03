@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
@@ -48,7 +49,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  *
  * @author gwiedebach
  */
-public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
+public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator, SCS2YoGraphicHolder
 {
    public static final int dimensions = 3;
    public final ReferenceFrame trajectoryFrame;
@@ -676,6 +677,7 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
       return maxSpeedTime.getDoubleValue();
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(namePrefix + getClass().getSimpleName());

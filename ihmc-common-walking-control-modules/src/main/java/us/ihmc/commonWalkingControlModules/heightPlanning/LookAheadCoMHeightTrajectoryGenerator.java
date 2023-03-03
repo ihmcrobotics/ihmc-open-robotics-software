@@ -23,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeight
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -40,7 +41,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class LookAheadCoMHeightTrajectoryGenerator
+public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolder
 {
    private static final double defaultPercentageInOffset = 0.05;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -628,6 +629,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       return yoTime.getValue() - heightOffsetHandler.getOffsetHeightAboveGroundChangedTime();
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

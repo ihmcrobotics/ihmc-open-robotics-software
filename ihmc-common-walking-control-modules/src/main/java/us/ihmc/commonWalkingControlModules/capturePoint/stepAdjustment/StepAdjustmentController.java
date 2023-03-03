@@ -7,10 +7,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 
-public interface StepAdjustmentController
+public interface StepAdjustmentController extends SCS2YoGraphicHolder
 {
    void reset();
 
@@ -34,6 +34,4 @@ public interface StepAdjustmentController
    boolean wasFootstepAdjusted();
 
    boolean useStepAdjustment();
-
-   YoGraphicDefinition getSCS2YoGraphics();
 }

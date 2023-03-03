@@ -6,19 +6,17 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class FootstepListVisualizer
+public class FootstepListVisualizer implements SCS2YoGraphicHolder
 {
    private static final int maxNumberOfFootstepsToVisualizePerSide = 2;
    public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
@@ -93,6 +91,7 @@ public class FootstepListVisualizer
       }
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

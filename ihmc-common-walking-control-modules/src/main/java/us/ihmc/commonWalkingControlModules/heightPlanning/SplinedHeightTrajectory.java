@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -29,7 +30,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SplinedHeightTrajectory
+public class SplinedHeightTrajectory implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double constraintWeight = 1000.0;
@@ -288,6 +289,7 @@ public class SplinedHeightTrajectory
       return trajectoryGenerator.getPosition();
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       if (bagOfBalls == null)

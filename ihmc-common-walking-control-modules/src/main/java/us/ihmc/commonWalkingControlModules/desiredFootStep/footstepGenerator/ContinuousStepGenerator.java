@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -103,7 +104,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  *
  * @author Sylvain Bertrand
  */
-public class ContinuousStepGenerator implements Updatable
+public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 {
    private static final int MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE = 3;
    public static final Color defaultLeftColor = new Color(28, 134, 238); // dodgerblue 2, from: http://cloford.com/resources/colours/500col.htm
@@ -955,6 +956,7 @@ public class ContinuousStepGenerator implements Updatable
          footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, alternateStepPose2D, swingSide, touchdownPoseToPack);
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

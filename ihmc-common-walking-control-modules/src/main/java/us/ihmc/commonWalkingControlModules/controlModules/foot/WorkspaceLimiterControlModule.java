@@ -29,6 +29,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -46,7 +47,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class WorkspaceLimiterControlModule
+public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 {
    private static final double epsilon = 5e-3;
    private boolean visualize = true;
@@ -836,6 +837,7 @@ public class WorkspaceLimiterControlModule
       return true;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       if (!visualize)

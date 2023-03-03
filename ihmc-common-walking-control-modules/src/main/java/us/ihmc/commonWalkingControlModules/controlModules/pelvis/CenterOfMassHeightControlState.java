@@ -457,6 +457,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       return statusHelper.pollStatusMessage(statusDesiredPosition, statusActualPosition);
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
