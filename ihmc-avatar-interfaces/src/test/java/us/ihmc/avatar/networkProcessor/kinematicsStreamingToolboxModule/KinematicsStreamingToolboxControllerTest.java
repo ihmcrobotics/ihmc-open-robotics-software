@@ -76,7 +76,7 @@ import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.simulationConstructionSetTools.tools.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
