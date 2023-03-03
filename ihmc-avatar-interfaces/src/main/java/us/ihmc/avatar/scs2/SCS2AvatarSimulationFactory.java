@@ -51,6 +51,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -77,7 +78,6 @@ import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
@@ -391,7 +391,7 @@ public class SCS2AvatarSimulationFactory
                                                     gravity.get(),
                                                     robotModel.get().getEstimatorDT());
       if (enableSCS1YoGraphics.get())
-         simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
+         simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
          simulationConstructionSet.addYoGraphic(controllerThread.getSCS2YoGraphics());
    }
@@ -445,7 +445,7 @@ public class SCS2AvatarSimulationFactory
                                                           stepSnapperUpdatable,
                                                           ros2Node);
       if (enableSCS1YoGraphics.get())
-         simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getSCS1YoGraphicsListRegistry()));
+         simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
          simulationConstructionSet.addYoGraphic(stepGeneratorThread.getSCS2YoGraphics());
    }
