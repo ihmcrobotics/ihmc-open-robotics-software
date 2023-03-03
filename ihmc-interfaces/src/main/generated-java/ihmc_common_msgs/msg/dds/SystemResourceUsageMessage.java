@@ -27,8 +27,19 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
    /**
             * ======== Network statistics ========
             */
-   public float net_bytes_in_;
-   public float net_bytes_out_;
+   public int iface_count_;
+   /**
+            * [n] : name for nth iface
+            */
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  iface_names_;
+   /**
+            * [n] : current rx (kbps) for nth iface
+            */
+   public us.ihmc.idl.IDLSequence.Float  iface_rx_kbps_;
+   /**
+            * [n] : current tx (kbps) for nth iface
+            */
+   public us.ihmc.idl.IDLSequence.Float  iface_tx_kbps_;
    /**
             * ======== NVIDIA GPU statistics ========
             */
@@ -49,6 +60,11 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
    public SystemResourceUsageMessage()
    {
       cpu_usages_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
+
+      iface_names_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (100, "type_d");
+      iface_rx_kbps_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
+
+      iface_tx_kbps_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
       nvidia_gpu_memory_used_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
@@ -73,10 +89,11 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       cpu_count_ = other.cpu_count_;
 
       cpu_usages_.set(other.cpu_usages_);
-      net_bytes_in_ = other.net_bytes_in_;
+      iface_count_ = other.iface_count_;
 
-      net_bytes_out_ = other.net_bytes_out_;
-
+      iface_names_.set(other.iface_names_);
+      iface_rx_kbps_.set(other.iface_rx_kbps_);
+      iface_tx_kbps_.set(other.iface_tx_kbps_);
       nvidia_gpu_count_ = other.nvidia_gpu_count_;
 
       nvidia_gpu_memory_used_.set(other.nvidia_gpu_memory_used_);
@@ -135,25 +152,43 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
    /**
             * ======== Network statistics ========
             */
-   public void setNetBytesIn(float net_bytes_in)
+   public void setIfaceCount(int iface_count)
    {
-      net_bytes_in_ = net_bytes_in;
+      iface_count_ = iface_count;
    }
    /**
             * ======== Network statistics ========
             */
-   public float getNetBytesIn()
+   public int getIfaceCount()
    {
-      return net_bytes_in_;
+      return iface_count_;
    }
 
-   public void setNetBytesOut(float net_bytes_out)
+
+   /**
+            * [n] : name for nth iface
+            */
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getIfaceNames()
    {
-      net_bytes_out_ = net_bytes_out;
+      return iface_names_;
    }
-   public float getNetBytesOut()
+
+
+   /**
+            * [n] : current rx (kbps) for nth iface
+            */
+   public us.ihmc.idl.IDLSequence.Float  getIfaceRxKbps()
    {
-      return net_bytes_out_;
+      return iface_rx_kbps_;
+   }
+
+
+   /**
+            * [n] : current tx (kbps) for nth iface
+            */
+   public us.ihmc.idl.IDLSequence.Float  getIfaceTxKbps()
+   {
+      return iface_tx_kbps_;
    }
 
    /**
@@ -224,9 +259,13 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.cpu_usages_, other.cpu_usages_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.net_bytes_in_, other.net_bytes_in_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.iface_count_, other.iface_count_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.net_bytes_out_, other.net_bytes_out_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.iface_names_, other.iface_names_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.iface_rx_kbps_, other.iface_rx_kbps_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.iface_tx_kbps_, other.iface_tx_kbps_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.nvidia_gpu_count_, other.nvidia_gpu_count_, epsilon)) return false;
 
@@ -256,10 +295,11 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       if(this.cpu_count_ != otherMyClass.cpu_count_) return false;
 
       if (!this.cpu_usages_.equals(otherMyClass.cpu_usages_)) return false;
-      if(this.net_bytes_in_ != otherMyClass.net_bytes_in_) return false;
+      if(this.iface_count_ != otherMyClass.iface_count_) return false;
 
-      if(this.net_bytes_out_ != otherMyClass.net_bytes_out_) return false;
-
+      if (!this.iface_names_.equals(otherMyClass.iface_names_)) return false;
+      if (!this.iface_rx_kbps_.equals(otherMyClass.iface_rx_kbps_)) return false;
+      if (!this.iface_tx_kbps_.equals(otherMyClass.iface_tx_kbps_)) return false;
       if(this.nvidia_gpu_count_ != otherMyClass.nvidia_gpu_count_) return false;
 
       if (!this.nvidia_gpu_memory_used_.equals(otherMyClass.nvidia_gpu_memory_used_)) return false;
@@ -283,10 +323,14 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       builder.append(this.cpu_count_);      builder.append(", ");
       builder.append("cpu_usages=");
       builder.append(this.cpu_usages_);      builder.append(", ");
-      builder.append("net_bytes_in=");
-      builder.append(this.net_bytes_in_);      builder.append(", ");
-      builder.append("net_bytes_out=");
-      builder.append(this.net_bytes_out_);      builder.append(", ");
+      builder.append("iface_count=");
+      builder.append(this.iface_count_);      builder.append(", ");
+      builder.append("iface_names=");
+      builder.append(this.iface_names_);      builder.append(", ");
+      builder.append("iface_rx_kbps=");
+      builder.append(this.iface_rx_kbps_);      builder.append(", ");
+      builder.append("iface_tx_kbps=");
+      builder.append(this.iface_tx_kbps_);      builder.append(", ");
       builder.append("nvidia_gpu_count=");
       builder.append(this.nvidia_gpu_count_);      builder.append(", ");
       builder.append("nvidia_gpu_memory_used=");
