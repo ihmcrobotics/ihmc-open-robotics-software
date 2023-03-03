@@ -533,12 +533,12 @@ int getTraversibilityOffsetSet(int yaw_index)
    }
 }
 
-float computeSidedTraversibility(float* height_map_params,
-                                 float* planner_params,
-                                 int* offsets,
+float computeSidedTraversibility(global float* height_map_params,
+                                 global float* planner_params,
+                                 global int* offsets,
                                  int offset_set,
-                                 float* height_map_data,
-                                 float* normal_xyz_data,
+                                 global float* height_map_data,
+                                 global float* normal_xyz_data,
                                  int node_side,
                                  float2 node,
                                  int neighbor_idx,
@@ -1471,7 +1471,7 @@ void kernel computeWaypointMapGradients(global float* height_map_params,
       }
       else
       {
-         float* sided_buffer;
+         global float* sided_buffer;
          if (side == 0)
             sided_buffer = left_traversibilities_for_gradient_map;
          else
