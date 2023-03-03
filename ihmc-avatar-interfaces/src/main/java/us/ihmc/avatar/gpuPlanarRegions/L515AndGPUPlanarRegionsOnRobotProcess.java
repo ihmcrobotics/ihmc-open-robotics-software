@@ -258,7 +258,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             val2 = Short.toUnsignedInt(depthU16C1Image.ptr(400, 200).getShort());
             val3 = Short.toUnsignedInt(depthU16C1Image.ptr(600, 50).getShort());
 
-            depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
+            depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthDiscretization(), 0.0);
 
             syncedRobot.update();
             ReferenceFrame cameraFrame =

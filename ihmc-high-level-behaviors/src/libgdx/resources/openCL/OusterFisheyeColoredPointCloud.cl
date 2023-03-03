@@ -2,9 +2,11 @@
 #define VERTICAL_FIELD_OF_VIEW 1
 #define DEPTH_IMAGE_WIDTH 2
 #define DEPTH_IMAGE_HEIGHT 3
-#define POINT_SIZE 4
-#define LEVEL_OF_COLOR_DETAIL 5
-#define USE_FISHEYE_COLOR 6
+#define GRADIENT_MODE 4
+#define USE_SINUSOIDAL_GRADIENT 5
+#define POINT_SIZE 6
+#define LEVEL_OF_COLOR_DETAIL 7
+#define USE_FISHEYE_COLOR 8
 
 #define FISHEYE_IMAGE_WIDTH 0
 #define FISHEYE_IMAGE_HEIGHT 1
@@ -13,13 +15,16 @@
 #define FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X 4
 #define FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y 5
 
-kernel void imageToPointCloud(global float* parameters,
-                              global float* ousterToWorldTransform,
-                              read_only image2d_t discretizedDepthImage,
-                              global float* fisheyeParameters,
-                              read_only image2d_t fThetaFisheyeRGBA8Image,
-                              global float* ousterToFisheyeTransform,
-                              global float* pointCloudVertexBuffer)
+#define GRADIENT_MODE_WORLD_Z 0
+#define GRADIENT_MODE_SENSOR_X 1
+
+kernel void computeVertexBuffer(global float* parameters,
+                                global float* ousterToWorldTransform,
+                                read_only image2d_t discretizedDepthImage,
+                                global float* fisheyeParameters,
+                                read_only image2d_t fThetaFisheyeRGBA8Image,
+                                global float* ousterToFisheyeTransform,
+                                global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -80,8 +85,8 @@ kernel void imageToPointCloud(global float* parameters,
    }
 
    float4 pointColor = (float4) (1.0f, 1.0f, 1.0f, 1.0f);
-   bool coloredWithSensorData = false;
-   if (fisheyeParameters[USE_FISHEYE_COLOR])
+   bool appliedColorFromSensor = false;
+   if (parameters[USE_FISHEYE_COLOR])
    {
       float3 fisheyeFramePoint = transformPoint3D32(ousterFramePoint, ousterToFisheyeTransform);
 
@@ -100,22 +105,30 @@ kernel void imageToPointCloud(global float* parameters,
          // https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function
          // https://www.ihmc.us/wp-content/uploads/2023/02/equidistant_fisheye_model-1024x957.jpeg
          float azimuthalAngle = atan2(-fisheyeFramePoint.z, -fisheyeFramePoint.y);
-         int fisheyeCol = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X]
-                        + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_X] * angleOfIncidence * cos(azimuthalAngle);
-         int fisheyeRow = fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y]
-                        + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y] * angleOfIncidence * sin(azimuthalAngle);
+         int fisheyeCol = round(fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_X]
+                              + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_X] * angleOfIncidence * cos(azimuthalAngle));
+         int fisheyeRow = round(fisheyeParameters[FISHEYE_IMAGE_FOCAL_PRINCIPAL_POINT_PIXELS_Y]
+                              + fisheyeParameters[FISHEYE_IMAGE_FOCAL_LENGTH_PIXELS_Y] * angleOfIncidence * sin(azimuthalAngle));
 
-         if (fisheyeCol >= 0 && fisheyeCol < fisheyeParameters[FISHEYE_IMAGE_WIDTH] && fisheyeRow >= 0 && fisheyeRow < fisheyeParameters[FISHEYE_IMAGE_HEIGHT])
+         if (intervalContains(fisheyeCol, 0, fisheyeParameters[FISHEYE_IMAGE_WIDTH])
+          && intervalContains(fisheyeRow, 0, fisheyeParameters[FISHEYE_IMAGE_HEIGHT]))
          {
             uint4 fisheyeColor = read_imageui(fThetaFisheyeRGBA8Image, (int2) (fisheyeCol, fisheyeRow));
             pointColor = convert_float4(fisheyeColor) / 255.0f;
-            coloredWithSensorData = true;
+            appliedColorFromSensor = true;
          }
       }
    }
-   if (!coloredWithSensorData)
+   if (!appliedColorFromSensor)
    {
-      pointColor = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
+      if (parameters[GRADIENT_MODE] == GRADIENT_MODE_WORLD_Z)
+      {
+         pointColor = calculateGradientColorOptionFloat4(worldFramePoint.z, parameters[USE_SINUSOIDAL_GRADIENT]);
+      }
+      else // GRADIENT_MODE_SENSOR_X
+      {
+         pointColor = calculateGradientColorOptionFloat4(eyeDepthInMeters, parameters[USE_SINUSOIDAL_GRADIENT]);
+      }
    }
 
    pointCloudVertexBuffer[pointStartIndex + 3] = pointColor.x;
