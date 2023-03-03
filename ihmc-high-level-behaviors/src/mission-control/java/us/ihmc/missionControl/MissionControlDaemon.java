@@ -2,6 +2,7 @@ package us.ihmc.missionControl;
 
 import ihmc_common_msgs.msg.dds.SystemResourceUsageMessage;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
@@ -14,11 +15,17 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
+/**
+ * Requires sysstat
+ *    sudo apt install sysstat
+ *    sudo systemctl enable sysstat
+ *    sudo systemctl start sysstat
+ */
 public class MissionControlDaemon
 {
    private final LinuxResourceMonitor resourceMonitor;
    private final SysstatNetworkMonitor networkMonitor;
-   private final NVIDIAGPUUsageMonitor gpuUsageMonitor;
+   private final NVIDIAGPUMonitor gpuUsageMonitor;
 
    private final ROS2Node ros2Node;
    private final IHMCROS2Publisher<SystemResourceUsageMessage> systemResourceUsagePublisher;
@@ -31,7 +38,7 @@ public class MissionControlDaemon
 
       resourceMonitor = new LinuxResourceMonitor();
       networkMonitor = new SysstatNetworkMonitor();
-      gpuUsageMonitor = new NVIDIAGPUUsageMonitor();
+      gpuUsageMonitor = new NVIDIAGPUMonitor();
 
       networkMonitor.start();
 
@@ -49,14 +56,14 @@ public class MissionControlDaemon
       if (ros2Node == null)
          return;
 
-      resourceMonitor.update();
-
       SystemResourceUsageMessage message = new SystemResourceUsageMessage();
+
+      resourceMonitor.update();
 
       // Set memory statistics
       {
          message.setMemoryUsed(resourceMonitor.getUsedRAMGiB());
-         message.setTotalMemory(resourceMonitor.getTotalRAMGiB());
+         message.setMemoryTotal(resourceMonitor.getTotalRAMGiB());
       }
 
       // Set CPU statistics
@@ -94,9 +101,9 @@ public class MissionControlDaemon
          if (gpuUsageMonitor.getHasNvidiaGPU())
          {
             message.setNvidiaGpuCount(1);
-            message.getNvidiaGpuUtilization().add(gpuUsageMonitor.getGPUUsage());
-            message.getNvidiaGpuMemoryUsed().add(gpuUsageMonitor.getGPUUsedMemoryMB());
-            message.getNvidiaGpuTotalMemory().add(gpuUsageMonitor.getGPUTotalMemoryMB());
+            message.getNvidiaGpuUtilization().add(gpuUsageMonitor.getGpuUsage());
+            message.getNvidiaGpuMemoryUsed().add(gpuUsageMonitor.getMemoryUsed());
+            message.getNvidiaGpuTotalMemory().add(gpuUsageMonitor.getMemoryTotal());
          }
       }
 
@@ -127,17 +134,21 @@ public class MissionControlDaemon
       ros2Node.destroy();
    }
 
+   private static volatile boolean running = true;
+
    public static void main(String[] args)
    {
       new MissionControlDaemon();
 
-      try
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
-         Thread.sleep(10000000);
-      }
-      catch (InterruptedException e)
+         running = false;
+         Runtime.getRuntime().halt(0); // Set exit code to 0
+      }));
+
+      while (running)
       {
-         throw new RuntimeException(e);
+         ThreadTools.sleep(1000);
       }
    }
 }

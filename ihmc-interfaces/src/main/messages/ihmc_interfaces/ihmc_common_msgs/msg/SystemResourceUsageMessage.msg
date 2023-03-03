@@ -2,7 +2,7 @@
 
 # ======== System memory statistics ========
 float32 memory_used
-float32 total_memory
+float32 memory_total
 
 # ======== CPU statistics ========
 int32 cpu_count

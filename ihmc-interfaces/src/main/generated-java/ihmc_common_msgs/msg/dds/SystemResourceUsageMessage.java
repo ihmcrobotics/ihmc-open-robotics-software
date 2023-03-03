@@ -15,7 +15,7 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
             * ======== System memory statistics ========
             */
    public float memory_used_;
-   public float total_memory_;
+   public float memory_total_;
    /**
             * ======== CPU statistics ========
             */
@@ -84,7 +84,7 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
    {
       memory_used_ = other.memory_used_;
 
-      total_memory_ = other.total_memory_;
+      memory_total_ = other.memory_total_;
 
       cpu_count_ = other.cpu_count_;
 
@@ -116,13 +116,13 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       return memory_used_;
    }
 
-   public void setTotalMemory(float total_memory)
+   public void setMemoryTotal(float memory_total)
    {
-      total_memory_ = total_memory;
+      memory_total_ = memory_total;
    }
-   public float getTotalMemory()
+   public float getMemoryTotal()
    {
-      return total_memory_;
+      return memory_total_;
    }
 
    /**
@@ -253,7 +253,7 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.memory_used_, other.memory_used_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.total_memory_, other.total_memory_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.memory_total_, other.memory_total_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cpu_count_, other.cpu_count_, epsilon)) return false;
 
@@ -290,7 +290,7 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
 
       if(this.memory_used_ != otherMyClass.memory_used_) return false;
 
-      if(this.total_memory_ != otherMyClass.total_memory_) return false;
+      if(this.memory_total_ != otherMyClass.memory_total_) return false;
 
       if(this.cpu_count_ != otherMyClass.cpu_count_) return false;
 
@@ -317,8 +317,8 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       builder.append("SystemResourceUsageMessage {");
       builder.append("memory_used=");
       builder.append(this.memory_used_);      builder.append(", ");
-      builder.append("total_memory=");
-      builder.append(this.total_memory_);      builder.append(", ");
+      builder.append("memory_total=");
+      builder.append(this.memory_total_);      builder.append(", ");
       builder.append("cpu_count=");
       builder.append(this.cpu_count_);      builder.append(", ");
       builder.append("cpu_usages=");
