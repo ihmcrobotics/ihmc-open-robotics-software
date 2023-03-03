@@ -13,6 +13,13 @@ uint16 image_width
 # Image height in pixels
 uint16 image_height
 
+# Depth discretization unit length.
+# This is used when this image is a depth image. The image will be represented
+# in data as unsigned integers where the units are this distance.
+# For instance a depth pixel value of 2 and discretization value of 0.1 would
+# indicate a depth of 0.2 meters.
+float32 depth_discretization
+
 # The raw data for the image
 int8[] data
 
@@ -25,7 +32,33 @@ geometry_msgs/Point position
 # Orientation of the focal point at sensor data aquisition
 geometry_msgs/Quaternion orientation
 
-# Intrinsic parameters for frustum camera models
-perception_msgs/IntrinsicParametersMessage intrinsic_parameters
+# Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
+bool is_pinhole_camera_model
+
+# Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
+bool is_equidistant_fisheye_camera_model
+
+# If the camera model is the Ouster camera model.
+# With the Ouster camera model, the vertical and horizonal fields of view
+# are used instead of the focal length and principal point parameters.
+bool is_ouster_camera_model
+
+# Horizontal focal length in units of pixels (Fx)
+float32 focal_length_x_pixels
+
+# Vertical focal length in units of pixels (Fx)
+float32 focal_length_y_pixels
+
+# Principal point X in units of pixels (Cx)
+float32 principal_point_x_pixels
+
+# Principal point Y in units of pixels (Cy)
+float32 principal_point_y_pixels
+
+# If Ouster camera model, the vertical field of view in radians
+float32 ouster_vertical_field_of_view
+
+# If Ouster camera model, the horizontal field of view in radians
+float32 ouster_horizontal_field_of_view
 
 

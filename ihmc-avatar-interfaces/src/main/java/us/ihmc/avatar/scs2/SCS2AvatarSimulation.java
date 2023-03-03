@@ -1,5 +1,7 @@
 package us.ihmc.avatar.scs2;
 
+import java.util.Objects;
+
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
@@ -204,6 +206,12 @@ public class SCS2AvatarSimulation
    }
 
    // GUI controls:
+   /**
+    * Align the camera to look at the robot root joint from the front using a default latitude.
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
+    */
    public void setCameraDefaultRobotView()
    {
       checkSimulationSessionAlive();
@@ -223,6 +231,9 @@ public class SCS2AvatarSimulation
     * <p>
     * The camera is rotated during this operation, its position remains unchanged.
     * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
     * 
     * @param focus the new focus position.
     */
@@ -236,6 +247,9 @@ public class SCS2AvatarSimulation
     * Sets the new focus point the camera is looking at.
     * <p>
     * The camera is rotated during this operation, its position remains unchanged.
+    * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
     * </p>
     *
     * @param x the x-coordinate of the new focus location.
@@ -279,6 +293,12 @@ public class SCS2AvatarSimulation
 
    /**
     * Sets the camera configuration.
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
     * 
     * @param cameraFocus    the new focus position (where the camera is looking at).
     * @param cameraPosition the new camerate position.
@@ -287,6 +307,12 @@ public class SCS2AvatarSimulation
    {
       setCameraFocusPosition(cameraFocus);
       setCameraPosition(cameraPosition);
+   }
+
+   public void requestCameraRigidBodyTracking(String rigidBodyName)
+   {
+      Objects.requireNonNull(robot, "The robot has not been set yet.");
+      requestCameraRigidBodyTracking(robot.getName(), rigidBodyName);
    }
 
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
