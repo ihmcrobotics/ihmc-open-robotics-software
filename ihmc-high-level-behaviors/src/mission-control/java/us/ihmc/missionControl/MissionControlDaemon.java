@@ -18,6 +18,7 @@ public class MissionControlDaemon
 {
    private final LinuxResourceMonitor resourceMonitor;
    private final SysstatNetworkMonitor networkMonitor;
+   private final NVIDIAGPUUsageMonitor gpuUsageMonitor;
 
    private final ROS2Node ros2Node;
    private final IHMCROS2Publisher<SystemResourceUsageMessage> systemResourceUsagePublisher;
@@ -30,6 +31,7 @@ public class MissionControlDaemon
 
       resourceMonitor = new LinuxResourceMonitor();
       networkMonitor = new SysstatNetworkMonitor();
+      gpuUsageMonitor = new NVIDIAGPUUsageMonitor();
 
       networkMonitor.start();
 
@@ -88,7 +90,14 @@ public class MissionControlDaemon
 
       // Set GPU statistics
       {
-         // TODO:
+         // TODO: support multiple GPUs
+         if (gpuUsageMonitor.getHasNvidiaGPU())
+         {
+            message.setNvidiaGpuCount(1);
+            message.getNvidiaGpuUtilization().add(gpuUsageMonitor.getGPUUsage());
+            message.getNvidiaGpuMemoryUsed().add(gpuUsageMonitor.getGPUUsedMemoryMB());
+            message.getNvidiaGpuTotalMemory().add(gpuUsageMonitor.getGPUTotalMemoryMB());
+         }
       }
 
       // Publish the message
