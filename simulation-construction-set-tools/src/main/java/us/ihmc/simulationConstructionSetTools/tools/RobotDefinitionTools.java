@@ -1,4 +1,4 @@
-package us.ihmc.simulationToolkit;
+package us.ihmc.simulationConstructionSetTools.tools;
 
 import java.io.InputStream;
 import java.util.Collection;
