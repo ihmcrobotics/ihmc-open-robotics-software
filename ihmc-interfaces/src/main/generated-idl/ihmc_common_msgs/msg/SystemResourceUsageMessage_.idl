@@ -18,7 +18,7 @@ module ihmc_common_msgs
          * ======== System memory statistics ========
          */
         float memory_used;
-        float total_memory;
+        float memory_total;
         /**
          * ======== CPU statistics ========
          */

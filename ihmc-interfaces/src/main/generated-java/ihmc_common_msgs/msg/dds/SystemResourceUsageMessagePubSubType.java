@@ -131,7 +131,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       cdr.write_type_5(data.getMemoryUsed());
 
-      cdr.write_type_5(data.getTotalMemory());
+      cdr.write_type_5(data.getMemoryTotal());
 
       cdr.write_type_2(data.getCpuCount());
 
@@ -173,7 +173,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       data.setMemoryUsed(cdr.read_type_5());
       	
-      data.setTotalMemory(cdr.read_type_5());
+      data.setMemoryTotal(cdr.read_type_5());
       	
       data.setCpuCount(cdr.read_type_2());
       	
@@ -195,7 +195,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    public final void serialize(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_5("memory_used", data.getMemoryUsed());
-      ser.write_type_5("total_memory", data.getTotalMemory());
+      ser.write_type_5("memory_total", data.getMemoryTotal());
       ser.write_type_2("cpu_count", data.getCpuCount());
       ser.write_type_e("cpu_usages", data.getCpuUsages());
       ser.write_type_2("iface_count", data.getIfaceCount());
@@ -212,7 +212,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data)
    {
       data.setMemoryUsed(ser.read_type_5("memory_used"));
-      data.setTotalMemory(ser.read_type_5("total_memory"));
+      data.setMemoryTotal(ser.read_type_5("memory_total"));
       data.setCpuCount(ser.read_type_2("cpu_count"));
       ser.read_type_e("cpu_usages", data.getCpuUsages());
       data.setIfaceCount(ser.read_type_2("iface_count"));
