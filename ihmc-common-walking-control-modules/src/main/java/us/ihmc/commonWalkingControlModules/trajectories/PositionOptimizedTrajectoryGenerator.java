@@ -21,6 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
@@ -366,7 +367,10 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
          for (int i = 0; i < segments.getIntegerValue(); i++)
          {
             coefficients.get(i).toArray(tempCoeffs);
-            trajectories.get(axis).get(i).setDirectlyReverse(tempCoeffs);
+            YoPolynomial trajectory = trajectories.get(axis).get(i);
+            trajectory.setDirectlyReverse(tempCoeffs);
+            double startTime = i > 0 ? waypointTimes.get(i - 1).getDoubleValue() : 0.0;
+            trajectory.getTimeInterval().setInterval(startTime, waypointTimes.get(i).getDoubleValue());
          }
       }
 
@@ -587,6 +591,10 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
       return desiredAcceleration;
    }
 
+   public EnumMap<Axis3D, ArrayList<YoPolynomial>> getTrajectories()
+   {
+      return trajectories;
+   }
 
    public void informDone()
    {

@@ -426,6 +426,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       output.setBodyPathPlanningResult(bodyPathPlanningResult);
       output.setFootstepPlanningResult(FootstepPlanningResult.PLANNING);
       output.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.lap());
+      output.setSwingTrajectories(getSwingPlanningModule().getSwingTrajectories());
       statusCallbacks.forEach(callback -> callback.accept(output));
    }
 

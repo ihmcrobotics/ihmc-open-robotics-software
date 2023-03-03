@@ -28,7 +28,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
-import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.simulationConstructionSetTools.tools.RobotDefinitionTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetupFactories;
 import us.ihmc.valkyrie.ValkyrieMutableInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
