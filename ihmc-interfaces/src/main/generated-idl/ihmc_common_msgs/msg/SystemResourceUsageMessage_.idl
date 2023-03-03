@@ -1,0 +1,56 @@
+#ifndef __ihmc_common_msgs__msg__SystemResourceUsageMessage__idl__
+#define __ihmc_common_msgs__msg__SystemResourceUsageMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This is part of the IHMC Common message package.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::SystemResourceUsageMessage_")
+      struct SystemResourceUsageMessage
+      {
+        /**
+         * ======== System memory statistics ========
+         */
+        float memory_used;
+        float total_memory;
+        /**
+         * ======== CPU statistics ========
+         */
+        long cpu_count;
+        /**
+         * [n] : usage for nth CPU
+         */
+        sequence<float> cpu_usages;
+        /**
+         * ======== Network statistics ========
+         */
+        float net_bytes_in;
+        float net_bytes_out;
+        /**
+         * ======== NVIDIA GPU statistics ========
+         */
+        long nvidia_gpu_count;
+        /**
+         * [n] : memory used for nth GPU
+         */
+        sequence<float> nvidia_gpu_memory_used;
+        /**
+         * [n] : total memory for nth GPU
+         */
+        sequence<float> nvidia_gpu_total_memory;
+        /**
+         * [n] : utilization for nth GPU
+         */
+        sequence<float> nvidia_gpu_utilization;
+      };
+    };
+  };
+};
+
+#endif

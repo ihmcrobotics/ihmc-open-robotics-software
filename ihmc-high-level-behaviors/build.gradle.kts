@@ -38,6 +38,7 @@ missionControlDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
+   api("us.ihmc:ihmc-communication:source")
 }
 
 libgdxDependencies {

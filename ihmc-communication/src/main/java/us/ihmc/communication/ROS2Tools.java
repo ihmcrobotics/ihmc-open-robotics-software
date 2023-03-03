@@ -3,6 +3,7 @@ package us.ihmc.communication;
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.SystemResourceUsageMessage;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
@@ -110,6 +111,8 @@ public class ROS2Tools
    public static final ROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule(HEIGHT_MAP_MODULE_NAME);
 
    public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
+
+   public static final ROS2Topic<SystemResourceUsageMessage> SYSTEM_RESOURCE_USAGE = IHMC_ROOT.withTypeName(SystemResourceUsageMessage.class);
 
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
    public static final ROS2Topic<PlanarRegionsListMessage> REA_SUPPORT_REGIONS_INPUT = REA.withRobot(null)

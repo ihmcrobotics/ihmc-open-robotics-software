@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 public class LinuxResourceMonitor
 {
-   private double totalRAMGiB;
-   private double usedRAMGiB;
+   private float totalRAMGiB;
+   private float usedRAMGiB;
 
    private final ArrayList<CPUCoreTracker> cpuCoreTrackers = new ArrayList<>();
    private final ArrayList<String> cpuLines = new ArrayList<>();
@@ -27,8 +27,8 @@ public class LinuxResourceMonitor
       String free = ProcessTools.execSimpleCommand("free --mebi");
       String[] lines = free.split("\\R");
       String[] amongSpaces = lines[1].split("\\s+");
-      totalRAMGiB = Double.parseDouble(amongSpaces[1]) / 1000.0;
-      usedRAMGiB = Double.parseDouble(amongSpaces[2]) / 1000.0;
+      totalRAMGiB = (float) (Float.parseFloat(amongSpaces[1]) / 1000.0);
+      usedRAMGiB = (float) (Float.parseFloat(amongSpaces[2]) / 1000.0);
    }
 
    private void calculateCPUUsage()
@@ -53,16 +53,16 @@ public class LinuxResourceMonitor
          String cpuLine = cpuLines.get(i);
          String[] split = cpuLine.split("\\s+");
          // https://www.baeldung.com/linux/get-cpu-usage
-         double timeInUserMode = Double.parseDouble(split[1]);
-         double timeNiceUserMode = Double.parseDouble(split[2]);
-         double timeInKernelCode = Double.parseDouble(split[3]);
-         double idleTime = Double.parseDouble(split[4]);
-         double ioWaitTime = Double.parseDouble(split[5]);
-         double interruptTime = Double.parseDouble(split[6]);
-         double softIRQTime = Double.parseDouble(split[7]);
-         //         double stealTime = Double.parseDouble(split[8]);
-         //         double guestTime = Double.parseDouble(split[9]);
-         //         double guestNiceTime = Double.parseDouble(split[10]);
+         float timeInUserMode = Float.parseFloat(split[1]);
+         float timeNiceUserMode = Float.parseFloat(split[2]);
+         float timeInKernelCode = Float.parseFloat(split[3]);
+         float idleTime = Float.parseFloat(split[4]);
+         float ioWaitTime = Float.parseFloat(split[5]);
+         float interruptTime = Float.parseFloat(split[6]);
+         float softIRQTime = Float.parseFloat(split[7]);
+         //         float stealTime = Float.parseFloat(split[8]);
+         //         float guestTime = Float.parseFloat(split[9]);
+         //         float guestNiceTime = Float.parseFloat(split[10]);
 
          cpuCoreTrackers.get(i).update(timeInUserMode, timeNiceUserMode, timeInKernelCode, idleTime, ioWaitTime, interruptTime, softIRQTime);
       }
@@ -73,12 +73,12 @@ public class LinuxResourceMonitor
       return cpuCoreTrackers;
    }
 
-   public double getTotalRAMGiB()
+   public float getTotalRAMGiB()
    {
       return totalRAMGiB;
    }
 
-   public double getUsedRAMGiB()
+   public float getUsedRAMGiB()
    {
       return usedRAMGiB;
    }
