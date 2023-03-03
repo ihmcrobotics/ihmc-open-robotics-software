@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -67,7 +67,7 @@ libgdxDependencies {
    api("org.lwjgl:lwjgl-assimp:$lwjglVersion:natives-windows-x86")
    api("org.lwjgl:lwjgl-assimp:$lwjglVersion:natives-macos")
 
-   val imguiVersion = "1.86.4"
+   val imguiVersion = "1.86.9"
    api("io.github.spair:imgui-java-binding:$imguiVersion")
    api("io.github.spair:imgui-java-lwjgl3:$imguiVersion")
    api("io.github.spair:imgui-java-natives-linux-ft:$imguiVersion")
