@@ -81,7 +81,7 @@ public class RDXFootstepAction implements RDXBehaviorAction
    @Override
    public void update()
    {
-      poseGizmo.updateTransforms();
+      poseGizmo.update();
       poseGizmo.getGizmoFrame().getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
       highlightModel.setPose(tempTransform, ankleToSoleFrameTransform);
    }
