@@ -9,7 +9,7 @@ public class RDXSCS2StyleChartDemo
 
    public RDXSCS2StyleChartDemo()
    {
-      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+      baseUI = new RDXBaseUI();
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {

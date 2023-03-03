@@ -12,9 +12,7 @@ import us.ihmc.scs2.simulation.robot.Robot;
 
 public class RDXSCS2DoorDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXSCS2Session visualOnlySession;
 
    public RDXSCS2DoorDemo()
