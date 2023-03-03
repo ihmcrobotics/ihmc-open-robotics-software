@@ -59,7 +59,7 @@ public class YoVariableConnectionBurstTest
    @Test
    public void TestYoVariableConnectionBurst()
    {
-	   // Creates server, adds the main registry, and starts the server
+      // Creates server, adds the main registry, and starts the server
       final YoVariableServer server = new YoVariableServer("TestServer", null, logSettings, dt);
       server.setMainRegistry(registry, null);
       server.start();
@@ -83,34 +83,35 @@ public class YoVariableConnectionBurstTest
       // Start a producer/consumer test
       seq_id.set(0L);
 
-      TestEnum[] values = { TestEnum.A, TestEnum.B, TestEnum.C, TestEnum.D };
+      TestEnum[] values = {TestEnum.A, TestEnum.B, TestEnum.C, TestEnum.D};
 
-      for(int i = 0; i < 16; i++)
+      for (int i = 0; i < 16; i++)
       {
          seq_id.increment();
          var3.set(values[i % 4]);
 
          updateVariables(server, jitteryTimestamp);
 
-      YoBuffer buffer = scsYoVariablesUpdatedListener.getDataBuffer();
-      YoLong seq =  (YoLong)buffer.findVariable("seq_id");
+         YoBuffer buffer = scsYoVariablesUpdatedListener.getDataBuffer();
+         YoLong seq = (YoLong) buffer.findVariable("seq_id");
 
-      double[] filledBuffer = buffer.getEntry(seq).getBuffer();
-      int lastIndex = bufferSize - 1;
+         double[] filledBuffer = buffer.getEntry(seq).getBuffer();
+         int lastIndex = bufferSize - 1;
 
-      while (buffer.getEntry(seq).getBuffer()[lastIndex] == 0.0)
-      {
-         lastIndex = lastIndex - 1;
+         while (buffer.getEntry(seq).getBuffer()[lastIndex] == 0.0)
+         {
+            lastIndex = lastIndex - 1;
+         }
+
+         //Check if last 8 values of the YoVariable match the buffer data
+         for (int j = lastIndex; j > (lastIndex - 8); j--)
+         {
+            assertEquals("Buffer at j: " + filledBuffer[j] + " but buffer at j + 1: " + filledBuffer[j + 1], filledBuffer[j], (double) j);
+            assertFalse(filledBuffer[j] == filledBuffer[j - 1]);
+         }
+
+         scsYoVariablesUpdatedListener.closeAndDispose();
+         server.close();
       }
-
-      //Check if last 8 values of the YoVariable match the buffer data
-      for(int i = lastIndex; i > (lastIndex - 8); i--)
-      {
-         assertEquals("Buffer at i: " + filledBuffer[i] + " but buffer at i + 1: " + filledBuffer[i + 1], filledBuffer[i] , (double) i);
-         assertFalse(filledBuffer[i] == filledBuffer[i - 1]);
-      }
-
-      scsYoVariablesUpdatedListener.closeAndDispose();
-      server.close();
    }
 }
