@@ -111,6 +111,8 @@ public class SCS2AvatarSimulationFactory
    protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
+   protected final OptionalFactoryField<Boolean> enableSCS1YoGraphics = new OptionalFactoryField<Boolean>("enableSCS1YoGraphics", false);
+   protected final OptionalFactoryField<Boolean> enableSCS2YoGraphics = new OptionalFactoryField<Boolean>("enableSCS2YoGraphics", true);
    protected final OptionalFactoryField<RealtimeROS2Node> realtimeROS2Node = new OptionalFactoryField<>("realtimeROS2Node");
    protected final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
    protected final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
@@ -388,7 +390,10 @@ public class SCS2AvatarSimulationFactory
                                                     ros2Node,
                                                     gravity.get(),
                                                     robotModel.get().getEstimatorDT());
-      simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
+      if (enableSCS1YoGraphics.get())
+         simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
+      if (enableSCS2YoGraphics.get())
+         simulationConstructionSet.addYoGraphic(controllerThread.getSCS2YoGraphics());
    }
 
    private void setupStepGeneratorThread()
@@ -439,7 +444,10 @@ public class SCS2AvatarSimulationFactory
                                                           robotModel.get(),
                                                           stepSnapperUpdatable,
                                                           ros2Node);
-      simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getSCS1YoGraphicsListRegistry()));
+      if (enableSCS1YoGraphics.get())
+         simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getSCS1YoGraphicsListRegistry()));
+      if (enableSCS2YoGraphics.get())
+         simulationConstructionSet.addYoGraphic(stepGeneratorThread.getSCS2YoGraphics());
    }
 
    private void setupMultiThreadedRobotController()
@@ -531,8 +539,12 @@ public class SCS2AvatarSimulationFactory
       {
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
-         builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(), null, controllerThread.getSCS2YoGraphics()));
-         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(), null, stepGeneratorThread.getSCS2YoGraphics()));
+         builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(),
+                                                    enableSCS1YoGraphics.get() ? controllerThread.getSCS1YoGraphicsListRegistry() : null,
+                                                    enableSCS2YoGraphics.get() ? controllerThread.getSCS2YoGraphics() : null));
+         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(),
+                                                    enableSCS1YoGraphics.get() ? stepGeneratorThread.getSCS1YoGraphicsListRegistry() : null,
+                                                    enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null));
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          builders,
@@ -546,15 +558,19 @@ public class SCS2AvatarSimulationFactory
       {
          yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
                                           estimatorThread.getFullRobotModel().getElevator(),
-                                          null,
-                                          estimatorThread.getSCS2YoGraphics());
+                                          enableSCS1YoGraphics.get() ? estimatorThread.getSCS1YoGraphicsListRegistry() : null,
+                                          enableSCS2YoGraphics.get() ? estimatorThread.getSCS2YoGraphics() : null);
          estimatorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              estimatorThread.getYoRegistry()));
 
-         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), null, controllerThread.getSCS2YoGraphics());
+         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(),
+                                      enableSCS1YoGraphics.get() ? controllerThread.getSCS1YoGraphicsListRegistry() : null,
+                                      enableSCS2YoGraphics.get() ? controllerThread.getSCS2YoGraphics() : null);
          controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                               controllerThread.getYoVariableRegistry()));
-         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), null, stepGeneratorThread.getSCS2YoGraphics());
+         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(),
+                                      enableSCS1YoGraphics.get() ? stepGeneratorThread.getSCS1YoGraphicsListRegistry() : null,
+                                      enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null);
          stepGeneratorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                                  stepGeneratorThread.getYoVariableRegistry()));
       }
@@ -840,6 +856,28 @@ public class SCS2AvatarSimulationFactory
       this.gravity.set(gravity);
    }
 
+   /**
+    * Sets whether the {@code YoGraphicsListRegistry} from the different threads are to be passed to
+    * the simulation and yoVariable server.
+    * 
+    * @param enableSCS1YoGraphics default value is {@code false}.
+    */
+   public void setEnableSCS1YoGraphics(boolean enableSCS1YoGraphics)
+   {
+      this.enableSCS1YoGraphics.set(enableSCS1YoGraphics);
+   }
+
+   /**
+    * Sets whether the {@code YoGraphicDefintiion}s from the different threads are to be passed to the
+    * simulation and yoVariable server.
+    * 
+    * @param enableSCS2YoGraphics default value is {@code true}.
+    */
+   public void setEnableSCS2YoGraphics(boolean enableSCS2YoGraphics)
+   {
+      this.enableSCS2YoGraphics.set(enableSCS2YoGraphics);
+   }
+
    public void setAutomaticallyStartSimulation(boolean automaticallyStartSimulation)
    {
       this.automaticallyStartSimulation.set(automaticallyStartSimulation);
@@ -898,10 +936,5 @@ public class SCS2AvatarSimulationFactory
       this.useHeadingAndVelocityScript.set(useHeadingAndVelocityScript);
       this.heightMapForFootstepZ.set(heightMapForFootstepZ);
       this.headingAndVelocityEvaluationScriptParameters.set(headingAndVelocityEvaluationScriptParameters);
-   }
-
-   public AvatarStepGeneratorThread getStepGeneratorThread()
-   {
-      return stepGeneratorThread;
    }
 }

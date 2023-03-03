@@ -401,6 +401,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       return false;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

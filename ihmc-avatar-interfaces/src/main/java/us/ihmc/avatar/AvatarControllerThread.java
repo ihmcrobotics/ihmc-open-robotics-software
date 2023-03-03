@@ -364,6 +364,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       return yoGraphicsListRegistry;
    }
 
+   @Override
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

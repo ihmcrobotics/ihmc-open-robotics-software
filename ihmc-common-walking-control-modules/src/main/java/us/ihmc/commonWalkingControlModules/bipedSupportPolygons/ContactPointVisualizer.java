@@ -10,6 +10,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -21,7 +22,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 /**
  * @author twan Date: 5/28/13
  */
-public class ContactPointVisualizer implements Updatable
+public class ContactPointVisualizer implements Updatable, SCS2YoGraphicHolder
 {
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -103,6 +104,7 @@ public class ContactPointVisualizer implements Updatable
       yoGraphicVectors.get(i).update();
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

@@ -3,6 +3,7 @@ package us.ihmc.stateEstimation.humanoid;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
@@ -12,7 +13,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
  * Classes implementing this interface will extend the {@link RobotController} interface as well.
  * </p>
  */
-public interface StateEstimatorController extends RobotController, StateEstimatorModeSubscriber
+public interface StateEstimatorController extends RobotController, StateEstimatorModeSubscriber, SCS2YoGraphicHolder
 {
    static final TObjectDoubleMap<String> EMPTY_JOINT_POSITION_MAP = new TObjectDoubleHashMap<>(0);
 
@@ -34,6 +35,7 @@ public interface StateEstimatorController extends RobotController, StateEstimato
       initializeEstimator(rootJointTransform, EMPTY_JOINT_POSITION_MAP);
    }
 
+   @Override
    default YoGraphicDefinition getSCS2YoGraphics()
    {
       return null;

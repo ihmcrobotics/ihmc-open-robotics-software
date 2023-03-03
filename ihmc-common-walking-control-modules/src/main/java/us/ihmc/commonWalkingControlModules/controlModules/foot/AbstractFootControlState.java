@@ -11,11 +11,11 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 
-public abstract class AbstractFootControlState implements State
+public abstract class AbstractFootControlState implements State, SCS2YoGraphicHolder
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -81,6 +81,4 @@ public abstract class AbstractFootControlState implements State
    {
       return null;
    }
-
-   public abstract YoGraphicDefinition getSCS2YoGraphics();
 }

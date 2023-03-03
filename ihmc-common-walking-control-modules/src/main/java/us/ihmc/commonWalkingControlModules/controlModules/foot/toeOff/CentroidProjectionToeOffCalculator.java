@@ -272,6 +272,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       footPolygon.update();
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       if (!visualize)

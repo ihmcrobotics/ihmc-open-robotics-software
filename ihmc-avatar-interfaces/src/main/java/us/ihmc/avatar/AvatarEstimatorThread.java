@@ -21,6 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -32,7 +33,7 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class AvatarEstimatorThread extends ModularRobotController
+public class AvatarEstimatorThread extends ModularRobotController implements SCS2YoGraphicHolder
 {
    private final YoRegistry estimatorRegistry;
    private final YoBoolean firstTick;
@@ -211,6 +212,7 @@ public class AvatarEstimatorThread extends ModularRobotController
       return yoGraphicsListRegistry;
    }
 
+   @Override
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

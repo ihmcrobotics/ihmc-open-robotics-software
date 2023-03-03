@@ -25,12 +25,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class WholeBodyFeedbackController
+public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final InverseDynamicsCommandList inverseDynamicsOutput = new InverseDynamicsCommandList();
@@ -565,6 +566,7 @@ public class WholeBodyFeedbackController
       return feedbackControllerToolbox;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       return null;

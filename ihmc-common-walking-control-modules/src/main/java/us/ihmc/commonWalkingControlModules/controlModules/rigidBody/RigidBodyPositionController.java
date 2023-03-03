@@ -224,6 +224,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       return statusHelper.pollStatusMessage(positionHelper.getFeedbackControlCommand());
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());

@@ -13,6 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
@@ -28,7 +29,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * Class provides a CenterOfPressureCommand for the QP that is used to explore the foothold by
  * shifting the desired CoP to the corners of the foothold.
  */
-public class ExplorationHelper
+public class ExplorationHelper implements SCS2YoGraphicHolder
 {
    private final YoBoolean footholdExplorationActive;
    private final ExplorationParameters explorationParameters;
@@ -189,6 +190,7 @@ public class ExplorationHelper
       return null;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       if (yoDesiredCop == null)

@@ -29,6 +29,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -65,7 +66,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
  * 
  * @author Sylvain Bertrand
  */
-public class WalkingTrajectoryPath
+public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 {
    private static final boolean VISUALIZE = false;
 
@@ -642,6 +643,7 @@ public class WalkingTrajectoryPath
       return AngleTools.computeAngleAverage(firstPose.getYaw(), secondPose.getYaw());
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       if (currentZUpViz == null)

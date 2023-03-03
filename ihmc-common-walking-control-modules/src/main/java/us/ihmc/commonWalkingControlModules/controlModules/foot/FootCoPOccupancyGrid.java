@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -36,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class FootCoPOccupancyGrid
+public class FootCoPOccupancyGrid implements SCS2YoGraphicHolder
 {
    private static final boolean VISUALIZE = false;
    private static final double defaultThresholdForCellActivation = 1.0;
@@ -640,6 +641,7 @@ public class FootCoPOccupancyGrid
       return true;
    }
 
+   @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       if (!VISUALIZE)
