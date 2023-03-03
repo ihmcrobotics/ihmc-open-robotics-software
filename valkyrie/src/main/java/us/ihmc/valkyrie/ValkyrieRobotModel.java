@@ -47,7 +47,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationConstructionSetTools.tools.RobotDefinitionTools;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.valkyrie.behaviors.ValkyrieLookAndStepParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
