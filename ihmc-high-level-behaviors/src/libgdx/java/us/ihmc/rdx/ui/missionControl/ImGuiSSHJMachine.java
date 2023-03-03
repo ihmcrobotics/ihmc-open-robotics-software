@@ -7,11 +7,14 @@ import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.behaviors.tools.MessagerHelper;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
-import us.ihmc.missionControl.MissionControlService;
+import us.ihmc.missionControl.MissionControlDaemon;
+import us.ihmc.ros2.ROS2Node;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -22,6 +25,7 @@ public class ImGuiSSHJMachine
 {
    private final String machineName;
    private final MessagerHelper messagerHelper;
+   private final ROS2Node ros2Node;
 
    private final ImGuiMessagerManagerWidget messagerManagerWidget;
    private final AtomicReference<ArrayList<String>> serviceStatusSubscription;
@@ -99,19 +103,21 @@ public class ImGuiSSHJMachine
       });
       gpuPlot.getPlotLines().add(gpuUsagePlotLine);
 
-      messagerHelper = new MessagerHelper(MissionControlService.API.create());
+      messagerHelper = new MessagerHelper(MissionControlDaemon.API.create());
 
       ArrayList<String> initialStatuses = new ArrayList<>();
       initialStatuses.add("mission-control-2:Status not yet received.");
-      serviceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.ServiceStatuses, initialStatuses);
-      ramUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.RAMUsage, MutablePair.of(0.0, 1.0));
-      cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.CPUUsages, new ArrayList<>());
-      networkUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.NetworkUsage, MutablePair.of(0.0, 0.0));
-      chronySourceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.ChronySelectedServerStatus,
+      serviceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.ServiceStatuses, initialStatuses);
+      ramUsageSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.RAMUsage, MutablePair.of(0.0, 1.0));
+      cpuUsagesSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.CPUUsages, new ArrayList<>());
+      networkUsageSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.NetworkUsage, MutablePair.of(0.0, 0.0));
+      chronySourceStatusSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.ChronySelectedServerStatus,
                                                                             "Chrony status not yet received.");
-      gpuUsageSubscription = messagerHelper.subscribeViaReference(MissionControlService.API.GPUUsage, Double.NaN);
+      gpuUsageSubscription = messagerHelper.subscribeViaReference(MissionControlDaemon.API.GPUUsage, Double.NaN);
 
-      messagerManagerWidget = new ImGuiMessagerManagerWidget(messagerHelper, () -> hostname, MissionControlService.API.PORT);
+      messagerManagerWidget = new ImGuiMessagerManagerWidget(messagerHelper, () -> hostname, MissionControlDaemon.API.PORT);
+
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia-mission-control");
    }
 
    public void renderImGuiWidgets(boolean condensedView)
