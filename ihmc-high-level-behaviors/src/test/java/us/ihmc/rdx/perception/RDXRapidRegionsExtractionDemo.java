@@ -58,7 +58,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
     //'Turn_Rough',               # 20230228_202104_PerceptionLog.hdf5
     //'WalkBack_Rough',           # 20230228_202456_PerceptionLog.hdf5
 
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_191411_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
