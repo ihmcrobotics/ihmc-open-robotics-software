@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -20,12 +21,19 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 
 public class TwoWaypointSwingGenerator implements SwingGenerator
 {
@@ -245,7 +253,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       }
       else if (trajectoryType == TrajectoryType.CUSTOM && (waypoints.isEmpty() || waypoints.size() > maxNumberOfSwingWaypoints))
       {
-         LogTools.warn("Received unexpected amount of waypoints. Using default trajectory.");
+         LogTools.warn("Received unexpected amount ({}) of waypoints. Using default trajectory.", waypoints.size());
          this.trajectoryType = TrajectoryType.DEFAULT;
       }
       else
@@ -701,5 +709,10 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private FramePoint3D createNewWaypoint()
    {
       return new FramePoint3D(trajectoryFrame);
+   }
+
+   public EnumMap<Axis3D, ArrayList<YoPolynomial>> getSwingTrajectory()
+   {
+      return trajectory.getTrajectories();
    }
 }

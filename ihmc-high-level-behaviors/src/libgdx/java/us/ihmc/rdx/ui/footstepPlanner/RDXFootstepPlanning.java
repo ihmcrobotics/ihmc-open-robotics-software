@@ -15,6 +15,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
@@ -22,8 +23,10 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -48,12 +51,15 @@ public class RDXFootstepPlanning
    private final AtomicReference<PlanarRegionsListMessage> planarRegionsReference = new AtomicReference<>();
    private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerParametersReadOnly> footstepPlannerParametersReference = new AtomicReference<>();
+   private final AtomicReference<AStarBodyPathPlannerParametersReadOnly> bodyPathPlannerParametersReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerOutput> outputReference = new AtomicReference<>();
+   private final RDXTeleoperationParameters teleoperationParameters;
 
    private final AtomicBoolean hasNewPlanAvailable = new AtomicBoolean(false);
 
-   public RDXFootstepPlanning(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
+   public RDXFootstepPlanning(DRCRobotModel robotModel, RDXTeleoperationParameters teleoperationParameters, ROS2SyncedRobotModel syncedRobot)
    {
+      this.teleoperationParameters = teleoperationParameters;
       this.syncedRobot = syncedRobot;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       request = new FootstepPlannerRequest();
@@ -110,10 +116,14 @@ public class RDXFootstepPlanning
          footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
       else
          footstepPlannerParameters = footstepPlanner.getFootstepPlannerParameters();
+      AStarBodyPathPlannerParametersReadOnly bodyPathPlannerParameters = bodyPathPlannerParametersReference.getAndSet(null);
+      if (bodyPathPlannerParameters != null)
+         footstepPlanner.getAStarBodyPathPlannerParameters().set(bodyPathPlannerParameters);
 
       setGoalFootPosesFromMidFeetPose(footstepPlannerParameters, goalPose);
       setStanceSideToClosestToGoal(goalPose);
 
+      request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
       request.getStartFootPoses().forEach((side, pose3D) ->
       {
          FramePose3DReadOnly soleFramePose = syncedRobot.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side));
@@ -132,7 +142,7 @@ public class RDXFootstepPlanning
          assumeFlatGround = false;
       }
 
-      request.setPlanBodyPath(false);
+      request.setPlanBodyPath(teleoperationParameters.getPlanWithBodyPath());
       // TODO: Set start footholds!!
       //      request.setPlanarRegionsList(...);
       request.setAssumeFlatGround(assumeFlatGround);
@@ -145,12 +155,16 @@ public class RDXFootstepPlanning
       LogTools.info("Stance side: {}", request.getRequestedInitialStanceSide().name());
       LogTools.info("Planning footsteps...");
       footstepPlanner.handleRequest(request);
-      LogTools.info("Footstep planner completed with {}, {} step(s)",
+      LogTools.info("Footstep planner completed with body path {}, footstep planner {}, {} step(s)",
+                    output.getBodyPathPlanningResult(),
                     output.getFootstepPlanningResult(),
                     output.getFootstepPlan().getNumberOfSteps());
 
-      footstepPlannerLogger.logSession();
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(), "FootstepPlanLogDeletion");
+      ThreadTools.startAThread(() ->
+                               {
+                                  footstepPlannerLogger.logSession();
+                                  FootstepPlannerLogger.deleteOldLogs();
+                               }, "FootstepPlanLogAndDeletion");
 
       boolean plannerFailed = output.getFootstepPlan().getNumberOfSteps() < 1;
       if (plannerFailed)
@@ -211,6 +225,11 @@ public class RDXFootstepPlanning
    public void setFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.footstepPlannerParametersReference.set(footstepPlannerParameters);
+   }
+
+   public void setBodyPathPlannerParameters(AStarBodyPathPlannerParametersReadOnly bodyPathPlannerParameters)
+   {
+      this.bodyPathPlannerParametersReference.set(bodyPathPlannerParameters);
    }
 
    public boolean isReadyToWalk()

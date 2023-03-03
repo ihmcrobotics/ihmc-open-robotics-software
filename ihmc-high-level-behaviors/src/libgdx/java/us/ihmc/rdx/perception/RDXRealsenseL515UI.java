@@ -33,17 +33,15 @@ import java.nio.ByteOrder;
 public class RDXRealsenseL515UI
 {
    private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F1121365");
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Activator nativesLoadedActivator;
    private RDXInteractableRealsenseL515 l515Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense l515;
-   private RDXCVImagePanel depthImagePanel;
-   private RDXCVImagePanel colorImagePanel;
+   private RDXBytedecoImagePanel depthImagePanel;
+   private RDXBytedecoImagePanel colorImagePanel;
    private Mat depthU16C1Image;
    private Mat colorRGBImageMat;
    private BytedecoImage colorRGBImage;
@@ -58,9 +56,9 @@ public class RDXRealsenseL515UI
    private RDXPointCloudRenderer pointCloudRenderer;
    private OpenCLManager openCLManager;
    private final FramePoint3D framePoint = new FramePoint3D();
-   private final ImFloat focalLength = new ImFloat(0.00254f); // should be 1.88mm, but tuned it;
-   private final ImFloat cmosWidth = new ImFloat(0.0036894f); // 1/6" format
-   private final ImFloat cmosHeight = new ImFloat(0.0020753f); // 1/6" format
+   private final ImFloat focalLength = new ImFloat();
+   private final ImFloat cmosWidth = new ImFloat();
+   private final ImFloat cmosHeight = new ImFloat();
    private OpenCLFloatBuffer parametersBuffer;
    private _cl_program openCLProgram;
    private _cl_kernel createPointCloudKernel;
@@ -98,7 +96,6 @@ public class RDXRealsenseL515UI
                   l515.initialize();
 
                   openCLManager = new OpenCLManager();
-                  openCLManager.create();
                   pointCloudRenderer = new RDXPointCloudRenderer();
                }
 
@@ -112,15 +109,15 @@ public class RDXRealsenseL515UI
                      depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
 
                      depth32FC1Image = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_32FC1);
-                     depthImagePanel = new RDXCVImagePanel("L515 Depth", l515.getDepthWidth(), l515.getDepthHeight());
-                     baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getVideoPanel());
+                     depthImagePanel = new RDXBytedecoImagePanel("L515 Depth", l515.getDepthWidth(), l515.getDepthHeight());
+                     baseUI.getImGuiPanelManager().addPanel(depthImagePanel.getImagePanel());
 
 //                     colorRGBImageMat = new Mat(l515.getColorHeight(), l515.getColorWidth(), opencv_core.CV_8UC3, l515.getColorFrameData());
                      colorRGBImage = new BytedecoImage(l515.getColorWidth(), l515.getColorHeight(), opencv_core.CV_8UC3);
-                     colorImagePanel = new RDXCVImagePanel("L515 Color", l515.getColorWidth(), l515.getColorHeight());
-                     baseUI.getImGuiPanelManager().addPanel(colorImagePanel.getVideoPanel());
+                     colorImagePanel = new RDXBytedecoImagePanel("L515 Color", l515.getColorWidth(), l515.getColorHeight());
+                     baseUI.getImGuiPanelManager().addPanel(colorImagePanel.getImagePanel());
 
-                     baseUI.getPerspectiveManager().reloadPerspective();
+                     baseUI.getLayoutManager().reloadLayout();
 
                      numberOfDepthPoints = l515.getDepthWidth() * l515.getDepthHeight();
                      int pointCloudBytesLength = pointCloudRenderer.getFloatsPerVertex();
@@ -139,10 +136,14 @@ public class RDXRealsenseL515UI
                      colorImagePanel.getBytedecoImage().createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
                      pointCloudRenderingBuffer.createOpenCLBufferObject(openCLManager);
                      parametersBuffer.createOpenCLBufferObject(openCLManager);
+
+                     focalLength.set((float) l515.getDepthFocalLengthPixelsX());
+                     cmosWidth.set((float) l515.getDepthPrincipalOffsetXPixels());
+                     cmosHeight.set((float) l515.getDepthPrincipalOffsetYPixels());
                   }
 
                   frameReadFrequency.ping();
-                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
+                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthDiscretization(), 0.0);
 
                   depthImagePanel.drawDepthImage(depth32FC1Image.getBytedecoOpenCVMat());
 
@@ -208,7 +209,6 @@ public class RDXRealsenseL515UI
                   openCLManager.setKernelArgument(createPointCloudKernel, 3, parametersBuffer.getOpenCLBufferObject());
                   openCLManager.execute2D(createPointCloudKernel, l515.getDepthWidth(), l515.getDepthHeight());
                   pointCloudRenderingBuffer.readOpenCLBufferObject(openCLManager);
-                  openCLManager.finish();
 
                   pointCloudRenderer.updateMeshFastest(numberOfDepthPoints);
                }
@@ -226,7 +226,7 @@ public class RDXRealsenseL515UI
             {
                ImGui.text("Depth frame data size: " + l515.getDepthFrameDataSize());
                ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
-               ImGui.text("Depth to meters conversion: " + l515.getDepthToMeterConversion());
+               ImGui.text("Depth to meters conversion: " + l515.getDepthDiscretization());
 
                volatileInputFloat(labels.get("Focal length"), focalLength, 0.00001f);
                volatileInputFloat(labels.get("CMOS width"), cmosWidth, 0.00001f);

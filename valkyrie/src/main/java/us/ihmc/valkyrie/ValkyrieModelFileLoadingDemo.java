@@ -31,7 +31,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.scs2.simulation.robot.Robot;
-import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.simulationConstructionSetTools.tools.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 

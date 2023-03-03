@@ -6,7 +6,7 @@ buildscript {
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -49,7 +49,6 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:robot-environment-awareness:source")
-   apiBytedecoNatives("hdf5", "1.12.2-")
 }
 
 openpnpDependencies {
@@ -61,28 +60,12 @@ val javaCPPVersion = "1.5.8"
 bytedecoDependencies {
    api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:ihmc-commons:0.31.0")
-   apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.21-")
-   apiBytedecoNatives("opencv", "4.6.0-")
-   apiBytedecoNatives("opencl", "3.0-")
-   apiBytedecoNatives("librealsense2", "2.50.0-")
-   apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoNatives("ffmpeg", "5.0-")
-   apiBytedecoNatives("hdf5", "1.12.2-")
-   apiBytedecoNatives("ffmpeg", "5.1.2-")
+   apiCommonBytedecoNatives()
 }
 
 javacvDependencies {
    apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
-   apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.21-")
-   apiBytedecoNatives("opencv", "4.6.0-")
-   apiBytedecoNatives("opencl", "3.0-")
-   apiBytedecoNatives("librealsense2", "2.50.0-")
-   apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoNatives("ffmpeg", "5.0-")
-   apiBytedecoNatives("hdf5", "1.12.2-")
-   apiBytedecoNatives("ffmpeg", "5.1.2-")
+   apiCommonBytedecoNatives()
 }
 
 slamWrapperDependencies {
@@ -90,21 +73,43 @@ slamWrapperDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
 }
 
+fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
+{
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.21-")
+   apiBytedecoNatives("opencv", "4.6.0-")
+   apiBytedecoNatives("opencl", "3.0-")
+   apiBytedecoNatives("librealsense2", "2.50.0-")
+   apiBytedecoNatives("spinnaker", "3.0.0.118-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("hdf5", "1.12.2-")
+   apiBytedecoNatives("ffmpeg", "5.1.2-")
+}
+
+// We are trying to avoid downloading binaries that aren't used by anyone
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
-   if (name != "spinnaker")
+   if (name == "spinnaker")
+   {
+      // We couldn't figure out how to sign a JAR to publish without the "-SNAPSHOT" yet
+      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT")
+      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT:linux-x86_64")
+      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT:windows-x86_64")
+   }
+   else
+   {
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
       apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-arm64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
-   if (name != "spinnaker")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
       apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
+   }
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
 {
    api(dependencyNotation) {
-      exclude(group = "org.bytedeco")
+      exclude(group = "org.bytedeco") // This is required in order for the above to work
    }
 }
 

@@ -20,9 +20,7 @@ import java.nio.ByteBuffer;
 
 public class RDXHighLevelDepthSensorDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
 
    private RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
@@ -31,7 +29,7 @@ public class RDXHighLevelDepthSensorDemo
    private int mousePosX;
    private int mousePosY;
    private RDXFrustumVisualizer frustumVisualizer;
-   private RDXCVImagePanel mainViewDepthPanel;
+   private RDXBytedecoImagePanel mainViewDepthPanel;
    private BytedecoImage image;
 
    public RDXHighLevelDepthSensorDemo()
@@ -130,12 +128,12 @@ public class RDXHighLevelDepthSensorDemo
                                             (int) baseUI.getPrimary3DPanel().getRenderSizeY(),
                                             opencv_core.CV_32FC1,
                                             depthBuffer);
-                  mainViewDepthPanel = new RDXCVImagePanel("Main view depth", (int) baseUI.getPrimary3DPanel().getRenderSizeX(),
-                                                           (int) baseUI.getPrimary3DPanel().getRenderSizeY(),
-                                                           true);
-                  baseUI.getImGuiPanelManager().addPanel(mainViewDepthPanel.getVideoPanel());
+                  mainViewDepthPanel = new RDXBytedecoImagePanel("Main view depth", (int) baseUI.getPrimary3DPanel().getRenderSizeX(),
+                                                                 (int) baseUI.getPrimary3DPanel().getRenderSizeY(),
+                                                                 true);
+                  baseUI.getImGuiPanelManager().addPanel(mainViewDepthPanel.getImagePanel());
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                image.resize(aliasedRenderedAreaWidth, aliasedRenderedAreaHeight, null, depthBuffer);

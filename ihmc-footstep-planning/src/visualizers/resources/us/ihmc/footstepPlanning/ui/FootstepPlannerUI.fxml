@@ -34,6 +34,12 @@
                               <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
                           </content>
                       </Tab>
+
+                      <Tab text="A Star Body Path Parameters">
+                          <content>
+                              <fx:include fx:id="aStarBodyPathParametersUI" source="AStarBodyPathParametersUI.fxml" />
+                          </content>
+                      </Tab>
       
                       <Tab text="Footstep Parameters">
                           <content>

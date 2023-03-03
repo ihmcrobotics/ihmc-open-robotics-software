@@ -170,6 +170,8 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       FramePoint3D footLocation = new FramePoint3D(stepFrame);
       FrameQuaternion footOrientation = new FrameQuaternion(stepFrame);
       footLocation.changeFrame(ReferenceFrame.getWorldFrame());
+      footLocation.setY(0.0);
+      
       footOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, footLocation, footOrientation);
@@ -220,12 +222,17 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       pushRobotController.applyForceDelayed(singleSupportStartConditions.get(RobotSide.LEFT), 0.0, forceDirection, magnitude, pushDuration);
 
       assertTrue(simulationTestHelper.simulateNow(initialTransfer));
+      
+      boolean adjusted = false;
       for (int i = 0; i < (simulationTime - initialTransfer) / dt; i++)
       {
          assertTrue(simulationTestHelper.simulateNow(dt));
-         if (i > 2 && singleSupportStartConditions.get(RobotSide.LEFT).testCondition(Double.NaN))
-            assertTrue("Footstep wasn't adjusted, when it should have been", leftFootstepWasAdjusted.getBooleanValue());
+         if(leftFootstepWasAdjusted.getBooleanValue())
+         {
+            adjusted = true;
+         }
       }
+      assertTrue("Footstep wasn't adjusted, when it should have been", adjusted);
 
       simulationTestHelper.simulateNow(0.5);
    }

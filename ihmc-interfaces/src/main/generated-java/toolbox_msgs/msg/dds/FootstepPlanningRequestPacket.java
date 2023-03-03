@@ -59,6 +59,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public boolean plan_body_path_;
    /**
+            * If true, will plan footsteps. If false, will not plan footsteps
+            */
+   public boolean plan_footsteps_ = true;
+   /**
             * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
             */
    public boolean perform_a_star_search_ = true;
@@ -153,6 +157,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       abort_if_body_path_planner_fails_ = other.abort_if_body_path_planner_fails_;
 
       plan_body_path_ = other.plan_body_path_;
+
+      plan_footsteps_ = other.plan_footsteps_;
 
       perform_a_star_search_ = other.perform_a_star_search_;
 
@@ -305,6 +311,21 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public boolean getPlanBodyPath()
    {
       return plan_body_path_;
+   }
+
+   /**
+            * If true, will plan footsteps. If false, will not plan footsteps
+            */
+   public void setPlanFootsteps(boolean plan_footsteps)
+   {
+      plan_footsteps_ = plan_footsteps;
+   }
+   /**
+            * If true, will plan footsteps. If false, will not plan footsteps
+            */
+   public boolean getPlanFootsteps()
+   {
+      return plan_footsteps_;
    }
 
    /**
@@ -538,6 +559,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_body_path_, other.plan_body_path_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_footsteps_, other.plan_footsteps_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_a_star_search_, other.perform_a_star_search_, epsilon)) return false;
 
       if (this.body_path_waypoints_.size() != other.body_path_waypoints_.size()) { return false; }
@@ -598,6 +621,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.plan_body_path_ != otherMyClass.plan_body_path_) return false;
 
+      if(this.plan_footsteps_ != otherMyClass.plan_footsteps_) return false;
+
       if(this.perform_a_star_search_ != otherMyClass.perform_a_star_search_) return false;
 
       if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
@@ -653,6 +678,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.abort_if_body_path_planner_fails_);      builder.append(", ");
       builder.append("plan_body_path=");
       builder.append(this.plan_body_path_);      builder.append(", ");
+      builder.append("plan_footsteps=");
+      builder.append(this.plan_footsteps_);      builder.append(", ");
       builder.append("perform_a_star_search=");
       builder.append(this.perform_a_star_search_);      builder.append(", ");
       builder.append("body_path_waypoints=");

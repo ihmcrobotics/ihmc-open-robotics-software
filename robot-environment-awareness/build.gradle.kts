@@ -8,7 +8,7 @@ buildscript {
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
@@ -36,7 +36,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.25.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.26.0")
    api("us.ihmc:ihmc-ros-tools:source")
 
    apiBytedecoNatives("javacpp")
