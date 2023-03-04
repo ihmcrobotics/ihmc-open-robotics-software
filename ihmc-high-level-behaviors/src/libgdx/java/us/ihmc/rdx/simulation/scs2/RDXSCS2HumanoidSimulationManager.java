@@ -20,7 +20,7 @@ import us.ihmc.tools.thread.StatelessNotification;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-public class RDXSCS2EnvironmentManager
+public class RDXSCS2HumanoidSimulationManager
 {
    private RDXSCS2BulletSimulationSession scs2SimulationSession;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -39,7 +39,7 @@ public class RDXSCS2EnvironmentManager
    private final ArrayList<String> robotsToHide = new ArrayList<>();
    private volatile boolean starting = false;
    private volatile boolean started = false;
-   private ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
+   private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
    private final StatelessNotification destroyedNotification = new StatelessNotification();
    private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
 
