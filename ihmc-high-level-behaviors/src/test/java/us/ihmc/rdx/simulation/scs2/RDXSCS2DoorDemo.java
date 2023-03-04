@@ -8,6 +8,7 @@ import us.ihmc.rdx.simulation.environment.object.objects.FlatGroundDefinition;
 import us.ihmc.rdx.simulation.environment.object.objects.door.DoorDefinition;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
 
 public class RDXSCS2DoorDemo
@@ -26,7 +27,7 @@ public class RDXSCS2DoorDemo
             baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
 
             visualOnlySession = new RDXSCS2Session();
-            SimulationSession simulationSession = new SimulationSession();
+            SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
 
             DoorDefinition doorDefinition = new DoorDefinition();
             doorDefinition.getDoorPanelDefinition().setAddFiducials(true);
