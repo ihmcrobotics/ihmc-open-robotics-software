@@ -58,6 +58,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private SideDependentList<ConvexPolygon2D> defaultPolygons;
    private RDXTeleoperationParameters teleoperationParameters;
 
+   private int previousPlanLength;
    private boolean wasPlanUpdated = false;
 
    public void create(RDXBaseUI baseUI,
@@ -208,6 +209,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void update()
    {
+
       // Update footsteps in the list, and the one being placed
       for (int i = 0; i < footsteps.size(); i++)
       {
@@ -216,9 +218,13 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       if (selectedFootstep != null)
          selectedFootstep.update();
 
-      stepChecker.update(footsteps);
+      // check if the plan grew in length
+      wasPlanUpdated |= previousPlanLength < footsteps.size();
       wasPlanUpdated |= pollIfAnyStepWasUpdated();
-      if (wasPlanUpdated && teleoperationParameters.getReplanSwingTrajectoryOnChange())
+      previousPlanLength = footsteps.size();
+
+      stepChecker.update(footsteps);
+      if (wasPlanUpdated && teleoperationParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
          swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
          wasPlanUpdated = false;
