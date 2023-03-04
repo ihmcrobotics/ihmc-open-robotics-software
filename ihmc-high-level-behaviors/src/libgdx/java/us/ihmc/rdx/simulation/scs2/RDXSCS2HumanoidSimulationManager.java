@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 
 public class RDXSCS2HumanoidSimulationManager
 {
-   private RDXSCS2BulletSimulationSession scs2SimulationSession;
+   private RDXSCS2SimulationSession scs2SimulationSession;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiPanel managerPanel = new ImGuiPanel("SCS 2 Simulation Session", this::renderImGuiWidgets);
    private SCS2AvatarSimulation avatarSimulation;
@@ -138,7 +138,7 @@ public class RDXSCS2HumanoidSimulationManager
          avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
          avatarSimulation.setSystemExitOnDestroy(false);
 
-         scs2SimulationSession = new RDXSCS2BulletSimulationSession();
+         scs2SimulationSession = new RDXSCS2SimulationSession();
          scs2SimulationSession.create(baseUI, managerPanel);
          scs2SimulationSession.startSession(avatarSimulation.getSimulationConstructionSet().getSimulationSession());
          scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
