@@ -4,6 +4,7 @@ import boofcv.struct.calib.CameraPinholeBrown;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -25,6 +26,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
@@ -37,7 +39,6 @@ import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -75,11 +76,10 @@ public class DualBlackflyCamera
    private final Stopwatch copyDuration = new Stopwatch();
    private long sequenceNumber = 0;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-
-   private final ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
    private final FramePose3D framePoseOfMarker = new FramePose3D();
    private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
    private final HashMap<Integer, OpenCVArUcoMarker> arUcoMarkersToTrack = new HashMap<>();
+   private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
 
    public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot)
    {
@@ -98,16 +98,14 @@ public class DualBlackflyCamera
       this.ros2Helper = ros2Helper;
       this.realtimeROS2Node = realtimeROS2Node;
 
-      for (OpenCVArUcoMarker openCVArUcoMarker : arUcoMarkersToTrack)
-      {
-         this.arUcoMarkersToTrack.put(openCVArUcoMarker.getId(), openCVArUcoMarker);
-      }
+      arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
+                                                                arUcoMarkersToTrack,
+                                                                syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(),
+                                                                ros2Helper);
 
       blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
       blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
       blackfly.startAcquiringImages();
-
-      markersToTrack.add(new OpenCVArUcoMarker(0,0.2032));
    }
 
    public void update()
@@ -168,8 +166,9 @@ public class DualBlackflyCamera
 
 //            opencv_core.flip(blackflySourceImage.getBytedecoOpenCVMat(), blackflySourceImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_BOTH);
 
-//            opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
-            Mat postDistortionMat = blackflySourceImage.getBytedecoOpenCVMat();
+            opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
+            Mat postDistortionMat = undistortedImageMat;
+//            Mat postDistortionMat = blackflySourceImage.getBytedecoOpenCVMat();
 
             if (side == RobotSide.RIGHT)
             {
@@ -187,11 +186,11 @@ public class DualBlackflyCamera
 
                syncedRobot.update();
                ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
-
+               
                arUcoMarkerDetection.update();
-
                arUcoMarkerDetection.drawDetectedMarkers(postDistortionMat);
                arUcoMarkerDetection.drawRejectedPoints(postDistortionMat);
+               arUcoMarkerPublisher.update();
 
                SwapReference<Mat> ids = arUcoMarkerDetection.getIds();
                arUcoMarkerPoses.getMarkerId().clear();
