@@ -9,10 +9,16 @@ import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletTerrainObject;
 
+/**
+ * This class enables to use SCS 2 terrain objects as kinematic Bullet
+ * simulation objects, for instance, you can make the finger joints
+ * terrain objects and to Bullet they are unyeilding but can exert forces
+ * on the world. This allows us to simulate the robot kinematically only,
+ * but still test out lightweight manipulation tasks in simulation.
+ */
 public class BulletKinematicRobotLink
 {
    private final Object referenceFrameAccessSync = new Object();
@@ -48,7 +54,8 @@ public class BulletKinematicRobotLink
 
    public void addCollidableShape(GeometryDefinition geometryDefinition)
    {
-//      terrainObjectDefinition.addVisualDefinition(new VisualDefinition(originPose, geometryDefinition, materialDefinition));
+      // There is not necessarily a need to add cooresponding visual definition.
+      // terrainObjectDefinition.addVisualDefinition(new VisualDefinition(originPose, geometryDefinition, materialDefinition));
       terrainObjectDefinition.addCollisionShapeDefinition(new CollisionShapeDefinition(originPose, geometryDefinition));
    }
 
