@@ -15,7 +15,7 @@ import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class RDXSimulatedRobot
+public class RDXSCS2Robot
 {
    private final RobotDefinition robotDefinition;
    private final YoRegistry mirroredRobotRegistry;
@@ -24,7 +24,7 @@ public class RDXSimulatedRobot
    private LinkedYoRegistry robotLinkedYoRegistry;
    private boolean initialize = true;
 
-   public RDXSimulatedRobot(RobotDefinition robotDefinition)
+   public RDXSCS2Robot(RobotDefinition robotDefinition)
    {
       this.robotDefinition = robotDefinition;
       mirroredRobotRegistry = SharedMemoryTools.newRegistryFromNamespace(SimulationSession.ROOT_REGISTRY_NAME, robotDefinition.getName());
