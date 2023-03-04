@@ -40,14 +40,11 @@ public class RDXVirtualGhostObject extends RDXModelInstance
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (showing)
-      {
-         if (sceneLevels.contains(RDXSceneLevel.MODEL))
-            super.getRenderables(renderables, pool);
+      if (sceneLevels.contains(RDXSceneLevel.MODEL))
+         super.getRenderables(renderables, pool);
 
-         if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
-            referenceFrameGraphic.getRenderables(renderables, pool);
-      }
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+         referenceFrameGraphic.getRenderables(renderables, pool);
    }
 
    public RigidBodyTransform getTransformToParent()
