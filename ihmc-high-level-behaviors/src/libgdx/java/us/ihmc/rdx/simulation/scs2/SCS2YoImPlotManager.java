@@ -1,6 +1,5 @@
 package us.ihmc.rdx.simulation.scs2;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
@@ -21,7 +20,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class SCS2YoImPlotManager
 {
