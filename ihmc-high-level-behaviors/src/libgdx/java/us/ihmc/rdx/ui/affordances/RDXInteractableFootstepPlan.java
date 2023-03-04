@@ -218,7 +218,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
       stepChecker.update(footsteps);
       wasPlanUpdated |= pollIfAnyStepWasUpdated();
-      if (wasPlanUpdated)
+      if (wasPlanUpdated && teleoperationParameters.getReplanSwingTrajectoryOnChange())
       {
          swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
          wasPlanUpdated = false;
