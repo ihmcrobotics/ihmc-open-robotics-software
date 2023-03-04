@@ -81,6 +81,7 @@ public class TerrainPerceptionProcessWithDriver
    private final ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
    private final ROS2Topic<PlanarRegionsListMessage> regionsTopic;
 
+   private String serialNumber;
    private int depthWidth;
    private int depthHeight;
    private int colorWidth;
@@ -88,13 +89,14 @@ public class TerrainPerceptionProcessWithDriver
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
-   public TerrainPerceptionProcessWithDriver(RealsenseConfiguration realsenseConfiguration,
+   public TerrainPerceptionProcessWithDriver(String serialNumber, RealsenseConfiguration realsenseConfiguration,
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic,
                                              ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
                                              ROS2Topic<PlanarRegionsListMessage> regionsTopic,
                                              Supplier<ReferenceFrame> sensorFrameUpdater)
    {
+      this.serialNumber = serialNumber;
       this.realsenseConfiguration = realsenseConfiguration;
       this.depthTopic = depthTopic;
       this.colorTopic = colorTopic;
@@ -128,7 +130,7 @@ public class TerrainPerceptionProcessWithDriver
             LogTools.info("Natives loaded.");
 
             realSenseHardwareManager = new RealSenseHardwareManager();
-            sensor = realSenseHardwareManager.createBytedecoRealsenseDevice(realsenseConfiguration.getSerialNumber(),
+            sensor = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber,
                                                                             realsenseConfiguration.getDepthWidth(),
                                                                             realsenseConfiguration.getDepthHeight(),
                                                                             realsenseConfiguration.getDepthFPS());
@@ -169,8 +171,8 @@ public class TerrainPerceptionProcessWithDriver
                depthBytedecoImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
                color8UC3Image = new Mat(colorHeight, colorWidth, opencv_core.CV_8UC3, colorFrameData);
 
-               PerceptionMessageTools.setDepthIntrinsicsFromRealsense(sensor, depthImageMessage.getIntrinsicParameters());
-               PerceptionMessageTools.setColorIntrinsicsFromRealsense(sensor, colorImageMessage.getIntrinsicParameters());
+               PerceptionMessageTools.setDepthIntrinsicsFromRealsense(sensor, depthImageMessage);
+               PerceptionMessageTools.setColorIntrinsicsFromRealsense(sensor, colorImageMessage);
 
                // Important not to store as a field, as update() needs to be called each frame
                ReferenceFrame cameraFrame = sensorFrameUpdater.get();
@@ -288,7 +290,7 @@ public class TerrainPerceptionProcessWithDriver
       */
 
       String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365"); // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563
-      new TerrainPerceptionProcessWithDriver(new RealsenseConfiguration(l515SerialNumber, 768, 1024, 30, true, 720, 1280, 30),
+      new TerrainPerceptionProcessWithDriver(l515SerialNumber, RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
                                              ROS2Tools.L515_DEPTH_IMAGE,
                                              ROS2Tools.L515_COLOR_IMAGE,
                                              ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,

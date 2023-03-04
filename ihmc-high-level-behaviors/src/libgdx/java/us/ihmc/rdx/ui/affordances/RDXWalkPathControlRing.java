@@ -147,7 +147,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       if (footstepPlanToGenerateMeshes != null)
 //      if (footstepPlan != null)
       {
-         plannedFootstepPlacement.updateFromPlan(footstepPlan);
+         plannedFootstepPlacement.updateFromPlan(footstepPlan, null);
 //         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes,
 //                                                                                           "Walk Path Control Ring Plan"));
          footstepPlanToGenerateMeshes = null;

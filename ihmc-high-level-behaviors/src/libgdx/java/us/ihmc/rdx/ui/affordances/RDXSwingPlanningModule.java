@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.affordances;
 
+import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -80,7 +81,7 @@ public class RDXSwingPlanningModule
 
       for (int i = 0; i < footstepPlan.size(); i++)
       {
-         footstepPlan.get(i).updatePlannedTrajectory(tempPlan.getFootstep(i));
+         footstepPlan.get(i).updatePlannedTrajectory(Pair.of(tempPlan.getFootstep(i), swingPlanningModule.getSwingTrajectories().get(i)));
       }
    }
 
