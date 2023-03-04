@@ -47,7 +47,7 @@ public class JSONTools
     */
    public static void forEachArrayElement(JsonNode parentNode, String arrayName, Consumer<JsonNode> nodeConsumer)
    {
-      for (Iterator<JsonNode> actionNodeIterator = parentNode.withArray(arrayName).elements(); actionNodeIterator.hasNext(); )
+      for (Iterator<JsonNode> actionNodeIterator = parentNode.withArray(arrayName).elements(); actionNodeIterator.hasNext();)
       {
          nodeConsumer.accept(actionNodeIterator.next());
       }
