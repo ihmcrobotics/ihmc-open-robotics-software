@@ -34,6 +34,7 @@ public class RDXSwingPlanningModule
    private final SideDependentList<FramePose3DBasics> startFootPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
+   private boolean isCurrentlyPlanning = false;
 
    public RDXSwingPlanningModule(ROS2SyncedRobotModel syncedRobot,
                                  FootstepPlannerParametersReadOnly footstepPlannerParameters,
@@ -68,6 +69,7 @@ public class RDXSwingPlanningModule
 
    public synchronized void update(List<RDXInteractableFootstep> footstepPlan, SwingPlannerType swingPlannerType)
    {
+      isCurrentlyPlanning = true;
       setInitialFeet();
       FootstepPlan tempPlan = createFakeFootstepPlan(footstepPlan);
 
@@ -83,6 +85,7 @@ public class RDXSwingPlanningModule
       {
          footstepPlan.get(i).updatePlannedTrajectory(Pair.of(tempPlan.getFootstep(i), swingPlanningModule.getSwingTrajectories().get(i)));
       }
+      isCurrentlyPlanning = false;
    }
 
    private FootstepPlan createFakeFootstepPlan(List<RDXInteractableFootstep> footstepPlan)
@@ -98,4 +101,8 @@ public class RDXSwingPlanningModule
       executorService.destroy();
    }
 
+   public boolean getIsCurrentlyPlanning()
+   {
+      return isCurrentlyPlanning;
+   }
 }

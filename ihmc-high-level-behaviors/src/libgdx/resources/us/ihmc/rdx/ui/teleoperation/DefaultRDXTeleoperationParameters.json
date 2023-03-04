@@ -22,5 +22,5 @@
   "Footstep length multiplier" : 1.0,
   "Is PSI adjustable" : false,
   "Plan with body path" : false,
-  "Replan Swing Trajectories On Change" : true
+  "Replan swing trajectories on change" : true
 }
