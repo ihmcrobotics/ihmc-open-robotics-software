@@ -39,10 +39,13 @@ public class RDXSCS2TerrainObject
 
    public void update()
    {
-      centerOfMassFrame.update(transformToParent ->
+      if (bulletTerrainObject != null)
       {
-         transformToParent.set(bulletTerrainObject.getTransformToWorld());
-      });
+         centerOfMassFrame.update(transformToParent ->
+         {
+            transformToParent.set(bulletTerrainObject.getTransformToWorld());
+         });
+      }
 
       visualFrameGraphicsNode.update();
       collisionFrameGraphicsNode.update();
