@@ -674,11 +674,10 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
 
             depthImageMessage.setImageHeight(depthSensorSimulator.getImageHeight());
             depthImageMessage.setImageWidth(depthSensorSimulator.getImageWidth());
-            depthImageMessage.getIntrinsicParameters().setFx(depthSensorSimulator.getFocalLengthPixels().get());
-            depthImageMessage.getIntrinsicParameters().setFy(depthSensorSimulator.getFocalLengthPixels().get());
-            depthImageMessage.getIntrinsicParameters().setCx(depthSensorSimulator.getPrincipalOffsetXPixels().get());
-            depthImageMessage.getIntrinsicParameters().setCy(depthSensorSimulator.getPrincipalOffsetYPixels().get());
-            depthImageMessage.getIntrinsicParameters().setSkew(0.0);
+            depthImageMessage.setFocalLengthXPixels(depthSensorSimulator.getFocalLengthPixels().get());
+            depthImageMessage.setFocalLengthYPixels(depthSensorSimulator.getFocalLengthPixels().get());
+            depthImageMessage.setPrincipalPointXPixels(depthSensorSimulator.getPrincipalOffsetXPixels().get());
+            depthImageMessage.setPrincipalPointYPixels(depthSensorSimulator.getPrincipalOffsetYPixels().get());
 
             Instant now = Instant.now();
             sensorPose.setToZero(sensorFrame);
@@ -698,11 +697,10 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
 
             colorImageMessage.setImageHeight(depthSensorSimulator.getImageHeight());
             colorImageMessage.setImageWidth(depthSensorSimulator.getImageWidth());
-            colorImageMessage.getIntrinsicParameters().setFx(depthSensorSimulator.getFocalLengthPixels().get());
-            colorImageMessage.getIntrinsicParameters().setFy(depthSensorSimulator.getFocalLengthPixels().get());
-            colorImageMessage.getIntrinsicParameters().setCx(depthSensorSimulator.getPrincipalOffsetXPixels().get());
-            colorImageMessage.getIntrinsicParameters().setCy(depthSensorSimulator.getPrincipalOffsetYPixels().get());
-            colorImageMessage.getIntrinsicParameters().setSkew(0.0);
+            colorImageMessage.setFocalLengthXPixels(depthSensorSimulator.getFocalLengthPixels().get());
+            colorImageMessage.setFocalLengthYPixels(depthSensorSimulator.getFocalLengthPixels().get());
+            colorImageMessage.setPrincipalPointXPixels(depthSensorSimulator.getPrincipalOffsetXPixels().get());
+            colorImageMessage.setPrincipalPointYPixels(depthSensorSimulator.getPrincipalOffsetYPixels().get());
 
             opencv_imgproc.cvtColor(rgba8Mat, rgb8Mat, opencv_imgproc.COLOR_RGBA2RGB);
 
