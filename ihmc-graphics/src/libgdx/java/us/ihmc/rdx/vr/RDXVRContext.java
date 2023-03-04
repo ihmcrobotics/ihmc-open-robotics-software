@@ -10,7 +10,6 @@ import java.util.function.Consumer;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.*;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
 
@@ -25,6 +24,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
@@ -120,15 +120,14 @@ public class RDXVRContext
       WorkspaceFile actionManifestFile = new WorkspaceFile(directory, "actions.json");
       JSONFileTools.load(actionManifestFile, node ->
       {
-         for (Iterator<JsonNode> it = node.withArray("default_bindings").elements(); it.hasNext(); )
+         JSONTools.forEachArrayElement(node, "default_bindings", objectNode ->
          {
-            JsonNode objectNode = it.next();
             String controllerBindings = objectNode.get("binding_url").asText();
             if (controllerBindings.contains("focus3"))
                controllerModel = RDXVRControllerModel.FOCUS3;
             else
                controllerModel = RDXVRControllerModel.INDEX;
-         }
+         });
       });
       LogTools.info("Using VR controller model: {}", controllerModel);
       VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilePath().toString());
