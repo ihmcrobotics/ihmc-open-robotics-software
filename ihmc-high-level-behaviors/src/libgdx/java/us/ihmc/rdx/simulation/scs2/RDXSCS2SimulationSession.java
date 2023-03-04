@@ -12,10 +12,10 @@ import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
 
 import java.util.Set;
 
-public class RDXSCS2BulletSimulationSession extends RDXSCS2Session
+public class RDXSCS2SimulationSession extends RDXSCS2Session
 {
-   private RDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
    private PhysicsEngine physicsEngine;
+   private RDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
 
    /**
     * Bring your own session.
@@ -37,9 +37,10 @@ public class RDXSCS2BulletSimulationSession extends RDXSCS2Session
          if (physicsEngine instanceof BulletPhysicsEngine)
             bulletPhysicsDebugger.drawBulletDebugDrawings();
 
+         // This technically belongs in RDXSCS2Session, but there's no after tick callback for a regular session
          if (pauseAtEndOfBuffer.get() && yoManager.getCurrentIndex() == yoManager.getBufferSize() - 2)
          {
-            simulationSession.setSessionMode(SessionMode.PAUSE);
+            session.setSessionMode(SessionMode.PAUSE);
          }
       });
    }

@@ -9,7 +9,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.simulation.BoxRobotDefinition;
 import us.ihmc.rdx.simulation.SlopeGroundDefinition;
-import us.ihmc.rdx.simulation.scs2.RDXSCS2BulletSimulationSession;
+import us.ihmc.rdx.simulation.scs2.RDXSCS2SimulationSession;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
@@ -32,7 +32,7 @@ import java.util.Random;
 public class RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final RDXSCS2BulletSimulationSession rdxSCS2SimulationSession = new RDXSCS2BulletSimulationSession();
+   private final RDXSCS2SimulationSession rdxSCS2SimulationSession = new RDXSCS2SimulationSession();
 
    public RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo()
    {
