@@ -329,7 +329,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       if (footstepPlanning.pollHasNewPlanAvailable()) // failed
       {
          FootstepPlannerOutput output = footstepPlanning.pollOutput();
-         interactableFootstepPlan.updateFromPlan(output.getFootstepPlan());
+         interactableFootstepPlan.updateFromPlan(output.getFootstepPlan(), output.getSwingTrajectories());
          if (output.getBodyPath().size() > 0)
             bodyPathPlanGraphic.generateMeshesAsync(output.getBodyPath());
          else

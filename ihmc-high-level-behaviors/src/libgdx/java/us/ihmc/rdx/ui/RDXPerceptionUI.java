@@ -90,10 +90,10 @@ public class RDXPerceptionUI
             blackflyRightVideoVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(blackflyRightVideoVisualizer);
 
-            RDXROS2ColoredDepthVisualizer l515ColoredDepthVisualizer = new RDXROS2ColoredDepthVisualizer("L515 Colored Depth",
-                                                                                                         PubSubImplementation.FAST_RTPS,
-                                                                                                         ROS2Tools.L515_DEPTH_IMAGE,
-                                                                                                         ROS2Tools.L515_COLOR_IMAGE);
+            RDXROS2ColoredPointCloudVisualizer l515ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("L515 Colored Depth",
+                                                                                                                   PubSubImplementation.FAST_RTPS,
+                                                                                                                   ROS2Tools.L515_DEPTH_IMAGE,
+                                                                                                                   ROS2Tools.L515_COLOR_IMAGE);
             l515ColoredDepthVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(l515ColoredDepthVisualizer);
 

@@ -18,7 +18,6 @@ import us.ihmc.log.LogTools;
 import java.awt.image.BufferedImage;
 import java.time.Instant;
 
-
 public class BytedecoOpenCVTools
 {
    public static final IntPointer compressionParametersPNG = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION);
@@ -311,14 +310,6 @@ public class BytedecoOpenCVTools
       }
 
       return matString.toString();
-   }
-
-   public static void displayVideoPacketColor(VideoPacket videoPacket)
-   {
-      Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
-      byte[] compressedByteArray = videoPacket.getData().toArray();
-      BytedecoOpenCVTools.decompressJPG(compressedByteArray, colorImage);
-      display("Color Image", colorImage, 1);
    }
 
    public static void display(String tag, Mat image, int delay)

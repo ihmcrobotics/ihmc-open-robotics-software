@@ -150,6 +150,13 @@ public class ROS2Tools
                                                                                                              IHMC_ROOT.withModule(BLACKFLY_NAME + "right")
                                                                                                                       .withType(BigVideoPacket.class)
                                                                                                                       .withSuffix("video"));
+   public static final SideDependentList<ROS2Topic<ImageMessage>> BLACKFLY_FISHEYE_COLOR_IMAGE
+         = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "_fisheye")
+                                            .withType(ImageMessage.class)
+                                            .withSuffix("left"),
+                                   IHMC_ROOT.withModule(BLACKFLY_NAME + "_fisheye")
+                                            .withType(ImageMessage.class)
+                                            .withSuffix("right"));
    public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = IHMC_ROOT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = IHMC_ROOT.withModule("ouster").withTypeName(ImageMessage.class).withSuffix("depth");

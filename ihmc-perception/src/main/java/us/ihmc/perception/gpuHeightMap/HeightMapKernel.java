@@ -49,8 +49,11 @@ public class HeightMapKernel
       openCLProgram.close();
       unpackPointCloudKernel.close();
 
-      decompressionOutputImage.destroy(openCLManager);
-      pointCloudVertexBuffer.destroy(openCLManager);
+      if (decompressionOutputImage != null)
+         decompressionOutputImage.destroy(openCLManager);
+
+      if (pointCloudVertexBuffer != null)
+         pointCloudVertexBuffer.destroy(openCLManager);
 
       openCLProgram.close();
    }
