@@ -1,7 +1,6 @@
 package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -21,12 +20,11 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
-import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
+import us.ihmc.rdx.ui.interactable.RDXInteractableOuster;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
@@ -48,7 +46,7 @@ public class RDXNettyOusterUI
    private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
    private final ImFloat pointSize = new ImFloat(0.01f);
    private ModifiableReferenceFrame sensorFrame;
-   private RDXInteractableFrameModel ousterInteractable;
+   private RDXInteractableOuster ousterInteractable;
    private int depthWidth;
    private int depthHeight;
    private BytedecoImage fisheyeImage;
@@ -68,19 +66,10 @@ public class RDXNettyOusterUI
 
    public void create(RDXBaseUI baseUI)
    {
-      ModelData ousterSensorModel = RDXModelLoader.loadModelData("environmentObjects/ousterSensor/Ouster.g3dj");
-      CylinderRayIntersection cylinderIntersection = new CylinderRayIntersection();
-      ousterInteractable = new RDXInteractableFrameModel();
+      ousterInteractable = new RDXInteractableOuster(baseUI.getPrimary3DPanel(),
+                                                     sensorFrame.getReferenceFrame(),
+                                                     sensorFrame.getTransformToParent());
       sensorFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
-      ousterInteractable.create(sensorFrame.getReferenceFrame(),
-                                sensorFrame.getTransformToParent(),
-                                baseUI.getPrimary3DPanel(),
-                                ousterSensorModel,
-                                pickRay ->
-                                {
-                                   cylinderIntersection.update(0.0734, 0.04, -0.0372, ousterInteractable.getReferenceFrame().getTransformToWorldFrame());
-                                   return cylinderIntersection.intersect(pickRay);
-                                });
 
       ouster = new NettyOuster();
       ouster.setOnFrameReceived(this::onFrameReceived);
@@ -174,7 +163,7 @@ public class RDXNettyOusterUI
          {
             depthExtractionSynchronizedBlockStopwatchPlot.stop();
             depthExtractionKernelStopwatchPlot.start();
-            depthExtractionKernel.runKernel(ousterInteractable.getReferenceFrame().getTransformToRoot());
+            depthExtractionKernel.runKernel(ousterInteractable.getInteractableFrameModel().getReferenceFrame().getTransformToRoot());
             depthExtractionKernelStopwatchPlot.stop();
          }
 
@@ -185,7 +174,7 @@ public class RDXNettyOusterUI
          pointCloudRenderer.updateMeshFastestBeforeKernel();
          pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
 
-         ousterFisheyeKernel.updateSensorTransform(ousterInteractable.getReferenceFrame());
+         ousterFisheyeKernel.updateSensorTransform(ousterInteractable.getInteractableFrameModel().getReferenceFrame());
          depthImageToPointCloudStopwatchPlot.start();
          ousterFisheyeKernel.runKernel(horizontalFieldOfView.get(),
                                        verticalFieldOfView.get(),
@@ -262,7 +251,7 @@ public class RDXNettyOusterUI
 
    public RDXInteractableFrameModel getOusterInteractable()
    {
-      return ousterInteractable;
+      return ousterInteractable.getInteractableFrameModel();
    }
 
    public RDXOusterFisheyeColoredPointCloudKernel getOusterFisheyeKernel()
