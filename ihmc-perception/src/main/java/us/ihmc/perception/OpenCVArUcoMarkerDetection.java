@@ -126,7 +126,8 @@ public class OpenCVArUcoMarkerDetection
             {
                // ArUco library doesn't support alpha channel being in there
                opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(),
-                                       rgb8ImageForDetection.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGBA2RGB);
+                                       rgb8ImageForDetection.getForThreadOne().getBytedecoOpenCVMat(),
+                                       opencv_imgproc.COLOR_RGBA2RGB);
             }
             else
             {
