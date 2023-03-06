@@ -13,11 +13,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.Set;
 
 /**
  * TODO: Figure out how to incorporate this class with things better.
@@ -137,27 +140,30 @@ public class RDXVRModeManager
       }
    }
 
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      switch (mode)
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
-         case FOOTSTEP_PLACEMENT ->
+         switch (mode)
          {
-            handPlacedFootstepMode.getRenderables(renderables, pool);
+            case FOOTSTEP_PLACEMENT ->
+            {
+               handPlacedFootstepMode.getRenderables(renderables, pool);
+            }
+            case WHOLE_BODY_IK_STREAMING ->
+            {
+               kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
+            }
+            case JOYSTICK_WALKING ->
+            {
+               joystickBasedStepping.getRenderables(renderables, pool);
+            }
          }
-         case WHOLE_BODY_IK_STREAMING ->
-         {
-            kinematicsStreamingMode.getVirtualRenderables(renderables, pool);
-         }
-         case JOYSTICK_WALKING ->
-         {
-            joystickBasedStepping.getRenderables(renderables, pool);
-         }
-      }
 
-      if (renderPanel)
-      {
-         leftHandPanel.getRenderables(renderables, pool);
+         if (renderPanel)
+         {
+            leftHandPanel.getRenderables(renderables, pool);
+         }
       }
    }
 
