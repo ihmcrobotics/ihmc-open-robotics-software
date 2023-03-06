@@ -1,12 +1,16 @@
 package us.ihmc.perception.ouster;
 
+import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.ROS2HeartbeatMonitor;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLManager;
@@ -27,6 +31,8 @@ public class OusterDriverAndDepthPublisher
    private final Activator nativesLoadedActivator;
    private final ROS2HeartbeatMonitor publishLidarScanMonitor;
    private final Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier;
+   private final  RigidBodyTransform ousterToChestTransform;
+   private final IHMCROS2Input<RigidBodyTransformMessage> frameUpdateSubscription;
    private final Runnable asynchronousCompressAndPublish = this::asynchronousCompressAndPublish;
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;
    private final NettyOuster ouster;
@@ -39,10 +45,12 @@ public class OusterDriverAndDepthPublisher
 
    public OusterDriverAndDepthPublisher(ROS2ControllerPublishSubscribeAPI ros2,
                                         Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier,
+                                        RigidBodyTransform ousterToChestTransform,
                                         ROS2Topic<ImageMessage> imageMessageTopic,
                                         ROS2Topic<LidarScanMessage> lidarScanTopic)
    {
       this.humanoidReferenceFramesSupplier = humanoidReferenceFramesSupplier;
+      this.ousterToChestTransform = ousterToChestTransform;
 
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
@@ -54,6 +62,8 @@ public class OusterDriverAndDepthPublisher
       depthPublisher = new OusterDepthPublisher(imageMessageTopic, lidarScanTopic, publishLidarScanMonitor::isAlive);
       heightMapUpdater = new OusterHeightMapUpdater(ros2);
       heightMapUpdater.start();
+
+      frameUpdateSubscription = ros2.subscribe(ROS2Tools.OUSTER_LIDAR_FRAME_UPDATE);
 
       extractCompressAndPublishThread = MissingThreadTools.newSingleThreadExecutor("CopyAndPublish", true, 1);
       // Using incoming Ouster UDP Netty events as the thread scheduler. Only called on last datagram of frame.
@@ -86,6 +96,10 @@ public class OusterDriverAndDepthPublisher
 
          synchronized (this)
          {
+            if (frameUpdateSubscription.getMessageNotification().poll())
+            {
+               MessageTools.toEuclid(frameUpdateSubscription.getMessageNotification().read(), ousterToChestTransform);
+            }
             humanoidReferenceFrames = humanoidReferenceFramesSupplier.get();
          }
 
