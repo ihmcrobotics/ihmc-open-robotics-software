@@ -64,17 +64,6 @@ public class RDXVRModeManager
    {
       renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
 
-      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-      {
-         if (mode == RDXVRMode.INPUTS_DISABLED && controller.getAButtonActionData().bChanged() && !controller.getAButtonActionData().bState())
-         {
-            vrContext.teleport(transform ->
-            {
-               syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToDesiredFrame(transform, ReferenceFrame.getWorldFrame());
-            });
-         }
-      });
-
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
          leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
