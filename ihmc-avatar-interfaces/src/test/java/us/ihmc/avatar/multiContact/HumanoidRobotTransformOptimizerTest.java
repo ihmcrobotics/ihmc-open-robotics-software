@@ -23,7 +23,7 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationConstructionSetTools.tools.RobotDefinitionTools;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 
 public abstract class HumanoidRobotTransformOptimizerTest
 {

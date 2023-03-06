@@ -136,6 +136,13 @@ public class RDXPose3DGizmo implements RenderableProvider
       initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
+   public RDXPose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
+   {
+      ReferenceFrame gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame,
+                                                                                                         gizmoTransformToParentFrameToModify);
+      initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
+   }
+
    private void initialize(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
       this.parentReferenceFrame = gizmoFrame.getParent();
