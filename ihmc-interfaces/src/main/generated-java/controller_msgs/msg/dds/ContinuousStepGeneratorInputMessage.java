@@ -19,6 +19,7 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
    public double forward_velocity_;
    public double lateral_velocity_;
    public double turn_velocity_;
+   public double walking_mode_switch_value_;
    public boolean unit_velocities_;
 
    public ContinuousStepGeneratorInputMessage()
@@ -42,6 +43,8 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
       lateral_velocity_ = other.lateral_velocity_;
 
       turn_velocity_ = other.turn_velocity_;
+
+      walking_mode_switch_value_ = other.walking_mode_switch_value_;
 
       unit_velocities_ = other.unit_velocities_;
 
@@ -98,6 +101,15 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
       return turn_velocity_;
    }
 
+   public void setWalkingModeSwitchValue(double walking_mode_switch_value)
+   {
+      walking_mode_switch_value_ = walking_mode_switch_value;
+   }
+   public double getWalkingModeSwitchValue()
+   {
+      return walking_mode_switch_value_;
+   }
+
    public void setUnitVelocities(boolean unit_velocities)
    {
       unit_velocities_ = unit_velocities;
@@ -135,6 +147,8 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.turn_velocity_, other.turn_velocity_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.walking_mode_switch_value_, other.walking_mode_switch_value_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unit_velocities_, other.unit_velocities_, epsilon)) return false;
 
 
@@ -160,6 +174,8 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
 
       if(this.turn_velocity_ != otherMyClass.turn_velocity_) return false;
 
+      if(this.walking_mode_switch_value_ != otherMyClass.walking_mode_switch_value_) return false;
+
       if(this.unit_velocities_ != otherMyClass.unit_velocities_) return false;
 
 
@@ -182,6 +198,8 @@ public class ContinuousStepGeneratorInputMessage extends Packet<ContinuousStepGe
       builder.append(this.lateral_velocity_);      builder.append(", ");
       builder.append("turn_velocity=");
       builder.append(this.turn_velocity_);      builder.append(", ");
+      builder.append("walking_mode_switch_value=");
+      builder.append(this.walking_mode_switch_value_);      builder.append(", ");
       builder.append("unit_velocities=");
       builder.append(this.unit_velocities_);
       builder.append("}");

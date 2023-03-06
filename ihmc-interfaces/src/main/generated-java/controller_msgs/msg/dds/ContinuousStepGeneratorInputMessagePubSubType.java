@@ -50,6 +50,8 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -80,6 +82,9 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -99,8 +104,9 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
 
       cdr.write_type_6(data.getTurnVelocity());
 
-      cdr.write_type_7(data.getUnitVelocities());
+      cdr.write_type_6(data.getWalkingModeSwitchValue());
 
+      cdr.write_type_7(data.getUnitVelocities());
    }
 
    public static void read(controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage data, us.ihmc.idl.CDR cdr)
@@ -114,10 +120,10 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
       data.setLateralVelocity(cdr.read_type_6());
       	
       data.setTurnVelocity(cdr.read_type_6());
-      	
-      data.setUnitVelocities(cdr.read_type_7());
-      	
 
+      data.setWalkingModeSwitchValue(cdr.read_type_6());
+
+      data.setUnitVelocities(cdr.read_type_7());
    }
 
    @Override
@@ -128,6 +134,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
       ser.write_type_6("forward_velocity", data.getForwardVelocity());
       ser.write_type_6("lateral_velocity", data.getLateralVelocity());
       ser.write_type_6("turn_velocity", data.getTurnVelocity());
+      ser.write_type_6("walking_mode_switch_value", data.getWalkingModeSwitchValue());
       ser.write_type_7("unit_velocities", data.getUnitVelocities());
    }
 
@@ -139,6 +146,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
       data.setForwardVelocity(ser.read_type_6("forward_velocity"));
       data.setLateralVelocity(ser.read_type_6("lateral_velocity"));
       data.setTurnVelocity(ser.read_type_6("turn_velocity"));
+      data.setWalkingModeSwitchValue(ser.read_type_6("walking_mode_switch_value"));
       data.setUnitVelocities(ser.read_type_7("unit_velocities"));
    }
 

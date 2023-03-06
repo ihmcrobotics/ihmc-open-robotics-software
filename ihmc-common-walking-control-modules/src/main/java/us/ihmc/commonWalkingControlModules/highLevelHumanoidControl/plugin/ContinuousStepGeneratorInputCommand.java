@@ -10,7 +10,7 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
    private double forwardVelocity;
    private double lateralVelocity;
    private double turnVelocity;
-   private double walkingModeSwitchValue;
+   private double walkingModeSwitchValue = -1.0;
    private boolean unitVelocities;
 
    @Override
@@ -32,6 +32,7 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
       forwardVelocity = other.forwardVelocity;
       lateralVelocity = other.lateralVelocity;
       turnVelocity = other.turnVelocity;
+      walkingModeSwitchValue = other.walkingModeSwitchValue;
       unitVelocities = other.unitVelocities;
    }
 
@@ -43,6 +44,7 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
       forwardVelocity = message.getForwardVelocity();
       lateralVelocity = message.getLateralVelocity();
       turnVelocity = message.getTurnVelocity();
+      walkingModeSwitchValue = message.getWalkingModeSwitchValue();
       unitVelocities = message.getUnitVelocities();
    }
 

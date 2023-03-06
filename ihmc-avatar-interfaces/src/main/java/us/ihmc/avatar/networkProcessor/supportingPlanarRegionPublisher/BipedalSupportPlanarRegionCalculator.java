@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import org.ros.gradle_plugins.CatkinPackage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -34,20 +35,35 @@ public class BipedalSupportPlanarRegionCalculator
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] allJointsExcludingHands;
+   private final HumanoidReferenceFrames referenceFrames;
    private final SideDependentList<ContactablePlaneBody> contactableFeet;
    private final SideDependentList<List<FramePoint2D>> scaledContactPointList = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
+   private final boolean referenceFramesProvided;
+
    public BipedalSupportPlanarRegionCalculator(DRCRobotModel robotModel)
    {
-      this (robotModel, robotModel.createFullRobotModel());
+      this(robotModel, robotModel.createFullRobotModel(), null);
    }
 
-   public BipedalSupportPlanarRegionCalculator(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel)
+   public BipedalSupportPlanarRegionCalculator(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
+      if (referenceFrames == null)
+      {
+         referenceFramesProvided = false;
+         this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      }
+      else
+      {
+         this.referenceFrames = referenceFrames;
+         referenceFramesProvided = true;
+      }
+
       this.fullRobotModel = fullRobotModel;
       allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(referenceFrames);
       contactableBodiesFactory.setFootContactPoints(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       contactableFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
 
@@ -82,6 +98,8 @@ public class BipedalSupportPlanarRegionCalculator
       if (robotConfigurationData !=null)
          KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, fullRobotModel.getRootJoint(), allJointsExcludingHands);
 
+      if (!referenceFramesProvided)
+         referenceFrames.updateFrames();
 
       SideDependentList<Boolean> isInSupport = new SideDependentList<Boolean>(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty(),
                                                                               !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty());

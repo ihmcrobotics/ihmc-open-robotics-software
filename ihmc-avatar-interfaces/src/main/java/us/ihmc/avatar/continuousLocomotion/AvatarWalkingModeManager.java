@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorCommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ConcurrentMessageInputBuffer;
@@ -67,10 +68,11 @@ public class AvatarWalkingModeManager implements Updatable
 
       ignoreRCWalkingModeSelection = new YoBoolean("ignoreRCWalkingModeSelection", registry);
       ignoreAutoWalkingModeSwitch = new YoBoolean("ignoreAutoWalkingModeSwitch", registry);
-      ignoreAutoWalkingModeSwitch.set(true);
+      ignoreAutoWalkingModeSwitch.set(false);
 
-      yoJoystickRequestedWalkingMode = new YoEnum<>("yoJoystickRequestedWalkingMode", registry, JoystickRequestedWalkingMode.class, false);
+      yoJoystickRequestedWalkingMode = new YoEnum<>("joystickRequestedWalkingMode", registry, JoystickRequestedWalkingMode.class, false);
       yoJoystickRequestedWalkingMode.set(JoystickRequestedWalkingMode.WALKING);
+      yoJoystickRequestedWalkingMode.addListener(change -> updateRequestedWalkingState());
 
       locomotionManagerRequestedWalkingState = new YoEnum<>("locomotionManagerRequestedWalkingState", registry, HighLevelControllerName.class, false);
       locomotionManagerRequestedWalkingState.set(HighLevelControllerName.WALKING);
@@ -88,7 +90,7 @@ public class AvatarWalkingModeManager implements Updatable
       messagesToRegister.add(WalkingStatusMessage.class);
       messagesToRegister.add(PauseWalkingMessage.class);
 
-      messageListener = new ConcurrentMessageInputBuffer(messagesToRegister);
+      messageListener = new ConcurrentMessageInputBuffer(null, messagesToRegister, 35);
       terrainIdentifier = new AvatarFlatGroundDetector(robotModel, fullRobotModel, referenceFrames, messageListener, registry);
 
       csgCommandInputManager.addPlanarRegionsListCommandConsumer(terrainIdentifier::acceptPlanarRegionsListCommand);
@@ -98,7 +100,6 @@ public class AvatarWalkingModeManager implements Updatable
       statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, messageListener::submitMessage);
       statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, messageListener::submitMessage);
       statusMessageOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, messageListener::submitMessage);
-      statusMessageOutputManager.attachStatusMessageListener(PauseWalkingMessage.class, messageListener::submitMessage);
 
       parentRegistry.addChild(registry);
    }
@@ -107,7 +108,6 @@ public class AvatarWalkingModeManager implements Updatable
    public void update(double time)
    {
       consumeMessages();
-      updateRequestedWalkingState();
 
       if (shouldExecuteTransition())
       {
@@ -116,7 +116,7 @@ public class AvatarWalkingModeManager implements Updatable
          walkingCommandInputManager.submitCommand(controllerStateCommand);
 
          walkingCommandInputManager.clearCommands(PauseWalkingCommand.class);
-         pauseWalkingCommand.setFromMessage(walkingMessageBeforeTransition);//walkingStatusBeforeTransition == WalkingStatus.PAUSED || walkingStatusBeforeTransition == WalkingStatus.ABORT_REQUESTED);
+         pauseWalkingCommand.setPauseRequested(walkingStatusBeforeTransition == WalkingStatus.PAUSED);
          walkingCommandInputManager.submitCommand(pauseWalkingCommand);
       }
    }
@@ -126,43 +126,45 @@ public class AvatarWalkingModeManager implements Updatable
       if (messageListener.isNewMessageAvailable(HighLevelStateChangeStatusMessage.class))
       {
          currentController = HighLevelControllerName.fromByte(messageListener.pollNewestMessage(HighLevelStateChangeStatusMessage.class).getEndHighLevelControllerName());
+         messageListener.clearMessages(HighLevelStateChangeStatusMessage.class);
       }
 
       if (messageListener.isNewMessageAvailable(WalkingStatusMessage.class))
       {
          walkingStatusMessage.set(messageListener.pollNewestMessage(WalkingStatusMessage.class));
+         messageListener.clearMessages(WalkingStatusMessage.class);
       }
+
+      terrainIdentifier.consumeMessages();
    }
 
    private void updateRequestedWalkingState()
    {
-      if (yoJoystickRequestedWalkingMode.getEnumValue() == JoystickRequestedWalkingMode.FAST_WALKING || (yoJoystickRequestedWalkingMode.getEnumValue() == JoystickRequestedWalkingMode.AUTO && terrainIdentifier.flatGroundDetected() && !ignoreAutoWalkingModeSwitch.getBooleanValue()))
+      if (yoJoystickRequestedWalkingMode.getEnumValue() == JoystickRequestedWalkingMode.FAST_WALKING || (yoJoystickRequestedWalkingMode.getEnumValue() == JoystickRequestedWalkingMode.AUTO && !ignoreAutoWalkingModeSwitch.getBooleanValue() && terrainIdentifier.flatGroundDetected()))
          locomotionManagerRequestedWalkingState.set(HighLevelControllerName.CUSTOM1);
 
-      else if (yoJoystickRequestedWalkingMode.getEnumValue() == JoystickRequestedWalkingMode.WALKING || (yoJoystickRequestedWalkingMode.getEnumValue() == JoystickRequestedWalkingMode.AUTO && !terrainIdentifier.flatGroundDetected() && !ignoreAutoWalkingModeSwitch.getBooleanValue()))
+      else if (yoJoystickRequestedWalkingMode.getEnumValue() == JoystickRequestedWalkingMode.WALKING || (yoJoystickRequestedWalkingMode.getEnumValue() == JoystickRequestedWalkingMode.AUTO && !ignoreAutoWalkingModeSwitch.getBooleanValue() && !terrainIdentifier.flatGroundDetected()))
          locomotionManagerRequestedWalkingState.set(HighLevelControllerName.WALKING);
    }
 
    private void recordWalkingStatusBeforeTransition()
    {
-      walkingStatusBeforeTransition = WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus());
-
-      if (messageListener.isNewMessageAvailable(PauseWalkingMessage.class))
-      {
-         walkingMessageBeforeTransition.set(messageListener.pollNewestMessage(PauseWalkingMessage.class));
-      }
+      if (walkingStatusMessage.getWalkingStatus() == -1 || WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) == WalkingStatus.PAUSED)// || WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) == WalkingStatus.ABORT_REQUESTED)
+         walkingStatusBeforeTransition = WalkingStatus.PAUSED;
+      else
+         walkingStatusBeforeTransition = WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus());
    }
 
    private boolean shouldExecuteTransition()
    {
-      if (locomotionManagerRequestedWalkingState.getEnumValue() != currentController && WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) == WalkingStatus.PAUSED)
+      if (locomotionManagerRequestedWalkingState.getEnumValue() != currentController && (walkingStatusMessage.getWalkingStatus() == -1 || WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) == WalkingStatus.PAUSED))
       {
          return true;
       }
 
       else if (locomotionManagerRequestedWalkingState.getEnumValue() != currentController && WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) != WalkingStatus.PAUSED)
       {
-         walkingCommandInputManager.clearCommands(PauseWalkingCommand.class);
+         //walkingCommandInputManager.clearCommands(PauseWalkingCommand.class);
          pauseWalkingCommand.setPauseRequested(true);
          walkingCommandInputManager.submitCommand(pauseWalkingCommand);
          return false;

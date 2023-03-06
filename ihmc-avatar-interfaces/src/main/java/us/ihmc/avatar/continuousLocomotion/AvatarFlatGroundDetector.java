@@ -3,6 +3,7 @@ package us.ihmc.avatar.continuousLocomotion;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionCalculator;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -84,7 +85,7 @@ public class AvatarFlatGroundDetector
 
       parameters = new YoAvatarWalkingModeManagerParameters(new AvatarWalkingModeManagerParameters(), registry);
 
-      bipedalSupportPlanarRegionCalculator = new BipedalSupportPlanarRegionCalculator(robotModel, fullRobotModel);
+      bipedalSupportPlanarRegionCalculator = new BipedalSupportPlanarRegionCalculator(robotModel, fullRobotModel, referenceFrames);
 
       yoDetectedTerrain = new YoEnum<>("detectedTerrain", registry, detectedTerrain.class, false);
       yoDetectedTerrain.set(detectedTerrain.ROUGH);
@@ -92,7 +93,7 @@ public class AvatarFlatGroundDetector
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         footPoses.get(robotSide).set(new FramePose3D(referenceFrames.getSoleFrame(robotSide)));
+         footPoses.put(robotSide, new FramePose3D(referenceFrames.getSoleFrame(robotSide)));
          footPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
       }
 
@@ -101,7 +102,7 @@ public class AvatarFlatGroundDetector
 
    public void update()
    {
-      consumeMessages();
+      //consumeMessages();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -305,21 +306,24 @@ public class AvatarFlatGroundDetector
       planarRegionsHistory.clear();
    }
 
-   private void consumeMessages()
+   public void consumeMessages()
    {
       if (messageListener.isNewMessageAvailable(CapturabilityBasedStatus.class))
       {
          capturabilityBasedStatus.set(messageListener.pollNewestMessage(CapturabilityBasedStatus.class));
-         //messageListener.clearMessages(CapturabilityBasedStatus.class);
+         messageListener.clearMessages(CapturabilityBasedStatus.class);
       }
 
       if (messageListener.isNewMessageAvailable(FootstepStatusMessage.class))
       {
          latestFootstepStatusMessage.set(messageListener.pollNewestMessage(FootstepStatusMessage.class));
+
          if (RobotSide.fromByte(leftFootstepStatusMessage.getRobotSide()) == RobotSide.LEFT)
             leftFootstepStatusMessage.set(latestFootstepStatusMessage);
          else
             rightFootstepStatusMessage.set(latestFootstepStatusMessage);
+
+         messageListener.clearMessages(FootstepStatusMessage.class);
       }
    }
 
