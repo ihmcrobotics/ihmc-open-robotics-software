@@ -675,7 +675,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       return jointAnglesString.toString();
    }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   // The create method adds the renderables, so this shouldn't be accessed externally.
+   private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {

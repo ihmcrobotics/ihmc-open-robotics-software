@@ -258,12 +258,7 @@ public class RDXImGuiLayoutManager
          LogTools.info(1, "Reloading layout.");
       }
       applyLayoutDirectory();
-      Path directory = currentConfigurationLocation.isVersionControl() ?
-            layoutDirectory.getWorkspaceDirectory() : layoutDirectory.getExternalDirectory();
-      if (Files.exists(directory))
-      {
-         loadConfiguration(currentConfigurationLocation);
-      }
+      loadConfiguration(currentConfigurationLocation);
    }
 
    public ImGuiConfigurationLocation getCurrentConfigurationLocation()
