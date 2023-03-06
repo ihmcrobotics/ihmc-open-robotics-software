@@ -11,8 +11,10 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.io.*;
 import java.net.Socket;
@@ -47,6 +49,18 @@ public class NettyOuster
 {
    public static final int TCP_PORT = 7501;
    public static final int UDP_PORT = 7502;
+
+   /**
+    * There seems to be more than 10 degress of yaw in the data, a degree of roll error,
+    * and possibly even almost a degree of pitch error inherent in the Ouster data.
+    * @dcalvert took measurements and calibrated this data using RDXNettyOusterDemo
+    * with OS0-128 S/N 122221003063
+    */
+   public RigidBodyTransform OUSTER_INTRINSIC_TRANSFORM_CORRECTION = new RigidBodyTransform();
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(OUSTER_INTRINSIC_TRANSFORM_CORRECTION.getRotation(), 11.683,  1.163,  0.885);
+   }
+
 
    public static final int BITS_PER_BYTE = 8;
 
