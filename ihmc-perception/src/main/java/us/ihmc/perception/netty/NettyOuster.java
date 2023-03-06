@@ -56,9 +56,9 @@ public class NettyOuster
     * @dcalvert took measurements and calibrated this data using RDXNettyOusterDemo
     * with OS0-128 S/N 122221003063
     */
-   public RigidBodyTransform OUSTER_INTRINSIC_TRANSFORM_CORRECTION = new RigidBodyTransform();
+   public static final RigidBodyTransform INTRINSIC_TRANSFORM_CORRECTION = new RigidBodyTransform();
    {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(OUSTER_INTRINSIC_TRANSFORM_CORRECTION.getRotation(), 11.683,  1.163,  0.885);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(INTRINSIC_TRANSFORM_CORRECTION.getRotation(), 11.683,  1.163,  0.885);
    }
 
 
