@@ -66,11 +66,10 @@ public class RDXNettyOusterUI
 
    public void create(RDXBaseUI baseUI)
    {
+      sensorFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
       ousterInteractable = new RDXInteractableOuster(baseUI.getPrimary3DPanel(),
                                                      sensorFrame.getReferenceFrame(),
                                                      sensorFrame.getTransformToParent());
-      sensorFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
-
       ouster = new NettyOuster();
       ouster.setOnFrameReceived(this::onFrameReceived);
       ouster.bind();
