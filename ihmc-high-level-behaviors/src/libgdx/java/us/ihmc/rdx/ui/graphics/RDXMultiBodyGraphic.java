@@ -8,6 +8,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
+import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
@@ -33,46 +34,35 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
 
    public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics originalRootBody)
    {
-      loadRobotModelAndGraphics(robotDefinition, originalRootBody, false);
+      loadRobotModelAndGraphics(robotDefinition, originalRootBody, RDXVisualTools.NO_SCALING, false);
    }
 
-   public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics originalRootBody, boolean scale)
+   public void loadRobotModelAndGraphics(RobotDefinition robotDefinition,
+                                         RigidBodyBasics originalRootBody,
+                                         double scaleFactor,
+                                         boolean createReferenceFrameGraphics)
    {
-      if (multiBody != null)
-         multiBody.destroy();
-
       ThreadTools.startAsDaemon(() ->
       {
-         multiBody = loadRigidBody(originalRootBody, robotDefinition, scale);
+         multiBody = loadRigidBody(originalRootBody, robotDefinition, scaleFactor, createReferenceFrameGraphics);
          robotLoadedActivator.activate();
       }, getClass().getSimpleName() + "Loading");
    }
 
    private RDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition)
    {
-      return loadRigidBody(rigidBody, robotDefinition, false);
+      return loadRigidBody(rigidBody, robotDefinition, RDXVisualTools.NO_SCALING, false);
    }
 
-   private RDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition, boolean scale)
+   private RDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition, double scaleFactor, boolean createReferenceFrameGraphics)
    {
       RDXRigidBody RDXRigidBody;
       Executor executorToRunLaterOnThreadWithGraphicsContext = Gdx.app::postRunnable;
-      if (scale)
-      {
-         RDXRigidBody = RDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
-                                                                   robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
-                                                                   executorToRunLaterOnThreadWithGraphicsContext,
-                                                                   robotDefinition.getResourceClassLoader(),
-                                                                   1.1f, 1.1f, 1.1f);
-      }
-
-      else
-      {
-         RDXRigidBody = RDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
-                                                                   robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
-                                                                   executorToRunLaterOnThreadWithGraphicsContext,
-                                                                   robotDefinition.getResourceClassLoader());
-      }
+      RDXRigidBody = RDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
+                                                                robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
+                                                                executorToRunLaterOnThreadWithGraphicsContext,
+                                                                scaleFactor,
+                                                                createReferenceFrameGraphics);
 
       for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
       {
@@ -84,16 +74,16 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
             fourBarJoint.getJointA().setSuccessor(RDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyDA(),
                                                                                              fourBarJointDefinition.getBodyDA(),
                                                                                              executorToRunLaterOnThreadWithGraphicsContext,
-                                                                                             robotDefinition.getResourceClassLoader(),
-                                                                                             1.1f, 1.1f, 1.1f));
+                                                                                             scaleFactor,
+                                                                                             createReferenceFrameGraphics));
             fourBarJoint.getJointB().setSuccessor(RDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyBC(),
                                                                                              fourBarJointDefinition.getBodyBC(),
                                                                                              executorToRunLaterOnThreadWithGraphicsContext,
-                                                                                             robotDefinition.getResourceClassLoader(),
-                                                                                             0.0f, 0.0f, 0.0f));
+                                                                                             scaleFactor,
+                                                                                             createReferenceFrameGraphics));
          }
 
-         childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition));
+         childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition, scaleFactor, createReferenceFrameGraphics));
       }
 
       return RDXRigidBody;
@@ -125,9 +115,17 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
       }
    }
 
+   public void getVisualReferenceFrameRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if (isActive() && robotLoadedActivator.poll())
+      {
+         multiBody.getVisualReferenceFrameRenderables(renderables, pool);
+      }
+   }
+
    public void destroy()
    {
-      multiBody.destroy();
+
    }
 
    public boolean isRobotLoaded()
