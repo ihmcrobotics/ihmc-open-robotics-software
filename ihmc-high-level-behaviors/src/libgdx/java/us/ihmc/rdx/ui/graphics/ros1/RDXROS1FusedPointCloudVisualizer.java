@@ -17,6 +17,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.RDXROS1Visualizer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.OpenCLManager;
@@ -26,6 +27,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Deprecated
@@ -235,9 +237,9 @@ public class RDXROS1FusedPointCloudVisualizer extends RDXROS1Visualizer
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive())
+      if (isActive() && sceneLevelCheck(sceneLevels))
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 
