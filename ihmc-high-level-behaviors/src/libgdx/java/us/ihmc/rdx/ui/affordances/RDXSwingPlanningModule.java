@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,6 +31,7 @@ public class RDXSwingPlanningModule
    private final ROS2SyncedRobotModel syncedRobot;
    private PlanarRegionsListMessage planarRegionsListMessage;
    private HeightMapMessage heightMapMessage;
+   private SwingPlannerParametersReadOnly swingPlannerParameters;
 
    private final SideDependentList<FramePose3DBasics> startFootPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
@@ -57,6 +59,11 @@ public class RDXSwingPlanningModule
       this.heightMapMessage = heightMapData;
    }
 
+   public void setSwingPlannerParameters(SwingPlannerParametersReadOnly swingPlannerParameters)
+   {
+      this.swingPlannerParameters = swingPlannerParameters;
+   }
+
    public void setInitialFeet()
    {
       startFootPoses.forEach((side, pose) -> pose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side)));
@@ -75,6 +82,7 @@ public class RDXSwingPlanningModule
 
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      swingPlanningModule.getSwingPlannerParameters().set(swingPlannerParameters);
       swingPlanningModule.computeSwingWaypoints(planarRegionsList,
                                                 heightMapData,
                                                 tempPlan,
