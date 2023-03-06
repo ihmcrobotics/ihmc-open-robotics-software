@@ -119,7 +119,11 @@ public class GPUAStarBodyPathSmootherWaypoint
       waypoint = new YoFramePoseUsingYawPitchRoll("waypoint" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       initialWaypoint = new YoFramePoint3D("initWaypoint" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       waypointFrame = new PoseReferenceFrame("waypointFrame" + waypointIndex, ReferenceFrame.getWorldFrame());
-      nominalStepFrames = new SideDependentList<>(side -> ReferenceFrameTools.constructFrameWithUnchangingTranslationFromParent(side.getCamelCaseNameForStartOfExpression() + "nominalStepFrame" + waypointIndex, waypointFrame, new Vector3D(0.0, side.negateIfRightSide(plannerParameters.getHalfStanceWidth()), 0.0)));
+      nominalStepFrames = new SideDependentList<>(side ->
+         ReferenceFrameTools.constructFrameWithUnchangingTranslationFromParent(
+               side.getCamelCaseNameForStartOfExpression() + "nominalStepFrame" + waypointIndex,
+               waypointFrame,
+               new Vector3D(0.0, side.negateIfRightSide(plannerParameters.getHalfStanceWidth()), 0.0)));
 
       yoSmoothnessGradient = new YoFrameVector3D("smoothGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       yoEqualSpacingGradient = new YoFrameVector3D("spacingGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
