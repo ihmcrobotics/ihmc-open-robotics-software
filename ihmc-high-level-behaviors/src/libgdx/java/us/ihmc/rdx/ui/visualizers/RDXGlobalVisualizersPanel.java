@@ -106,6 +106,7 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RDXRenderab
       {
          visualizer.destroy();
       }
-      ros1Helper.destroy();
+      if (ros1Helper != null)
+         ros1Helper.destroy();
    }
 }
