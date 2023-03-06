@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 
@@ -27,6 +28,7 @@ public class RDXOusterFisheyeColoredPointCloudKernel
    private final OpenCLRigidBodyTransformParameter ousterToWorldTransformParameter = new OpenCLRigidBodyTransformParameter();
    private final OpenCLRigidBodyTransformParameter ousterToFisheyeTransformParameter = new OpenCLRigidBodyTransformParameter();
    private final RigidBodyTransform ousterToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform ousterToWorldTransformCorrected = new RigidBodyTransform();
    private final RigidBodyTransform ousterToFisheyeTransform = new RigidBodyTransform();
    private int levelOfColorDetail;
    private int heightWithVerticalPointsForColorDetail;
@@ -111,7 +113,9 @@ public class RDXOusterFisheyeColoredPointCloudKernel
       floatParameters.setParameter(pointSize);
       floatParameters.setParameter((float) levelOfColorDetail);
       floatParameters.setParameter(useSensorColor && fisheyeImage != null);
-      ousterToWorldTransformParameter.setParameter(ousterToWorldTransform);
+      ousterToWorldTransformCorrected.set(ousterToWorldTransform);
+      ousterToWorldTransformCorrected.preMultiply(NettyOuster.INTRINSIC_TRANSFORM_CORRECTION);
+      ousterToWorldTransformParameter.setParameter(ousterToWorldTransformCorrected);
 
       // It appears you've got to write something to the OpenCL argument even if you don't use it,
       // so we write a placeholder image.

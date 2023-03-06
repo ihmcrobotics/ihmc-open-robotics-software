@@ -8,6 +8,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
@@ -38,6 +39,7 @@ public class OusterDepthExtractionKernel
    private final Supplier<Boolean> computeHeightMap;
    private final BytePointer lidarFrameByteBufferPointerCopy;
    private final Supplier<Boolean> computeLidarScan;
+   private final RigidBodyTransform dataTransformToWorldCorrected = new RigidBodyTransform();
 
    private final OpenCLManager openCLManager;
    private final _cl_program depthImageExtractionProgram;
@@ -138,7 +140,10 @@ public class OusterDepthExtractionKernel
 
       if (computeLidarScan.get() || computeHeightMap.get())
       {
-         populateSensorValuesBuffer(cameraPose);
+         dataTransformToWorldCorrected.set(cameraPose);
+         dataTransformToWorldCorrected.preMultiply(NettyOuster.INTRINSIC_TRANSFORM_CORRECTION);
+
+         populateSensorValuesBuffer(dataTransformToWorldCorrected);
          openCLManager.setKernelArgument(imageToPointCloudKernel, 0, sensorValuesBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(imageToPointCloudKernel, 1, extractedDepthImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(imageToPointCloudKernel, 2, pointCloudXYZBuffer.getOpenCLBufferObject());
