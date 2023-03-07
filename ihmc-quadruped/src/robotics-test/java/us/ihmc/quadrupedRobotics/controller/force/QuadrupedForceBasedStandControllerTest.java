@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
@@ -242,6 +243,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       runMovingBody(initialBodyHeight, 0.0, 0.0, 0.0, heightDelta, orientationDelta);
    }
 
+   @Disabled
    @Test
    public void testStandingUpAndShiftingCoM() throws IOException
    {

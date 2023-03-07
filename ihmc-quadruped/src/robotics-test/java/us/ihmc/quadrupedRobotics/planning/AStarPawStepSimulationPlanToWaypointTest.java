@@ -11,7 +11,6 @@ import quadruped_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
 import quadruped_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.blackoutGenerators.SystemTimeBasedBlackoutSimulator;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
@@ -49,8 +48,8 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
          }
 
          conductor = quadrupedTestFactory.createTestConductor();
-//         variables = new QuadrupedTestYoVariables(conductor.getScs());
-//         stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
+         variables = new QuadrupedTestYoVariables(conductor.getScs());
+         stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -61,15 +60,11 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
    @AfterEach
    public void tearDown()
    {
-      System.out.println("Inside function");
       quadrupedTestFactory.close();
-      System.out.println("Well passed the close thing lol");
       conductor.concludeTesting();
-      System.out.println("ConcludeTesting passed....");
       conductor = null;
       variables = null;
       stepTeleopManager = null;
-      System.out.println("Suck it thing");
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -78,7 +73,6 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
    public void testSimpleForwardPoint()
    {
       setUpSimulation(null);
-      conductor.setKeepSCSUp(false);
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
