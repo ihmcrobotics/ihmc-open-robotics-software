@@ -706,7 +706,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
 
             Instant now = Instant.now();
             PerceptionMessageTools.publishJPGCompressedColorImage(rgba8Mat, yuv420Image, ros2ColorTopic, colorImageMessage, ros2Helper, sensorPose, now, colorSequenceNumber++,
-                                                                  depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth());
+                                                                  depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth(), 0.001f);
          });
       }
 

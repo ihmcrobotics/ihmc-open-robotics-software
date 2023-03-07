@@ -184,10 +184,12 @@ public class RealsenseColorAndDepthPublisher
          MutableBytePointer depthFrameData = realsense.getDepthFrameData();
          depth16UC1Image = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
          PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
+         depthImageMessage.setIsPinholeCameraModel(true);
 
          MutableBytePointer colorFrameData = realsense.getColorFrameData();
          color8UC3Image = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, colorFrameData);
          PerceptionMessageTools.setColorIntrinsicsFromRealsense(realsense, colorImageMessage);
+         colorImageMessage.setIsPinholeCameraModel(true);
 
          yuvColorImage = new Mat();
 
@@ -212,7 +214,7 @@ public class RealsenseColorAndDepthPublisher
                                                                acquisitionTime,
                                                                depthSequenceNumber++,
                                                                realsense.getDepthHeight(),
-                                                               realsense.getDepthWidth());
+                                                               realsense.getDepthWidth(), (float) realsense.getDepthDiscretization());
          }
 
          if (parameters.getPublishColor())
@@ -225,7 +227,7 @@ public class RealsenseColorAndDepthPublisher
                                                                   cameraPose,
                                                                   acquisitionTime,
                                                                   colorSequenceNumber++,
-                                                                  realsense.getColorHeight(), realsense.getColorWidth());
+                                                                  realsense.getColorHeight(), realsense.getColorWidth(), (float) realsense.getDepthDiscretization());
          }
 
          if (parameters.getLoggingEnabled())

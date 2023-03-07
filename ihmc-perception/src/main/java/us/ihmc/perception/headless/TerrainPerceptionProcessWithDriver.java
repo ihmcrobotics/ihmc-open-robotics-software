@@ -235,7 +235,7 @@ public class TerrainPerceptionProcessWithDriver
                                                            now,
                                                            colorSequenceNumber,
                                                            colorHeight,
-                                                           colorWidth);
+                                                           colorWidth, (float) sensor.getDepthDiscretization());
 
             //            display(depthU16C1Image, color8UC3Image, 1);
          }

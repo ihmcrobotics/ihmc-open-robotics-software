@@ -88,7 +88,8 @@ public class PerceptionMessageTools
                                                   Instant aquisitionTime,
                                                   long sequenceNumber,
                                                   int height,
-                                                  int width)
+                                                  int width,
+                                                  float depthToMetersRatio)
    {
       packImageMessage(depthImageMessage,
                        compressedDepthPointer,
@@ -97,6 +98,7 @@ public class PerceptionMessageTools
                        sequenceNumber,
                        height,
                        width,
+                       depthToMetersRatio,
                        ImageMessageFormat.DEPTH_PNG_16UC1);
       helper.publish(topic, depthImageMessage);
    }
@@ -110,7 +112,8 @@ public class PerceptionMessageTools
                                                      Instant aquisitionTime,
                                                      long sequenceNumber,
                                                      int height,
-                                                     int width)
+                                                     int width,
+                                                     float depthToMetersRatio)
    {
       BytePointer compressedColorPointer = new BytePointer();
       BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
@@ -121,6 +124,7 @@ public class PerceptionMessageTools
                        sequenceNumber,
                        height,
                        width,
+                       depthToMetersRatio,
                        ImageMessageFormat.COLOR_JPEG_YUVI420);
       helper.publish(topic, colorImageMessage);
    }
@@ -174,6 +178,7 @@ public class PerceptionMessageTools
                                        long sequenceNumber,
                                        int height,
                                        int width,
+                                       float depthToMetersRatio,
                                        ImageMessageFormat format)
    {
       packImageMessageData(dataBytePointer, imageMessage);
@@ -184,6 +189,7 @@ public class PerceptionMessageTools
       imageMessage.getOrientation().set(cameraPose.getOrientation());
       imageMessage.setSequenceNumber(sequenceNumber);
       MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
+      imageMessage.setDepthDiscretization(depthToMetersRatio);
    }
 
    public static void packVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)
