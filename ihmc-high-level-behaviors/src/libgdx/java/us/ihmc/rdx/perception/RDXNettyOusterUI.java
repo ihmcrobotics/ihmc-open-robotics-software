@@ -101,7 +101,7 @@ public class RDXNettyOusterUI
     */
    private void createPointCloudAndKernel()
    {
-      depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager);
+      depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, () -> false, () -> false);
 
       int totalNumberOfPoints = ousterFisheyeKernel.calculateNumberOfPointsForLevelOfColorDetail(ouster.getImageWidth(),
                                                                                                  ouster.getImageHeight(),
@@ -183,7 +183,7 @@ public class RDXNettyOusterUI
                                        pointSize.get(),
                                        true,
                                        RDXColorGradientMode.WORLD_Z.ordinal(),
-                                       false,
+                                       true,
                                        depthExtractionKernel.getExtractedDepthImage(),
                                        fisheyeFocalLengthPixelsX,
                                        fisheyeFocalLengthPixelsY,
