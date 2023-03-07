@@ -49,53 +49,22 @@ kernel void computeVertexBuffer(global float* parameters,
 
    float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (unshiftedX, ousterY)).x * parameters[DISCRETE_RESOLUTION];
 
-//   int xFromCenter = -x - (parameters[DEPTH_IMAGE_WIDTH] / 2); // flip
-//   int yFromCenter = ousterY - (parameters[DEPTH_IMAGE_HEIGHT] / 2);
-
-//   float angleXFromCenter = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * 2.0f * M_PI_F;
-//   float angleYFromCenter = yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * M_PI_F / 2.0;
-//
-//   // Create additional rotation only transform
-//   float16 angledRotationMatrix = newRotationMatrix();
-//   angledRotationMatrix = setToPitchOrientation(angleYFromCenter, angledRotationMatrix);
-//   angledRotationMatrix = prependYawRotation(angleXFromCenter, angledRotationMatrix);
-//
-//   float3 beamFramePoint = (float3) (eyeDepthInMeters, 0.0f, 0.0f);
-//   float3 origin = (float3) (0.0f, 0.0f, 0.0f);
-//   float3 rotationMatrixRow0 = (float3) (angledRotationMatrix.s0, angledRotationMatrix.s1, angledRotationMatrix.s2);
-//   float3 rotationMatrixRow1 = (float3) (angledRotationMatrix.s3, angledRotationMatrix.s4, angledRotationMatrix.s5);
-//   float3 rotationMatrixRow2 = (float3) (angledRotationMatrix.s6, angledRotationMatrix.s7, angledRotationMatrix.s8);
-//
-//   float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint, rotationMatrixRow0, rotationMatrixRow1, rotationMatrixRow2, origin);
-
-//   float encoderAngle = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * 2.0f * M_PI_F;
-//   float azimuthAngle = 0.0f;
-//   float altitudeAngle = -yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * M_PI_F / 2.0;
    float encoderAngle = 2.0f * M_PI_F * (1.0f - ((float) x / (float) parameters[DEPTH_IMAGE_WIDTH]));
-//   float azimuthAngle = 0.0f;
-//   float altitudeAngle = -yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * M_PI_F / 2.0;
    float azimuthAngle = -azimuthAngles[ousterY];
-   float altitudeAngle = altitudeAngles[ousterY];
 
+   // Adjust the altitude angle to add points above and below for color detail
+   int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - parameters[LEVEL_OF_COLOR_DETAIL];
+   float altitudeStep = M_PI_F / 2.0 / (totalVerticalPointsForColorDetail * parameters[DEPTH_IMAGE_HEIGHT]);
+   float altitudeAdjustment = verticalColorDetailOffsetIndex * altitudeStep;
+
+   float altitudeAngle = altitudeAngles[ousterY] + altitudeAdjustment;
+
+   // This uses the model from the user manual
    float beamLength = eyeDepthInMeters - parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN]; // Subtract the length of the sensor arm
    float3 ousterFramePoint = (float3)
       (-beamLength * cos(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * cos(encoderAngle),
        -beamLength * sin(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * sin(encoderAngle),
        beamLength * sin(altitudeAngle));
-
-   float pointSize = parameters[POINT_SIZE] * eyeDepthInMeters;
-   if (totalVerticalPointsForColorDetail > 1)
-   {
-//      int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - parameters[LEVEL_OF_COLOR_DETAIL];
-//      float verticalPointOffsetLocalZ = verticalColorDetailOffsetIndex * pointSize / 2.0f;
-//      float3 colorDetailPointOffsetLocalFrame = (float3) (0.0, 0.0, verticalPointOffsetLocalZ);
-//      float3 colorDetailPointOffset = transformPoint3D32_2(colorDetailPointOffsetLocalFrame,
-//                                                           rotationMatrixRow0,
-//                                                           rotationMatrixRow1,
-//                                                           rotationMatrixRow2,
-//                                                           origin);
-//      ousterFramePoint += colorDetailPointOffset;
-   }
 
    float3 worldFramePoint = transformPoint3D32(ousterFramePoint, ousterToWorldTransform);
 
@@ -165,5 +134,5 @@ kernel void computeVertexBuffer(global float* parameters,
    pointCloudVertexBuffer[pointStartIndex + 4] = pointColor.y;
    pointCloudVertexBuffer[pointStartIndex + 5] = pointColor.z;
    pointCloudVertexBuffer[pointStartIndex + 6] = pointColor.w;
-   pointCloudVertexBuffer[pointStartIndex + 7] = pointSize;
+   pointCloudVertexBuffer[pointStartIndex + 7] = parameters[POINT_SIZE] * eyeDepthInMeters;
 }
