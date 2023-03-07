@@ -15,6 +15,8 @@ import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 
 public class DoorDefinition extends RobotDefinition
 {
+   public static final double DOOR_PANEL_THICKNESS = 0.0508;
+
    private SixDoFJointState initialSixDoFState;
    private OneDoFJointState initialHingeState;
    private OneDoFJointState initialLeverState;
@@ -59,7 +61,7 @@ public class DoorDefinition extends RobotDefinition
       RevoluteJointDefinition doorLeverJoint = new RevoluteJointDefinition("doorLeverJoint");
       doorLeverJoint.setAxis(Axis3D.X);
       doorPanelDefinition.addChildJoint(doorLeverJoint);
-      doorLeverJoint.getTransformToParent().getTranslation().add(-0.0508 / 2.0, 0.9144 - 0.05, (2.0447 / 2.0) - 0.13);
+      doorLeverJoint.getTransformToParent().getTranslation().add(-DOOR_PANEL_THICKNESS / 2.0, 0.9144 - 0.05, (2.0447 / 2.0) - 0.13);
       initialLeverState = new OneDoFJointState();
       doorLeverJoint.setInitialJointState(initialLeverState);
 
