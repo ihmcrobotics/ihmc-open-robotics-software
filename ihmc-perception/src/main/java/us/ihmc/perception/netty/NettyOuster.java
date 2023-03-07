@@ -57,9 +57,13 @@ public class NettyOuster
     * with OS0-128 S/N 122221003063
     */
    public static final RigidBodyTransform INTRINSIC_TRANSFORM_CORRECTION = new RigidBodyTransform();
+
    {
       EuclidCoreMissingTools.setYawPitchRollDegrees(INTRINSIC_TRANSFORM_CORRECTION.getRotation(), 11.683,  1.163,  0.885);
    }
+
+   /** Ouster produces ranges as unsigned integers in millimeters, so this is just a conversion to meters. */
+   public static final float DISCRETE_RESOLUTION = 0.001f;
 
    public static final int BITS_PER_BYTE = 8;
 
@@ -111,6 +115,7 @@ public class NettyOuster
    private int columnsPerFrame;
    public static final int MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM = 16;
    private ByteBuffer pixelShiftBuffer;
+   private float lidarOriginToBeamOrigin;
    private ByteBuffer beamAltitudeAnglesBuffer;
    private ByteBuffer beamAzimuthAnglesBuffer;
    private int measurementBlockSize;
@@ -226,7 +231,8 @@ public class NettyOuster
 
       performQuery("get_beam_intrinsics", rootNode ->
       {
-         float lidarOriginToBeamOrigin = (float) rootNode.get("lidar_origin_to_beam_origin_mm").asDouble() / 1000.0f; // Convert to meters
+         // Convert to meters
+         lidarOriginToBeamOrigin = (float) rootNode.get("lidar_origin_to_beam_origin_mm").asDouble() / 1000.0f;
          LogTools.info("Lidar origin to beam origin: {}", lidarOriginToBeamOrigin);
          JsonNode beamAltitudeAnglesNode = rootNode.get("beam_altitude_angles");
          JsonNode beamAzimuthAnglesNode = rootNode.get("beam_azimuth_angles");
@@ -365,6 +371,21 @@ public class NettyOuster
    public ByteBuffer getPixelShiftBuffer()
    {
       return pixelShiftBuffer;
+   }
+
+   public ByteBuffer getBeamAltitudeAnglesBuffer()
+   {
+      return beamAltitudeAnglesBuffer;
+   }
+
+   public ByteBuffer getBeamAzimuthAnglesBuffer()
+   {
+      return beamAzimuthAnglesBuffer;
+   }
+
+   public float getLidarOriginToBeamOrigin()
+   {
+      return lidarOriginToBeamOrigin;
    }
 
    public int getColumnsPerFrame()

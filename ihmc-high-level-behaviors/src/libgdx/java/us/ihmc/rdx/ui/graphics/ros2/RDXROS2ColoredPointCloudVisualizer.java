@@ -160,6 +160,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
                                                                            colorChannel.getTranslationToWorld());
                ousterFisheyeKernel.runKernel(depthChannel.getOusterHorizontalFieldOfView(),
                                              depthChannel.getOusterVerticalFieldOfView(),
+                                             0.0f,
                                              pointSize.get(),
                                              usingColor && useSensorColor.get(),
                                              gradientMode.ordinal(),
