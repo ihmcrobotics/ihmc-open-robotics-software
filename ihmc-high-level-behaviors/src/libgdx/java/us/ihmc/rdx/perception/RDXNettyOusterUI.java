@@ -108,7 +108,7 @@ public class RDXNettyOusterUI
                                                                                                  levelOfColorDetail.get());
 
       if (pointCloudVertexBuffer == null
-          || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX < totalNumberOfPoints)
+          || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX != totalNumberOfPoints)
       {
          LogTools.info("Allocating new buffers. {} total points", totalNumberOfPoints);
 
