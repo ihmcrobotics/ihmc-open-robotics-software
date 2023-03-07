@@ -61,7 +61,6 @@ public class NettyOuster
       EuclidCoreMissingTools.setYawPitchRollDegrees(INTRINSIC_TRANSFORM_CORRECTION.getRotation(), 11.683,  1.163,  0.885);
    }
 
-
    public static final int BITS_PER_BYTE = 8;
 
    // Header block
@@ -112,9 +111,12 @@ public class NettyOuster
    private int columnsPerFrame;
    public static final int MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM = 16;
    private ByteBuffer pixelShiftBuffer;
+   private ByteBuffer beamAltitudeAnglesBuffer;
+   private ByteBuffer beamAzimuthAnglesBuffer;
    private int measurementBlockSize;
    private int udpDatagramsPerFrame;
    private int lidarFrameSizeBytes;
+   private final RigidBodyTransform spindleCenterToBaseTransform = new RigidBodyTransform();
 
    private volatile boolean tryingTCP = false;
    private volatile boolean tcpInitialized = false;
@@ -224,8 +226,36 @@ public class NettyOuster
 
       performQuery("get_beam_intrinsics", rootNode ->
       {
-         double lidarOriginToBeamOrigin = rootNode.get("lidar_origin_to_beam_origin_mm").asDouble() / 1000.0; // Convert to meters
+         float lidarOriginToBeamOrigin = (float) rootNode.get("lidar_origin_to_beam_origin_mm").asDouble() / 1000.0f; // Convert to meters
          LogTools.info("Lidar origin to beam origin: {}", lidarOriginToBeamOrigin);
+         JsonNode beamAltitudeAnglesNode = rootNode.get("beam_altitude_angles");
+         JsonNode beamAzimuthAnglesNode = rootNode.get("beam_azimuth_angles");
+         beamAltitudeAnglesBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
+         beamAzimuthAnglesBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
+         for (int i = 0; i < pixelsPerColumn; i++)
+         {
+            beamAltitudeAnglesBuffer.putFloat((float) beamAltitudeAnglesNode.get(i).asDouble());
+            beamAzimuthAnglesBuffer.putFloat((float) beamAzimuthAnglesNode.get(i).asDouble());
+         }
+         beamAltitudeAnglesBuffer.rewind();
+         beamAzimuthAnglesBuffer.rewind();
+      });
+
+      performQuery("get_lidar_intrinsics", rootNode ->
+      {
+         JsonNode lidarToSensorTransformNode = rootNode.get("lidar_to_sensor_transform");
+         spindleCenterToBaseTransform.getRotation().setAndNormalize(lidarToSensorTransformNode.get(0).asDouble(),
+                                                                    lidarToSensorTransformNode.get(1).asDouble(),
+                                                                    lidarToSensorTransformNode.get(2).asDouble(),
+                                                                    lidarToSensorTransformNode.get(4).asDouble(),
+                                                                    lidarToSensorTransformNode.get(5).asDouble(),
+                                                                    lidarToSensorTransformNode.get(6).asDouble(),
+                                                                    lidarToSensorTransformNode.get(8).asDouble(),
+                                                                    lidarToSensorTransformNode.get(9).asDouble(),
+                                                                    lidarToSensorTransformNode.get(10).asDouble());
+         spindleCenterToBaseTransform.getTranslation().set(lidarToSensorTransformNode.get(3).asDouble(),
+                                                           lidarToSensorTransformNode.get(7).asDouble(),
+                                                           lidarToSensorTransformNode.get(11).asDouble());
       });
 
       LogTools.info("Ouster is initialized.");
