@@ -143,10 +143,10 @@ public class ProMPManager
          learnedProMPs.replace(bodyPart, new ProMP(trainingTrajectories.get(bodyPart), numberBasisFunctions));
    }
 
-   public int inferClosestTask(List<FramePose3D> observedFrameTrajectory, String bodyPart)
+   public int computeDistanceAtStart(List<FramePose3D> observedFrameTrajectory, String bodyPart)
    {
       EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory, bodyPart);
-      TrajectoryVector meanTrajectories = trainingTrajectories.get(bodyPart).trajectories();
+      TrajectoryVector meanTrajectories =null;
       meanTrajectories.push_back(meanTrajectories.get_mean_start_value());
 
       int taskId = infer_closest_trajectory(observedTrajectory, meanTrajectories);
