@@ -26,10 +26,10 @@ public class SensorHeadParameters
    public static final double FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS
          = FE185C086HA_1_FOCAL_LENGTH * SpinnakerBlackfly.BFLY_U3_23S6C_WIDTH_PIXELS / SpinnakerBlackfly.BFLY_U3_23S6C_CMOS_SENSOR_WIDTH;
 
-   public static final RigidBodyTransform OUSTER_TO_FISHEYE_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform FISHEYE_TO_OUSTER_TRANSFORM = new RigidBodyTransform();
    static
    {
-      OUSTER_TO_FISHEYE_TRANSFORM.getTranslation().set(0.023,  0.078,  0.076);
-      EuclidCoreMissingTools.setYawPitchRollDegrees(OUSTER_TO_FISHEYE_TRANSFORM.getRotation(), 13.007, 24.205, 6.461);
+      FISHEYE_TO_OUSTER_TRANSFORM.getTranslation().set(0.005, -0.067, -0.077);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(FISHEYE_TO_OUSTER_TRANSFORM.getRotation(), 0.000, -24.369,  0.000);
    }
 }

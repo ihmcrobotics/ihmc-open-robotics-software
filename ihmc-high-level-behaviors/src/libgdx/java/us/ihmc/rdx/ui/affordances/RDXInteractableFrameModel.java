@@ -147,6 +147,17 @@ public class RDXInteractableFrameModel
       return representativeReferenceFrame;
    }
 
+   public RigidBodyTransform getTransformToParentToModify()
+   {
+      return transformToParent;
+   }
+
+   public void setPose(RigidBodyTransform transformToParent)
+   {
+      this.transformToParent.set(transformToParent);
+      representativeReferenceFrame.update();
+   }
+
    public void setExtendedContextMenu(Runnable runnable)
    {
       this.extendedContextMenu = runnable;

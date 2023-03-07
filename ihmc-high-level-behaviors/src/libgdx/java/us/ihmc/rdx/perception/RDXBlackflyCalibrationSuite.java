@@ -167,6 +167,7 @@ public class RDXBlackflyCalibrationSuite
                   baseUI.getImGuiPanelManager().addPanel(undistortedFisheyePanel.getImagePanel());
 
                   interactableBlackflyFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel());
+                  interactableBlackflyFujinon.getInteractableFrameModel().setPose(SensorHeadParameters.FISHEYE_TO_OUSTER_TRANSFORM);
 
                   openCVArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
                   blackflySensorFrame = interactableBlackflyFujinon.getInteractableFrameModel().getReferenceFrame();
@@ -181,7 +182,6 @@ public class RDXBlackflyCalibrationSuite
                   baseUI.getPrimaryScene().addRenderableProvider(arUcoMarkerDetectionUI::getRenderables, RDXSceneLevel.VIRTUAL);
 
                   nettyOusterUI.createAfterNativesLoaded();
-                  nettyOusterUI.getSensorFrame().update(transformToBlackfly -> transformToBlackfly.set(SensorHeadParameters.OUSTER_TO_FISHEYE_TRANSFORM));
 
                   baseUI.getLayoutManager().reloadLayout();
 
