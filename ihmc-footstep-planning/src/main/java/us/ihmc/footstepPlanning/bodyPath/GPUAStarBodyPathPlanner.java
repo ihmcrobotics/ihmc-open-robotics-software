@@ -40,7 +40,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class GPUAStarBodyPathPlanner
+public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 {
    private static final int numberOfNeighborsPerExpansion = 16;
    private static final int defaultCells = (int) (5.0 / 0.03);
@@ -178,7 +178,7 @@ public class GPUAStarBodyPathPlanner
       this.stepScores = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StepScore", registry));
       this.stanceTraversibility = new YoDouble("stanceTraversibility", registry);
 
-      // These is the 16 neighbor offsets
+      // These are the 16 neighbor offsets
       packNeighborOffsets(neighborsOffsetX, neighborsOffsetY);
 
       openCLManager = new OpenCLManager();
@@ -248,8 +248,6 @@ public class GPUAStarBodyPathPlanner
       cellsPerSide = numberOfCells;
       this.nodesPerSide = numberOfNodes;
       this.nodeCenterIndex = (nodesPerSide - 1) / 2;
-
-      openCLManager.create();
 
       pathPlannerProgram = openCLManager.loadProgram("BodyPathPlanning", "HeightMapUtils.cl");
       computeNormalsWithLeastSquaresKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithLeastSquares");
@@ -345,6 +343,7 @@ public class GPUAStarBodyPathPlanner
    /**
     * Sets the height map data for the path planner to use.
     */
+   @Override
    public void setHeightMapData(HeightMapData heightMapData)
    {
       this.heightMapData = heightMapData;
@@ -363,6 +362,7 @@ public class GPUAStarBodyPathPlanner
     * Computes the body path plan using the information contained in {@param request}, and packs into the output {@param outputToPack}. For this to work,
     * {@link #setHeightMapData(HeightMapData)} must be called first.
     */
+   @Override
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
       if (firstTick)
@@ -933,8 +933,6 @@ public class GPUAStarBodyPathPlanner
       // get the data from the GPU
       sampledHeightBuffer.readOpenCLBufferObject(openCLManager);
       leastSquaresNormalXYZBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
    /**
@@ -1024,8 +1022,6 @@ public class GPUAStarBodyPathPlanner
 
       int totalCells = cellsPerSide * cellsPerSide;
       openCLManager.execute1D(computeNormalsWithRansacKernel, totalCells);
-
-      openCLManager.finish();
    }
 
    /**
@@ -1043,8 +1039,6 @@ public class GPUAStarBodyPathPlanner
       openCLManager.execute1D(snapVerticesKernel, totalCells);
 
       snappedNodeHeightBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
    /**
@@ -1060,8 +1054,6 @@ public class GPUAStarBodyPathPlanner
       openCLManager.execute1D(computeHeuristicCostKernel, totalCells);
 
       heuristicCostMapBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
    /**
@@ -1101,8 +1093,6 @@ public class GPUAStarBodyPathPlanner
       rollCostMapBuffer.readOpenCLBufferObject(openCLManager);
       traversibilityCostMapBuffer.readOpenCLBufferObject(openCLManager);
       edgeCostMapBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
    }
 
    /**
@@ -1326,6 +1316,7 @@ public class GPUAStarBodyPathPlanner
     *  be done automatically as part of the planning process, since the logs are saved aftwards.
      */
 
+   @Override
    public void clearLoggedData()
    {
       edgeDataMap.clear();
@@ -1334,7 +1325,7 @@ public class GPUAStarBodyPathPlanner
 
    /**
     * Computes whether the planner should incrementally publish its status. This allows the planner to output its current status to a remote process, if
-    * the plan is taking a long time, using the {@link #reportStatus(FootstepPlannerRequest, FootstepPlannerOutput)} message.
+    * the plan is taking a long time, using the message.
     */
    private boolean shouldPublishStatus(FootstepPlannerRequest request)
    {
@@ -1360,7 +1351,8 @@ public class GPUAStarBodyPathPlanner
    /**
     * Returns the best next node to expand from the plan queue.
     */
-   private BodyPathLatticePoint getNextNode()
+   @Override
+   public BodyPathLatticePoint getNextNode()
    {
       while (!stack.isEmpty())
       {
@@ -1408,6 +1400,7 @@ public class GPUAStarBodyPathPlanner
    /**
     * Ceases the iterative planning at the current iteration, and will return the best un-smoothed plan that has been found so far
     */
+   @Override
    public void halt()
    {
       haltRequested.set(true);
@@ -1416,6 +1409,7 @@ public class GPUAStarBodyPathPlanner
    /**
     * Retuns the list of all the iteration data for the planner. This is used for logging.
     */
+   @Override
    public List<AStarBodyPathIterationData> getIterationData()
    {
       return iterationData;
@@ -1424,11 +1418,13 @@ public class GPUAStarBodyPathPlanner
    /**
     * Returns the map of all edge data in the graph that has been calculated so far. This is used for logging.
     */
+   @Override
    public HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> getEdgeDataMap()
    {
       return edgeDataMap;
    }
 
+   @Override
    public YoRegistry getRegistry()
    {
       return registry;

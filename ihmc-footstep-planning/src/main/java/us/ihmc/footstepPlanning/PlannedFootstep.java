@@ -90,6 +90,16 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       this.transferDuration = other.getTransferDuration();
    }
 
+   public void reset()
+   {
+      robotSide = null;
+      footstepPose.setToNaN();
+      foothold.clear();
+      trajectoryType = null;
+      customWaypointPositions.clear();
+      customWaypointProportions.clear();
+   }
+
    @Override
    public RobotSide getRobotSide()
    {

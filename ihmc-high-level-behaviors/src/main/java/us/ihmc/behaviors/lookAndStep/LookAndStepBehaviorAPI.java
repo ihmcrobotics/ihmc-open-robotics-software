@@ -24,7 +24,7 @@ public class LookAndStepBehaviorAPI
    private static final ROS2Topic<?> LOOK_AND_STEP_BEHAVIOR = ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME);
 
    public static final String REGIONS_FOR_FOOTSTEP_PLANNING = RosTools.MAPSENSE_REGIONS;
-   public static final ROS2Topic<PlanarRegionsListMessage> ROS2_REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.RAPID_REGIONS;
+   public static final ROS2Topic<PlanarRegionsListMessage> ROS2_REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.PERSPECTIVE_RAPID_REGIONS;
    public static final ROS2Topic<HeightMapMessage> ROS2_HEIGHT_MAP = ROS2Tools.HEIGHT_MAP_OUTPUT;
 
    /**

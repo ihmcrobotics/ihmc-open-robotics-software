@@ -37,7 +37,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final SideDependentList<DualBlackflyCamera> blackflies = new SideDependentList<>();
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
-   private List<OpenCVArUcoMarker> arUcoMarkersToTrack;
+   private final List<OpenCVArUcoMarker> arUcoMarkersToTrack;
 
    public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel, List<OpenCVArUcoMarker> arUcoMarkersToTrack)
    {
@@ -96,7 +96,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                boolean allInitialized = true;
                for (RobotSide side : blackflies.sides())
                {
-                  allInitialized &= blackflies.get(side).getRos2VideoPublisher() != null;
+                  allInitialized &= blackflies.get(side).getRos2ImagePublisher() != null;
                }
 
                if (allInitialized)

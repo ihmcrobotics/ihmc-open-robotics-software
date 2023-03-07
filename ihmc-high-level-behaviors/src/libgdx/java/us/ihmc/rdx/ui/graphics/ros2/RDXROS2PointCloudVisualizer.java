@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.type.ImBoolean;
@@ -16,8 +15,10 @@ import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
@@ -25,13 +26,14 @@ import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -41,9 +43,10 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements RenderableProvider
+public class RDXROS2PointCloudVisualizer extends RDXVisualizer
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
@@ -52,7 +55,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private final ImPlotIntegerPlot segmentIndexPlot = new ImPlotIntegerPlot("Segment", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean subscribed = new ImBoolean(true);
+   private final ImBoolean subscribed = new ImBoolean(false);
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private int pointsPerSegment;
    private int numberOfSegments;
@@ -71,6 +74,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
+   private ROS2Heartbeat lidarActiveHeartbeat;
 
    public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
@@ -79,7 +83,10 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-      setSubscribed(subscribed.get());
+      if (topic.getType().equals(LidarScanMessage.class))
+      {
+         lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.PUBLISH_LIDAR_SCAN);
+      }
    }
 
    private void subscribe()
@@ -128,7 +135,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       super.create();
 
       openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLProgram = openCLManager.loadProgram("FusedSensorPointCloudSubscriberVisualizer");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "unpackPointCloud");
 
@@ -141,7 +147,14 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    {
       super.update();
 
-      if (subscribed.get() && isActive())
+      boolean subscribedAndActive = subscribed.get() && isActive();
+
+      if (lidarActiveHeartbeat != null)
+      {
+         lidarActiveHeartbeat.setAlive(subscribedAndActive);
+      }
+
+      if (subscribedAndActive)
       {
          FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
          if (fusedMessage != null)
@@ -291,9 +304,9 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive())
+      if (isActive() && sceneLevelCheck(sceneLevels))
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 
@@ -314,6 +327,14 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       subscribed.set(false);
       ros2Callback.destroy();
       ros2Callback = null;
+   }
+
+   @Override
+   public void destroy()
+   {
+      if (lidarActiveHeartbeat != null)
+         lidarActiveHeartbeat.destroy();
+      super.destroy();
    }
 
    public boolean isSubscribed()

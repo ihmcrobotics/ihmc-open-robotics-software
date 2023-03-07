@@ -12,6 +12,8 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 
+import java.util.Set;
+
 import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.*;
 
 public class RDXVROnlyPointCloudDemo
@@ -29,11 +31,14 @@ public class RDXVROnlyPointCloudDemo
          {
             vrApplication.getScene().addDefaultLighting();
             vrApplication.getScene().addCoordinateFrame(1.0);
-            vrApplication.getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            vrApplication.getScene().addRenderableProvider(this::getRenderables);
             vrApplication.getVRContext().addVRInputProcessor(this::processVRInput);
 
             ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "vr_viewer");
-            fusedPointCloud = new RDXROS2PointCloudVisualizer("Fused Point Cloud", ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
+            fusedPointCloud = new RDXROS2PointCloudVisualizer("Fused Point Cloud",
+                                                              ros2Node,
+                                                              ROS2Tools.MULTISENSE_LIDAR_SCAN);
+            fusedPointCloud.setSubscribed(true);
             fusedPointCloud.create();
             fusedPointCloud.setActive(true);
          }
@@ -56,9 +61,9 @@ public class RDXVROnlyPointCloudDemo
             fusedPointCloud.update();
          }
 
-         private void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+         private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
          {
-            fusedPointCloud.getRenderables(renderables, pool);
+            fusedPointCloud.getRenderables(renderables, pool, sceneLevels);
             vrApplication.getVRContext().getControllerRenderables(renderables, pool);
             vrApplication.getVRContext().getBaseStationRenderables(renderables, pool);
          }

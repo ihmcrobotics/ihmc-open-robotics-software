@@ -89,7 +89,7 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    @Override
    public void update()
    {
-      poseGizmo.updateTransforms();
+      poseGizmo.update();
       poseGizmo.getGizmoFrame().getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
       highlightModel.setPose(tempTransform, handGraphicToControlTransform);
    }

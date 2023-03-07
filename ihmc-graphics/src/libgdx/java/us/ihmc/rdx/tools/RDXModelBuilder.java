@@ -188,7 +188,7 @@ public class RDXModelBuilder
    {
       return buildModelInstance(meshBuilder ->
       {
-        meshBuilder.addLine(start, end, lineWidth, color);
+         meshBuilder.addLine(start, end, lineWidth, color);
       }, "line");
    }
 

@@ -13,10 +13,13 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -79,26 +82,42 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
-   private final FramePose3D framePose3D = new FramePose3D();
-   private final FramePose3D tempFramePose3D = new FramePose3D();
    /** The main, source, true, base transform that this thing represents. */
    private RigidBodyTransform transformToParent;
+   /** This pose 3D should always be left in world frame and represent this gizmo's pose. */
+   private final FramePose3D framePose3D = new FramePose3D();
+   /** Pose used for making adjustments. */
+   private final FramePose3D adjustmentPose3D = new FramePose3D();
+   /** Used for adjusting orientation with respect to different frames. */
+   private final FrameQuaternion rotationAdjustmentQuaternion = new FrameQuaternion();
+   /** Used to move the gizmo with respect to where you are looking at the scene from. */
+   private final ModifiableReferenceFrame cameraZUpFrameForAdjustment = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   /** Gizmo transform to world so it can be calculated once. */
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+   /** Transforms to world for placing the graphics. */
+   private final RigidBodyTransform[] axisTransformToWorlds = new RigidBodyTransform[3];
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
    private RDXFocusBasedCamera camera3D;
-   private final FramePose3D keyboardAdjustmentPose3D = new FramePose3D();
-   private ModifiableReferenceFrame keyboardTransformationFrameInWorld;
    private final Point3D cameraPosition = new Point3D();
    private double distanceToCamera;
    private double lastDistanceToCamera = -1.0;
    private final double translateSpeedFactor = 0.5;
    private boolean queuePopupToOpen = false;
    private final Random random = new Random();
+   private boolean proportionsNeedUpdate = false;
+   private boolean adjustmentNeedsToBeApplied = false;
+   private RDXPose3DGizmoAdjustmentFrame translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP;
+   private RDXPose3DGizmoAdjustmentFrame rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP;
+   private final ImDouble positionX = new ImDouble();
+   private final ImDouble positionY = new ImDouble();
+   private final ImDouble positionZ = new ImDouble();
+   private final ImDouble yaw = new ImDouble();
+   private final ImDouble pitch = new ImDouble();
+   private final ImDouble roll = new ImDouble();
 
    public RDXPose3DGizmo()
    {
@@ -117,12 +136,18 @@ public class RDXPose3DGizmo implements RenderableProvider
       initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
+   public RDXPose3DGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
+   {
+      ReferenceFrame gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame,
+                                                                                                         gizmoTransformToParentFrameToModify);
+      initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
+   }
+
    private void initialize(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
    {
       this.parentReferenceFrame = gizmoFrame.getParent();
       this.transformToParent = gizmoTransformToParentFrameToModify;
       this.gizmoFrame = gizmoFrame;
-      keyboardTransformationFrameInWorld = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    }
 
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
@@ -165,6 +190,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          int resolution = 25;
          torusModels[axis.ordinal()].setMesh(
             meshBuilder -> meshBuilder.addArcTorus(0.0, Math.PI * 2.0f, torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), resolution, color));
+         axisTransformToWorlds[axis.ordinal()] = new RigidBodyTransform();
       }
 
       recreateGraphics();
@@ -172,8 +198,6 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      updateTransforms();
-
       boolean isWindowHovered = ImGui.isWindowHovered();
       ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
@@ -197,13 +221,11 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      updateTransforms();
-
       ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
       isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
 
-      if (isGizmoHovered && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
+      if (isGizmoHovered && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
       {
          queuePopupToOpen = true;
       }
@@ -228,11 +250,9 @@ public class RDXPose3DGizmo implements RenderableProvider
                                                                         axisRotations.get(closestCollisionSelection.toAxis3D()),
                                                                         transformToWorld);
 
-            tempFramePose3D.setToZero(gizmoFrame);
-            tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-            tempFramePose3D.getPosition().add(linearMotion);
-            tempFramePose3D.changeFrame(parentReferenceFrame);
-            tempFramePose3D.get(transformToParent);
+            adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+            adjustmentPose3D.getPosition().add(linearMotion);
+            adjustmentNeedsToBeApplied = true;
             closestCollision.add(linearMotion);
          }
          else if (closestCollisionSelection.isAngular())
@@ -242,11 +262,9 @@ public class RDXPose3DGizmo implements RenderableProvider
                                                  axisRotations.get(closestCollisionSelection.toAxis3D()),
                                                  transformToWorld))
             {
-               tempFramePose3D.setToZero(gizmoFrame);
-               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-               clockFaceDragAlgorithm.getMotion().transform(tempFramePose3D.getOrientation());
-               tempFramePose3D.changeFrame(parentReferenceFrame);
-               tempFramePose3D.get(transformToParent);
+               adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+               clockFaceDragAlgorithm.getMotion().transform(adjustmentPose3D.getOrientation());
+               adjustmentNeedsToBeApplied = true;
             }
          }
       }
@@ -255,14 +273,13 @@ public class RDXPose3DGizmo implements RenderableProvider
       if (ImGui.getIO().getKeyCtrl() && input.getMouseWheelDelta() != 0.0f)
       {
          float deltaScroll = input.getMouseWheelDelta();
-         tempFramePose3D.setToZero(gizmoFrame);
-         tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
          // Add some noise to not get stuck in discrete space
          double noise = random.nextDouble() * 0.005;
          double speed = 0.012 + noise;
-         tempFramePose3D.getOrientation().appendYawRotation(Math.signum(deltaScroll) * speed * Math.PI);
-         tempFramePose3D.changeFrame(parentReferenceFrame);
-         tempFramePose3D.get(transformToParent);
+         Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
+         orientationToAdjust.appendYawRotation(Math.signum(deltaScroll) * speed * Math.PI);
+         afterRotationAdjustment();
+         adjustmentNeedsToBeApplied = true;
       }
 
       // keyboard based controls
@@ -273,12 +290,6 @@ public class RDXPose3DGizmo implements RenderableProvider
       boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
       if (anyArrowHeld) // only the arrow keys do the moving
       {
-         keyboardTransformationFrameInWorld.getTransformToParent().setToZero();
-         keyboardTransformationFrameInWorld.getTransformToParent().getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
-         keyboardTransformationFrameInWorld.getReferenceFrame().update();
-         keyboardAdjustmentPose3D.setToZero(gizmoFrame);
-         keyboardAdjustmentPose3D.changeFrame(keyboardTransformationFrameInWorld.getReferenceFrame());
-
          boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
          boolean altHeld = ImGui.getIO().getKeyAlt();
          boolean shiftHeld = ImGui.getIO().getKeyShift();
@@ -286,79 +297,68 @@ public class RDXPose3DGizmo implements RenderableProvider
          if (altHeld) // orientation
          {
             double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
+            Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
             if (upArrowHeld) // pitch +
             {
-               keyboardAdjustmentPose3D.getOrientation().appendPitchRotation(amount);
+               orientationToAdjust.appendPitchRotation(amount);
             }
             if (downArrowHeld) // pitch -
             {
-               keyboardAdjustmentPose3D.getOrientation().appendPitchRotation(-amount);
+               orientationToAdjust.appendPitchRotation(-amount);
             }
             if (rightArrowHeld && !ctrlHeld) // roll +
             {
-               keyboardAdjustmentPose3D.getOrientation().appendRollRotation(amount);
+               orientationToAdjust.appendRollRotation(amount);
             }
             if (leftArrowHeld && !ctrlHeld) // roll -
             {
-               keyboardAdjustmentPose3D.getOrientation().appendRollRotation(-amount);
+               orientationToAdjust.appendRollRotation(-amount);
             }
             if (leftArrowHeld && ctrlHeld) // yaw +
             {
-               keyboardAdjustmentPose3D.getOrientation().appendYawRotation(amount);
+               orientationToAdjust.appendYawRotation(amount);
             }
             if (rightArrowHeld && ctrlHeld) // yaw -
             {
-               keyboardAdjustmentPose3D.getOrientation().appendYawRotation(-amount);
+               orientationToAdjust.appendYawRotation(-amount);
             }
+            afterRotationAdjustment();
          }
          else // translation
          {
             double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
-            distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
+            beforeForTranslationAdjustment();
             if (upArrowHeld && !ctrlHeld) // x +
             {
-               keyboardAdjustmentPose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
+               adjustmentPose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
             }
             if (downArrowHeld && !ctrlHeld) // x -
             {
-               keyboardAdjustmentPose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
+               adjustmentPose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
             }
             if (leftArrowHeld) // y +
             {
-               keyboardAdjustmentPose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
+               adjustmentPose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
             }
             if (rightArrowHeld) // y -
             {
-               keyboardAdjustmentPose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
+               adjustmentPose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
             }
             if (upArrowHeld && ctrlHeld) // z +
             {
-               keyboardAdjustmentPose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
+               adjustmentPose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
             }
             if (downArrowHeld && ctrlHeld) // z -
             {
-               keyboardAdjustmentPose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
+               adjustmentPose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
             }
          }
 
-         keyboardAdjustmentPose3D.changeFrame(parentReferenceFrame);
-         keyboardAdjustmentPose3D.get(transformToParent);
+         adjustmentNeedsToBeApplied = true;
       }
 
       // after things have been modified, update the derivative stuff
-      updateTransforms();
-
-      if (resizeAutomatically.get())
-      {
-         LibGDXTools.toEuclid(camera3D.position, cameraPosition);
-         distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
-         if (lastDistanceToCamera != distanceToCamera)
-         {
-            lastDistanceToCamera = distanceToCamera;
-            recreateGraphics();
-            updateTransforms();
-         }
-      }
+      update();
    }
 
    private void renderTooltipAndContextMenu()
@@ -373,28 +373,60 @@ public class RDXPose3DGizmo implements RenderableProvider
       if (ImGui.beginPopup(labels.get("Popup")))
       {
          renderImGuiTuner();
-         if (ImGui.menuItem("Cancel"))
+         if (ImGui.menuItem("Close"))
             ImGui.closeCurrentPopup();
          ImGui.endPopup();
       }
    }
 
-   /** Call this instead of process3DViewInput if the gizmo is deactivated. */
-   public void updateTransforms()
+   /** Call this instead of calculate3DViewPick and process3DViewInput if the gizmo is deactivated. */
+   public void update()
    {
+      if (adjustmentNeedsToBeApplied)
+      {
+         adjustmentNeedsToBeApplied = false;
+         adjustmentPose3D.changeFrame(parentReferenceFrame);
+         adjustmentPose3D.get(transformToParent);
+      }
+
       gizmoFrame.update();
+      adjustmentPose3D.setToZero(gizmoFrame);
+
       for (Axis3D axis : Axis3D.values)
       {
          framePose3D.setToZero(gizmoFrame);
          framePose3D.getOrientation().setAndNormalize(axisRotations.get(axis));
          framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-         framePose3D.get(tempTransform);
-         LibGDXTools.toLibGDX(tempTransform, arrowModels[axis.ordinal()].getOrCreateModelInstance().transform);
-         LibGDXTools.toLibGDX(tempTransform, torusModels[axis.ordinal()].getOrCreateModelInstance().transform);
+         framePose3D.get(axisTransformToWorlds[axis.ordinal()]);
       }
-      tempFramePose3D.setToZero(gizmoFrame);
-      tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-      tempFramePose3D.get(transformToWorld);
+      // The above Axis calculations actually end up on Z, so we don't have to recalculate this
+      framePose3D.get(transformToWorld);
+      updateGraphicTransforms();
+      distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
+
+      if (resizeAutomatically.get())
+      {
+         LibGDXTools.toEuclid(camera3D.position, cameraPosition);
+         if (lastDistanceToCamera != distanceToCamera)
+         {
+            lastDistanceToCamera = distanceToCamera;
+            recreateGraphics();
+         }
+      }
+      if (proportionsNeedUpdate)
+      {
+         proportionsNeedUpdate = false;
+         recreateGraphics();
+      }
+   }
+
+   private void updateGraphicTransforms()
+   {
+      for (Axis3D axis : Axis3D.values)
+      {
+         LibGDXTools.toLibGDX(axisTransformToWorlds[axis.ordinal()], arrowModels[axis.ordinal()].getOrCreateModelInstance().transform);
+         LibGDXTools.toLibGDX(axisTransformToWorlds[axis.ordinal()], torusModels[axis.ordinal()].getOrCreateModelInstance().transform);
+      }
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
@@ -409,9 +441,8 @@ public class RDXPose3DGizmo implements RenderableProvider
          // collide tori
          for (Axis3D axis : Axis3D.values)
          {
-            LibGDXTools.toEuclid(torusModels[axis.ordinal()].getOrCreateModelInstance().transform, tempTransform);
             // TODO: Only update when shape changes?
-            torusIntersection.update(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), tempTransform);
+            torusIntersection.update(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), axisTransformToWorlds[axis.ordinal()]);
             double distance = torusIntersection.intersect(pickRay, 100);
             if (!Double.isNaN(distance) && distance < closestCollisionDistance)
             {
@@ -424,13 +455,11 @@ public class RDXPose3DGizmo implements RenderableProvider
          // collide arrows
          for (Axis3D axis : Axis3D.values)
          {
-            LibGDXTools.toEuclid(arrowModels[axis.ordinal()].getOrCreateModelInstance().transform, tempTransform);
-
             for (RobotSide side : RobotSide.values)
             {
                double zOffset = side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
                // TODO: Only update when shape changes?
-               arrowIntersection.update(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, tempTransform);
+               arrowIntersection.update(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, axisTransformToWorlds[axis.ordinal()]);
                double distance = arrowIntersection.intersect(pickRay, 100, side == RobotSide.LEFT); // only show the cones in the positive direction
 
                if (!Double.isNaN(distance) && distance < closestCollisionDistance)
@@ -479,38 +508,184 @@ public class RDXPose3DGizmo implements RenderableProvider
    {
       ImGui.text("Parent frame: " + parentReferenceFrame.getName());
 
-      ImGui.checkbox("Resize based on camera distance", resizeAutomatically);
+      ImGui.text("Translation adjustment frame:");
+      if (ImGui.radioButton(labels.get("Camera Z Up", 0), translationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP))
+         translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Camera", 0), translationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.CAMERA))
+         translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("World", 0), translationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.WORLD))
+         translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.WORLD;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Parent", 0), translationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.PARENT))
+         translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.PARENT;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Local", 0), translationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.LOCAL))
+         translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.LOCAL;
+      ImGui.text("Rotation adjustment frame:");
+      if (ImGui.radioButton(labels.get("Camera Z Up", 1), rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP))
+         rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Camera", 1), rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.CAMERA))
+         rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("World", 1), rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.WORLD))
+         rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.WORLD;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Parent", 1), rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.PARENT))
+         rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.PARENT;
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Local", 1), rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.LOCAL))
+         rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.LOCAL;
 
-      boolean proportionsChanged = false;
-      ImGui.pushItemWidth(100.00f);
-      if (resizeAutomatically.get())
-         proportionsChanged |= ImGui.dragFloat(labels.get("Torus camera size"), torusCameraSize.getData(), 0.001f);
-      else
-         proportionsChanged |= ImGui.dragFloat(labels.get("Torus radius"), torusRadius.getData(), 0.001f);
-      ImGui.popItemWidth();
+      beforeForTranslationAdjustment();
+      positionX.set(adjustmentPose3D.getPosition().getX());
+      positionY.set(adjustmentPose3D.getPosition().getY());
+      positionZ.set(adjustmentPose3D.getPosition().getZ());
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("X"), positionX, 0.01, 0.1, "%.5f");
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Y"), positionY, 0.01, 0.1, "%.5f");
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Z"), positionZ, 0.01, 0.1, "%.5f");
+      adjustmentPose3D.getPosition().set(positionX.get(), positionY.get(), positionZ.get());
 
-      if (ImGui.collapsingHeader(labels.get("Advanced")))
+      Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
+      yaw.set(orientationToAdjust.getYaw());
+      pitch.set(orientationToAdjust.getPitch());
+      roll.set(orientationToAdjust.getRoll());
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Yaw"), yaw, 0.01, 0.1, "%.5f");
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Pitch"), pitch, 0.01, 0.1, "%.5f");
+      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Roll"), roll, 0.01, 0.1, "%.5f");
+      orientationToAdjust.setYawPitchRoll(yaw.get(), pitch.get(), roll.get());
+      afterRotationAdjustment();
+
+      ImGui.text("Set to zero in:");
+      ImGui.sameLine();
+      if (ImGui.button("World"))
       {
-         if (ImGui.button("Set to zero in parent frame"))
-         {
-            transformToParent.setToZero();
-         }
-
-         ImGui.pushItemWidth(100.00f);
-         proportionsChanged |= ImGui.dragFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio.getData(), 0.001f);
-         proportionsChanged |= ImGui.dragFloat(labels.get("Arrow length ratio"), arrowLengthRatio.getData(), 0.05f);
-         proportionsChanged |= ImGui.dragFloat(labels.get("Arrow head body length ratio"), arrowHeadBodyLengthRatio.getData(), 0.05f);
-         proportionsChanged |= ImGui.dragFloat(labels.get("Arrow head body radius ratio"), arrowHeadBodyRadiusRatio.getData(), 0.05f);
-         proportionsChanged |= ImGui.dragFloat(labels.get("Arrow spacing factor"), arrowSpacingFactor.getData(), 0.05f);
-         ImGui.popItemWidth();
+         adjustmentPose3D.setToZero(ReferenceFrame.getWorldFrame());
+         adjustmentNeedsToBeApplied = true;
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Parent"))
+      {
+         adjustmentPose3D.setToZero(parentReferenceFrame);
+         adjustmentNeedsToBeApplied = true;
       }
 
-      if (proportionsChanged)
-         recreateGraphics();
+      if (ImGui.collapsingHeader(labels.get("Controls")))
+      {
+         ImGui.text("Drag using the left mouse button to manipulate the gizmo.");
+      }
 
-      ImGui.text("Drag using the left mouse button to manipulate the gizmo.");
+      if (ImGui.collapsingHeader(labels.get("Visual options")))
+      {
+         ImGui.checkbox("Resize based on camera distance", resizeAutomatically);
 
-      updateTransforms();
+         ImGui.pushItemWidth(100.00f);
+         if (resizeAutomatically.get())
+            proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Torus camera size"), torusCameraSize.getData(), 0.001f);
+         else
+            proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Torus radius"), torusRadius.getData(), 0.001f);
+         ImGui.popItemWidth();
+         ImGui.separator();
+         ImGui.pushItemWidth(100.00f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Torus tube radius ratio"), torusTubeRadiusRatio.getData(), 0.001f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow length ratio"), arrowLengthRatio.getData(), 0.05f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow head body length ratio"), arrowHeadBodyLengthRatio.getData(), 0.05f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow head body radius ratio"), arrowHeadBodyRadiusRatio.getData(), 0.05f);
+         proportionsNeedUpdate |= ImGui.dragFloat(labels.get("Arrow spacing factor"), arrowSpacingFactor.getData(), 0.05f);
+         ImGui.popItemWidth();
+      }
+   }
+
+   private void beforeForTranslationAdjustment()
+   {
+      switch (translationAdjustmentFrame)
+      {
+         case WORLD -> adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+         case PARENT -> adjustmentPose3D.changeFrame(parentReferenceFrame);
+         case CAMERA_ZUP ->
+         {
+            prepareCameraZUpFrameForAdjustment();
+            adjustmentPose3D.changeFrame(cameraZUpFrameForAdjustment.getReferenceFrame());
+         }
+         case CAMERA ->
+         {
+            adjustmentPose3D.changeFrame(camera3D.getCameraFrame());
+         }
+      }
+   }
+
+   private Orientation3DBasics beforeForRotationAdjustment()
+   {
+      switch (rotationAdjustmentFrame)
+      {
+         case WORLD, PARENT, CAMERA, CAMERA_ZUP ->
+         {
+            if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.WORLD)
+            {
+               rotationAdjustmentQuaternion.setToZero(ReferenceFrame.getWorldFrame());
+            }
+            else if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.PARENT)
+            {
+               rotationAdjustmentQuaternion.setToZero(parentReferenceFrame);
+            }
+            else if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP)
+            {
+               prepareCameraZUpFrameForAdjustment();
+               rotationAdjustmentQuaternion.setToZero(cameraZUpFrameForAdjustment.getReferenceFrame());
+            }
+            else // CAMERA
+            {
+               rotationAdjustmentQuaternion.setToZero(camera3D.getCameraFrame());
+            }
+
+            return rotationAdjustmentQuaternion;
+         }
+         default -> // LOCAL
+         {
+            adjustmentPose3D.changeFrame(gizmoFrame);
+            return adjustmentPose3D.getOrientation();
+         }
+      }
+   }
+
+   private void prepareCameraZUpFrameForAdjustment()
+   {
+      cameraZUpFrameForAdjustment.getTransformToParent().getTranslation().set(camera3D.getCameraPose().getPosition());
+      cameraZUpFrameForAdjustment.getTransformToParent().getRotation().setToYawOrientation(camera3D.getCameraPose().getYaw());
+      cameraZUpFrameForAdjustment.getReferenceFrame().update();
+   }
+
+   private void afterRotationAdjustment()
+   {
+      switch (rotationAdjustmentFrame)
+      {
+         case WORLD, PARENT, CAMERA, CAMERA_ZUP ->
+         {
+            if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.WORLD)
+            {
+               rotationAdjustmentQuaternion.changeFrame(ReferenceFrame.getWorldFrame());
+               adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+            }
+            else if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.PARENT)
+            {
+               rotationAdjustmentQuaternion.changeFrame(parentReferenceFrame);
+               adjustmentPose3D.changeFrame(parentReferenceFrame);
+            }
+            else if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP)
+            {
+               rotationAdjustmentQuaternion.changeFrame(cameraZUpFrameForAdjustment.getReferenceFrame());
+               adjustmentPose3D.changeFrame(cameraZUpFrameForAdjustment.getReferenceFrame());
+            }
+            else // CAMERA
+            {
+               rotationAdjustmentQuaternion.changeFrame(camera3D.getCameraFrame());
+               adjustmentPose3D.changeFrame(camera3D.getCameraFrame());
+            }
+            adjustmentPose3D.getOrientation().prepend(rotationAdjustmentQuaternion);
+         }
+      }
    }
 
    private void recreateGraphics()
@@ -536,6 +711,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          arrowModels[axis.ordinal()].invalidateMesh();
          torusModels[axis.ordinal()].invalidateMesh();
       }
+      updateGraphicTransforms();
    }
 
    @Override

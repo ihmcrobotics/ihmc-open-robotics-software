@@ -37,7 +37,6 @@ public class GPUPointCloudTools
    public GPUPointCloudTools(int maxNumberOfPoints)
    {
       this.maxNumberOfPoints = maxNumberOfPoints;
-      openCLManager.create();
 
 //      inputPointCloudBuffer = new OpenCLFloatBuffer(maxNumberOfPoints * 3 * Float.BYTES);
 //      transformedPointCloudBuffer = new OpenCLFloatBuffer(maxNumberOfPoints * 3 * Float.BYTES);
@@ -81,8 +80,6 @@ public class GPUPointCloudTools
       openCLManager.execute1D(transformPointsKernel, points.size());
 
       transformedPointCloudBuffer.readOpenCLBufferObject(openCLManager);
-
-      openCLManager.finish();
 
       return retrieveTransformedPoints(points.size(), transformedPointCloudBuffer.getBackingDirectFloatBuffer());
    }

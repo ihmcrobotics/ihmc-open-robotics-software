@@ -173,6 +173,7 @@ public class KSTStreamingState implements State
       ikSolverJointGains = ikController.getDefaultJointGains();
       ikController.getCenterOfMassSafeMargin().set(parameters.getCenterOfMassSafeMargin());
       ikController.setPublishingSolutionPeriod(parameters.getPublishingSolutionPeriod());
+      ikController.getMomentumWeight().set(parameters.getCenterOfMassHoldWeight());
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
