@@ -56,6 +56,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
    @AfterEach
    public void tearDown()
    {
+      conductor.setKeepSCSUp(false);
       quadrupedTestFactory.close();
       conductor.concludeTesting();
       conductor = null;
