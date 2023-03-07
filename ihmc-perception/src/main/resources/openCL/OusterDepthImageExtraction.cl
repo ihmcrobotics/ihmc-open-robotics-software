@@ -23,7 +23,7 @@ kernel void extractDepthImage(global float* parameters,
    shiftedX += pixelShifts[y];
 
    if (shiftedX < 0)
-      shiftedX = parameters[COLUMNS_PER_FRAME] + shiftedX;
+      shiftedX += parameters[COLUMNS_PER_FRAME];
    if (shiftedX > parameters[COLUMNS_PER_FRAME] - 1)
       shiftedX -= parameters[COLUMNS_PER_FRAME];
 

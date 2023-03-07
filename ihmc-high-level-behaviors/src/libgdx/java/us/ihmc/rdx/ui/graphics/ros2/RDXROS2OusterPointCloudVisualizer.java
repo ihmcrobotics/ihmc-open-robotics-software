@@ -175,9 +175,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
          pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
 
          ousterFisheyeKernel.getOusterToWorldTransformToPack().set(imageMessage.getOrientation(), imageMessage.getPosition());
-         ousterFisheyeKernel.runKernel(horizontalFieldOfView,
-                                       verticalFieldOfView,
-                                       0.0f,
+         ousterFisheyeKernel.runKernel(0.0f,
                                        pointSize.get(),
                                        false,
                                        RDXColorGradientMode.WORLD_Z.ordinal(),
