@@ -7,10 +7,13 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.HeightMapMessage;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
-import us.ihmc.rdx.visualizers.RDXHeightMapGraphic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -23,13 +26,15 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
 
-   public RDXHeightMapVisualizer(String title)
+   public RDXHeightMapVisualizer(ROS2PublishSubscribeAPI ros2)
    {
-      super(title);
+      super("Height Map");
 
       boolean daemon = true;
       int queueSize = 1;
       executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), daemon, queueSize);
+
+      ros2.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
    }
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
@@ -38,12 +43,12 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
       if (isActive())
       {
          executorService.clearQueueAndExecute(() ->
-                                              {
-                                                 gridMapGraphic.setInPaintHeight(inPaintHeight.get());
-                                                 gridMapGraphic.setRenderGroundPlane(renderGroundPlane.get());
-                                                 gridMapGraphic.setRenderGroundCells(renderGroundCells.get());
-                                                 gridMapGraphic.generateMeshesAsync(heightMapMessage);
-                                              });
+         {
+            gridMapGraphic.setInPaintHeight(inPaintHeight.get());
+            gridMapGraphic.setRenderGroundPlane(renderGroundPlane.get());
+            gridMapGraphic.setRenderGroundCells(renderGroundCells.get());
+            gridMapGraphic.generateMeshesAsync(heightMapMessage);
+         });
       }
    }
 
@@ -79,7 +84,8 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
    public void update()
    {
       super.update();
-      if (isActive())
+      boolean isActive = isActive();
+      if (isActive)
       {
          gridMapGraphic.update();
       }

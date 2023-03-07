@@ -17,6 +17,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.RDXROS1Visualizer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.OpenCLManager;
@@ -26,6 +27,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Deprecated
@@ -102,7 +104,6 @@ public class RDXROS1FusedPointCloudVisualizer extends RDXROS1Visualizer
          l515PointsOnlyHostBuffer = BufferUtils.newByteBuffer(151413 * 4 * 3);
          l515PointsOnly = new Mat(1, 151413, opencv_core.CV_32FC3, new BytePointer(l515PointsOnlyHostBuffer));
 
-         openCLManager.create();
          numberOfOusterPoints = 1024 * 128;
          ousterInBytesLength = numberOfOusterPoints * 48;
          zed2InBytesLength = 1280 * 720 * 3;
@@ -236,16 +237,15 @@ public class RDXROS1FusedPointCloudVisualizer extends RDXROS1Visualizer
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive())
+      if (isActive() && sceneLevelCheck(sceneLevels))
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 
    public static void main(String[] args)
    {
       OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
       openCLManager.loadSingleFunctionProgramAndCreateKernel("projectZED2ToOusterPoints");
    }
 }

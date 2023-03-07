@@ -6,7 +6,7 @@ buildscript {
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -56,7 +56,7 @@ openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCPPVersion = "1.5.9-SNAPSHOT"
+val javaCPPVersion = "1.5.8"
 
 bytedecoDependencies {
    api("us.ihmc:euclid:0.19.1")
@@ -90,13 +90,21 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
 // We are trying to avoid downloading binaries that aren't used by anyone
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
-   if (name != "spinnaker")
+   if (name == "spinnaker")
+   {
+      // We couldn't figure out how to sign a JAR to publish without the "-SNAPSHOT" yet
+      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT")
+      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT:linux-x86_64")
+      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT:windows-x86_64")
+   }
+   else
+   {
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
       apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-arm64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
-   if (name != "spinnaker")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
       apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
+   }
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)

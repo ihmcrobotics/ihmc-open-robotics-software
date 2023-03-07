@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -27,6 +28,7 @@ public class SwingOverPlanarRegionsVisualizer
    private static final ReferenceFrame WORLD = ReferenceFrame.getWorldFrame();
 
    private final SimulationConstructionSet scs;
+   private final SimulationConstructionSet2 scs2;
 
    private final YoFrameConvexPolygon2D yoFootPolygon;
    private final YoFrameConvexPolygon2D yoCollisionPolygon;
@@ -55,7 +57,23 @@ public class SwingOverPlanarRegionsVisualizer
                                            ConvexPolygon2DReadOnly footPolygon,
                                            SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander)
    {
+      this(scs, null, registry, yoGraphicsListRegistry, footPolygon, swingOverPlanarRegionsTrajectoryExpander);
+   }
+
+   public SwingOverPlanarRegionsVisualizer(SimulationConstructionSet2 scs, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                           ConvexPolygon2DReadOnly footPolygon,
+                                           SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander)
+   {
+      this(null, scs, registry, yoGraphicsListRegistry, footPolygon, swingOverPlanarRegionsTrajectoryExpander);
+   }
+
+   private SwingOverPlanarRegionsVisualizer(SimulationConstructionSet scs, SimulationConstructionSet2 scs2, YoRegistry registry,
+                                           YoGraphicsListRegistry yoGraphicsListRegistry,
+                                           ConvexPolygon2DReadOnly footPolygon,
+                                           SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander)
+   {
       this.scs = scs;
+      this.scs2 = scs2;
       this.trajectoryExpander = swingOverPlanarRegionsTrajectoryExpander;
 
       this.footPolygon = footPolygon;
@@ -183,8 +201,10 @@ public class SwingOverPlanarRegionsVisualizer
 
 //      swingFloorPlane.set(swingStartPosition, tempPlaneNormal);
 
-
-      scs.tickAndUpdate(scs.getTime() + 0.1);
+      if (scs != null)
+         scs.tickAndUpdate(scs.getTime() + 0.1);
+      if (scs2 != null)
+         scs2.tick();
    }
 
    /*

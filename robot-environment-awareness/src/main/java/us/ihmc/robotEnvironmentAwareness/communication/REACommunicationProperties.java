@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import controller_msgs.msg.dds.ConcaveHullFactoryParametersMessage;
 import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
 import ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType;
+import ihmc_common_msgs.msg.dds.InstantMessage;
 import perception_msgs.msg.dds.*;
 import controller_msgs.msg.dds.Polygon2DMessage;
 import controller_msgs.msg.dds.Polygon2DMessagePubSubType;
@@ -97,6 +98,7 @@ public class REACommunicationProperties
       privateNetClassList.registerPacketField(PlanarRegionsListMessage.class);
       privateNetClassList.registerPacketField(Polygon2DMessage.class);
       privateNetClassList.registerPacketField(PlanarRegionMessage.class);
+      privateNetClassList.registerPacketField(InstantMessage.class);
 
       privateNetClassList.registerPacketClass(ConcaveHullFactoryParametersMessage.class);
       privateNetClassList.registerPacketField(ConcaveHullFactoryParametersMessage.class);

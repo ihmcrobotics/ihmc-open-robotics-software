@@ -22,6 +22,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXObjectDetector;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
@@ -46,6 +47,8 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
+
+import java.util.Set;
 
 public class RDXVRKinematicsStreamingMode
 {
@@ -434,14 +437,14 @@ public class RDXVRKinematicsStreamingMode
       ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(robotModel.getSimpleRobotName()), toolboxStateMessage);
    }
 
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (status.hasReceivedFirstMessage())
       {
-         ghostRobotGraphic.getRenderables(renderables, pool);
+         ghostRobotGraphic.getRenderables(renderables, pool,sceneLevels);
          if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
          {
-            sharedControlAssistant.getGhostPreviewGraphic().getRenderables(renderables, pool);
+            sharedControlAssistant.getGhostPreviewGraphic().getRenderables(renderables, pool, sceneLevels);
             var splineGraphics = sharedControlAssistant.getSplinePreviewGraphic();
             for (var spline : splineGraphics.keySet())
                splineGraphics.get(spline).getRenderables(renderables, pool);
