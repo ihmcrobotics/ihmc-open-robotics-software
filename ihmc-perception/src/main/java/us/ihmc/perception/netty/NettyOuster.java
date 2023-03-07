@@ -51,13 +51,10 @@ public class NettyOuster
    public static final int UDP_PORT = 7502;
 
    /**
-    * There seems to be more than 10 degress of yaw in the data, a degree of roll error,
-    * and possibly even almost a degree of pitch error inherent in the Ouster data.
-    * @dcalvert took measurements and calibrated this data using RDXNettyOusterDemo
-    * with OS0-128 S/N 122221003063
+    * FIXME: Out of date. We need to determine if this is still needed after applying the correct instrinsics.
+    * OS0-128 S/N 122221003063
     */
    public static final RigidBodyTransform INTRINSIC_TRANSFORM_CORRECTION = new RigidBodyTransform();
-
    {
       EuclidCoreMissingTools.setYawPitchRollDegrees(INTRINSIC_TRANSFORM_CORRECTION.getRotation(), 11.683,  1.163,  0.885);
    }
