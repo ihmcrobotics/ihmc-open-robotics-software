@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -68,7 +69,8 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
       MaterialDefinition material = new MaterialDefinition(ghostColor);
       SCS2DefinitionMissingTools.forEachRigidBodyDefinitionIncludingFourBars(robotDefinition.getRootBodyDefinition(),
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
-      loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), true);
+      boolean createReferenceFrameGraphics = true;
+      loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), RDXVisualTools.NO_SCALING, createReferenceFrameGraphics);
    }
 
    @Override
