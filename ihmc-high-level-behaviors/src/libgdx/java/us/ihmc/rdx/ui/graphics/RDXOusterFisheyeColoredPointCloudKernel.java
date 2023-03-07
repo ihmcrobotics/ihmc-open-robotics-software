@@ -119,8 +119,6 @@ public class RDXOusterFisheyeColoredPointCloudKernel
                          BytedecoImage fisheyeImage,
                          OpenCLFloatBuffer pointCloudVertexBuffer)
    {
-      floatParameters.setParameter(horizontalFieldOfView);
-      floatParameters.setParameter(verticalFieldOfView);
       floatParameters.setParameter(ousterDepthImage.getImageWidth());
       floatParameters.setParameter(ousterDepthImage.getImageHeight());
       floatParameters.setParameter(lidarOriginToBeamOrigin);
@@ -130,11 +128,9 @@ public class RDXOusterFisheyeColoredPointCloudKernel
       floatParameters.setParameter(pointSize);
       floatParameters.setParameter((float) levelOfColorDetail);
       floatParameters.setParameter(useSensorColor && fisheyeImage != null);
-      altitudeAnglesOpenCLBuffer.writeOpenCLBufferObject(openCLManager);
-      azimuthAnglesOpenCLBuffer.writeOpenCLBufferObject(openCLManager);
-      ousterToWorldTransformCorrected.set(ousterToWorldTransform);
-      ousterToWorldTransformCorrected.preMultiply(NettyOuster.INTRINSIC_TRANSFORM_CORRECTION);
-      ousterToWorldTransformParameter.setParameter(ousterToWorldTransformCorrected);
+//      ousterToWorldTransformCorrected.set(ousterToWorldTransform);
+//      ousterToWorldTransformCorrected.preMultiply(NettyOuster.INTRINSIC_TRANSFORM_CORRECTION);
+      ousterToWorldTransformParameter.setParameter(ousterToWorldTransform);
 
       // It appears you've got to write something to the OpenCL argument even if you don't use it,
       // so we write a placeholder image.
@@ -149,11 +145,13 @@ public class RDXOusterFisheyeColoredPointCloudKernel
       ousterToFisheyeTransformParameter.setParameter(ousterToFisheyeTransform);
 
       floatParameters.writeOpenCLBufferObject(openCLManager);
+      altitudeAnglesOpenCLBuffer.writeOpenCLBufferObject(openCLManager);
+      azimuthAnglesOpenCLBuffer.writeOpenCLBufferObject(openCLManager);
       ousterToWorldTransformParameter.writeOpenCLBufferObject(openCLManager);
-      fisheyeFloatParameters.writeOpenCLBufferObject(openCLManager);
-      ousterToFisheyeTransformParameter.writeOpenCLBufferObject(openCLManager);
       ousterDepthImage.writeOpenCLImage(openCLManager);
+      fisheyeFloatParameters.writeOpenCLBufferObject(openCLManager);
       colorImage.writeOpenCLImage(openCLManager);
+      ousterToFisheyeTransformParameter.writeOpenCLBufferObject(openCLManager);
 
       openCLManager.setKernelArgument(unpackPointCloudKernel, 0, floatParameters.getOpenCLBufferObject());
       openCLManager.setKernelArgument(unpackPointCloudKernel, 1, altitudeAnglesOpenCLBuffer.getOpenCLBufferObject());
