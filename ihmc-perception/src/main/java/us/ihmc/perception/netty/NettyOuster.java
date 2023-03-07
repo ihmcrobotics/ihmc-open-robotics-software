@@ -240,9 +240,17 @@ public class NettyOuster
          beamAzimuthAnglesBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
          for (int i = 0; i < pixelsPerColumn; i++)
          {
-            beamAltitudeAnglesBuffer.putFloat((float) beamAltitudeAnglesNode.get(i).asDouble());
-            beamAzimuthAnglesBuffer.putFloat((float) beamAzimuthAnglesNode.get(i).asDouble());
+            beamAltitudeAnglesBuffer.putFloat((float) Math.toRadians(beamAltitudeAnglesNode.get(i).asDouble()));
+            beamAzimuthAnglesBuffer.putFloat((float) Math.toRadians(beamAzimuthAnglesNode.get(i).asDouble()));
          }
+         beamAltitudeAnglesBuffer.rewind();
+         beamAzimuthAnglesBuffer.rewind();
+         float[] altitudeAnglesArray = new float[pixelsPerColumn];
+         float[] azimuthAnglesArray = new float[pixelsPerColumn];
+         beamAltitudeAnglesBuffer.asFloatBuffer().get(altitudeAnglesArray);
+         beamAzimuthAnglesBuffer.asFloatBuffer().get(azimuthAnglesArray);
+         LogTools.debug("Altitude angles: {}", altitudeAnglesArray);
+         LogTools.debug("Azimuth angles: {}", azimuthAnglesArray);
          beamAltitudeAnglesBuffer.rewind();
          beamAzimuthAnglesBuffer.rewind();
       });
