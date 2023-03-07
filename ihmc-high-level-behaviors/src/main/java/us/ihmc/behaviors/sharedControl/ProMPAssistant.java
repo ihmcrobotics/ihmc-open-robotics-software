@@ -264,8 +264,40 @@ public class ProMPAssistant
       }
    }
 
+   private boolean contextDetected(String objectName)
+   {
+      if (currentContext.isEmpty() && !objectName.isEmpty())
+      {
+         if (contextTasksMap.containsKey(objectName))
+         {
+            currentContext = objectName;
+            List<String> candidateTasks = contextTasksMap.get(currentContext);
+            if (candidateTasks.size() > 0)
+            {
+               for (int i = 0; i < candidateTasks.size(); i++)
+               {
+                  String candidateTask = candidateTasks.get(i);
+                  // here compute the distance for each cadidate task. current task is the minimum.
+                  proMPManagers.get(candidateTask).computeDistanceAtStart();
+                  // TODO what if someone is lefthanded, or simply wants to use the left hand for that task?
+                  //  Learn task for both hands and called them ...L and ...R, check initial velocity of hands to determine which one is being used
+                  // get the body part used for recognition for this task
+                  bodyPartRecognition = taskBodyPartRecognitionMap.get(candidateTask);
+               }
+            }
+         }
+         else
+         {
+            LogTools.info("Detected object ({}) does not have any associated learned policy for assistance", objectName);
+            return false;
+         }
+      }
+      return !currentContext.isEmpty();
+   }
+
    private boolean taskDetected(String objectName)
    {
+      // call contextDetected here and do the initialization of bodyparts later if task gotten
       if (currentTask.isEmpty() && !objectName.isEmpty())
       {
          if(contextTasksMap.containsKey(objectName))
@@ -273,6 +305,8 @@ public class ProMPAssistant
             List<String> candidateTasks = contextTasksMap.get(objectName);
             if(candidateTasks.size() > 0)
             {
+               // here compute the distance for each cadidate task. current task is the minimum.
+               proMPManagers.get(candidateTasks.get(i)).computeDistanceAtStart();
                // TODO if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
                currentTask = candidateTasks.get(0);
                // TODO what if someone is lefthanded, or simply wants to use the left hand for that task?
