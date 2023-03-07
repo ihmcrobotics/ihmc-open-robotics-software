@@ -1,50 +1,33 @@
 #define COLUMNS_PER_FRAME 0
-#define PIXELS_PER_COLUMN 1
-#define MEASUREMENT_BLOCK_SIZE 2
-#define HEADER_BLOCK_BYTES 3
-#define CHANNEL_DATA_BLOCK_BYTES 4
+#define MEASUREMENT_BLOCK_SIZE 1
+#define HEADER_BLOCK_BYTES 2
+#define CHANNEL_DATA_BLOCK_BYTES 3
 
 kernel void extractDepthImage(global float* parameters,
                               global int* pixelShifts,
-                              global int* altitudeAngles,
-                              global int* azimuthAngles,
                               global unsigned char* lidarFrameBuffer,
                               read_write image2d_t depthImage16UC1)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
 
-   if (y < parameters[PIXELS_PER_COLUMN])
-   {
-      int bytesToColumnDataBlockStart = x * parameters[MEASUREMENT_BLOCK_SIZE] + parameters[HEADER_BLOCK_BYTES] + y * parameters[CHANNEL_DATA_BLOCK_BYTES];
+   int bytesToColumnDataBlockStart = x * parameters[MEASUREMENT_BLOCK_SIZE] + parameters[HEADER_BLOCK_BYTES] + y * parameters[CHANNEL_DATA_BLOCK_BYTES];
 
-      // Ouster data is little endian
-      unsigned char range_MSB = lidarFrameBuffer[bytesToColumnDataBlockStart];
-      unsigned char range_LSB = lidarFrameBuffer[bytesToColumnDataBlockStart + 1];
-      // OpenCV is little endian
-      unsigned short range = (range_LSB << 8) | range_MSB;
+   // Ouster data is little endian
+   unsigned char range_MSB = lidarFrameBuffer[bytesToColumnDataBlockStart];
+   unsigned char range_LSB = lidarFrameBuffer[bytesToColumnDataBlockStart + 1];
+   // OpenCV is little endian
+   unsigned short range = (range_LSB << 8) | range_MSB;
 
-      int shiftedX = x;
-      shiftedX += pixelShifts[y];
+   int shiftedX = x;
+   shiftedX += pixelShifts[y];
 
-      if (shiftedX < 0)
-         shiftedX = parameters[COLUMNS_PER_FRAME] + shiftedX;
-      if (shiftedX > parameters[COLUMNS_PER_FRAME] - 1)
-         shiftedX -= parameters[COLUMNS_PER_FRAME];
+   if (shiftedX < 0)
+      shiftedX = parameters[COLUMNS_PER_FRAME] + shiftedX;
+   if (shiftedX > parameters[COLUMNS_PER_FRAME] - 1)
+      shiftedX -= parameters[COLUMNS_PER_FRAME];
 
-      write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
-   }
-   else
-   {
-      int bytesToEncoderCount = x * parameters[MEASUREMENT_BLOCK_SIZE]
-                                  + parameters[TIMESTAMP_BYTES]
-                                  + parameters[MEASUREMENT_ID_BYTES]
-                                  + parameters[FRAME_ID_BYTES];
-
-      unsigned int encoderCount = lidarFrameBuffer[bytesToEncoderCount];
-
-      write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
-   }
+   write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
 }
 
 #define HORIZONTAL_FIELD_OF_VIEW 0
