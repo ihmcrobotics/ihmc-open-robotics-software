@@ -201,6 +201,6 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    public void destroy()
    {
       super.destroy();
-      realtimeROS2Node.destroy();
+      setSubscribed(false);
    }
 }
