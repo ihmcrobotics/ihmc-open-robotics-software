@@ -1,14 +1,12 @@
-#define HORIZONTAL_FIELD_OF_VIEW 0
-#define VERTICAL_FIELD_OF_VIEW 1
-#define DEPTH_IMAGE_WIDTH 2
-#define DEPTH_IMAGE_HEIGHT 3
-#define LIDAR_ORIGIN_TO_BEAM_ORIGIN 4
-#define DISCRETE_RESOLUTION 5
-#define GRADIENT_MODE 6
-#define USE_SINUSOIDAL_GRADIENT 7
-#define POINT_SIZE 8
-#define LEVEL_OF_COLOR_DETAIL 9
-#define USE_FISHEYE_COLOR 10
+#define DEPTH_IMAGE_WIDTH 0
+#define DEPTH_IMAGE_HEIGHT 1
+#define LIDAR_ORIGIN_TO_BEAM_ORIGIN 2
+#define DISCRETE_RESOLUTION 3
+#define GRADIENT_MODE 4
+#define USE_SINUSOIDAL_GRADIENT 5
+#define POINT_SIZE 6
+#define LEVEL_OF_COLOR_DETAIL 7
+#define USE_FISHEYE_COLOR 8
 
 #define FISHEYE_IMAGE_WIDTH 0
 #define FISHEYE_IMAGE_HEIGHT 1
@@ -19,6 +17,8 @@
 
 #define GRADIENT_MODE_WORLD_Z 0
 #define GRADIENT_MODE_SENSOR_X 1
+
+#define TWO_PI_F 2.0f * M_PI_F
 
 kernel void computeVertexBuffer(global float* parameters,
                                 global float* altitudeAngles,
@@ -43,35 +43,48 @@ kernel void computeVertexBuffer(global float* parameters,
    int xFromCenter = -x - (parameters[DEPTH_IMAGE_WIDTH] / 2); // flip
    int yFromCenter = ousterY - (parameters[DEPTH_IMAGE_HEIGHT] / 2);
 
-   float angleXFromCenter = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * parameters[HORIZONTAL_FIELD_OF_VIEW];
-   float angleYFromCenter = yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * parameters[VERTICAL_FIELD_OF_VIEW];
+//   float angleXFromCenter = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * 2.0f * M_PI_F;
+//   float angleYFromCenter = yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * M_PI_F / 2.0;
+//
+//   // Create additional rotation only transform
+//   float16 angledRotationMatrix = newRotationMatrix();
+//   angledRotationMatrix = setToPitchOrientation(angleYFromCenter, angledRotationMatrix);
+//   angledRotationMatrix = prependYawRotation(angleXFromCenter, angledRotationMatrix);
+//
+//   float3 beamFramePoint = (float3) (eyeDepthInMeters, 0.0f, 0.0f);
+//   float3 origin = (float3) (0.0f, 0.0f, 0.0f);
+//   float3 rotationMatrixRow0 = (float3) (angledRotationMatrix.s0, angledRotationMatrix.s1, angledRotationMatrix.s2);
+//   float3 rotationMatrixRow1 = (float3) (angledRotationMatrix.s3, angledRotationMatrix.s4, angledRotationMatrix.s5);
+//   float3 rotationMatrixRow2 = (float3) (angledRotationMatrix.s6, angledRotationMatrix.s7, angledRotationMatrix.s8);
+//
+//   float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint, rotationMatrixRow0, rotationMatrixRow1, rotationMatrixRow2, origin);
 
-   // Create additional rotation only transform
-   float16 angledRotationMatrix = newRotationMatrix();
-   angledRotationMatrix = setToPitchOrientation(angleYFromCenter, angledRotationMatrix);
-   angledRotationMatrix = prependYawRotation(angleXFromCenter, angledRotationMatrix);
+   float encoderAngle = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * 2.0f * M_PI_F;
+   float azimuthAngle = 0.0f;
+   float altitudeAngle = -yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * M_PI_F / 2.0;
+//   float encoderAngle = 2.0f * M_PI_F * (1.0f - ((float) x / (float) parameters[DEPTH_IMAGE_WIDTH]));
+//   float azimuthAngle = -azimuthAngles[ousterY];
+//   float altitudeAngle = altitudeAngles[ousterY];
 
-   float3 beamFramePoint = (float3) (eyeDepthInMeters, 0.0f, 0.0f);
-   float3 origin = (float3) (0.0f, 0.0f, 0.0f);
-   float3 rotationMatrixRow0 = (float3) (angledRotationMatrix.s0, angledRotationMatrix.s1, angledRotationMatrix.s2);
-   float3 rotationMatrixRow1 = (float3) (angledRotationMatrix.s3, angledRotationMatrix.s4, angledRotationMatrix.s5);
-   float3 rotationMatrixRow2 = (float3) (angledRotationMatrix.s6, angledRotationMatrix.s7, angledRotationMatrix.s8);
-
-   float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint, rotationMatrixRow0, rotationMatrixRow1, rotationMatrixRow2, origin);
-
-   parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN]
-   float encoderAngle = 2.0f * M_PI_F * (1.0f - ())
+   float beamLength = eyeDepthInMeters - parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN]; // Subtract the length of the sensor arm
+   float3 ousterFramePoint = (float3)
+      (beamLength * cos(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * cos(encoderAngle),
+       beamLength * sin(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * sin(encoderAngle),
+       beamLength * sin(altitudeAngle));
 
    float pointSize = parameters[POINT_SIZE] * eyeDepthInMeters;
-   int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - parameters[LEVEL_OF_COLOR_DETAIL];
-   float verticalPointOffsetLocalZ = verticalColorDetailOffsetIndex * pointSize / 2.0f;
-   float3 colorDetailPointOffsetLocalFrame = (float3) (0.0, 0.0, verticalPointOffsetLocalZ);
-   float3 colorDetailPointOffset = transformPoint3D32_2(colorDetailPointOffsetLocalFrame,
-                                                        rotationMatrixRow0,
-                                                        rotationMatrixRow1,
-                                                        rotationMatrixRow2,
-                                                        origin);
-   ousterFramePoint += colorDetailPointOffset;
+   if (totalVerticalPointsForColorDetail > 1)
+   {
+//      int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - parameters[LEVEL_OF_COLOR_DETAIL];
+//      float verticalPointOffsetLocalZ = verticalColorDetailOffsetIndex * pointSize / 2.0f;
+//      float3 colorDetailPointOffsetLocalFrame = (float3) (0.0, 0.0, verticalPointOffsetLocalZ);
+//      float3 colorDetailPointOffset = transformPoint3D32_2(colorDetailPointOffsetLocalFrame,
+//                                                           rotationMatrixRow0,
+//                                                           rotationMatrixRow1,
+//                                                           rotationMatrixRow2,
+//                                                           origin);
+//      ousterFramePoint += colorDetailPointOffset;
+   }
 
    float3 worldFramePoint = transformPoint3D32(ousterFramePoint, ousterToWorldTransform);
 
