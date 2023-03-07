@@ -21,6 +21,7 @@
 #define TWO_PI_F 2.0f * M_PI_F
 
 kernel void computeVertexBuffer(global float* parameters,
+                                global int* pixelShifts,
                                 global float* altitudeAngles,
                                 global float* azimuthAngles,
                                 global float* ousterToWorldTransform,
@@ -34,14 +35,22 @@ kernel void computeVertexBuffer(global float* parameters,
    int y = get_global_id(1);
 
    // Adds points above and below the lidar point symetrically
-   // for the purpose of displaying more color details
+   // for the purpose of displaying more color details.
    int totalVerticalPointsForColorDetail = 1 + 2 * parameters[LEVEL_OF_COLOR_DETAIL];
    int ousterY = y / totalVerticalPointsForColorDetail;
 
-   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, ousterY)).x * parameters[DISCRETE_RESOLUTION];
+   // Undo depth image pixel shifts. Using the azimuth angles is more precise.
+   int unshiftedX = x;
+   unshiftedX += pixelShifts[ousterY];
+   if (unshiftedX < 0)
+      unshiftedX += parameters[DEPTH_IMAGE_WIDTH];
+   if (unshiftedX > parameters[DEPTH_IMAGE_WIDTH] - 1)
+      unshiftedX -= parameters[DEPTH_IMAGE_WIDTH];
 
-   int xFromCenter = -x - (parameters[DEPTH_IMAGE_WIDTH] / 2); // flip
-   int yFromCenter = ousterY - (parameters[DEPTH_IMAGE_HEIGHT] / 2);
+   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (unshiftedX, ousterY)).x * parameters[DISCRETE_RESOLUTION];
+
+//   int xFromCenter = -x - (parameters[DEPTH_IMAGE_WIDTH] / 2); // flip
+//   int yFromCenter = ousterY - (parameters[DEPTH_IMAGE_HEIGHT] / 2);
 
 //   float angleXFromCenter = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * 2.0f * M_PI_F;
 //   float angleYFromCenter = yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * M_PI_F / 2.0;
@@ -59,17 +68,19 @@ kernel void computeVertexBuffer(global float* parameters,
 //
 //   float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint, rotationMatrixRow0, rotationMatrixRow1, rotationMatrixRow2, origin);
 
-   float encoderAngle = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * 2.0f * M_PI_F;
-   float azimuthAngle = 0.0f;
-   float altitudeAngle = -yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * M_PI_F / 2.0;
-//   float encoderAngle = 2.0f * M_PI_F * (1.0f - ((float) x / (float) parameters[DEPTH_IMAGE_WIDTH]));
-//   float azimuthAngle = -azimuthAngles[ousterY];
-//   float altitudeAngle = altitudeAngles[ousterY];
+//   float encoderAngle = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * 2.0f * M_PI_F;
+//   float azimuthAngle = 0.0f;
+//   float altitudeAngle = -yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * M_PI_F / 2.0;
+   float encoderAngle = 2.0f * M_PI_F * (1.0f - ((float) x / (float) parameters[DEPTH_IMAGE_WIDTH]));
+//   float azimuthAngle = 0.0f;
+//   float altitudeAngle = -yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * M_PI_F / 2.0;
+   float azimuthAngle = -azimuthAngles[ousterY];
+   float altitudeAngle = altitudeAngles[ousterY];
 
    float beamLength = eyeDepthInMeters - parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN]; // Subtract the length of the sensor arm
    float3 ousterFramePoint = (float3)
-      (beamLength * cos(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * cos(encoderAngle),
-       beamLength * sin(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * sin(encoderAngle),
+      (-beamLength * cos(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * cos(encoderAngle),
+       -beamLength * sin(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * sin(encoderAngle),
        beamLength * sin(altitudeAngle));
 
    float pointSize = parameters[POINT_SIZE] * eyeDepthInMeters;

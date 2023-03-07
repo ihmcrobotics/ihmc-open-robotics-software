@@ -122,7 +122,7 @@ public class RDXNettyOusterUI
          pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
       }
 
-      ousterFisheyeKernel.setInstrinsicParameters(ouster.getBeamAltitudeAnglesBuffer(), ouster.getBeamAzimuthAnglesBuffer());
+      ousterFisheyeKernel.setInstrinsicParameters(ouster.getPixelShiftBuffer(), ouster.getBeamAltitudeAnglesBuffer(), ouster.getBeamAzimuthAnglesBuffer());
    }
 
    public void setFisheyeImageToColorPoints(BytedecoImage fThetaFisheyeRGBA8Image,
@@ -177,9 +177,7 @@ public class RDXNettyOusterUI
 
          ousterFisheyeKernel.updateSensorTransform(ousterInteractable.getInteractableFrameModel().getReferenceFrame());
          depthImageToPointCloudStopwatchPlot.start();
-         ousterFisheyeKernel.runKernel(horizontalFieldOfView.get(),
-                                       verticalFieldOfView.get(),
-                                       ouster.getLidarOriginToBeamOrigin(),
+         ousterFisheyeKernel.runKernel(ouster.getLidarOriginToBeamOrigin(),
                                        pointSize.get(),
                                        true,
                                        RDXColorGradientMode.WORLD_Z.ordinal(),
