@@ -2,11 +2,13 @@
 #define VERTICAL_FIELD_OF_VIEW 1
 #define DEPTH_IMAGE_WIDTH 2
 #define DEPTH_IMAGE_HEIGHT 3
-#define GRADIENT_MODE 4
-#define USE_SINUSOIDAL_GRADIENT 5
-#define POINT_SIZE 6
-#define LEVEL_OF_COLOR_DETAIL 7
-#define USE_FISHEYE_COLOR 8
+#define LIDAR_ORIGIN_TO_BEAM_ORIGIN 4
+#define DISCRETE_RESOLUTION 5
+#define GRADIENT_MODE 6
+#define USE_SINUSOIDAL_GRADIENT 7
+#define POINT_SIZE 8
+#define LEVEL_OF_COLOR_DETAIL 9
+#define USE_FISHEYE_COLOR 10
 
 #define FISHEYE_IMAGE_WIDTH 0
 #define FISHEYE_IMAGE_HEIGHT 1
@@ -19,6 +21,8 @@
 #define GRADIENT_MODE_SENSOR_X 1
 
 kernel void computeVertexBuffer(global float* parameters,
+                                global float* altitudeAngles,
+                                global float* azimuthAngles,
                                 global float* ousterToWorldTransform,
                                 read_only image2d_t discretizedDepthImage,
                                 global float* fisheyeParameters,
@@ -34,8 +38,7 @@ kernel void computeVertexBuffer(global float* parameters,
    int totalVerticalPointsForColorDetail = 1 + 2 * parameters[LEVEL_OF_COLOR_DETAIL];
    int ousterY = y / totalVerticalPointsForColorDetail;
 
-   float discreteResolution = 0.001f;
-   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, ousterY)).x * discreteResolution;
+   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, ousterY)).x * parameters[DISCRETE_RESOLUTION];
 
    int xFromCenter = -x - (parameters[DEPTH_IMAGE_WIDTH] / 2); // flip
    int yFromCenter = ousterY - (parameters[DEPTH_IMAGE_HEIGHT] / 2);
@@ -55,6 +58,9 @@ kernel void computeVertexBuffer(global float* parameters,
    float3 rotationMatrixRow2 = (float3) (angledRotationMatrix.s6, angledRotationMatrix.s7, angledRotationMatrix.s8);
 
    float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint, rotationMatrixRow0, rotationMatrixRow1, rotationMatrixRow2, origin);
+
+   parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN]
+   float encoderAngle = 2.0f * M_PI_F * (1.0f - ())
 
    float pointSize = parameters[POINT_SIZE] * eyeDepthInMeters;
    int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - parameters[LEVEL_OF_COLOR_DETAIL];

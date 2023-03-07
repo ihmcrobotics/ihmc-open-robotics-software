@@ -1,64 +1,73 @@
-kernel void extractDepthImage(global float* parameters, global int* pixelShifts, global unsigned char* lidarFrameBuffer, read_write image2d_t depthImage16UC1)
+#define COLUMNS_PER_FRAME 0
+#define PIXELS_PER_COLUMN 1
+#define MEASUREMENT_BLOCK_SIZE 2
+#define HEADER_BLOCK_BYTES 3
+#define CHANNEL_DATA_BLOCK_BYTES 4
+
+kernel void extractDepthImage(global float* parameters,
+                              global int* pixelShifts,
+                              global int* altitudeAngles,
+                              global int* azimuthAngles,
+                              global unsigned char* lidarFrameBuffer,
+                              read_write image2d_t depthImage16UC1)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
 
-   int columnsPerFrame = parameters[0];
-   int measurementBlockSize = parameters[1];
-   int headerBlockBytes = parameters[2];
-   int channelDataBlockBytes = parameters[3];
-   int columnsPerMeasurementBlock = parameters[4];
+   if (y < parameters[PIXELS_PER_COLUMN])
+   {
+      int bytesToColumnDataBlockStart = x * parameters[MEASUREMENT_BLOCK_SIZE] + parameters[HEADER_BLOCK_BYTES] + y * parameters[CHANNEL_DATA_BLOCK_BYTES];
 
-   int shiftedX = x;
-   shiftedX += pixelShifts[y];
+      // Ouster data is little endian
+      unsigned char range_MSB = lidarFrameBuffer[bytesToColumnDataBlockStart];
+      unsigned char range_LSB = lidarFrameBuffer[bytesToColumnDataBlockStart + 1];
+      // OpenCV is little endian
+      unsigned short range = (range_LSB << 8) | range_MSB;
 
-   if (shiftedX < 0)
-      shiftedX = columnsPerFrame + shiftedX;
-   if (shiftedX > columnsPerFrame - 1)
-      shiftedX -= columnsPerFrame;
+      int shiftedX = x;
+      shiftedX += pixelShifts[y];
 
-   int bytesToColumnDataBlockStart = x * measurementBlockSize + headerBlockBytes + y * channelDataBlockBytes;
+      if (shiftedX < 0)
+         shiftedX = parameters[COLUMNS_PER_FRAME] + shiftedX;
+      if (shiftedX > parameters[COLUMNS_PER_FRAME] - 1)
+         shiftedX -= parameters[COLUMNS_PER_FRAME];
 
-   // Ouster data is little endian
-   unsigned char range_MSB = lidarFrameBuffer[bytesToColumnDataBlockStart];
-   unsigned char range_LSB = lidarFrameBuffer[bytesToColumnDataBlockStart + 1];
-   // OpenCV is little endian
-   unsigned short range = (range_LSB << 8) | range_MSB;
+      write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
+   }
+   else
+   {
+      int bytesToEncoderCount = x * parameters[MEASUREMENT_BLOCK_SIZE]
+                                  + parameters[TIMESTAMP_BYTES]
+                                  + parameters[MEASUREMENT_ID_BYTES]
+                                  + parameters[FRAME_ID_BYTES];
 
-   write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
+      unsigned int encoderCount = lidarFrameBuffer[bytesToEncoderCount];
+
+      write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
+   }
 }
 
-kernel void imageToPointCloud(global float* parameters, read_only image2d_t discretizedDepthImage, global float* pointCloudVertexBuffer)
+#define HORIZONTAL_FIELD_OF_VIEW 0
+#define VERTICAL_FIELD_OF_VIEW 1
+#define DEPTH_IMAGE_WIDTH 2
+#define DEPTH_IMAGE_HEIGHT 3
+#define DISCRETE_RESOLUTION 4
+#define LIDAR_ORIGIN_TO_BEAM_ORIGIN 5
+
+kernel void imageToPointCloud(global float* parameters,
+                              read_only image2d_t discretizedDepthImage,
+                              global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
 
-   float horizontalFieldOfView = parameters[0];
-   float verticalFieldOfView = parameters[1];
-   float translationX = parameters[2];
-   float translationY = parameters[3];
-   float translationZ = parameters[4];
-   float rotationMatrixM00 = parameters[5];
-   float rotationMatrixM01 = parameters[6];
-   float rotationMatrixM02 = parameters[7];
-   float rotationMatrixM10 = parameters[8];
-   float rotationMatrixM11 = parameters[9];
-   float rotationMatrixM12 = parameters[10];
-   float rotationMatrixM20 = parameters[11];
-   float rotationMatrixM21 = parameters[12];
-   float rotationMatrixM22 = parameters[13];
-   int depthImageWidth = parameters[14];
-   int depthImageHeight = parameters[15];
-   float pointResolution = parameters[16];
+   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, y)).x * parameters[DISCRETE_RESOLUTION];
 
-   float discreteResolution = 0.001f;
-   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, y)).x * discreteResolution;
+   int xFromCenter = -x - (parameters[DEPTH_IMAGE_WIDTH] / 2); // flip
+   int yFromCenter = y - (parameters[DEPTH_IMAGE_HEIGHT] / 2);
 
-   int xFromCenter = -x - (depthImageWidth / 2); // flip
-   int yFromCenter = y - (depthImageHeight / 2);
-
-   float angleXFromCenter = xFromCenter / (float) depthImageWidth * horizontalFieldOfView;
-   float angleYFromCenter = yFromCenter / (float) depthImageHeight * verticalFieldOfView;
+   float angleXFromCenter = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * parameters[HORIZONTAL_FIELD_OF_VIEW];
+   float angleYFromCenter = yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * parameters[VERTICAL_FIELD_OF_VIEW];
 
    // Create additional rotation only transform
    float16 angledRotationMatrix = newRotationMatrix();
@@ -73,7 +82,7 @@ kernel void imageToPointCloud(global float* parameters, read_only image2d_t disc
                                        angledRotationMatrix.s2, angledRotationMatrix.s3, angledRotationMatrix.s4, angledRotationMatrix.s5,
                                        angledRotationMatrix.s6, angledRotationMatrix.s7, angledRotationMatrix.s8);
 
-   int pointStartIndex = (depthImageWidth * y + x) * 3;
+   int pointStartIndex = (parameters[DEPTH_IMAGE_WIDTH] * y + x) * 3;
 
    if (eyeDepthInMeters == 0.0f)
    {

@@ -13,6 +13,8 @@ import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
 
+import java.nio.ByteBuffer;
+
 /**
  * This class is for renedering the Ouster point cloud with optional coloring
  * from a fisheye camera with an equidistant camera model.
@@ -30,6 +32,8 @@ public class RDXOusterFisheyeColoredPointCloudKernel
    private final RigidBodyTransform ousterToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform ousterToWorldTransformCorrected = new RigidBodyTransform();
    private final RigidBodyTransform ousterToFisheyeTransform = new RigidBodyTransform();
+   private OpenCLFloatBuffer altitudeAnglesOpenCLBuffer;
+   private OpenCLFloatBuffer azimuthAnglesOpenCLBuffer;
    private int levelOfColorDetail;
    private int heightWithVerticalPointsForColorDetail;
 
@@ -66,8 +70,17 @@ public class RDXOusterFisheyeColoredPointCloudKernel
       return ousterToFisheyeTransform;
    }
 
+   public void setInstrinsicParameters(ByteBuffer beamAltitudeAnglesBuffer, ByteBuffer beamAzimuthAnglesBuffer)
+   {
+      altitudeAnglesOpenCLBuffer = new OpenCLFloatBuffer(beamAltitudeAnglesBuffer);
+      altitudeAnglesOpenCLBuffer.createOpenCLBufferObject(openCLManager);
+      azimuthAnglesOpenCLBuffer = new OpenCLFloatBuffer(beamAzimuthAnglesBuffer);
+      azimuthAnglesOpenCLBuffer.createOpenCLBufferObject(openCLManager);
+   }
+
    public void runKernel(float horizontalFieldOfView,
                          float verticalFieldOfView,
+                         float lidarOriginToBeamOrigin,
                          float pointSize,
                          boolean useSensorColor,
                          int gradientMode,
@@ -77,6 +90,7 @@ public class RDXOusterFisheyeColoredPointCloudKernel
    {
       runKernel(horizontalFieldOfView,
                 verticalFieldOfView,
+                lidarOriginToBeamOrigin,
                 pointSize,
                 useSensorColor,
                 gradientMode,
@@ -92,6 +106,7 @@ public class RDXOusterFisheyeColoredPointCloudKernel
 
    public void runKernel(float horizontalFieldOfView,
                          float verticalFieldOfView,
+                         float lidarOriginToBeamOrigin,
                          float pointSize,
                          boolean useSensorColor,
                          int gradientMode,
@@ -108,11 +123,15 @@ public class RDXOusterFisheyeColoredPointCloudKernel
       floatParameters.setParameter(verticalFieldOfView);
       floatParameters.setParameter(ousterDepthImage.getImageWidth());
       floatParameters.setParameter(ousterDepthImage.getImageHeight());
+      floatParameters.setParameter(lidarOriginToBeamOrigin);
+      floatParameters.setParameter(NettyOuster.DISCRETE_RESOLUTION);
       floatParameters.setParameter(gradientMode);
       floatParameters.setParameter(useSinusoidalGradientPattern);
       floatParameters.setParameter(pointSize);
       floatParameters.setParameter((float) levelOfColorDetail);
       floatParameters.setParameter(useSensorColor && fisheyeImage != null);
+      altitudeAnglesOpenCLBuffer.writeOpenCLBufferObject(openCLManager);
+      azimuthAnglesOpenCLBuffer.writeOpenCLBufferObject(openCLManager);
       ousterToWorldTransformCorrected.set(ousterToWorldTransform);
       ousterToWorldTransformCorrected.preMultiply(NettyOuster.INTRINSIC_TRANSFORM_CORRECTION);
       ousterToWorldTransformParameter.setParameter(ousterToWorldTransformCorrected);
@@ -137,12 +156,14 @@ public class RDXOusterFisheyeColoredPointCloudKernel
       colorImage.writeOpenCLImage(openCLManager);
 
       openCLManager.setKernelArgument(unpackPointCloudKernel, 0, floatParameters.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 1, ousterToWorldTransformParameter.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 2, ousterDepthImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 3, fisheyeFloatParameters.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 4, colorImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 5, ousterToFisheyeTransformParameter.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 6, pointCloudVertexBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 1, altitudeAnglesOpenCLBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 2, azimuthAnglesOpenCLBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 3, ousterToWorldTransformParameter.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 4, ousterDepthImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 5, fisheyeFloatParameters.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 6, colorImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 7, ousterToFisheyeTransformParameter.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 8, pointCloudVertexBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(unpackPointCloudKernel, ousterDepthImage.getImageWidth(), heightWithVerticalPointsForColorDetail);
       pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
    }
