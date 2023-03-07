@@ -127,7 +127,7 @@ public class ZED2ColorStereoPublisher
          readImage(color8UC3CombinedImage);
 
          PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3CombinedImage, yuvCombinedImage, colorTopic, colorImageMessage, ros2Helper,
-                                                               cameraPose, now, colorSequenceNumber++, imageHeight, imageWidth);
+                                                               cameraPose, now, colorSequenceNumber++, imageHeight, imageWidth, 0.001f);
       }
 
    }

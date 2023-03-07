@@ -193,7 +193,7 @@ def extract_trajectory_from_output(file):
 if __name__ == '__main__':
 
     home = os.path.expanduser('~')
-    path = home + '/.ihmc/logs/perception/IROS_2023/'
+    path = home + '/.ihmc/logs/perception/'
     files = sorted(os.listdir(path))
     
     titles = [  'WalkForward_FallAtTheEnd', # 20230228_191411_PerceptionLog.hdf5
@@ -207,8 +207,8 @@ if __name__ == '__main__':
                 'Stairs_ClimbUp',           # 20230228_204753_PerceptionLog.hdf5
               ]
 
-    for i, file in enumerate(files):
-        print('Index: ', i, ' File: ', file, '\tTitle: ', titles[i])
+#     for i, file in enumerate(files):
+#         print('Index: ', i, ' File: ', file, '\tTitle: ', titles[i])
 
     # INDEX TO LOAD ----------------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -217,12 +217,15 @@ if __name__ == '__main__':
     # INDEX TO LOAD -----------------------------------------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     filename = files[index_to_load]
-    print('\nLoading file: ', index_to_load, '\tName: ', filename, '\tTitle: ', titles[index_to_load], '\n')
+    filename = '20230307_131852_PerceptionLog.hdf5'
+#     print('\nLoading file: ', index_to_load, '\tName: ', filename, '\tTitle: ', titles[index_to_load], '\n')
 
     data = h5py.File(path + filename, 'r')
-    output_file = '/home/quantum/Workspace/Code/Resources/IROS_2023/' + titles[index_to_load] + '.txt'
+    print_file_info(data, filename)
 
-    # player_main(data)
+#     output_file = '/home/quantum/Workspace/Code/Resources/IROS_2023/' + titles[index_to_load] + '.txt'
+
+    player_main(data)
     
-    plotter_main(data, output_file)
+#     plotter_main(data, output_file)
 
