@@ -716,7 +716,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          commandInputManager.clearAllCommands();
 
          boolean isInSwing = stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_LEFT_SUPPORT
-               || stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_RIGHT_SUPPORT;
+                             || stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_RIGHT_SUPPORT;
          if (enablePushRecoveryOnFailure.getBooleanValue() && !isInSwing)
          {
             commandInputManager.submitMessage(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.PUSH_RECOVERY));
