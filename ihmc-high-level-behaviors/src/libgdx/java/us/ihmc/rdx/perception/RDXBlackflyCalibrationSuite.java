@@ -180,6 +180,7 @@ public class RDXBlackflyCalibrationSuite
                   ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
                   double sideLength = 0.1982;
                   markersToTrack.add(new OpenCVArUcoMarker(0, sideLength));
+                  markersToTrack.add(new OpenCVArUcoMarker(2, sideLength));
                   // TODO: Use frame from openCVArUcoMarkerDetection? i.e. remove redudant parameter
                   arUcoMarkerDetectionUI.create(openCVArUcoMarkerDetection, markersToTrack, blackflySensorFrame);
                   baseUI.getImGuiPanelManager().addPanel(arUcoMarkerDetectionUI.getMainPanel());
