@@ -217,7 +217,7 @@ if __name__ == '__main__':
     # INDEX TO LOAD -----------------------------------------------------<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     filename = files[index_to_load]
-    filename = '20230307_131852_PerceptionLog.hdf5'
+    filename = '20230308_152625_PerceptionLog.hdf5'
 #     print('\nLoading file: ', index_to_load, '\tName: ', filename, '\tTitle: ', titles[index_to_load], '\n')
 
     data = h5py.File(path + filename, 'r')

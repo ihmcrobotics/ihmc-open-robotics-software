@@ -26,6 +26,7 @@ import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -54,6 +55,7 @@ public class RealsenseColorAndDepthPublisher
    private final ROS2Helper ros2Helper;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final FramePose3D cameraPose = new FramePose3D();
+   private final FramePose3D colorPoseInDepthFrame = new FramePose3D();
 
    private final Point3D cameraPosition = new Point3D();
    private final Quaternion cameraQuaternion = new Quaternion();
@@ -106,7 +108,7 @@ public class RealsenseColorAndDepthPublisher
 
       initializeSensor();
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
       ros2Helper = new ROS2Helper(ros2Node);
 
       LogTools.info("Setting Up ROS2 Property Set Group");
@@ -148,7 +150,7 @@ public class RealsenseColorAndDepthPublisher
          throw new RuntimeException("Device not found. Set -D<model>.serial.number=00000000000");
       }
 
-      LogTools.info("Enabling Color On Realsense");
+      LogTools.info("Enabling Color On Realsense: {}", realsenseConfiguration);
       realsense.enableColor(realsenseConfiguration);
       realsense.initialize();
 
@@ -183,6 +185,8 @@ public class RealsenseColorAndDepthPublisher
          cameraPosition.set(cameraPose.getPosition());
          cameraQuaternion.set(cameraPose.getOrientation());
 
+         colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
+
          compressedDepthPointer = new BytePointer();
          BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
 
@@ -207,7 +211,7 @@ public class RealsenseColorAndDepthPublisher
                                                                   colorTopic,
                                                                   colorImageMessage,
                                                                   ros2Helper,
-                                                                  cameraPose,
+                                                                  colorPoseInDepthFrame,
                                                                   acquisitionTime,
                                                                   colorSequenceNumber++,
                                                                   realsense.getColorHeight(),
