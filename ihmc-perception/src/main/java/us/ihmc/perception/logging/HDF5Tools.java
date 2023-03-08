@@ -348,39 +348,6 @@ public class HDF5Tools
       return numberOfGroups;
    }
 
-   // TODO: Complete the method to store a double matrix
-   public void storeMatrix(Group group, double[] data)
-   {
-      long[] dimensions = {5, 5};
-      if (group.nameExists(String.valueOf(0)))
-      {
-         DataSet dataset = group.openDataSet(String.valueOf(0));
-         dataset.write(new DoublePointer(data), new DataType(PredType.NATIVE_DOUBLE()));
-         dataset._close();
-      }
-      else
-      {
-         DataSet dataset = group.createDataSet(String.valueOf(0), new DataType(PredType.NATIVE_DOUBLE()), new DataSpace(2, dimensions));
-         dataset._close();
-      }
-   }
-
-   // TODO: Does not work yet. Needs to be fixed.
-   public void storeRawByteArray(Group group, long index, byte[] data, long size)
-   {
-      LogTools.debug("Store Byte Array: {} {}", index, size);
-      long[] dimensions = {size};
-      LogTools.debug("Creating Dataset: {} {}", group.toString(), String.valueOf(index));
-
-      DataSpace dataSpace = new DataSpace(1, dimensions);
-      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_UCHAR()), dataSpace);
-
-      dataset.write(new BytePointer(data), new DataType(PredType.NATIVE_UCHAR()));
-
-      dataSpace._close();
-      dataset._close();
-   }
-
    public void storeBytes(Group group, long index, BytePointer srcBytePointer)
    {
       long size = srcBytePointer.limit();
@@ -394,8 +361,6 @@ public class HDF5Tools
 
       dataSet.write((Pointer) srcBytePointer, dataType);
    }
-
-   /* TODO: Does not work yet. Needs to be fixed. */
 
    public int loadBytes(Group group, int index, BytePointer bytePointer)
    {
@@ -425,5 +390,136 @@ public class HDF5Tools
    {
       ArrayList<Float> timestamps = new ArrayList<>();
       return timestamps;
+   }
+
+   /**
+    * Writes an int attribute to the HDF5 group.
+    * @param name
+    * @param value
+    */
+   public void writeIntAttribute(Group group, String name, int value)
+   {
+      long[] dims = {1};
+      DataType dataType = new DataType(PredType.NATIVE_INT32());
+      DataSpace dataSpace = new DataSpace(1, dims);
+      Attribute attribute = group.createAttribute(name, dataType, dataSpace);
+      IntPointer pointer = new IntPointer(1);
+      pointer.put(0, value);
+      attribute.write(dataType, pointer);
+      attribute._close();
+   }
+
+   /**
+    * Writes a long attribute to the HDF5 group.
+    * @param group HDF5 group to write the attribute to.
+    * @param name Attribute name.
+    * @param value Attribute value.
+    */
+   public void writeLongAttribute(Group group, String name, long value)
+   {
+      long[] dims = {1};
+      DataType dataType = new DataType(PredType.NATIVE_INT64());
+      DataSpace dataSpace = new DataSpace(1, dims);
+      Attribute attribute = group.createAttribute(name, dataType, dataSpace);
+      LongPointer pointer = new LongPointer(1);
+      pointer.put(0, value);
+      attribute.write(dataType, pointer);
+      attribute._close();
+   }
+
+   /**
+    * Writes a float attribute to the HDF5 group.
+    * @param group HDF5 group to write the attribute to.
+    * @param name Attribute name.
+    * @param value Attribute value.
+    */
+   public void writeFloatAttribute(Group group, String name, float value)
+   {
+      long[] dims = {1};
+      DataType dataType = new DataType(PredType.NATIVE_FLOAT());
+      DataSpace dataSpace = new DataSpace(1, dims);
+      Attribute attribute = group.createAttribute(name, dataType, dataSpace);
+      FloatPointer pointer = new FloatPointer(1);
+      pointer.put(0, value);
+      attribute.write(dataType, pointer);
+      attribute._close();
+   }
+
+/**
+    * Writes a double attribute to the HDF5 group.
+    * @param group HDF5 group to write the attribute to.
+    * @param name Attribute name.
+    * @param value Attribute value.
+    */
+   public void writeDoubleAttribute(Group group, String name, double value)
+   {
+      long[] dims = {1};
+      DataType dataType = new DataType(PredType.NATIVE_DOUBLE());
+      DataSpace dataSpace = new DataSpace(1, dims);
+      Attribute attribute = group.createAttribute(name, dataType, dataSpace);
+      DoublePointer pointer = new DoublePointer(1);
+      pointer.put(0, value);
+      attribute.write(dataType, pointer);
+      attribute._close();
+   }
+
+   /**
+    * Reads an int attribute to the HDF5 group.
+    * @param group HDF5 group to read the attribute from.
+    * @param name Attribute name.
+    */
+   public int readIntAttribute(Group group, String name)
+   {
+      Attribute sizeAttribute = group.openAttribute(name);
+      IntPointer sizeAttributePointer = new IntPointer(1);
+      DataType dataType = new DataType(PredType.NATIVE_INT32());
+      sizeAttribute.read(dataType, sizeAttributePointer);
+      sizeAttribute._close();
+      return sizeAttributePointer.get(0);
+   }
+
+   /**
+    * Reads a long attribute to the HDF5 group.
+    * @param group HDF5 group to read the attribute from.
+    * @param name Attribute name.
+    */
+   public long readLongAttribute(Group group, String name)
+   {
+      Attribute sizeAttribute = group.openAttribute(name);
+      LongPointer sizeAttributePointer = new LongPointer(1);
+      DataType dataType = new DataType(PredType.NATIVE_INT64());
+      sizeAttribute.read(dataType, sizeAttributePointer);
+      sizeAttribute._close();
+      return sizeAttributePointer.get(0);
+   }
+
+   /**
+    * Reads a float attribute to the HDF5 group.
+    * @param group HDF5 group to read the attribute from.
+    * @param name Attribute name.
+    */
+   public float readFloatAttribute(Group group, String name)
+   {
+      Attribute sizeAttribute = group.openAttribute(name);
+      FloatPointer sizeAttributePointer = new FloatPointer(1);
+      DataType dataType = new DataType(PredType.NATIVE_FLOAT());
+      sizeAttribute.read(dataType, sizeAttributePointer);
+      sizeAttribute._close();
+      return sizeAttributePointer.get(0);
+   }
+
+   /**
+    * Reads a double attribute to the HDF5 group.
+    * @param group HDF5 group to read the attribute from.
+    * @param name Attribute name.
+    */
+   public double readDoubleAttribute(Group group, String name)
+   {
+      Attribute sizeAttribute = group.openAttribute(name);
+      DoublePointer sizeAttributePointer = new DoublePointer(1);
+      DataType dataType = new DataType(PredType.NATIVE_DOUBLE());
+      sizeAttribute.read(dataType, sizeAttributePointer);
+      sizeAttribute._close();
+      return sizeAttributePointer.get(0);
    }
 }
