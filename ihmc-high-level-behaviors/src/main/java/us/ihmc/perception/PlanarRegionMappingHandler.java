@@ -91,7 +91,7 @@ public class PlanarRegionMappingHandler
    private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
 
    private int planarRegionListIndex = 0;
-   private int perceptionLogIndex = 150;
+   private int perceptionLogIndex = 0;
    private int totalDepthCount = 0;
 
    private String sensorLogChannelName;
