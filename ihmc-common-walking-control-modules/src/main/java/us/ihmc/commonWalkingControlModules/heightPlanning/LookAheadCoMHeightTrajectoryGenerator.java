@@ -410,8 +410,13 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                  startWaypointX,
                                                  startWaypointY,
                                                  startGroundHeight);
-      double startMaxHeight = findWaypointHeight(maximumHeight
-            + extraToeOffHeight, hipWidth.getDoubleValue(), startAnkleX, startAnkleY, startWaypointX, startWaypointY, startGroundHeight);
+      double startMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
+                                                 hipWidth.getDoubleValue(),
+                                                 startAnkleX,
+                                                 startAnkleY,
+                                                 startWaypointX,
+                                                 startWaypointY,
+                                                 startGroundHeight);
       startMinHeight = Math.min(startMinHeight, startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
       startMaxHeight = Math.max(startMaxHeight, startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
       double firstMinHeight = findWaypointHeight(minimumHeight,
@@ -445,8 +450,13 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                         secondMidpointX,
                                                         secondMidpointY,
                                                         endGroundHeight);
-      double exchangeInFromMaxHeight = findWaypointHeight(maximumHeight
-            + extraToeOffHeight, hipWidth.getDoubleValue(), startAnkleX, startAnkleY, secondMidpointX, secondMidpointY, startGroundHeight);
+      double exchangeInFromMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
+                                                          hipWidth.getDoubleValue(),
+                                                          startAnkleX,
+                                                          startAnkleY,
+                                                          secondMidpointX,
+                                                          secondMidpointY,
+                                                          startGroundHeight);
       double exchangeInToMaxHeight = findWaypointHeight(maximumHeight,
                                                         hipWidth.getDoubleValue(),
                                                         endAnkleX,
@@ -471,8 +481,13 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                          thirdMidpointX,
                                                          thirdMidpointY,
                                                          endGroundHeight);
-      double exchangeOutFromMaxHeight = findWaypointHeight(maximumHeight
-            + extraToeOffHeight, hipWidth.getDoubleValue(), startAnkleX, startAnkleY, thirdMidpointX, thirdMidpointY, startGroundHeight);
+      double exchangeOutFromMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
+                                                           hipWidth.getDoubleValue(),
+                                                           startAnkleX,
+                                                           startAnkleY,
+                                                           thirdMidpointX,
+                                                           thirdMidpointY,
+                                                           startGroundHeight);
       double exchangeOutToMaxHeight = findWaypointHeight(maximumHeight,
                                                          hipWidth.getDoubleValue(),
                                                          endAnkleX,
@@ -560,7 +575,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       point.addY(heightOffsetHandler.getOffsetHeightAboveGround());
       comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame,
                                                          comHeightPartialDerivativesDataToPack.getComHeight()
-                                                               + heightOffsetHandler.getOffsetHeightAboveGround());
+                                                                     + heightOffsetHandler.getOffsetHeightAboveGround());
 
       this.splineQuery.set(point.getX());
       this.desiredCoMHeight.set(point.getY());
