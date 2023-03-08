@@ -74,8 +74,8 @@ public class PerceptionDataLogger
 
    public PerceptionDataLogger()
    {
-      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
+//      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+//      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
 
       channels.put(PerceptionLoggerConstants.D435_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.D435_COLOR_NAME, 0, 0));
       references.put(PerceptionLoggerConstants.D435_COLOR_NAME, new AtomicReference<>(null));

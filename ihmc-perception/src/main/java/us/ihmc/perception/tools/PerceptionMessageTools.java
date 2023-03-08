@@ -98,8 +98,9 @@ public class PerceptionMessageTools
                        sequenceNumber,
                        height,
                        width,
-                       depthToMetersRatio,
-                       ImageMessageFormat.DEPTH_PNG_16UC1);
+                       depthToMetersRatio);
+
+      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
       helper.publish(topic, depthImageMessage);
    }
 
@@ -124,8 +125,8 @@ public class PerceptionMessageTools
                        sequenceNumber,
                        height,
                        width,
-                       depthToMetersRatio,
-                       ImageMessageFormat.COLOR_JPEG_YUVI420);
+                       depthToMetersRatio);
+      ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
       helper.publish(topic, colorImageMessage);
    }
 
@@ -178,11 +179,9 @@ public class PerceptionMessageTools
                                        long sequenceNumber,
                                        int height,
                                        int width,
-                                       float depthToMetersRatio,
-                                       ImageMessageFormat format)
+                                       float depthToMetersRatio)
    {
       packImageMessageData(dataBytePointer, imageMessage);
-      imageMessage.setFormat(format.ordinal());
       imageMessage.setImageHeight(height);
       imageMessage.setImageWidth(width);
       imageMessage.getPosition().set(cameraPose.getPosition());

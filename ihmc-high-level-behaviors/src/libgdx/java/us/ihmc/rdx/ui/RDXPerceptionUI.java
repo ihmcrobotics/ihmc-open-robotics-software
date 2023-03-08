@@ -64,6 +64,14 @@ public class RDXPerceptionUI
                                                                                 PubSubImplementation.FAST_RTPS,
                                                                                 ROS2Tools.L515_DEPTH_IMAGE));
 
+            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D455 Color",
+                                                                                PubSubImplementation.FAST_RTPS,
+                                                                                ROS2Tools.D455_COLOR_IMAGE));
+
+            globalVisualizersUI.addVisualizer(new RDXROS2ImageMessageVisualizer("D455 Depth",
+                                                                                PubSubImplementation.FAST_RTPS,
+                                                                                ROS2Tools.D455_DEPTH_IMAGE));
+
             RDXROS2ColoredPointCloudVisualizer d455ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("D455 Colored Depth",
                                                                                                                    PubSubImplementation.FAST_RTPS,
                                                                                                                    ROS2Tools.D455_DEPTH_IMAGE,
