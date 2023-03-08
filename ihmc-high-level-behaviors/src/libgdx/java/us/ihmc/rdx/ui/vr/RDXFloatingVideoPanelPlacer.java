@@ -10,6 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXFloatingVideoPanelPlacer
 {
+   private RDXPanelPlacementMode mode = RDXPanelPlacementMode.MANUAL_PLACEMENT;
    private static final double yPanel = 0.0;
    private static final double zPanel = 0.17;
    private final RDX3DSituatedImagePanel floatingVideoPanel = new RDX3DSituatedImagePanel();
@@ -21,7 +22,21 @@ public class RDXFloatingVideoPanelPlacer
    private final RigidBodyTransform gripOffsetTransform = new RigidBodyTransform();
    private boolean grippedLastTime = false;
 
-   public void place(RDXVRContext context)
+
+   public void update(RDXVRContext context)
+   {
+      switch(mode)
+      {
+         case MANUAL_PLACEMENT:
+            placeWithGripper(context);
+            break;
+         case FOLLOW_HEADSET:
+            followHeadset(context);
+            break;
+      }
+   }
+
+   public void followHeadset(RDXVRContext context)
    {
       context.addVRInputProcessor(vrContext ->
       {
@@ -89,6 +104,11 @@ public class RDXFloatingVideoPanelPlacer
             }
          });
       });
+   }
+
+   public void setMode(RDXPanelPlacementMode mode)
+   {
+      this.mode = mode;
    }
 
    public RDX3DSituatedImagePanel getFloatingVideoPanel()
