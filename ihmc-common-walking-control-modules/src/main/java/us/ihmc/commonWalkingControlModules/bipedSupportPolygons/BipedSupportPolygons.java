@@ -78,8 +78,11 @@ public class BipedSupportPolygons implements SCS2YoGraphicHolder
          footPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2D(midFeetZUpFrame));
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         YoFrameConvexPolygon2D footPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix
-               + "FootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
+         YoFrameConvexPolygon2D footPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "FootPolygon",
+                                                                            "",
+                                                                            worldFrame,
+                                                                            maxNumberOfContactPointsPerFoot,
+                                                                            registry);
          footPolygonsViz.put(robotSide, footPolygonViz);
          YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon",
                                                                        footPolygonViz,
