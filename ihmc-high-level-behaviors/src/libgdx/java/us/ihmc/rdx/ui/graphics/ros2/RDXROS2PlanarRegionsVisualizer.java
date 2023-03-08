@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -9,6 +8,7 @@ import imgui.internal.ImGui;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
@@ -19,7 +19,9 @@ import us.ihmc.tools.thread.MissingThreadTools;
 
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-public class RDXROS2PlanarRegionsVisualizer extends RDXVisualizer implements RenderableProvider
+import java.util.Set;
+
+public class RDXROS2PlanarRegionsVisualizer extends RDXVisualizer
 {
    private final RDXPlanarRegionsGraphic planarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final ResettableExceptionHandlingExecutorService executorService;
@@ -88,9 +90,9 @@ public class RDXROS2PlanarRegionsVisualizer extends RDXVisualizer implements Ren
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive())
+      if (isActive() && sceneLevelCheck(sceneLevels))
       {
          planarRegionsGraphic.getRenderables(renderables, pool);
       }
