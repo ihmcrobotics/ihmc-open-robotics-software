@@ -115,7 +115,6 @@ public class RDXVRModeManager
       if (showFloatingVideoPanel.get())
       {
          ImGui.sameLine();
-
          if (ImGui.radioButton(labels.get("Manually place"), panelPlacementMode == RDXPanelPlacementMode.MANUAL_PLACEMENT))
          {
             panelPlacementMode = RDXPanelPlacementMode.MANUAL_PLACEMENT;
