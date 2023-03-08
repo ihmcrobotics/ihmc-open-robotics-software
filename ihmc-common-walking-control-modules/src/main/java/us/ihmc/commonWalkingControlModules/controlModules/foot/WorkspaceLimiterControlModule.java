@@ -286,15 +286,22 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
                                                                                    registry,
                                                                                    correctionAlphaFilter);
       heightVelocityCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(namePrefix
-            + "HeightVelocityCorrectedFilteredForSingularityAvoidance", registry, correctionAlphaFilter);
+                                                                                           + "HeightVelocityCorrectedFilteredForSingularityAvoidance",
+                                                                                           registry,
+                                                                                           correctionAlphaFilter);
       heightAccelerationCorrectedFilteredForSingularityAvoidance = new AlphaFilteredYoVariable(namePrefix
-            + "HeightAccelerationCorrectedFilteredForSingularityAvoidance", registry, correctionAlphaFilter);
+                                                                                               + "HeightAccelerationCorrectedFilteredForSingularityAvoidance",
+                                                                                               registry,
+                                                                                               correctionAlphaFilter);
 
       if (visualize)
       {
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
-                                                  new YoGraphicPosition(namePrefix
-                                                        + "DesiredFootPosition", yoDesiredFootPosition, 0.025, YoAppearance.Red(), GraphicType.BALL));
+                                                  new YoGraphicPosition(namePrefix + "DesiredFootPosition",
+                                                                        yoDesiredFootPosition,
+                                                                        0.025,
+                                                                        YoAppearance.Red(),
+                                                                        GraphicType.BALL));
          yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance",
                                                   new YoGraphicPosition(namePrefix + "CorrectedDesiredFootPosition",
                                                                         yoCorrectedDesiredFootPosition,
@@ -418,7 +425,7 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
          pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
          double upperBoundToStartHeightCorrection = maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.getValue()
-               - percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight.getValue();
+                                                    - percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight.getValue();
 
          if (desiredPercentOfLegLength.getDoubleValue() > upperBoundToStartHeightCorrection)
          {
@@ -426,9 +433,9 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
          }
 
          double upperBoundToStartFootCorrection = maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.getValue()
-               - percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue();
+                                                  - percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue();
          double lowerBoundToStartFootCorrection = minPercentOfLegLengthForSingularityAvoidanceInSwing.getValue()
-               + percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue();
+                                                  + percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue();
 
          if (desiredPercentOfLegLength.getDoubleValue() > upperBoundToStartFootCorrection)
          {
@@ -459,7 +466,7 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 
       double desiredFootPositionInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(),
                                                         maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.getValue()
-                                                              * maximumLegLength.getDoubleValue());
+                                                                                           * maximumLegLength.getDoubleValue());
 
       // Mix the desired leg extension velocity to progressively follow the pelvis velocity as the the leg is more straight
       double desiredLinearVelocityZ = InterpolationTools.linearInterpolate(desiredFootLinearVelocity.getZ(),
@@ -502,7 +509,7 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 
       double desiredFootPositionInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(),
                                                         maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.getValue()
-                                                              * maximumLegLength.getDoubleValue());
+                                                                                           * maximumLegLength.getDoubleValue());
 
       correctFootDesiredsWithScaleFactor(desiredFootPositionInAxisFrame,
                                          desiredFootPositionToCorrect,
@@ -522,7 +529,7 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
       isSwingSingularityAvoidanceUsed.set(true);
 
       double alpha = (desiredPercentOfLegLength.getDoubleValue() - minPercentOfLegLengthForSingularityAvoidanceInSwing.getValue())
-            / percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue();
+                     / percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue();
       alphaSwingSingularityAvoidanceForFoot.set(1.0 - MathTools.clamp(alpha, 0.0, 1.0));
 
       double desiredFootPositionInAxisFrame = -Math.max(desiredLegLength.getDoubleValue(),
@@ -614,7 +621,7 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 
          comHeightDataToCorrect.setComHeightVelocity(comHeightDataToCorrect.getComHeightVelocity() + unachievedSwingVelocityFiltered.getDoubleValue());
          comHeightDataToCorrect.setComHeightAcceleration(comHeightDataToCorrect.getComHeightAcceleration()
-               + unachievedSwingAccelerationFiltered.getDoubleValue());
+                                                         + unachievedSwingAccelerationFiltered.getDoubleValue());
 
          return true;
       }
@@ -660,15 +667,15 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
       }
 
       double maxPercent = maxPercentOfLegLengthForSingularityAvoidanceInSupport.getValue();
-      boolean singularityAvoidanceShouldBeDisabled = desiredPercentOfLegLength.getDoubleValue() < maxPercent
-            - percentOfLegLengthMarginToDisableSingularityAvoidance.getValue();
-      boolean legDoesNotNeedSingularityAvoidance = desiredPercentOfLegLength.getDoubleValue() < maxPercent
-            - percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight.getValue();
+      boolean singularityAvoidanceShouldBeDisabled = desiredPercentOfLegLength.getDoubleValue()
+                                                     < maxPercent - percentOfLegLengthMarginToDisableSingularityAvoidance.getValue();
+      boolean legDoesNotNeedSingularityAvoidance = desiredPercentOfLegLength.getDoubleValue()
+                                                   < maxPercent - percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight.getValue();
 
       // This checks to see if we were doing singularity avoidance, but the leg is straight now, and we aren't already transitioning out of using
       // singularity avoidance.
       if (isSupportSingularityAvoidanceUsed.getBooleanValue() && singularityAvoidanceShouldBeDisabled
-            && !doSmoothTransitionOutOfSingularityAvoidance.getBooleanValue())
+          && !doSmoothTransitionOutOfSingularityAvoidance.getBooleanValue())
       {
          alphaSupportSingularityAvoidance.set(0.0);
          doSmoothTransitionOutOfSingularityAvoidance.set(true);
@@ -733,16 +740,16 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 
       // If height is lower than filtered and the knee is bent enough, then really want to get out of singularity avoidance faster. So in this case, smooth faster...
       else if (desiredCenterOfMassHeightPoint.getZ() <= heightCorrectedFilteredForSingularityAvoidance.getDoubleValue()
-            && (desiredPercentOfLegLength.getDoubleValue() < maxPercentOfLegLengthForSingularityAvoidanceInSupport.getValue()
-                  - percentOfLegLengthMarginToDisableSingularityAvoidance.getValue()))
+               && (desiredPercentOfLegLength.getDoubleValue()
+                   < maxPercentOfLegLengthForSingularityAvoidanceInSupport.getValue() - percentOfLegLengthMarginToDisableSingularityAvoidance.getValue()))
       {
          // Call this twice here to smooth faster. Need to get out of singularity avoidance!
          heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
          heightCorrectedFilteredForSingularityAvoidance.update(desiredCenterOfMassHeightPoint.getZ());
 
          // If leg is bent a lot and singularity avoidance no longer needed, stop smoothing...
-         if (desiredPercentOfLegLength.getDoubleValue() < maxPercentOfLegLengthForSingularityAvoidanceInSupport.getValue()
-               - percentOfLegLengthMarginToAbortSingularityAvoidance.getValue())
+         if (desiredPercentOfLegLength.getDoubleValue()
+             < maxPercentOfLegLengthForSingularityAvoidanceInSupport.getValue() - percentOfLegLengthMarginToAbortSingularityAvoidance.getValue())
          {
             alphaSupportSingularityAvoidance.set(0.0);
             isSupportSingularityAvoidanceUsed.set(false);
@@ -851,10 +858,16 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
       {
          group.addChild(newYoGraphicCoordinateSystem3D(virtualLegTangentialFrameHipCentered.getName(), yoVirtualLegTangentialFrameHipCenteredPose, 0.1));
          group.addChild(newYoGraphicCoordinateSystem3D(virtualLegTangentialFrameAnkleCentered.getName(), yoVirtualLegTangentialFrameAnkleCenteredPose, 0.1));
-         group.addChild(newYoGraphicArrow3D(namePrefix
-               + "DesiredFootVelocity", yoDesiredFootPosition, yoDesiredFootLinearVelocity, 0.2, ColorDefinitions.Red()));
-         group.addChild(newYoGraphicArrow3D(namePrefix
-               + "CorrectedFootVelocity", yoCorrectedDesiredFootPosition, yoCorrectedDesiredFootLinearVelocity, 0.2, ColorDefinitions.Green()));
+         group.addChild(newYoGraphicArrow3D(namePrefix + "DesiredFootVelocity",
+                                            yoDesiredFootPosition,
+                                            yoDesiredFootLinearVelocity,
+                                            0.2,
+                                            ColorDefinitions.Red()));
+         group.addChild(newYoGraphicArrow3D(namePrefix + "CorrectedFootVelocity",
+                                            yoCorrectedDesiredFootPosition,
+                                            yoCorrectedDesiredFootLinearVelocity,
+                                            0.2,
+                                            ColorDefinitions.Green()));
       }
 
       return group;
