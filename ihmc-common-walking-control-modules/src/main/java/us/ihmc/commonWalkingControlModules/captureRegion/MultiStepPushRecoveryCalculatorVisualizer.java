@@ -50,12 +50,18 @@ public class MultiStepPushRecoveryCalculatorVisualizer implements SCS2YoGraphicH
             capturePointsAtTouchdown.add(new YoFramePoint2D("capturePointAtTouchdown" + i, worldFrame, registry));
             recoveryStepLocations.add(new YoFramePoint2D("recoveryStepLocation" + i, worldFrame, registry));
 
-            YoFrameConvexPolygon2D yoCaptureRegionPolygonAtTouchdown = new YoFrameConvexPolygon2D(captureName
-                  + "AtTouchdown", suffix, worldFrame, 30, registry);
+            YoFrameConvexPolygon2D yoCaptureRegionPolygonAtTouchdown = new YoFrameConvexPolygon2D(captureName + "AtTouchdown",
+                                                                                                  suffix,
+                                                                                                  worldFrame,
+                                                                                                  30,
+                                                                                                  registry);
             yoCaptureRegionsAtTouchdown.add(yoCaptureRegionPolygonAtTouchdown);
 
-            YoArtifactPolygon capturePolygonAtTouchdownArtifact = new YoArtifactPolygon(captureName + "AtTouchdown"
-                  + suffix, yoCaptureRegionPolygonAtTouchdown, Color.RED, false, true);
+            YoArtifactPolygon capturePolygonAtTouchdownArtifact = new YoArtifactPolygon(captureName + "AtTouchdown" + suffix,
+                                                                                        yoCaptureRegionPolygonAtTouchdown,
+                                                                                        Color.RED,
+                                                                                        false,
+                                                                                        true);
 
             String reachableName = "reachableRegion" + i;
 
@@ -71,10 +77,16 @@ public class MultiStepPushRecoveryCalculatorVisualizer implements SCS2YoGraphicH
 
             YoArtifactPolygon intersectingPolygonArtifact = new YoArtifactPolygon(intersectingName + suffix, yoIntersectingRegion, Color.YELLOW, false);
 
-            YoGraphicPosition touchdownICPViz = new YoGraphicPosition("capturePointTouchdown" + i
-                  + suffix, capturePointsAtTouchdown.get(i), 0.01, YoAppearance.Yellow(), YoGraphicPosition.GraphicType.SOLID_BALL);
-            YoGraphicPosition footstepViz = new YoGraphicPosition("recoveryStepLocation" + i
-                  + suffix, recoveryStepLocations.get(i), 0.01, YoAppearance.Blue(), YoGraphicPosition.GraphicType.SOLID_BALL);
+            YoGraphicPosition touchdownICPViz = new YoGraphicPosition("capturePointTouchdown" + i + suffix,
+                                                                      capturePointsAtTouchdown.get(i),
+                                                                      0.01,
+                                                                      YoAppearance.Yellow(),
+                                                                      YoGraphicPosition.GraphicType.SOLID_BALL);
+            YoGraphicPosition footstepViz = new YoGraphicPosition("recoveryStepLocation" + i + suffix,
+                                                                  recoveryStepLocations.get(i),
+                                                                  0.01,
+                                                                  YoAppearance.Blue(),
+                                                                  YoGraphicPosition.GraphicType.SOLID_BALL);
 
             graphicsListRegistry.registerArtifact(listName, capturePolygonAtTouchdownArtifact);
             graphicsListRegistry.registerArtifact(listName, reachablePolygonArtifact);
@@ -134,10 +146,16 @@ public class MultiStepPushRecoveryCalculatorVisualizer implements SCS2YoGraphicH
          String intersectingName = "intersectingRegion" + i;
          group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D(intersectingName + suffix, yoIntersectingRegions.get(i), ColorDefinitions.Yellow()));
 
-         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointTouchdown" + i
-               + suffix, capturePointsAtTouchdown.get(i), 0.01, ColorDefinitions.Yellow(), DefaultPoint2DGraphic.CIRCLE_FILLED));
-         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("recoveryStepLocation" + i
-               + suffix, recoveryStepLocations.get(i), 0.01, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_FILLED));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointTouchdown" + i + suffix,
+                                                                       capturePointsAtTouchdown.get(i),
+                                                                       0.01,
+                                                                       ColorDefinitions.Yellow(),
+                                                                       DefaultPoint2DGraphic.CIRCLE_FILLED));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("recoveryStepLocation" + i + suffix,
+                                                                       recoveryStepLocations.get(i),
+                                                                       0.01,
+                                                                       ColorDefinitions.Blue(),
+                                                                       DefaultPoint2DGraphic.CIRCLE_FILLED));
       }
       return group;
    }
