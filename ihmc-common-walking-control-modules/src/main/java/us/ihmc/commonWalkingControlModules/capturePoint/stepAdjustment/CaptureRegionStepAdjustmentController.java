@@ -141,8 +141,11 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    {
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix
-            + "FootstepSolution", this.footstepSolution.getPosition(), 0.005, YoAppearance.DarkRed(), YoGraphicPosition.GraphicType.BALL);
+      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "FootstepSolution",
+                                                                        this.footstepSolution.getPosition(),
+                                                                        0.005,
+                                                                        YoAppearance.DarkRed(),
+                                                                        YoGraphicPosition.GraphicType.BALL);
 
       artifactList.add(clippedFootstepSolution.createArtifact());
 
@@ -303,8 +306,11 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(reachabilityConstraintHandler.getSCS2YoGraphics());
       group.addChild(captureRegionCalculator.getSCS2YoGraphics());
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoNamePrefix
-            + "FootstepSolution", this.footstepSolution.getPosition(), 0.005, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.CIRCLE));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoNamePrefix + "FootstepSolution",
+                                                                    this.footstepSolution.getPosition(),
+                                                                    0.005,
+                                                                    ColorDefinitions.DarkRed(),
+                                                                    DefaultPoint2DGraphic.CIRCLE));
       group.setVisible(VISUALIZE);
       return group;
    }
