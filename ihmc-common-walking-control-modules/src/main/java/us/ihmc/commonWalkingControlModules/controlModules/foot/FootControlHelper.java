@@ -134,7 +134,7 @@ public class FootControlHelper implements SCS2YoGraphicHolder
       else
       {
          double epsilon = isDesiredCoPOnEdge.getBooleanValue() ? supportStateParameters.getCopOnEdgeEpsilonWithHysteresis()
-               : supportStateParameters.getCopOnEdgeEpsilon();
+                                                               : supportStateParameters.getCopOnEdgeEpsilon();
          FrameConvexPolygon2DReadOnly footSupportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
          isDesiredCoPOnEdge.set(!footSupportPolygon.isPointInside(desiredCoP, -epsilon)); // Minus means that the check is done with a smaller polygon
       }
