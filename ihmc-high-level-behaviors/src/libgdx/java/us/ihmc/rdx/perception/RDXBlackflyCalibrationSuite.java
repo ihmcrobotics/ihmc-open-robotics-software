@@ -117,6 +117,9 @@ public class RDXBlackflyCalibrationSuite
    private Size sourceImageSize;
    private Size undistortedImageSize;
    private Mat rectificationTransformation;
+   private Mat undistortionMap1;
+   private Mat undistortionMap2;
+   private Scalar undistortionRemapBorderValue;
    private Mat newCameraMatrixEstimate;
    private final Throttler undistortionThrottler = new Throttler().setFrequency(60.0);
    private OpenCVArUcoMarkerDetection openCVArUcoMarkerDetection;
@@ -218,6 +221,9 @@ public class RDXBlackflyCalibrationSuite
                   cameraMatrixForUndistortion = new SwapReference<>(Mat::new);
                   cameraMatrixForUndistortion.initializeBoth(cameraMatrix::copyTo);
                   rectificationTransformation = new Mat(3, 3, opencv_core.CV_64F);
+                  undistortionMap1 = new Mat();
+                  undistortionMap2 = new Mat();
+                  undistortionRemapBorderValue = new Scalar();
                   opencv_core.setIdentity(rectificationTransformation);
                   newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
                   opencv_core.setIdentity(newCameraMatrixEstimate);
@@ -384,19 +390,22 @@ public class RDXBlackflyCalibrationSuite
 
             // Fisheye undistortion
             // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
-            opencv_calib3d.fisheyeUndistortImage(imageForUndistortion.getForThreadTwo(),
-                                                 texture.getRGBA8Mat(),
-                                                 cameraMatrixForUndistortion.getForThreadTwo(),
-                                                 distortionCoefficientsForUndistortion.getForThreadTwo(),
-                                                 newCameraMatrixEstimate,
-                                                 undistortedImageSize);
+            opencv_calib3d.fisheyeInitUndistortRectifyMap(cameraMatrixForUndistortion.getForThreadTwo(),
+                                                          distortionCoefficientsForUndistortion.getForThreadTwo(),
+                                                          rectificationTransformation,
+                                                          newCameraMatrixEstimate,
+                                                          undistortedImageSize,
+                                                          opencv_core.CV_16SC2,
+                                                          undistortionMap1,
+                                                          undistortionMap2);
 
-            // TODO: We need to switch to using these. You only need to do
-            //   initUndistortRectifyMap once, then remap is fast
-            //   opencv_calib3d.initUndistortRectifyMap();
-            //   opencv_calib3d.remap();
-            //   Also, we need to finish https://github.com/bytedeco/javacpp-presets/issues/1185
-            //   in order to do this.
+            opencv_imgproc.remap(imageForUndistortion.getForThreadTwo(),
+                                 texture.getRGBA8Mat(),
+                                 undistortionMap1,
+                                 undistortionMap2,
+                                 opencv_imgproc.INTER_LINEAR,
+                                 opencv_core.BORDER_CONSTANT,
+                                 undistortionRemapBorderValue);
 
             newCameraMatrixEstimate.copyTo(openCVArUcoMarkerDetection.getCameraMatrix());
             openCVArUcoMarkerDetection.update(texture.getRGBA8Image());
