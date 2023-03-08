@@ -216,7 +216,7 @@ public class ThreePotatoAngularMomentumCalculator implements SCS2YoGraphicHolder
       }
 
       if (time > predictedCoMTrajectory.getEndTime() || time > predictedLeftFootTrajectory.getLastWaypointTime()
-            || time > predictedRightFootTrajectory.getLastWaypointTime())
+          || time > predictedRightFootTrajectory.getLastWaypointTime())
       {
          angularMomentumPredictionTimer.stopMeasurement();
          return;
@@ -285,7 +285,7 @@ public class ThreePotatoAngularMomentumCalculator implements SCS2YoGraphicHolder
             double time = timeInInterval + timeInterval.getStartTime();
 
             if (time > predictedLeftFootTrajectory.getLastWaypointTime() && time > predictedRightFootTrajectory.getLastWaypointTime()
-                  || time > comTrajectories.getEndTime())
+                || time > comTrajectories.getEndTime())
             {
                break;
             }
@@ -315,7 +315,7 @@ public class ThreePotatoAngularMomentumCalculator implements SCS2YoGraphicHolder
             if (debug && totalAngularMomentum.containsNaN() || Double.isInfinite(totalAngularMomentum.length()))
                throw new RuntimeException("Error.");
             if (useHeightScaledAngularMomentum.getValue()
-                  && !MathTools.isLessThanOrEqualToWithPrecision(comTrajectories.getAcceleration().getZ(), gravityZ, 1e-3))
+                && !MathTools.isLessThanOrEqualToWithPrecision(comTrajectories.getAcceleration().getZ(), gravityZ, 1e-3))
                totalAngularMomentum.scale(gravityZ / (gravityZ + comTrajectories.getAcceleration().getZ()));
 
             angularMomentumEstimator.addObjectivePosition(timeInInterval, totalAngularMomentum);
