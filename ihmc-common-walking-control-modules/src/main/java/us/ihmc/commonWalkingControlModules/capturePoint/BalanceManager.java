@@ -942,9 +942,9 @@ public class BalanceManager implements SCS2YoGraphicHolder
       icpError2d.changeFrame(leadingSoleZUpFrame);
       boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT ? icpError2d.getY() > 0.0 : icpError2d.getY() < 0.0;
       double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue()
-            : maxICPErrorBeforeSingleSupportBackwardX.getValue();
+                                                                       : maxICPErrorBeforeSingleSupportBackwardX.getValue();
       double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue()
-            : maxICPErrorBeforeSingleSupportOuterY.getValue();
+                                                                     : maxICPErrorBeforeSingleSupportOuterY.getValue();
       normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
                              + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
    }
