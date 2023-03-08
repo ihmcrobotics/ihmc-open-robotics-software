@@ -226,10 +226,10 @@ public class RDXBlackflyCalibrationSuite
                      while (running)
                      {
                         blackflyReader.readBlackflyImage();
-                        calibrationPatternDetectionUI.copyInSourceImage(blackflyReader.getBayerRGImage());
+                        calibrationPatternDetectionUI.copyBayerBGImage(blackflyReader.getBayerBGImage());
 
                         if (hdf5ImageLoggingUI != null)
-                           hdf5ImageLoggingUI.copyRGBImage(blackflyReader.getBayerRGImage());
+                           hdf5ImageLoggingUI.copyBayerBGImage(blackflyReader.getBayerBGImage());
                      }
                   }, "CameraRead");
                   ThreadTools.startAsDaemon(() ->
@@ -559,22 +559,29 @@ public class RDXBlackflyCalibrationSuite
                                                              simpleBlobDetector);
             }
             LogTools.info("Found corners for image {}: {}", i, patternFound);
-            cornersOrCentersMatVector.push_back(cornersOrCentersMat);
-
-            Point2fVector cornersOrCenters = new Point2fVector();
-            for (int x = 0; x < cornersOrCentersMat.cols(); x++)
+            if (patternFound)
             {
-               for (int y = 0; y < cornersOrCentersMat.rows(); y++)
+               cornersOrCentersMatVector.push_back(cornersOrCentersMat);
+
+               Point2fVector cornersOrCenters = new Point2fVector();
+               for (int x = 0; x < cornersOrCentersMat.cols(); x++)
                {
-                  BytePointer ptr = cornersOrCentersMat.ptr(y, x);
-                  float xValue = ptr.getFloat();
-                  float yValue = ptr.getFloat(Float.BYTES);
-                  cornersOrCenters.push_back(new Point2f(xValue, yValue));
-                  LogTools.debug("image point: {}, {}", xValue, yValue);
+                  for (int y = 0; y < cornersOrCentersMat.rows(); y++)
+                  {
+                     BytePointer ptr = cornersOrCentersMat.ptr(y, x);
+                     float xValue = ptr.getFloat();
+                     float yValue = ptr.getFloat(Float.BYTES);
+                     cornersOrCenters.push_back(new Point2f(xValue, yValue));
+                     LogTools.debug("image point: {}, {}", xValue, yValue);
+                  }
                }
+               imagePoints.push_back(cornersOrCenters);
+               imagePointsMatVector.push_back(cornersOrCentersMat);
             }
-            imagePoints.push_back(cornersOrCenters);
-            imagePointsMatVector.push_back(cornersOrCentersMat);
+            else
+            {
+               LogTools.warn("Excluding image {}", i);
+            }
          }
 
          calibrationSourceImagePatternDrawRequest.set();
@@ -601,7 +608,7 @@ public class RDXBlackflyCalibrationSuite
       Point3fVectorVector objectPoints = new Point3fVectorVector();
       MatVector objectPointsMatVector = new MatVector();
 
-      for (int i = 0; i < calibrationSourceImages.size(); i++)
+      for (int i = 0; i < cornersOrCentersMatVector.size(); i++)
       {
          Point3fVector pointsOnPattern = new Point3fVector();
          // We have to pack the Mat version for now until this is fixed:
