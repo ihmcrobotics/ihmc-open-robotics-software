@@ -24,7 +24,7 @@ ihmc {
    configurePublications()
 }
 
-val javaCPPVersion = "1.5.8"
+val javaCPPVersion = "1.5.9"
 
 mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
@@ -39,17 +39,17 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-logger:0.26.0")
    api("us.ihmc:ihmc-ros-tools:source")
 
-   apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.21-")
-   apiBytedecoNatives("opencv", "4.6.0-")
+   apiBytedecoNatives("javacpp", "", "-20230222.151859-137")
+   apiBytedecoNatives("openblas", "0.3.21-", "-20221104.072840-16")
+   apiBytedecoNatives("opencv", "4.7.0-", "-20230218.054119-148")
 }
 
-fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "", versionSuffix: String = "")
 {
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:linux-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:windows-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:macosx-x86_64")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
