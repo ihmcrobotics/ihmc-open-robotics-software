@@ -25,12 +25,15 @@ import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RDXOpenCVArUcoMarkerDetectionUI
 {
    private final String namePostfix;
    private ReferenceFrame cameraFrame;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
+   private final ArrayList<RDXOpenCVArUcoMarkerTrackedID> trackedIDs = new ArrayList<>();
+   private final HashMap<Integer, RDXOpenCVArUcoMarkerTrackedID> idToTrackedIDMap = new HashMap<>();
    private BytedecoImage imageForDrawing;
    private RDXMatImagePanel markerImagePanel;
    private final ImGuiPanel mainPanel;
@@ -164,7 +167,28 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       ImGui.text("Image width: " + imageForDrawing.getImageWidth() + " height: " + imageForDrawing.getImageHeight());
       detectionDurationPlot.render();
       ImGui.text("Detected ArUco Markers:");
-      arUcoMarkerDetection.forEachDetectedID(id -> ImGui.text("ID: " + id));
+      for (RDXOpenCVArUcoMarkerTrackedID trackedID : trackedIDs)
+      {
+         trackedID.setCurrentlyDetected(false);
+      }
+      arUcoMarkerDetection.forEachDetectedID(id ->
+      {
+         RDXOpenCVArUcoMarkerTrackedID trackedID = idToTrackedIDMap.get(id);
+         if (trackedID == null)
+         {
+            trackedID = new RDXOpenCVArUcoMarkerTrackedID(id);
+            idToTrackedIDMap.put(id, trackedID);
+            trackedIDs.add(trackedID);
+         }
+         trackedID.setCurrentlyDetected(true);
+      });
+      for (RDXOpenCVArUcoMarkerTrackedID trackedID : trackedIDs)
+      {
+         ImGui.text("ID: " + trackedID.getId());
+         ImGui.sameLine();
+         trackedID.renderPlotLine();
+      }
+
       ImGui.text("Rejected image points: " + arUcoMarkerDetection.getNumberOfRejectedPoints());
 
       ImGui.pushItemWidth(150.0f);

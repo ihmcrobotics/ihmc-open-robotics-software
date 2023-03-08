@@ -71,7 +71,6 @@ public class OpenCVArUcoMarkerDetection
       ids = new SwapReference<>(Mat::new);
       rejectedImagePoints = new SwapReference<>(MatVector::new);
       detectorParameters = DetectorParameters.create();
-      detectorParameters.markerBorderBits(2);
       estimateParameters = EstimateParameters.create();
       cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
       distortionCoefficients = new Mat(1, 4, opencv_core.CV_32FC1);
