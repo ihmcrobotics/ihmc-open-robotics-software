@@ -35,6 +35,7 @@ import java.util.function.Consumer;
 public class RDXImGuiWindowAndDockSystem
 {
    public static final String IMGUI_SETTINGS_INI_FILE_NAME = "ImGuiSettings.ini";
+   private final RDXImGuiLayoutManager layoutManager;
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
    private long context;
@@ -57,8 +58,9 @@ public class RDXImGuiWindowAndDockSystem
                                                                        LibGDXApplicationCreator.DEFAULT_WINDOW_HEIGHT);
    private final ImGuiPosition primaryWindowPosition = new ImGuiPosition(0, 0);
 
-   public RDXImGuiWindowAndDockSystem()
+   public RDXImGuiWindowAndDockSystem(RDXImGuiLayoutManager layoutManager)
    {
+      this.layoutManager = layoutManager;
       panelManager = new ImGuiPanelManager();
    }
 
@@ -68,7 +70,7 @@ public class RDXImGuiWindowAndDockSystem
       panelsFile = new HybridFile(configurationDirectory, "ImGuiPanels.json");
    }
 
-   public void create(long windowHandle, RDXImGuiLayoutManager layoutManager)
+   public void create(long windowHandle)
    {
       this.windowHandle = windowHandle;
 
@@ -128,8 +130,6 @@ public class RDXImGuiWindowAndDockSystem
       imGuiGl3.init(glslVersion);
 
       GLFW.glfwGetWindowFrameSize(windowHandle, frameSizeLeft, frameSizeTop, frameSizeRight, frameSizeBottom);
-
-      layoutManager.reloadLayout();
    }
 
    public void beforeWindowManagement()
@@ -139,6 +139,8 @@ public class RDXImGuiWindowAndDockSystem
       ImGuiTools.glClearDarkGray();
       imGuiGlfw.newFrame();
       ImGui.newFrame();
+
+      layoutManager.ensureInitialLayoutLoaded();
 
       ImGui.pushFont(imFont);
 
