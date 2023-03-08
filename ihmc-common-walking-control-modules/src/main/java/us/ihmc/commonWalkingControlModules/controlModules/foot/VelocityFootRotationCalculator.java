@@ -152,21 +152,32 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       });
       double freq = angularVelocityFilterBreakFrequency.getDoubleValue();
       angularVelocityAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(freq, controllerDt));
-      footAngularVelocityFiltered = new AlphaFilteredYoFrameVector2d(namePrefix
-            + "AngularVelocityFiltered", "", registry, angularVelocityAlphaFilter, soleFrame);
+      footAngularVelocityFiltered = new AlphaFilteredYoFrameVector2d(namePrefix + "AngularVelocityFiltered",
+                                                                     "",
+                                                                     registry,
+                                                                     angularVelocityAlphaFilter,
+                                                                     soleFrame);
 
       yoCenterOfRotationPositionAlphaFilter = new YoDouble(namePrefix + "CoRPositionAlphaFilter", registry);
       centerOfRotationFiltered = new AlphaFilteredYoFramePoint2d(namePrefix + "CoRFiltered", "", registry, yoCenterOfRotationPositionAlphaFilter, soleFrame);
       yoCenterOfRotationVelocityAlphaFilter = new YoDouble(namePrefix + "CoRVelocityAlphaFilter", registry);
       centerOfRotationTransverseVelocity = new YoDouble(namePrefix + "CoRTransversalVelocity", registry);
-      centerOfRotationVelocityFiltered = new FilteredVelocityYoFrameVector2d(namePrefix
-            + "CoRVelocity", "", yoCenterOfRotationVelocityAlphaFilter, dt, registry, centerOfRotationFiltered);
+      centerOfRotationVelocityFiltered = new FilteredVelocityYoFrameVector2d(namePrefix + "CoRVelocity",
+                                                                             "",
+                                                                             yoCenterOfRotationVelocityAlphaFilter,
+                                                                             dt,
+                                                                             registry,
+                                                                             centerOfRotationFiltered);
 
       lineSegmentOfRotation = new YoFrameLineSegment2D(namePrefix + "LoRPosition", worldFrame, registry);
       angleOfLineOfRotation = new YoDouble(namePrefix + "AngleOfLoR", registry);
       lineOfRotationAngularVelocityAlphaFilter = new YoDouble(namePrefix + "LoRAngularVelocityAlphaFilter", registry);
-      lineOfRotationAngularVelocityFiltered = new FilteredVelocityYoVariable(namePrefix
-            + "LoRAngularVelocityFiltered", "", lineOfRotationAngularVelocityAlphaFilter, angleOfLineOfRotation, dt, registry);
+      lineOfRotationAngularVelocityFiltered = new FilteredVelocityYoVariable(namePrefix + "LoRAngularVelocityFiltered",
+                                                                             "",
+                                                                             lineOfRotationAngularVelocityAlphaFilter,
+                                                                             angleOfLineOfRotation,
+                                                                             dt,
+                                                                             registry);
 
       angularVelocityAroundLineOfRotation = new YoDouble(namePrefix + "AngularVelocityAroundLoR", registry);
 
@@ -268,7 +279,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       isAngularVelocityAroundLoRPastThreshold.set(angularVelocityAroundLineOfRotation.getDoubleValue() > angularVelocityAroundLoRThreshold.getDoubleValue());
 
       isFootRotating.set(isLineOfRotationStable.getBooleanValue() && isCenterOfRotationStable.getBooleanValue()
-            && isAngularVelocityAroundLoRPastThreshold.getBooleanValue() && isFootDropPastThreshold.getBooleanValue());
+                         && isAngularVelocityAroundLoRPastThreshold.getBooleanValue() && isFootDropPastThreshold.getBooleanValue());
    }
 
    private void intersectLineOfRotationWithFootPolygon()
