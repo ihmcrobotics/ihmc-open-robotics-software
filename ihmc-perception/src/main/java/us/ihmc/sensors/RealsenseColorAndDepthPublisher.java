@@ -7,12 +7,9 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -28,16 +25,12 @@ import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
-import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.tools.OpenCVJPEGCompression;
-import us.ihmc.perception.tools.OpenCVPNGCompression;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.Throttler;
 
 import java.nio.file.Paths;
@@ -47,7 +40,6 @@ import java.util.Date;
 import java.util.function.Supplier;
 
 /**
- * <<<<<<< HEAD
  * Publishes color and depth from Realsense D435
  * ----+ L515 Device Configuration: Serial Number: F0245563, Depth Height 768, Depth Width: 1024, Depth FPS: 15, Color Height 720, Color Width: 1280, Color FPS:
  * 15
@@ -55,9 +47,6 @@ import java.util.function.Supplier;
  * <p>
  * Use this to retrieve files from ihmc-mini-2
  * rsync -aP ihmc-mini-2:/home/ihmc/.ihmc/logs/perception/20230226_172530_PerceptionLog.hdf5 /home/robotlab/.ihmc/logs/perception/
- * =======
- * Publishes color and depth images from Realsense devices.
- * >>>>>>> develop
  */
 public class RealsenseColorAndDepthPublisher
 {
@@ -94,8 +83,6 @@ public class RealsenseColorAndDepthPublisher
    private BytePointer compressedColorPointer;
    private BytePointer compressedDepthPointer;
 
-   private final Pose3D mocapPose = new Pose3D();
-
    private final ImageMessage colorImageMessage = new ImageMessage();
    private final ImageMessage depthImageMessage = new ImageMessage();
    private long depthSequenceNumber = 0;
@@ -125,16 +112,11 @@ public class RealsenseColorAndDepthPublisher
       LogTools.info("Setting Up ROS2 Property Set Group");
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
-
-      new IHMCROS2Callback<>(ros2Node, ROS2Tools.MOCAP_RIGID_BODY, (message) ->
-      {
-         message.get(mocapPose);
-      });
    }
 
    /**
-    *  Must be called from the sensor-specific calling class, after the sensor and logger initialization have succeeded.
-    *  */
+    * Must be called from the sensor-specific calling class, after the sensor and logger initialization have succeeded.
+    */
    public void run()
    {
       while (running)
@@ -154,7 +136,7 @@ public class RealsenseColorAndDepthPublisher
       LogTools.info("Creating Bytedeco Realsense Device");
       realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
 
-      if(realsense == null)
+      if (realsense == null)
       {
          running = false;
          throw new RuntimeException("Device Could Not Be Initialized.");
@@ -214,7 +196,8 @@ public class RealsenseColorAndDepthPublisher
                                                                acquisitionTime,
                                                                depthSequenceNumber++,
                                                                realsense.getDepthHeight(),
-                                                               realsense.getDepthWidth(), (float) realsense.getDepthDiscretization());
+                                                               realsense.getDepthWidth(),
+                                                               (float) realsense.getDepthDiscretization());
          }
 
          if (parameters.getPublishColor())
@@ -227,7 +210,9 @@ public class RealsenseColorAndDepthPublisher
                                                                   cameraPose,
                                                                   acquisitionTime,
                                                                   colorSequenceNumber++,
-                                                                  realsense.getColorHeight(), realsense.getColorWidth(), (float) realsense.getDepthDiscretization());
+                                                                  realsense.getColorHeight(),
+                                                                  realsense.getColorWidth(),
+                                                                  (float) realsense.getDepthDiscretization());
          }
 
          if (parameters.getLoggingEnabled())
@@ -252,9 +237,6 @@ public class RealsenseColorAndDepthPublisher
 
             perceptionDataLogger.storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_POSITION, cameraPosition);
             perceptionDataLogger.storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, cameraQuaternion);
-
-            perceptionDataLogger.storeFloatArray(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPose.getPosition());
-            perceptionDataLogger.storeFloatArray(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapPose.getOrientation());
 
             previousLoggerEnabledState = true;
          }
@@ -308,8 +290,8 @@ public class RealsenseColorAndDepthPublisher
    }
 
    /**
-    *  Must be called in the shutdown hook from the sensor-specific calling class. Handles Ctrl + C based closing gracefully.
-    *  */
+    * Must be called in the shutdown hook from the sensor-specific calling class. Handles Ctrl + C based closing gracefully.
+    */
    public void destroy()
    {
       running = false;
