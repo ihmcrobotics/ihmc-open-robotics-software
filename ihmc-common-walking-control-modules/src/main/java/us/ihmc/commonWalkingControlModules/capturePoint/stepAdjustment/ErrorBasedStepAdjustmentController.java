@@ -258,8 +258,11 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    {
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix
-            + "FootstepSolution", this.footstepSolution.getPosition(), 0.005, YoAppearance.DarkRed(), YoGraphicPosition.GraphicType.BALL);
+      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "FootstepSolution",
+                                                                        this.footstepSolution.getPosition(),
+                                                                        0.005,
+                                                                        YoAppearance.DarkRed(),
+                                                                        YoGraphicPosition.GraphicType.BALL);
 
       artifactList.add(clippedFootstepSolution.createArtifact());
 
@@ -661,8 +664,11 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(reachabilityConstraintHandler.getSCS2YoGraphics());
       group.addChild(environmentConstraintProvider.getSCS2YoGraphics());
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoNamePrefix
-            + "FootstepSolution", footstepSolution.getPosition(), 0.005, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.CIRCLE));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoNamePrefix + "FootstepSolution",
+                                                                    footstepSolution.getPosition(),
+                                                                    0.005,
+                                                                    ColorDefinitions.DarkRed(),
+                                                                    DefaultPoint2DGraphic.CIRCLE));
       group.setVisible(VISUALIZE);
       return group;
    }
