@@ -6,6 +6,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -384,9 +385,13 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(scs2AdditionalYoGraphics);
-      WholeBodyControllerCore wholeBodyControllerCore = controllerFactoryHelper.getWholeBodyControllerCoreFactory().getWholeBodyControllerCore();
+      WholeBodyControllerCoreFactory wholeBodyControllerCoreFactory = controllerFactoryHelper.getWholeBodyControllerCoreFactory();
+      WholeBodyControllerCore wholeBodyControllerCore = wholeBodyControllerCoreFactory.getWholeBodyControllerCore();
       if (wholeBodyControllerCore != null)
          group.addChild(wholeBodyControllerCore.getSCS2YoGraphics());
+      LinearMomentumRateControlModule linearMomentumRateControlModule = wholeBodyControllerCoreFactory.getLinearMomentumRateControlModule();
+      if (linearMomentumRateControlModule != null)
+         group.addChild(linearMomentumRateControlModule.getSCS2YoGraphics());
       group.addChild(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getSCS2YoGraphics());
       group.addChild(controllerFactoryHelper.getManagerFactory().getSCS2YoGraphics());
       for (HighLevelControllerState controllerState : highLevelControllerStates.values())

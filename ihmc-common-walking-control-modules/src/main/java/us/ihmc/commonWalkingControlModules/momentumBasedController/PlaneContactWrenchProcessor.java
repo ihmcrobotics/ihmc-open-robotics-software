@@ -23,9 +23,9 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint2DDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -177,9 +177,7 @@ public class PlaneContactWrenchProcessor implements SCS2YoGraphicHolder
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
          YoFramePoint3D cop = centersOfPressureWorld.get(contactablePlaneBodies.get(i));
-         YoGraphicPoint3DDefinition copGraphic3D = YoGraphicDefinitionFactory.newYoGraphicPoint3D(cop.getNamePrefix(), cop, 0.005, ColorDefinitions.Navy());
-         group.addChild(copGraphic3D);
-         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(copGraphic3D, DefaultPoint2DGraphic.CIRCLE));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(cop.getNamePrefix(), cop, 0.010, ColorDefinitions.Navy(), DefaultPoint2DGraphic.CIRCLE));
       }
       group.setVisible(VISUALIZE);
       return group;

@@ -122,11 +122,11 @@ public class CenterOfPressureVisualizer implements SCS2YoGraphicHolder
       for (RigidBodyBasics rigidBody : footRigidBodies)
       {
          group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Meas " + rigidBody.getName()
-               + "CoP", footRawCoPPositionsInWorld.get(rigidBody), 0.008, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.DIAMOND));
+               + "CoP", footRawCoPPositionsInWorld.get(rigidBody), 0.016, ColorDefinitions.DarkRed(), DefaultPoint2DGraphic.DIAMOND));
       }
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Meas CoP",
                                                                     overallRawCoPPositionInWorld,
-                                                                    0.015,
+                                                                    0.03,
                                                                     ColorDefinitions.DarkRed(),
                                                                     DefaultPoint2DGraphic.DIAMOND));
       return group;

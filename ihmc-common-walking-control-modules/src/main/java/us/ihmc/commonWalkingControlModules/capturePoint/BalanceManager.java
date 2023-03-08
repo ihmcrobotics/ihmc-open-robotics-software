@@ -1074,44 +1074,46 @@ public class BalanceManager implements SCS2YoGraphicHolder
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(angularMomentumHandler.getSCS2YoGraphics());
       group.addChild(icpControlPolygons.getSCS2YoGraphics());
+      if (precomputedICPPlanner != null)
+         group.addChild(precomputedICPPlanner.getSCS2YoGraphics());
       group.addChild(stepAdjustmentController.getSCS2YoGraphics());
 
       if (viewCoPHistory)
       {
          YoGraphicPointcloud3DDefinition perfectCoPTrajViz;
          YoGraphicPointcloud3DDefinition perfectCMPTrajViz;
-         perfectCoPTrajViz = newYoGraphicPointcloud3D("perfectCoP", perfectCoPTrajectory.getPositions(), 0.002, ColorDefinitions.DarkViolet());
-         perfectCMPTrajViz = newYoGraphicPointcloud3D("perfectCMP", perfectCMPTrajectory.getPositions(), 0.002, ColorDefinitions.DarkViolet());
+         perfectCoPTrajViz = newYoGraphicPointcloud3D("perfectCoP", perfectCoPTrajectory.getPositions(), 0.004, ColorDefinitions.DarkViolet());
+         perfectCMPTrajViz = newYoGraphicPointcloud3D("perfectCMP", perfectCMPTrajectory.getPositions(), 0.004, ColorDefinitions.DarkViolet());
          group.addChild(perfectCoPTrajViz);
          group.addChild(perfectCMPTrajViz);
          group.addChild(newYoGraphicPointcloud2D(perfectCoPTrajViz, DefaultPoint2DGraphic.CIRCLE_PLUS));
          group.addChild(newYoGraphicPointcloud2D(perfectCMPTrajViz, DefaultPoint2DGraphic.CIRCLE));
-         group.addChild(newYoGraphicPoint2D("Desired Capture Point",
-                                            yoDesiredCapturePoint,
-                                            0.01,
-                                            ColorDefinitions.Yellow().darker(),
-                                            DefaultPoint2DGraphic.CIRCLE_CROSS));
-         group.addChild(newYoGraphicPoint2D("Final Desired Capture Point",
-                                            yoFinalDesiredICP,
-                                            0.01,
-                                            ColorDefinitions.Beige().darker(),
-                                            DefaultPoint2DGraphic.CIRCLE_CROSS));
-         group.addChild(newYoGraphicPoint2D("Final Desired CoM", yoFinalDesiredCoM, 0.01, ColorDefinitions.Black(), DefaultPoint2DGraphic.CIRCLE_CROSS));
-         YoGraphicPoint2DDefinition perfectCMPViz = newYoGraphicPoint2D("Perfect CMP",
-                                                                        yoPerfectCMP,
-                                                                        0.002,
-                                                                        ColorDefinitions.BlueViolet(),
-                                                                        DefaultPoint2DGraphic.CIRCLE);
-         perfectCMPTrajViz.setVisible(false);
-         group.addChild(perfectCMPViz);
-         YoGraphicPoint2DDefinition perfectCoPViz = newYoGraphicPoint2D("Perfect CoP",
-                                                                        yoPerfectCoP,
-                                                                        0.002,
-                                                                        ColorDefinitions.DarkViolet(),
-                                                                        DefaultPoint2DGraphic.CIRCLE_CROSS);
-         perfectCMPTrajViz.setVisible(false);
-         group.addChild(perfectCoPViz);
       }
+      group.addChild(newYoGraphicPoint2D("Desired Capture Point",
+                                         yoDesiredCapturePoint,
+                                         0.02,
+                                         ColorDefinitions.Yellow().darker(),
+                                         DefaultPoint2DGraphic.CIRCLE_CROSS));
+      group.addChild(newYoGraphicPoint2D("Final Desired Capture Point",
+                                         yoFinalDesiredICP,
+                                         0.02,
+                                         ColorDefinitions.Beige().darker(),
+                                         DefaultPoint2DGraphic.CIRCLE_CROSS));
+      group.addChild(newYoGraphicPoint2D("Final Desired CoM", yoFinalDesiredCoM, 0.02, ColorDefinitions.Black(), DefaultPoint2DGraphic.CIRCLE_CROSS));
+      YoGraphicPoint2DDefinition perfectCMPViz = newYoGraphicPoint2D("Perfect CMP",
+                                                                     yoPerfectCMP,
+                                                                     0.004,
+                                                                     ColorDefinitions.BlueViolet(),
+                                                                     DefaultPoint2DGraphic.CIRCLE);
+      perfectCMPViz.setVisible(false);
+      group.addChild(perfectCMPViz);
+      YoGraphicPoint2DDefinition perfectCoPViz = newYoGraphicPoint2D("Perfect CoP",
+                                                                     yoPerfectCoP,
+                                                                     0.004,
+                                                                     ColorDefinitions.DarkViolet(),
+                                                                     DefaultPoint2DGraphic.CIRCLE_CROSS);
+      perfectCoPViz.setVisible(false);
+      group.addChild(perfectCoPViz);
 
       return group;
    }

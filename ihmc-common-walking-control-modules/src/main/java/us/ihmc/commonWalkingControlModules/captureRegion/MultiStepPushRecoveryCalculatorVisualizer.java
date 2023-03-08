@@ -148,12 +148,12 @@ public class MultiStepPushRecoveryCalculatorVisualizer implements SCS2YoGraphicH
 
          group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("capturePointTouchdown" + i + suffix,
                                                                        capturePointsAtTouchdown.get(i),
-                                                                       0.01,
+                                                                       0.02,
                                                                        ColorDefinitions.Yellow(),
                                                                        DefaultPoint2DGraphic.CIRCLE_FILLED));
          group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("recoveryStepLocation" + i + suffix,
                                                                        recoveryStepLocations.get(i),
-                                                                       0.01,
+                                                                       0.02,
                                                                        ColorDefinitions.Blue(),
                                                                        DefaultPoint2DGraphic.CIRCLE_FILLED));
       }

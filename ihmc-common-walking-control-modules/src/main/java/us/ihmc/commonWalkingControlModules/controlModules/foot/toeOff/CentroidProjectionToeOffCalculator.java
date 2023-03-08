@@ -280,8 +280,8 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       if (rayOrigin == null)
          return null;
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("origin", rayOrigin, 0.005, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_FILLED));
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("end", rayEnd, 0.005, ColorDefinitions.Red(), DefaultPoint2DGraphic.CIRCLE_FILLED));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("origin", rayOrigin, 0.01, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_FILLED));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("end", rayEnd, 0.01, ColorDefinitions.Red(), DefaultPoint2DGraphic.CIRCLE_FILLED));
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicLineSegment2DDefinition("toeOffList", rayOrigin, rayEnd, ColorDefinitions.Red()));
       return group;
    }
