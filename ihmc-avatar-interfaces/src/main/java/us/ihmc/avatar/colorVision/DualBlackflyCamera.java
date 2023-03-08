@@ -1,6 +1,8 @@
 package us.ihmc.avatar.colorVision;
 
-import boofcv.struct.calib.CameraPinholeBrown;
+import org.bytedeco.opencv.global.opencv_calib3d;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -58,9 +60,15 @@ public class DualBlackflyCamera
    private final FrequencyCalculator imagePublishRateCalculator = new FrequencyCalculator();
    private BytedecoImage blackflySourceImage;
    private Mat cameraMatrix;
+   private Mat newCameraMatrixEstimate;
    private Mat distortionCoefficients;
-   private CameraPinholeBrown cameraPinholeBrown;
-   private Mat undistortedImageMat;
+   private Size sourceImageSize;
+   private Size undistortedImageSize;
+   private Mat rectificationTransformation;
+   private Mat undistortionMap1;
+   private Mat undistortionMap2;
+   private Scalar undistortionRemapBorderValue;
+   private Mat distortedRGBImage;
    private BytedecoImage undistortedImage;
    private Mat yuv420Image;
    private Mat rgbaMat;
@@ -128,29 +136,6 @@ public class DualBlackflyCamera
 
             blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8U);
 
-            // From OpenCV calibrateCamera with Blackfly serial number 17372478 with FE185C086HA-1 fisheye lens
-            // Procedure conducted by Bhavyansh Mishra on 12/14/2021
-            cameraPinholeBrown = new CameraPinholeBrown();
-            cameraPinholeBrown.setFx(499.3716197917922);
-            cameraPinholeBrown.setFy(506.42956667285574);
-            cameraPinholeBrown.setCx(1043.8826790137316);
-            cameraPinholeBrown.setCy(572.2558510618412);
-
-            cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
-            cameraMatrix.ptr(0, 0).putDouble(cameraPinholeBrown.getFx());
-            cameraMatrix.ptr(0, 1).putDouble(0.0);
-            cameraMatrix.ptr(0, 2).putDouble(cameraPinholeBrown.getCx());
-            cameraMatrix.ptr(1, 0).putDouble(0.0);
-            cameraMatrix.ptr(1, 1).putDouble(cameraPinholeBrown.getFy());
-            cameraMatrix.ptr(1, 2).putDouble(cameraPinholeBrown.getCy());
-            cameraMatrix.ptr(2, 0).putDouble(0.0);
-            cameraMatrix.ptr(2, 1).putDouble(0.0);
-            cameraMatrix.ptr(2, 2).putDouble(1.0);
-            distortionCoefficients = new Mat(-0.1304880574839372, 0.0343337720836711, 0, 0, 0.002347490605947351,
-                                             0.163868408051474, -0.02493286434834704, 0.01394671162254435);
-            distortionCoefficients.reshape(1, 8);
-            undistortedImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
-
             yuv420Image = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
             rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Mat for color conversion
 
@@ -166,10 +151,8 @@ public class DualBlackflyCamera
             blackflySourceImage.rewind();
             blackflySourceImage.changeAddress(spinImageDataPointer.address());
 
-//            opencv_core.flip(blackflySourceImage.getBytedecoOpenCVMat(), blackflySourceImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_BOTH);
-
-//            opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
-            Mat postDistortionMat = blackflySourceImage.getBytedecoOpenCVMat();
+            // TODO: Still need a flip anywhere?
+            // opencv_core.flip(blackflySourceImage.getBytedecoOpenCVMat(), blackflySourceImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_BOTH);
 
             if (side == RobotSide.RIGHT)
             {
@@ -177,21 +160,72 @@ public class DualBlackflyCamera
                ReferenceFrame ousterLidarFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
                if (arUcoMarkerDetection == null)
                {
-                  undistortedImage = new BytedecoImage(postDistortionMat);
+                  undistortedImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+                  distortedRGBImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
 
+                  cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
+                  opencv_core.setIdentity(cameraMatrix);
+                  cameraMatrix.ptr(0, 0).putDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_UNDISORTION);
+                  cameraMatrix.ptr(0, 2).putDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_UNDISORTION);
+                  cameraMatrix.ptr(1, 1).putDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_UNDISORTION);
+                  cameraMatrix.ptr(1, 2).putDouble(SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_UNDISORTION);
+                  newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
+                  opencv_core.setIdentity(newCameraMatrixEstimate);
+                  distortionCoefficients = new Mat(SensorHeadParameters.K1_FOR_UNDISORTION,
+                                                   SensorHeadParameters.K2_FOR_UNDISORTION,
+                                                   SensorHeadParameters.K3_FOR_UNDISORTION,
+                                                   SensorHeadParameters.K4_FOR_UNDISORTION);
+                  sourceImageSize = new Size(imageWidth, imageHeight);
+                  undistortedImageSize = new Size((int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageWidth),
+                                                  (int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageHeight));
+                  rectificationTransformation = new Mat(3, 3, opencv_core.CV_64F);
+                  undistortionMap1 = new Mat();
+                  undistortionMap2 = new Mat();
+                  undistortionRemapBorderValue = new Scalar();
+
+                  double balanceNewFocalLength = 0.0;
+                  double fovScaleFocalLengthDivisor = 1.0;
+                  opencv_calib3d.fisheyeEstimateNewCameraMatrixForUndistortRectify(cameraMatrix,
+                                                                                   distortionCoefficients,
+                                                                                   sourceImageSize,
+                                                                                   rectificationTransformation,
+                                                                                   newCameraMatrixEstimate,
+                                                                                   balanceNewFocalLength,
+                                                                                   undistortedImageSize,
+                                                                                   fovScaleFocalLengthDivisor);
+                  // Fisheye undistortion
+                  // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
+                  opencv_calib3d.fisheyeInitUndistortRectifyMap(cameraMatrix,
+                                                                distortionCoefficients,
+                                                                rectificationTransformation,
+                                                                newCameraMatrixEstimate,
+                                                                undistortedImageSize,
+                                                                opencv_core.CV_16SC2,
+                                                                undistortionMap1,
+                                                                undistortionMap2);
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
                   arUcoMarkerDetection.create(blackflyCameraFrame);
                   arUcoMarkerDetection.setSourceImageForDetection(undistortedImage);
-                  arUcoMarkerDetection.setCameraInstrinsics(cameraPinholeBrown);
+                  newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
                }
 
                syncedRobot.update();
                ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
 
+               opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), distortedRGBImage, opencv_imgproc.COLOR_BayerBG2RGB);
+               opencv_imgproc.remap(distortedRGBImage,
+                                    undistortedImage.getBytedecoOpenCVMat(),
+                                    undistortionMap1,
+                                    undistortionMap2,
+                                    opencv_imgproc.INTER_LINEAR,
+                                    opencv_core.BORDER_CONSTANT,
+                                    undistortionRemapBorderValue);
+
                arUcoMarkerDetection.update();
 
-               arUcoMarkerDetection.drawDetectedMarkers(postDistortionMat);
-               arUcoMarkerDetection.drawRejectedPoints(postDistortionMat);
+               // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
+               // arUcoMarkerDetection.drawDetectedMarkers(postDistortionMat);
+               // arUcoMarkerDetection.drawRejectedPoints(postDistortionMat);
 
                SwapReference<Mat> ids = arUcoMarkerDetection.getIds();
                arUcoMarkerPoses.getMarkerId().clear();
@@ -220,7 +254,7 @@ public class DualBlackflyCamera
             // Converting BayerRG8 -> RGBA -> YUV
             // Here we use COLOR_BayerBG2RGBA opencv conversion. The Blackfly cameras are set to use BayerRG pixel format.
             // But, for some reason, it's actually BayerBG. Changing to COLOR_BayerRG2RGBA will result in the wrong colors.
-            opencv_imgproc.cvtColor(postDistortionMat, rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
+            opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), rgbaMat, opencv_imgproc.COLOR_BayerBG2RGBA);
             opencv_imgproc.cvtColor(rgbaMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
             convertColorDuration.suspend();
 
