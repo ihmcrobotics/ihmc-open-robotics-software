@@ -1,6 +1,6 @@
 package us.ihmc.perception.sensorHead;
 
-import org.bytedeco.opencv.opencv_aruco.DetectorParameters;
+import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.robotics.EuclidCoreMissingTools;
