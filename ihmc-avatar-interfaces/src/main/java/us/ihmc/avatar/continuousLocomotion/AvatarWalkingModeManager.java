@@ -29,6 +29,7 @@ public class AvatarWalkingModeManager implements Updatable
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble rcValueThreshold;
+   private final YoBoolean transitionRequested; //TODO probably rename
    private final YoBoolean ignoreRCWalkingModeSelection;
    private final YoBoolean ignoreAutoWalkingModeSwitch; //TODO probably rename
 
@@ -54,6 +55,8 @@ public class AvatarWalkingModeManager implements Updatable
    private HighLevelControllerName currentController = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
    private WalkingStatus walkingStatusBeforeTransition = WalkingStatus.PAUSED;
 
+   private boolean transitionPending = false;
+
    public AvatarWalkingModeManager(DRCRobotModel robotModel,
                                    FullHumanoidRobotModel fullRobotModel,
                                    StatusMessageOutputManager statusMessageOutputManager,
@@ -66,6 +69,7 @@ public class AvatarWalkingModeManager implements Updatable
       rcValueThreshold = new YoDouble("rcWalkingModeValueThreshold", registry);
       rcValueThreshold.set(1.0);
 
+      transitionRequested = new YoBoolean("ignoreAutoWalkingModeSwitch", registry);
       ignoreRCWalkingModeSelection = new YoBoolean("ignoreRCWalkingModeSelection", registry);
       ignoreAutoWalkingModeSwitch = new YoBoolean("ignoreAutoWalkingModeSwitch", registry);
       ignoreAutoWalkingModeSwitch.set(false);
@@ -76,7 +80,15 @@ public class AvatarWalkingModeManager implements Updatable
 
       locomotionManagerRequestedWalkingState = new YoEnum<>("locomotionManagerRequestedWalkingState", registry, HighLevelControllerName.class, false);
       locomotionManagerRequestedWalkingState.set(HighLevelControllerName.WALKING);
-      locomotionManagerRequestedWalkingState.addListener(change -> recordWalkingStatusBeforeTransition());
+      locomotionManagerRequestedWalkingState.addListener(change ->
+                                                         {
+                                                            if (locomotionManagerRequestedWalkingState.getEnumValue() != currentController)
+                                                            {
+                                                               recordWalkingStatusBeforeTransition();
+                                                               pauseWalking();
+                                                               transitionRequested.set(true);
+                                                            }
+                                                         });
 
       this.walkingCommandInputManager = walkingCommandInputManager;
 
@@ -104,12 +116,24 @@ public class AvatarWalkingModeManager implements Updatable
       parentRegistry.addChild(registry);
    }
 
+   private void pauseWalking()
+   {
+      //walkingCommandInputManager.clearCommands(PauseWalkingCommand.class);
+      pauseWalkingCommand.setPauseRequested(true);
+      walkingCommandInputManager.submitCommand(pauseWalkingCommand);
+   }
+
+   private boolean isWalkingPaused()
+   {
+      return WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) == WalkingStatus.PAUSED;
+   }
+
    @Override
    public void update(double time)
    {
       consumeMessages();
 
-      if (shouldExecuteTransition())
+      if (transitionRequested.getBooleanValue() && isWalkingPaused())
       {
          walkingCommandInputManager.clearCommands(HighLevelControllerStateCommand.class);
          controllerStateCommand.setHighLevelControllerName(locomotionManagerRequestedWalkingState.getEnumValue());
@@ -118,7 +142,18 @@ public class AvatarWalkingModeManager implements Updatable
          walkingCommandInputManager.clearCommands(PauseWalkingCommand.class);
          pauseWalkingCommand.setPauseRequested(walkingStatusBeforeTransition == WalkingStatus.PAUSED);
          walkingCommandInputManager.submitCommand(pauseWalkingCommand);
+
+         transitionPending = true;
       }
+
+      if (transitionPending)
+         checkIfTransitionStillPending();
+   }
+
+   private void checkIfTransitionStillPending()
+   {
+      if (locomotionManagerRequestedWalkingState.getEnumValue() == currentController)
+         transitionPending = false;
    }
 
    private void consumeMessages()
@@ -149,7 +184,7 @@ public class AvatarWalkingModeManager implements Updatable
 
    private void recordWalkingStatusBeforeTransition()
    {
-      if (walkingStatusMessage.getWalkingStatus() == -1 || WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) == WalkingStatus.PAUSED)// || WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) == WalkingStatus.ABORT_REQUESTED)
+      if (walkingStatusMessage.getWalkingStatus() == -1 || WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) == WalkingStatus.PAUSED)
          walkingStatusBeforeTransition = WalkingStatus.PAUSED;
       else
          walkingStatusBeforeTransition = WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus());
@@ -157,7 +192,8 @@ public class AvatarWalkingModeManager implements Updatable
 
    private boolean shouldExecuteTransition()
    {
-      if (locomotionManagerRequestedWalkingState.getEnumValue() != currentController && (walkingStatusMessage.getWalkingStatus() == -1 || WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) == WalkingStatus.PAUSED))
+      if (locomotionManagerRequestedWalkingState.getEnumValue() != currentController
+          && (walkingStatusMessage.getWalkingStatus() == -1 || WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()) == WalkingStatus.PAUSED))
       {
          return true;
       }
