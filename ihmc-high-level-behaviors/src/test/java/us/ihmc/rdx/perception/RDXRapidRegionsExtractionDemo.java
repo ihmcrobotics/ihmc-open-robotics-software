@@ -47,14 +47,6 @@ import java.util.ArrayList;
 
 public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 {
-   //20230117_161540_PerceptionLog.hdf5 (311 MB)
-   //20230117_162417_PerceptionLog.hdf5 (231 MB)
-   //20230117_162825_PerceptionLog.hdf5 (328 MB)
-
-   // 'WalkForward_Rough',        # 20230228_201947_PerceptionLog.hdf5
-   //'Turn_Rough',               # 20230228_202104_PerceptionLog.hdf5
-   //'WalkBack_Rough',           # 20230228_202456_PerceptionLog.hdf5
-
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
