@@ -1,8 +1,10 @@
 package us.ihmc.rdx.ui.vr;
 
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.graphics.RDX3DSituatedImagePanel;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
@@ -21,94 +23,90 @@ public class RDXFloatingVideoPanelPlacer
    private final FramePose3D floatingPanelFramePose = new FramePose3D();
    private final RigidBodyTransform gripOffsetTransform = new RigidBodyTransform();
    private boolean grippedLastTime = false;
+   private boolean justActivated = true;
 
 
    public void update(RDXVRContext context)
    {
-      switch(mode)
-      {
-         case MANUAL_PLACEMENT:
-            placeWithGripper(context);
-            break;
-         case FOLLOW_HEADSET:
-            followHeadset(context);
-            break;
-      }
-   }
-
-   public void followHeadset(RDXVRContext context)
-   {
       context.addVRInputProcessor(vrContext ->
       {
          vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
-          {
-             if (controller.getTouchpadTouchedActionData().bState())
-             {
-                double y = controller.getTouchpadActionData().y();
-                if (!Double.isNaN(lastTouchpadFloatingPanelY))
-                {
-                   panelZoom = y - lastTouchpadFloatingPanelY;
-                }
-                lastTouchpadFloatingPanelY = y;
-                panelDistanceFromHeadset = panelDistanceFromHeadset + panelZoom;
-             }
-             else
-             {
-                lastTouchpadFloatingPanelY = Double.NaN;
-             }
-          });
-         vrContext.getHeadset().runIfConnected(headset ->
          {
-              if (floatingVideoPanel.getModelInstance() != null)
-              {
-                 floatingPanelFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
-                 floatingPanelFramePose.getPosition().set(panelDistanceFromHeadset, yPanel, zPanel);
-                 floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-                 floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
-                 floatingPanelFrame.getReferenceFrame().update();
-              }
-         });
-      });
-   }
-
-   public void placeWithGripper(RDXVRContext context)
-   {
-      context.addVRInputProcessor(vrContext ->
-      {
-         vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-         {
-            if (floatingVideoPanel.getModelInstance() != null)
+            if (mode == RDXPanelPlacementMode.FOLLOW_HEADSET)
             {
-               floatingPanelFramePose.setToZero(floatingPanelFrame.getReferenceFrame());
-               floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               boolean controllerIsCloseToPanel = controller.getXForwardZUpPose().getPosition().distance(floatingPanelFramePose.getPosition()) < 0.05;
-               boolean isGripping = controller.getGripActionData().x() > 0.9;
-               if ((grippedLastTime || controllerIsCloseToPanel) && isGripping)
+               if (controller.getTouchpadTouchedActionData().bState())
                {
-                  if (!grippedLastTime) // set up offset
+                  double y = controller.getTouchpadActionData().y();
+                  if (!Double.isNaN(lastTouchpadFloatingPanelY))
                   {
-                     floatingPanelFramePose.changeFrame(controller.getXForwardZUpControllerFrame());
-                     floatingPanelFramePose.get(gripOffsetTransform);
-                     floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                     panelZoom = y - lastTouchpadFloatingPanelY;
                   }
-                  floatingPanelFrame.getTransformToParent().set(gripOffsetTransform);
-                  controller.getXForwardZUpControllerFrame().getTransformToWorldFrame().transform(floatingPanelFrame.getTransformToParent());
-                  floatingPanelFrame.getReferenceFrame().update();
-
-                  grippedLastTime = true;
+                  lastTouchpadFloatingPanelY = y;
+                  panelDistanceFromHeadset = panelDistanceFromHeadset + panelZoom;
                }
                else
                {
-                  grippedLastTime = false;
+                  lastTouchpadFloatingPanelY = Double.NaN;
+               }
+            }
+         });
+         vrContext.getHeadset().runIfConnected(headset ->
+         {
+            if (mode == RDXPanelPlacementMode.FOLLOW_HEADSET || (mode == RDXPanelPlacementMode.MANUAL_PLACEMENT && justActivated))
+            {
+               if (floatingVideoPanel.getModelInstance() != null)
+               {
+                  floatingPanelFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
+                  floatingPanelFramePose.getPosition().set(panelDistanceFromHeadset, yPanel, zPanel);
+                  floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                  floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
+                  floatingPanelFrame.getReferenceFrame().update();
+               }
+            }
+         });
+         vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+         {
+            if (mode == RDXPanelPlacementMode.MANUAL_PLACEMENT)
+            {
+               if (floatingVideoPanel.getModelInstance() != null)
+               {
+                  floatingPanelFramePose.setToZero(floatingPanelFrame.getReferenceFrame());
+                  floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                  boolean controllerIsCloseToPanel = controller.getXForwardZUpPose().getPosition().distance(floatingPanelFramePose.getPosition()) < 0.05;
+                  boolean isGripping = controller.getGripActionData().x() > 0.9;
+                  if ((grippedLastTime || controllerIsCloseToPanel) && isGripping)
+                  {
+                     if (!grippedLastTime) // set up offset
+                     {
+                        floatingPanelFramePose.changeFrame(controller.getXForwardZUpControllerFrame());
+                        floatingPanelFramePose.get(gripOffsetTransform);
+                        floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                     }
+                     floatingPanelFrame.getTransformToParent().set(gripOffsetTransform);
+                     controller.getXForwardZUpControllerFrame().getTransformToWorldFrame().transform(floatingPanelFrame.getTransformToParent());
+                     floatingPanelFrame.getReferenceFrame().update();
+
+                     grippedLastTime = true;
+                  }
+                  else
+                  {
+                     grippedLastTime = false;
+                  }
                }
             }
          });
       });
    }
 
+   public void checkNotification(boolean activatedPanel)
+   {
+      justActivated = activatedPanel;
+   }
+
    public void setMode(RDXPanelPlacementMode mode)
    {
-      this.mode = mode;
+      if (this.mode != mode)
+         this.mode = mode;
    }
 
    public RDX3DSituatedImagePanel getFloatingVideoPanel()
