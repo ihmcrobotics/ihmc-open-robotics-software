@@ -10,6 +10,7 @@ import perception_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,6 +18,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,6 +46,9 @@ public class PerceptionDataLogger
 {
    private static final int BUFFER_SIZE = 1000000;
 
+   private ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private PerceptionConfigurationParameters parameters;
+
    private final HashMap<String, byte[]> byteArrays = new HashMap<>();
    private final HashMap<String, BytePointer> bytePointers = new HashMap<>();
    private final HashMap<String, Integer> counts = new HashMap<>();
@@ -68,6 +74,9 @@ public class PerceptionDataLogger
 
    public PerceptionDataLogger()
    {
+      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
+
       channels.put(PerceptionLoggerConstants.D435_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.D435_COLOR_NAME, 0, 0));
       references.put(PerceptionLoggerConstants.D435_COLOR_NAME, new AtomicReference<>(null));
 
