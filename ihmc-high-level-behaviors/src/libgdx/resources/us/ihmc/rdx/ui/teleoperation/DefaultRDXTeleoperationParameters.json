@@ -20,5 +20,7 @@
   "Shuffle step width" : 0.21,
   "Turning step width" : 0.2,
   "Footstep length multiplier" : 1.0,
-  "Is PSI adjustable" : false
+  "Is PSI adjustable" : false,
+  "Plan with body path" : false,
+  "Replan swing trajectories on change" : true
 }
