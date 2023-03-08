@@ -99,13 +99,19 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
          ArtifactList artifactList = new ArtifactList(listName);
          YoGraphicsList graphicsList = new YoGraphicsList(listName);
 
-         YoGraphicPosition planePointViz = new YoGraphicPosition(namePrefix
-               + "PlanePoint", measuredCoPFiltered, 0.005, YoAppearance.Blue(), GraphicType.SOLID_BALL);
+         YoGraphicPosition planePointViz = new YoGraphicPosition(namePrefix + "PlanePoint",
+                                                                 measuredCoPFiltered,
+                                                                 0.005,
+                                                                 YoAppearance.Blue(),
+                                                                 GraphicType.SOLID_BALL);
 
          YoGraphicVector planeNormalViz = new YoGraphicVector(namePrefix + "PlaneNormal", measuredCoPFiltered, groundPlaneNormal, YoAppearance.Blue());
 
-         YoArtifactLineSegment2d lineOfRotationArtifact = new YoArtifactLineSegment2d(namePrefix
-               + "LineOfRotationGeometric", lineSegmentOfRotation, Color.GREEN, 0.01, 0.01);
+         YoArtifactLineSegment2d lineOfRotationArtifact = new YoArtifactLineSegment2d(namePrefix + "LineOfRotationGeometric",
+                                                                                      lineSegmentOfRotation,
+                                                                                      Color.GREEN,
+                                                                                      0.01,
+                                                                                      0.01);
 
          graphicsList.add(planeNormalViz);
          artifactList.add(planePointViz.createArtifact());
