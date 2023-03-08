@@ -145,7 +145,7 @@ public class RDXPerceptionUI
             baseUI.getImGuiPanelManager().addPanel(buildingConstructor.getPanelName(), buildingConstructor::renderImGuiWidgets);
 
             baseUI.create();
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
 
             remotePerceptionUI = new RDXRemotePerceptionUI(new ROS2Helper(ros2Node));
             baseUI.getImGuiPanelManager().addPanel(remotePerceptionUI.getPanel());

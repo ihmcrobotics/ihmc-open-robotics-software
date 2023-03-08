@@ -17,6 +17,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
@@ -25,6 +26,8 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.string.StringTools;
 
+import java.util.Set;
+
 /**
  * Supports Realsenses and Ouster and Fisheye colored point clouds.
  * This visualizer is designed to automatically resize and adapt to changing
@@ -32,7 +35,7 @@ import us.ihmc.tools.string.StringTools;
  * It provides our full set of analytics as plots, such as message size,
  * delay, sequence discontinuities, etc. and coloring options.
  */
-public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements RenderableProvider
+public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
 {
    private final String titleBeforeAdditions;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -228,10 +231,9 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
       }
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive() && pointCloudRenderer != null)
+      if (isActive() && pointCloudRenderer != null && sceneLevelCheck(sceneLevels))
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 

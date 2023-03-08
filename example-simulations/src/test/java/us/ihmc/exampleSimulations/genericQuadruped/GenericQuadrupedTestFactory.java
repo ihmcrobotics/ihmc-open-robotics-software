@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
@@ -85,7 +84,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
    public GenericQuadrupedTestFactory()
    {
-      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.setKeepSCSUp(false);
    }
 
    @Override
@@ -203,6 +202,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       goalOrientedTestConductor.getScs().addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry));
 
       FactoryTools.disposeFactory(this);
+
+      ros2Node.destroy();
 
       return goalOrientedTestConductor;
    }
