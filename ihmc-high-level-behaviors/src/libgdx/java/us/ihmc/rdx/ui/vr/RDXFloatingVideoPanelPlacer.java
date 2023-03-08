@@ -1,10 +1,8 @@
 package us.ihmc.rdx.ui.vr;
 
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.graphics.RDX3DSituatedImagePanel;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
