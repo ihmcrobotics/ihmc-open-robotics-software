@@ -242,6 +242,12 @@ public class RDXImGuiLayoutManager
       }
    }
 
+   public void ensureInitialLayoutLoaded()
+   {
+      if (firstLoad)
+         reloadLayout();
+   }
+
    /**
     * This should be called during the update() phase.
     * It might have undesired behavior if called while in the rendering ImGui widgets phase.
