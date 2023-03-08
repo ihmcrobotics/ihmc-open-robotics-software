@@ -946,7 +946,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue()
             : maxICPErrorBeforeSingleSupportOuterY.getValue();
       normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
-            + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
+                             + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
    }
 
    public double getNormalizedEllipticICPError()
