@@ -2,8 +2,8 @@ package us.ihmc.perception.logging;
 
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;
-import org.bytedeco.hdf5.Group;
-import org.bytedeco.hdf5.H5File;
+import org.bytedeco.hdf5.*;
+import org.bytedeco.javacpp.IntPointer;
 import us.ihmc.log.LogTools;
 
 import java.nio.file.Path;
@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class HDF5Manager
 {
-   public static int MAX_BUFFER_SIZE = 10;
+   public static int MAX_BUFFER_SIZE = 100;
 
    private HashMap<String, Group> groups;
    private HashMap<String, TFloatArrayList> floatBuffers;

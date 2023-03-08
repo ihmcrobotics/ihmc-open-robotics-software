@@ -434,6 +434,85 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   public void testHDF5Attributes()
+   {
+      HDF5Tools hdf5Tools = new HDF5Tools();
+      hdf5ManagerWriter = new HDF5Manager("test_attributes.hdf5", hdf5.H5F_ACC_TRUNC());
+      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+
+      byte[] dataArray = new byte[40];
+      for (int i = 0; i < dataArray.length; i++)
+      {
+         dataArray[i] = (byte) i;
+      }
+      hdf5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
+
+      // Create an attribute for storing size of the byte array
+      long[] dims = {1};
+      DataType dataType = new DataType(PredType.NATIVE_INT32());
+      DataSpace dataSpace = new DataSpace(1, dims);
+      Attribute attribute = writeGroup.createAttribute("Size", dataType, dataSpace);
+      IntPointer pointer = new IntPointer(1);
+      pointer.put(0, dataArray.length);
+      attribute.write(dataType, pointer);
+      attribute._close();
+      writeGroup._close();
+      hdf5ManagerWriter.getFile()._close();
+
+      hdf5ManagerReader = new HDF5Manager("test_attributes.hdf5", hdf5.H5F_ACC_RDONLY());
+      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+
+      Attribute sizeAttribute = readGroup.openAttribute("Size");
+      IntPointer sizeAttributePointer = new IntPointer(1);
+      sizeAttribute.read(dataType, sizeAttributePointer);
+      sizeAttribute._close();
+
+      assertEquals(dataArray.length, sizeAttributePointer.get(0));
+
+      hdf5ManagerWriter.closeFile();
+      hdf5ManagerReader.closeFile();
+   }
+
+   @Test
+   public void testHDF5ToolsAttributesAPI()
+   {
+      HDF5Tools hdf5Tools = new HDF5Tools();
+      hdf5ManagerWriter = new HDF5Manager("test_attributes_api.hdf5", hdf5.H5F_ACC_TRUNC());
+      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+
+      byte[] dataArray = new byte[40];
+      for (int i = 0; i < dataArray.length; i++)
+      {
+         dataArray[i] = (byte) i;
+      }
+      hdf5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
+
+      hdf5Tools.writeIntAttribute(writeGroup, "Int", 12345);
+      hdf5Tools.writeLongAttribute(writeGroup, "Long", 123456);
+      hdf5Tools.writeFloatAttribute(writeGroup, "Float", 0.12345f);
+      hdf5Tools.writeDoubleAttribute(writeGroup, "Double", 0.123456);
+
+      writeGroup._close();
+      hdf5ManagerWriter.getFile()._close();
+
+      hdf5ManagerReader = new HDF5Manager("test_attributes_api.hdf5", hdf5.H5F_ACC_RDONLY());
+      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+
+      int value = hdf5Tools.readIntAttribute(readGroup, "Int");
+      long longValue = hdf5Tools.readLongAttribute(readGroup, "Long");
+      float floatValue = hdf5Tools.readFloatAttribute(readGroup, "Float");
+      double doubleValue = hdf5Tools.readDoubleAttribute(readGroup, "Double");
+
+      assertEquals(12345, value);
+      assertEquals(123456, longValue);
+      assertEquals(0.12345f, floatValue, 1e-10);
+      assertEquals(0.123456, doubleValue, 1e-10);
+
+      hdf5ManagerWriter.closeFile();
+      hdf5ManagerReader.closeFile();
+   }
+
+   @Test
    @Disabled
    public void testCompressedDepthLoggingJPG()
    {
