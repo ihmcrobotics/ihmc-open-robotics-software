@@ -214,7 +214,7 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Meas CoM",
                                                                     yoCenterOfMassPosition,
-                                                                    0.006,
+                                                                    0.012,
                                                                     ColorDefinitions.Black(),
                                                                     DefaultPoint2DGraphic.CROSS));
       return group;

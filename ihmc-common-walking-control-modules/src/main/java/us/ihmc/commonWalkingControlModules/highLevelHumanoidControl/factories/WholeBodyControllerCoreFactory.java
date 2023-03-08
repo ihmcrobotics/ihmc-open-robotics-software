@@ -150,6 +150,11 @@ public class WholeBodyControllerCoreFactory
       return controllerCore;
    }
 
+   public LinearMomentumRateControlModule getLinearMomentumRateControlModule()
+   {
+      return linearMomentumRateControlModule;
+   }
+
    public LinearMomentumRateControlModule getOrCreateLinearMomentumRateControlModule(YoRegistry registry)
    {
       if (linearMomentumRateControlModule != null)

@@ -15,9 +15,7 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicPoint3DDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -83,12 +81,7 @@ public class BasisVectorVisualizer implements SCS2YoGraphicHolder
       {
          YoFramePoint3D origin = pointOfBases.get(i);
          YoFrameVector3D basisVector = yoBasisVectors.get(i);
-         YoGraphicPoint3DDefinition basisVectorGraphic = YoGraphicDefinitionFactory.newYoGraphicPoint3D(basisVector.getNamePrefix(),
-                                                                                                        origin,
-                                                                                                        vizScaling,
-                                                                                                        ColorDefinitions.Aqua());
-         group.addChild(basisVectorGraphic);
-         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(basisVectorGraphic, DefaultPoint2DGraphic.CIRCLE));
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D(basisVector.getNamePrefix(), origin, basisVector, vizScaling, ColorDefinitions.Aqua()));
       }
       return group;
    }

@@ -308,7 +308,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       group.addChild(captureRegionCalculator.getSCS2YoGraphics());
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoNamePrefix + "FootstepSolution",
                                                                     this.footstepSolution.getPosition(),
-                                                                    0.005,
+                                                                    0.01,
                                                                     ColorDefinitions.DarkRed(),
                                                                     DefaultPoint2DGraphic.CIRCLE));
       group.setVisible(VISUALIZE);

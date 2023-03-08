@@ -206,7 +206,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(newYoGraphicArrow3D(namePrefix + "PlaneNormal", measuredCoPFiltered, groundPlaneNormal, 1.0, ColorDefinitions.Blue()));
-      group.addChild(newYoGraphicPoint2D(namePrefix + "PlanePoint", measuredCoPFiltered, 0.005, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_FILLED));
+      group.addChild(newYoGraphicPoint2D(namePrefix + "PlanePoint", measuredCoPFiltered, 0.01, ColorDefinitions.Blue(), DefaultPoint2DGraphic.CIRCLE_FILLED));
       group.addChild(newYoGraphicLineSegment2DDefinition(namePrefix + "LineOfRotationGeometric", lineSegmentOfRotation, ColorDefinitions.Green()));
       group.setVisible(VISUALIZE);
       return group;

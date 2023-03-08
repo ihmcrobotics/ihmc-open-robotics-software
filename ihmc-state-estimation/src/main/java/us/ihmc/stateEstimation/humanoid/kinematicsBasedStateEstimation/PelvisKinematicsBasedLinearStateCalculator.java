@@ -375,7 +375,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       {
          YoGraphicPoint2DDefinition copVisual = YoGraphicDefinitionFactory.newYoGraphicPoint2D(foot.getName() + "StateEstimatorCoP",
                                                                                                copPositionInWorld,
-                                                                                               0.005,
+                                                                                               0.01,
                                                                                                ColorDefinitions.DeepPink(),
                                                                                                DefaultPoint2DGraphic.CIRCLE);
          return copVisual;

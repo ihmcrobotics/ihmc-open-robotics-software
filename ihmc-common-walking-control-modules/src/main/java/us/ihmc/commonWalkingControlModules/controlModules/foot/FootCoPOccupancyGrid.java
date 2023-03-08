@@ -654,7 +654,7 @@ public class FootCoPOccupancyGrid implements SCS2YoGraphicHolder
             String namePrefix = "CellViz_X" + String.valueOf(i) + "Y" + String.valueOf(j);
             YoGraphicPoint3DDefinition yoGraphicPoint3D = YoGraphicDefinitionFactory.newYoGraphicPoint3D(namePrefix,
                                                                                                          cellViz[i][j],
-                                                                                                         0.004,
+                                                                                                         0.008,
                                                                                                          ColorDefinitions.Orange());
             group.addChild(yoGraphicPoint3D);
             group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoGraphicPoint3D, DefaultPoint2DGraphic.CIRCLE));

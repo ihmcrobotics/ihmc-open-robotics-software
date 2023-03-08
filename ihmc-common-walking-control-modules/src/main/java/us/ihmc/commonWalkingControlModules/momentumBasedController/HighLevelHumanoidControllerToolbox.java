@@ -1026,7 +1026,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          group.addChild(contactPointVisualizer.getSCS2YoGraphics());
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Controller CoP",
                                                                     yoCenterOfPressure,
-                                                                    0.005,
+                                                                    0.01,
                                                                     ColorDefinitions.Black(),
                                                                     DefaultPoint2DGraphic.DIAMOND));
       

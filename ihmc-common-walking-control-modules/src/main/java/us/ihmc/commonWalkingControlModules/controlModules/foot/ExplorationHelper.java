@@ -198,7 +198,7 @@ public class ExplorationHelper implements SCS2YoGraphicHolder
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Desired Center of Pressure for Exploration",
                                                                     yoDesiredCop,
-                                                                    0.003,
+                                                                    0.006,
                                                                     ColorDefinitions.Blue(),
                                                                     DefaultPoint2DGraphic.CIRCLE));
       return group;
