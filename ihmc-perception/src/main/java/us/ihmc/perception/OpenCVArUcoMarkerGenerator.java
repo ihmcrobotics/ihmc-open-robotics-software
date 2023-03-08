@@ -1,8 +1,8 @@
 package us.ihmc.perception;
 
-import org.bytedeco.opencv.global.opencv_aruco;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.opencv_aruco.Dictionary;
+import org.bytedeco.opencv.global.opencv_objdetect;
+import org.bytedeco.opencv.opencv_objdetect.Dictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 public class OpenCVArUcoMarkerGenerator
@@ -46,14 +46,14 @@ public class OpenCVArUcoMarkerGenerator
    public static void main(String[] args)
    {
       Mat markerToSave = new Mat();
-      Dictionary dictionary = opencv_aruco.getPredefinedDictionary(OpenCVArUcoMarkerDetection.DEFAULT_DICTIONARY);
+      Dictionary dictionary = opencv_objdetect.getPredefinedDictionary(OpenCVArUcoMarkerDetection.DEFAULT_DICTIONARY);
       int startingMarkerID = 0;
       int numberOfSequentialMarkersToGenerate = 4;
       int endIndex = startingMarkerID + numberOfSequentialMarkersToGenerate;
       int totalImageSizePixels = 2000;
       for (; startingMarkerID < endIndex; startingMarkerID++)
       {
-         opencv_aruco.drawMarker(dictionary, startingMarkerID, totalImageSizePixels, markerToSave, 2);
+//         opencv_aruco.drawMarker(dictionary, startingMarkerID, totalImageSizePixels, markerToSave, 2);
          opencv_imgcodecs.imwrite("marker" + startingMarkerID + ".png", markerToSave);
       }
    }
