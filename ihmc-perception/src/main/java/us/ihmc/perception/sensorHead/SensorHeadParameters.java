@@ -26,10 +26,14 @@ public class SensorHeadParameters
    public static final double FE185C086HA_1_FOCAL_LENGTH = 0.0027;
    public static final double FE185C086HA_1_FOCAL_LENGTH_IN_BFLY_U3_23S6C_PIXELS
          = FE185C086HA_1_FOCAL_LENGTH * SpinnakerBlackfly.BFLY_U3_23S6C_WIDTH_PIXELS / SpinnakerBlackfly.BFLY_U3_23S6C_CMOS_SENSOR_WIDTH;
-   public static final double FOCAL_LENGTH_X_FOR_UNDISORTION = 451.18520;
-   public static final double FOCAL_LENGTH_Y_FOR_UNDISORTION = 451.24202;
-   public static final double PRINCIPAL_POINT_X_FOR_UNDISORTION = 969.78071;
-   public static final double PRINCIPAL_POINT_Y_FOR_UNDISORTION = 609.84049;
+   /** These undistortion fx, fy, generated through calibration with average reprojection error of 0.24742. */
+   public static final double FOCAL_LENGTH_X_FOR_UNDISORTION = 451.13411;
+   public static final double FOCAL_LENGTH_Y_FOR_UNDISORTION = 451.23058;
+   /** These undistortion principal point (i.e. cx, cy) were then hand tuned by @dcalvert so that close by ArUco
+    *  marker coordinate frame lined up good with the colored point cloud. This is the manipulation zone, which is
+    *  where we care about accuracy the most. */
+   public static final double PRINCIPAL_POINT_X_FOR_UNDISORTION = 934.69385;
+   public static final double PRINCIPAL_POINT_Y_FOR_UNDISORTION = 578.91155;
    public static final double K1_FOR_UNDISORTION = 0.0066063;
    public static final double K2_FOR_UNDISORTION = 0.0103141;
    public static final double K3_FOR_UNDISORTION = -0.0056699;
