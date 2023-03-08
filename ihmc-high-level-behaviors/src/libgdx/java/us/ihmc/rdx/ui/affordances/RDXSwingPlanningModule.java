@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,10 +31,12 @@ public class RDXSwingPlanningModule
    private final ROS2SyncedRobotModel syncedRobot;
    private PlanarRegionsListMessage planarRegionsListMessage;
    private HeightMapMessage heightMapMessage;
+   private SwingPlannerParametersReadOnly swingPlannerParameters;
 
    private final SideDependentList<FramePose3DBasics> startFootPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
+   private boolean isCurrentlyPlanning = false;
 
    public RDXSwingPlanningModule(ROS2SyncedRobotModel syncedRobot,
                                  FootstepPlannerParametersReadOnly footstepPlannerParameters,
@@ -56,6 +59,11 @@ public class RDXSwingPlanningModule
       this.heightMapMessage = heightMapData;
    }
 
+   public void setSwingPlannerParameters(SwingPlannerParametersReadOnly swingPlannerParameters)
+   {
+      this.swingPlannerParameters = swingPlannerParameters;
+   }
+
    public void setInitialFeet()
    {
       startFootPoses.forEach((side, pose) -> pose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side)));
@@ -68,11 +76,13 @@ public class RDXSwingPlanningModule
 
    public synchronized void update(List<RDXInteractableFootstep> footstepPlan, SwingPlannerType swingPlannerType)
    {
+      isCurrentlyPlanning = true;
       setInitialFeet();
       FootstepPlan tempPlan = createFakeFootstepPlan(footstepPlan);
 
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      swingPlanningModule.getSwingPlannerParameters().set(swingPlannerParameters);
       swingPlanningModule.computeSwingWaypoints(planarRegionsList,
                                                 heightMapData,
                                                 tempPlan,
@@ -83,6 +93,7 @@ public class RDXSwingPlanningModule
       {
          footstepPlan.get(i).updatePlannedTrajectory(Pair.of(tempPlan.getFootstep(i), swingPlanningModule.getSwingTrajectories().get(i)));
       }
+      isCurrentlyPlanning = false;
    }
 
    private FootstepPlan createFakeFootstepPlan(List<RDXInteractableFootstep> footstepPlan)
@@ -98,4 +109,8 @@ public class RDXSwingPlanningModule
       executorService.destroy();
    }
 
+   public boolean getIsCurrentlyPlanning()
+   {
+      return isCurrentlyPlanning;
+   }
 }

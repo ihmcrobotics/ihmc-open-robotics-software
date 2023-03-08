@@ -6,8 +6,9 @@ import org.bytedeco.opencv.global.opencv_aruco;
 import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_aruco.DetectorParameters;
-import org.bytedeco.opencv.opencv_aruco.Dictionary;
+import org.bytedeco.opencv.global.opencv_objdetect;
+import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
+import org.bytedeco.opencv.opencv_objdetect.Dictionary;
 import org.bytedeco.opencv.opencv_aruco.EstimateParameters;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -31,7 +32,7 @@ import java.util.function.Consumer;
 
 public class OpenCVArUcoMarkerDetection
 {
-   public static final int DEFAULT_DICTIONARY = opencv_aruco.DICT_4X4_100;
+   public static final int DEFAULT_DICTIONARY = opencv_objdetect.DICT_4X4_100;
 
    private Dictionary dictionary;
    private ReferenceFrame sensorFrame;
@@ -66,12 +67,12 @@ public class OpenCVArUcoMarkerDetection
    {
       this.sensorFrame = sensorFrame;
 
-      dictionary = opencv_aruco.getPredefinedDictionary(DEFAULT_DICTIONARY);
+      dictionary = opencv_objdetect.getPredefinedDictionary(DEFAULT_DICTIONARY);
       corners = new SwapReference<>(MatVector::new);
       ids = new SwapReference<>(Mat::new);
       rejectedImagePoints = new SwapReference<>(MatVector::new);
-      detectorParameters = DetectorParameters.create();
-      estimateParameters = EstimateParameters.create();
+      detectorParameters = new DetectorParameters();
+      estimateParameters = new EstimateParameters();
       cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
       distortionCoefficients = new Mat(1, 4, opencv_core.CV_32FC1);
       distortionCoefficients.ptr(0, 0).putFloat(0.0f);
@@ -273,7 +274,7 @@ public class OpenCVArUcoMarkerDetection
    {
       synchronized (detectionDataSync)
       {
-         opencv_aruco.drawDetectedMarkers(imageForDrawing, corners.getForThreadTwo(), ids.getForThreadTwo(), borderColor);
+         opencv_objdetect.drawDetectedMarkers(imageForDrawing, corners.getForThreadTwo(), ids.getForThreadTwo(), borderColor);
       }
    }
 
@@ -281,7 +282,7 @@ public class OpenCVArUcoMarkerDetection
    {
       synchronized (detectionDataSync)
       {
-         opencv_aruco.drawDetectedMarkers(imageForDrawing, rejectedImagePoints.getForThreadTwo());
+         opencv_objdetect.drawDetectedMarkers(imageForDrawing, rejectedImagePoints.getForThreadTwo());
       }
    }
 
