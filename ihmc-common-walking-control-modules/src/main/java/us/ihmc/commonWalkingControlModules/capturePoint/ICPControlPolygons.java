@@ -70,8 +70,11 @@ public class ICPControlPolygons implements SCS2YoGraphicHolder
 
          if (VISUALIZE)
          {
-            YoFrameConvexPolygon2D controlFootPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix
-                  + "controlFootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
+            YoFrameConvexPolygon2D controlFootPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "controlFootPolygon",
+                                                                                      "",
+                                                                                      worldFrame,
+                                                                                      maxNumberOfContactPointsPerFoot,
+                                                                                      registry);
             controlFootPolygonsViz.put(robotSide, controlFootPolygonViz);
             YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Control Foot Polygon",
                                                                           controlFootPolygonViz,
