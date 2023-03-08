@@ -9,7 +9,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.PlanarRegionMappingHandler;
-import us.ihmc.perception.tools.MocapTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -112,7 +111,7 @@ public class RDXPlanarRegionMappingDemo
                   framePose.set(transform);
                   modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.04, Color.GREEN);
 
-//                  keyframeTrajectoryGraphic.generateMeshes();
+                  //                  keyframeTrajectoryGraphic.generateMeshes();
 
                   LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
                   poseModels.add(modelInstance);
