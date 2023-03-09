@@ -102,7 +102,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
                                                 double nominalHeightAboveGround,
                                                 double maximumHeightAboveGround,
-                                                double defaultOffsetHeightAboveGround,
                                                 double doubleSupportPercentageIn,
                                                 ReferenceFrame centerOfMassFrame,
                                                 ReferenceFrame frameOfHeight,
@@ -114,7 +113,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       this(minimumHeightAboveGround,
            nominalHeightAboveGround,
            maximumHeightAboveGround,
-           defaultOffsetHeightAboveGround,
            doubleSupportPercentageIn,
            0.0,
            centerOfMassFrame,
@@ -128,7 +126,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
                                                 double nominalHeightAboveGround,
                                                 double maximumHeightAboveGround,
-                                                double defaultOffsetHeightAboveGround,
                                                 double doubleSupportPercentageIn,
                                                 double hipWidth,
                                                 ReferenceFrame centerOfMassFrame,
@@ -143,7 +140,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       this.soleFrames = soleFrames;
       this.yoTime = yoTime;
 
-      heightOffsetHandler = new HeightOffsetHandler(yoTime, defaultOffsetHeightAboveGround, registry);
+      heightOffsetHandler = new HeightOffsetHandler(yoTime, registry);
       doubleSupportExchangeOffset.set(defaultPercentageInOffset);
 
       setMinimumHeightAboveGround(minimumHeightAboveGround);

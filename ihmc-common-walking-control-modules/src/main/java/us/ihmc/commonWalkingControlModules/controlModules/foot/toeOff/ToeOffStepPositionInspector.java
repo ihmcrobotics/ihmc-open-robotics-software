@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -42,6 +43,7 @@ public class ToeOffStepPositionInspector
    private final ZUpFrame leadingFootZUpFrame = new ZUpFrame(leadingFootFrame, "leadingFootZUpFrame");
 
    public ToeOffStepPositionInspector(SideDependentList<MovingReferenceFrame> soleZUpFrames,
+                                      WalkingControllerParameters walkingControllerParameters,
                                       ToeOffParameters toeOffParameters,
                                       double inPlaceWidth,
                                       double footLength,
@@ -53,7 +55,7 @@ public class ToeOffStepPositionInspector
 
       minStepLengthForToeOff = new DoubleParameter("minStepLengthForToeOff", registry, toeOffParameters.getMinStepLengthForToeOff());
       minStepForwardForToeOff = new DoubleParameter("minStepForwardForToeOff", registry, footLength);
-      minStepHeightForToeOff = new DoubleParameter("minStepHeightForToeOff", registry, toeOffParameters.getMinStepHeightForToeOff());
+      minStepHeightForToeOff = new DoubleParameter("minStepHeightForToeOff", registry, walkingControllerParameters.getHeightChangeForNonFlatStep());
 
       parentRegistry.addChild(registry);
    }
