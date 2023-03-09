@@ -644,6 +644,14 @@ public class RotationTools
          return wz + Math.tan(pitch) * (Math.sin(yaw) * wy + Math.cos(yaw) * wx);
    }
 
+   /**
+    * Computes the weighted average of multiple quaternions using Singular Value Decomposition.
+    * WARNING: This method generates garbage as it creates new matrices and vectors at every call
+    *
+    * @param quaternions list of quaternions
+    * @param weights list of weights
+    * @return Returns the weighted average quaternion if SVD succeeds. Otherwise, returns the first quaternion in the list.
+    */
    public static Quaternion computeAverageQuaternion(List<QuaternionReadOnly> quaternions, List<Double> weights)
    {
       DMatrixRMaj Q = new DMatrixRMaj(4, quaternions.size());
@@ -686,11 +694,6 @@ public class RotationTools
             if (D.get(i, i) > D.get(maxIndex, maxIndex))
                maxIndex = i;
          }
-
-         //LogTools.info("Max index: " + maxIndex);
-         //LogTools.info("U = " + U);
-         //LogTools.info("D = " + D);
-         //LogTools.info("Vt = " + Vt);
 
          return new Quaternion(U.get(0, maxIndex), U.get(1, maxIndex), U.get(2, maxIndex), U.get(3, maxIndex));
       }
