@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -17,7 +19,6 @@ import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
 {
@@ -36,7 +37,7 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    private ImBoolean renderPointCloud = new ImBoolean(false);
    private ImInt icpPreviousIndex = new ImInt(10);
    private ImInt icpCurrentIndex = new ImInt(14);
-  
+
    public RDXPlanarRegionMappingUIPanel(String name, PlanarRegionMappingHandler mappingManager)
    {
       this.mappingManager = mappingManager;
@@ -48,14 +49,14 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      if(ImGui.beginTabBar("Mapping"))
+      if (ImGui.beginTabBar("Mapping"))
       {
-         if(ImGui.beginTabItem("Map"))
+         if (ImGui.beginTabItem("Map"))
          {
             if (ImGui.button("Load Next Set"))
                mappingManager.nextButtonCallback();
             ImGui.sameLine();
-            if(ImGui.button("Perform Map Clean-up"))
+            if (ImGui.button("Perform Map Clean-up"))
                mappingManager.performMapCleanUp();
             if (ImGui.button("Auto Increment"))
                mappingManager.autoIncrementButtonCallback();
@@ -72,9 +73,9 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
             ImGui.endTabItem();
          }
 
-         if(ImGui.beginTabItem("Registration"))
+         if (ImGui.beginTabItem("Registration"))
          {
-            if(ImGui.button("Load Previous"))
+            if (ImGui.button("Load Previous"))
             {
                mappingManager.loadRegionsFromLogIntoPrevious(icpPreviousIndex.get());
                previousRegionsGraphic.generateMeshes(mappingManager.getPreviousRegions().getPlanarRegionsList());
@@ -86,7 +87,7 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
             icpPreviousIndex.set(Math.min(icpPreviousIndex.get(), icpCurrentIndex.get() - 1));
             icpCurrentIndex.set(Math.max(1, icpCurrentIndex.get()));
 
-            if(ImGui.button("Load Curernt"))
+            if (ImGui.button("Load Curernt"))
             {
                mappingManager.loadRegionsFromLogIntoCurrent(icpCurrentIndex.get());
                currentRegionsGraphic.generateMeshes(mappingManager.getCurrentRegions().getPlanarRegionsList());
@@ -95,7 +96,7 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
             }
             ImGui.sameLine();
             ImGui.sliderInt("Current", icpCurrentIndex.getData(), 1, mappingManager.getTotalDepthCount() - 1);
-            if(ImGui.button("Optimize Transform"))
+            if (ImGui.button("Optimize Transform"))
             {
                mappingManager.computeICP();
                currentRegionsGraphic.generateMeshes(mappingManager.getCurrentRegions().getPlanarRegionsList());
@@ -103,14 +104,13 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
                drawMatches();
             }
 
-            if(ImGui.checkbox("Render Bounding Boxes [Previous]", renderBoundingBoxEnabled))
+            if (ImGui.checkbox("Render Bounding Boxes [Previous]", renderBoundingBoxEnabled))
             {
                previousRegionsGraphic.setDrawBoundingBox(renderBoundingBoxEnabled.get());
                previousRegionsGraphic.generateMeshes(mappingManager.getPreviousRegions().getPlanarRegionsList());
                previousRegionsGraphic.update();
-
             }
-            if(ImGui.checkbox("Render Bounding Boxes [Current]", renderBoundingBoxEnabled))
+            if (ImGui.checkbox("Render Bounding Boxes [Current]", renderBoundingBoxEnabled))
             {
                currentRegionsGraphic.setDrawBoundingBox(renderBoundingBoxEnabled.get());
                currentRegionsGraphic.generateMeshes(mappingManager.getCurrentRegions().getPlanarRegionsList());
@@ -134,15 +134,18 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    public void drawMatches()
    {
       lineMeshModel.clear();
-      HashMap<Integer, Integer> matches = new HashMap<>();
+      TIntIntMap matches = new TIntIntHashMap();
       PlaneRegistrationTools.findBestPlanarRegionMatches(mappingManager.getCurrentRegions().getPlanarRegionsList(),
-                                                         mappingManager.getPreviousRegions().getPlanarRegionsList(), matches,
+                                                         mappingManager.getPreviousRegions().getPlanarRegionsList(),
+                                                         matches,
                                                          (float) mappingManager.getParameters().getBestMinimumOverlapThreshold(),
                                                          (float) mappingManager.getParameters().getBestMatchAngularThreshold(),
-                                                         (float) mappingManager.getParameters().getBestMatchDistanceThreshold(), 0.3f);
+                                                         (float) mappingManager.getParameters().getBestMatchDistanceThreshold(),
+                                                         0.3f);
 
       ArrayList<Point3DReadOnly> matchEndPoints = new ArrayList<>();
-      for(Integer match : matches.keySet())
+      int[] keySet = matches.keySet().toArray();
+      for (Integer match : keySet)
       {
          matchEndPoints.add(mappingManager.getPreviousRegions().getPlanarRegionsList().getPlanarRegion(match).getPoint());
          matchEndPoints.add(mappingManager.getCurrentRegions().getPlanarRegionsList().getPlanarRegion(matches.get(match)).getPoint());

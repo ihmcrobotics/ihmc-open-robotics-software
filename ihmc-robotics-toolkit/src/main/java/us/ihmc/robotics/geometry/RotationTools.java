@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
@@ -652,7 +653,7 @@ public class RotationTools
     * @param weights list of weights
     * @return Returns the weighted average quaternion if SVD succeeds. Otherwise, returns the first quaternion in the list.
     */
-   public static Quaternion computeAverageQuaternion(List<QuaternionReadOnly> quaternions, List<Double> weights)
+   public static Quaternion computeAverageQuaternion(List<QuaternionReadOnly> quaternions, TDoubleArrayList weights)
    {
       DMatrixRMaj Q = new DMatrixRMaj(4, quaternions.size());
       DMatrixRMaj QWQt = new DMatrixRMaj(4, 4);

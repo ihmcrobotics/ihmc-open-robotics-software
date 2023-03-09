@@ -1,5 +1,9 @@
 package us.ihmc.perception.tools;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
@@ -30,7 +34,7 @@ import java.util.Set;
 
 public class PlaneRegistrationTools
 {
-   public static void findPatchMatches(PatchFeatureGrid previousGrid, PatchFeatureGrid currentGrid, HashMap<Integer, Integer> matches)
+   public static void findPatchMatches(PatchFeatureGrid previousGrid, PatchFeatureGrid currentGrid, TIntIntMap matches)
    {
       Point3D previousCentroid = new Point3D();
       Point3D currentCentroid = new Point3D();
@@ -66,7 +70,7 @@ public class PlaneRegistrationTools
 
    public static void computeTransformFromPatches(PatchFeatureGrid previousGrid,
                                                   PatchFeatureGrid currentGrid,
-                                                  HashMap<Integer, Integer> matches,
+                                                  TIntIntMap matches,
                                                   RigidBodyTransform transformToPack)
    {
       SvdImplicitQrDecompose_DDRM svd = new SvdImplicitQrDecompose_DDRM(false, true, true, true);
@@ -77,7 +81,7 @@ public class PlaneRegistrationTools
       DMatrixRMaj matrixOne = new DMatrixRMaj(3, matches.size());
       DMatrixRMaj matrixTwo = new DMatrixRMaj(3, matches.size());
 
-      Set<Integer> keys = matches.keySet();
+      int[] keySet = matches.keySet().toArray();
 
       Point3D previousCentroid = new Point3D();
       Point3D currentCentroid = new Point3D();
@@ -88,7 +92,7 @@ public class PlaneRegistrationTools
       Point3D currentMean = new Point3D();
 
       int matrixIndex = 0;
-      for (Integer key : matches.keySet())
+      for (Integer key : keySet)
       {
          previousGrid.getCentroid(key, previousCentroid);
          previousGrid.getNormal(key, previousNormal);
@@ -143,14 +147,14 @@ public class PlaneRegistrationTools
     * Computes the transform from the previous to the current planar regions list.
     * Uses approach described in the paper: https://www.comp.nus.edu.sg/~lowkl/publications/lowk_point-to-plane_icp_techrep.pdf
     * <p>
-    * Use Iterative Linear Least Squares on SE3 tranform parameterized using the exponential map, as a tangent space vector. Every iteration
-    * moves the current planar regions closer to the previous planar regions. Usually 4-5 iterations are enough for convergence. Minizes a similarity metric
-    * between the corresponding planar regions (point-to-plane).
+    * Use Iterative Linear Least Squares for quaternion averaging based estimation. Every iteration
+    * moves the current planar regions closer to the previous planar regions. Usually 4-5 iterations are enough for convergence.
     *
-    * @param previousRegions
-    * @param currentRegions
-    * @param transformToPack
-    * @param parameters
+    * @param previousRegions The previous planar regions list.
+    * @param currentRegions The current planar regions list.
+    * @param transformToPack The transform from the previous to the current planar regions list.
+    * @param parameters The parameters for the registration.
+    * @return True if the registration was successful, false otherwise.
     */
    public static boolean computeIterativeClosestPlane(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions,
                                                       RigidBodyTransform transformToPack, PlanarRegionMappingParameters parameters)
@@ -158,7 +162,7 @@ public class PlaneRegistrationTools
       RigidBodyTransform transform;
       RigidBodyTransform finalTransform = new RigidBodyTransform();
 
-      HashMap<Integer, Integer> matches = new HashMap<>();
+      TIntIntMap matches = new TIntIntHashMap();
 
       PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
                                                         (float) parameters.getBestMatchAngularThreshold(),
@@ -174,7 +178,6 @@ public class PlaneRegistrationTools
 
          if (matches.size() < parameters.getICPMinMatches())
          {
-//            LogTools.info("Not Enough Matches: {}", matches.size());
             return false;
          }
 
@@ -183,8 +186,6 @@ public class PlaneRegistrationTools
 
          double error = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
          double ratio = (previousError - error) / previousError;
-
-//         LogTools.info(String.format("Iteration: %d, Matches: %d, Previous Error: %.5f, Error: %.5f, Ratio: %.5f", i, matches.size(), previousError, error, ratio));
 
          if ((Math.abs(ratio) < parameters.getICPTerminationRatio()) || (matches.size() < parameters.getICPMinMatches()))
          {
@@ -195,13 +196,8 @@ public class PlaneRegistrationTools
          previousError = error + 1e-7;
       }
 
-//      LogTools.info("Size: {}", (int) ( (float)previousError / 0.0002f));
-
-//      LogTools.info("[{}]", ">".repeat(Math.abs((int) ((float) previousError / 0.0002f))) + ".".repeat(Math.max((int) ((0.03f - (float) previousError) / 0.0002f), 0)));
-
       if (previousError > parameters.getICPErrorCutoff())
       {
-//         LogTools.warn("ICP failed to converge, error: {}", previousError);
          return false;
       }
 
@@ -211,12 +207,14 @@ public class PlaneRegistrationTools
 
    public static RigidBodyTransform computeTransformFromRegions(PlanarRegionsList previousRegions,
                                                                 PlanarRegionsList currentRegions,
-                                                                HashMap<Integer, Integer> matches)
+                                                                TIntIntMap matches)
    {
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
+      int[] keySet = matches.keySet().toArray();
+
       int totalNumOfBoundaryPoints = 0;
-      for (Integer i : matches.keySet())
+      for (Integer i : keySet)
       {
          totalNumOfBoundaryPoints += currentRegions.getPlanarRegionsAsList().get(matches.get(i)).getConcaveHullSize();
       }
@@ -228,17 +226,6 @@ public class PlaneRegistrationTools
       DMatrixRMaj solution = solveUsingSVDDecomposition(A, b);
       //DMatrixRMaj solution = solveUsingDampedLeastSquares(A, b);
 
-      // TODO: Remove this
-      //CommonOps_DDRM.scale(0.1, solution);
-
-      //LogTools.info("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
-      //
-//      LogTools.info("[SVD] Rotation({}, {}, {})", solution.get(0), solution.get(1), solution.get(2));
-//      LogTools.info("[SVD] Translation({}, {}, {})", solution.get(3), solution.get(4), solution.get(5));
-      //
-      //LogTools.info("[QR] Rotation({}, {}, {})", solutionQR.get(0), solutionQR.get(1), solutionQR.get(2));
-      //LogTools.info("[QR] Translation({}, {}, {})", solutionQR.get(3), solutionQR.get(4), solutionQR.get(5));
-
       RotationMatrix rotation = new RotationMatrix(solution.get(2), solution.get(1), solution.get(0));
       Point3D translation = new Point3D(solution.get(3), solution.get(4), solution.get(5));
       transformToReturn.set(rotation, translation);
@@ -248,12 +235,12 @@ public class PlaneRegistrationTools
 
    public static RigidBodyTransform computeQuaternionAveragingTransform(PlanarRegionsList previousRegions,
                                                                         PlanarRegionsList currentRegions,
-                                                                        HashMap<Integer, Integer> matches)
+                                                                        TIntIntMap matches)
    {
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
       ArrayList<QuaternionReadOnly> quaternions = findRotationEstimates(previousRegions, currentRegions, matches);
-      ArrayList<Double> weights = computeResidualWeights(previousRegions, currentRegions, matches, quaternions);
+      TDoubleArrayList weights = computeResidualWeights(previousRegions, currentRegions, matches, quaternions);
       Quaternion averageQuaternion = RotationTools.computeAverageQuaternion(quaternions, weights);
 
       Point3D averageTranslation = new Point3D();
@@ -269,11 +256,12 @@ public class PlaneRegistrationTools
 
    public static ArrayList<Point3DReadOnly> findTranslationEstimates(PlanarRegionsList previousRegions,
                                                                      PlanarRegionsList currentRegions,
-                                                                     HashMap<Integer, Integer> matches)
+                                                                     TIntIntMap matches)
    {
       ArrayList<Point3DReadOnly> translations = new ArrayList<>();
 
-      for (Integer i : matches.keySet())
+      int[] keySet = matches.keySet().toArray();
+      for (Integer i : keySet)
       {
          PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(i));
          PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(i);
@@ -294,11 +282,12 @@ public class PlaneRegistrationTools
 
    public static ArrayList<QuaternionReadOnly> findRotationEstimates(PlanarRegionsList previousRegions,
                                                                      PlanarRegionsList currentRegions,
-                                                                     HashMap<Integer, Integer> matches)
+                                                                     TIntIntMap matches)
    {
       ArrayList<QuaternionReadOnly> quaternions = new ArrayList<>();
 
-      for (Integer i : matches.keySet())
+      int[] keySet = matches.keySet().toArray();
+      for (Integer i : keySet)
       {
          PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(i));
          PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(i);
@@ -332,21 +321,22 @@ public class PlaneRegistrationTools
       return averageTranslation;
    }
 
-   public static ArrayList<Double> computeResidualWeights(PlanarRegionsList previousRegions,
+   public static TDoubleArrayList computeResidualWeights(PlanarRegionsList previousRegions,
                                                           PlanarRegionsList currentRegions,
-                                                          HashMap<Integer, Integer> matches,
+                                                          TIntIntMap matches,
                                                           ArrayList<QuaternionReadOnly> quaternions)
    {
-      ArrayList<Double> weightsToPack = new ArrayList<>();
+      TDoubleArrayList weightsToPack = new TDoubleArrayList();
 
       RigidBodyTransform transform = new RigidBodyTransform();
+      int[] keySet = matches.keySet().toArray();
 
       for (int i = 0; i < quaternions.size(); i++)
       {
          double weight = 0.0;
          transform.setRotationAndZeroTranslation(quaternions.get(i));
 
-         for (Integer index : matches.keySet())
+         for (Integer index : keySet)
          {
             PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(index));
             PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(index);
@@ -366,12 +356,13 @@ public class PlaneRegistrationTools
 
    public static void constructLeastSquaresProblem(PlanarRegionsList previousRegions,
                                                    PlanarRegionsList currentRegions,
-                                                   HashMap<Integer, Integer> matches,
+                                                   TIntIntMap matches,
                                                    DMatrixRMaj A,
                                                    DMatrixRMaj b)
    {
       int i = 0;
-      for (Integer m : matches.keySet())
+      int[] keySet = matches.keySet().toArray();
+      for (Integer m : keySet)
       {
          PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(m);
          PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(m));
@@ -409,22 +400,6 @@ public class PlaneRegistrationTools
 
             b.set(i, -diff.dot(correspondingMapNormal));
             i++;
-
-            //LogTools.info(String.format("[%d, %d] Point: (%.2f, %.2f, %.2f), Corresponding Point: (%.2f, %.2f, %.2f)", m, matches.get(m),
-            //                            latestPoint.getX(),
-            //                            latestPoint.getY(),
-            //                            latestPoint.getZ(),
-            //                            correspondingMapCentroid.getX(),
-            //                            correspondingMapCentroid.getY(),
-            //                            correspondingMapCentroid.getZ()));
-            //
-            //LogTools.info(String.format("[%d, %d] Normal: (%.2f, %.2f, %.2f), Corresponding Normal: (%.2f, %.2f, %.2f)", m, matches.get(m),
-            //                            currentRegion.getNormal().getX(),
-            //                            currentRegion.getNormal().getY(),
-            //                            currentRegion.getNormal().getZ(),
-            //                            correspondingMapNormal.getX(),
-            //                            correspondingMapNormal.getY(),
-            //                            correspondingMapNormal.getZ()));
          }
       }
    }
@@ -452,15 +427,10 @@ public class PlaneRegistrationTools
          DMatrixRMaj svdVWinv = new DMatrixRMaj(6, A.numRows);
          DMatrixRMaj svdInverse = new DMatrixRMaj(6, A.numRows);
 
-         //LogTools.info("SVD V, Winv, Ut: ({}, {}, {})", svdV, svdWInv, svdUt);
-
          CommonOps_DDRM.mult(svdV, svdWInv, svdVWinv);
          CommonOps_DDRM.mult(svdVWinv, svdUt, svdInverse);
          CommonOps_DDRM.mult(svdInverse, b, solution);
       }
-
-      //DMatrixRMaj pInverse = new DMatrixRMaj(3, 3);
-      //CommonOps_DDRM.pinv(A, pInverse);
 
       return solution;
    }
@@ -507,10 +477,11 @@ public class PlaneRegistrationTools
       return solution;
    }
 
-   public static double computeRegistrationError(PlanarRegionsList referenceRegions, PlanarRegionsList transformedRegions, HashMap<Integer, Integer> matches)
+   public static double computeRegistrationError(PlanarRegionsList referenceRegions, PlanarRegionsList transformedRegions, TIntIntMap matches)
    {
       double error = 0.0;
-      for (Integer key : matches.keySet())
+      int[] keySet = matches.keys();
+      for (Integer key : keySet)
       {
          PlanarRegion referenceRegion = referenceRegions.getPlanarRegion(key);
          PlanarRegion transformedRegion = transformedRegions.getPlanarRegion(matches.get(key));
@@ -532,7 +503,7 @@ public class PlaneRegistrationTools
 
    public static void findBestPlanarRegionMatches(PlanarRegionsList map,
                                                   PlanarRegionsList incoming,
-                                                  HashMap<Integer, Integer> matches,
+                                                  TIntIntMap matches,
                                                   float overlapThreshold,
                                                   float normalThreshold,
                                                   float distanceThreshold,
