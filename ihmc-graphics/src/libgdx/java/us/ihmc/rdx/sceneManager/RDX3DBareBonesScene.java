@@ -140,6 +140,11 @@ public class RDX3DBareBonesScene
       scene.addRenderableProvider(renderableProvider);
    }
 
+   public void addRenderableProvider(RDXRenderableProvider renderableProvider)
+   {
+      scene.addRenderableProvider(renderableProvider);
+   }
+
    public void addRenderableProvider(RenderableProvider renderableProvider, RDXSceneLevel sceneLevel)
    {
       scene.addRenderableProvider(renderableProvider, sceneLevel);

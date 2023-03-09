@@ -75,12 +75,12 @@ public class RDXBaseUI2D
                                                        classForLoading,
                                                        configurationExtraPath);
 
-      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
       layoutManager = new RDXImGuiLayoutManager(classForLoading,
                                                 directoryNameToAssumePresent,
                                                 subsequentPathToResourceFolder,
                                                 configurationExtraPath,
                                                 configurationBaseDirectory);
+      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem(layoutManager);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
       {
@@ -128,7 +128,7 @@ public class RDXBaseUI2D
 
 
 
-      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), layoutManager);
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
    }

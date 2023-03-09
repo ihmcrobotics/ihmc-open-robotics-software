@@ -1,8 +1,8 @@
 package us.ihmc.perception;
 
-import org.bytedeco.opencv.global.opencv_aruco;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.opencv_aruco.Dictionary;
+import org.bytedeco.opencv.global.opencv_objdetect;
+import org.bytedeco.opencv.opencv_objdetect.Dictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
 
 public class OpenCVArUcoMarkerGenerator
@@ -31,7 +31,7 @@ public class OpenCVArUcoMarkerGenerator
     * Let's get the exact width from the rouned pixels to meters. 1 pixel = 0.0254 / 300.0.
     * So 2362 pixels is a 0.1999826667 meter wide marker.
     *
-    * Set totalImageSizePixels below to 2362 and add as layers to the GIMP image and print.
+    * Set totalImageSizePixels below to 2362 and File > Open as Layers to the GIMP image and print.
     * Check with a ruler that it's about 20 cm wide.
     *
     * The above is sometimes too big to fit on the printed area of a page, so:
@@ -46,14 +46,14 @@ public class OpenCVArUcoMarkerGenerator
    public static void main(String[] args)
    {
       Mat markerToSave = new Mat();
-      Dictionary dictionary = opencv_aruco.getPredefinedDictionary(OpenCVArUcoMarkerDetection.DEFAULT_DICTIONARY);
+      Dictionary dictionary = opencv_objdetect.getPredefinedDictionary(OpenCVArUcoMarkerDetection.DEFAULT_DICTIONARY);
       int startingMarkerID = 0;
       int numberOfSequentialMarkersToGenerate = 4;
       int endIndex = startingMarkerID + numberOfSequentialMarkersToGenerate;
       int totalImageSizePixels = 2000;
       for (; startingMarkerID < endIndex; startingMarkerID++)
       {
-         opencv_aruco.drawMarker(dictionary, startingMarkerID, totalImageSizePixels, markerToSave, 2);
+//         opencv_aruco.drawMarker(dictionary, startingMarkerID, totalImageSizePixels, markerToSave, 2);
          opencv_imgcodecs.imwrite("marker" + startingMarkerID + ".png", markerToSave);
       }
    }

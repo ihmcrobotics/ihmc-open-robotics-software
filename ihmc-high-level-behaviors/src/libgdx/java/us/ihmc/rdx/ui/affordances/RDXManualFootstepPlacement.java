@@ -156,6 +156,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       footstepIndex++;
       RDXInteractableFootstep addedStep = footstepPlan.getFootsteps().add();
+      addedStep.reset();
       addedStep.copyFrom(baseUI, footstepBeingPlaced);
       // Switch sides
       currentFootStepSide = currentFootStepSide.getOppositeSide();

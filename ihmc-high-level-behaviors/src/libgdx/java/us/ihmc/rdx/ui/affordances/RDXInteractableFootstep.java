@@ -4,9 +4,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
+import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,8 +17,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.PlannedFootstep;
@@ -31,16 +32,17 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
+import us.ihmc.rdx.visualizers.RDXPolynomial;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.Timer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -60,11 +62,13 @@ public class RDXInteractableFootstep
    private boolean flashingFootStepsColorHigh = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
 
-   private final List<ModelInstance> trajectoryModel = new ArrayList<>();
+   private final List<ModelInstance> trajectoryWaypointModel = new ArrayList<>();
+   private final RDXPolynomial swingTrajectoryModel = new RDXPolynomial(0.03, 25);
 
    private final SideDependentList<ConvexPolygon2D> defaultPolygons;
-   private final AtomicReference<PlannedFootstep> plannedFootstepInput = new AtomicReference<>(null);
+   private final AtomicReference<Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>>> plannedFootstepInput = new AtomicReference<>(null);
    private final PlannedFootstep plannedFootstepInternal;
+   private final EnumMap<Axis3D, List<PolynomialReadOnly>> plannedFootstepTrajectory = new EnumMap<>(Axis3D.class);
 
    private boolean wasPoseUpdated = false;
 
@@ -97,11 +101,11 @@ public class RDXInteractableFootstep
       }
    }
 
-   public RDXInteractableFootstep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex, SideDependentList<ConvexPolygon2D> defaultPolygons)
+   public void reset()
    {
-      this.defaultPolygons = defaultPolygons;
-      plannedFootstepInternal = new PlannedFootstep(plannedFootstep);
-      updateFromPlannedStep(baseUI,plannedFootstep,footstepIndex);
+      getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
+      plannedFootstepInternal.reset();
+      plannedFootstepTrajectory.clear();
    }
 
    public PlannedFootstepReadOnly getPlannedFootstep()
@@ -109,10 +113,13 @@ public class RDXInteractableFootstep
       return plannedFootstepInternal;
    }
 
-   public void updateFromPlannedStep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex)
+   public void updateFromPlannedStep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory, int footstepIndex)
    {
       plannedFootstepInput.set(null);
       plannedFootstepInternal.set(plannedFootstep);
+      plannedFootstepTrajectory.clear();
+      if (swingTrajectory != null)
+         swingTrajectory.keySet().forEach(key -> plannedFootstepTrajectory.put(key, copyPolynomialList(swingTrajectory.get(key))));
 
       boolean setCustomFoothold = plannedFootstepInternal.hasFoothold();
       if (setCustomFoothold)
@@ -160,13 +167,13 @@ public class RDXInteractableFootstep
       updatePose(plannedFootstep.getFootstepPose());
    }
 
-   public void updatePlannedTrajectory(PlannedFootstep other)
+   public void updatePlannedTrajectory(Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>> other)
    {
       wasPoseUpdated = true;
       plannedFootstepInput.set(other);
    }
 
-   private void updatePlannedTrajectoryInternal(PlannedFootstep other)
+   private void updatePlannedTrajectoryInternal(PlannedFootstep other, EnumMap<Axis3D, List<PolynomialReadOnly>> otherTrajectory)
    {
       plannedFootstepInternal.setTrajectoryType(other.getTrajectoryType());
       plannedFootstepInternal.getCustomWaypointProportions().clear();
@@ -178,6 +185,16 @@ public class RDXInteractableFootstep
       for (int i = 0; i < other.getCustomWaypointPositions().size(); i++)
       {
          plannedFootstepInternal.getCustomWaypointPositions().add(new Point3D(other.getCustomWaypointPositions().get(i)));
+      }
+
+      plannedFootstepTrajectory.clear();
+      if (otherTrajectory != null)
+      {
+         for (Axis3D axis : Axis3D.values)
+         {
+            List<PolynomialReadOnly> polynomialListCopy = copyPolynomialList(otherTrajectory.get(axis));
+            plannedFootstepTrajectory.put(axis, polynomialListCopy);
+         }
       }
    }
 
@@ -199,9 +216,10 @@ public class RDXInteractableFootstep
 
       if (plannedFootstepInput.get() != null)
       {
-         updatePlannedTrajectoryInternal(plannedFootstepInput.getAndSet(null));
+         Pair<PlannedFootstep, EnumMap<Axis3D, List<PolynomialReadOnly>>> pair = plannedFootstepInput.getAndSet(null);
+         updatePlannedTrajectoryInternal(pair.getLeft(), pair.getRight());
       }
-      updateTrajectoryModel(plannedFootstepInternal);
+      updateTrajectoryModel(plannedFootstepInternal, plannedFootstepTrajectory);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -267,8 +285,10 @@ public class RDXInteractableFootstep
       footstepIndexText.getRenderables(renderables, pool);
       footstepModelInstance.getRenderables(renderables, pool);
 
-      for (ModelInstance trajectoryPoint : trajectoryModel)
+      for (ModelInstance trajectoryPoint : trajectoryWaypointModel)
          trajectoryPoint.getRenderables(renderables, pool);
+
+      swingTrajectoryModel.getRenderables(renderables, pool);
    }
 
    // Sets the gizmo's position and rotation
@@ -370,9 +390,10 @@ public class RDXInteractableFootstep
    public void updatePose(RigidBodyTransformReadOnly footstepPose)
    {
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(footstepPose);
-      selectablePose3DGizmo.getPoseGizmo().updateTransforms();
+      selectablePose3DGizmo.getPoseGizmo().update();
+
+      wasPoseUpdated = !plannedFootstepInternal.getFootstepPose().epsilonEquals(footstepPose, 1e-2);
       plannedFootstepInternal.getFootstepPose().set(footstepPose);
-      wasPoseUpdated = true;
    }
 
    public boolean pollWasPoseUpdated()
@@ -382,16 +403,16 @@ public class RDXInteractableFootstep
       return value;
    }
 
-   private void updateTrajectoryModel(PlannedFootstep footstep)
+   private void updateTrajectoryModel(PlannedFootstep footstep, EnumMap<Axis3D, List<PolynomialReadOnly>> trajectory)
    {
-      trajectoryModel.clear();
+      trajectoryWaypointModel.clear();
       if (footstep.getTrajectoryType() == TrajectoryType.CUSTOM)
       {
          for (Point3D trajectoryPosition : footstep.getCustomWaypointPositions())
          {
             ModelInstance sphere = RDXModelBuilder.createSphere(0.03f, Color.WHITE);
             LibGDXTools.toLibGDX(trajectoryPosition, sphere.transform);
-            trajectoryModel.add(sphere);
+            trajectoryWaypointModel.add(sphere);
          }
       }
       else if (footstep.getTrajectoryType() == TrajectoryType.WAYPOINTS)
@@ -400,9 +421,41 @@ public class RDXInteractableFootstep
          {
             ModelInstance sphere = RDXModelBuilder.createSphere(0.03f, Color.BLACK);
             LibGDXTools.toLibGDX(trajectoryPosition.getPosition(), sphere.transform);
-            trajectoryModel.add(sphere);
+            trajectoryWaypointModel.add(sphere);
          }
       }
+
+      swingTrajectoryModel.clear();
+      List<RDXPolynomial.Polynomial3DVariableHolder> polynomials = createPolynomial3DList(trajectory.get(Axis3D.X), trajectory.get(Axis3D.Y), trajectory.get(Axis3D.Z));
+      swingTrajectoryModel.compute(polynomials);
+   }
+
+   private static List<RDXPolynomial.Polynomial3DVariableHolder> createPolynomial3DList(List<PolynomialReadOnly> xPolynomial, List<PolynomialReadOnly> yPolynomial, List<PolynomialReadOnly> zPolynomial)
+   {
+      List<RDXPolynomial.Polynomial3DVariableHolder> polynomials = new ArrayList<>();
+      if (xPolynomial == null || yPolynomial == null || zPolynomial == null)
+         return polynomials;
+
+      for (int i = 0; i < xPolynomial.size(); i++)
+      {
+         polynomials.add(new RDXPolynomial.Polynomial3DVariables(xPolynomial.get(i), yPolynomial.get(i), zPolynomial.get(i)));
+      }
+      return polynomials;
+   }
+
+   private static List<PolynomialReadOnly> copyPolynomialList(List<PolynomialReadOnly> other)
+   {
+      List<PolynomialReadOnly> copy = new ArrayList<>();
+      other.forEach(poly -> copy.add(copyPolynomial(poly)));
+
+      return copy;
+   }
+
+   private static PolynomialReadOnly copyPolynomial(PolynomialReadOnly other)
+   {
+      Polynomial polynomial = new Polynomial(other.getNumberOfCoefficients());
+      polynomial.set(other);
+      return polynomial;
    }
 
    /**

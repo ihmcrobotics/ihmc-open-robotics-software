@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -28,7 +28,7 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.19.1")
    api("us.ihmc:euclid-shape:0.19.1")
    api("us.ihmc:euclid-geometry:0.19.1")
-   api("us.ihmc:ihmc-graphics-description:0.19.8")
+   api("us.ihmc:ihmc-graphics-description:0.20.0")
    api("us.ihmc:ihmc-native-library-loader:2.0.1")
 }
 

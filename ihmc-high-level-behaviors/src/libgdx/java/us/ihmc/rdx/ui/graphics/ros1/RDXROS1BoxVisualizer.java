@@ -19,14 +19,17 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.RDXROS1Visualizer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
+import java.util.Set;
+
 @Deprecated
-public class RDXROS1BoxVisualizer extends RDXROS1Visualizer implements RenderableProvider
+public class RDXROS1BoxVisualizer extends RDXROS1Visualizer
 {
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ModelBuilder modelBuilder = new ModelBuilder();
@@ -43,7 +46,7 @@ public class RDXROS1BoxVisualizer extends RDXROS1Visualizer implements Renderabl
    private final Point3D center = new Point3D();
    private final Quaternion zeroOrientation = new Quaternion();
    private final Point3D[] vertices = new Point3D[8];
-   private Color color = new Color(0.7f, 0.7f, 0.7f, 1.0f);
+   private final Color color = new Color(0.7f, 0.7f, 0.7f, 1.0f);
 
    public RDXROS1BoxVisualizer(String title, String ros1BoxTopic)
    {
@@ -174,10 +177,10 @@ public class RDXROS1BoxVisualizer extends RDXROS1Visualizer implements Renderabl
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       // sync over current and add
-      if (modelInstance != null)
+      if (modelInstance != null && sceneLevelCheck(sceneLevels))
       {
          modelInstance.getRenderables(renderables, pool);
       }

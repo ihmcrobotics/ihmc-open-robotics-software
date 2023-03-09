@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
@@ -21,7 +21,7 @@ basicsDependencies {
    api("us.ihmc:euclid-frame:0.19.1")
    api("us.ihmc:euclid-frame-shape:0.19.1")
    api("us.ihmc:euclid-shape:0.19.1")
-   api("us.ihmc:ihmc-robot-description:0.21.6")
+   api("us.ihmc:ihmc-robot-description:0.21.7")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
 }
@@ -39,7 +39,7 @@ planningDependencies {
 
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.25.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.27.1")
    api("us.ihmc:ihmc-path-planning:source")
 }
 
