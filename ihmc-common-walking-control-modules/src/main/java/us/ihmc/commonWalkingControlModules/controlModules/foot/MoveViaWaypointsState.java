@@ -16,6 +16,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -40,8 +42,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private final PIDSE3GainsReadOnly gains;
 
-   public MoveViaWaypointsState(FootControlHelper footControlHelper,
-                                PIDSE3GainsReadOnly gains, YoRegistry registry)
+   public MoveViaWaypointsState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
       super(footControlHelper);
 
@@ -130,8 +131,12 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private void packCommandForTouchdown()
    {
-      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
-                                                       desiredAngularAcceleration, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation,
+                                                       desiredPosition,
+                                                       desiredAngularVelocity,
+                                                       desiredLinearVelocity,
+                                                       desiredAngularAcceleration,
+                                                       desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
       spatialFeedbackControlCommand.setGains(gains);
    }
@@ -178,8 +183,12 @@ public class MoveViaWaypointsState extends AbstractFootControlState
          desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }
 
-      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
-                                                       desiredAngularAcceleration, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation,
+                                                       desiredPosition,
+                                                       desiredAngularVelocity,
+                                                       desiredLinearVelocity,
+                                                       desiredAngularAcceleration,
+                                                       desiredLinearAcceleration);
    }
 
    private final RigidBodyTransform oldBodyFrameDesiredTransform = new RigidBodyTransform();
@@ -225,5 +234,13 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    public TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {
       return poseController.pollStatusToReport();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(poseController.getSCS2YoGraphics());
+      return group;
    }
 }
