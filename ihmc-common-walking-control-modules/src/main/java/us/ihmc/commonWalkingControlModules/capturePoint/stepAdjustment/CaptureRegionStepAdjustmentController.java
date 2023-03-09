@@ -1,7 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -24,6 +24,11 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -34,8 +39,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.List;
 
 public class CaptureRegionStepAdjustmentController implements StepAdjustmentController
 {
@@ -118,7 +121,12 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                                                registry,
                                                                                yoGraphicsListRegistry);
 
-      captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, false, yoNamePrefix, registry, yoGraphicsListRegistry);
+      captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames,
+                                                                   walkingControllerParameters,
+                                                                   false,
+                                                                   yoNamePrefix,
+                                                                   registry,
+                                                                   yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -217,10 +225,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    @Override
-   public void compute(double currentTime,
-                       FramePoint2DReadOnly desiredICP,
-                       FramePoint2DReadOnly currentICP,
-                       double omega0)
+   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FramePoint2DReadOnly currentICP, double omega0)
    {
       if (!isInSwing.getBooleanValue())
          return;
@@ -229,8 +234,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       computeTimeRemainingInState();
 
       computeLimitedAreaForCoP();
-
-
 
       captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(),
                                                      timeRemainingInState.getDoubleValue(),
@@ -295,5 +298,20 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    {
       FrameConvexPolygon2DReadOnly supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(upcomingFootstepSide.getEnumValue().getOppositeSide());
       polygonScaler.scaleConvexPolygon(supportPolygon, distanceInsideToScaleSupportPolygon.getValue(), allowableAreaForCoP);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(reachabilityConstraintHandler.getSCS2YoGraphics());
+      group.addChild(captureRegionCalculator.getSCS2YoGraphics());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoNamePrefix + "FootstepSolution",
+                                                                    this.footstepSolution.getPosition(),
+                                                                    0.01,
+                                                                    ColorDefinitions.DarkRed(),
+                                                                    DefaultPoint2DGraphic.CIRCLE));
+      group.setVisible(VISUALIZE);
+      return group;
    }
 }
