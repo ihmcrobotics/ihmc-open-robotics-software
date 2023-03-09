@@ -30,7 +30,7 @@ public class ChronyStatusMonitor
 
    public void checkChronyStatus()
    {
-      String chronycSources = ProcessTools.execSimpleCommand("chronyc sources");
+      String chronycSources = ProcessTools.execSimpleCommandSafe("chronyc sources");
       String[] lines = chronycSources.split("\\R");
       String chronycBestSourceStatus = "Chrony is not currently synchronized with a source.";
       for (String line : lines)

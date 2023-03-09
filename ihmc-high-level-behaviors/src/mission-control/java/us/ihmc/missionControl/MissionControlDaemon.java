@@ -11,6 +11,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -35,7 +36,6 @@ public class MissionControlDaemon
 
    public MissionControlDaemon()
    {
-
       resourceMonitor = new LinuxResourceMonitor();
       networkMonitor = new SysstatNetworkMonitor();
       gpuUsageMonitor = new NVIDIAGPUMonitor();
@@ -46,7 +46,7 @@ public class MissionControlDaemon
       systemResourceUsagePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SYSTEM_RESOURCE_USAGE);
 
       updateThreadScheduler = new ExceptionHandlingThreadScheduler("MissionControlUpdate", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      scheduledFuture = updateThreadScheduler.schedule(this::update, 0.2);
+      scheduledFuture = updateThreadScheduler.schedule(this::update, 0.25);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
@@ -107,13 +107,23 @@ public class MissionControlDaemon
          }
       }
 
+      System.out.println("publishing...");
+
       // Publish the message
       systemResourceUsagePublisher.publish(message);
    }
 
    private String getStatus(String serviceName)
    {
-      String statusOutput = ProcessTools.execSimpleCommand("systemctl status " + serviceName);
+      String statusOutput = null;
+      try
+      {
+         statusOutput = ProcessTools.execSimpleCommand("systemctl status " + serviceName);
+      }
+      catch (IOException | InterruptedException ignored)
+      {
+      }
+      if (statusOutput == null) return null;
       String[] lines = statusOutput.split("\\R");
       if (lines.length < 3)
       {
