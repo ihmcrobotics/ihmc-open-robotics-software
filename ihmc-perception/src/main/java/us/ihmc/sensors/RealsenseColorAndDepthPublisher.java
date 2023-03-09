@@ -130,8 +130,6 @@ public class RealsenseColorAndDepthPublisher
 
    private void initializeSensor()
    {
-      LogTools.info("\n\n------------------------------------------------------ Attempting Sensor Initialization -------------------------------------------");
-
       LogTools.info("Creating Realsense Hardware Manager");
       realSenseHardwareManager = new RealSenseHardwareManager();
 
@@ -150,11 +148,8 @@ public class RealsenseColorAndDepthPublisher
          throw new RuntimeException("Device not found. Set -D<model>.serial.number=00000000000");
       }
 
-      LogTools.info("Enabling Color On Realsense: {}", realsenseConfiguration);
       realsense.enableColor(realsenseConfiguration);
       realsense.initialize();
-
-      LogTools.info("\n------------------------------------------------------ Sensor Initialized -------------------------------------------\n\n");
    }
 
    private void update()

@@ -3,7 +3,6 @@ package us.ihmc.perception.tools;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.set.TIntSet;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
@@ -19,7 +18,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
@@ -28,12 +26,11 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RotationTools;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 public class PlaneRegistrationTools
 {
+   // TODO: Complete this method and test it with PatchFeatureGrid from the RapidRegionsExtractor.
    public static void findPatchMatches(PatchFeatureGrid previousGrid, PatchFeatureGrid currentGrid, TIntIntMap matches)
    {
       Point3D previousCentroid = new Point3D();
@@ -42,8 +39,6 @@ public class PlaneRegistrationTools
       Vector3D currentNormal = new Vector3D();
 
       float distanceThreshold = 0.1f;
-
-      LogTools.debug("Previous Size: {}, Current Size: {}", previousGrid.getTotal(), currentGrid.getTotal());
 
       for (int i = 0; i < previousGrid.getTotal(); i++)
       {
@@ -68,6 +63,7 @@ public class PlaneRegistrationTools
       }
    }
 
+   // TODO: Complete this method and test it with PatchFeatureGrid from the RapidRegionsExtractor.
    public static void computeTransformFromPatches(PatchFeatureGrid previousGrid,
                                                   PatchFeatureGrid currentGrid,
                                                   TIntIntMap matches,
@@ -94,20 +90,19 @@ public class PlaneRegistrationTools
       int matrixIndex = 0;
       for (Integer key : keySet)
       {
+         int currentIndex = matches.get(key);
+
          previousGrid.getCentroid(key, previousCentroid);
          previousGrid.getNormal(key, previousNormal);
 
-         currentGrid.getCentroid(matches.get(key), currentCentroid);
-         currentGrid.getNormal(matches.get(key), currentNormal);
+         currentGrid.getCentroid(currentIndex, currentCentroid);
+         currentGrid.getNormal(currentIndex, currentNormal);
 
          previousMean.add(previousCentroid);
          currentMean.add(currentCentroid);
 
          previousCentroid.get(0, matrixIndex, matrixOne);
          currentCentroid.get(0, matrixIndex, matrixTwo);
-
-         LogTools.debug("Matrix1: {}", matrixOne);
-         LogTools.debug("Matrix2: {}", matrixTwo);
 
          CommonOps_DDRM.multAddTransB(matrixOne, matrixTwo, patchMatrix);
 
@@ -129,17 +124,11 @@ public class PlaneRegistrationTools
          DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
          CommonOps_DDRM.mult(svdU, svdVt, rotationMatrix);
 
-         LogTools.debug("Rotation Matrix: " + rotationMatrix);
-
          transformToPack.setRotationAndZeroTranslation(rotationMatrix);
          transformToPack.appendTranslation(translation);
 
-         LogTools.debug("Transform: \n{}", transformToPack);
-
          Point3D angles = new Point3D();
          transformToPack.getRotation().getEuler(angles);
-
-         LogTools.debug("Angles: {}", angles);
       }
    }
 
@@ -151,30 +140,39 @@ public class PlaneRegistrationTools
     * moves the current planar regions closer to the previous planar regions. Usually 4-5 iterations are enough for convergence.
     *
     * @param previousRegions The previous planar regions list.
-    * @param currentRegions The current planar regions list.
+    * @param currentRegions  The current planar regions list.
     * @param transformToPack The transform from the previous to the current planar regions list.
-    * @param parameters The parameters for the registration.
+    * @param parameters      The parameters for the registration.
     * @return True if the registration was successful, false otherwise.
     */
-   public static boolean computeIterativeClosestPlane(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions,
-                                                      RigidBodyTransform transformToPack, PlanarRegionMappingParameters parameters)
+   public static boolean computeIterativeClosestPlane(PlanarRegionsList previousRegions,
+                                                      PlanarRegionsList currentRegions,
+                                                      RigidBodyTransform transformToPack,
+                                                      PlanarRegionMappingParameters parameters)
    {
       RigidBodyTransform transform;
       RigidBodyTransform finalTransform = new RigidBodyTransform();
 
       TIntIntMap matches = new TIntIntHashMap();
 
-      PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
-                                                        (float) parameters.getBestMatchAngularThreshold(),
-                                                        (float) parameters.getBestMatchDistanceThreshold(),
-                                                        0.3f);
+      PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions,
+                                                         previousRegions,
+                                                         matches,
+                                                         (float) parameters.getBestMinimumOverlapThreshold(),
+                                                         (float) parameters.getBestMatchAngularThreshold(),
+                                                         (float) parameters.getBestMatchDistanceThreshold(),
+                                                         0.3f);
       double previousError = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
       for (int i = 0; i < parameters.getICPMaxIterations(); i++)
       {
          matches.clear();
-         PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions, previousRegions, matches, (float) parameters.getBestMinimumOverlapThreshold(),
-                                                           (float) parameters.getBestMatchAngularThreshold(),
-                                                           (float) parameters.getBestMatchDistanceThreshold(), 0.3f);
+         PlaneRegistrationTools.findBestPlanarRegionMatches(currentRegions,
+                                                            previousRegions,
+                                                            matches,
+                                                            (float) parameters.getBestMinimumOverlapThreshold(),
+                                                            (float) parameters.getBestMatchAngularThreshold(),
+                                                            (float) parameters.getBestMatchDistanceThreshold(),
+                                                            0.3f);
 
          if (matches.size() < parameters.getICPMinMatches())
          {
@@ -205,9 +203,7 @@ public class PlaneRegistrationTools
       return true;
    }
 
-   public static RigidBodyTransform computeTransformFromRegions(PlanarRegionsList previousRegions,
-                                                                PlanarRegionsList currentRegions,
-                                                                TIntIntMap matches)
+   public static RigidBodyTransform computeTransformFromRegions(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, TIntIntMap matches)
    {
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
@@ -233,9 +229,7 @@ public class PlaneRegistrationTools
       return transformToReturn;
    }
 
-   public static RigidBodyTransform computeQuaternionAveragingTransform(PlanarRegionsList previousRegions,
-                                                                        PlanarRegionsList currentRegions,
-                                                                        TIntIntMap matches)
+   public static RigidBodyTransform computeQuaternionAveragingTransform(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, TIntIntMap matches)
    {
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
@@ -254,9 +248,7 @@ public class PlaneRegistrationTools
       return transformToReturn;
    }
 
-   public static ArrayList<Point3DReadOnly> findTranslationEstimates(PlanarRegionsList previousRegions,
-                                                                     PlanarRegionsList currentRegions,
-                                                                     TIntIntMap matches)
+   public static ArrayList<Point3DReadOnly> findTranslationEstimates(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, TIntIntMap matches)
    {
       ArrayList<Point3DReadOnly> translations = new ArrayList<>();
 
@@ -280,9 +272,7 @@ public class PlaneRegistrationTools
       return translations;
    }
 
-   public static ArrayList<QuaternionReadOnly> findRotationEstimates(PlanarRegionsList previousRegions,
-                                                                     PlanarRegionsList currentRegions,
-                                                                     TIntIntMap matches)
+   public static ArrayList<QuaternionReadOnly> findRotationEstimates(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, TIntIntMap matches)
    {
       ArrayList<QuaternionReadOnly> quaternions = new ArrayList<>();
 
@@ -322,9 +312,9 @@ public class PlaneRegistrationTools
    }
 
    public static TDoubleArrayList computeResidualWeights(PlanarRegionsList previousRegions,
-                                                          PlanarRegionsList currentRegions,
-                                                          TIntIntMap matches,
-                                                          ArrayList<QuaternionReadOnly> quaternions)
+                                                         PlanarRegionsList currentRegions,
+                                                         TIntIntMap matches,
+                                                         ArrayList<QuaternionReadOnly> quaternions)
    {
       TDoubleArrayList weightsToPack = new TDoubleArrayList();
 
@@ -500,7 +490,6 @@ public class PlaneRegistrationTools
       return error;
    }
 
-
    public static void findBestPlanarRegionMatches(PlanarRegionsList map,
                                                   PlanarRegionsList incoming,
                                                   TIntIntMap matches,
@@ -513,7 +502,6 @@ public class PlaneRegistrationTools
       List<PlanarRegion> newRegions = incoming.getPlanarRegionsAsList();
       List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
       Vector3D originVector = new Vector3D();
-
 
       for (int i = 0; i < newRegions.size(); i++)
       {
