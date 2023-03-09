@@ -45,6 +45,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
@@ -57,6 +58,11 @@ import us.ihmc.robotics.screwTheory.AngularExcursionCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -69,7 +75,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProvider
+public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProvider, SCS2YoGraphicHolder
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -121,6 +127,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final SideDependentList<YoDouble> yoCoPErrorMagnitude = new SideDependentList<YoDouble>(new YoDouble("leftFootCoPErrorMagnitude", registry),
                                                                                                    new YoDouble("rightFootCoPErrorMagnitude", registry));
 
+   private ContactPointVisualizer contactPointVisualizer;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final JointBasics[] controlledJoints;
@@ -255,7 +262,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          ArrayList<YoPlaneContactState> planeContactStateList = new ArrayList<>();
          for (RobotSide robotSide : RobotSide.values)
             planeContactStateList.add(footContactStates.get(robotSide));
-         ContactPointVisualizer contactPointVisualizer = new ContactPointVisualizer(planeContactStateList, yoGraphicsListRegistry, registry);
+         contactPointVisualizer = new ContactPointVisualizer(planeContactStateList, yoGraphicsListRegistry, registry);
          addUpdatable(contactPointVisualizer);
       }
 
@@ -1004,4 +1011,25 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return walkingMessageHandler;
    }
 
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(bipedSupportPolygons.getSCS2YoGraphics());
+      if (walkingMessageHandler != null)
+         group.addChild(walkingMessageHandler.getSCS2YoGraphics());
+      if (walkingTrajectoryPath != null)
+         group.addChild(walkingTrajectoryPath.getSCS2YoGraphics());
+      if (referenceFramesVisualizer != null)
+         group.addChild(referenceFramesVisualizer.getSCS2YoGraphics());
+      if (contactPointVisualizer != null)
+         group.addChild(contactPointVisualizer.getSCS2YoGraphics());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Controller CoP",
+                                                                    yoCenterOfPressure,
+                                                                    0.01,
+                                                                    ColorDefinitions.Black(),
+                                                                    DefaultPoint2DGraphic.DIAMOND));
+      
+      return group;
+   }
 }
