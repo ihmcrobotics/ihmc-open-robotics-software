@@ -56,9 +56,11 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
    private final HeightOffsetHandler heightOffsetHandler;
    private final YoEnum<RobotSide> supportLegSide = new YoEnum<>("supportLegSide", registry, RobotSide.class);
 
-   private final YoDouble minimumHeightAboveGround = new YoDouble("minimumHeightAboveGround", registry);
-   private final YoDouble nominalHeightAboveGround = new YoDouble("nominalHeightAboveGround", registry);
-   private final YoDouble maximumHeightAboveGround = new YoDouble("maximumHeightAboveGround", registry);
+   private final YoDouble minimumLegLength = new YoDouble("minimumLegLength", registry);
+   private final YoDouble nominalLegLength = new YoDouble("nominalLegLength", registry);
+   private final YoDouble maximumLegLength = new YoDouble("maximumLegLength", registry);
+   private final YoDouble heightChangeForNonFlatStep = new YoDouble("heightChangeForNonFlatStep", registry);
+   private final YoDouble maxLengthReductionSteppingDown = new YoDouble("maxLengthReductionSteppingDown", registry);
    private final YoDouble hipWidth = new YoDouble("hipWidth", registry);
    private final YoDouble extraToeOffHeight = new YoDouble("extraToeOffHeight", registry);
 
@@ -99,11 +101,12 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
    private final SplinedHeightTrajectory splinedHeightTrajectory;
 
-   public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
-                                                double nominalHeightAboveGround,
-                                                double maximumHeightAboveGround,
-                                                double defaultOffsetHeightAboveGround,
-                                                double doubleSupportPercentageIn,
+   public LookAheadCoMHeightTrajectoryGenerator(double minimumLegLength,
+                                                double nominalLegLength,
+                                                double maximumLegLength,
+                                                double nominalDoubleSupportExchange,
+                                                double heightThresholdForNonFlat,
+                                                double maxLengthReductionSteppingDown,
                                                 ReferenceFrame centerOfMassFrame,
                                                 ReferenceFrame frameOfHeight,
                                                 SideDependentList<? extends ReferenceFrame> soleFrames,
@@ -111,11 +114,12 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                 YoGraphicsListRegistry yoGraphicsListRegistry,
                                                 YoRegistry parentRegistry)
    {
-      this(minimumHeightAboveGround,
-           nominalHeightAboveGround,
-           maximumHeightAboveGround,
-           defaultOffsetHeightAboveGround,
-           doubleSupportPercentageIn,
+      this(minimumLegLength,
+           nominalLegLength,
+           maximumLegLength,
+           nominalDoubleSupportExchange,
+           heightThresholdForNonFlat,
+           maxLengthReductionSteppingDown,
            0.0,
            centerOfMassFrame,
            frameOfHeight,
@@ -125,11 +129,12 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
            parentRegistry);
    }
 
-   public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
-                                                double nominalHeightAboveGround,
-                                                double maximumHeightAboveGround,
-                                                double defaultOffsetHeightAboveGround,
-                                                double doubleSupportPercentageIn,
+   public LookAheadCoMHeightTrajectoryGenerator(double minimumLegLength,
+                                                double nominalLegLength,
+                                                double maximumLegLength,
+                                                double nominalDoubleSupportExchange,
+                                                double heightChangeForNonFlatStep,
+                                                double maxLengthReductionSteppingDown,
                                                 double hipWidth,
                                                 ReferenceFrame centerOfMassFrame,
                                                 ReferenceFrame frameOfHeight,
@@ -143,12 +148,14 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       this.soleFrames = soleFrames;
       this.yoTime = yoTime;
 
-      heightOffsetHandler = new HeightOffsetHandler(yoTime, defaultOffsetHeightAboveGround, registry);
+      heightOffsetHandler = new HeightOffsetHandler(yoTime, registry);
       doubleSupportExchangeOffset.set(defaultPercentageInOffset);
 
-      setMinimumHeightAboveGround(minimumHeightAboveGround);
-      setNominalHeightAboveGround(nominalHeightAboveGround);
-      setMaximumHeightAboveGround(maximumHeightAboveGround);
+      this.minimumLegLength.set(minimumLegLength);
+      this.nominalLegLength.set(nominalLegLength);
+      this.maximumLegLength.set(maximumLegLength);
+      this.heightChangeForNonFlatStep.set(heightChangeForNonFlatStep);
+      this.maxLengthReductionSteppingDown.set(maxLengthReductionSteppingDown);
       this.hipWidth.set(hipWidth);
 
       heightWaypoints = new RecyclingArrayList<>(6, SupplierBuilder.indexedSupplier(this::createHeightWaypoint));
@@ -157,7 +164,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       setSupportLeg(RobotSide.LEFT);
 
-      this.nominalDoubleSupportExchange.set(doubleSupportPercentageIn);
+      this.nominalDoubleSupportExchange.set(nominalDoubleSupportExchange);
 
       parentRegistry.addChild(registry);
 
@@ -178,7 +185,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
          colors.add(YoAppearance.BlueViolet());
          colors.add(YoAppearance.Azure());
 
-         String graphicListName = "BetterCoMHeightTrajectoryGenerator";
+         String graphicListName = "CoMHeightTrajectoryGenerator";
 
          heightWaypoints.clear();
          for (int i = 0; i < colors.size(); i++)
@@ -205,29 +212,14 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
    {
       tempFramePoint.setToZero(frameOfHeight);
       tempFramePoint.changeFrame(frameOfSupportLeg);
-      tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
+      tempFramePoint.setZ(nominalLegLength.getDoubleValue());
 
-      desiredCoMHeight.set(nominalHeightAboveGround.getDoubleValue());
+      desiredCoMHeight.set(nominalLegLength.getDoubleValue());
       desiredCoMPosition.setMatchingFrame(tempFramePoint);
 
       extraToeOffHeight.set(0.0);
 
       heightOffsetHandler.reset();
-   }
-
-   public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
-   {
-      this.minimumHeightAboveGround.set(minimumHeightAboveGround);
-   }
-
-   public void setNominalHeightAboveGround(double nominalHeightAboveGround)
-   {
-      this.nominalHeightAboveGround.set(nominalHeightAboveGround);
-   }
-
-   public void setMaximumHeightAboveGround(double maximumHeightAboveGround)
-   {
-      this.maximumHeightAboveGround.set(maximumHeightAboveGround);
    }
 
    public double getDoubleSupportPercentageIn()
@@ -262,19 +254,19 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       yoTransferToPosition.setMatchingFrame(transferToPosition);
 
       tempFramePoint.setToZero(frameOfSupportLeg);
-      tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
+      tempFramePoint.setZ(nominalLegLength.getDoubleValue());
       tempFramePoint.changeFrame(worldFrame);
 
       double midstanceY = 0.5 * (transferToPosition.getY() + transferFromPosition.getY());
 
       CoMHeightTrajectoryWaypoint startWaypoint = getWaypointInFrame(frameOfSupportLeg);
-      startWaypoint.setHeight(nominalHeightAboveGround.getDoubleValue());
-      startWaypoint.setMinMax(nominalHeightAboveGround.getDoubleValue() - 0.05, nominalHeightAboveGround.getDoubleValue() + 0.05);
+      startWaypoint.setHeight(nominalLegLength.getDoubleValue());
+      startWaypoint.setMinMax(nominalLegLength.getDoubleValue() - 0.05, nominalLegLength.getDoubleValue() + 0.05);
       startWaypoint.setXY(transferFromPosition.getX(), midstanceY);
 
       CoMHeightTrajectoryWaypoint endWaypoint = getWaypointInFrame(frameOfSupportLeg);
-      endWaypoint.setHeight(nominalHeightAboveGround.getDoubleValue());
-      endWaypoint.setMinMax(nominalHeightAboveGround.getDoubleValue() - 0.05, nominalHeightAboveGround.getDoubleValue() + 0.05);
+      endWaypoint.setHeight(nominalLegLength.getDoubleValue());
+      endWaypoint.setMinMax(nominalLegLength.getDoubleValue() - 0.05, nominalLegLength.getDoubleValue() + 0.05);
       endWaypoint.setXY(transferToPosition.getX(), midstanceY);
 
       desiredCoMPositionAtStart.set(desiredCoMPosition);
@@ -297,7 +289,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       transferFromPosition.setToZero(soleFrames.get(transferToAndNextFootstepsData.getTransferToSide().getOppositeSide()));
       transferToPosition.changeFrame(frameOfSupportLeg);
       transferFromPosition.changeFrame(frameOfSupportLeg);
-      double startAnkleZ = transferFromPosition.getZ();
+      double startFootZ = transferFromPosition.getZ();
 
       yoTransferFromPosition.setMatchingFrame(transferFromPosition);
       yoTransferToPosition.setMatchingFrame(transferToPosition);
@@ -309,8 +301,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       endCoMPosition.setIncludingFrame(transferToFootstepPosition);
       endCoMPosition.changeFrame(frameOfSupportLeg);
-      double middleAnkleZ = endCoMPosition.getZ();
-      endCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue());
+      double endFootZ = endCoMPosition.getZ();
+      endCoMPosition.addZ(nominalLegLength.getDoubleValue());
 
       double midstanceY = 0.5 * (transferToPosition.getY() + transferFromPosition.getY());
       startCoMPosition.setY(midstanceY);
@@ -322,7 +314,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       {
          tempFramePoint.setIncludingFrame(transferToAndNextFootstepsData.getCoMAtEndOfState(), 0.0);
          tempFramePoint.changeFrame(frameOfSupportLeg);
-         tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
+         tempFramePoint.setZ(nominalLegLength.getDoubleValue());
 
          double percentExchange = EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, endCoMPosition);
 
@@ -341,10 +333,10 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       computeWaypoints(startCoMPosition,
                        endCoMPosition,
-                       startAnkleZ,
-                       middleAnkleZ,
-                       minimumHeightAboveGround.getDoubleValue(),
-                       maximumHeightAboveGround.getDoubleValue(),
+                       startFootZ,
+                       endFootZ,
+                       minimumLegLength.getDoubleValue(),
+                       maximumLegLength.getDoubleValue(),
                        this.extraToeOffHeight.getDoubleValue());
 
       for (int i = 0; i < heightWaypoints.size(); i++)
@@ -360,14 +352,18 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                  FramePoint3DReadOnly endCoMPosition,
                                  double startGroundHeight,
                                  double endGroundHeight,
-                                 double minimumHeight,
-                                 double maximumHeight,
+                                 double minimumLength,
+                                 double maximumLength,
                                  double extraToeOffHeight)
    {
       double startAnkleX = transferFromPosition.getX();
       double startAnkleY = transferFromPosition.getY();
       double endAnkleX = transferToPosition.getX();
       double endAnkleY = transferToPosition.getY();
+
+      double stepHeightChange = transferToPosition.getZ() - transferFromPosition.getZ();
+      boolean isSteppingDown = stepHeightChange < -heightChangeForNonFlatStep.getValue();
+      double heightReductionDuringExchange = isSteppingDown ? maxLengthReductionSteppingDown.getDoubleValue() : 0.0;
 
       double startWaypointX = startCoMPosition.getX();
       double endWaypointX = endCoMPosition.getX();
@@ -403,14 +399,14 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       fourthMidpoint.setXY(fourthMidpointX, fourthMidpointY);
       endWaypoint.setXY(endWaypointX, endWaypointY);
 
-      double startMinHeight = findWaypointHeight(minimumHeight,
+      double startMinHeight = findWaypointHeight(minimumLength,
                                                  hipWidth.getDoubleValue(),
                                                  startAnkleX,
                                                  startAnkleY,
                                                  startWaypointX,
                                                  startWaypointY,
                                                  startGroundHeight);
-      double startMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
+      double startMaxHeight = findWaypointHeight(maximumLength + extraToeOffHeight,
                                                  hipWidth.getDoubleValue(),
                                                  startAnkleX,
                                                  startAnkleY,
@@ -419,14 +415,14 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                  startGroundHeight);
       startMinHeight = Math.min(startMinHeight, startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
       startMaxHeight = Math.max(startMaxHeight, startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
-      double firstMinHeight = findWaypointHeight(minimumHeight,
+      double firstMinHeight = findWaypointHeight(minimumLength,
                                                  hipWidth.getDoubleValue(),
                                                  startAnkleX,
                                                  startAnkleY,
                                                  firstMidpointX,
                                                  firstMidpointY,
                                                  startGroundHeight);
-      double firstMaxHeight = findWaypointHeight(maximumHeight,
+      double firstMaxHeight = findWaypointHeight(maximumLength,
                                                  hipWidth.getDoubleValue(),
                                                  startAnkleX,
                                                  startAnkleY,
@@ -436,28 +432,28 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       firstMinHeight = Math.min(firstMinHeight, startMinHeight);
       firstMaxHeight = Math.min(firstMaxHeight, startMaxHeight);
 
-      double exchangeInFromMinHeight = findWaypointHeight(minimumHeight,
+      double exchangeInFromMinHeight = findWaypointHeight(minimumLength,
                                                           hipWidth.getDoubleValue(),
                                                           startAnkleX,
                                                           startAnkleY,
                                                           secondMidpointX,
                                                           secondMidpointY,
                                                           startGroundHeight);
-      double exchangeInToMinHeight = findWaypointHeight(minimumHeight,
+      double exchangeInToMinHeight = findWaypointHeight(minimumLength,
                                                         hipWidth.getDoubleValue(),
                                                         endAnkleX,
                                                         endAnkleY,
                                                         secondMidpointX,
                                                         secondMidpointY,
                                                         endGroundHeight);
-      double exchangeInFromMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
+      double exchangeInFromMaxHeight = findWaypointHeight(maximumLength + extraToeOffHeight - heightReductionDuringExchange,
                                                           hipWidth.getDoubleValue(),
                                                           startAnkleX,
                                                           startAnkleY,
                                                           secondMidpointX,
                                                           secondMidpointY,
                                                           startGroundHeight);
-      double exchangeInToMaxHeight = findWaypointHeight(maximumHeight,
+      double exchangeInToMaxHeight = findWaypointHeight(maximumLength - heightReductionDuringExchange,
                                                         hipWidth.getDoubleValue(),
                                                         endAnkleX,
                                                         endAnkleY,
@@ -467,28 +463,28 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       double secondMinHeight = Math.min(Math.max(exchangeInFromMinHeight, exchangeInToMinHeight), Math.min(exchangeInFromMaxHeight, exchangeInToMaxHeight));
       double secondMaxHeight = Math.min(exchangeInFromMaxHeight, exchangeInToMaxHeight);
 
-      double exchangeOutFromMinHeight = findWaypointHeight(minimumHeight,
+      double exchangeOutFromMinHeight = findWaypointHeight(minimumLength,
                                                            hipWidth.getDoubleValue(),
                                                            startAnkleX,
                                                            startAnkleY,
                                                            thirdMidpointX,
                                                            thirdMidpointY,
                                                            startGroundHeight);
-      double exchangeOutToMinHeight = findWaypointHeight(minimumHeight,
+      double exchangeOutToMinHeight = findWaypointHeight(minimumLength,
                                                          hipWidth.getDoubleValue(),
                                                          endAnkleX,
                                                          endAnkleY,
                                                          thirdMidpointX,
                                                          thirdMidpointY,
                                                          endGroundHeight);
-      double exchangeOutFromMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
+      double exchangeOutFromMaxHeight = findWaypointHeight(maximumLength + extraToeOffHeight - heightReductionDuringExchange,
                                                            hipWidth.getDoubleValue(),
                                                            startAnkleX,
                                                            startAnkleY,
                                                            thirdMidpointX,
                                                            thirdMidpointY,
                                                            startGroundHeight);
-      double exchangeOutToMaxHeight = findWaypointHeight(maximumHeight,
+      double exchangeOutToMaxHeight = findWaypointHeight(maximumLength - heightReductionDuringExchange,
                                                          hipWidth.getDoubleValue(),
                                                          endAnkleX,
                                                          endAnkleY,
@@ -498,22 +494,22 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       double thirdMinHeight = Math.min(Math.max(exchangeOutFromMinHeight, exchangeOutToMinHeight), Math.min(exchangeOutFromMaxHeight, exchangeOutToMaxHeight));
       double thirdMaxHeight = Math.min(exchangeOutFromMaxHeight, exchangeOutToMaxHeight);
 
-      double fourthMinHeight = findWaypointHeight(minimumHeight,
+      double fourthMinHeight = findWaypointHeight(minimumLength,
                                                   hipWidth.getDoubleValue(),
                                                   endAnkleX,
                                                   endAnkleY,
                                                   fourthMidpointX,
                                                   fourthMidpointY,
                                                   endGroundHeight);
-      double fourthMaxHeight = findWaypointHeight(maximumHeight,
+      double fourthMaxHeight = findWaypointHeight(maximumLength,
                                                   hipWidth.getDoubleValue(),
                                                   endAnkleX,
                                                   endAnkleY,
                                                   fourthMidpointX,
                                                   fourthMidpointY,
                                                   endGroundHeight);
-      double endMinHeight = minimumHeight + endGroundHeight;
-      double endMaxHeight = maximumHeight + endGroundHeight;
+      double endMinHeight = minimumLength + endGroundHeight;
+      double endMaxHeight = maximumLength + endGroundHeight;
 
       fourthMinHeight = Math.min(fourthMinHeight, endMinHeight);
       fourthMaxHeight = Math.min(fourthMaxHeight, endMaxHeight);

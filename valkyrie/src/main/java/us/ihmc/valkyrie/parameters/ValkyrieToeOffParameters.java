@@ -48,9 +48,9 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
    }
 
    @Override
-   public double getMinStepHeightForToeOff()
+   public double getHeightChangeForNonFlatStep()
    {
-      return super.getMinStepHeightForToeOff() * physicalProperties.getModelSizeScale();
+      return super.getHeightChangeForNonFlatStep() * physicalProperties.getModelSizeScale();
    }
    
    @Override
