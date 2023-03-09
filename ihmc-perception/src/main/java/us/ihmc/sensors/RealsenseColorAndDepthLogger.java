@@ -92,7 +92,6 @@ public class RealsenseColorAndDepthLogger
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
-         ThreadTools.sleepSeconds(0.5);
          destroy();
       }, getClass().getSimpleName() + "Shutdown"));
 
@@ -156,6 +155,10 @@ public class RealsenseColorAndDepthLogger
 
    private void destroy()
    {
+      // Wait for the logger threads to finish
+      ThreadTools.sleepSeconds(0.5);
+
+      // Release and close all resources
       running = false;
       sensor.deleteDevice();
       realSenseHardwareManager.deleteContext();

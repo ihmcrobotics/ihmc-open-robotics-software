@@ -132,7 +132,11 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
       }
    }
 
+   @Override
    public void destroy()
    {
+      unsubscribe();
+      ros2Node.destroy();
+      super.destroy();
    }
 }

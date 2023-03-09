@@ -316,7 +316,7 @@ public class BytedecoOpenCVTools
    {
       opencv_highgui.imshow(tag, image);
       int code = opencv_highgui.waitKeyEx(delay);
-      if (code == 113)
+      if (code == 113) // Keycode for 'q'
       {
          System.exit(0);
       }

@@ -139,13 +139,13 @@ public class RealsenseColorAndDepthPublisher
       if (realsense == null)
       {
          running = false;
-         throw new RuntimeException("Device Could Not Be Initialized.");
+         throw new RuntimeException("Device could not be initialized.");
       }
 
       if (realsense.getDevice() == null)
       {
          running = false;
-         throw new RuntimeException("Device not found. Set -D<model>.serial.number=00000000000");
+         throw new RuntimeException("RealSense device not found. Set -D<model>.serial.number=00000000000");
       }
 
       realsense.enableColor(realsenseConfiguration);

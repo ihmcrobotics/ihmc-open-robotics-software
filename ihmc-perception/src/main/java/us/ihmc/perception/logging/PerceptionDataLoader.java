@@ -258,12 +258,6 @@ public class PerceptionDataLoader
                //         LogTools.info("Decompression Time: {} ms", (end_decompress - begin_decompress) / 1e6f);
 
                BytedecoOpenCVTools.displayDepth("L515 Depth", depthImage, 1);
-
-               int code = opencv_highgui.waitKeyEx(50);
-               if (code == 113)
-               {
-                  System.exit(0);
-               }
             }
    }
 }
