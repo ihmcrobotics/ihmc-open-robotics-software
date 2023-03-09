@@ -31,7 +31,7 @@ public class ToeOffStepPositionInspector
 
    private final DoubleProvider minStepLengthForToeOff;
    private final DoubleProvider minStepForwardForToeOff;
-   private final DoubleProvider minStepHeightForToeOff;
+   private final DoubleProvider heightChangeForNonFlatStep;
 
    private final double inPlaceWidth;
    private final double footLength;
@@ -55,7 +55,7 @@ public class ToeOffStepPositionInspector
 
       minStepLengthForToeOff = new DoubleParameter("minStepLengthForToeOff", registry, toeOffParameters.getMinStepLengthForToeOff());
       minStepForwardForToeOff = new DoubleParameter("minStepForwardForToeOff", registry, footLength);
-      minStepHeightForToeOff = new DoubleParameter("minStepHeightForToeOff", registry, walkingControllerParameters.getHeightChangeForNonFlatStep());
+      heightChangeForNonFlatStep = new DoubleParameter("heightChangeForNonFlatStep", registry, walkingControllerParameters.getHeightChangeForNonFlatStep());
 
       parentRegistry.addChild(registry);
    }
@@ -84,8 +84,8 @@ public class ToeOffStepPositionInspector
       else
          leadingFootPosition.setY(0.0);
 
-      isSteppingUp.set(leadingFootPosition.getZ() > minStepHeightForToeOff.getValue());
-      isSteppingDown.set(leadingFootPosition.getZ() < -minStepHeightForToeOff.getValue());
+      isSteppingUp.set(leadingFootPosition.getZ() > heightChangeForNonFlatStep.getValue());
+      isSteppingDown.set(leadingFootPosition.getZ() < -heightChangeForNonFlatStep.getValue());
 
       double scale = 1.0;
       if (isSteppingDown.getBooleanValue())
