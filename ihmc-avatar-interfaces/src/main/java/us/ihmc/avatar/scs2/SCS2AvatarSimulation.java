@@ -424,6 +424,11 @@ public class SCS2AvatarSimulation
       this.stepGeneratorThread = stepGeneratorThread;
    }
 
+   public AvatarStepGeneratorThread getStepGeneratorThread()
+   {
+      return stepGeneratorThread;
+   }
+
    public void setSimulatedRobotTimeProvider(SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider)
    {
       this.simulatedRobotTimeProvider = simulatedRobotTimeProvider;
