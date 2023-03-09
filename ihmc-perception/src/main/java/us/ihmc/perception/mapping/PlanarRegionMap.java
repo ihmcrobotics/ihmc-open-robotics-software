@@ -5,7 +5,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
@@ -721,7 +720,7 @@ public class PlanarRegionMap
          transformToPrevious.setIdentity();
 
          LogTools.debug("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
-         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions, regions.copy(), transformToPrevious, parameters);
+         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousRegions, regions.copy(), transformToPrevious, parameters);
 
 //         PerceptionPrintTools.printTransform("Transform to previous", transformToPrevious);
 
@@ -747,7 +746,7 @@ public class PlanarRegionMap
          regions.applyTransform(transformToWorld);
 
          RigidBodyTransform residualTransform = new RigidBodyTransform();
-         boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, regions.copy(), residualTransform, parameters);
+         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(finalMap, regions.copy(), residualTransform, parameters);
 
          if (valid)
          {
