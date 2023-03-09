@@ -49,8 +49,8 @@ public class PlanarRegionMap
    float odomNoise = 0.00001f;
    float IQANoise = 0.00001f;
 
-   private float[] IQANoiseArray;
-   private float[] odomNoiseArray;
+   private final float[] IQANoiseArray = new float[] {IQANoise, IQANoise, IQANoise, IQANoise, IQANoise, IQANoise};;
+   private final float[] odomNoiseArray = new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise};;
 
    private MergingMode merger;
    private MatchingMode matcher;
@@ -594,8 +594,8 @@ public class PlanarRegionMap
       odomNoise = (float) parameters.getStateEstimatorNoiseVariance();
       planeNoise = (float) parameters.getPlaneNoiseVariance();
 
-      IQANoiseArray = new float[] {IQANoise, IQANoise, IQANoise, IQANoise, IQANoise, IQANoise};
-      odomNoiseArray = new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise};
+      Arrays.fill(IQANoiseArray, IQANoise);
+      Arrays.fill(odomNoiseArray, odomNoise);
 
       factorGraph.createOdometryNoiseModel(IQANoiseArray);
       factorGraph.createOrientedPlaneNoiseModel(new float[] {planeNoise, planeNoise, planeNoise});
