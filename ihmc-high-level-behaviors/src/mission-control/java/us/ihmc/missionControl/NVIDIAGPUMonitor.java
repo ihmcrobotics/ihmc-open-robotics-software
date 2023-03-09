@@ -4,6 +4,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.processManagement.ProcessTools;
 
+import java.io.IOException;
+
 // TODO: support multiple GPUs
 public class NVIDIAGPUMonitor
 {
@@ -20,8 +22,15 @@ public class NVIDIAGPUMonitor
 
    public NVIDIAGPUMonitor()
    {
-      String nvidiaSMI = ProcessTools.execSimpleCommand("nvidia-smi");
-      if (nvidiaSMI != null && !nvidiaSMI.isEmpty())
+      String nvidiaSMI = null;
+      try
+      {
+         nvidiaSMI = ProcessTools.execSimpleCommand("nvidia-smi");
+      }
+      catch (IOException | InterruptedException ignored)
+      {
+      }
+      if (nvidiaSMI != null)
       {
          hasNvidiaGPU = true;
       }
@@ -73,7 +82,14 @@ public class NVIDIAGPUMonitor
       if (!hasNvidiaGPU)
          return;
 
-      String smiQuery = ProcessTools.execSimpleCommand("nvidia-smi --query --display=MEMORY,UTILIZATION");
+      String smiQuery = null;
+      try
+      {
+         smiQuery = ProcessTools.execSimpleCommand("nvidia-smi --query --display=MEMORY,UTILIZATION");
+      }
+      catch (IOException | InterruptedException ignored)
+      {
+      }
 
       if (smiQuery == null)
       {

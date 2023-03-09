@@ -24,7 +24,7 @@ public class LinuxResourceMonitor
 
    private void calculateRAMUsage()
    {
-      String free = ProcessTools.execSimpleCommand("free --mebi");
+      String free = ProcessTools.execSimpleCommandSafe("free --mebi");
       String[] lines = free.split("\\R");
       String[] amongSpaces = lines[1].split("\\s+");
       totalRAMGiB = (float) (Float.parseFloat(amongSpaces[1]) / 1000.0);
@@ -33,7 +33,7 @@ public class LinuxResourceMonitor
 
    private void calculateCPUUsage()
    {
-      String procStat = ProcessTools.execSimpleCommand("cat /proc/stat");
+      String procStat = ProcessTools.execSimpleCommandSafe("cat /proc/stat");
       String[] lines = procStat.split("\\R");
       cpuLines.clear();
       for (String line : lines)
