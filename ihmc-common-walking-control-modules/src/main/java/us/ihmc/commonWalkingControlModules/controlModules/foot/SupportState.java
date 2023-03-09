@@ -35,6 +35,8 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -573,5 +575,15 @@ public class SupportState extends AbstractFootControlState
    {
       this.angularWeight = angularWeight;
       this.linearWeight = linearWeight;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(explorationHelper.getSCS2YoGraphics());
+      if (group.isEmpty())
+         return null;
+      return group;
    }
 }

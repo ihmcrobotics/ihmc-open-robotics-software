@@ -26,6 +26,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -33,6 +34,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -41,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class FootControlModule
+public class FootControlModule implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry;
    private final ContactablePlaneBody contactableFoot;
@@ -590,5 +593,17 @@ public class FootControlModule
    public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
    {
       return footControlHelper.getSwingTrajectoryCalculator().getSwingTrajectory();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(footControlHelper.getSCS2YoGraphics());
+      group.addChild(swingState.getSCS2YoGraphics());
+      group.addChild(moveViaWaypointsState.getSCS2YoGraphics());
+      group.addChild(onToesState.getSCS2YoGraphics());
+      group.addChild(supportState.getSCS2YoGraphics());
+      return group;
    }
 }
