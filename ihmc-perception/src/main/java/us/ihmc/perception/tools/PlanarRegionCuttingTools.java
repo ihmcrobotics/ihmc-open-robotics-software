@@ -146,9 +146,9 @@ public class PlanarRegionCuttingTools
                   PlanarRegion finalRegionA = resultRegions.get(0);
                   PlanarRegion finalRegionB = resultRegions.get(1);
 
-                  if(finalRegionA.getConcaveHull() == null || finalRegionB.getConcaveHull() == null)
+                  if (finalRegionA.getConcaveHull() == null || finalRegionB.getConcaveHull() == null)
                      continue;
-                  else if(finalRegionA.getConcaveHull().size() < 3 || finalRegionB.getConcaveHull().size() < 3)
+                  else if (finalRegionA.getConcaveHull().size() < 3 || finalRegionB.getConcaveHull().size() < 3)
                      continue;
 
                   regionA.set(finalRegionA);
