@@ -516,11 +516,10 @@ public class RotationToolsTest
       ArrayList<QuaternionReadOnly> quaternions = new ArrayList<>();
       ArrayList<Double> weights = new ArrayList<>();
 
-
       int totalQuaternions = 10;
 
       Point3D averageEulerAngles = new Point3D();
-      for(int i = 0; i<totalQuaternions; i++)
+      for (int i = 0; i < totalQuaternions; i++)
       {
          averageEulerAngles.add(0.1 * i, i*0.02, i*0.03);
          Quaternion quaternion = new Quaternion(0.1 * i, i*0.02, i*0.03);
@@ -528,7 +527,7 @@ public class RotationToolsTest
       }
 
       //Fill weights with ones of the same length as quaternions
-      for(int i = 0; i<totalQuaternions; i++)
+      for (int i = 0; i < totalQuaternions; i++)
       {
          weights.add(1.0);
       }
@@ -563,7 +562,6 @@ public class RotationToolsTest
       m2.set(a);
 
       assertTrue(m2.epsilonEquals(m, 1e-5));
-
    }
 
    /**
@@ -581,7 +579,6 @@ public class RotationToolsTest
       m2.set(a);
 
       assertTrue(m2.epsilonEquals(m, 1e-5));
-
    }
 
    public static void assertAxisAngleEquivalent(String errorMsg, AxisAngle axisAngleExpected, AxisAngle axisAngleActual, AxisAngleComparisonMode mode, double epsilon)
