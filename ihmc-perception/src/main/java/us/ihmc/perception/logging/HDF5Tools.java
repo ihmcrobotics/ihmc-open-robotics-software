@@ -220,6 +220,7 @@ public class HDF5Tools
     * @param group The HDF5 group where the requested float array is stored
     * @param index The index of the dataset within the requested group.
     */
+   @Deprecated
    public float[] loadFloatArray(Group group, long index)
    {
       DataSet dataset = group.openDataSet(String.valueOf(index));
