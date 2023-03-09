@@ -1,5 +1,9 @@
 package us.ihmc.avatar;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -21,6 +25,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
@@ -28,10 +33,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class AvatarStepGeneratorThread implements AvatarControllerThreadInterface
 {
@@ -98,13 +99,13 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       continuousStepGeneratorPlugin = pluginFactory.buildPlugin(humanoidReferenceFrames,
-                                                                   drcRobotModel.getStepGeneratorDT(),
-                                                                   drcRobotModel.getWalkingControllerParameters(),
-                                                                   walkingOutputManager,
-                                                                   walkingCommandInputManager,
-                                                                   null,
-                                                                   null,
-                                                                   csgTime);
+                                                                drcRobotModel.getStepGeneratorDT(),
+                                                                drcRobotModel.getWalkingControllerParameters(),
+                                                                walkingOutputManager,
+                                                                walkingCommandInputManager,
+                                                                null,
+                                                                null,
+                                                                csgTime);
       csgRegistry.addChild(continuousStepGeneratorPlugin.getRegistry());
 
       if (environmentalConstraints != null)
@@ -174,9 +175,17 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       return csgRegistry;
    }
 
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
+   public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()
    {
       return csgGraphics;
+   }
+
+   @Override
+   public YoGraphicGroupDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(continuousStepGeneratorPlugin.getSCS2YoGraphics());
+      return group.isEmpty() ? null : group;
    }
 
    @Override

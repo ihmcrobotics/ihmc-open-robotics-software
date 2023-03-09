@@ -38,7 +38,7 @@ mainDependencies {
    api("org.ddogleg:ddogleg:0.18")
 
    api("us.ihmc:euclid:0.19.1")
-   api("us.ihmc:simulation-construction-set:0.22.10")
+   api("us.ihmc:simulation-construction-set:0.23.0")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
@@ -55,7 +55,7 @@ openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCPPVersion = "1.5.8"
+val javaCPPVersion = "1.5.9"
 
 bytedecoDependencies {
    api("us.ihmc:euclid:0.19.1")
@@ -64,46 +64,37 @@ bytedecoDependencies {
 }
 
 javacvDependencies {
-   apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
+   apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion-20230303.063631-11")
    apiCommonBytedecoNatives()
 }
 
 slamWrapperDependencies {
-   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("javacpp", "", "-20230222.151859-137")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
 {
-   apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.21-")
-   apiBytedecoNatives("opencv", "4.6.0-")
-   apiBytedecoNatives("opencl", "3.0-")
-   apiBytedecoNatives("librealsense2", "2.50.0-")
-   apiBytedecoNatives("spinnaker", "3.0.0.118-")
-   apiBytedecoNatives("ffmpeg", "5.0-")
-   apiBytedecoNatives("hdf5", "1.12.2-")
-   apiBytedecoNatives("ffmpeg", "5.1.2-")
+   apiBytedecoNatives("javacpp", "", "-20230222.151859-137")
+   apiBytedecoNatives("openblas", "0.3.21-", "-20221104.072840-16")
+   apiBytedecoNatives("opencv", "4.7.0-", "-20230218.054119-148")
+   apiBytedecoNatives("opencl", "3.0-", "-20221104.001125-5")
+   apiBytedecoNatives("librealsense2", "2.50.0-", "-20221104.001736-8")
+   apiBytedecoNatives("spinnaker", "3.0.0.118-", "-20230218.091411-11")
+   apiBytedecoNatives("ffmpeg", "5.1.2-", "-20230120.070542-158")
+   apiBytedecoNatives("hdf5", "1.12.2-", "-20221104.003540-9")
 }
 
 // We are trying to avoid downloading binaries that aren't used by anyone
-fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "", versionSuffix: String = "")
 {
-   if (name == "spinnaker")
-   {
-      // We couldn't figure out how to sign a JAR to publish without the "-SNAPSHOT" yet
-      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT")
-      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT:linux-x86_64")
-      apiBytedecoSelective("us.ihmc:$name:3.0.0.118-1.5.8-SNAPSHOT:windows-x86_64")
-   }
-   else
-   {
-      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
-      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
-      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-arm64")
-      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
-      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
-   }
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:linux-x86_64")
+   if (name != "spinnaker")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:linux-arm64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:windows-x86_64")
+   if (name != "spinnaker")
+      apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion$versionSuffix:macosx-x86_64")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
@@ -123,7 +114,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:simulation-construction-set:0.22.10")
+   api("us.ihmc:simulation-construction-set:0.23.0")
 
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
