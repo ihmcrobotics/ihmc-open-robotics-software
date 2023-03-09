@@ -172,12 +172,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double defaultOffsetHeightAboveAnkle()
-   {
-      return 0.0;
-   }
-
-   @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
       return physicalProperties.getThighLength() + physicalProperties.getShinLength();
