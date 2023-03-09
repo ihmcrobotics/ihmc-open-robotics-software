@@ -29,7 +29,7 @@ public class PerceptionPrintTools
    public static void printPlanarRegionsListVertices(String tag, PlanarRegionsList regions)
    {
       LogTools.info("[{}]", tag);
-      for(int i = 0; i<regions.getNumberOfPlanarRegions(); i++)
+      for(int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
       {
          LogTools.info("Region Index: {}, Region ID: {}", i, regions.getPlanarRegion(i).getRegionId());
          printPlanarRegionVertices(regions.getPlanarRegion(i));
