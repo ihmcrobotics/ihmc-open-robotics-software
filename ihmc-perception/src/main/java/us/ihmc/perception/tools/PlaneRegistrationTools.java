@@ -186,7 +186,7 @@ public class PlaneRegistrationTools
 
 //         LogTools.info(String.format("Iteration: %d, Matches: %d, Previous Error: %.5f, Error: %.5f, Ratio: %.5f", i, matches.size(), previousError, error, ratio));
 
-         if ( (Math.abs(ratio) < parameters.getICPTerminationRatio()) || (matches.size() < parameters.getICPMinMatches()))
+         if ((Math.abs(ratio) < parameters.getICPTerminationRatio()) || (matches.size() < parameters.getICPMinMatches()))
          {
             break;
          }
@@ -199,7 +199,7 @@ public class PlaneRegistrationTools
 
 //      LogTools.info("[{}]", ">".repeat(Math.abs((int) ((float) previousError / 0.0002f))) + ".".repeat(Math.max((int) ((0.03f - (float) previousError) / 0.0002f), 0)));
 
-      if(previousError > parameters.getICPErrorCutoff())
+      if (previousError > parameters.getICPErrorCutoff())
       {
 //         LogTools.warn("ICP failed to converge, error: {}", previousError);
          return false;
@@ -510,7 +510,7 @@ public class PlaneRegistrationTools
    public static double computeRegistrationError(PlanarRegionsList referenceRegions, PlanarRegionsList transformedRegions, HashMap<Integer, Integer> matches)
    {
       double error = 0.0;
-      for(Integer key : matches.keySet())
+      for (Integer key : matches.keySet())
       {
          PlanarRegion referenceRegion = referenceRegions.getPlanarRegion(key);
          PlanarRegion transformedRegion = transformedRegions.getPlanarRegion(matches.get(key));
@@ -570,7 +570,7 @@ public class PlaneRegistrationTools
             }
          }
 
-         if(minSimilarityIndex != -1)
+         if (minSimilarityIndex != -1)
          {
             matches.put(i, minSimilarityIndex);
          }
