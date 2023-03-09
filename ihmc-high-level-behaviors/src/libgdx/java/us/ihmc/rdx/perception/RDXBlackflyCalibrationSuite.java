@@ -221,10 +221,10 @@ public class RDXBlackflyCalibrationSuite
                   cameraMatrixForUndistortion = new SwapReference<>(Mat::new);
                   cameraMatrixForUndistortion.initializeBoth(cameraMatrix::copyTo);
                   rectificationTransformation = new Mat(3, 3, opencv_core.CV_64F);
+                  opencv_core.setIdentity(rectificationTransformation);
                   undistortionMap1 = new Mat();
                   undistortionMap2 = new Mat();
                   undistortionRemapBorderValue = new Scalar();
-                  opencv_core.setIdentity(rectificationTransformation);
                   newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
                   opencv_core.setIdentity(newCameraMatrixEstimate);
                   cameraMatrixForMonitorShifting = opencv_core.noArray();

@@ -285,20 +285,23 @@ public class BytedecoOpenCVTools
       return "unknown image type";
    }
 
-   public static void printMat(Mat image, String prefix)
+   public static void printMat(String name, Mat image)
    {
-      LogTools.info(matToString(image, prefix));
+      LogTools.info(matToString(name, image));
    }
 
-   public static String matToString(Mat image, String prefix)
+   public static String matToString(String name, Mat image)
    {
-      StringBuilder matString = new StringBuilder("Mat: [" + prefix + "] \n");
+      StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
 
       for (int i = 0; i < image.rows(); i++)
       {
          for (int j = 0; j < image.cols(); j++)
          {
-            matString.append(image.ptr(i, j).getShort()).append("\t");
+            if (image.type() == opencv_core.CV_16UC1)
+               matString.append(image.ptr(i, j).getShort()).append("\t");
+            if (image.type() == opencv_core.CV_64FC1)
+               matString.append("%.5f\t".formatted(image.ptr(i, j).getDouble()));
          }
          matString.append("\n");
       }
