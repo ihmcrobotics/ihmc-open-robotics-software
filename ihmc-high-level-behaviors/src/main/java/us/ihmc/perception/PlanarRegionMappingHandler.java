@@ -290,7 +290,7 @@ public class PlanarRegionMappingHandler
 
             loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
 
-            while(!dataAvailable.poll())
+            while (!dataAvailable.poll())
             {
                try
                {
