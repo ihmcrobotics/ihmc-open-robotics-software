@@ -651,12 +651,12 @@ public class RotationTools
       DMatrixRMaj QW = new DMatrixRMaj(4, weights.size());
 
       DMatrixRMaj W = new DMatrixRMaj(weights.size(), weights.size());
-      for(int i = 0; i< weights.size(); i++)
+      for (int i = 0; i< weights.size(); i++)
       {
          W.set(i, i, weights.get(i));
       }
 
-      for(int i = 0; i< quaternions.size(); i++)
+      for (int i = 0; i< quaternions.size(); i++)
       {
          QuaternionReadOnly quaternion = quaternions.get(i);
          Q.set(0, i, quaternion.getX());
