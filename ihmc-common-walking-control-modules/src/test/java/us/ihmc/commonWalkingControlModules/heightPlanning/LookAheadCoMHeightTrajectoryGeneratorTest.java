@@ -226,6 +226,8 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
                                                                                                   nominalHeight,
                                                                                                   maximumHeight,
                                                                                                   0.0,
+                                                                                                  Double.POSITIVE_INFINITY,
+                                                                                                  0.0,
                                                                                                   doubleSupportIn,
                                                                                                   comFrame,
                                                                                                   comFrame,

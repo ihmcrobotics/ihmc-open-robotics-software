@@ -710,6 +710,15 @@ public abstract class WalkingControllerParameters
    public abstract double maximumHeightAboveAnkle();
 
    /**
+    * This is a reduction factor of {@link #maximumHeightAboveAnkle()} that is applied during the exchange phase to the height trajectory when the robot is
+    * stepping down
+    */
+   public double getMaxLegLengthReductionSteppingDown()
+   {
+      return 0.03;
+   }
+
+   /**
     * If the step height change is above this value, it indicates that the foot should not be considered "flat", and that the robot is either
     * stepping up or down
     */
