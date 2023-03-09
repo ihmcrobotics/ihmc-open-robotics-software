@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
 
@@ -1148,11 +1150,12 @@ class PlanarRegionSLAMTest
       PlanarRegionsList listOne = createSomeRightAngledWalls(-3, false, new RigidBodyTransform(), true, true, true);
       PlanarRegionsList listTwo = createSomeRightAngledWalls(-6, false, worldToSensorTransform, true, true, true);
 
-      HashMap<Integer, Integer> matches = new HashMap<>();
+      TIntIntMap matches = new TIntIntHashMap();
 
       PlaneRegistrationTools.findBestPlanarRegionMatches(listOne, listTwo, matches, 0.4f, 0.6f, 0.4f, 0.5f);
 
-      for(Integer key : matches.keySet())
+      int[] keys = matches.keys();
+      for(Integer key : keys)
       {
          LogTools.info("Match: " + key + " " + matches.get(key));
       }
