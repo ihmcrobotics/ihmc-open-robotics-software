@@ -725,7 +725,7 @@ public class PlanarRegionMap
 
 //         PerceptionPrintTools.printTransform("Transform to previous", transformToPrevious);
 
-         if(!valid)
+         if (!valid)
          {
 //            LogTools.warn("[FAILED] Last Index: {}, Current Index: {}", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
 //            return null;
@@ -736,7 +736,7 @@ public class PlanarRegionMap
          isKeyframe = true;
       }
 
-      if(isKeyframe)
+      if (isKeyframe)
       {
          previousRegions.clear();
          previousRegions.addPlanarRegionsList(regions.copy());
@@ -749,7 +749,7 @@ public class PlanarRegionMap
          RigidBodyTransform residualTransform = new RigidBodyTransform();
          boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(finalMap, regions.copy(), residualTransform, parameters);
 
-         if(valid)
+         if (valid)
          {
             transformToWorld.preMultiply(residualTransform);
             regions.applyTransform(residualTransform);
@@ -841,10 +841,10 @@ public class PlanarRegionMap
 
       boolean isKeyframe = (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
 
-      if(translation.norm() > parameters.getKeyframeDistanceThreshold())
+      if (translation.norm() > parameters.getKeyframeDistanceThreshold())
          LogTools.warn("[Keyframe] High Translation: " + translation.norm());
 
-      if(euler.norm() > parameters.getKeyframeAngularThreshold())
+      if (euler.norm() > parameters.getKeyframeAngularThreshold())
          LogTools.warn("[Keyframe] High Rotation: " + euler.norm());
 
       return isKeyframe;
@@ -854,9 +854,9 @@ public class PlanarRegionMap
    {
       PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
 
-      for(PlanarRegion region : finalMap.getPlanarRegionsAsList())
+      for (PlanarRegion region : finalMap.getPlanarRegionsAsList())
       {
-         if((currentTimeIndex - region.getTickOfLastMeasurement() > 5) // Region has not been matched enough in a while. Not good region.
+         if ((currentTimeIndex - region.getTickOfLastMeasurement() > 5) // Region has not been matched enough in a while. Not good region.
              && (region.getNumberOfTimesMatched() < parameters.getMinimumNumberOfTimesMatched())) // Region has not been matched enough
          {
             finalMap.getPlanarRegionsAsList().remove(region);
