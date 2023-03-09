@@ -22,10 +22,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCVArUcoMarker;
-import us.ihmc.perception.OpenCVArUcoMarkerDetection;
-import us.ihmc.perception.OpenCVArUcoMarkerROS2Publisher;
+import us.ihmc.perception.*;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
@@ -153,8 +150,8 @@ public class DualBlackflyCamera
                   cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
                   opencv_core.setIdentity(cameraMatrix);
                   cameraMatrix.ptr(0, 0).putDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_UNDISORTION);
-                  cameraMatrix.ptr(0, 2).putDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_UNDISORTION);
-                  cameraMatrix.ptr(1, 1).putDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_UNDISORTION);
+                  cameraMatrix.ptr(1, 1).putDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_UNDISORTION);
+                  cameraMatrix.ptr(0, 2).putDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_UNDISORTION);
                   cameraMatrix.ptr(1, 2).putDouble(SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_UNDISORTION);
                   newCameraMatrixEstimate = new Mat(3, 3, opencv_core.CV_64F);
                   opencv_core.setIdentity(newCameraMatrixEstimate);
@@ -166,6 +163,7 @@ public class DualBlackflyCamera
                   undistortedImageSize = new Size((int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageWidth),
                                                   (int) (SensorHeadParameters.UNDISTORTED_IMAGE_SCALE * imageHeight));
                   rectificationTransformation = new Mat(3, 3, opencv_core.CV_64F);
+                  opencv_core.setIdentity(rectificationTransformation);
                   undistortionMap1 = new Mat();
                   undistortionMap2 = new Mat();
                   undistortionRemapBorderValue = new Scalar();
