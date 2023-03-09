@@ -10,10 +10,13 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class PerceptionPrintTools
+public class PerceptionDebugTools
 {
-   public static void printMatches(String tag, PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches)
+   public static void printMatches(String tag, PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches, boolean debug)
    {
+      if (!debug)
+         return;
+
       LogTools.info("------------------------------------------------ Printing Matches ({}) ---------------------------------------------", tag);
       LogTools.info("Map Region Count: {}", map.getNumberOfPlanarRegions());
       LogTools.info("Incoming Regions Count: {}", regions.getNumberOfPlanarRegions());
@@ -26,18 +29,24 @@ public class PerceptionPrintTools
       LogTools.info("------------------------------------------------ Printing Matches End ---------------------------------------------");
    }
 
-   public static void printPlanarRegionsListVertices(String tag, PlanarRegionsList regions)
+   public static void printPlanarRegionsListVertices(String tag, PlanarRegionsList regions, boolean debug)
    {
+      if (!debug)
+         return;
+
       LogTools.info("[{}]", tag);
       for(int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
       {
          LogTools.info("Region Index: {}, Region ID: {}", i, regions.getPlanarRegion(i).getRegionId());
-         printPlanarRegionVertices(regions.getPlanarRegion(i));
+         printPlanarRegionVertices(regions.getPlanarRegion(i), debug);
       }
    }
 
-   public static void printPlanarRegionVertices(PlanarRegion region)
+   public static void printPlanarRegionVertices(PlanarRegion region, boolean debug)
    {
+      if (!debug)
+         return;
+
       LogTools.info("Concave Hull Vertices -----------------------------------");
       for (int i = 0; i < region.getConcaveHullSize(); i++)
       {
@@ -46,8 +55,11 @@ public class PerceptionPrintTools
       System.out.println();
    }
 
-   public static void printRegionIDs(String tag, PlanarRegionsList regions)
+   public static void printRegionIDs(String tag, PlanarRegionsList regions, boolean debug)
    {
+      if (!debug)
+         return;
+
       int[] ids = new int[regions.getNumberOfPlanarRegions()];
       for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
       {
@@ -56,8 +68,11 @@ public class PerceptionPrintTools
       LogTools.info("[{}] Region IDs: {}", tag, Arrays.toString(ids));
    }
 
-   public static void printPlane(PlanarRegion region)
+   public static void printPlane(PlanarRegion region, boolean debug)
    {
+      if (!debug)
+         return;
+
       LogTools.info("Plane: {}",
                     String.format("%.2f, %.2f, %.2f, %.2f",
                                   region.getNormal().getX(),
@@ -66,8 +81,11 @@ public class PerceptionPrintTools
                                   region.getNormal().dot(region.getPoint())));
    }
 
-   public static void printTransform(String tag, RigidBodyTransform transform)
+   public static void printTransform(String tag, RigidBodyTransform transform, boolean debug)
    {
+      if (!debug)
+         return;
+
       Point3D euler = new Point3D();
       transform.getRotation().getEuler(euler);
 

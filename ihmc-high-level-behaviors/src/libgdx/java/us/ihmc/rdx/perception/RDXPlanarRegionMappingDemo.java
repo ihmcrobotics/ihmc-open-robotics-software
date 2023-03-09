@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.PlanarRegionMappingHandler;
+import us.ihmc.perception.tools.MocapTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -142,19 +143,19 @@ public class RDXPlanarRegionMappingDemo
                   baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
                }
 
-               //if (!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
-               //{
-               //   MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
-               //
-               //   mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
-               //   mocapGraphic.update();
-               //}
-               //
-               //if (!mappingManager.getSensorPositionBuffer().isEmpty())
-               //{
-               //   rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
-               //   rootJointGraphic.update();
-               //}
+//               if (!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
+//               {
+//                  MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
+//
+//                  mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
+//                  mocapGraphic.update();
+//               }
+//
+//               if (!mappingManager.getSensorPositionBuffer().isEmpty())
+//               {
+//                  rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
+//                  rootJointGraphic.update();
+//               }
 
                graphicsInitialized = true;
 

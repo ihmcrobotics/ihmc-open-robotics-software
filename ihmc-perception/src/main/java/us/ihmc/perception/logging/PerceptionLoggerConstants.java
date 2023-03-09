@@ -2,6 +2,8 @@ package us.ihmc.perception.logging;
 
 public class PerceptionLoggerConstants
 {
+   public static final int MAX_BUFFER_SIZE = 1000000;
+
    public static final String ROBOT_CONFIGURATION_DATA_NAME = "/robot/root/position/";
    public static final String ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME = "/robot/configuration/timestamps/";
 

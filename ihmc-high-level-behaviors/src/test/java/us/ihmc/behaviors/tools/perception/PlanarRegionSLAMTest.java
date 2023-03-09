@@ -37,7 +37,7 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
-import us.ihmc.perception.tools.PerceptionPrintTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullMergerTest;
@@ -1129,13 +1129,13 @@ class PlanarRegionSLAMTest
       Vector4D planeTwo = map.getOptimalLandmarkById(2);
       Vector4D planeThree = map.getOptimalLandmarkById(3);
 
-      PerceptionPrintTools.printPlane(listOne.getPlanarRegion(0));
+      PerceptionDebugTools.printPlane(listOne.getPlanarRegion(0), true);
       LogTools.info("Plane One: " + planeOne);
 
-      PerceptionPrintTools.printPlane(listOne.getPlanarRegion(1));
+      PerceptionDebugTools.printPlane(listOne.getPlanarRegion(1), true);
       LogTools.info("Plane Two: " + planeTwo);
 
-      PerceptionPrintTools.printPlane(listOne.getPlanarRegion(2));
+      PerceptionDebugTools.printPlane(listOne.getPlanarRegion(2), true);
       LogTools.info("Plane Three: " + planeThree);
 
    }

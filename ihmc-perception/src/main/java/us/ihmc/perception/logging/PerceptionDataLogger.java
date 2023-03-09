@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -68,8 +67,7 @@ public class PerceptionDataLogger
    private AtomicReference<Boolean> stopLoggingRequest = new AtomicReference<>(false);
 
    private HashMap<String, PerceptionLogChannel> channels = new HashMap<>();
-   private HashMap<String, AtomicReference<ImageMessage>> references = new HashMap<>();
-   private HashMap<String, AtomicReference<BigVideoPacket>> bigVideoPacketReferences = new HashMap<>();
+   private HashMap<String, AtomicReference<ImageMessage>> imageMessageReferences = new HashMap<>();
    private HashMap<String, AtomicReference<Pose3D>> transformMessageReferences = new HashMap<>();
 
    public PerceptionDataLogger()
@@ -78,25 +76,25 @@ public class PerceptionDataLogger
 //      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
 
       channels.put(PerceptionLoggerConstants.D435_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.D435_COLOR_NAME, 0, 0));
-      references.put(PerceptionLoggerConstants.D435_COLOR_NAME, new AtomicReference<>(null));
+      imageMessageReferences.put(PerceptionLoggerConstants.D435_COLOR_NAME, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.D435_DEPTH_NAME, 0, 0));
-      references.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new AtomicReference<>(null));
+      imageMessageReferences.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.L515_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.L515_COLOR_NAME, 0, 0));
-      references.put(PerceptionLoggerConstants.L515_COLOR_NAME, new AtomicReference<>(null));
+      imageMessageReferences.put(PerceptionLoggerConstants.L515_COLOR_NAME, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.L515_DEPTH_NAME, 0, 0));
-      references.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new AtomicReference<>(null));
+      imageMessageReferences.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, 0));
-      references.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new AtomicReference<>(null));
+      imageMessageReferences.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0, 0));
-      bigVideoPacketReferences.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new AtomicReference<>(null));
+      imageMessageReferences.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0, 0));
-      references.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new AtomicReference<>(null));
+      imageMessageReferences.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new PerceptionLogChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, 0, 0));
       transformMessageReferences.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new AtomicReference<>(null));
@@ -225,30 +223,29 @@ public class PerceptionDataLogger
 
             ImageMessage imageMessage = new ImageMessage();
             subscriber.takeNextData(imageMessage, sampleInfo);
-            references.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).set(imageMessage);
-            logDepthOuster(references.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).getAndSet(null));
+            imageMessageReferences.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).set(imageMessage);
+            logDepthOuster(imageMessageReferences.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).getAndSet(null));
          });
       }
 
+      // TODO: Make this work with the new ImageMessage message for Blackfly images
       // Add callback for Blackfly Color images
-      LogTools.info("Blackfly Color Enabled: " + channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled());
-      if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
-      {
-         SampleInfo sampleInfo = new SampleInfo();
-         byteArrays.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[BUFFER_SIZE]);
-         bytePointers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new BytePointer(BUFFER_SIZE));
-         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
-         ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
-         {
-
-            BigVideoPacket imageMessage = new BigVideoPacket();
-            subscriber.takeNextData(imageMessage, sampleInfo);
-            bigVideoPacketReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).set(imageMessage);
-            logColorBlackfly(bigVideoPacketReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).getAndSet(null));
-
-            LogTools.info("BlackFly Image Received: {}", imageMessage.getAcquisitionTimeSecondsSinceEpoch());
-         });
-      }
+//      LogTools.info("Blackfly Color Enabled: " + channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled());
+//      if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
+//      {
+//         SampleInfo sampleInfo = new SampleInfo();
+//         byteArrays.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[BUFFER_SIZE]);
+//         bytePointers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new BytePointer(BUFFER_SIZE));
+//         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
+//         ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
+//         {
+//            subscriber.takeNextData(imageMessage, sampleInfo);
+//            imageMessageReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).set(imageMessage);
+//            logColorBlackfly(bigVideoPacketReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).getAndSet(null));
+//
+//            LogTools.info("BlackFly Image Received: {}", imageMessage.getAcquisitionTimeSecondsSinceEpoch());
+//         });
+//      }
 
       // Add callback for MoCap data
       LogTools.info("MoCap Logging Enabled: " + channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled());
@@ -419,20 +416,6 @@ public class PerceptionDataLogger
                Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
          storeLongArray(PerceptionLoggerConstants.ZED2_SENSOR_TIME, timestamp);
          storeCompressedImage(PerceptionLoggerConstants.ZED2_COLOR_NAME, message);
-      }
-   }
-
-   public void logColorBlackfly(BigVideoPacket message)
-   {
-      LogTools.info("Logging Blackfly Color: ", message.toString());
-
-      if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
-      {
-         channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).incrementCount();
-         long timestamp =
-               Conversions.secondsToNanoseconds(message.getAcquisitionTimeSecondsSinceEpoch()) + message.getAcquisitionTimeAdditionalNanos();
-         storeLongArray(PerceptionLoggerConstants.BLACKFLY_COLOR_TIME, timestamp);
-         //storeCompressedImage(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, message);
       }
    }
 

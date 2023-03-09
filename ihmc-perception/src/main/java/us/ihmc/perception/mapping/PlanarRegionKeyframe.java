@@ -3,6 +3,12 @@ package us.ihmc.perception.mapping;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+/**
+ * This class is used to store a keyframe of a planar region map. It contains the planar regions list, the transform to the previous keyframe,
+ * and the transform to the world frame. It also contains the time index of the keyframe. It may be extended to store more information for loop closures
+ * in the future.
+ */
+
 public class PlanarRegionKeyframe
 {
    private int timeIndex = 0;

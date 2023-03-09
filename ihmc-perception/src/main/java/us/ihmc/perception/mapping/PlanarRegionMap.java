@@ -12,7 +12,7 @@ import us.ihmc.perception.tools.PlanarRegionCuttingTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
 import us.ihmc.perception.tools.PerceptionEuclidTools;
-import us.ihmc.perception.tools.PerceptionPrintTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -48,8 +48,24 @@ public class PlanarRegionMap
    float odomNoise = 0.00001f;
    float IQANoise = 0.00001f;
 
-   private final float[] IQANoiseArray = new float[] {IQANoise, IQANoise, IQANoise, IQANoise, IQANoise, IQANoise};;
-   private final float[] odomNoiseArray = new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise};;
+   private final float[] IQANoiseArray = new float[] {IQANoise, IQANoise, IQANoise, IQANoise, IQANoise, IQANoise};
+   private final float[] odomNoiseArray = new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise};
+
+   private boolean initialized = false;
+   private boolean modified = false;
+   private int uniqueRegionsFound = 0;
+   private int currentTimeIndex = 0;
+   private int uniqueIDtracker = 1;
+
+   private final RigidBodyTransform currentToPreviousSensorTransform = new RigidBodyTransform();
+   private final RigidBodyTransform previousSensorToWorldFrameTransform = new RigidBodyTransform();
+   private final RigidBodyTransform worldToPreviousSensorFrameTransform = new RigidBodyTransform();
+   private final RigidBodyTransform sensorToWorldTransformPrior = new RigidBodyTransform();
+   private final RigidBodyTransform sensorToWorldTransformPosterior = new RigidBodyTransform();
+   private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform previousTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
+   private final PlanarRegionsList previousRegions = new PlanarRegionsList();
 
    private MergingMode merger;
    private MatchingMode matcher;
@@ -57,37 +73,16 @@ public class PlanarRegionMap
    private PlanarRegionMappingParameters parameters;
    private SlamWrapper.FactorGraphExternal factorGraph;
 
-   private final RigidBodyTransform currentToPreviousSensorTransform = new RigidBodyTransform();
-
-   private final RigidBodyTransform previousSensorToWorldFrameTransform = new RigidBodyTransform();
-   private final RigidBodyTransform worldToPreviousSensorFrameTransform = new RigidBodyTransform();
-
-   RigidBodyTransform sensorToWorldTransformPrior = new RigidBodyTransform();
-   RigidBodyTransform sensorToWorldTransformPosterior = new RigidBodyTransform();
-
-   private boolean initialized = false;
-   private boolean modified = false;
-   private int uniqueRegionsFound = 0;
-   private int uniqueIDtracker = 1;
-
-   RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
-   RigidBodyTransform previousTransformToWorld = new RigidBodyTransform();
-   RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
-
    private final ArrayList<PlanarRegionKeyframe> keyframes = new ArrayList<>();
-   private PlanarRegionsList previousRegions = new PlanarRegionsList();
-
-   private final TIntArrayList mapIDs = new TIntArrayList();
-   private final TIntArrayList incomingIDs = new TIntArrayList();
-
    private final HashMap<Integer, TIntArrayList> incomingToMapMatches = new HashMap<>();
    private final HashMap<Integer, TIntArrayList> mapToIncomingMatches = new HashMap<>();
-
+   private final TIntArrayList mapIDs = new TIntArrayList();
+   private final TIntArrayList incomingIDs = new TIntArrayList();
    private final HashSet<Integer> mapRegionIDSet = new HashSet<>();
+
 
    private PlanarRegionsList finalMap;
 
-   private int currentTimeIndex = 0;
 
    public PlanarRegionMap(boolean useSmoothingMerger)
    {
@@ -179,7 +174,7 @@ public class PlanarRegionMap
             region.setRegionId(-uniqueIDtracker++);
       }
 
-      PerceptionPrintTools.printRegionIDs("Incoming", priorRegionsInWorld);
+      PerceptionDebugTools.printRegionIDs("Incoming", priorRegionsInWorld, true);
 
       if (!initialized)
       {
@@ -819,7 +814,7 @@ public class PlanarRegionMap
 
          previousTransformToWorld.set(estimatedTransformToWorld);
 
-         PerceptionPrintTools.printTransform(String.valueOf(sensorPoseIndex), transformToWorld);
+         PerceptionDebugTools.printTransform(String.valueOf(sensorPoseIndex), transformToWorld, true);
 
          LogTools.debug("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
 
@@ -836,7 +831,7 @@ public class PlanarRegionMap
       Vector3DBasics translation = transformToPrevious.getTranslation();
       transformToPrevious.getRotation().getEuler(euler);
 
-//      PerceptionPrintTools.printTransform("ICP", transformToPrevious);
+      PerceptionDebugTools.printTransform("ICP", transformToPrevious, false);
 
       boolean isKeyframe = (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
 
