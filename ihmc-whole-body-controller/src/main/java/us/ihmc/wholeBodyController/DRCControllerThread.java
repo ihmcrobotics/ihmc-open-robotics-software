@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
@@ -24,12 +25,15 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -48,7 +52,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
-public class DRCControllerThread implements MultiThreadedRobotControlElement
+public class DRCControllerThread implements MultiThreadedRobotControlElement, SCS2YoGraphicHolder
 {
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean SHOW_INERTIA_GRAPHICS = false;
@@ -73,6 +77,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+   private final YoGraphicGroupDefinition scs2YoGraphics = new YoGraphicGroupDefinition(getClass().getSimpleName());
    private final ForceSensorDataHolderReadOnly forceSensorDataHolderForController;
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
@@ -270,7 +275,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          }
       }
 
-      RobotController robotController = controllerFactory.getController(controllerModel,
+      HumanoidHighLevelControllerManager robotController = controllerFactory.getController(controllerModel,
                                                                         controlDT,
                                                                         gravity,
                                                                         yoTime,
@@ -281,6 +286,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
                                                                         centerOfPressureDataHolderForEstimator,
                                                                         lowLevelControllerOutput,
                                                                         jointsToIgnore);
+      scs2YoGraphics.addChild(robotController.getSCS2YoGraphics());
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.addRobotController(robotController);
@@ -472,6 +478,12 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return scs2YoGraphics;
    }
 
    @Override

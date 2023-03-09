@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.robotics.graphics.VisualDefinitionConverter;
+import us.ihmc.graphicsDescription.conversion.VisualsConversionTools;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -36,7 +36,7 @@ public class InclinedEnvironment implements CommonAvatarEnvironmentInterface
    {
       inclinedGround = new CombinedTerrainObject3D("Ramps");
 
-      AppearanceDefinition appearance = VisualDefinitionConverter.toAppearanceDefinition(new MaterialDefinition(ColorDefinitions.DarkGrey(),
+      AppearanceDefinition appearance = VisualsConversionTools.toAppearanceDefinition(new MaterialDefinition(ColorDefinitions.DarkGrey(),
                                                                                                                 ColorDefinitions.DarkGrey(),
                                                                                                                 ColorDefinitions.White(),
                                                                                                                 null,
