@@ -255,41 +255,6 @@ public class RealsenseColorAndDepthPublisher
          }
 
          ros2PropertySetGroup.update();
-         //=======
-         //            pngCompression.compress(depth16UC1Image);
-         //            jpegCompression.compressRGB(color8UC3Image);
-         //
-         //            PerceptionMessageTools.packImageMessageData(pngCompression.getCompressedData(), depthImageMessage);
-         //            ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
-         //            depthImageMessage.setImageHeight(realsense.getDepthHeight());
-         //            depthImageMessage.setImageWidth(realsense.getDepthWidth());
-         //            depthImageMessage.getPosition().set(cameraPose.getPosition());
-         //            depthImageMessage.getOrientation().set(cameraPose.getOrientation());
-         //            depthImageMessage.setSequenceNumber(depthSequenceNumber++);
-         //            MessageTools.toMessage(acquisitionTime, depthImageMessage.getAcquisitionTime());
-         //            depthImageMessage.setFocalLengthXPixels(realsense.getDepthIntrinsicParameters().fx());
-         //            depthImageMessage.setFocalLengthYPixels(realsense.getDepthIntrinsicParameters().fy());
-         //            depthImageMessage.setPrincipalPointXPixels(realsense.getDepthIntrinsicParameters().ppx());
-         //            depthImageMessage.setPrincipalPointYPixels(realsense.getDepthIntrinsicParameters().ppy());
-         //            depthImageMessage.setDepthDiscretization((float) realsense.getDepthDiscretization());
-         //            depthImageMessage.setIsPinholeCameraModel(true);
-         //            ros2Helper.publish(depthTopic, depthImageMessage);
-         //
-         //            PerceptionMessageTools.packImageMessageData(jpegCompression.getCompressedData(), colorImageMessage);
-         //            ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
-         //            colorImageMessage.setImageHeight(realsense.getColorHeight());
-         //            colorImageMessage.setImageWidth(realsense.getColorWidth());
-         //            colorImageMessage.getPosition().set(realsense.getDepthToColorTranslation());
-         //            colorImageMessage.getOrientation().set(realsense.getDepthToColorRotation());
-         //            colorImageMessage.setSequenceNumber(colorSequenceNumber++);
-         //            MessageTools.toMessage(acquisitionTime, colorImageMessage.getAcquisitionTime());
-         //            colorImageMessage.setFocalLengthXPixels(realsense.getColorIntrinsicParameters().fx());
-         //            colorImageMessage.setFocalLengthYPixels(realsense.getColorIntrinsicParameters().fy());
-         //            colorImageMessage.setPrincipalPointXPixels(realsense.getColorIntrinsicParameters().ppx());
-         //            colorImageMessage.setPrincipalPointYPixels(realsense.getColorIntrinsicParameters().ppy());
-         //            colorImageMessage.setIsPinholeCameraModel(true);
-         //            ros2Helper.publish(colorTopic, colorImageMessage);
-         //>>>>>>> develop
       }
    }
 
