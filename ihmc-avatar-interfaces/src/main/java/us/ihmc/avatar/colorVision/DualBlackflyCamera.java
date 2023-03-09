@@ -3,7 +3,6 @@ package us.ihmc.avatar.colorVision;
 import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
-import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -20,13 +19,13 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
@@ -35,12 +34,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class DualBlackflyCamera
@@ -82,12 +78,9 @@ public class DualBlackflyCamera
    private final Stopwatch encodingDuration = new Stopwatch();
    private final Stopwatch copyDuration = new Stopwatch();
    private long sequenceNumber = 0;
+   private List<OpenCVArUcoMarker> arUcoMarkersToTrack;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-
-   private final ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
-   private final FramePose3D framePoseOfMarker = new FramePose3D();
-   private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
-   private final HashMap<Integer, OpenCVArUcoMarker> arUcoMarkersToTrack = new HashMap<>();
+   private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
 
    public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot)
    {
@@ -105,17 +98,11 @@ public class DualBlackflyCamera
       this.side = side;
       this.ros2Helper = ros2Helper;
       this.realtimeROS2Node = realtimeROS2Node;
-
-      for (OpenCVArUcoMarker openCVArUcoMarker : arUcoMarkersToTrack)
-      {
-         this.arUcoMarkersToTrack.put(openCVArUcoMarker.getId(), openCVArUcoMarker);
-      }
+      this.arUcoMarkersToTrack = arUcoMarkersToTrack;
 
       blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
       blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
       blackfly.startAcquiringImages();
-
-      markersToTrack.add(new OpenCVArUcoMarker(0,0.2032));
    }
 
    public void update()
@@ -207,6 +194,10 @@ public class DualBlackflyCamera
                   arUcoMarkerDetection.create(blackflyCameraFrame);
                   arUcoMarkerDetection.setSourceImageForDetection(undistortedImage);
                   newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
+                  arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
+                                                                            arUcoMarkersToTrack,
+                                                                            syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(),
+                                                                            ros2Helper);
                }
 
                syncedRobot.update();
@@ -222,32 +213,10 @@ public class DualBlackflyCamera
                                     undistortionRemapBorderValue);
 
                arUcoMarkerDetection.update();
-
                // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
                // arUcoMarkerDetection.drawDetectedMarkers(postDistortionMat);
                // arUcoMarkerDetection.drawRejectedPoints(postDistortionMat);
-
-               SwapReference<Mat> ids = arUcoMarkerDetection.getIds();
-               arUcoMarkerPoses.getMarkerId().clear();
-               arUcoMarkerPoses.getOrientation().clear();
-               arUcoMarkerPoses.getPosition().clear();
-               for (int i = 0; i < ids.getForThreadTwo().rows(); i++)
-               {
-                  int markerID = ids.getForThreadTwo().ptr(i, 0).getInt();
-                  OpenCVArUcoMarker markerToTrack = arUcoMarkersToTrack.get(markerID);
-
-                  if (markerToTrack != null)
-                  {
-                     framePoseOfMarker.setIncludingFrame(blackflyCameraFrame, arUcoMarkerDetection.getPose(markerToTrack));
-                     framePoseOfMarker.changeFrame(ReferenceFrame.getWorldFrame());
-
-                     arUcoMarkerPoses.getMarkerId().add(markerID);
-                     arUcoMarkerPoses.getOrientation().add().set(framePoseOfMarker.getOrientation());
-                     arUcoMarkerPoses.getPosition().add().set(framePoseOfMarker.getX(), framePoseOfMarker.getY(), framePoseOfMarker.getZ());
-                  }
-               }
-
-               ros2Helper.publish(DualBlackflyComms.FRAME_POSE, arUcoMarkerPoses);
+               arUcoMarkerPublisher.update();
             }
 
             convertColorDuration.start();
