@@ -715,7 +715,7 @@ public abstract class WalkingControllerParameters
     */
    public double getMaxLegLengthReductionSteppingDown()
    {
-      return 0.03;
+      return 0.0;
    }
 
    /**
