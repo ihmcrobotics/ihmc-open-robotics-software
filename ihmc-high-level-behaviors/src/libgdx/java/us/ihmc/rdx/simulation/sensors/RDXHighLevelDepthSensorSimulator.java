@@ -360,7 +360,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                   publishColorImageROS2();
             }
 
-            if(ros2Node != null)
+            if (ros2Node != null)
             {
                if (publishDepthImageMessageROS2.get())
                   publishROS2DepthImageMessage();
@@ -665,7 +665,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
 
    public void publishROS2DepthImageMessage()
    {
-      if(!depthExecutor.isExecuting() && publishDepthImageMessageROS2.get())
+      if (!depthExecutor.isExecuting() && publishDepthImageMessageROS2.get())
       {
          depthExecutor.execute(() -> {
 
@@ -691,7 +691,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
 
    public void publishROS2ColorImageMessage()
    {
-      if(!colorExecutor.isExecuting() && publishColorImageMessageROS2.get())
+      if (!colorExecutor.isExecuting() && publishColorImageMessageROS2.get())
       {
          colorExecutor.execute(() -> {
 
