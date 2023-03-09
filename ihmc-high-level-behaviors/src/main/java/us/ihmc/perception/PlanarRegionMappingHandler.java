@@ -433,9 +433,9 @@ public class PlanarRegionMappingHandler
    public void computeICP()
    {
       RigidBodyTransform currentToPreviousTransform = new RigidBodyTransform();
-      boolean valid = PlaneRegistrationTools.computeIterativeClosestPlane(previousRegions.getPlanarRegionsList(),
-                                                                          currentRegions.getPlanarRegionsList(),
-                                                                          currentToPreviousTransform, getParameters());
+      boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousRegions.getPlanarRegionsList(),
+                                                                                                  currentRegions.getPlanarRegionsList(),
+                                                                                                  currentToPreviousTransform, getParameters());
 
       PerceptionPrintTools.printTransform("ComputeICP", currentToPreviousTransform);
    }
