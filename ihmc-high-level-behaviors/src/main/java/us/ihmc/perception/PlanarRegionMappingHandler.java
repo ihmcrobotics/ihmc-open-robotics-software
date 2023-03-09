@@ -27,7 +27,7 @@ import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.odometry.RapidPatchesBasedICP;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
-import us.ihmc.perception.tools.PerceptionPrintTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -284,37 +284,34 @@ public class PlanarRegionMappingHandler
 
       if (source == DataSource.PERCEPTION_LOG)
       {
-//         if (perceptionLogIndex % HDF5Manager.MAX_BUFFER_SIZE != (HDF5Manager.MAX_BUFFER_SIZE - 1))
+         LogTools.debug("Loading Perception Log: {}", perceptionLogIndex);
+
+         loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
+
+         while (!dataAvailable.poll())
          {
-            LogTools.debug("Loading Perception Log: {}", perceptionLogIndex);
-
-            loadDataFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
-
-            while (!dataAvailable.poll())
+            try
             {
-               try
-               {
-                  Thread.sleep(10);
-               }
-               catch (InterruptedException e)
-               {
-                  e.printStackTrace();
-               }
+               Thread.sleep(10);
             }
-
-            framePlanarRegionsList = new FramePlanarRegionsList();
-            rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, framePlanarRegionsList);
-
-            LogTools.debug("Regions Found: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
-
-            //rapidPatchesBasedICP.update(rapidRegionsExtractor.getPreviousFeatureGrid(), rapidRegionsExtractor.getCurrentFeatureGrid());
-            //rapidRegionsExtractor.copyFeatureGridMapUsingOpenCL();
-
-            if (framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+            catch (InterruptedException e)
             {
-               planarRegionMap.setModified(true);
-               updateMapWithNewRegions(framePlanarRegionsList);
+               e.printStackTrace();
             }
+         }
+
+         framePlanarRegionsList = new FramePlanarRegionsList();
+         rapidRegionsExtractor.update(depth16UC1Image, cameraFrame, framePlanarRegionsList);
+
+         LogTools.debug("Regions Found: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
+
+         //rapidPatchesBasedICP.update(rapidRegionsExtractor.getPreviousFeatureGrid(), rapidRegionsExtractor.getCurrentFeatureGrid());
+         //rapidRegionsExtractor.copyFeatureGridMapUsingOpenCL();
+
+         if (framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+         {
+            planarRegionMap.setModified(true);
+            updateMapWithNewRegions(framePlanarRegionsList);
          }
 
          perceptionLogIndex += 1;
@@ -331,13 +328,17 @@ public class PlanarRegionMappingHandler
 
    private void loadDataFromPerceptionLog(PerceptionDataLoader loader, int index)
    {
-      loadAndDecompressThreadExecutor.clearQueueAndExecute(() -> {
-         loader.loadCompressedDepth(sensorLogChannelName, index, depthPointer, depth16UC1Image.getBytedecoOpenCVMat());
-         sensorTransformToWorld.getTranslation().set(sensorPositionBuffer.get(index));
-         sensorTransformToWorld.getRotation().set(sensorOrientationBuffer.get(index));
-         cameraFrame.update();
-         dataAvailable.set();
-      });
+      loadAndDecompressThreadExecutor.clearQueueAndExecute(() ->
+                                                           {
+                                                              loader.loadCompressedDepth(sensorLogChannelName,
+                                                                                         index,
+                                                                                         depthPointer,
+                                                                                         depth16UC1Image.getBytedecoOpenCVMat());
+                                                              sensorTransformToWorld.getTranslation().set(sensorPositionBuffer.get(index));
+                                                              sensorTransformToWorld.getRotation().set(sensorOrientationBuffer.get(index));
+                                                              cameraFrame.update();
+                                                              dataAvailable.set();
+                                                           });
    }
 
    public PlanarRegionsList pollMapRegions()
@@ -435,9 +436,10 @@ public class PlanarRegionMappingHandler
       RigidBodyTransform currentToPreviousTransform = new RigidBodyTransform();
       boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousRegions.getPlanarRegionsList(),
                                                                                                   currentRegions.getPlanarRegionsList(),
-                                                                                                  currentToPreviousTransform, getParameters());
+                                                                                                  currentToPreviousTransform,
+                                                                                                  getParameters());
 
-      PerceptionPrintTools.printTransform("ComputeICP", currentToPreviousTransform);
+      PerceptionDebugTools.printTransform("ComputeICP", currentToPreviousTransform, true);
    }
 
    public void hardResetTheMap()

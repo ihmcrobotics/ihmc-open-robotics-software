@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
-import us.ihmc.perception.tools.PerceptionPrintTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PlanarRegionCuttingTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTestTools;
@@ -177,9 +177,9 @@ public class PlanarRegionMapTest
       worldToSensorThree.invert();
       planarRegionsListThree.applyTransform(worldToSensorThree);
 
-      PerceptionPrintTools.printPlanarRegionsListVertices("List One", planarRegionsListOne);
-      PerceptionPrintTools.printPlanarRegionsListVertices("List Two", planarRegionsListTwo);
-      PerceptionPrintTools.printPlanarRegionsListVertices("List Three", planarRegionsListThree);
+      PerceptionDebugTools.printPlanarRegionsListVertices("List One", planarRegionsListOne, true);
+      PerceptionDebugTools.printPlanarRegionsListVertices("List Two", planarRegionsListTwo, true);
+      PerceptionDebugTools.printPlanarRegionsListVertices("List Three", planarRegionsListThree, true);
 
       PlanarRegionMap planarRegionMap = new PlanarRegionMap(true);
 
@@ -187,11 +187,11 @@ public class PlanarRegionMapTest
       planarRegionMap.registerRegions(planarRegionsListOne, sensorToWorldOne);
 
       RigidBodyTransform keyframePoseThree = planarRegionMap.registerRegions(planarRegionsListTwo, sensorToWorldTwo);
-      PerceptionPrintTools.printTransform("Keyframe Pose Two", keyframePoseThree);
+      PerceptionDebugTools.printTransform("Keyframe Pose Two", keyframePoseThree, true);
 
       RigidBodyTransform keyframePoseTwo = planarRegionMap.registerRegions(planarRegionsListThree, sensorToWorldThree);
-      PerceptionPrintTools.printTransform("Keyframe Pose Three", keyframePoseTwo);
+      PerceptionDebugTools.printTransform("Keyframe Pose Three", keyframePoseTwo, true);
 
-      PerceptionPrintTools.printPlanarRegionsListVertices("Final Map", planarRegionMap.getMapRegions());
+      PerceptionDebugTools.printPlanarRegionsListVertices("Final Map", planarRegionMap.getMapRegions(), true);
    }
 }

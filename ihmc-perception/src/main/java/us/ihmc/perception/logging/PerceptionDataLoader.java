@@ -224,7 +224,7 @@ public class PerceptionDataLoader
 //         LogTools.info("[{}] Quaternion: {}", i, mocapOrientationList.get(i));
 //      }
 
-         BytePointer bytePointer = new BytePointer(1000000);
+         BytePointer bytePointer = new BytePointer(PerceptionLoggerConstants.MAX_BUFFER_SIZE);
 
          Mat colorImage = new Mat();
          Mat depthImage = new Mat(768, 1280, opencv_core.CV_16UC1);
