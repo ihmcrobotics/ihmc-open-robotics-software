@@ -151,10 +151,9 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       double hipWidth = leftHipPitch.getY() - rightHipPitch.getY();
 
-      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle() + ankleToGround;
-      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleToGround;
-      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle() + ankleToGround;
-//      walkingControllerParameters.getToeOffParameters().getHeightChangeForNonFlatStep().getMaxStepDown()
+      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();// + ankleToGround;
+      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();// + ankleToGround;
+      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();// + ankleToGround;
 
       double doubleSupportPercentageIn = 0.3;
 
