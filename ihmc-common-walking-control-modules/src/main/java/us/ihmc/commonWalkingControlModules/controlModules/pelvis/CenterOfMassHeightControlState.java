@@ -150,18 +150,18 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       double hipWidth = leftHipPitch.getY() - rightHipPitch.getY();
 
-      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle() + ankleToGround;
-      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleToGround;
-      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle() + ankleToGround;
-      double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle();
+      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();// + ankleToGround;
+      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();// + ankleToGround;
+      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();// + ankleToGround;
 
       double doubleSupportPercentageIn = 0.3;
 
       return new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
                                                        nominalHeightAboveGround,
                                                        maximumHeightAboveGround,
-                                                       defaultOffsetHeightAboveGround,
                                                        doubleSupportPercentageIn,
+                                                       walkingControllerParameters.getHeightChangeForNonFlatStep(),
+                                                       walkingControllerParameters.getMaxLegLengthReductionSteppingDown(),
                                                        hipWidth,
                                                        centerOfMassFrame,
                                                        pelvisFrame,
