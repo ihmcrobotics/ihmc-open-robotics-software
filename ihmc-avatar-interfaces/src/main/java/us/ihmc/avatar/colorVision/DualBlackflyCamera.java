@@ -212,8 +212,8 @@ public class DualBlackflyCamera
 
                arUcoMarkerDetection.update();
                // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
-               // arUcoMarkerDetection.drawDetectedMarkers(postDistortionMat);
-               // arUcoMarkerDetection.drawRejectedPoints(postDistortionMat);
+               // arUcoMarkerDetection.drawDetectedMarkers(blackflySourceImage.getBytedecoOpenCVMat());
+               // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
                arUcoMarkerPublisher.update();
             }
 
