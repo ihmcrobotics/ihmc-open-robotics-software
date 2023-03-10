@@ -98,7 +98,7 @@ def print_group_info(data, group):
     dtype = 'none'
 
     if total_datasets > 0:
-        dtype = data[group + '/0'][:].dtype
+        dtype = data[group + '/' + list(data[group].keys())[0]][:].dtype
 
     print(f"{'  ' + group:<45} {str(total_groups):<20} {str(total_datasets):<25} {str(dtype):<10}")
 
