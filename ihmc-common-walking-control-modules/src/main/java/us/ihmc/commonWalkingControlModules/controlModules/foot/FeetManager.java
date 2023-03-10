@@ -3,11 +3,15 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters.SmoothFootUnloadMethod;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.PartialFootholdModuleParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.YoPartialFootholdModuleParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.*;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.CentroidProjectionToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.DynamicStateInspectorParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.GeometricToeOffManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -119,9 +123,20 @@ public class FeetManager implements SCS2YoGraphicHolder
       YoPartialFootholdModuleParameters footholdRotationParameters = new YoPartialFootholdModuleParameters(new PartialFootholdModuleParameters(), registry);
       SupportStateParameters supportStateParameters = new SupportStateParameters(walkingControllerParameters, registry);
 
-      boolean enableSmoothUnloading = walkingControllerParameters.enforceSmoothFootUnloading();
-      DoubleProvider minWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("minWeightFractionPerFoot", registry, 0.0) : null;
-      DoubleProvider maxWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("maxWeightFractionPerFoot", registry, 2.0) : null;
+      SmoothFootUnloadMethod smoothUnloading = walkingControllerParameters.enforceSmoothFootUnloading();
+      DoubleProvider minWeightFractionPerFoot = null;
+      DoubleProvider maxWeightFractionPerFoot = null;
+      DoubleProvider unloadedFinalRhoWeight = null;
+
+      if (smoothUnloading == SmoothFootUnloadMethod.HARD_CONSTRAINT)
+      {
+         minWeightFractionPerFoot = new DoubleParameter("minWeightFractionPerFoot", registry, 0.0);
+         maxWeightFractionPerFoot = new DoubleParameter("maxWeightFractionPerFoot", registry, 2.0);
+      }
+      else if (smoothUnloading == SmoothFootUnloadMethod.RHO_WEIGHT)
+      {
+         unloadedFinalRhoWeight = new DoubleParameter("unloadedFinalRhoWeight", registry, 0.02);
+      }
 
       WorkspaceLimiterParameters workspaceLimiterParameters = new WorkspaceLimiterParameters(registry);
       YoSwingTrajectoryParameters swingTrajectoryParameters = new YoSwingTrajectoryParameters("FootSwing", walkingControllerParameters, registry);
@@ -142,6 +157,7 @@ public class FeetManager implements SCS2YoGraphicHolder
                                                                      supportStateParameters,
                                                                      minWeightFractionPerFoot,
                                                                      maxWeightFractionPerFoot,
+                                                                     unloadedFinalRhoWeight,
                                                                      registry);
 
          footControlModules.put(robotSide, footControlModule);
