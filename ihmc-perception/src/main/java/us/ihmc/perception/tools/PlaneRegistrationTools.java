@@ -507,6 +507,7 @@ public class PlaneRegistrationTools
 
             originVector.sub(newRegionOrigin, mapRegionOrigin);
 
+            // TODO: Improve this logic with better metrics than origin-origin distance between regions.
             double distance = originVector.norm();
             double normalDistance = Math.abs(originVector.dot(mapRegionNormal));
             double normalSimilarity = mapRegionNormal.dot(newRegionNormal);

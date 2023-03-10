@@ -18,12 +18,9 @@ import java.util.Map;
  */
 public class HDF5Manager
 {
-   public static int MAX_BUFFER_SIZE = 100;
+   public static int MAX_BUFFER_SIZE = 10;
 
    private HashMap<String, Group> groups;
-   private HashMap<String, TFloatArrayList> floatBuffers;
-   private HashMap<String, TLongArrayList> longBuffers;
-   private HashMap<String, Integer> counts;
    private H5File file;
 
    /**
@@ -36,80 +33,8 @@ public class HDF5Manager
    {
       file = new H5File(filePath, flag);
       groups = new HashMap<>();
-      counts = new HashMap<>();
-      floatBuffers = new HashMap<>();
-      longBuffers = new HashMap<>();
    }
 
-   /**
-    * Resets buffers for storing intermediate data before logging.
-    *
-    * @param namespace The string namespace or topic name for which the buffer needs to be reset
-    */
-   public void resetBuffer(String namespace)
-   {
-      floatBuffers.get(namespace).clear();
-   }
-
-   /**
-    * Get the current index within the provided namespace. The number of files in the directory decides the current index value
-    *
-    * @param namespace The string namespace or topic name for which the file-count index needs to be returned
-    * @return File count index for the given namespace or topic name
-    */
-   public int getBufferIndex(String namespace)
-   {
-      if (floatBuffers.containsKey(namespace))
-      {
-         LogTools.info("Get Index: {} {}", namespace, floatBuffers.get(namespace).size());
-         return floatBuffers.get(namespace).size();
-      }
-      else
-      {
-         LogTools.info("Index Not Found");
-         return 0;
-      }
-   }
-
-   /**
-    * Getter for Buffer belonging to the requested namespace
-    *
-    * @param namespace The string namespace or topic name for which the buffer has been requested
-    * @return Intermediate buffer for the requested namespace or topic name
-    */
-   public TFloatArrayList getFloatBuffer(String namespace)
-   {
-      if (floatBuffers.containsKey(namespace))
-      {
-         return floatBuffers.get(namespace);
-      }
-      else
-      {
-         TFloatArrayList list = new TFloatArrayList();
-         floatBuffers.put(namespace, list);
-         return list;
-      }
-   }
-
-   /**
-    * Getter for Long Buffers belonging to the requested namespace
-    *
-    * @param namespace The string namespace or topic name for which the buffer has been requested
-    * @return Long intermediate buffer for the requested namespace or topic name
-    */
-   public TLongArrayList getLongBuffer(String namespace)
-   {
-      if (longBuffers.containsKey(namespace))
-      {
-         return longBuffers.get(namespace);
-      }
-      else
-      {
-         TLongArrayList list = new TLongArrayList();
-         longBuffers.put(namespace, list);
-         return list;
-      }
-   }
 
    /**
     * Getter to request the HDF5 group for the given topic name
@@ -143,15 +68,7 @@ public class HDF5Manager
       int count = 0;
       if (groups.containsKey(namespace))
       {
-         if (counts.containsKey(namespace))
-         {
-            count = counts.get(namespace);
-            counts.put(namespace, count);
-         }
-         else
-         {
-            count = (int) groups.get(namespace).getNumObjs();
-         }
+         count = (int) groups.get(namespace).getNumObjs();
          return count;
       }
       else if (file.nameExists(namespace))
@@ -159,7 +76,6 @@ public class HDF5Manager
          Group group = file.openGroup(namespace);
          groups.put(namespace, group);
          count = (int) group.getNumObjs();
-         counts.put(namespace, count);
          return count;
       }
       else
