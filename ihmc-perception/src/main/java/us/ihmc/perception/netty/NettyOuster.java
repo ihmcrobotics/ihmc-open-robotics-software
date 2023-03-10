@@ -14,7 +14,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.io.*;
 import java.net.Socket;
@@ -50,17 +49,9 @@ public class NettyOuster
    public static final int TCP_PORT = 7501;
    public static final int UDP_PORT = 7502;
 
-   /**
-    * FIXME: Out of date. We need to determine if this is still needed after applying the correct instrinsics.
-    * OS0-128 S/N 122221003063
-    */
-   public static final RigidBodyTransform INTRINSIC_TRANSFORM_CORRECTION = new RigidBodyTransform();
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(INTRINSIC_TRANSFORM_CORRECTION.getRotation(), 11.683,  1.163,  0.885);
-   }
-
    /** Ouster produces ranges as unsigned integers in millimeters, so this is just a conversion to meters. */
    public static final float DISCRETE_RESOLUTION = 0.001f;
+   public static final int MAX_POINTS_PER_COLUMN = 128;
 
    public static final int BITS_PER_BYTE = 8;
 
@@ -157,7 +148,7 @@ public class NettyOuster
                   tryingTCP = false;
                }, "TCPConfiguration");
             }
-            else
+            if (tcpInitialized)
             {
                ByteBuf content = packet.content();
 
@@ -216,6 +207,10 @@ public class NettyOuster
          {
             pixelShiftBuffer.putInt(pixelShiftNode.get(i).asInt());
          }
+         pixelShiftBuffer.rewind();
+         int[] pixelShiftsArray = new int[pixelsPerColumn];
+         pixelShiftBuffer.asIntBuffer().get(pixelShiftsArray);
+         LogTools.debug("Pixel shifts: {}", pixelShiftsArray);
          pixelShiftBuffer.rewind();
       });
 

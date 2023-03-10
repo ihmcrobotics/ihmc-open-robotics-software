@@ -239,7 +239,7 @@ public class DualBlackflyCamera
             imageMessage.setFocalLengthYPixels((float) SensorHeadParameters.FOCAL_LENGTH_Y_FOR_COLORING);
             imageMessage.setPrincipalPointXPixels((float) SensorHeadParameters.PRINCIPAL_POINT_X_FOR_COLORING);
             imageMessage.setPrincipalPointYPixels((float) SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_COLORING);
-            imageMessage.setIsEquidistantFisheyeCameraModel(true);
+            CameraModel.EQUIDISTANT_FISHEYE.packMessageFormat(imageMessage);
             imageMessage.setSequenceNumber(sequenceNumber++);
             ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(imageMessage);
             imageMessage.getPosition().set(ousterToBlackflyTransfrom.getTranslation());

@@ -9,6 +9,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.realsense.BytedecoRealsense;
@@ -139,7 +140,7 @@ public class RealsenseColorAndDepthPublisher
             depthImageMessage.setPrincipalPointXPixels(realsense.getDepthIntrinsicParameters().ppx());
             depthImageMessage.setPrincipalPointYPixels(realsense.getDepthIntrinsicParameters().ppy());
             depthImageMessage.setDepthDiscretization((float) realsense.getDepthDiscretization());
-            depthImageMessage.setIsPinholeCameraModel(true);
+            CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
             ros2Helper.publish(depthTopic, depthImageMessage);
 
             PerceptionMessageTools.packImageMessageData(jpegCompression.getCompressedData(), colorImageMessage);
@@ -154,7 +155,7 @@ public class RealsenseColorAndDepthPublisher
             colorImageMessage.setFocalLengthYPixels(realsense.getColorIntrinsicParameters().fy());
             colorImageMessage.setPrincipalPointXPixels(realsense.getColorIntrinsicParameters().ppx());
             colorImageMessage.setPrincipalPointYPixels(realsense.getColorIntrinsicParameters().ppy());
-            colorImageMessage.setIsPinholeCameraModel(true);
+            CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
             ros2Helper.publish(colorTopic, colorImageMessage);
          }
       }

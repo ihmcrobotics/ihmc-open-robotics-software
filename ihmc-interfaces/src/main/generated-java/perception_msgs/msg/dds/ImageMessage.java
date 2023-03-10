@@ -43,7 +43,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    /**
             * The image format. Ordinal of OpenCVImageFormat
             */
-   public int format_;
+   public byte format_;
    /**
             * Position of the focal point at sensor data aquisition
             */
@@ -53,19 +53,9 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    /**
-            * Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
+            * Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
             */
-   public boolean is_pinhole_camera_model_;
-   /**
-            * Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
-            */
-   public boolean is_equidistant_fisheye_camera_model_;
-   /**
-            * If the camera model is the Ouster camera model.
-            * With the Ouster camera model, the vertical and horizonal fields of view
-            * are used instead of the focal length and principal point parameters.
-            */
-   public boolean is_ouster_camera_model_;
+   public byte camera_model_;
    /**
             * Horizontal focal length in units of pixels (Fx)
             */
@@ -83,13 +73,17 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             */
    public float principal_point_y_pixels_;
    /**
-            * If Ouster camera model, the vertical field of view in radians
+            * If Ouster camera model, the pixel offsets used to re-stagger the depth image.
             */
-   public float ouster_vertical_field_of_view_;
+   public us.ihmc.idl.IDLSequence.Byte  ouster_pixel_shifts_;
    /**
-            * If Ouster camera model, the horizontal field of view in radians
+            * If Ouster camera model, the calibrated beam altitude angles used to get 3D points.
             */
-   public float ouster_horizontal_field_of_view_;
+   public us.ihmc.idl.IDLSequence.Float  ouster_beam_altitude_angles_;
+   /**
+            * If Ouster camera model, the calibrated beam azimuth angles used to get 3D points.
+            */
+   public us.ihmc.idl.IDLSequence.Float  ouster_beam_azimuth_angles_;
 
    public ImageMessage()
    {
@@ -98,6 +92,12 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
+      ouster_pixel_shifts_ = new us.ihmc.idl.IDLSequence.Byte (128, "type_9");
+
+      ouster_beam_altitude_angles_ = new us.ihmc.idl.IDLSequence.Float (128, "type_5");
+
+      ouster_beam_azimuth_angles_ = new us.ihmc.idl.IDLSequence.Float (128, "type_5");
+
    }
 
    public ImageMessage(ImageMessage other)
@@ -122,11 +122,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
-      is_pinhole_camera_model_ = other.is_pinhole_camera_model_;
-
-      is_equidistant_fisheye_camera_model_ = other.is_equidistant_fisheye_camera_model_;
-
-      is_ouster_camera_model_ = other.is_ouster_camera_model_;
+      camera_model_ = other.camera_model_;
 
       focal_length_x_pixels_ = other.focal_length_x_pixels_;
 
@@ -136,10 +132,9 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       principal_point_y_pixels_ = other.principal_point_y_pixels_;
 
-      ouster_vertical_field_of_view_ = other.ouster_vertical_field_of_view_;
-
-      ouster_horizontal_field_of_view_ = other.ouster_horizontal_field_of_view_;
-
+      ouster_pixel_shifts_.set(other.ouster_pixel_shifts_);
+      ouster_beam_altitude_angles_.set(other.ouster_beam_altitude_angles_);
+      ouster_beam_azimuth_angles_.set(other.ouster_beam_azimuth_angles_);
    }
 
    /**
@@ -231,14 +226,14 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    /**
             * The image format. Ordinal of OpenCVImageFormat
             */
-   public void setFormat(int format)
+   public void setFormat(byte format)
    {
       format_ = format;
    }
    /**
             * The image format. Ordinal of OpenCVImageFormat
             */
-   public int getFormat()
+   public byte getFormat()
    {
       return format_;
    }
@@ -262,52 +257,18 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    }
 
    /**
-            * Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
+            * Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
             */
-   public void setIsPinholeCameraModel(boolean is_pinhole_camera_model)
+   public void setCameraModel(byte camera_model)
    {
-      is_pinhole_camera_model_ = is_pinhole_camera_model;
+      camera_model_ = camera_model;
    }
    /**
-            * Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
+            * Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
             */
-   public boolean getIsPinholeCameraModel()
+   public byte getCameraModel()
    {
-      return is_pinhole_camera_model_;
-   }
-
-   /**
-            * Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
-            */
-   public void setIsEquidistantFisheyeCameraModel(boolean is_equidistant_fisheye_camera_model)
-   {
-      is_equidistant_fisheye_camera_model_ = is_equidistant_fisheye_camera_model;
-   }
-   /**
-            * Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
-            */
-   public boolean getIsEquidistantFisheyeCameraModel()
-   {
-      return is_equidistant_fisheye_camera_model_;
-   }
-
-   /**
-            * If the camera model is the Ouster camera model.
-            * With the Ouster camera model, the vertical and horizonal fields of view
-            * are used instead of the focal length and principal point parameters.
-            */
-   public void setIsOusterCameraModel(boolean is_ouster_camera_model)
-   {
-      is_ouster_camera_model_ = is_ouster_camera_model;
-   }
-   /**
-            * If the camera model is the Ouster camera model.
-            * With the Ouster camera model, the vertical and horizonal fields of view
-            * are used instead of the focal length and principal point parameters.
-            */
-   public boolean getIsOusterCameraModel()
-   {
-      return is_ouster_camera_model_;
+      return camera_model_;
    }
 
    /**
@@ -370,34 +331,31 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       return principal_point_y_pixels_;
    }
 
-   /**
-            * If Ouster camera model, the vertical field of view in radians
-            */
-   public void setOusterVerticalFieldOfView(float ouster_vertical_field_of_view)
-   {
-      ouster_vertical_field_of_view_ = ouster_vertical_field_of_view;
-   }
-   /**
-            * If Ouster camera model, the vertical field of view in radians
-            */
-   public float getOusterVerticalFieldOfView()
-   {
-      return ouster_vertical_field_of_view_;
-   }
 
    /**
-            * If Ouster camera model, the horizontal field of view in radians
+            * If Ouster camera model, the pixel offsets used to re-stagger the depth image.
             */
-   public void setOusterHorizontalFieldOfView(float ouster_horizontal_field_of_view)
+   public us.ihmc.idl.IDLSequence.Byte  getOusterPixelShifts()
    {
-      ouster_horizontal_field_of_view_ = ouster_horizontal_field_of_view;
+      return ouster_pixel_shifts_;
    }
+
+
    /**
-            * If Ouster camera model, the horizontal field of view in radians
+            * If Ouster camera model, the calibrated beam altitude angles used to get 3D points.
             */
-   public float getOusterHorizontalFieldOfView()
+   public us.ihmc.idl.IDLSequence.Float  getOusterBeamAltitudeAngles()
    {
-      return ouster_horizontal_field_of_view_;
+      return ouster_beam_altitude_angles_;
+   }
+
+
+   /**
+            * If Ouster camera model, the calibrated beam azimuth angles used to get 3D points.
+            */
+   public us.ihmc.idl.IDLSequence.Float  getOusterBeamAzimuthAngles()
+   {
+      return ouster_beam_azimuth_angles_;
    }
 
 
@@ -433,11 +391,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_pinhole_camera_model_, other.is_pinhole_camera_model_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_equidistant_fisheye_camera_model_, other.is_equidistant_fisheye_camera_model_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_ouster_camera_model_, other.is_ouster_camera_model_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.camera_model_, other.camera_model_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.focal_length_x_pixels_, other.focal_length_x_pixels_, epsilon)) return false;
 
@@ -447,9 +401,11 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.principal_point_y_pixels_, other.principal_point_y_pixels_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ouster_vertical_field_of_view_, other.ouster_vertical_field_of_view_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.ouster_pixel_shifts_, other.ouster_pixel_shifts_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ouster_horizontal_field_of_view_, other.ouster_horizontal_field_of_view_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.ouster_beam_altitude_angles_, other.ouster_beam_altitude_angles_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.ouster_beam_azimuth_angles_, other.ouster_beam_azimuth_angles_, epsilon)) return false;
 
 
       return true;
@@ -478,11 +434,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!this.position_.equals(otherMyClass.position_)) return false;
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
-      if(this.is_pinhole_camera_model_ != otherMyClass.is_pinhole_camera_model_) return false;
-
-      if(this.is_equidistant_fisheye_camera_model_ != otherMyClass.is_equidistant_fisheye_camera_model_) return false;
-
-      if(this.is_ouster_camera_model_ != otherMyClass.is_ouster_camera_model_) return false;
+      if(this.camera_model_ != otherMyClass.camera_model_) return false;
 
       if(this.focal_length_x_pixels_ != otherMyClass.focal_length_x_pixels_) return false;
 
@@ -492,10 +444,9 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if(this.principal_point_y_pixels_ != otherMyClass.principal_point_y_pixels_) return false;
 
-      if(this.ouster_vertical_field_of_view_ != otherMyClass.ouster_vertical_field_of_view_) return false;
-
-      if(this.ouster_horizontal_field_of_view_ != otherMyClass.ouster_horizontal_field_of_view_) return false;
-
+      if (!this.ouster_pixel_shifts_.equals(otherMyClass.ouster_pixel_shifts_)) return false;
+      if (!this.ouster_beam_altitude_angles_.equals(otherMyClass.ouster_beam_altitude_angles_)) return false;
+      if (!this.ouster_beam_azimuth_angles_.equals(otherMyClass.ouster_beam_azimuth_angles_)) return false;
 
       return true;
    }
@@ -524,12 +475,8 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       builder.append(this.position_);      builder.append(", ");
       builder.append("orientation=");
       builder.append(this.orientation_);      builder.append(", ");
-      builder.append("is_pinhole_camera_model=");
-      builder.append(this.is_pinhole_camera_model_);      builder.append(", ");
-      builder.append("is_equidistant_fisheye_camera_model=");
-      builder.append(this.is_equidistant_fisheye_camera_model_);      builder.append(", ");
-      builder.append("is_ouster_camera_model=");
-      builder.append(this.is_ouster_camera_model_);      builder.append(", ");
+      builder.append("camera_model=");
+      builder.append(this.camera_model_);      builder.append(", ");
       builder.append("focal_length_x_pixels=");
       builder.append(this.focal_length_x_pixels_);      builder.append(", ");
       builder.append("focal_length_y_pixels=");
@@ -538,10 +485,12 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       builder.append(this.principal_point_x_pixels_);      builder.append(", ");
       builder.append("principal_point_y_pixels=");
       builder.append(this.principal_point_y_pixels_);      builder.append(", ");
-      builder.append("ouster_vertical_field_of_view=");
-      builder.append(this.ouster_vertical_field_of_view_);      builder.append(", ");
-      builder.append("ouster_horizontal_field_of_view=");
-      builder.append(this.ouster_horizontal_field_of_view_);
+      builder.append("ouster_pixel_shifts=");
+      builder.append(this.ouster_pixel_shifts_);      builder.append(", ");
+      builder.append("ouster_beam_altitude_angles=");
+      builder.append(this.ouster_beam_altitude_angles_);      builder.append(", ");
+      builder.append("ouster_beam_azimuth_angles=");
+      builder.append(this.ouster_beam_azimuth_angles_);
       builder.append("}");
       return builder.toString();
    }

@@ -118,24 +118,12 @@ public class PerceptionMessageTools
 
    public static void extractImageMessageData(ImageMessage imageMessage, ByteBuffer dataByteBuffer)
    {
-      int numberOfBytes = imageMessage.getData().size();
-      dataByteBuffer.rewind();
-      dataByteBuffer.limit(dataByteBuffer.capacity());
-      for (int i = 0; i < numberOfBytes; i++)
-      {
-         dataByteBuffer.put(imageMessage.getData().get(i));
-      }
-      dataByteBuffer.flip();
+      MessageTools.extractIDLSequence(imageMessage.getData(), dataByteBuffer);
    }
 
    public static void packImageMessageData(ByteBuffer dataByteBuffer, ImageMessage imageMessage)
    {
-      imageMessage.getData().resetQuick();
-      for (int i = 0; i < dataByteBuffer.limit(); i++)
-      {
-         imageMessage.getData().add(dataByteBuffer.get(i));
-      }
-
+      MessageTools.packIDLSequence(dataByteBuffer, imageMessage.getData());
    }
 
    public static void packImageMessageData(BytePointer dataBytePointer, ImageMessage imageMessage)
@@ -157,7 +145,7 @@ public class PerceptionMessageTools
                                        ImageMessageFormat format)
    {
       packImageMessageData(dataBytePointer, imageMessage);
-      imageMessage.setFormat(format.ordinal());
+      format.packMessageFormat(imageMessage);
       imageMessage.setImageHeight(height);
       imageMessage.setImageWidth(width);
       imageMessage.getPosition().set(cameraPose.getPosition());
