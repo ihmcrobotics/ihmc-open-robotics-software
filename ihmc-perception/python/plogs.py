@@ -5,9 +5,10 @@ import math
 import cv2
 import argparse
 
-from hdf5_converter import *
 from hdf5_reader import *
+from hdf5_converter import *
 from transform_utils import *
+from hdf5_generator import *
 
 def convert_main():
 
@@ -187,12 +188,7 @@ def extract_trajectory_from_output(file):
     return (positions, rotations)
     
     
-    
-        
-     
-
-if __name__ == '__main__':
-
+def analyzer_main():
     home = os.path.expanduser('~')
     path = home + '/.ihmc/logs/perception/'
     files = sorted(os.listdir(path))
@@ -230,3 +226,26 @@ if __name__ == '__main__':
     
 #     plotter_main(data, output_file)
 
+     
+
+if __name__ == '__main__':
+
+    home = os.path.expanduser('~')
+    path = home + '/.ihmc/logs/perception/'
+
+    timestamps_path = '/home/quantum/Workspace/Storage/Other/Temp/dataset/sequences/00/times.txt'
+    poses_path = '/home/quantum/Workspace/Storage/Other/Temp/dataset/data_odometry_poses/poses/00.txt'
+    
+    dataset_paths = ['/home/quantum/Workspace/Storage/Other/Temp/dataset/sequences/00/image_0/']
+    group_names = ['/kitti/left/']
+
+    # data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'w')
+
+    # data = insert_image_datasets(data, dataset_paths, group_names)
+    # data = insert_timestamps(data, timestamps_path, '/kitti/ground_truth/')
+    # data = insert_poses(data, poses_path, '/kitti/time/')
+
+    # data.close()
+
+    data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'r')
+    print_file_info(data, 'KITTI_Dataset_00.hdf5')
