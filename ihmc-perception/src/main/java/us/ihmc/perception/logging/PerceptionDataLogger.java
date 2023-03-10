@@ -1,11 +1,11 @@
 package us.ihmc.perception.logging;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TLongArrayList;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.LongPointer;
 import perception_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.CommunicationMode;
@@ -19,9 +19,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -50,6 +50,8 @@ public class PerceptionDataLogger
 
    private final HashMap<String, byte[]> byteArrays = new HashMap<>();
    private final HashMap<String, BytePointer> bytePointers = new HashMap<>();
+   private final HashMap<String, LongPointer> longPointers = new HashMap<>();
+   private final HashMap<String, FloatPointer> floatPointers = new HashMap<>();
    private final HashMap<String, Integer> counts = new HashMap<>();
 
    private final CommunicationMode communicationMode;
@@ -322,12 +324,12 @@ public class PerceptionDataLogger
       {
          channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).incrementCount();
 
-         storeLongArray(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME, data.getMonotonicTime());
-         storeFloatArray(PerceptionLoggerConstants.ROOT_POSITION_NAME, data.getRootPosition());
-         storeFloatArray(PerceptionLoggerConstants.ROOT_ORIENTATION_NAME, data.getRootOrientation());
-         storeFloatArray(PerceptionLoggerConstants.JOINT_ANGLES_NAME, data.getJointAngles().toArray());
-         storeFloatArray(PerceptionLoggerConstants.JOINT_VELOCITIES_NAME, data.getJointVelocities().toArray());
-         storeFloatArray(PerceptionLoggerConstants.JOINT_TORQUES_NAME, data.getJointTorques().toArray());
+         storeLongs(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME, data.getMonotonicTime());
+         storeFloats(PerceptionLoggerConstants.ROOT_POSITION_NAME, data.getRootPosition());
+         storeFloats(PerceptionLoggerConstants.ROOT_ORIENTATION_NAME, data.getRootOrientation());
+         storeFloats(PerceptionLoggerConstants.JOINT_ANGLES_NAME, data.getJointAngles());
+         storeFloats(PerceptionLoggerConstants.JOINT_VELOCITIES_NAME, data.getJointVelocities());
+         storeFloats(PerceptionLoggerConstants.JOINT_TORQUES_NAME, data.getJointTorques());
       }
    }
 
@@ -340,9 +342,9 @@ public class PerceptionDataLogger
          channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).incrementCount();
          long timestamp =
                Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
-         storeLongArray(PerceptionLoggerConstants.OUSTER_SENSOR_TIME, timestamp);
-         storeFloatArray(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, message.getPosition());
-         storeFloatArray(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, message.getOrientation());
+         storeLongs(PerceptionLoggerConstants.OUSTER_SENSOR_TIME, timestamp);
+         storeFloats(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, message.getPosition());
+         storeFloats(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, message.getOrientation());
          storeCompressedImage(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, message);
       }
    }
@@ -356,9 +358,9 @@ public class PerceptionDataLogger
          channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).incrementCount();
          long timestamp =
                Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
-         storeLongArray(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
-         storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_POSITION, message.getPosition());
-         storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, message.getOrientation());
+         storeLongs(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
+         storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, message.getPosition());
+         storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, message.getOrientation());
          storeCompressedImage(PerceptionLoggerConstants.L515_DEPTH_NAME, message);
       }
    }
@@ -385,9 +387,9 @@ public class PerceptionDataLogger
          channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).incrementCount();
          long timestamp =
                Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
-         storeLongArray(PerceptionLoggerConstants.D435_SENSOR_TIME, timestamp);
-         storeFloatArray(PerceptionLoggerConstants.D435_SENSOR_POSITION, message.getPosition());
-         storeFloatArray(PerceptionLoggerConstants.D435_SENSOR_ORIENTATION, message.getOrientation());
+         storeLongs(PerceptionLoggerConstants.D435_SENSOR_TIME, timestamp);
+         storeFloats(PerceptionLoggerConstants.D435_SENSOR_POSITION, message.getPosition());
+         storeFloats(PerceptionLoggerConstants.D435_SENSOR_ORIENTATION, message.getOrientation());
          storeCompressedImage(PerceptionLoggerConstants.D435_DEPTH_NAME, message);
       }
    }
@@ -414,7 +416,7 @@ public class PerceptionDataLogger
          channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).incrementCount();
          long timestamp =
                Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
-         storeLongArray(PerceptionLoggerConstants.ZED2_SENSOR_TIME, timestamp);
+         storeLongs(PerceptionLoggerConstants.ZED2_SENSOR_TIME, timestamp);
          storeCompressedImage(PerceptionLoggerConstants.ZED2_COLOR_NAME, message);
       }
    }
@@ -430,8 +432,8 @@ public class PerceptionDataLogger
          RigidBodyTransform transform = new RigidBodyTransform();
          pose.set(transform);
          Quaternion orientation = new Quaternion(transform.getRotation());
-         storeFloatArray(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new Point3D(transform.getTranslation()));
-         storeFloatArray(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, orientation);
+         storeFloats(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new Point3D(transform.getTranslation()));
+         storeFloats(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, orientation);
       }
    }
 
@@ -488,90 +490,97 @@ public class PerceptionDataLogger
       });
    }
 
-   public void storeFloatArray(String namespace, float[] array)
+   public void storeFloatsFromPointer(String namespace, FloatPointer floatPointer, int columns)
    {
       executorService.submit(() ->
       {
          synchronized (hdf5Manager)
          {
             Group group = hdf5Manager.getGroup(namespace);
-            TFloatArrayList buffer = hdf5Manager.getFloatBuffer(namespace);
 
-            int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
-            if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
-            {
-               long count = hdf5Manager.getCount(namespace);
-               hdf5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
-               hdf5Manager.resetBuffer(namespace);
-            }
-            buffer.addAll(array);
+            int count = counts.get(namespace);
+            counts.put(namespace, count + 1);
 
-            if (stopLoggingRequest.get())
-            {
-               LogTools.warn("Logging Last Remaining: [{}] -> Count: [{}]", namespace, bufferSize);
-               long count = hdf5Manager.getCount(namespace);
-               hdf5Tools.storeFloatArray2D(group, count, buffer, bufferSize, array.length);
-               channels.get(namespace).setEnabled(false);
-            }
+            hdf5Tools.storeFloatArray2D(group, count, floatPointer, HDF5Manager.MAX_BUFFER_SIZE, columns);
+            floatPointer.position(0);
+            floatPointer.limit(0);
          }
       });
    }
 
-   public void storeLongArray(String namespace, long[] array)
+   public void storeLongsFromPointer(String namespace, LongPointer longPointer, int columns)
    {
       executorService.submit(() ->
       {
          synchronized (hdf5Manager)
          {
             Group group = hdf5Manager.getGroup(namespace);
-            TLongArrayList buffer = hdf5Manager.getLongBuffer(namespace);
 
-            int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
-            if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
-            {
-               long count = hdf5Manager.getCount(namespace);
-               hdf5Tools.storeLongArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
-               hdf5Manager.resetBuffer(namespace);
-            }
-            buffer.addAll(array);
+            int count = counts.get(namespace);
+            counts.put(namespace, count + 1);
 
-            if (stopLoggingRequest.get())
-            {
-               LogTools.warn("Logging Last Remaining: [{}] -> Count: [{}]", namespace, bufferSize);
-               long count = hdf5Manager.getCount(namespace);
-               hdf5Tools.storeLongArray2D(group, count, buffer, bufferSize, array.length);
-               channels.get(namespace).setEnabled(false);
-            }
+            hdf5Tools.storeLongArray2D(group, count, longPointer, HDF5Manager.MAX_BUFFER_SIZE, columns);
+            longPointer.position(0);
+            longPointer.limit(0);
          }
       });
    }
 
-   public void storeLongArray(String namespace, long value)
+   public void storeLongs(String namespace, long value)
    {
-      long[] pointArray = new long[1];
-      pointArray[0] = value;
-      storeLongArray(namespace, pointArray);
+      LongPointer pointer = longPointers.get(namespace);
+      pointer.limit(pointer.limit() + 1);
+      pointer.put(pointer.limit(), value);
+
+      if (pointer.limit() == PerceptionLoggerConstants.MAX_BUFFER_SIZE)
+      {
+         storeLongsFromPointer(namespace, pointer, 1);
+      }
    }
 
-   public void storeFloatArray(String namespace, float value)
+   public void storeFloats(String namespace, float value)
    {
-      float[] pointArray = new float[1];
-      pointArray[0] = value;
-      storeFloatArray(namespace, pointArray);
+      FloatPointer pointer = floatPointers.get(namespace);
+      pointer.limit(pointer.limit() + 1);
+      pointer.put(pointer.limit(), value);
+
+      if (pointer.limit() == PerceptionLoggerConstants.MAX_BUFFER_SIZE)
+      {
+         storeFloatsFromPointer(namespace, pointer, 1);
+      }
    }
 
-   public void storeFloatArray(String namespace, Point3D point)
+   public void storeFloats(String namespace, Point3D point)
    {
-      float[] pointArray = new float[3];
-      point.get(pointArray);
-      storeFloatArray(namespace, pointArray);
+      FloatPointer pointer = floatPointers.get(namespace);
+      int startIndex = (int) pointer.limit();
+
+      pointer.limit(pointer.limit() + 3);
+      PerceptionMessageTools.copyToFloatPointer(point, pointer, startIndex);
+
+      storeFloatsFromPointer(namespace, pointer, 3);
    }
 
-   public void storeFloatArray(String namespace, Quaternion orientation)
+   public void storeFloats(String namespace, Quaternion orientation)
    {
-      float[] pointArray = new float[4];
-      orientation.get(pointArray);
-      storeFloatArray(namespace, pointArray);
+      FloatPointer pointer = floatPointers.get(namespace);
+      int startIndex = (int) pointer.limit();
+
+      pointer.limit(pointer.limit() + 4);
+      PerceptionMessageTools.copyToFloatPointer(orientation, pointer, startIndex);
+
+      storeFloatsFromPointer(namespace, pointer, 4);
+   }
+
+   public void storeFloats(String namespace, IDLSequence.Float floats)
+   {
+      FloatPointer pointer = floatPointers.get(namespace);
+      int startIndex = (int) pointer.limit();
+
+      pointer.limit(pointer.limit() + floats.size());
+      PerceptionMessageTools.copyToFloatPointer(floats, pointer, startIndex);
+
+      storeFloatsFromPointer(namespace, pointer, floats.size());
    }
 
    public HashMap<String, PerceptionLogChannel> getChannels()

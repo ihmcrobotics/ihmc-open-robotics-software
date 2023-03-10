@@ -2,6 +2,8 @@ package us.ihmc.perception.tools;
 
 import boofcv.struct.calib.CameraPinhole;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
@@ -13,6 +15,9 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.realsense.BytedecoRealsense;
@@ -208,5 +213,36 @@ public class PerceptionMessageTools
       byte[] compressedByteArray = videoPacket.getData().toArray();
       BytedecoOpenCVTools.decompressJPG(compressedByteArray, colorImage);
       BytedecoOpenCVTools.display("Color Image", colorImage, 1);
+   }
+
+   public static void copyToFloatPointer(IDLSequence.Float floatSequence, FloatPointer floatBuffer, int startIndex)
+   {
+      for (int i = 0; i < floatSequence.size(); i++)
+      {
+         floatBuffer.put(i + startIndex, floatSequence.get(i));
+      }
+   }
+
+   public static void copyToLongPointer(IDLSequence.Long longSequence, LongPointer longPointer, int startIndex)
+   {
+      for (int i = 0; i < longSequence.size(); i++)
+      {
+         longPointer.put(i + startIndex, longSequence.get(i));
+      }
+   }
+
+   public static void copyToFloatPointer(Point3D point, FloatPointer floatPointer, int startIndex)
+   {
+      floatPointer.put(startIndex, (float) point.getX());
+      floatPointer.put(startIndex + 1, (float) point.getY());
+      floatPointer.put(startIndex + 2, (float) point.getZ());
+   }
+
+   public static void copyToFloatPointer(Quaternion quaternion, FloatPointer floatPointer, int startIndex)
+   {
+      floatPointer.put(startIndex, (float) quaternion.getX());
+      floatPointer.put(startIndex + 1, (float) quaternion.getY());
+      floatPointer.put(startIndex + 2, (float) quaternion.getZ());
+      floatPointer.put(startIndex + 3, (float) quaternion.getS());
    }
 }

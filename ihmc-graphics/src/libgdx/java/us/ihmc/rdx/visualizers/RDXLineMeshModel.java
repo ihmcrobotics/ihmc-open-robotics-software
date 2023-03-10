@@ -59,6 +59,11 @@ public class RDXLineMeshModel implements RenderableProvider
       executorService.clearQueueAndExecute(() -> generateMeshes(points, skip));
    }
 
+   /**
+    * Generates a mesh for the given points. The points are sequentially pairwise connected as 0-1, 2-3, 4-5, etc. This is useful for visualizing
+    * feature correspondences. For example, matching planar region pairs from two different sets of planar regions.
+    * @param points The points to connect pairwise.
+    */
    public synchronized void generateMeshForMatchLines(ArrayList<Point3DReadOnly> points)
    {
       // if we're passing in null, make an empty list

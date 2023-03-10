@@ -2,6 +2,7 @@ package us.ihmc.perception.logging;
 
 public class PerceptionLoggerConstants
 {
+   public static final String HDF5_FILE_EXTENSION = ".hdf5";
    public static final int MAX_BUFFER_SIZE = 1000000;
 
    public static final String ROBOT_CONFIGURATION_DATA_NAME = "/robot/root/position/";

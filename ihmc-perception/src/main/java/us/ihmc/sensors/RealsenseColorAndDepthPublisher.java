@@ -27,7 +27,6 @@ import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -231,11 +230,11 @@ public class RealsenseColorAndDepthPublisher
 
             long timestamp = Conversions.secondsToNanoseconds(acquisitionTime.getEpochSecond()) + acquisitionTime.getNano();
 
-            perceptionDataLogger.storeLongArray(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
+            perceptionDataLogger.storeLongs(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
             perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.L515_DEPTH_NAME, compressedDepthPointer);
 
-            perceptionDataLogger.storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_POSITION, cameraPosition);
-            perceptionDataLogger.storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, cameraQuaternion);
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, cameraPosition);
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, cameraQuaternion);
 
             previousLoggerEnabledState = true;
          }

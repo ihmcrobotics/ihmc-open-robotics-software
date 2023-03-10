@@ -4,6 +4,7 @@ import gnu.trove.list.array.TFloatArrayList;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.indexer.FloatBufferIndexer;
@@ -408,9 +409,9 @@ public class PerceptionDataLoggingTest
       Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
 
       float[] floatArray = new float[]{12.3f, 32.1f, 43.1f, 32.43f};
-      TFloatArrayList dataArray = new TFloatArrayList(floatArray);
+      FloatPointer dataArray = new FloatPointer(floatArray);
 
-      hdf5Tools.storeFloatArray2D(writeGroup, 0, dataArray, 1, dataArray.size());
+      hdf5Tools.storeFloatArray2D(writeGroup, 0, dataArray, 1, floatArray.length);
 
       writeGroup._close();
       hdf5ManagerWriter.getFile()._close();
