@@ -126,8 +126,8 @@ public class OusterDepthExtractionKernel
          pointCloudParametersBuffer.writeOpenCLBufferObject(openCLManager);
 
          openCLManager.setKernelArgument(imageToPointCloudKernel, 0, pointCloudParametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(imageToPointCloudKernel, 2, extractedDepthImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(imageToPointCloudKernel, 3, pointCloudXYZBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(imageToPointCloudKernel, 1, extractedDepthImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(imageToPointCloudKernel, 2, pointCloudXYZBuffer.getOpenCLBufferObject());
          openCLManager.execute2D(imageToPointCloudKernel, nettyOuster.getImageWidth(), nettyOuster.getImageHeight());
 
          pointCloudXYZBuffer.readOpenCLBufferObject(openCLManager);
