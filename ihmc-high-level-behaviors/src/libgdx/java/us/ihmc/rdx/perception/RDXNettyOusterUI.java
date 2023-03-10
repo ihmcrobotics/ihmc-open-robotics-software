@@ -17,7 +17,6 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -42,8 +41,6 @@ public class RDXNettyOusterUI
    private OusterDepthExtractionKernel depthExtractionKernel;
    private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
    private RDXPointCloudRenderer pointCloudRenderer;
-   private final ImFloat verticalFieldOfView = new ImFloat((float) Math.toRadians(90.0));
-   private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
    private final ImFloat pointSize = new ImFloat(0.01f);
    private ModifiableReferenceFrame sensorFrame;
    private RDXInteractableOuster ousterInteractable;
@@ -209,8 +206,6 @@ public class RDXNettyOusterUI
    {
       ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
 
-      ImGuiTools.volatileInputFloat(labels.get("Vertical field of view"), verticalFieldOfView);
-      ImGuiTools.volatileInputFloat(labels.get("Horizontal field of view"), horizontalFieldOfView);
       ImGui.sliderFloat(labels.get("Point size"), pointSize.getData(), 0.0005f, 0.05f);
       if (ImGui.sliderInt(labels.get("Level of color detail"), levelOfColorDetail.getData(), 0, 3))
          levelOfColorDetailChanged.set();
