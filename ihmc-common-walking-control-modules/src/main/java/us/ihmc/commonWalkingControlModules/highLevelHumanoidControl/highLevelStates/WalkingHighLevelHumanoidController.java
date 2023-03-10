@@ -245,7 +245,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                    walkingControllerParameters,
                                                    registry);
 
-      touchdownErrorCompensator = new TouchdownErrorCompensator(walkingMessageHandler, controllerToolbox.getReferenceFrames().getSoleFrames(), registry);
+      touchdownErrorCompensator = new TouchdownErrorCompensator(walkingMessageHandler, controllerToolbox.getContactableFeet(), registry);
       stateMachine = setupStateMachine();
 
       double highCoPDampingDuration = walkingControllerParameters.getHighCoPDampingDurationToPreventFootShakies();
