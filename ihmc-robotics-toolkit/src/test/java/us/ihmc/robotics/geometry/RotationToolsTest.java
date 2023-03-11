@@ -6,6 +6,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Random;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -514,7 +515,7 @@ public class RotationToolsTest
    public void testQuaternionAveraging() throws Exception
    {
       ArrayList<QuaternionReadOnly> quaternions = new ArrayList<>();
-      ArrayList<Double> weights = new ArrayList<>();
+      TDoubleArrayList weights = new TDoubleArrayList();
 
       int totalQuaternions = 10;
 

@@ -252,7 +252,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          public void dispose()
          {
             rapidPlanarRegionsExtractor.setProcessing(false);
-            perceptionDataLoader.destroy();
+            perceptionDataLoader.closeLogFile();
             rapidRegionsUIPanel.destroy();
             baseUI.dispose();
          }

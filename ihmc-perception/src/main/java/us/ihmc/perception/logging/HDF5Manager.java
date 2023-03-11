@@ -18,8 +18,6 @@ import java.util.Map;
  */
 public class HDF5Manager
 {
-   public static int MAX_BUFFER_SIZE = 10;
-
    private HashMap<String, Group> groups;
    private H5File file;
 
