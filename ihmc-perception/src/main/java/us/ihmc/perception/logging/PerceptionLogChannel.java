@@ -1,17 +1,24 @@
 package us.ihmc.perception.logging;
 
+import org.bytedeco.javacpp.*;
+
 public class PerceptionLogChannel
 {
    private String name;
    private int count;
    private int index;
+   private int blockSize;
    boolean enabled = false;
 
-   public PerceptionLogChannel(String name, int count, int index)
+   private Pointer dataPointer = null;
+
+   public PerceptionLogChannel(String name, int count, int index, int blockSize, Pointer dataPointer)
    {
+      this.blockSize = blockSize;
       this.name = name;
       this.count = count;
       this.index = index;
+      this.dataPointer = dataPointer;
    }
 
    public boolean isEnabled()
@@ -67,5 +74,50 @@ public class PerceptionLogChannel
    public void setCount(int count)
    {
       this.count = count;
+   }
+
+   public void setDataPointer(Pointer dataPointer)
+   {
+      this.dataPointer = dataPointer;
+   }
+
+   public Pointer getDataPointer()
+   {
+      return dataPointer;
+   }
+
+   public FloatPointer getFloatPointer()
+   {
+      return (FloatPointer) dataPointer;
+   }
+
+   public DoublePointer getDoublePointer()
+   {
+      return (DoublePointer) dataPointer;
+   }
+
+   public LongPointer getLongPointer()
+   {
+      return (LongPointer) dataPointer;
+   }
+
+   public IntPointer getIntPointer()
+   {
+      return (IntPointer) dataPointer;
+   }
+
+   public BytePointer getBytePointer()
+   {
+      return (BytePointer) dataPointer;
+   }
+
+   public int getBlockSize()
+   {
+      return blockSize;
+   }
+
+   public void setBlockSize(int blockSize)
+   {
+      this.blockSize = blockSize;
    }
 }

@@ -176,7 +176,7 @@ public class RDXRapidHeightMapExtractionDemo
          public void dispose()
          {
             rapidHeightMapUpdater.setProcessing(false);
-            perceptionDataLoader.destroy();
+            perceptionDataLoader.closeLogFile();
             openCLManager.destroy();
             heightMapRenderer.dispose();
             baseUI.dispose();

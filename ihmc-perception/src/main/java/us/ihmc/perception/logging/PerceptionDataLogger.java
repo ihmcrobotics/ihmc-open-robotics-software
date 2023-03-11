@@ -5,6 +5,7 @@ import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.LongPointer;
 import perception_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
@@ -43,16 +44,9 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class PerceptionDataLogger
 {
-   private static final int BUFFER_SIZE = 1000000;
-
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private PerceptionConfigurationParameters parameters;
 
-   private final HashMap<String, byte[]> byteArrays = new HashMap<>();
-   private final HashMap<String, BytePointer> bytePointers = new HashMap<>();
-   private final HashMap<String, LongPointer> longPointers = new HashMap<>();
-   private final HashMap<String, FloatPointer> floatPointers = new HashMap<>();
-   private final HashMap<String, Integer> counts = new HashMap<>();
 
    private final CommunicationMode communicationMode;
    private final ArrayDeque<Runnable> runnablesToStopLogging = new ArrayDeque<>();
@@ -69,6 +63,8 @@ public class PerceptionDataLogger
    private AtomicReference<Boolean> stopLoggingRequest = new AtomicReference<>(false);
 
    private HashMap<String, PerceptionLogChannel> channels = new HashMap<>();
+
+   private final HashMap<String, byte[]> byteArrays = new HashMap<>();
    private HashMap<String, AtomicReference<ImageMessage>> imageMessageReferences = new HashMap<>();
    private HashMap<String, AtomicReference<Pose3D>> transformMessageReferences = new HashMap<>();
 
@@ -77,40 +73,76 @@ public class PerceptionDataLogger
 //      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
 //      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
 
-      channels.put(PerceptionLoggerConstants.D435_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.D435_COLOR_NAME, 0, 0));
-      imageMessageReferences.put(PerceptionLoggerConstants.D435_COLOR_NAME, new AtomicReference<>(null));
-
-      channels.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.D435_DEPTH_NAME, 0, 0));
-      imageMessageReferences.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new AtomicReference<>(null));
-
-      channels.put(PerceptionLoggerConstants.L515_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.L515_COLOR_NAME, 0, 0));
-      imageMessageReferences.put(PerceptionLoggerConstants.L515_COLOR_NAME, new AtomicReference<>(null));
-
-      channels.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.L515_DEPTH_NAME, 0, 0));
-      imageMessageReferences.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new AtomicReference<>(null));
-
-      channels.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, 0));
-      imageMessageReferences.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new AtomicReference<>(null));
-
-      channels.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0, 0));
-      imageMessageReferences.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new AtomicReference<>(null));
-
-      channels.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0, 0));
-      imageMessageReferences.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new AtomicReference<>(null));
-
-      channels.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new PerceptionLogChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, 0, 0));
-      transformMessageReferences.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new AtomicReference<>(null));
-
-      channels.put(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME,
-                   new PerceptionLogChannel(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, 0, 0));
-
       communicationMode = CommunicationMode.INTERPROCESS;
    }
 
-   public void addChannel(String channelName)
+   public void addAllChannels()
    {
-      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0));
-      counts.put(channelName, 0);
+      addLongChannel(PerceptionLoggerConstants.D435_SENSOR_TIME);
+      addImageChannel(PerceptionLoggerConstants.D435_DEPTH_NAME);
+      addImageChannel(PerceptionLoggerConstants.D435_COLOR_NAME);
+      addFloatChannel(PerceptionLoggerConstants.D435_SENSOR_POSITION);
+      addFloatChannel(PerceptionLoggerConstants.D435_SENSOR_ORIENTATION);
+
+      addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME);
+      addImageChannel(PerceptionLoggerConstants.L515_COLOR_NAME);
+      addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
+      addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION);
+      addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION);
+
+      addImageChannel(PerceptionLoggerConstants.OUSTER_DEPTH_NAME);
+      addFloatChannel(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION);
+      addFloatChannel(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION);
+      addLongChannel(PerceptionLoggerConstants.OUSTER_SENSOR_TIME);
+
+      addImageChannel(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME);
+      //addChannelFloat(PerceptionLoggerConstants.BLACKFLY_SENSOR_POSITION);
+      //addChannelFloat(PerceptionLoggerConstants.BLACKFLY_SENSOR_ORIENTATION);
+      //addChannelLong(PerceptionLoggerConstants.BLACKFLY_SENSOR_TIME);
+
+      addImageChannel(PerceptionLoggerConstants.ZED2_COLOR_NAME);
+      //addChannelImage(PerceptionLoggerConstants.ZED2_DEPTH_NAME);
+      //addChannelFloat(PerceptionLoggerConstants.ZED2_SENSOR_POSITION);
+      //addChannelFloat(PerceptionLoggerConstants.ZED2_SENSOR_ORIENTATION);
+      //addChannelLong(PerceptionLoggerConstants.ZED2_SENSOR_TIME);
+
+      addLongChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_TIME);
+      addFloatChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION);
+      addFloatChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION);
+      transformMessageReferences.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new AtomicReference<>(null));
+
+      addLongChannel(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME);
+      addFloatChannel(PerceptionLoggerConstants.ROOT_POSITION_NAME);
+      addFloatChannel(PerceptionLoggerConstants.ROOT_ORIENTATION_NAME);
+      addFloatChannel(PerceptionLoggerConstants.JOINT_ANGLES_NAME);
+      addFloatChannel(PerceptionLoggerConstants.JOINT_VELOCITIES_NAME);
+      addFloatChannel(PerceptionLoggerConstants.JOINT_TORQUES_NAME);
+   }
+
+   public void addByteChannel(String channelName)
+   {
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, new BytePointer(PerceptionLoggerConstants.BYTE_BUFFER_SIZE)));
+   }
+
+   public void addFloatChannel(String channelName)
+   {
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, new FloatPointer(PerceptionLoggerConstants.FLOAT_BUFFER_SIZE)));
+   }
+
+   public void addLongChannel(String channelName)
+   {
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, new LongPointer(PerceptionLoggerConstants.LONG_BUFFER_SIZE)));
+   }
+
+   public void addIntChannel(String channelName)
+   {
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, new IntPointer(PerceptionLoggerConstants.INT_BUFFER_SIZE)));
+   }
+
+   public void addImageChannel(String channelName)
+   {
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE)));
+      imageMessageReferences.put(channelName, new AtomicReference<>(null));
    }
 
    public void openLogFile(String logFileName)
@@ -160,9 +192,7 @@ public class PerceptionDataLogger
       // Add callback for D435 Color images
       if (channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).isEnabled())
       {
-         byteArrays.put(PerceptionLoggerConstants.D435_COLOR_NAME, new byte[BUFFER_SIZE]);
-         bytePointers.put(PerceptionLoggerConstants.D435_COLOR_NAME, new BytePointer(BUFFER_SIZE));
-         counts.put(PerceptionLoggerConstants.D435_COLOR_NAME, 0);
+         byteArrays.put(PerceptionLoggerConstants.D435_COLOR_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.D435_COLOR_IMAGE);
          d435VideoSubscription.addCallback(this::logColorD435);
          runnablesToStopLogging.addLast(d435VideoSubscription::destroy);
@@ -171,9 +201,7 @@ public class PerceptionDataLogger
       // Add callback for D435 Depth images
       if (channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).isEnabled())
       {
-         byteArrays.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new byte[BUFFER_SIZE]);
-         bytePointers.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new BytePointer(BUFFER_SIZE));
-         counts.put(PerceptionLoggerConstants.D435_DEPTH_NAME, 0);
+         byteArrays.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          var d435DepthSubscription = ros2Helper.subscribe(ROS2Tools.D435_DEPTH_IMAGE);
          d435DepthSubscription.addCallback(this::logDepthD435);
          runnablesToStopLogging.addLast(d435DepthSubscription::destroy);
@@ -182,9 +210,7 @@ public class PerceptionDataLogger
       // Add callback for L515 Depth Maps
       if (channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).isEnabled())
       {
-         byteArrays.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new byte[BUFFER_SIZE]);
-         bytePointers.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new BytePointer(BUFFER_SIZE));
-         counts.put(PerceptionLoggerConstants.L515_DEPTH_NAME, 0);
+         byteArrays.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH_IMAGE);
          l515DepthSubscription.addCallback(this::logDepthL515);
          runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
@@ -193,9 +219,7 @@ public class PerceptionDataLogger
       // Add callback for L515 Color Images
       if (channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).isEnabled())
       {
-         byteArrays.put(PerceptionLoggerConstants.L515_COLOR_NAME, new byte[BUFFER_SIZE]);
-         bytePointers.put(PerceptionLoggerConstants.L515_COLOR_NAME, new BytePointer(BUFFER_SIZE));
-         counts.put(PerceptionLoggerConstants.L515_COLOR_NAME, 0);
+         byteArrays.put(PerceptionLoggerConstants.L515_COLOR_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_COLOR_IMAGE);
          l515ColorSubscription.addCallback(this::logColorL515);
          runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
@@ -204,9 +228,7 @@ public class PerceptionDataLogger
       // Add callback for D435 Color images
       if (channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
       {
-         byteArrays.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new byte[BUFFER_SIZE]);
-         bytePointers.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new BytePointer(BUFFER_SIZE));
-         counts.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0);
+         byteArrays.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          var zed2StereoSubscription = ros2Helper.subscribe(ROS2Tools.ZED2_STEREO_COLOR);
          zed2StereoSubscription.addCallback(this::logColorZED2);
          runnablesToStopLogging.addLast(zed2StereoSubscription::destroy);
@@ -216,9 +238,7 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
       {
          SampleInfo sampleInfo = new SampleInfo();
-         byteArrays.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new byte[BUFFER_SIZE]);
-         bytePointers.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new BytePointer(BUFFER_SIZE));
-         counts.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0);
+         byteArrays.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
          ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
          {
             LogTools.info("Depth Map Received");
@@ -236,8 +256,7 @@ public class PerceptionDataLogger
 //      if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
 //      {
 //         SampleInfo sampleInfo = new SampleInfo();
-//         byteArrays.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[BUFFER_SIZE]);
-//         bytePointers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new BytePointer(BUFFER_SIZE));
+//         byteArrays.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[PerceptionLoggerConstants.BUFFER_SIZE]);
 //         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
 //         ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
 //         {
@@ -253,7 +272,6 @@ public class PerceptionDataLogger
       LogTools.info("MoCap Logging Enabled: " + channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled());
       if (channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
       {
-         counts.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, 0);
          ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.MOCAP_RIGID_BODY, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
          {
             Pose3D transformMessage = new Pose3D();
@@ -445,7 +463,7 @@ public class PerceptionDataLogger
       IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
       imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size());
 
-      BytePointer bytePointer = bytePointers.get(namespace);
+      BytePointer bytePointer = channels.get(namespace).getBytePointer();
       bytePointer.put(heapArray, 0, packet.getData().size());
       bytePointer.limit(packet.getData().size());
       storeBytesFromPointer(namespace, bytePointer);
@@ -464,8 +482,8 @@ public class PerceptionDataLogger
         {
            Group group = hdf5Manager.getGroup(namespace);
 
-           int imageCount = counts.get(namespace);
-           counts.put(namespace, imageCount + 1);
+           int imageCount = channels.get(namespace).getCount();
+           channels.get(namespace).incrementCount();
 
            hdf5Tools.storeBytes(group, imageCount, bytePointer);
         }
@@ -498,10 +516,10 @@ public class PerceptionDataLogger
          {
             Group group = hdf5Manager.getGroup(namespace);
 
-            int count = counts.get(namespace);
-            counts.put(namespace, count + 1);
+            int count = channels.get(namespace).getCount();
+            channels.get(namespace).incrementCount();
 
-            hdf5Tools.storeFloatArray2D(group, count, floatPointer, HDF5Manager.MAX_BUFFER_SIZE, columns);
+            hdf5Tools.storeFloatArray2D(group, count, floatPointer, PerceptionLoggerConstants.BLOCK_SIZE, columns);
             floatPointer.position(0);
             floatPointer.limit(0);
          }
@@ -516,10 +534,10 @@ public class PerceptionDataLogger
          {
             Group group = hdf5Manager.getGroup(namespace);
 
-            int count = counts.get(namespace);
-            counts.put(namespace, count + 1);
+            int count = channels.get(namespace).getCount();
+            channels.get(namespace).incrementCount();
 
-            hdf5Tools.storeLongArray2D(group, count, longPointer, HDF5Manager.MAX_BUFFER_SIZE, columns);
+            hdf5Tools.storeLongArray2D(group, count, longPointer, PerceptionLoggerConstants.BLOCK_SIZE, columns);
             longPointer.position(0);
             longPointer.limit(0);
          }
@@ -528,11 +546,11 @@ public class PerceptionDataLogger
 
    public void storeLongs(String namespace, long value)
    {
-      LongPointer pointer = longPointers.get(namespace);
+      LongPointer pointer = channels.get(namespace).getLongPointer();
       pointer.limit(pointer.limit() + 1);
       pointer.put(pointer.limit(), value);
 
-      if (pointer.limit() == PerceptionLoggerConstants.MAX_BUFFER_SIZE)
+      if (pointer.limit() == PerceptionLoggerConstants.BLOCK_SIZE)
       {
          storeLongsFromPointer(namespace, pointer, 1);
       }
@@ -540,11 +558,11 @@ public class PerceptionDataLogger
 
    public void storeFloats(String namespace, float value)
    {
-      FloatPointer pointer = floatPointers.get(namespace);
+      FloatPointer pointer = channels.get(namespace).getFloatPointer();
       pointer.limit(pointer.limit() + 1);
       pointer.put(pointer.limit(), value);
 
-      if (pointer.limit() == PerceptionLoggerConstants.MAX_BUFFER_SIZE)
+      if (pointer.limit() == PerceptionLoggerConstants.BLOCK_SIZE)
       {
          storeFloatsFromPointer(namespace, pointer, 1);
       }
@@ -552,7 +570,7 @@ public class PerceptionDataLogger
 
    public void storeFloats(String namespace, Point3D point)
    {
-      FloatPointer pointer = floatPointers.get(namespace);
+      FloatPointer pointer = channels.get(namespace).getFloatPointer();
       int startIndex = (int) pointer.limit();
 
       pointer.limit(pointer.limit() + 3);
@@ -563,7 +581,7 @@ public class PerceptionDataLogger
 
    public void storeFloats(String namespace, Quaternion orientation)
    {
-      FloatPointer pointer = floatPointers.get(namespace);
+      FloatPointer pointer = channels.get(namespace).getFloatPointer();
       int startIndex = (int) pointer.limit();
 
       pointer.limit(pointer.limit() + 4);
@@ -574,7 +592,7 @@ public class PerceptionDataLogger
 
    public void storeFloats(String namespace, IDLSequence.Float floats)
    {
-      FloatPointer pointer = floatPointers.get(namespace);
+      FloatPointer pointer = channels.get(namespace).getFloatPointer();
       int startIndex = (int) pointer.limit();
 
       pointer.limit(pointer.limit() + floats.size());

@@ -1,6 +1,5 @@
 package us.ihmc.perception.logging;
 
-import gnu.trove.list.array.TFloatArrayList;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
@@ -14,12 +13,15 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -511,6 +513,35 @@ public class PerceptionDataLoggingTest
 
       hdf5ManagerWriter.closeFile();
       hdf5ManagerReader.closeFile();
+   }
+
+   @Test
+   public void testPerceptionDataLoggerStoreFloats()
+   {
+      PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
+      perceptionDataLogger.openLogFile("test_pointer_api.hdf5");
+
+      String channelName = "/test/pointer/";
+      perceptionDataLogger.addChannel(channelName);
+      perceptionDataLogger.setChannelEnabled(channelName, true);
+
+      byte[] dataArray = new byte[40];
+      for (int i = 0; i < dataArray.length; i++)
+      {
+         dataArray[i] = (byte) i;
+      }
+
+      perceptionDataLogger.storeFloats(channelName, new Point3D(0, 1, 2));
+      perceptionDataLogger.closeLogFile();
+
+      PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
+      perceptionDataLoader.openLogFile("test_pointer_api.hdf5");
+
+      ArrayList<Point3D> points = new ArrayList<>();
+      perceptionDataLoader.loadPoint3DList(channelName, points);
+      perceptionDataLoader.closeLogFile();
+
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(points.get(0), new Point3D(0, 1, 2), 1e-10);
    }
 
    @Test

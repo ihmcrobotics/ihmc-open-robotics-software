@@ -1,15 +1,11 @@
 package us.ihmc.perception.logging;
 
-import org.bytedeco.hdf5.DataSet;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
@@ -59,11 +55,6 @@ public class PerceptionDataLoader
       {
          LogTools.warn("Log file does not exist: {}", filePath);
       }
-   }
-
-   public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points, int rows, int cols)
-   {
-      hdf5Tools.loadPointCloud(hdf5Manager.getGroup(namespace), index, points, rows, cols);
    }
 
    public void loadPoint3DList(String namespace, ArrayList<Point3D> points)
@@ -146,7 +137,7 @@ public class PerceptionDataLoader
       return hdf5Manager;
    }
 
-   public void destroy()
+   public void closeLogFile()
    {
       hdf5Manager.closeFile();
    }
@@ -224,7 +215,7 @@ public class PerceptionDataLoader
 //         LogTools.info("[{}] Quaternion: {}", i, mocapOrientationList.get(i));
 //      }
 
-         BytePointer bytePointer = new BytePointer(PerceptionLoggerConstants.MAX_BUFFER_SIZE);
+         BytePointer bytePointer = new BytePointer(PerceptionLoggerConstants.FLOAT_BUFFER_SIZE);
 
          Mat colorImage = new Mat();
          Mat depthImage = new Mat(768, 1280, opencv_core.CV_16UC1);
