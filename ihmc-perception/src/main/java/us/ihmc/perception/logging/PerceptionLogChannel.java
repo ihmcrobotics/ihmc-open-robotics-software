@@ -4,16 +4,24 @@ import org.bytedeco.javacpp.*;
 
 public class PerceptionLogChannel
 {
+   public enum ChannelType
+   {
+      IMAGE_BYTES, TRANSFORM, LONG, DOUBLE, FLOAT, INT, BYTE, BOOLEAN, STRING
+   }
+
+   private ChannelType channelType;
    private String name;
    private int count;
    private int index;
    private int blockSize;
-   boolean enabled = false;
+   private int frameSize;
+   boolean enabled = true;
 
    private Pointer dataPointer = null;
 
-   public PerceptionLogChannel(String name, int count, int index, int blockSize, Pointer dataPointer)
+   public PerceptionLogChannel(String name, int count, int index, int frameSize, int blockSize, Pointer dataPointer)
    {
+      this.frameSize = frameSize;
       this.blockSize = blockSize;
       this.name = name;
       this.count = count;
@@ -119,5 +127,25 @@ public class PerceptionLogChannel
    public void setBlockSize(int blockSize)
    {
       this.blockSize = blockSize;
+   }
+
+   public int getFrameSize()
+   {
+      return frameSize;
+   }
+
+   public void setFrameSize(int frameSize)
+   {
+      this.frameSize = frameSize;
+   }
+
+   public ChannelType getChannelType()
+   {
+      return channelType;
+   }
+
+   public void setChannelType(ChannelType channelType)
+   {
+      this.channelType = channelType;
    }
 }

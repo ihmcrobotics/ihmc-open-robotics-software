@@ -42,6 +42,7 @@ public class HDF5Manager
     */
    public Group getGroup(String namespace)
    {
+      LogTools.info("Groups: {}", groups.size());
       if (groups.containsKey(namespace))
       {
          return groups.get(namespace);
@@ -101,15 +102,15 @@ public class HDF5Manager
    public Group createGroup(String namespace)
    {
       Path path = Paths.get(namespace);
-      Group group = null;
+      Group group = file.createGroup("root");
 
       for (int i = 0; i < path.getNameCount(); i++)
       {
-         String name = path.subpath(0, i + 1).toString();
-         if (!file.nameExists(name))
-         {
-            group = file.createGroup(name);
-         }
+         String name = "/" + path.subpath(0, i + 1).toString();
+
+         LogTools.info("Creating Group: {}", name);
+
+         group = group.createGroup(name);
       }
 
       if (group == null)

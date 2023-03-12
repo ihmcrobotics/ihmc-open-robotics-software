@@ -87,7 +87,7 @@ public class RealsenseColorAndDepthLogger
       FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
       perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
-      perceptionDataLogger.addChannel(depthChannelName);
+      perceptionDataLogger.addImageChannel(depthChannelName);
       perceptionDataLogger.setChannelEnabled(depthChannelName, true);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->

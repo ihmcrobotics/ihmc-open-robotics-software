@@ -494,6 +494,7 @@ public class PerceptionDataLoggingTest
       hdf5Tools.writeLongAttribute(writeGroup, "Long", 123456);
       hdf5Tools.writeFloatAttribute(writeGroup, "Float", 0.12345f);
       hdf5Tools.writeDoubleAttribute(writeGroup, "Double", 0.123456);
+      hdf5Tools.writeStringAttribute(writeGroup, "String", "Hello World");
 
       writeGroup._close();
       hdf5ManagerWriter.getFile()._close();
@@ -505,11 +506,13 @@ public class PerceptionDataLoggingTest
       long longValue = hdf5Tools.readLongAttribute(readGroup, "Long");
       float floatValue = hdf5Tools.readFloatAttribute(readGroup, "Float");
       double doubleValue = hdf5Tools.readDoubleAttribute(readGroup, "Double");
+      String stringValue = hdf5Tools.readStringAttribute(readGroup, "String");
 
       assertEquals(12345, value);
       assertEquals(123456, longValue);
       assertEquals(0.12345f, floatValue, 1e-10);
       assertEquals(0.123456, doubleValue, 1e-10);
+      assertEquals("Hello World", stringValue);
 
       hdf5ManagerWriter.closeFile();
       hdf5ManagerReader.closeFile();
@@ -521,27 +524,23 @@ public class PerceptionDataLoggingTest
       PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
       perceptionDataLogger.openLogFile("test_pointer_api.hdf5");
 
-      String channelName = "/test/pointer/";
-      perceptionDataLogger.addChannel(channelName);
-      perceptionDataLogger.setChannelEnabled(channelName, true);
-
-      byte[] dataArray = new byte[40];
-      for (int i = 0; i < dataArray.length; i++)
-      {
-         dataArray[i] = (byte) i;
-      }
+      String channelName = "/test/pointer/points/";
+      perceptionDataLogger.addFloatChannel(channelName, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
 
       perceptionDataLogger.storeFloats(channelName, new Point3D(0, 1, 2));
       perceptionDataLogger.closeLogFile();
 
       PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
       perceptionDataLoader.openLogFile("test_pointer_api.hdf5");
+      perceptionDataLoader.addFloatChannel(channelName, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
 
       ArrayList<Point3D> points = new ArrayList<>();
       perceptionDataLoader.loadPoint3DList(channelName, points);
       perceptionDataLoader.closeLogFile();
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(points.get(0), new Point3D(0, 1, 2), 1e-10);
+      LogTools.info("Total Points: {}", points.size());
+
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(0, 1, 2), points.get(0), 1e-10);
    }
 
    @Test
