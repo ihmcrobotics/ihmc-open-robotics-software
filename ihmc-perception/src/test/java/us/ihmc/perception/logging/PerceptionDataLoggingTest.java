@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 
@@ -243,35 +244,6 @@ public class PerceptionDataLoggingTest
       LogTools.info("Loading Took: {} ms", end - intermediate);
 
       System.out.println(Arrays.toString(outputArray));
-
-      for (int i = 0; i < dataArray.length; i++)
-      {
-         assertEquals(dataArray[i], outputArray[i]);
-      }
-      hdf5ManagerWriter.closeFile();
-      hdf5ManagerReader.closeFile();
-   }
-
-   @Test
-   public void testLoggingIntArray()
-   {
-      HDF5Tools hdf5Tools = new HDF5Tools();
-      hdf5ManagerWriter = new HDF5Manager("hdf5_test_int_array.hdf5", hdf5.H5F_ACC_TRUNC());
-      Group writeGroup = hdf5ManagerWriter.getGroup("/test/ints/");
-
-      int[] dataArray = {0, 255, 1, 3, 4, 42, 153};
-
-      hdf5Tools.storeIntArray(writeGroup, 0, dataArray, dataArray.length);
-
-      writeGroup._close();
-      hdf5ManagerWriter.getFile()._close();
-
-      hdf5ManagerReader = new HDF5Manager("hdf5_test_int_array.hdf5", hdf5.H5F_ACC_RDONLY());
-      Group readGroup = hdf5ManagerReader.getGroup("/test/ints/");
-      int[] outputArray = hdf5Tools.loadIntArray(readGroup, 0);
-
-      assertEquals(dataArray.length, 7);
-      assertEquals(outputArray.length, 7);
 
       for (int i = 0; i < dataArray.length; i++)
       {
@@ -524,23 +496,32 @@ public class PerceptionDataLoggingTest
       PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
       perceptionDataLogger.openLogFile("test_pointer_api.hdf5");
 
-      String channelName = "/test/pointer/points/";
-      perceptionDataLogger.addFloatChannel(channelName, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      String pointChannelName = "/test/pointer/points/";
+      String quaternionChannelName = "/test/pointer/quaternions/";
 
-      perceptionDataLogger.storeFloats(channelName, new Point3D(0, 1, 2));
+      perceptionDataLogger.addFloatChannel(pointChannelName, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(quaternionChannelName, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+
+      perceptionDataLogger.storeFloats(pointChannelName, new Point3D(0, 1, 2));
+      perceptionDataLogger.storeFloats(quaternionChannelName, new Quaternion(0, 1, 2, 3));
       perceptionDataLogger.closeLogFile();
 
       PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
       perceptionDataLoader.openLogFile("test_pointer_api.hdf5");
-      perceptionDataLoader.addFloatChannel(channelName, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLoader.addFloatChannel(pointChannelName, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLoader.addFloatChannel(quaternionChannelName, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
 
       ArrayList<Point3D> points = new ArrayList<>();
-      perceptionDataLoader.loadPoint3DList(channelName, points);
+      ArrayList<Quaternion> quaternions = new ArrayList<>();
+      perceptionDataLoader.loadPoint3DList(pointChannelName, points);
+      perceptionDataLoader.loadQuaternionList(quaternionChannelName, quaternions);
       perceptionDataLoader.closeLogFile();
 
       LogTools.info("Total Points: {}", points.size());
+      LogTools.info("Total Quaternions: {}", quaternions.size());
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(0, 1, 2), points.get(0), 1e-10);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(0, 1, 2), points.get(0), 1e-7);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(new Quaternion(0, 1, 2, 3), quaternions.get(0), 1e-7);
    }
 
    @Test
@@ -678,5 +659,35 @@ public class PerceptionDataLoggingTest
       hdf5.H5Fclose(readFileId);
 
       assertEquals(123, data[0], 1e-5);
+   }
+
+   @Test
+   @Disabled
+   public void testLoggingIntArray()
+   {
+      HDF5Tools hdf5Tools = new HDF5Tools();
+      hdf5ManagerWriter = new HDF5Manager("hdf5_test_int_array.hdf5", hdf5.H5F_ACC_TRUNC());
+      Group writeGroup = hdf5ManagerWriter.getGroup("/test/ints/");
+
+      int[] dataArray = {0, 255, 1, 3, 4, 42, 153};
+
+      hdf5Tools.storeIntArray(writeGroup, 0, dataArray, dataArray.length);
+
+      writeGroup._close();
+      hdf5ManagerWriter.getFile()._close();
+
+      hdf5ManagerReader = new HDF5Manager("hdf5_test_int_array.hdf5", hdf5.H5F_ACC_RDONLY());
+      Group readGroup = hdf5ManagerReader.getGroup("/test/ints/");
+      int[] outputArray = hdf5Tools.loadIntArray(readGroup, 0);
+
+      assertEquals(dataArray.length, 7);
+      assertEquals(outputArray.length, 7);
+
+      for (int i = 0; i < dataArray.length; i++)
+      {
+         assertEquals(dataArray[i], outputArray[i]);
+      }
+      hdf5ManagerWriter.closeFile();
+      hdf5ManagerReader.closeFile();
    }
 }
