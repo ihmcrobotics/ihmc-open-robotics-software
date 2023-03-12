@@ -7,7 +7,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.LongPointer;
-import perception_msgs.msg.dds.*;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
@@ -29,10 +29,11 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
-import java.io.File;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,7 +47,6 @@ public class PerceptionDataLogger
 {
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private PerceptionConfigurationParameters parameters;
-
 
    private final CommunicationMode communicationMode;
    private final ArrayDeque<Runnable> runnablesToStopLogging = new ArrayDeque<>();
@@ -70,30 +70,30 @@ public class PerceptionDataLogger
 
    public PerceptionDataLogger()
    {
-//      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-//      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
+      //      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+      //      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
 
       communicationMode = CommunicationMode.INTERPROCESS;
    }
 
    public void addAllChannels()
    {
-      addLongChannel(PerceptionLoggerConstants.D435_SENSOR_TIME);
+      addLongChannel(PerceptionLoggerConstants.D435_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
       addImageChannel(PerceptionLoggerConstants.D435_DEPTH_NAME);
       addImageChannel(PerceptionLoggerConstants.D435_COLOR_NAME);
-      addFloatChannel(PerceptionLoggerConstants.D435_SENSOR_POSITION);
-      addFloatChannel(PerceptionLoggerConstants.D435_SENSOR_ORIENTATION);
+      addFloatChannel(PerceptionLoggerConstants.D435_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.D435_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
 
-      addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME);
+      addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
       addImageChannel(PerceptionLoggerConstants.L515_COLOR_NAME);
       addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
-      addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION);
-      addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION);
+      addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
 
+      addLongChannel(PerceptionLoggerConstants.OUSTER_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
       addImageChannel(PerceptionLoggerConstants.OUSTER_DEPTH_NAME);
-      addFloatChannel(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION);
-      addFloatChannel(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION);
-      addLongChannel(PerceptionLoggerConstants.OUSTER_SENSOR_TIME);
+      addFloatChannel(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
 
       addImageChannel(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME);
       //addChannelFloat(PerceptionLoggerConstants.BLACKFLY_SENSOR_POSITION);
@@ -106,68 +106,156 @@ public class PerceptionDataLogger
       //addChannelFloat(PerceptionLoggerConstants.ZED2_SENSOR_ORIENTATION);
       //addChannelLong(PerceptionLoggerConstants.ZED2_SENSOR_TIME);
 
-      addLongChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_TIME);
-      addFloatChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION);
-      addFloatChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION);
+      addLongChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
       transformMessageReferences.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new AtomicReference<>(null));
 
-      addLongChannel(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME);
-      addFloatChannel(PerceptionLoggerConstants.ROOT_POSITION_NAME);
-      addFloatChannel(PerceptionLoggerConstants.ROOT_ORIENTATION_NAME);
-      addFloatChannel(PerceptionLoggerConstants.JOINT_ANGLES_NAME);
-      addFloatChannel(PerceptionLoggerConstants.JOINT_VELOCITIES_NAME);
-      addFloatChannel(PerceptionLoggerConstants.JOINT_TORQUES_NAME);
+      addLongChannel(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.ROOT_POSITION_NAME, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.ROOT_ORIENTATION_NAME, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.JOINT_ANGLES_NAME, 26, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.JOINT_VELOCITIES_NAME, 26, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      addFloatChannel(PerceptionLoggerConstants.JOINT_TORQUES_NAME, 26, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
    }
 
-   public void addByteChannel(String channelName)
+   public void addByteChannel(String channelName, int frameSize, int blockSize)
    {
-      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, new BytePointer(PerceptionLoggerConstants.BYTE_BUFFER_SIZE)));
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new BytePointer(PerceptionLoggerConstants.BYTE_BUFFER_SIZE)));
+      channels.get(channelName).setChannelType(PerceptionLogChannel.ChannelType.BYTE);
+      channels.get(channelName).getFloatPointer().limit(0);
+      Group group = hdf5Manager.getGroup(channelName);
+
+      hdf5Tools.writeIntAttribute(group, "frame_size", frameSize);
+      hdf5Tools.writeIntAttribute(group, "block_size", blockSize);
    }
 
-   public void addFloatChannel(String channelName)
+   public void addFloatChannel(String channelName, int frameSize, int blockSize)
    {
-      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, new FloatPointer(PerceptionLoggerConstants.FLOAT_BUFFER_SIZE)));
+      channels.put(channelName,
+                   new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new FloatPointer(PerceptionLoggerConstants.FLOAT_BUFFER_SIZE)));
+      channels.get(channelName).setChannelType(PerceptionLogChannel.ChannelType.FLOAT);
+      channels.get(channelName).getFloatPointer().limit(0);
+      Group group = hdf5Manager.getGroup(channelName);
+
+      hdf5Tools.writeIntAttribute(group, "frame_size", frameSize);
+      hdf5Tools.writeIntAttribute(group, "block_size", blockSize);
    }
 
-   public void addLongChannel(String channelName)
+   public void addLongChannel(String channelName, int frameSize, int blockSize)
    {
-      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, new LongPointer(PerceptionLoggerConstants.LONG_BUFFER_SIZE)));
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new LongPointer(PerceptionLoggerConstants.LONG_BUFFER_SIZE)));
+      channels.get(channelName).setChannelType(PerceptionLogChannel.ChannelType.LONG);
+      channels.get(channelName).getFloatPointer().limit(0);
+      Group group = hdf5Manager.getGroup(channelName);
+
+      hdf5Tools.writeIntAttribute(group, "frame_size", frameSize);
+      hdf5Tools.writeIntAttribute(group, "block_size", blockSize);
    }
 
-   public void addIntChannel(String channelName)
+   public void addIntChannel(String channelName, int frameSize, int blockSize)
    {
-      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, new IntPointer(PerceptionLoggerConstants.INT_BUFFER_SIZE)));
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new IntPointer(PerceptionLoggerConstants.INT_BUFFER_SIZE)));
+      channels.get(channelName).setChannelType(PerceptionLogChannel.ChannelType.INT);
+      channels.get(channelName).getFloatPointer().limit(0);
+      Group group = hdf5Manager.getGroup(channelName);
+
+      hdf5Tools.writeIntAttribute(group, "frame_size", frameSize);
+      hdf5Tools.writeIntAttribute(group, "block_size", blockSize);
    }
 
    public void addImageChannel(String channelName)
    {
-      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE)));
+      channels.put(channelName,
+                   new PerceptionLogChannel(channelName,
+                                            0,
+                                            0,
+                                            PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE,
+                                            1,
+                                            new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE)));
+
+      channels.get(channelName).setChannelType(PerceptionLogChannel.ChannelType.IMAGE_BYTES);
+      Group group = hdf5Manager.getGroup(channelName);
+
+      hdf5Tools.writeIntAttribute(group, "frame_size", PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE);
+      hdf5Tools.writeIntAttribute(group, "block_size", 1);
+
       imageMessageReferences.put(channelName, new AtomicReference<>(null));
    }
 
    public void openLogFile(String logFileName)
    {
       this.filePath = logFileName;
-      File logFile = new File(logFileName);
-      if (!logFile.exists() && !logFile.isDirectory())
-      {
-         LogTools.info("Creating HDF5 File: " + logFileName);
-         hdf5Manager = new HDF5Manager(logFileName, hdf5.H5F_ACC_TRUNC);
-         hdf5Manager.getFile().openFile(logFileName, hdf5.H5F_ACC_RDWR);
-      }
-      else
-      {
-         LogTools.info("Opening Existing HDF5 File: " + logFileName);
-         hdf5Manager = new HDF5Manager(logFileName, hdf5.H5F_ACC_RDWR);
-      }
+      hdf5Manager = new HDF5Manager(logFileName, hdf5.H5F_ACC_TRUNC);
    }
 
    public void closeLogFile()
    {
       if (hdf5Manager != null)
       {
+         logResiduals();
+
+         try
+         {
+            Thread.sleep(500);
+         }
+         catch (InterruptedException e)
+         {
+            throw new RuntimeException(e);
+         }
+
          hdf5Manager.closeFile();
          LogTools.info("HDF5 File Saved: {}", filePath);
+      }
+   }
+
+   public void logResiduals()
+   {
+      if (hdf5Manager != null)
+      {
+         for (String channelName : channels.keySet())
+         {
+            PerceptionLogChannel channel = channels.get(channelName);
+            if (channel.isEnabled())
+            {
+               if (channel.getChannelType() == PerceptionLogChannel.ChannelType.FLOAT)
+               {
+                  Group group = hdf5Manager.getGroup(channelName);
+
+                  int count = channels.get(channelName).getCount();
+                  channels.get(channelName).incrementCount();
+
+                  FloatPointer floatPointer = channel.getFloatPointer();
+
+                  int frameCount = (int) floatPointer.limit() / channel.getFrameSize();
+
+                  LogTools.info("Logging {} frames of {} to HDF5", frameCount, channelName);
+                  hdf5Tools.storeFloatArray2D(group, count, floatPointer, frameCount, channel.getFrameSize());
+               }
+               else if (channel.getChannelType() == PerceptionLogChannel.ChannelType.LONG)
+               {
+                  Group group = hdf5Manager.getGroup(channelName);
+
+                  int count = channels.get(channelName).getCount();
+                  channels.get(channelName).incrementCount();
+
+                  LongPointer longPointer = channel.getLongPointer();
+                  int frameCount = (int) longPointer.limit() / channel.getFrameSize();
+
+                  hdf5Tools.storeLongArray2D(group, (long) count, longPointer, frameCount, channel.getFrameSize());
+               }
+               else if (channel.getChannelType() == PerceptionLogChannel.ChannelType.IMAGE_BYTES)
+               {
+                  Group group = hdf5Manager.getGroup(channelName);
+
+                  int count = channels.get(channelName).getCount();
+                  channels.get(channelName).incrementCount();
+
+                  BytePointer bytePointer = channel.getBytePointer();
+                  hdf5Tools.storeBytes(group, (long) count, bytePointer);
+               }
+            }
+         }
       }
    }
 
@@ -252,21 +340,21 @@ public class PerceptionDataLogger
 
       // TODO: Make this work with the new ImageMessage message for Blackfly images
       // Add callback for Blackfly Color images
-//      LogTools.info("Blackfly Color Enabled: " + channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled());
-//      if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
-//      {
-//         SampleInfo sampleInfo = new SampleInfo();
-//         byteArrays.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[PerceptionLoggerConstants.BUFFER_SIZE]);
-//         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
-//         ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
-//         {
-//            subscriber.takeNextData(imageMessage, sampleInfo);
-//            imageMessageReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).set(imageMessage);
-//            logColorBlackfly(bigVideoPacketReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).getAndSet(null));
-//
-//            LogTools.info("BlackFly Image Received: {}", imageMessage.getAcquisitionTimeSecondsSinceEpoch());
-//         });
-//      }
+      //      LogTools.info("Blackfly Color Enabled: " + channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled());
+      //      if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
+      //      {
+      //         SampleInfo sampleInfo = new SampleInfo();
+      //         byteArrays.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[PerceptionLoggerConstants.BUFFER_SIZE]);
+      //         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
+      //         ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
+      //         {
+      //            subscriber.takeNextData(imageMessage, sampleInfo);
+      //            imageMessageReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).set(imageMessage);
+      //            logColorBlackfly(bigVideoPacketReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).getAndSet(null));
+      //
+      //            LogTools.info("BlackFly Image Received: {}", imageMessage.getAcquisitionTimeSecondsSinceEpoch());
+      //         });
+      //      }
 
       // Add callback for MoCap data
       LogTools.info("MoCap Logging Enabled: " + channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled());
@@ -477,71 +565,55 @@ public class PerceptionDataLogger
    public void storeBytesFromPointer(String namespace, BytePointer bytePointer)
    {
       executorService.submit(() ->
-     {
-        synchronized (hdf5Manager)
-        {
-           Group group = hdf5Manager.getGroup(namespace);
+                             {
+                                synchronized (hdf5Manager)
+                                {
+                                   Group group = hdf5Manager.getGroup(namespace);
 
-           int imageCount = channels.get(namespace).getCount();
-           channels.get(namespace).incrementCount();
+                                   int imageCount = channels.get(namespace).getCount();
+                                   channels.get(namespace).incrementCount();
 
-           hdf5Tools.storeBytes(group, imageCount, bytePointer);
-        }
-     });
+                                   hdf5Tools.storeBytes(group, imageCount, bytePointer);
+                                }
+                             });
    }
 
-   public void storePointCloud(String namespace, LidarScanMessage message)
+   public void storeFloatsFromPointer(String namespace, FloatPointer floatPointer, int rows, int columns)
    {
-      executorService.submit(() ->
-      {
-         synchronized (hdf5Manager)
-         {
-            Group group = hdf5Manager.getGroup(namespace);
-            int index = hdf5Manager.getCount(namespace);
-            hdf5Tools.storeByteArray(group, index, message.getScan().toArray(), message.getScan().size());
+      LogTools.info("Storing Floats From Pointer: {}", namespace);
+      //executorService.submit(() ->
+      //                       {
+      //                          synchronized (hdf5Manager)
+      //                          {
+      Group group = hdf5Manager.getGroup(namespace);
 
-            if (stopLoggingRequest.get())
-            {
-               channels.get(namespace).setEnabled(false);
-            }
-         }
-      });
-   }
+      int count = channels.get(namespace).getCount();
+      channels.get(namespace).incrementCount();
 
-   public void storeFloatsFromPointer(String namespace, FloatPointer floatPointer, int columns)
-   {
-      executorService.submit(() ->
-      {
-         synchronized (hdf5Manager)
-         {
-            Group group = hdf5Manager.getGroup(namespace);
-
-            int count = channels.get(namespace).getCount();
-            channels.get(namespace).incrementCount();
-
-            hdf5Tools.storeFloatArray2D(group, count, floatPointer, PerceptionLoggerConstants.BLOCK_SIZE, columns);
-            floatPointer.position(0);
-            floatPointer.limit(0);
-         }
-      });
+      hdf5Tools.storeFloatArray2D(group, count, floatPointer, rows, columns);
+      floatPointer.position(0);
+      floatPointer.limit(0);
+      //   }
+      //});
    }
 
    public void storeLongsFromPointer(String namespace, LongPointer longPointer, int columns)
    {
       executorService.submit(() ->
-      {
-         synchronized (hdf5Manager)
-         {
-            Group group = hdf5Manager.getGroup(namespace);
+                             {
+                                synchronized (hdf5Manager)
+                                {
+                                   Group group = hdf5Manager.getGroup(namespace);
 
-            int count = channels.get(namespace).getCount();
-            channels.get(namespace).incrementCount();
+                                   int count = channels.get(namespace).getCount();
+                                   int blockSize = channels.get(namespace).getBlockSize();
+                                   channels.get(namespace).incrementCount();
 
-            hdf5Tools.storeLongArray2D(group, count, longPointer, PerceptionLoggerConstants.BLOCK_SIZE, columns);
-            longPointer.position(0);
-            longPointer.limit(0);
-         }
-      });
+                                   hdf5Tools.storeLongArray2D(group, count, longPointer, blockSize, columns);
+                                   longPointer.position(0);
+                                   longPointer.limit(0);
+                                }
+                             });
    }
 
    public void storeLongs(String namespace, long value)
@@ -550,9 +622,9 @@ public class PerceptionDataLogger
       pointer.limit(pointer.limit() + 1);
       pointer.put(pointer.limit(), value);
 
-      if (pointer.limit() == PerceptionLoggerConstants.BLOCK_SIZE)
+      if (pointer.limit() == channels.get(namespace).getBlockSize())
       {
-         storeLongsFromPointer(namespace, pointer, 1);
+         storeLongsFromPointer(namespace, pointer, channels.get(namespace).getFrameSize());
       }
    }
 
@@ -562,9 +634,9 @@ public class PerceptionDataLogger
       pointer.limit(pointer.limit() + 1);
       pointer.put(pointer.limit(), value);
 
-      if (pointer.limit() == PerceptionLoggerConstants.BLOCK_SIZE)
+      if (pointer.limit() == channels.get(namespace).getBlockSize())
       {
-         storeFloatsFromPointer(namespace, pointer, 1);
+         storeFloatsFromPointer(namespace, pointer, channels.get(namespace).getBlockSize(), channels.get(namespace).getFrameSize());
       }
    }
 
@@ -576,7 +648,14 @@ public class PerceptionDataLogger
       pointer.limit(pointer.limit() + 3);
       PerceptionMessageTools.copyToFloatPointer(point, pointer, startIndex);
 
-      storeFloatsFromPointer(namespace, pointer, 3);
+      int blockUsed = (int) (pointer.limit() / channels.get(namespace).getFrameSize());
+
+      LogTools.info("Pointer Limit: {}, Block Used: {}, Block Size: {}", pointer.limit(), blockUsed, channels.get(namespace).getBlockSize());
+
+      if (blockUsed > channels.get(namespace).getBlockSize())
+      {
+         storeFloatsFromPointer(namespace, pointer, channels.get(namespace).getBlockSize(), channels.get(namespace).getFrameSize());
+      }
    }
 
    public void storeFloats(String namespace, Quaternion orientation)
@@ -584,21 +663,31 @@ public class PerceptionDataLogger
       FloatPointer pointer = channels.get(namespace).getFloatPointer();
       int startIndex = (int) pointer.limit();
 
-      pointer.limit(pointer.limit() + 4);
+      pointer.limit(pointer.limit() + channels.get(namespace).getFrameSize());
       PerceptionMessageTools.copyToFloatPointer(orientation, pointer, startIndex);
 
-      storeFloatsFromPointer(namespace, pointer, 4);
+      int blockUsed = (int) pointer.limit() / channels.get(namespace).getFrameSize();
+      if (blockUsed > channels.get(namespace).getBlockSize())
+      {
+         storeFloatsFromPointer(namespace, pointer, channels.get(namespace).getBlockSize(), channels.get(namespace).getFrameSize());
+      }
    }
 
    public void storeFloats(String namespace, IDLSequence.Float floats)
    {
+      channels.get(namespace).setFrameSize(floats.size());
+
       FloatPointer pointer = channels.get(namespace).getFloatPointer();
       int startIndex = (int) pointer.limit();
 
-      pointer.limit(pointer.limit() + floats.size());
+      pointer.limit(pointer.limit() + channels.get(namespace).getFrameSize());
       PerceptionMessageTools.copyToFloatPointer(floats, pointer, startIndex);
 
-      storeFloatsFromPointer(namespace, pointer, floats.size());
+      int blockUsed = (int) pointer.limit() / channels.get(namespace).getFrameSize();
+      if (blockUsed > channels.get(namespace).getBlockSize())
+      {
+         storeFloatsFromPointer(namespace, pointer, channels.get(namespace).getBlockSize(), channels.get(namespace).getFrameSize());
+      }
    }
 
    public HashMap<String, PerceptionLogChannel> getChannels()

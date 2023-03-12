@@ -8,6 +8,7 @@ import us.ihmc.log.LogTools;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class HDF5Tools
 {
@@ -83,6 +84,8 @@ public class HDF5Tools
     */
    public void storeFloatArray2D(Group group, long index, FloatPointer pointer, int rows, int cols)
    {
+      LogTools.info("Store Float Array 2D: Index: {} Rows: {} Cols: {}", index, rows, cols);
+
       // Log the data buffer as separate dataset with same index
       long[] dimensions = {rows, cols};
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dimensions));
@@ -292,6 +295,23 @@ public class HDF5Tools
    }
 
    /**
+    * Writes a string attribute to the HDF5 group.
+    *
+    * @param group HDF5 group to write the attribute to.
+    * @param name  Attribute name.
+    * @param value Attribute value.
+    */
+   public void writeStringAttribute(Group group, String name, String value)
+   {
+      long[] dims = {value.length() + 1};
+      DataType dataType = new DataType(PredType.C_S1());
+      DataSpace dataSpace = new DataSpace(1, dims);
+      Attribute attribute = group.createAttribute(name, dataType, dataSpace);
+      attribute.write(dataType, value);
+      attribute._close();
+   }
+
+   /**
     * Reads an int attribute to the HDF5 group.
     *
     * @param group HDF5 group to read the attribute from.
@@ -353,6 +373,26 @@ public class HDF5Tools
       sizeAttribute.read(dataType, sizeAttributePointer);
       sizeAttribute._close();
       return sizeAttributePointer.get(0);
+   }
+
+   /**
+    * Reads a string attribute to the HDF5 group.
+    *
+    * @param group HDF5 group to read the attribute from.
+    * @param name  Attribute name.
+    */
+   public String readStringAttribute(Group group, String name)
+   {
+      Attribute attribute = group.openAttribute(name);
+      DataType dataType = new DataType(PredType.C_S1());
+      DataSpace dataSpace = attribute.getSpace();
+      long[] dims = new long[1];
+      dataSpace.getSimpleExtentDims(dims);
+      CharPointer charPointer = new CharPointer(dims[0] + 1);
+      attribute.read(dataType, charPointer);
+      attribute.close();
+      charPointer.put(dims[0], '\0');
+      return Arrays.toString(charPointer.getStringChars());
    }
 
    /**

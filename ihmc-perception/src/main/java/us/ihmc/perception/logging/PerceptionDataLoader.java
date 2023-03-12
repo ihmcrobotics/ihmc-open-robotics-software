@@ -2,7 +2,7 @@ package us.ihmc.perception.logging;
 
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.*;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PerceptionDataLoader
 {
@@ -43,13 +44,6 @@ public class PerceptionDataLoader
          this.filePath = filePath;
          hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
          channels.clear();
-
-         ArrayList<String> topicNames = hdf5Tools.findTopicNames(hdf5Manager.getFile());
-         for (String topic : topicNames)
-         {
-            LogTools.info("[Count: {}]\t Channel Found: {}", hdf5Manager.getCount(topic), topic);
-            channels.put(topic, new PerceptionLogChannel(topic, (int) hdf5Manager.getCount(topic), 0));
-         }
       }
       else
       {
@@ -57,14 +51,71 @@ public class PerceptionDataLoader
       }
    }
 
+   public void addByteChannel(String channelName, int frameSize, int blockSize)
+   {
+      channels.put(channelName,
+                   new PerceptionLogChannel(channelName,
+                                            0,
+                                            0,
+                                            frameSize,
+                                            blockSize,
+                                            new BytePointer(PerceptionLoggerConstants.BYTE_BUFFER_SIZE)));
+   }
+
+   public void addFloatChannel(String channelName, int frameSize, int blockSize)
+   {
+      channels.put(channelName,
+                   new PerceptionLogChannel(channelName,
+                                            0,
+                                            0,
+                                             frameSize,
+                                             blockSize,
+                                            new FloatPointer(PerceptionLoggerConstants.FLOAT_BUFFER_SIZE)));
+   }
+
+   public void addLongChannel(String channelName, int frameSize, int blockSize)
+   {
+      channels.put(channelName,
+                   new PerceptionLogChannel(channelName,
+                                            0,
+                                            0,
+                                            frameSize,
+                                            blockSize,
+                                            new LongPointer(PerceptionLoggerConstants.LONG_BUFFER_SIZE)));
+   }
+
+   public void addIntChannel(String channelName, int frameSize, int blockSize)
+   {
+      channels.put(channelName,
+                   new PerceptionLogChannel(channelName,
+                                            0,
+                                            0,
+                                            frameSize,
+                                            blockSize,
+                                            new IntPointer(PerceptionLoggerConstants.INT_BUFFER_SIZE)));
+   }
+
+   public void addImageChannel(String channelName)
+   {
+      channels.put(channelName,
+                   new PerceptionLogChannel(channelName,
+                                            0,
+                                            0,
+                                            PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE,
+                                            1,
+                                            new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE)));
+   }
+
    public void loadPoint3DList(String namespace, ArrayList<Point3D> points)
    {
 //      executorService.submit(() ->
 //      {
          int count = (int) hdf5Manager.getCount(namespace);
+         LogTools.info("[{}] Total Point3D Blocks: {}", namespace, count);
+
          for (int index = 0; index < count; index++)
          {
-            float[] pointFloatArray = new float[3 * HDF5Manager.MAX_BUFFER_SIZE];
+            float[] pointFloatArray = new float[3 * PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE];
             loadFloatArray(namespace, index, pointFloatArray);
 
             for (int i = 0; i < pointFloatArray.length / 3; i++)
@@ -84,7 +135,7 @@ public class PerceptionDataLoader
            int count = (int) hdf5Manager.getCount(namespace);
            for (int index = 0; index < count; index++)
            {
-              float[] pointFloatArray = new float[4 * HDF5Manager.MAX_BUFFER_SIZE];
+              float[] pointFloatArray = new float[4 * PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE];
               loadFloatArray(namespace, index, pointFloatArray);
 
               for (int i = 0; i < pointFloatArray.length / 4; i++)
@@ -174,7 +225,7 @@ public class PerceptionDataLoader
 //
 //      for (int i = 0; i < mocapPositionList.size(); i++)
 //      {
-//         if ((i % HDF5Manager.MAX_BUFFER_SIZE) == HDF5Manager.MAX_BUFFER_SIZE - 1)
+//         if ((i % PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE) == PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE - 1)
 //         {
 //            if (i == mocapPositionList.size() - 1)
 //            {
@@ -195,7 +246,7 @@ public class PerceptionDataLoader
 //
 //      for (int i = 0; i < mocapOrientationList.size(); i++)
 //      {
-//         if ((i % HDF5Manager.MAX_BUFFER_SIZE) == HDF5Manager.MAX_BUFFER_SIZE - 1)
+//         if ((i % PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE) == PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE - 1)
 //         {
 //            if (i == mocapOrientationList.size() - 1)
 //            {
