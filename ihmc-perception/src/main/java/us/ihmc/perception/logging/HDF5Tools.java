@@ -7,6 +7,7 @@ import us.ihmc.log.LogTools;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -41,9 +42,10 @@ public class HDF5Tools
     * @param data  The int[] array to be stored into the HDF5 file.
     * @param size  Size of the relevant part of the data to be stored
     */
+   @Deprecated
    public void storeIntArray(Group group, long index, int[] data, long size)
    {
-      LogTools.debug("Store Int Array: Index: {} Size: {}", index, size);
+      LogTools.info("Store Int Array: Index: {} Size: {}", index, size);
       long[] dimensions = {size};
 
       DataSpace dataSpace = new DataSpace(1, dimensions);
@@ -386,13 +388,15 @@ public class HDF5Tools
       Attribute attribute = group.openAttribute(name);
       DataType dataType = new DataType(PredType.C_S1());
       DataSpace dataSpace = attribute.getSpace();
-      long[] dims = new long[1];
+      long[] dims = new long[2];
       dataSpace.getSimpleExtentDims(dims);
-      CharPointer charPointer = new CharPointer(dims[0] + 1);
+
+      LogTools.info("Reading attribute: " + name + " with size: " + dims[0]);
+
+      BytePointer charPointer = new BytePointer(dims[0] + 1);
       attribute.read(dataType, charPointer);
-      attribute.close();
-      charPointer.put(dims[0], '\0');
-      return Arrays.toString(charPointer.getStringChars());
+      attribute._close();
+      return new String(charPointer.getStringBytes(), StandardCharsets.UTF_8);
    }
 
    /**
