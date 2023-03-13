@@ -62,29 +62,6 @@ public class PerceptionMessageTools
       cameraPinholeToPack.setCy(imageMessage.getPrincipalPointYPixels());
    }
 
-   public static void compressAndPublishDepthImagePNG(Mat depth16UC1Image,
-                                                      ROS2Topic<ImageMessage> topic,
-                                                      ImageMessage depthImageMessage,
-                                                      ROS2Helper helper,
-                                                      FramePose3D cameraPose,
-                                                      Instant aquisitionTime,
-                                                      long sequenceNumber,
-                                                      int height,
-                                                      int width)
-   {
-      BytePointer compressedDepthPointer = new BytePointer();
-      BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-      BytedecoOpenCVTools.packImageMessage(depthImageMessage,
-                                           compressedDepthPointer,
-                                           cameraPose,
-                                           aquisitionTime,
-                                           sequenceNumber,
-                                           height,
-                                           width,
-                                           ImageMessageFormat.DEPTH_PNG_16UC1.ordinal());
-      helper.publish(topic, depthImageMessage);
-   }
-
    public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
                                                   ROS2Topic<ImageMessage> topic,
                                                   ImageMessage depthImageMessage,
@@ -109,8 +86,7 @@ public class PerceptionMessageTools
       helper.publish(topic, depthImageMessage);
    }
 
-   public static void publishJPGCompressedColorImage(Mat color8UC3Image,
-                                                     Mat yuvColorImage,
+   public static void publishJPGCompressedColorImage(BytePointer compressedColorPointer,
                                                      ROS2Topic<ImageMessage> topic,
                                                      ImageMessage colorImageMessage,
                                                      ROS2Helper helper,
@@ -121,8 +97,6 @@ public class PerceptionMessageTools
                                                      int width,
                                                      float depthToMetersRatio)
    {
-      BytePointer compressedColorPointer = new BytePointer();
-      BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
       packImageMessage(colorImageMessage,
                        compressedColorPointer,
                        cameraPose,

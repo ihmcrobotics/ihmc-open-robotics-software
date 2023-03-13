@@ -86,6 +86,8 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private static final MutableInt INDEX = new MutableInt();
 
    private Mat depthImageMat;
+   private final BytePointer compressedColorPointer = new BytePointer();
+   private final BytePointer compressedDepthPointer = new BytePointer();;
 
    private final ImageMessage colorImageMessage = new ImageMessage();
    private final ImageMessage depthImageMessage = new ImageMessage();
@@ -682,8 +684,9 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             Instant now = Instant.now();
             sensorPose.setToZero(sensorFrame);
             sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
-            PerceptionMessageTools.compressAndPublishDepthImagePNG(depthImageMat, ros2DepthTopic, depthImageMessage, ros2Helper, sensorPose, now, depthSequenceNumber++,
-                                                                   depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth());
+            BytedecoOpenCVTools.compressImagePNG(depthImageMat, compressedDepthPointer);
+            PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer, ros2DepthTopic, depthImageMessage, ros2Helper, sensorPose, now, depthSequenceNumber++,
+                                                                   depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth(), 0.001f);
 
          });
       }
@@ -705,7 +708,8 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             opencv_imgproc.cvtColor(rgba8Mat, rgb8Mat, opencv_imgproc.COLOR_RGBA2RGB);
 
             Instant now = Instant.now();
-            PerceptionMessageTools.publishJPGCompressedColorImage(rgba8Mat, yuv420Image, ros2ColorTopic, colorImageMessage, ros2Helper, sensorPose, now, colorSequenceNumber++,
+            BytedecoOpenCVTools.compressRGBImageJPG(rgb8Mat, yuv420Image, compressedColorPointer);
+            PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer, ros2ColorTopic, colorImageMessage, ros2Helper, sensorPose, now, colorSequenceNumber++,
                                                                   depthSensorSimulator.getImageHeight(), depthSensorSimulator.getImageWidth(), 0.001f);
          });
       }

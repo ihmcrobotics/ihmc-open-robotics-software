@@ -22,6 +22,7 @@ import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
 
 import java.nio.ByteBuffer;
 
@@ -59,7 +60,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    {
       avutil.av_log_set_level(avutil.AV_LOG_WARNING);
 
-      String file = hdf5File.replaceFirst(hdf5Tools.HDF5_FILE_EXTENSION, ""); // BAD
+      String file = hdf5File.replaceFirst(PerceptionLoggerConstants.HDF5_FILE_EXTENSION, ""); // BAD
 
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = avformat.avformat_alloc_context();

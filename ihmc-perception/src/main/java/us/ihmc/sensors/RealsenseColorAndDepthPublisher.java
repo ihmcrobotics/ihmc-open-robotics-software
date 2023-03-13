@@ -19,6 +19,7 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -34,9 +35,7 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
 import java.util.function.Supplier;
 
 /**
@@ -81,8 +80,8 @@ public class RealsenseColorAndDepthPublisher
 
    private final double outputPeriod;
 
-   private BytePointer compressedColorPointer;
-   private BytePointer compressedDepthPointer;
+   private final BytePointer compressedColorPointer = new BytePointer();
+   private final BytePointer compressedDepthPointer = new BytePointer();;
 
    private final ImageMessage colorImageMessage = new ImageMessage();
    private final ImageMessage depthImageMessage = new ImageMessage();
@@ -151,6 +150,20 @@ public class RealsenseColorAndDepthPublisher
       realsense.initialize();
    }
 
+   private void initializeLogger()
+   {
+      String logFileName = HDF5Tools.generateLogFileName();
+      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+
+      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+      perceptionDataLogger.addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
+
+      loggerInitialized = true;
+   }
+
    private void update()
    {
       if (realsense.readFrameData())
@@ -181,8 +194,8 @@ public class RealsenseColorAndDepthPublisher
 
          colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
 
-         compressedDepthPointer = new BytePointer();
          BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
+         BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
 
          if (parameters.getPublishDepth())
          {
@@ -200,8 +213,7 @@ public class RealsenseColorAndDepthPublisher
 
          if (parameters.getPublishColor())
          {
-            PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3Image,
-                                                                  yuvColorImage,
+            PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
                                                                   colorTopic,
                                                                   colorImageMessage,
                                                                   ros2Helper,
@@ -217,24 +229,15 @@ public class RealsenseColorAndDepthPublisher
          {
             if (!loggerInitialized)
             {
-               SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-               String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
-               FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-
-               perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
-               perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
-               perceptionDataLogger.setChannelEnabled(PerceptionLoggerConstants.L515_DEPTH_NAME, true);
-
-               loggerInitialized = true;
+               initializeLogger();
             }
 
             long timestamp = Conversions.secondsToNanoseconds(acquisitionTime.getEpochSecond()) + acquisitionTime.getNano();
 
             perceptionDataLogger.storeLongs(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
-            perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.L515_DEPTH_NAME, compressedDepthPointer);
-
             perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, cameraPosition);
             perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, cameraQuaternion);
+            perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.L515_DEPTH_NAME, compressedDepthPointer);
 
             previousLoggerEnabledState = true;
          }

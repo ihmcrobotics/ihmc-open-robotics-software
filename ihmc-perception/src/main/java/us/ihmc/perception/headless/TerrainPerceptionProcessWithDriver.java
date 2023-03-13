@@ -1,5 +1,6 @@
 package us.ihmc.perception.headless;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -56,6 +57,9 @@ public class TerrainPerceptionProcessWithDriver
    private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
 
+   private final BytePointer compressedColorPointer = new BytePointer();
+   private final BytePointer compressedDepthPointer = new BytePointer();;
+
    private BytedecoImage debugExtractionImage;
    private final ImageMessage depthImageMessage = new ImageMessage();
    private final ImageMessage colorImageMessage = new ImageMessage();
@@ -64,7 +68,7 @@ public class TerrainPerceptionProcessWithDriver
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense sensor;
-   private Mat depthU16C1Image;
+   private Mat depth16UC1Image;
    private Mat color8UC3Image;
    private Mat yuvColorImage = new Mat();
    private BytedecoImage depthBytedecoImage;
@@ -160,14 +164,14 @@ public class TerrainPerceptionProcessWithDriver
 
             sensor.updateDataBytePointers();
 
-            if (depthU16C1Image == null)
+            if (depth16UC1Image == null)
             {
                LogTools.info("Is now reading frames.");
 
                MutableBytePointer depthFrameData = sensor.getDepthFrameData();
                MutableBytePointer colorFrameData = sensor.getColorFrameData();
 
-               depthU16C1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
+               depth16UC1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
                depthBytedecoImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
                color8UC3Image = new Mat(colorHeight, colorWidth, opencv_core.CV_8UC3, colorFrameData);
 
@@ -207,7 +211,7 @@ public class TerrainPerceptionProcessWithDriver
             //            LogTools.info("New Iteration: {}", dataAquisitionTime);
             ros2PropertySetGroup.update();
 
-            depthU16C1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
+            depth16UC1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
 
             FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
             extractFramePlanarRegionsList(depthBytedecoImage, ReferenceFrame.getWorldFrame(), framePlanarRegionsList);
@@ -215,9 +219,12 @@ public class TerrainPerceptionProcessWithDriver
 
             //            LogTools.info("Planar regions: {}", planarRegionsList.getNumberOfPlanarRegions());
 
+            BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
+            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
+
             // TODO:  Filter out regions that are colliding with the body before publishing
             PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
-            PerceptionMessageTools.compressAndPublishDepthImagePNG(depthU16C1Image,
+            PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
                                                                    depthTopic,
                                                                    depthImageMessage,
                                                                    ros2Helper,
@@ -225,9 +232,10 @@ public class TerrainPerceptionProcessWithDriver
                                                                    now,
                                                                    depthSequenceNumber,
                                                                    depthHeight,
-                                                                   depthWidth);
-            PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3Image,
-                                                           yuvColorImage,
+                                                                   depthWidth,
+                                                               (float) sensor.getDepthDiscretization());
+
+            PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
                                                            colorTopic,
                                                            colorImageMessage,
                                                            ros2Helper,
