@@ -8,7 +8,7 @@ This library provides a convenient python based command-line tool for replaying,
 
 ### Installation
 
-Install the python scripts into the binaries of your system using the install script inside plogs:
+Install the python scripts into the binaries of your system using the install script inside plogs (navigate to the plogs directory):
 
     bash install.sh
 
