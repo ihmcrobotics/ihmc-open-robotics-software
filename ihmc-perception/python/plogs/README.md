@@ -6,6 +6,12 @@
 
 This library provides a convenient python based command-line tool for replaying, plotting, analyzing and viewing perception logs collected on robots using their sensor signals. 
 
+### Installation
+
+Install the python scripts into the binaries of your system using the install script inside plogs:
+
+    bash install.sh
+
 ### Dependencies
     h5py
     matplotlib
