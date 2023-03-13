@@ -60,7 +60,7 @@ def print_file_info(h5, h5_filename):
     print()
 
 def print_file_size(path, filename):
-    print(f"{'  ' + filename:<45} {os.path.getsize(path + filename) / 1e6:<8.3f} MB")
+    print(f"{'  ' + filename:<45} {os.path.getsize(path + filename) / (1024 * 1024):<8.3f} MB")
 
 def print_file_sizes(path, filenames):    
     print('------------------------------------------ HDF5 File Sizes --------------------------------------------\n\n')
