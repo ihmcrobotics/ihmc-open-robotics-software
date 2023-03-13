@@ -143,19 +143,19 @@ public class RDXPlanarRegionMappingDemo
                   baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
                }
 
-//               if (!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
-//               {
-//                  MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
-//
-//                  mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
-//                  mocapGraphic.update();
-//               }
-//
-//               if (!mappingManager.getSensorPositionBuffer().isEmpty())
-//               {
-//                  rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
-//                  rootJointGraphic.update();
-//               }
+               if (!mappingManager.getMocapPositionBuffer().isEmpty() && !graphicsInitialized)
+               {
+                  MocapTools.adjustMocapPositionsByOffset(mappingManager.getMocapPositionBuffer(), mappingManager.getSensorPositionBuffer().get(0));
+
+                  mocapGraphic.generateMeshes(mappingManager.getMocapPositionBuffer(), 10);
+                  mocapGraphic.update();
+               }
+
+               if (!mappingManager.getSensorPositionBuffer().isEmpty())
+               {
+                  rootJointGraphic.generateMeshes(mappingManager.getSensorPositionBuffer(), 5);
+                  rootJointGraphic.update();
+               }
 
                graphicsInitialized = true;
 

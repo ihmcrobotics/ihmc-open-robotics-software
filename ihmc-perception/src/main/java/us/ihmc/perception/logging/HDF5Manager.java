@@ -1,9 +1,6 @@
 package us.ihmc.perception.logging;
 
-import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TLongArrayList;
 import org.bytedeco.hdf5.*;
-import org.bytedeco.javacpp.IntPointer;
 import us.ihmc.log.LogTools;
 
 import java.nio.file.Path;
@@ -35,14 +32,36 @@ public class HDF5Manager
 
 
    /**
+    * Open a handle for the group requested in the namespace
+    *
+    * @param namespace The namespace for which a group handle has been requested
+    * @return The HDF5 group handle for the requested namespace
+    */
+   public Group openOrGetGroup(String namespace)
+   {
+      if (groups.containsKey(namespace))
+      {
+         return groups.get(namespace);
+      }
+      else if (file.nameExists(namespace))
+      {
+         LogTools.info("Opening Group: {}", namespace);
+         Group group = file.openGroup(namespace);
+         groups.put(namespace, group);
+         return group;
+      }
+      else
+         return null;
+   }
+
+   /**
     * Getter to request the HDF5 group for the given topic name
     *
     * @param namespace The namespace or topic name for which the HDF5 group object has been requested
     * @return The HDF5 group object associated with the given namespace or topic name.
     */
-   public Group getGroup(String namespace)
+   public Group createOrGetGroup(String namespace)
    {
-      LogTools.info("Groups: {}", groups.size());
       if (groups.containsKey(namespace))
       {
          return groups.get(namespace);
@@ -79,18 +98,6 @@ public class HDF5Manager
       }
       else
          return 0;
-   }
-
-   /**
-    * Open a handle for the group requested in the namespace
-    *
-    * @param namespace The namespace for which a group handle has been requested
-    * @return The HDF5 group handle for the requested namespace
-    */
-   public Group openGroup(String namespace)
-   {
-      Group group = file.openGroup(namespace);
-      return group;
    }
 
    /**
