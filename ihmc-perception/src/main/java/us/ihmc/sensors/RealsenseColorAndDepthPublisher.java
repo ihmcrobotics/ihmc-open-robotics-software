@@ -49,29 +49,30 @@ import java.util.function.Supplier;
  */
 public class RealsenseColorAndDepthPublisher
 {
-   private String serialNumber;
-   private final ROS2Helper ros2Helper;
+   private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private final RealsenseConfiguration realsenseConfiguration;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
-   private final FramePose3D cameraPose = new FramePose3D();
-   private final FramePose3D colorPoseInDepthFrame = new FramePose3D();
-
-   private final Point3D cameraPosition = new Point3D();
-   private final Quaternion cameraQuaternion = new Quaternion();
-
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
-   private volatile boolean running = true;
+   private final ROS2Helper ros2Helper;
+   private final String serialNumber;
+
+   private final PerceptionConfigurationParameters parameters = new PerceptionConfigurationParameters();
+   private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
+   private final BytePointer compressedColorPointer = new BytePointer();
+   private final BytePointer compressedDepthPointer = new BytePointer();;
+   private final FramePose3D colorPoseInDepthFrame = new FramePose3D();
+   private final ImageMessage colorImageMessage = new ImageMessage();
+   private final ImageMessage depthImageMessage = new ImageMessage();
+   private final Quaternion cameraQuaternion = new Quaternion();
+   private final FramePose3D cameraPose = new FramePose3D();
+   private final Point3D cameraPosition = new Point3D();
    private final Throttler throttler = new Throttler();
 
-   private PerceptionConfigurationParameters parameters = new PerceptionConfigurationParameters();
-   private ROS2StoredPropertySetGroup ros2PropertySetGroup;
-   private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
-
-   private boolean sensorInitialized = false;
-   private boolean loggerInitialized = false;
    private boolean previousLoggerEnabledState = false;
+   private boolean loggerInitialized = false;
+   private volatile boolean running = true;
 
-   private final RealsenseConfiguration realsenseConfiguration;
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense realsense;
    private Mat depth16UC1Image;
@@ -80,11 +81,6 @@ public class RealsenseColorAndDepthPublisher
 
    private final double outputPeriod;
 
-   private final BytePointer compressedColorPointer = new BytePointer();
-   private final BytePointer compressedDepthPointer = new BytePointer();;
-
-   private final ImageMessage colorImageMessage = new ImageMessage();
-   private final ImageMessage depthImageMessage = new ImageMessage();
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
@@ -126,44 +122,9 @@ public class RealsenseColorAndDepthPublisher
       }
    }
 
-   private void initializeSensor()
-   {
-      LogTools.info("Creating Realsense Hardware Manager");
-      realSenseHardwareManager = new RealSenseHardwareManager();
-
-      LogTools.info("Creating Bytedeco Realsense Device");
-      realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
-
-      if (realsense == null)
-      {
-         running = false;
-         throw new RuntimeException("Device could not be initialized.");
-      }
-
-      if (realsense.getDevice() == null)
-      {
-         running = false;
-         throw new RuntimeException("RealSense device not found. Set -D<model>.serial.number=00000000000");
-      }
-
-      realsense.enableColor(realsenseConfiguration);
-      realsense.initialize();
-   }
-
-   private void initializeLogger()
-   {
-      String logFileName = HDF5Tools.generateLogFileName();
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-
-      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
-      perceptionDataLogger.addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
-      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
-      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
-
-      loggerInitialized = true;
-   }
-
+   /**
+    * Update the sensor and logger, and publish the data to ROS2
+    */
    private void update()
    {
       if (realsense.readFrameData())
@@ -253,6 +214,50 @@ public class RealsenseColorAndDepthPublisher
 
          ros2PropertySetGroup.update();
       }
+   }
+
+   /**
+    * Setup everything needed for the realsense sensor to run and output data for color and depth at the desired rate and resolution.
+    */
+   private void initializeSensor()
+   {
+      LogTools.info("Creating Realsense Hardware Manager");
+      realSenseHardwareManager = new RealSenseHardwareManager();
+
+      LogTools.info("Creating Bytedeco Realsense Device");
+      realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+
+      if (realsense == null)
+      {
+         running = false;
+         throw new RuntimeException("Device could not be initialized.");
+      }
+
+      if (realsense.getDevice() == null)
+      {
+         running = false;
+         throw new RuntimeException("RealSense device not found. Set -D<model>.serial.number=00000000000");
+      }
+
+      realsense.enableColor(realsenseConfiguration);
+      realsense.initialize();
+   }
+
+   /**
+    * Setup everything needed for the perception logger to run and collect data for various sensor signals
+    */
+   private void initializeLogger()
+   {
+      String logFileName = HDF5Tools.generateLogFileName();
+      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+
+      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+      perceptionDataLogger.addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
+
+      loggerInitialized = true;
    }
 
    /**
