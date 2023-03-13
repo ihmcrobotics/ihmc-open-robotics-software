@@ -635,6 +635,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       return statusMessageOutputManager;
    }
 
+   public WholeBodyControllerCoreFactory getWholeBodyControllerCoreFactory()
+   {
+      return controllerCoreFactory;
+   }
+
    public void attachControllerFailureListeners(List<ControllerFailureListener> listeners)
    {
       for (int i = 0; i < listeners.size(); i++)
