@@ -82,17 +82,17 @@ public class RDXPerceptionUI
             blackflyRightVideoVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(blackflyRightVideoVisualizer);
 
-            RDXROS2ColoredDepthVisualizer l515ColoredDepthVisualizer = new RDXROS2ColoredDepthVisualizer("L515 Colored Depth",
-                                                                                                         PubSubImplementation.FAST_RTPS,
-                                                                                                         ROS2Tools.L515_DEPTH_IMAGE,
-                                                                                                         ROS2Tools.L515_COLOR_IMAGE);
+            RDXROS2ColoredPointCloudVisualizer l515ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("L515 Colored Depth",
+                                                                                                                   PubSubImplementation.FAST_RTPS,
+                                                                                                                   ROS2Tools.L515_DEPTH_IMAGE,
+                                                                                                                   ROS2Tools.L515_COLOR_IMAGE);
             l515ColoredDepthVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(l515ColoredDepthVisualizer);
 
-            globalVisualizersUI.addVisualizer(new RDXROS2ColoredDepthVisualizer("D435 Colored Depth",
-                                                                                PubSubImplementation.FAST_RTPS,
-                                                                                ROS2Tools.D435_DEPTH_IMAGE,
-                                                                                ROS2Tools.D435_COLOR_IMAGE));
+            globalVisualizersUI.addVisualizer(new RDXROS2ColoredPointCloudVisualizer("D435 Colored Depth",
+                                                                                     PubSubImplementation.FAST_RTPS,
+                                                                                     ROS2Tools.D435_DEPTH_IMAGE,
+                                                                                     ROS2Tools.D435_COLOR_IMAGE));
 
             RDXROS2PointCloudVisualizer l515ColoredPointCloudVisualizer = new RDXROS2PointCloudVisualizer("L515 Colored Point Cloud",
                                                                                                           ros2Node,
@@ -127,7 +127,7 @@ public class RDXPerceptionUI
             baseUI.getImGuiPanelManager().addPanel(buildingConstructor.getPanelName(), buildingConstructor::renderImGuiWidgets);
 
             baseUI.create();
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
 
             rapidRegionsExtractionUI = new RDXRemotePerceptionUI(new ROS2Helper(ros2Node));
             baseUI.getImGuiPanelManager().addPanel(rapidRegionsExtractionUI.getPanel());

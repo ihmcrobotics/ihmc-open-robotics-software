@@ -137,7 +137,7 @@ public class RDXInteractableRobotLink
             {
                dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                                            ReferenceFrame.getWorldFrame());
-               selectablePose3DGizmo.getPoseGizmo().updateTransforms();
+               selectablePose3DGizmo.getPoseGizmo().update();
                updateModified();
             }
 
@@ -257,7 +257,7 @@ public class RDXInteractableRobotLink
          robotCollidable.setDetachedTransform(true);
       }
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
-      selectablePose3DGizmo.getPoseGizmo().updateTransforms();
+      selectablePose3DGizmo.getPoseGizmo().update();
    }
 
    public boolean renderImGuiWidgets()

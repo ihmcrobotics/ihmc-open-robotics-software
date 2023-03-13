@@ -26,6 +26,8 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3Tr
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -79,10 +81,16 @@ public class SwingTrajectoryCalculator
 
    private final FrameEuclideanTrajectoryPoint tempPositionTrajectoryPoint = new FrameEuclideanTrajectoryPoint();
 
-   public SwingTrajectoryCalculator(String namePrefix, RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                    WalkingControllerParameters walkingControllerParameters, YoSwingTrajectoryParameters swingTrajectoryParameters,
+   private final String namePrefix;
+
+   public SwingTrajectoryCalculator(String namePrefix,
+                                    RobotSide robotSide,
+                                    HighLevelHumanoidControllerToolbox controllerToolbox,
+                                    WalkingControllerParameters walkingControllerParameters,
+                                    YoSwingTrajectoryParameters swingTrajectoryParameters,
                                     YoRegistry parentRegistry)
    {
+      this.namePrefix = namePrefix;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
       double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
       double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
@@ -217,8 +225,8 @@ public class SwingTrajectoryCalculator
 
    /**
     * Invoke this setter after {@link #setFootstep(Footstep)} to register what the final velocity is
-    * predicted at the end of swing, mainly to account for non-zero com velocity. The
-    * objective is to increase robustness to late touchdown.
+    * predicted at the end of swing, mainly to account for non-zero com velocity. The objective is to
+    * increase robustness to late touchdown.
     *
     * @param finalLinearVelocity the final velocity at touchdown to use. Not modified.
     */
@@ -265,9 +273,9 @@ public class SwingTrajectoryCalculator
 
    /**
     * Computes the trajectory waypoints. If the foot is executing a custom waypoint trajectory provided
-    * in the footstep (see Footstep#trajectoryType}, those are what are used. Otherwise, it
-    * uses the {@link TwoWaypointSwingGenerator} to optimize the waypoint times and velocities. If
-    * these waypoint positions have been provided using the custom waypoints interface in the
+    * in the footstep (see Footstep#trajectoryType}, those are what are used. Otherwise, it uses the
+    * {@link TwoWaypointSwingGenerator} to optimize the waypoint times and velocities. If these
+    * waypoint positions have been provided using the custom waypoints interface in the
     * {@link Footstep} class ({see Footstep#customPositionWaypoints}), these are used, otherwise they
     * are computed using the default waypoint proportions or {see Footstep#customWaypointProportions}
     * if provided.
@@ -433,5 +441,12 @@ public class SwingTrajectoryCalculator
       swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
       swingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
       swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(namePrefix + getClass().getSimpleName());
+      group.addChild(swingTrajectoryOptimizer.getSCS2YoGraphics());
+      return group;
    }
 }

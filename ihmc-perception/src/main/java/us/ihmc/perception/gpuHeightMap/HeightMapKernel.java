@@ -51,6 +51,7 @@ public class HeightMapKernel
 
       if (decompressionOutputImage != null)
          decompressionOutputImage.destroy(openCLManager);
+
       if (pointCloudVertexBuffer != null)
          pointCloudVertexBuffer.destroy(openCLManager);
 

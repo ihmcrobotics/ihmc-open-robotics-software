@@ -710,6 +710,24 @@ public abstract class WalkingControllerParameters
    public abstract double maximumHeightAboveAnkle();
 
    /**
+    * This is a reduction factor of {@link #maximumHeightAboveAnkle()} that is applied during the exchange phase to the height trajectory when the robot is
+    * stepping down
+    */
+   public double getMaxLegLengthReductionSteppingDown()
+   {
+      return 0.0;
+   }
+
+   /**
+    * If the step height change is above this value, it indicates that the foot should not be considered "flat", and that the robot is either
+    * stepping up or down
+    */
+   public double getHeightChangeForNonFlatStep()
+   {
+      return 0.10;
+   }
+
+   /**
     * Whether the height of the pelvis should be controlled instead of the center of mass height.
     */
    public boolean controlPelvisHeightInsteadOfCoMHeight()
@@ -728,12 +746,6 @@ public abstract class WalkingControllerParameters
    {
       return true;
    }
-
-   /**
-    * Parameter for the CoM height trajectory generation.
-    */
-   @Deprecated // Remove this. It is not actually doing anything.
-   public abstract double defaultOffsetHeightAboveAnkle();
 
    /**
     * Returns parameters related to stepping such as maximum step length etc.

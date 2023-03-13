@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
@@ -25,10 +24,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -98,9 +97,8 @@ public class RDXBehaviorActionSequenceEditor
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
       JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
       {
-         for (Iterator<JsonNode> actionNodeIterator = jsonNode.withArray("actions").elements(); actionNodeIterator.hasNext(); )
+         JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
          {
-            JsonNode actionNode = actionNodeIterator.next();
             String actionType = actionNode.get("type").asText();
             if (actionType.equals(RDXWalkAction.class.getSimpleName()))
             {
@@ -142,7 +140,7 @@ public class RDXBehaviorActionSequenceEditor
                RDXFootstepAction action = addFootstepAction();
                action.loadFromFile(actionNode);
             }
-         }
+         });
       });
       playbackNextIndex = 0;
    }

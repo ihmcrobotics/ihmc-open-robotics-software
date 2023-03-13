@@ -196,12 +196,6 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public double defaultOffsetHeightAboveAnkle()
-         {
-            return 0;
-         }
-
-         @Override
          public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
          {
             return false;
