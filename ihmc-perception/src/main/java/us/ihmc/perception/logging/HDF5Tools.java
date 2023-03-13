@@ -8,11 +8,22 @@ import us.ihmc.log.LogTools;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 
 public class HDF5Tools
 {
+   /**
+    * Method to generate HDF5 file name for a new log file
+    */
+   public static String generateLogFileName()
+   {
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
+      return logFileName;
+   }
+
    /**
     * Extracts the shape of a dataset and outputs the length along the requested dimension/axis (dim)
     *

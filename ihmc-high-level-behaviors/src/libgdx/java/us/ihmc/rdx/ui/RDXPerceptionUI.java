@@ -113,6 +113,13 @@ public class RDXPerceptionUI
             l515ColoredDepthVisualizer.setSubscribed(true);
             globalVisualizersUI.addVisualizer(l515ColoredDepthVisualizer);
 
+            RDXROS2ColoredPointCloudVisualizer d435ColoredDepthVisualizer = new RDXROS2ColoredPointCloudVisualizer("D435 Colored Depth",
+                                                                                                                   PubSubImplementation.FAST_RTPS,
+                                                                                                                   ROS2Tools.D435_DEPTH_IMAGE,
+                                                                                                                   ROS2Tools.D435_COLOR_IMAGE);
+            d435ColoredDepthVisualizer.setSubscribed(true);
+            globalVisualizersUI.addVisualizer(d435ColoredDepthVisualizer);
+
             RDXROS2PointCloudVisualizer l515ColoredPointCloudVisualizer = new RDXROS2PointCloudVisualizer("L515 Colored Point Cloud",
                                                                                                           ros2Node,
                                                                                                           ROS2Tools.FUSED_SENSOR_HEAD_POINT_CLOUD);

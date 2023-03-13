@@ -226,16 +226,13 @@ def analyzer_main():
     
 #     plotter_main(data, output_file)
 
-     
-
-if __name__ == '__main__':
-
+def kitti_main():
     home = os.path.expanduser('~')
     path = home + '/.ihmc/logs/perception/'
 
     timestamps_path = '/home/quantum/Workspace/Storage/Other/Temp/dataset/sequences/00/times.txt'
     poses_path = '/home/quantum/Workspace/Storage/Other/Temp/dataset/data_odometry_poses/poses/00.txt'
-    
+
     dataset_paths = ['/home/quantum/Workspace/Storage/Other/Temp/dataset/sequences/00/image_0/']
     group_names = ['/kitti/left/']
 
@@ -249,3 +246,13 @@ if __name__ == '__main__':
 
     data = h5py.File(path + 'KITTI_Dataset_00.hdf5', 'r')
     print_file_info(data, 'KITTI_Dataset_00.hdf5')
+
+if __name__ == '__main__':
+        home = os.path.expanduser('~')
+        path = home + '/.ihmc/logs/perception/'
+        filename = '20230312_190903_PerceptionLog.hdf5'
+
+        data = h5py.File(path + filename, 'r')
+        print_file_info(data, filename)
+
+        player_main(data)
