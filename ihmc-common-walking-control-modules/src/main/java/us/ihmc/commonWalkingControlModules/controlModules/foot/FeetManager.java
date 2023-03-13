@@ -135,7 +135,7 @@ public class FeetManager implements SCS2YoGraphicHolder
       }
       else if (smoothUnloading == SmoothFootUnloadMethod.RHO_WEIGHT)
       {
-         unloadedFinalRhoWeight = new DoubleParameter("unloadedFinalRhoWeight", registry, 0.001);
+         unloadedFinalRhoWeight = new DoubleParameter("unloadedFinalRhoWeight", registry, walkingControllerParameters.getFinalUnloadedRhoWeight());
       }
 
       WorkspaceLimiterParameters workspaceLimiterParameters = new WorkspaceLimiterParameters(registry);
