@@ -32,7 +32,7 @@ public class RaymanDefinition extends RobotDefinition
    public static final double BODY_MASS = 10;
    public static final double BODY_R = 0.2;
    public static double BODY_R_GYRATION = 0.1;
-   public static final Vector3DReadOnly BODY_COM = new Vector3D(0, 0, HEIGHT);
+   public static final Vector3DReadOnly BODY_COM = new Vector3D(0, 0, 0);
    public static final Vector3DReadOnly BODY_I = new Vector3D(Math.pow(BODY_R_GYRATION, 2) * BODY_MASS,
                                                               Math.pow(BODY_R_GYRATION, 2) * BODY_MASS,
                                                               Math.pow(BODY_R_GYRATION, 2) * BODY_MASS);
@@ -49,14 +49,16 @@ public class RaymanDefinition extends RobotDefinition
    public static final double FOOT_LENGTH = FOOT_BACK + FOOT_FORWARD;
    public static final double FOOT_WIDTH = 0.15;
    public static final double FOOT_HEIGHT = 0.051;
-   public static final double FOOT_MASS = 0.5;
-   public static final Vector3DReadOnly FOOT_COM = new Vector3D(0.050700, 0.0, -FOOT_HEIGHT / 2);
-   public static final Vector3DReadOnly FOOT_I = new Vector3D(0.00036326, 0.00152067, 0.00170404);
+   public static final double FOOT_MASS = 1.0;
+//   public static final Vector3DReadOnly FOOT_COM = new Vector3D(0.050700, 0.0, -FOOT_HEIGHT / 2);
+//   public static final Vector3DReadOnly FOOT_I = new Vector3D(0.00036326, 0.00152067, 0.00170404);
+   public static final Vector3DReadOnly FOOT_COM = new Vector3D(FOOT_LENGTH / 2, 0.0, -FOOT_HEIGHT / 2);
+   public static final Vector3DReadOnly FOOT_I = new Vector3D(0.001, 0.0035, 0.004);
 
    //etc
    public SideDependentList<RevoluteJointDefinition> footParentJoints = new SideDependentList<>();
-   public static final double KNEE_SPRING = 10;
-   public static final double KNEE_DAMPING = 8;
+   public static final double KNEE_SPRING = 100;
+   public static final double KNEE_DAMPING = 80;
 
    // NOTE: constructor
    public RaymanDefinition()
@@ -91,7 +93,7 @@ public class RaymanDefinition extends RobotDefinition
                                                                     Axis3D.X,
                                                                     mainBody);
 //      RigidBodyDefinition nullLeftHip = createNullBody("null_left_hip");
-      RigidBodyDefinition nullLeftHip = createNullSphere("null_left_hip", 0.05, new Vector3D(), ColorDefinitions.LightCoral());
+      RigidBodyDefinition nullLeftHip = createNullCapsule("leftHip", 0.05, new Vector3D(), ColorDefinitions.LightCoral());
       leftHipJoints[2].setSuccessor(nullLeftHip);
 
       // left prismatic (knee) joint
@@ -102,7 +104,7 @@ public class RaymanDefinition extends RobotDefinition
       nullLeftHip.addChildJoint(leftKneeJoint);
 
 //      RigidBodyDefinition nullLeftShin = createNullBody("null_left_shin");
-      RigidBodyDefinition nullLeftShin = createNullSphere("null_left_shin", 0.05, new Vector3D(), ColorDefinitions.Red());
+      RigidBodyDefinition nullLeftShin = createNullCapsule("null_left_shin", 0.05, new Vector3D(), ColorDefinitions.Red());
       leftKneeJoint.setSuccessor(nullLeftShin);
 
       // left ankle roll
@@ -145,8 +147,8 @@ public class RaymanDefinition extends RobotDefinition
                                                                    Axis3D.Y,
                                                                    Axis3D.X,
                                                                    mainBody);
-//      RigidBodyDefinition nullRightHip = createNullBody("null_right_hip");
-      RigidBodyDefinition nullRightHip = createNullSphere("null_right_hip", 0.05, new Vector3D(), ColorDefinitions.LightGreen());
+      // RigidBodyDefinition nullRightHip = createNullBody("null_right_hip");
+      RigidBodyDefinition nullRightHip = createNullCapsule("rightHip", 0.05, new Vector3D(), ColorDefinitions.LightGreen());
       rightHipJoints[2].setSuccessor(nullRightHip);
 
       // right prismatic (knee) joint
@@ -157,7 +159,7 @@ public class RaymanDefinition extends RobotDefinition
       nullRightHip.addChildJoint(rightKneeJoint);
 
 //      RigidBodyDefinition nullRightShin = createNullBody("null_right_shin");
-      RigidBodyDefinition nullRightShin = createNullSphere("null_right_shin", 0.05, new Vector3D(), ColorDefinitions.Green());
+      RigidBodyDefinition nullRightShin = createNullCapsule("null_right_shin", 0.05, new Vector3D(), ColorDefinitions.Green());
       rightKneeJoint.setSuccessor(nullRightShin);
 
       // right ankle roll
@@ -208,14 +210,14 @@ public class RaymanDefinition extends RobotDefinition
       forEachOneDoFJointDefinition(j -> j.setDamping(0.0));
    }
 
-   private RigidBodyDefinition createNullSphere(String title, double radius, Vector3DReadOnly offset, ColorDefinition color)
+   private RigidBodyDefinition createNullCapsule(String title, double radius, Vector3DReadOnly offset, ColorDefinition color)
    {
       // body
       RigidBodyDefinition sphere = new RigidBodyDefinition(title);
       sphere.setMass(1.0e-12);
       sphere.getMomentOfInertia().setToDiagonal(1.0e-12, 1.0e-12, 1.0e-12);
       // graphics
-      GeometryDefinition geometryDefinition = new Sphere3DDefinition(radius);
+      GeometryDefinition geometryDefinition = new Capsule3DDefinition(1.4 * radius, radius);
       MaterialDefinition materialDefinition = new MaterialDefinition(color);
       sphere.addVisualDefinition(new VisualDefinition(new RigidBodyTransform(), geometryDefinition, materialDefinition));
       return sphere;
@@ -231,10 +233,10 @@ public class RaymanDefinition extends RobotDefinition
       body.getMomentOfInertia().setToDiagonal(BODY_I.getX(), BODY_I.getY(), BODY_I.getZ());
 
       // add graphics definition.
-      GeometryDefinition geometryDefinition = new Box3DDefinition(BODY_R,BODY_R,BODY_R);
+      GeometryDefinition geometryDefinition = new ArcTorus3DDefinition(0, 2 * Math.PI, BODY_R, 0.5 * BODY_R);
       RigidBodyTransform pose = new RigidBodyTransform();
       pose.appendTranslation(0.0, 0.0, BODY_COM.getZ());
-      MaterialDefinition materialDefinition = new MaterialDefinition(ColorDefinitions.LightBlue());
+      MaterialDefinition materialDefinition = new MaterialDefinition(ColorDefinitions.BlanchedAlmond());
       body.addVisualDefinition(new VisualDefinition(pose, geometryDefinition, materialDefinition));
 
       return body;
@@ -257,6 +259,10 @@ public class RaymanDefinition extends RobotDefinition
       RevoluteJointDefinition joint1 = new RevoluteJointDefinition(jname1);
       RevoluteJointDefinition joint2 = new RevoluteJointDefinition(jname2);
       RevoluteJointDefinition joint3 = new RevoluteJointDefinition(jname3);
+
+      joint1.setPositionLimits(-Math.PI / 2, Math.PI / 2);
+      joint2.setPositionLimits(-Math.PI / 2, Math.PI / 2);
+      joint3.setPositionLimits(-Math.PI / 2, Math.PI / 2);
 
       RigidBodyDefinition joint1Body = createNullBody(jname1 + "Body");
       RigidBodyDefinition joint2Body = createNullBody(jname2 + "Body");

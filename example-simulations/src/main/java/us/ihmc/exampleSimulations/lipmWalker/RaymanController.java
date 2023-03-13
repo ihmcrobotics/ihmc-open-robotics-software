@@ -15,9 +15,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.MathTools;
+import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -37,6 +44,7 @@ import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -49,8 +57,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class RaymanController implements Controller
 {
@@ -84,7 +96,7 @@ public class RaymanController implements Controller
    private final YoFramePoint3D desiredCenterOfMassPoint = new YoFramePoint3D("desiredCenterOfMassPoint", WORLD_FRAME, registry);
    private final SideDependentList<YoFramePoint3D> soleFramePoints = new SideDependentList<>();
 
-   private final YoFramePoint3D measuredCapturePointPosition = new YoFramePoint3D("measuredCapturePoint", WORLD_FRAME, registry);
+   private final YoFramePoint3D measuredICP = new YoFramePoint3D("measuredCapturePoint", WORLD_FRAME, registry);
    private double omega0 = Math.sqrt(9.81 / DESIRED_CENTER_OF_MASS_HEIGHT);
 
    private final YoDouble desiredComVelocityX = new YoDouble("desiredComVelocityX", registry);
@@ -98,6 +110,10 @@ public class RaymanController implements Controller
 
    private final YoFramePoint3D desiredNextFootstepPositionForVisual = new YoFramePoint3D("desiredFootstepPosition", WORLD_FRAME, registry);
    private final YoFramePoint3D desiredCurrentFootPosition = new YoFramePoint3D("desiredCurrentFootPosition", WORLD_FRAME, registry);
+
+   private final ArrayList<Point3D> leftHipTrajectory = new ArrayList<>();
+   private final BagOfBalls leftHipTrajectoryBalls = new BagOfBalls(500, 0.05, "leftHipTrajectory", YoAppearance.Black(), registry, yoGraphicsListRegistry);
+   private int leftHipTrajectoryIndex = 0;
 
    private enum WalkingStateEnum
    {
@@ -124,8 +140,8 @@ public class RaymanController implements Controller
       bipedSupportPolygons = new BipedSupportPolygons(midFeetFrame, soleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       stateMachine = createStateMachine();
-      transferDuration.set(2.8);
-      swingDuration.set(2.8);
+      transferDuration.set(3.0);
+      swingDuration.set(3.0);
 
       //TODO: this should be calculated
       desiredStepLength.set(0.15);
@@ -138,8 +154,6 @@ public class RaymanController implements Controller
 
       ankleDesiredYawPitchRoll = new YoFrameYawPitchRoll("ankleDesiredYawPitchRoll", ReferenceFrame.getWorldFrame(), registry);
       ankleDesiredAngularVelocity = new YoFrameVector3D("ankleDesiredAngularVelocity", ReferenceFrame.getWorldFrame(), registry);
-
-
    }
 
    public YoGraphicDefinition createVisualization()
@@ -147,10 +161,9 @@ public class RaymanController implements Controller
       // define a group of YoGraphic definitions
       YoGraphicGroupDefinition graphicsGroup = new YoGraphicGroupDefinition("Controller");
       //      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredCapturePoint", desiredCapturePointPosition, 0.02, ColorDefinitions.Red()));
-      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("measuredCapturePoint",
-                                                                            measuredCapturePointPosition,
-                                                                            0.02,
-                                                                            ColorDefinitions.Blue()));
+      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("measuredICP", measuredICP,
+                                                                            0.1,
+                                                                            ColorDefinitions.BurlyWood()));
       graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("measuredCenterOfMass", measuredCenterOfMassPoint, 0.1, ColorDefinitions.Black()));
       graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredCenterOfMass", desiredCenterOfMassPoint, 0.1, ColorDefinitions.GreenYellow()));
       graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("leftSoleFramePoint",
@@ -168,6 +181,9 @@ public class RaymanController implements Controller
                                                                             desiredCurrentFootPosition,
                                                                             0.1,
                                                                             ColorDefinitions.Blue()));
+
+      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("leftHipTrajectory", leftHipTrajectoryBalls.getPositions(), 0.1, ColorDefinitions.Blue()));
+
       //      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredCentroidalMomentPivotPoint", desiredCentroidalMomentPivotPosition, 0.02, ColorDefinitions.Black()));
       return graphicsGroup;
    }
@@ -277,7 +293,7 @@ public class RaymanController implements Controller
 
       /*
        * As the pelvis is to kept level to the ground independently to the active state, we can simply
-       * setup the command here.
+       * setup the command here. MAIN BODY IS PELVIS IN RAYMAN.
        */
       OrientationFeedbackControlCommand pelvisOrientationCommand = new OrientationFeedbackControlCommand();
       pelvisOrientationCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS); // sets control mode to
@@ -342,6 +358,8 @@ public class RaymanController implements Controller
       @Override
       public void doAction(double timeInState)
       {
+         addHipTrajectoryPoint();
+
          // Here we get the position of both feet to compute the middle.
          FramePoint3D leftSolePosition = new FramePoint3D(robotJae.getSoleFrame(RobotSide.LEFT));
          leftSolePosition.changeFrame(WORLD_FRAME);
@@ -361,11 +379,8 @@ public class RaymanController implements Controller
 
          planeContactStateCommands = new SideDependentList<>(side -> createPlaneContactStateCommand(side, true));
 
-         FrameVector3D measuredCoMVelocity = new FrameVector3D(WORLD_FRAME, toolbox.getCentroidalMomentumRateCalculator().getCenterOfMassVelocity());
-         FramePoint3D measuredCPPosition = new FramePoint3D(WORLD_FRAME);
-         measuredCPPosition.scaleAdd(1.0 / omega0, measuredCoMVelocity, measuredCoMPosition);
-         measuredCapturePointPosition.set(measuredCPPosition);
-         measuredCapturePointPosition.setZ(0.0);
+         updateICP();
+
          measuredCenterOfMassPoint.set(measuredCoMPosition);
 
          for (RobotSide robotSide : RobotSide.values)
@@ -376,18 +391,12 @@ public class RaymanController implements Controller
             // This is the command that we can use to request a contactable body to be used for support or not.
             controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommands.get(robotSide));
 
-            OneDoFJointBasics[] leftAnkleRollPitch = robotJae.getAnkleJoints(RobotSide.LEFT);
-            OneDoFJointBasics[] rightAnkleRollPitch = robotJae.getAnkleJoints(RobotSide.RIGHT);
-
-            JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
-            jointspaceAccelerationCommand.addJoint(leftAnkleRollPitch[0], 0);
-            jointspaceAccelerationCommand.addJoint(leftAnkleRollPitch[1], 0);
-
-            controllerCoreCommand.addInverseDynamicsCommand(jointspaceAccelerationCommand);
-            //            rollCommand.set
-            //            JointLimitParameters ankleRollStandParameter = new JointLimitParameters();
-            //            ankleRollStandParameter.setMaxAbsJointVelocity(10);
-            //            ankleRollStandParameter.setJointLimitDistanceForMaxVelocity();
+//            OneDoFJointBasics[] leftAnkleRollPitch = robotJae.getAnkleJoints(RobotSide.LEFT);
+//            OneDoFJointBasics[] rightAnkleRollPitch = robotJae.getAnkleJoints(RobotSide.RIGHT);
+//            JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
+//            jointspaceAccelerationCommand.addJoint(leftAnkleRollPitch[0], 0);
+//            jointspaceAccelerationCommand.addJoint(leftAnkleRollPitch[1], 0);
+//            controllerCoreCommand.addInverseDynamicsCommand(jointspaceAccelerationCommand);
          }
          bipedSupportPolygons.updateUsingContactStateCommand(planeContactStateCommands);
       }
@@ -452,6 +461,12 @@ public class RaymanController implements Controller
       @Override
       public void doAction(double timeInState)
       {
+         // update icp
+         updateICP();
+
+         // left hip trajectory for debugging
+         addHipTrajectoryPoint();
+
          // The trajectory generator is updated to get the current progression percentage alpha which is in [0, 1].
          centerOfMassTrajectory.compute(MathTools.clamp(timeInState, 0.0, transferDuration.getValue()));
          double alpha = centerOfMassTrajectory.getValue();
@@ -574,6 +589,8 @@ public class RaymanController implements Controller
       @Override
       public void doAction(double timeInState)
       {
+         addHipTrajectoryPoint();
+
          // During this state, the center of mass is kept right above the support foot.
          FramePoint3D centerOfMassPosition = new FramePoint3D(robotJae.getSoleFrame(supportSide));
          centerOfMassPosition.changeFrame(WORLD_FRAME);
@@ -616,6 +633,7 @@ public class RaymanController implements Controller
 
          // Finally, we pack the swing foot command for the controller core.
          SpatialFeedbackControlCommand swingFootCommand = new SpatialFeedbackControlCommand();
+
          // sets control mode to inverse dynamics
          swingFootCommand.setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
          swingFootCommand.set(robotJae.getElevator(), robotJae.getFoot(swingSide));
@@ -627,6 +645,7 @@ public class RaymanController implements Controller
          controllerCoreCommand.addFeedbackControlCommand(swingFootCommand);
 
          desiredCurrentFootPosition.set(position);
+         updateICP();
 
          bipedSupportPolygons.updateUsingContactStateCommand(planeContactStateCommands);
       }
@@ -700,6 +719,37 @@ public class RaymanController implements Controller
       planeContactStateCommand.setCoefficientOfFriction(0.8);
       planeContactStateCommand.setContactNormal(new FrameVector3D(WORLD_FRAME, 0.0, 0.0, 1.0));
       return planeContactStateCommand;
+   }
+
+   public void updateICP()
+   {
+      FramePoint3D measuredCoMPosition = new FramePoint3D(WORLD_FRAME, toolbox.getCenterOfMassFrame().getTransformToWorldFrame().getTranslation());
+      FrameVector3D measuredCoMVelocity = new FrameVector3D(WORLD_FRAME, toolbox.getCentroidalMomentumRateCalculator().getCenterOfMassVelocity());
+      FramePoint3D measuredCPPosition = new FramePoint3D(WORLD_FRAME);
+      measuredCPPosition.scaleAdd(1.0 / omega0, measuredCoMVelocity, measuredCoMPosition);
+      measuredICP.set(measuredCPPosition);
+      measuredICP.setZ(0.0);
+   }
+
+   public void addHipTrajectoryPoint()
+   {
+      ReferenceFrame leftHipFrame = robotJae.getHipBodyReferenceFrame(RobotSide.LEFT);
+      leftHipTrajectoryBalls.setBall(new Point3D(leftHipFrame.getTransformToWorldFrame().getTranslation()));
+
+      if (leftHipTrajectory.size() == 500)
+      {
+         leftHipTrajectory.remove(0);
+      }
+      leftHipTrajectory.add(new Point3D(leftHipFrame.getTransformToWorldFrame().getTranslation()));
+
+      leftHipTrajectoryBalls.reset();
+
+      for (int i = 0; i < leftHipTrajectory.size(); ++i)
+      {
+         leftHipTrajectoryBalls.setBall((Point3DReadOnly) leftHipTrajectory.get(i), YoAppearance.Black(), i);
+      }
+
+//      LogTools.info("left hip location: {}", leftHipFrame.getTransformToWorldFrame().getTranslation());
    }
 
    @Override

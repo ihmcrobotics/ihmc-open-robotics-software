@@ -20,6 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -241,5 +242,11 @@ public class RaymanWalker
       MidFrameZUpFrame midFeetZUpFrame;
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", ReferenceFrame.getWorldFrame(), getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
       return midFeetZUpFrame;
+   }
+
+   public ReferenceFrame getHipBodyReferenceFrame(RobotSide side)
+   {
+      RigidBodyBasics hip = MultiBodySystemTools.findRigidBody(controllerRobot.getRootBody(), side.getCamelCaseName() + "Hip");
+      return hip.getBodyFixedFrame();
    }
 }

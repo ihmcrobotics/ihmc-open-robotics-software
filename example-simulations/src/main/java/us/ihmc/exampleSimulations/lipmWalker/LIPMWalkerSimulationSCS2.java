@@ -1,12 +1,7 @@
 package us.ihmc.exampleSimulations.lipmWalker;
 
-import us.ihmc.robotics.physics.PhysicsEngineTools;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.scs2.SimulationConstructionSet2;
-import us.ihmc.scs2.definition.controller.interfaces.Controller;
-import us.ihmc.scs2.definition.geometry.GeometryDefinition;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
-import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.robot.Robot;
 
@@ -88,7 +83,7 @@ public class LIPMWalkerSimulationSCS2
       // Camera settings
       scs.setCameraFocusPosition(0.0, 0.0, 0.8);
       scs.setCameraPosition(0.0, 5.0, 2.0);
-      scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(controller.getYoGraphicsListRegistry()));
+      scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controller.getYoGraphicsListRegistry()));
       scs.requestCameraRigidBodyTracking(scs.getRobots().get(0).getName(), scs.getRobots().get(0).getAllJoints().get(0).getSuccessor().getName());
       scs.requestPlotter2DCoordinateTracking("measuredCenterOfMassX","measuredCenterOfMassY","worldFrame");
       scs.showOverheadPlotter2D(true);

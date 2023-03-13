@@ -1,8 +1,7 @@
 package us.ihmc.exampleSimulations.lipmWalker;
 
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.scs2.SimulationConstructionSet2;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
-import us.ihmc.scs2.sessionVisualizer.jfx.yoGraphic.YoGraphicTools;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
 import us.ihmc.scs2.simulation.robot.Robot;
 
@@ -16,14 +15,14 @@ public class RaymanWalkerSimulation
       RaymanDefinition walkerDef = new RaymanDefinition();
 
       // Define ground contact parameters
-      ContactPointBasedContactParameters contact = ContactPointBasedContactParameters.defaultParameters();
-      contact.setKxy(40000.0);
-      contact.setBxy(100.0);
-      contact.setKz(500.0);
-      contact.setBz(250.0);
+      ContactPointBasedContactParameters parameters = ContactPointBasedContactParameters.defaultParameters();
+      parameters.setKxy(4000.0);
+      parameters.setBxy(100.0);
+      parameters.setKz(150.0);
+      parameters.setBz(50.0);
 
       // Instantiate a SCS object
-      SimulationConstructionSet2 scs = new SimulationConstructionSet2(SimulationConstructionSet2.contactPointBasedPhysicsEngineFactory(contact));
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2(SimulationConstructionSet2.contactPointBasedPhysicsEngineFactory(parameters));
 
       // The gravity has to be explicitly defined for the controller core (maybe a robot on the Moon someday...?)
       double gravityMagnitude = 9.81;
@@ -63,10 +62,10 @@ public class RaymanWalkerSimulation
       scs.setCameraFocusPosition(0.0, 0.0, 0.8);
       scs.setCameraPosition(0.0, 5.0, 2.0);
 
-      scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(controller.getYoGraphicsListRegistry()));
+      scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controller.getYoGraphicsListRegistry()));
       scs.addYoGraphic(controller.getYoGraphicDefinition());
       scs.requestCameraRigidBodyTracking(scs.getRobots().get(0).getName(), scs.getRobots().get(0).getAllJoints().get(0).getSuccessor().getName());
-      scs.requestPlotter2DCoordinateTracking("measuredCenterOfMassX","measuredCenterOfMassY","worldFrame");
+      scs.requestPlotter2DCoordinateTracking("measuredCenterOfMassPointX","measuredCenterOfMassPointY","worldFrame");
       scs.showOverheadPlotter2D(true);
       scs.start(false, false, false);
    }
