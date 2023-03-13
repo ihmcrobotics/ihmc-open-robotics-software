@@ -189,16 +189,7 @@ public class BytedecoOpenCVTools
 
    public static void compressImagePNG(Mat image, BytePointer data)
    {
-      Mat depth = null;
-      if (image.type() == opencv_core.CV_32FC1)
-      {
-         depth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC4, image.data());
-      }
-      else
-      {
-         depth = image;
-      }
-      opencv_imgcodecs.imencode(".png", depth, data, compressionParametersPNG);
+      opencv_imgcodecs.imencode(".png", image, data, compressionParametersPNG);
    }
 
    public static void decompressDepthPNG(BytePointer bytePointer, Mat image)
