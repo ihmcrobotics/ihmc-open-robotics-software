@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import h5py
 import numpy as np
 import os
@@ -248,11 +250,31 @@ def kitti_main():
     print_file_info(data, 'KITTI_Dataset_00.hdf5')
 
 if __name__ == '__main__':
-        home = os.path.expanduser('~')
-        path = home + '/.ihmc/logs/perception/'
-        filename = '20230312_190903_PerceptionLog.hdf5'
 
-        data = h5py.File(path + filename, 'r')
-        print_file_info(data, filename)
+    parser = argparse.ArgumentParser()
 
+    parser.add_argument("--path", help="path to search for files", type=str)
+    parser.add_argument("--list", help="increase output verbosity", action="store_true")
+    parser.add_argument("--info", help="file name for which to print info", type=str)
+    parser.add_argument("--play", help="file name to play", type=str)
+    parser.add_argument("--plot", help="file name to plot", type=str)
+
+    args = parser.parse_args()
+    home = os.path.expanduser('~')
+    path = args.path if args.path else home + '/.ihmc/logs/perception/'
+
+    if args.list:
+        files = sorted(os.listdir(path))
+        print_file_sizes(path, files)
+
+    if args.info:
+        data = h5py.File(path + args.info, 'r')
+        print_file_info(data, args.info)
+
+    if args.plot:
+        data = h5py.File(path + args.plot, 'r')
+        plotter_main(data)
+
+    if args.play:
+        data = h5py.File(path + args.play, 'r')
         player_main(data)
