@@ -48,7 +48,7 @@ public abstract class ToeOffParameters
     * switch the contact state to toe off for the trailing foot.
     * @return threshold height in meters for stepping up to cause toe off
     */
-   public double getMinStepHeightForToeOff()
+   public double getHeightChangeForNonFlatStep()
    {
       return 0.10;
    }

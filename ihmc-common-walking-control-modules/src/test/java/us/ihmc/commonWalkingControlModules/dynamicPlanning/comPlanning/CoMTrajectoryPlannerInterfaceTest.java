@@ -39,7 +39,7 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
    protected abstract CoMTrajectoryPlannerInterface createComTrajectoryPlanner();
 
    @BeforeEach
-   private void setupTest()
+   public void setupTest()
    {
       registry = new YoRegistry("testJacobian");
       omega = new YoDouble("omega", registry);
@@ -50,7 +50,7 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
    }
 
    @AfterEach
-   private void tearDown()
+   public void tearDown()
    {
       registry = null;
       omega = null;

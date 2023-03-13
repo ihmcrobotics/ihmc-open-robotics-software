@@ -31,6 +31,7 @@ import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
@@ -44,7 +45,6 @@ import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.simulation.SimulationTerminalCondition;
@@ -107,7 +107,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       if (fullRobotModel != null)
          avatarSimulation.setFullHumanoidRobotModel(fullRobotModel);
       if (yoGraphicsListRegistry != null)
-         simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
       if (parameters != null)
       {
@@ -516,13 +516,13 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       checkSimulationSessionAlive();
-      SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
+      YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
    }
 
    public void addYoGraphic(YoGraphic yoGraphic)
    {
       checkSimulationSessionAlive();
-      addYoGraphicDefinition(SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphic));
+      addYoGraphicDefinition(YoGraphicConversionTools.toYoGraphicDefinition(yoGraphic));
    }
 
    // Misc.

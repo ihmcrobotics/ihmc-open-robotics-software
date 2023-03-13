@@ -313,8 +313,8 @@ public class RapidRegionsDebutOutputGenerator
    //public void submitToPointCloudRenderer(int width, int height, BytedecoImage bytedecoImage, OpenCLManager openCLManager)
    //{
    //
-   //   openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer");
-   //   unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
+   //   openCLProgram = openCLManager.loadProgram("OusterFisheyeColoredPointCloud");
+   //   unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "computeVertexBuffer");
    //
    //   bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
    //

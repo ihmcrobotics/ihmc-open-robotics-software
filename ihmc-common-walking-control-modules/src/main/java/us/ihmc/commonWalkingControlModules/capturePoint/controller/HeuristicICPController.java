@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
@@ -18,6 +19,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -220,11 +225,16 @@ public class HeuristicICPController implements ICPControllerInterface
       unconstrainedFeedback.scaleAdd(1.0 - feedbackFeedforwardAlpha.getValue(), pureFeedforwardControl, pureFeedbackControl);
 
       unconstrainedFeedbackCMP.add(currentICP, unconstrainedFeedback);
-      unconstrainedFeedbackCoP.sub(unconstrainedFeedbackCMP, perfectCMPOffset);
+      unconstrainedFeedbackCoP.sub(unconstrainedFeedbackCMP, this.perfectCMPOffset);
 
       if (feedbackProjectionOperator != null)
       {
-         feedbackProjectionOperator.projectFeedback(currentICP, unconstrainedFeedbackCMP, perfectCMPOffset, supportPolygonInWorld, feedbackCoP, feedbackCMP);
+         feedbackProjectionOperator.projectFeedback(currentICP,
+                                                    unconstrainedFeedbackCMP,
+                                                    this.perfectCMPOffset,
+                                                    supportPolygonInWorld,
+                                                    feedbackCoP,
+                                                    feedbackCMP);
       }
 
       expectedControlICPVelocity.sub(currentICP, feedbackCMP);
@@ -237,14 +247,23 @@ public class HeuristicICPController implements ICPControllerInterface
    {
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition feedbackCoPViz = new YoGraphicPosition(yoNamePrefix
-            + "FeedbackCoP", this.feedbackCoP, 0.005, YoAppearance.Darkorange(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition feedbackCoPViz = new YoGraphicPosition(yoNamePrefix + "FeedbackCoP",
+                                                               this.feedbackCoP,
+                                                               0.005,
+                                                               YoAppearance.Darkorange(),
+                                                               YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
-      YoGraphicPosition unconstrainedFeedbackCMPViz = new YoGraphicPosition(yoNamePrefix
-            + "UnconstrainedFeedbackCMP", this.unconstrainedFeedbackCMP, 0.008, Purple(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition unconstrainedFeedbackCMPViz = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCMP",
+                                                                            this.unconstrainedFeedbackCMP,
+                                                                            0.008,
+                                                                            Purple(),
+                                                                            GraphicType.BALL_WITH_CROSS);
 
-      YoGraphicPosition unconstrainedFeedbackCoPViz = new YoGraphicPosition(yoNamePrefix
-            + "UnconstrainedFeedbackCoP", this.unconstrainedFeedbackCoP, 0.004, YoAppearance.Green(), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition unconstrainedFeedbackCoPViz = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCoP",
+                                                                            this.unconstrainedFeedbackCoP,
+                                                                            0.004,
+                                                                            YoAppearance.Green(),
+                                                                            GraphicType.BALL_WITH_ROTATED_CROSS);
 
       artifactList.add(feedbackCoPViz.createArtifact());
       artifactList.add(unconstrainedFeedbackCMPViz.createArtifact());
@@ -288,5 +307,26 @@ public class HeuristicICPController implements ICPControllerInterface
    public boolean useAngularMomentum()
    {
       return false;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicPoint2D("FeedbackCoP", feedbackCoP, 0.01, ColorDefinitions.DarkOrange(), DefaultPoint2DGraphic.CIRCLE_PLUS));
+      group.addChild(newYoGraphicPoint2D("UnconstrainedFeedbackCMP",
+                                         unconstrainedFeedbackCMP,
+                                         0.016,
+                                         ColorDefinitions.Purple(),
+                                         DefaultPoint2DGraphic.CIRCLE_PLUS));
+      group.addChild(newYoGraphicPoint2D("UnconstrainedFeedbackCoP",
+                                         unconstrainedFeedbackCoP,
+                                         0.008,
+                                         ColorDefinitions.Green(),
+                                         DefaultPoint2DGraphic.CIRCLE_CROSS));
+      group.addChild(feedbackProjectionOperator.getSCS2YoGraphics());
+      group.addChild(feedForwardAlphaCalculator.getSCS2YoGraphics());
+      group.setVisible(VISUALIZE);
+      return group;
    }
 }
