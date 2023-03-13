@@ -47,7 +47,6 @@ public class PerceptionLoggerConstants
    public static final String L515_SENSOR_POSITION = "/l515/sensor/position/";
    public static final String L515_SENSOR_ORIENTATION = "/l515/sensor/orientation/";
 
-
    public static final String MOCAP_RIGID_BODY_TIME = "/mocap/rigid_body/position";
    public static final String MOCAP_RIGID_BODY_POSITION = "/mocap/rigid_body/position";
    public static final String MOCAP_RIGID_BODY_ORIENTATION = "/mocap/rigid_body/orientation";
