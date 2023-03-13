@@ -17,7 +17,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PerceptionDataLoader
 {
@@ -115,11 +114,12 @@ public class PerceptionDataLoader
 
          for (int index = 0; index < count; index++)
          {
-            float[] pointFloatArray = new float[3 * PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE];
+            float[] pointFloatArray = new float[3 * PerceptionLoggerConstants.LEGACY_BLOCK_SIZE];
             loadFloatArray(namespace, index, pointFloatArray);
 
             for (int i = 0; i < pointFloatArray.length / 3; i++)
             {
+               //LogTools.info("Point: {}, {}, {}", pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]);
                points.add(new Point3D(pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]));
             }
          }
@@ -135,7 +135,7 @@ public class PerceptionDataLoader
            int count = (int) hdf5Manager.getCount(namespace);
            for (int index = 0; index < count; index++)
            {
-              float[] pointFloatArray = new float[4 * PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE];
+              float[] pointFloatArray = new float[4 * PerceptionLoggerConstants.LEGACY_BLOCK_SIZE];
               loadFloatArray(namespace, index, pointFloatArray);
 
               for (int i = 0; i < pointFloatArray.length / 4; i++)
@@ -153,13 +153,13 @@ public class PerceptionDataLoader
 
    public void loadFloatArray(String namespace, int index, float[] array)
    {
-      Group group = hdf5Manager.getGroup(namespace);
+      Group group = hdf5Manager.openOrGetGroup(namespace);
       hdf5Tools.loadFloatArray(group, index, array);
    }
 
    public void loadCompressedColor(String namespace, int index, Mat mat)
    {
-      Group group = hdf5Manager.getGroup(namespace);
+      Group group = hdf5Manager.openOrGetGroup(namespace);
       BytePointer bytePointer = new BytePointer(10);
       hdf5Tools.loadBytes(group, index, bytePointer);
       mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(bytePointer));
@@ -167,7 +167,7 @@ public class PerceptionDataLoader
 
    public void loadCompressedDepth(String namespace, int index, BytePointer bytePointer, Mat mat)
    {
-         Group group = hdf5Manager.getGroup(namespace);
+         Group group = hdf5Manager.openOrGetGroup(namespace);
          hdf5Tools.loadBytes(group, index, bytePointer);
 
          BytedecoOpenCVTools.decompressDepthPNG(bytePointer, mat);

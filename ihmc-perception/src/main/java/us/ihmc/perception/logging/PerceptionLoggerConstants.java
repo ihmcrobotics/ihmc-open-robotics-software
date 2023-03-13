@@ -12,6 +12,7 @@ public class PerceptionLoggerConstants
    public static final int DOUBLE_BUFFER_SIZE = 10000;
 
    public static final int DEFAULT_BLOCK_SIZE = 100;
+   public static final int LEGACY_BLOCK_SIZE = 10;
 
    public static final String ROBOT_CONFIGURATION_DATA_NAME = "/robot/root/position/";
    public static final String ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME = "/robot/configuration/timestamps/";

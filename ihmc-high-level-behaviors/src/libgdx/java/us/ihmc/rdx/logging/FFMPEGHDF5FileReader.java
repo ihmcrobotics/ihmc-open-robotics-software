@@ -122,7 +122,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       hdf5Manager = new HDF5Manager(hdf5File, hdf5.H5F_ACC_RDONLY);
       hdf5Manager.getFile().openFile(hdf5File, hdf5.H5F_ACC_RDONLY);
 
-      framesGroup = hdf5Manager.getGroup(FFMPEGHDF5Logger.NAMESPACE_ROOT);
+      framesGroup = hdf5Manager.createOrGetGroup(FFMPEGHDF5Logger.NAMESPACE_ROOT);
    }
 
    // Adapted from demuxing_decoding.c. Currently assumes video stream, but could be adapted for audio use, too

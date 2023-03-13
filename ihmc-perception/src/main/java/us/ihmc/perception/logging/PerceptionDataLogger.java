@@ -124,7 +124,7 @@ public class PerceptionDataLogger
       channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new BytePointer(PerceptionLoggerConstants.BYTE_BUFFER_SIZE)));
       channels.get(channelName).setChannelType(PerceptionLogChannel.ChannelType.BYTE);
       channels.get(channelName).getBytePointer().limit(0);
-      Group group = hdf5Manager.getGroup(channelName);
+      Group group = hdf5Manager.createOrGetGroup(channelName);
 
       hdf5Tools.writeIntAttribute(group, "frame_size", frameSize);
       hdf5Tools.writeIntAttribute(group, "block_size", blockSize);
@@ -136,7 +136,7 @@ public class PerceptionDataLogger
                    new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new FloatPointer(PerceptionLoggerConstants.FLOAT_BUFFER_SIZE)));
       channels.get(channelName).setChannelType(PerceptionLogChannel.ChannelType.FLOAT);
       channels.get(channelName).getFloatPointer().limit(0);
-      Group group = hdf5Manager.getGroup(channelName);
+      Group group = hdf5Manager.createOrGetGroup(channelName);
 
       hdf5Tools.writeIntAttribute(group, "frame_size", frameSize);
       hdf5Tools.writeIntAttribute(group, "block_size", blockSize);
@@ -147,7 +147,7 @@ public class PerceptionDataLogger
       channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new LongPointer(PerceptionLoggerConstants.LONG_BUFFER_SIZE)));
       channels.get(channelName).setChannelType(PerceptionLogChannel.ChannelType.LONG);
       channels.get(channelName).getLongPointer().limit(0);
-      Group group = hdf5Manager.getGroup(channelName);
+      Group group = hdf5Manager.createOrGetGroup(channelName);
 
       hdf5Tools.writeIntAttribute(group, "frame_size", frameSize);
       hdf5Tools.writeIntAttribute(group, "block_size", blockSize);
@@ -158,7 +158,7 @@ public class PerceptionDataLogger
       channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new IntPointer(PerceptionLoggerConstants.INT_BUFFER_SIZE)));
       channels.get(channelName).setChannelType(PerceptionLogChannel.ChannelType.INT);
       channels.get(channelName).getIntPointer().limit(0);
-      Group group = hdf5Manager.getGroup(channelName);
+      Group group = hdf5Manager.createOrGetGroup(channelName);
 
       hdf5Tools.writeIntAttribute(group, "frame_size", frameSize);
       hdf5Tools.writeIntAttribute(group, "block_size", blockSize);
@@ -175,7 +175,7 @@ public class PerceptionDataLogger
                                             new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE)));
 
       channels.get(channelName).setChannelType(PerceptionLogChannel.ChannelType.IMAGE_BYTES);
-      Group group = hdf5Manager.getGroup(channelName);
+      Group group = hdf5Manager.createOrGetGroup(channelName);
 
       hdf5Tools.writeIntAttribute(group, "frame_size", PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE);
       hdf5Tools.writeIntAttribute(group, "block_size", 1);
@@ -220,7 +220,7 @@ public class PerceptionDataLogger
             {
                if (channel.getChannelType() == PerceptionLogChannel.ChannelType.FLOAT)
                {
-                  Group group = hdf5Manager.getGroup(channelName);
+                  Group group = hdf5Manager.createOrGetGroup(channelName);
 
                   int count = channels.get(channelName).getCount();
                   channels.get(channelName).incrementCount();
@@ -234,7 +234,7 @@ public class PerceptionDataLogger
                }
                else if (channel.getChannelType() == PerceptionLogChannel.ChannelType.LONG)
                {
-                  Group group = hdf5Manager.getGroup(channelName);
+                  Group group = hdf5Manager.createOrGetGroup(channelName);
 
                   int count = channels.get(channelName).getCount();
                   channels.get(channelName).incrementCount();
@@ -246,7 +246,7 @@ public class PerceptionDataLogger
                }
                else if (channel.getChannelType() == PerceptionLogChannel.ChannelType.IMAGE_BYTES)
                {
-                  Group group = hdf5Manager.getGroup(channelName);
+                  Group group = hdf5Manager.createOrGetGroup(channelName);
 
                   int count = channels.get(channelName).getCount();
                   channels.get(channelName).incrementCount();
@@ -568,7 +568,7 @@ public class PerceptionDataLogger
                              {
                                 synchronized (hdf5Manager)
                                 {
-                                   Group group = hdf5Manager.getGroup(namespace);
+                                   Group group = hdf5Manager.createOrGetGroup(namespace);
 
                                    int imageCount = channels.get(namespace).getCount();
                                    channels.get(namespace).incrementCount();
@@ -585,7 +585,7 @@ public class PerceptionDataLogger
       //                       {
       //                          synchronized (hdf5Manager)
       //                          {
-      Group group = hdf5Manager.getGroup(namespace);
+      Group group = hdf5Manager.createOrGetGroup(namespace);
 
       int count = channels.get(namespace).getCount();
       channels.get(namespace).incrementCount();
@@ -603,7 +603,7 @@ public class PerceptionDataLogger
                              {
                                 synchronized (hdf5Manager)
                                 {
-                                   Group group = hdf5Manager.getGroup(namespace);
+                                   Group group = hdf5Manager.createOrGetGroup(namespace);
 
                                    int count = channels.get(namespace).getCount();
                                    int blockSize = channels.get(namespace).getBlockSize();

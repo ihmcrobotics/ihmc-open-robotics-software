@@ -48,7 +48,7 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       super.stop();
 
       try {
-         Group headerGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/header");
+         Group headerGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/header");
 
          byte[] headerData = FileUtils.readFileToByteArray(new File(tempFileName));
          hdf5Tools.storeByteArray(headerGroup, 0, headerData, headerData.length);
@@ -76,13 +76,13 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
    {
       isInitialized = true;
 
-      ptsGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/pts");
-      dtsGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/dts");
-      dataGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/data");
-      flagsGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/flags");
-      sideDataGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/side_data");
-      durationGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/duration");
-      posGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/pos");
+      ptsGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/pts");
+      dtsGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/dts");
+      dataGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/data");
+      flagsGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/flags");
+      sideDataGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/side_data");
+      durationGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/duration");
+      posGroup = hdf5Manager.createOrGetGroup(NAMESPACE_ROOT + "/pos");
 
       int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), streamFlags);
       FFMPEGTools.checkNonZeroError(returnCode, "Initializing codec context to use the codec");

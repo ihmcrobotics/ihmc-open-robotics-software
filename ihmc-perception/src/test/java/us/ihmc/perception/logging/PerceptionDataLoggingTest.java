@@ -56,7 +56,7 @@ public class PerceptionDataLoggingTest
    {
       HDF5Tools hdf5Tools = new HDF5Tools();
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_byte_array_as_ints.hdf5", hdf5.H5F_ACC_TRUNC());
-      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+      Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
       byte[] dataArray = {(byte) 0, (byte) 255, (byte) 1, (byte) 3, (byte) 4, (byte) 42, (byte) 153, (byte) 10, (byte) 11, (byte) 13, (byte) 15};
       byte[] dataArrayExtended = Arrays.copyOf(dataArray, dataArray.length + (Integer.BYTES - (dataArray.length % Integer.BYTES)));
@@ -67,7 +67,7 @@ public class PerceptionDataLoggingTest
       hdf5ManagerWriter.getFile()._close();
 
       hdf5ManagerReader = new HDF5Manager("hdf5_test_byte_array_as_ints.hdf5", hdf5.H5F_ACC_RDONLY());
-      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+      Group readGroup = hdf5ManagerReader.openOrGetGroup("/test/bytes/");
 
       byte[] outputArray = hdf5Tools.loadByteArray(readGroup, 0);
 
@@ -160,7 +160,7 @@ public class PerceptionDataLoggingTest
       BytePointer compressedDepthPointer = new BytePointer(0);
       BytedecoOpenCVTools.compressImagePNG(depth, compressedDepthPointer);
 
-      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+      Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
       hdf5Tools.storeBytes(writeGroup, 0, compressedDepthPointer);
 
@@ -169,7 +169,7 @@ public class PerceptionDataLoggingTest
       hdf5ManagerWriter.closeFile();
 
       hdf5ManagerReader = new HDF5Manager("hdf5_test_depth_png_3.hdf5", hdf5.H5F_ACC_RDONLY());
-      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+      Group readGroup = hdf5ManagerReader.openOrGetGroup("/test/bytes/");
 
       BytePointer pngCompressedBytes = new BytePointer(compressedDepthPointer.limit());
       hdf5Tools.loadBytes(readGroup, 0, pngCompressedBytes);
@@ -215,7 +215,7 @@ public class PerceptionDataLoggingTest
    {
       HDF5Tools hdf5Tools = new HDF5Tools();
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_large_bytes_as_ints.hdf5", hdf5.H5F_ACC_TRUNC());
-      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+      Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
       byte[] dataArray = new byte[40];
       for (int i = 0; i < dataArray.length; i++)
@@ -235,7 +235,7 @@ public class PerceptionDataLoggingTest
       hdf5ManagerWriter.getFile()._close();
 
       hdf5ManagerReader = new HDF5Manager("hdf5_test_large_bytes_as_ints.hdf5", hdf5.H5F_ACC_RDONLY());
-      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+      Group readGroup = hdf5ManagerReader.openOrGetGroup("/test/bytes/");
 
       byte[] outputArray = hdf5Tools.loadByteArray(readGroup, 0);
 
@@ -270,7 +270,7 @@ public class PerceptionDataLoggingTest
 
       LogTools.info("Raw Size: {}, Compressed Size: {}", depthFloat.rows() * depthFloat.cols() * 4, dataArray.length);
 
-      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+      Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
 //      LogTools.info("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
 
@@ -280,7 +280,7 @@ public class PerceptionDataLoggingTest
       hdf5ManagerWriter.getFile()._close();
 
       hdf5ManagerReader = new HDF5Manager("hdf5_test_depth_png.hdf5", hdf5.H5F_ACC_RDONLY());
-      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+      Group readGroup = hdf5ManagerReader.openOrGetGroup("/test/bytes/");
 
       byte[] pngCompressedBytes = hdf5Tools.loadByteArray(readGroup, 0);
 
@@ -332,7 +332,7 @@ public class PerceptionDataLoggingTest
 
 //      LogTools.info("Raw Size: {}, Compressed Size: {}", depth.rows() * depth.cols() * 4, dataArray.length);
 
-      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+      Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
 //      LogTools.info("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
 
@@ -342,7 +342,7 @@ public class PerceptionDataLoggingTest
       hdf5ManagerWriter.getFile()._close();
 
       hdf5ManagerReader = new HDF5Manager("hdf5_test_depth_png_2.hdf5", hdf5.H5F_ACC_RDONLY());
-      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+      Group readGroup = hdf5ManagerReader.openOrGetGroup("/test/bytes/");
 
       byte[] pngCompressedBytes = hdf5Tools.loadByteArray(readGroup, 0);
 
@@ -380,7 +380,7 @@ public class PerceptionDataLoggingTest
       HDF5Tools hdf5Tools = new HDF5Tools();
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_float_array.hdf5", hdf5.H5F_ACC_TRUNC());
 
-      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+      Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
       float[] floatArray = new float[]{12.3f, 32.1f, 43.1f, 32.43f};
       FloatPointer dataArray = new FloatPointer(floatArray);
@@ -391,7 +391,7 @@ public class PerceptionDataLoggingTest
       hdf5ManagerWriter.getFile()._close();
 
       hdf5ManagerReader = new HDF5Manager("hdf5_test_float_array.hdf5", hdf5.H5F_ACC_RDONLY());
-      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+      Group readGroup = hdf5ManagerReader.openOrGetGroup("/test/bytes/");
 
       float[] loadedFloats = hdf5Tools.loadFloatArray(readGroup, 0);
 
@@ -413,7 +413,7 @@ public class PerceptionDataLoggingTest
    {
       HDF5Tools hdf5Tools = new HDF5Tools();
       hdf5ManagerWriter = new HDF5Manager("test_attributes.hdf5", hdf5.H5F_ACC_TRUNC());
-      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+      Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
       byte[] dataArray = new byte[40];
       for (int i = 0; i < dataArray.length; i++)
@@ -435,7 +435,7 @@ public class PerceptionDataLoggingTest
       hdf5ManagerWriter.getFile()._close();
 
       hdf5ManagerReader = new HDF5Manager("test_attributes.hdf5", hdf5.H5F_ACC_RDONLY());
-      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+      Group readGroup = hdf5ManagerReader.openOrGetGroup("/test/bytes/");
 
       Attribute sizeAttribute = readGroup.openAttribute("Size");
       IntPointer sizeAttributePointer = new IntPointer(1);
@@ -453,7 +453,7 @@ public class PerceptionDataLoggingTest
    {
       HDF5Tools hdf5Tools = new HDF5Tools();
       hdf5ManagerWriter = new HDF5Manager("test_attributes_api.hdf5", hdf5.H5F_ACC_TRUNC());
-      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+      Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/bytes/");
 
       byte[] dataArray = new byte[40];
       for (int i = 0; i < dataArray.length; i++)
@@ -472,7 +472,7 @@ public class PerceptionDataLoggingTest
       hdf5ManagerWriter.getFile()._close();
 
       hdf5ManagerReader = new HDF5Manager("test_attributes_api.hdf5", hdf5.H5F_ACC_RDONLY());
-      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+      Group readGroup = hdf5ManagerReader.openOrGetGroup("/test/bytes/");
 
       int value = hdf5Tools.readIntAttribute(readGroup, "Int");
       long longValue = hdf5Tools.readLongAttribute(readGroup, "Long");
@@ -667,7 +667,7 @@ public class PerceptionDataLoggingTest
    {
       HDF5Tools hdf5Tools = new HDF5Tools();
       hdf5ManagerWriter = new HDF5Manager("hdf5_test_int_array.hdf5", hdf5.H5F_ACC_TRUNC());
-      Group writeGroup = hdf5ManagerWriter.getGroup("/test/ints/");
+      Group writeGroup = hdf5ManagerWriter.createOrGetGroup("/test/ints/");
 
       int[] dataArray = {0, 255, 1, 3, 4, 42, 153};
 
@@ -677,7 +677,7 @@ public class PerceptionDataLoggingTest
       hdf5ManagerWriter.getFile()._close();
 
       hdf5ManagerReader = new HDF5Manager("hdf5_test_int_array.hdf5", hdf5.H5F_ACC_RDONLY());
-      Group readGroup = hdf5ManagerReader.getGroup("/test/ints/");
+      Group readGroup = hdf5ManagerReader.createOrGetGroup("/test/ints/");
       int[] outputArray = hdf5Tools.loadIntArray(readGroup, 0);
 
       assertEquals(dataArray.length, 7);
