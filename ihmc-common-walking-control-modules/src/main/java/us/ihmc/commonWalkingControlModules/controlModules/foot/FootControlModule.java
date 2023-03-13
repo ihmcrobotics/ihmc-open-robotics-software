@@ -569,7 +569,8 @@ public class FootControlModule implements SCS2YoGraphicHolder
          return;
       }
 
-      unloadingRhoWeight.set(EuclidCoreTools.interpolate(defaultRhoWeight, unloadedFinalRhoWeight.getValue(), percentInUnloading));
+      double finalWeight = Math.max(unloadedFinalRhoWeight.getValue(), defaultRhoWeight);
+      unloadingRhoWeight.set(EuclidCoreTools.interpolate(defaultRhoWeight, finalWeight, percentInUnloading));
       controllerToolbox.getFootContactState(robotSide).setRhoWeights(unloadingRhoWeight.getValue());
    }
 
