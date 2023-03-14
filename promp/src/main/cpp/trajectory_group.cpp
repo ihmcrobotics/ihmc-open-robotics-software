@@ -112,7 +112,7 @@ double TrajectoryGroup::get_mean_start_value(int dof)
     }
     mean_start_value /= _trajs.size();
 
-    return mean_end_value;
+    return mean_start_value;
 }
 
 double TrajectoryGroup::get_mean_end_value(int dof)
