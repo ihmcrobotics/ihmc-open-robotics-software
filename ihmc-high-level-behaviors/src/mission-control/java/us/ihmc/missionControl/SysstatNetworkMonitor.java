@@ -20,12 +20,13 @@ public class SysstatNetworkMonitor
    private Map<String, Float> ifaceRxKbps = new ConcurrentHashMap<>();
    private Map<String, Float> ifaceTxKbps = new ConcurrentHashMap<>();
 
-   private volatile boolean running = true;
+   private static volatile boolean running = true;
 
    public SysstatNetworkMonitor()
    {
       sarReaderThread = new PausablePeriodicThread("sar-reader", 0.2, true, this::processSarOutput);
       sarReaderThread.start();
+      start();
    }
 
    public Map<String, Float> getIfaceRxKbps()
@@ -61,7 +62,6 @@ public class SysstatNetworkMonitor
             }
 
             process.destroy();
-
             process.waitFor();
          }
          catch (IOException | InterruptedException e)
