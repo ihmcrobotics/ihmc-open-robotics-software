@@ -1,12 +1,12 @@
 {
   "title" : "Polygonizer parameters for Spherical Rapid Regions",
   "Concave hull threshold" : {
-    "value" : 0.39185,
+    "value" : 0.413793,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Min number of nodes" : {
-    "value" : 7,
+    "value" : 16,
     "lowerBound" : 0,
     "upperBound" : 100
   },
