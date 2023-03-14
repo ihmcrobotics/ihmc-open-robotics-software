@@ -362,17 +362,6 @@ public class PlanarRegionMap
                if (wasMatched)
                   wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) <= distanceThreshold;
 
-               //LogTools.debug(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
-               //                            mapRegionIndex,
-               //                            mapRegion.getRegionId(),
-               //                            newRegion.getRegionId(),
-               //                            normalSimilarity,
-               //                            normalThreshold,
-               //                            normalDistance,
-               //                            normalDistanceThreshold,
-               //                            originDistance,
-               //                            distanceThreshold) + ": [{}]", wasMatched);
-
                if (wasMatched)
                {
                   graphToUpdate.addEdge(mapRegion, newRegion);
