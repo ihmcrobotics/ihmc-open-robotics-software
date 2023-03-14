@@ -27,7 +27,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-state-estimation:source")
 
-   api("us.ihmc:scs2-definition:17-0.13.0")
+   api("us.ihmc:scs2-definition:17-0.13.2")
 }
 
 testDependencies {
