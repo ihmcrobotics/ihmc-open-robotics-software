@@ -94,4 +94,6 @@ public class TrajectoryGroup extends Pointer {
          * @param dof of the trajectory of interest
          */
         public native double get_mean_end_value(int dof);
+
+        public native double get_mean_start_value(int dof);
     }
