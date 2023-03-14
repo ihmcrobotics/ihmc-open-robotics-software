@@ -1,17 +1,16 @@
-package us.ihmc.rdx.ui.missionControl.processes;
+package us.ihmc.rdx.ui.processes;
 
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
-import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.log.LogTools;
 
 import java.util.function.Supplier;
 
-public class BehaviorModuleProcess extends RestartableMissionControlProcess
+public class BehaviorModuleProcess extends RestartableProcess
 {
    private final Supplier<DRCRobotModel> robotModelSupplier;
    private final ImInt ros2Mode;

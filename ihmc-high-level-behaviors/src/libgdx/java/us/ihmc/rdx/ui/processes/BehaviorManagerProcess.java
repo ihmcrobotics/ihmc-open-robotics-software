@@ -1,9 +1,8 @@
-package us.ihmc.rdx.ui.missionControl.processes;
+package us.ihmc.rdx.ui.processes;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -11,7 +10,7 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 import java.util.function.Supplier;
 
-public class BehaviorManagerProcess extends RestartableMissionControlProcess
+public class BehaviorManagerProcess extends RestartableProcess
 {
    private final Supplier<DRCRobotModel> robotModelSupplier;
    private IHMCHumanoidBehaviorManager behaviorManager;

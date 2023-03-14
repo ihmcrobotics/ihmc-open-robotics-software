@@ -1,14 +1,13 @@
-package us.ihmc.rdx.ui.missionControl.processes;
+package us.ihmc.rdx.ui.processes;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.pubsub.DomainFactory;
 
 import java.util.function.Supplier;
 
-public class FootstepPlanningModuleProcess extends RestartableMissionControlProcess
+public class FootstepPlanningModuleProcess extends RestartableProcess
 {
    private final Supplier<DRCRobotModel> robotModelSupplier;
    private final Supplier<DomainFactory.PubSubImplementation> pubSubImplementationSupplier;

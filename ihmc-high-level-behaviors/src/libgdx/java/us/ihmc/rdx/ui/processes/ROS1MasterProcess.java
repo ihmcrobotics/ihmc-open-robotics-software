@@ -1,9 +1,8 @@
-package us.ihmc.rdx.ui.missionControl.processes;
+package us.ihmc.rdx.ui.processes;
 
 import us.ihmc.communication.ros.DockerROS1Master;
-import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
 
-public class ROS1MasterProcess extends RestartableMissionControlProcess
+public class ROS1MasterProcess extends RestartableProcess
 {
    private DockerROS1Master ros1Master;
 
