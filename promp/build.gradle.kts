@@ -13,7 +13,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.bytedeco:javacpp:1.5.8")
+   api("org.bytedeco:javacpp:1.5.9-20230222.151859-137")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
 }

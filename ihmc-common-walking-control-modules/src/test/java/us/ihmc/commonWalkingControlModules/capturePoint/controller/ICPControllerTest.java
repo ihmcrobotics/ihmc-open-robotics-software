@@ -661,12 +661,6 @@ public class ICPControllerTest
       }
 
       @Override
-      public double defaultOffsetHeightAboveAnkle()
-      {
-         return 0;
-      }
-
-      @Override
       public ICPControllerParameters getICPControllerParameters()
       {
          return new TestICPOptimizationParameters();

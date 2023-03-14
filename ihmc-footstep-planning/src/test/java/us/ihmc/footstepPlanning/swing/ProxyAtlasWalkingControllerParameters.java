@@ -163,12 +163,6 @@ public class ProxyAtlasWalkingControllerParameters extends WalkingControllerPara
    }
 
    @Override
-   public double defaultOffsetHeightAboveAnkle()
-   {
-      return 0;
-   }
-
-   @Override
    public SteppingParameters getSteppingParameters()
    {
       return new ProxyAtlasSteppingParameters();
