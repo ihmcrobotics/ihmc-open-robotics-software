@@ -24,6 +24,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    private DirectedGraph<FootstepGraphNode> footstepGraph;
    private DiscreteFootstep nominalIdealStep;
    private final YoBoolean stepSideIncorrect;
+   private boolean useReferencePlan = true;
 
    // TODO add to footstep planner parameters
    /* Weight factor for using reference vs nominal ideal steps. Alpha = 0 means use nominal ideal step, alpha = 1 means use reference value */
@@ -40,7 +41,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    {
       nominalIdealStep = nominalIdealStepCalculator.computeIdealStep(stanceNode, startOfSwing);
 
-      if (referenceFootstepPlan == null || referenceFootstepPlan.isEmpty())
+      if (!useReferencePlan || referenceFootstepPlan == null || referenceFootstepPlan.isEmpty())
       {
          return nominalIdealStep;
       }
@@ -66,7 +67,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
          throw new RuntimeException("Wrong side from reference plan, this should not happen ! ! !");
       }
       FramePose3D referenceFootstepPose = referenceFootstep.getFootstepPose();
-      LogTools.warn("~~~~~~~~~~~~~~~~~~~~ USING REFERENCE STEP IN THE REFERENCE_BASED_IDEAL_STEP_CALCULATOR ~~~~~~~~~~~~~~~~~~~~");
+      LogTools.warn("! ! ! ! ! ! ! ! USING REFERENCE STEP IN THE REFERENCE_BASED_IDEAL_STEP_CALCULATOR (alpha: {}) ! ! ! ! ! ! ! !", referenceAlpha);
 
       double idealStepX = EuclidCoreTools.interpolate(nominalIdealStep.getX(), referenceFootstepPose.getX(), referenceAlpha);
       double idealStepY = EuclidCoreTools.interpolate(nominalIdealStep.getY(), referenceFootstepPose.getY(), referenceAlpha);
@@ -104,5 +105,15 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    public DiscreteFootstep getNominalIdealStep()
    {
       return nominalIdealStep;
+   }
+
+   public boolean isUseReferencePlan()
+   {
+      return useReferencePlan;
+   }
+
+   public void setUseReferencePlan(boolean useReferencePlan)
+   {
+      this.useReferencePlan = useReferencePlan;
    }
 }

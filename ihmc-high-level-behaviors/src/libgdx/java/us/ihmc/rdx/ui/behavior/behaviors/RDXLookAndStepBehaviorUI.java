@@ -92,7 +92,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
    private ImBooleanWrapper useReferencePlan;
    private ImDouble ballAndArrowX = new ImDouble(7.0);
-   private ImDouble ballAndArrowY = new ImDouble(0.3);
+   private ImDouble ballAndArrowY = new ImDouble(0.5);
    private ImDouble ballAndArrowYaw = new ImDouble(0.1);
 
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
@@ -261,8 +261,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          helper.publish(ReviewApproval, true);
       }
       footstepPlanningDurationPlot.renderImGuiWidgets();
-//      ImGui.text("Footstep planning regions recieved:");
-//      steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
+      ImGui.text("Footstep planning regions recieved:");
+      steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
       stopForImpassibilities.accessImBoolean(stopForImpassibilities ->
       {
          if (ImGui.checkbox(labels.get("Stop for impassibilities"), stopForImpassibilities))
@@ -278,6 +278,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          if (ImGui.checkbox(labels.get("Use referencePlan"), useReferencePlan))
          {
             lookAndStepRemotePropertySet.setPropertyChanged();
+            helper.getOrCreateFootstepPlanner().getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setUseReferencePlan(useReferencePlan.get());
          }
       });
 
