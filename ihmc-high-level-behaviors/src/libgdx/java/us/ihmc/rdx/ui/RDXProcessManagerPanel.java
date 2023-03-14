@@ -16,7 +16,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
 import us.ihmc.rdx.ui.processes.RestartableProcess;
-import us.ihmc.rdx.ui.missionControl.processes.*;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.impl.intraprocess.IntraProcessDomain;
 import us.ihmc.rdx.ui.processes.*;
