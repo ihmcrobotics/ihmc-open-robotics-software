@@ -90,7 +90,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final Notification planningFailedNotification = new Notification();
    private volatile int numberOfPlannedSteps = 0;
 
-   private ImBooleanWrapper useReferencePlan;
    private ImDouble ballAndArrowX = new ImDouble(7.0);
    private ImDouble ballAndArrowY = new ImDouble(0.5);
    private ImDouble ballAndArrowYaw = new ImDouble(0.1);
@@ -163,8 +162,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
                                                                            helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"),
                                                                            SWING_PLANNER_PARAMETERS);
       stopForImpassibilities = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(), LookAndStepBehaviorParameters.stopForImpassibilities);
-
-      useReferencePlan = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(), LookAndStepBehaviorParameters.useReferencePlan);
    }
 
    @Override
@@ -272,15 +269,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       });
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
-
-      useReferencePlan.accessImBoolean(useReferencePlan ->
-      {
-         if (ImGui.checkbox(labels.get("Use referencePlan"), useReferencePlan))
-         {
-            lookAndStepRemotePropertySet.setPropertyChanged();
-            helper.getOrCreateFootstepPlanner().getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setUseReferencePlan(useReferencePlan.get());
-         }
-      });
 
       ImGuiTools.volatileInputDouble("ball_x", ballAndArrowX);
       ImGuiTools.volatileInputDouble("ball_y", ballAndArrowY);

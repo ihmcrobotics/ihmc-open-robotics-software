@@ -451,8 +451,7 @@ public class LookAndStepFootstepPlanningTask
       // TODO: maybe it could be swing + stance transition duration + 10% ?
       double expirationTime = 3.0;
       // TODO check if looks ok (revised after Duncan review)
-      if (lookAndStepParameters.getUseReferencePlan()
-          && successfulPlanExpirationTimer.isRunning(expirationTime)
+      if (successfulPlanExpirationTimer.isRunning(expirationTime)
           && previousFootstepPlan != null
           && previousFootstepPlan.getNumberOfSteps() >= 2)
       {
