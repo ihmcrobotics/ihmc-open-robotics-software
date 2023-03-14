@@ -221,9 +221,10 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
+      boolean isWindowHovered = input.isWindowHovered();
       ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
-      isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
+      isGizmoHovered = isWindowHovered && pickResult == input.getClosestPick();
 
       if (isGizmoHovered && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
       {
@@ -269,92 +270,95 @@ public class RDXPose3DGizmo implements RenderableProvider
          }
       }
 
-      // Use mouse wheel to yaw when ctrl key is held
-      if (ImGui.getIO().getKeyCtrl() && input.getMouseWheelDelta() != 0.0f)
+      if (isWindowHovered)
       {
-         float deltaScroll = input.getMouseWheelDelta();
-         // Add some noise to not get stuck in discrete space
-         double noise = random.nextDouble() * 0.005;
-         double speed = 0.012 + noise;
-         Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
-         orientationToAdjust.appendYawRotation(Math.signum(deltaScroll) * speed * Math.PI);
-         afterRotationAdjustment();
-         adjustmentNeedsToBeApplied = true;
-      }
-
-      // keyboard based controls
-      boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
-      boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
-      boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
-      boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
-      boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
-      if (anyArrowHeld) // only the arrow keys do the moving
-      {
-         boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
-         boolean altHeld = ImGui.getIO().getKeyAlt();
-         boolean shiftHeld = ImGui.getIO().getKeyShift();
-         double deltaTime = Gdx.graphics.getDeltaTime();
-         if (altHeld) // orientation
+         // Use mouse wheel to yaw when ctrl key is held
+         if (ImGui.getIO().getKeyCtrl() && input.getMouseWheelDelta() != 0.0f)
          {
-            double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
+            float deltaScroll = input.getMouseWheelDelta();
+            // Add some noise to not get stuck in discrete space
+            double noise = random.nextDouble() * 0.005;
+            double speed = 0.012 + noise;
             Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
-            if (upArrowHeld) // pitch +
-            {
-               orientationToAdjust.appendPitchRotation(amount);
-            }
-            if (downArrowHeld) // pitch -
-            {
-               orientationToAdjust.appendPitchRotation(-amount);
-            }
-            if (rightArrowHeld && !ctrlHeld) // roll +
-            {
-               orientationToAdjust.appendRollRotation(amount);
-            }
-            if (leftArrowHeld && !ctrlHeld) // roll -
-            {
-               orientationToAdjust.appendRollRotation(-amount);
-            }
-            if (leftArrowHeld && ctrlHeld) // yaw +
-            {
-               orientationToAdjust.appendYawRotation(amount);
-            }
-            if (rightArrowHeld && ctrlHeld) // yaw -
-            {
-               orientationToAdjust.appendYawRotation(-amount);
-            }
+            orientationToAdjust.appendYawRotation(Math.signum(deltaScroll) * speed * Math.PI);
             afterRotationAdjustment();
-         }
-         else // translation
-         {
-            double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
-            beforeForTranslationAdjustment();
-            if (upArrowHeld && !ctrlHeld) // x +
-            {
-               adjustmentPose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
-            }
-            if (downArrowHeld && !ctrlHeld) // x -
-            {
-               adjustmentPose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
-            }
-            if (leftArrowHeld) // y +
-            {
-               adjustmentPose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
-            }
-            if (rightArrowHeld) // y -
-            {
-               adjustmentPose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
-            }
-            if (upArrowHeld && ctrlHeld) // z +
-            {
-               adjustmentPose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
-            }
-            if (downArrowHeld && ctrlHeld) // z -
-            {
-               adjustmentPose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
-            }
+            adjustmentNeedsToBeApplied = true;
          }
 
-         adjustmentNeedsToBeApplied = true;
+         // keyboard based controls
+         boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
+         boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
+         boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
+         boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
+         boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
+         if (anyArrowHeld) // only the arrow keys do the moving
+         {
+            boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
+            boolean altHeld = ImGui.getIO().getKeyAlt();
+            boolean shiftHeld = ImGui.getIO().getKeyShift();
+            double deltaTime = Gdx.graphics.getDeltaTime();
+            if (altHeld) // orientation
+            {
+               double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
+               Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
+               if (upArrowHeld) // pitch +
+               {
+                  orientationToAdjust.appendPitchRotation(amount);
+               }
+               if (downArrowHeld) // pitch -
+               {
+                  orientationToAdjust.appendPitchRotation(-amount);
+               }
+               if (rightArrowHeld && !ctrlHeld) // roll +
+               {
+                  orientationToAdjust.appendRollRotation(amount);
+               }
+               if (leftArrowHeld && !ctrlHeld) // roll -
+               {
+                  orientationToAdjust.appendRollRotation(-amount);
+               }
+               if (leftArrowHeld && ctrlHeld) // yaw +
+               {
+                  orientationToAdjust.appendYawRotation(amount);
+               }
+               if (rightArrowHeld && ctrlHeld) // yaw -
+               {
+                  orientationToAdjust.appendYawRotation(-amount);
+               }
+               afterRotationAdjustment();
+            }
+            else // translation
+            {
+               double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
+               beforeForTranslationAdjustment();
+               if (upArrowHeld && !ctrlHeld) // x +
+               {
+                  adjustmentPose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
+               }
+               if (downArrowHeld && !ctrlHeld) // x -
+               {
+                  adjustmentPose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
+               }
+               if (leftArrowHeld) // y +
+               {
+                  adjustmentPose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
+               }
+               if (rightArrowHeld) // y -
+               {
+                  adjustmentPose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
+               }
+               if (upArrowHeld && ctrlHeld) // z +
+               {
+                  adjustmentPose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
+               }
+               if (downArrowHeld && ctrlHeld) // z -
+               {
+                  adjustmentPose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
+               }
+            }
+
+            adjustmentNeedsToBeApplied = true;
+         }
       }
 
       // after things have been modified, update the derivative stuff
