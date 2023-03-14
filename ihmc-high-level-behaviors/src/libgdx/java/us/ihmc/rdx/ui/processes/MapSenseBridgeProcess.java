@@ -1,10 +1,9 @@
-package us.ihmc.rdx.ui.missionControl.processes;
+package us.ihmc.rdx.ui.processes;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.sensors.realsense.MapSensePlanarRegionROS1Bridge;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -12,7 +11,7 @@ import us.ihmc.utilities.ros.RosTools;
 
 import java.util.function.Supplier;
 
-public class MapSenseBridgeProcess extends RestartableMissionControlProcess
+public class MapSenseBridgeProcess extends RestartableProcess
 {
    private final Supplier<DRCRobotModel> robotModelSupplier;
    private final Supplier<DomainFactory.PubSubImplementation> pubSubImplementationSupplier;

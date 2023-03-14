@@ -1,9 +1,8 @@
-package us.ihmc.rdx.ui.missionControl.processes;
+package us.ihmc.rdx.ui.processes;
 
 import us.ihmc.behaviors.tools.perception.DockerMapSense;
-import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
 
-public class MapSenseHeadlessProcess extends RestartableMissionControlProcess
+public class MapSenseHeadlessProcess extends RestartableProcess
 {
    private DockerMapSense mapsense;
 
