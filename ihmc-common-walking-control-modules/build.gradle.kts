@@ -28,7 +28,7 @@ mainDependencies {
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-trajectory-optimization:source")
    api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.14")
+   api("us.ihmc:ihmc-convex-optimization:0.17.15")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 //   api("us.ihmc:ihmc-footstep-planning:source")
@@ -41,7 +41,7 @@ testDependencies {
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
-   api("us.ihmc:ihmc-convex-optimization-test:0.17.14")
+   api("us.ihmc:ihmc-convex-optimization-test:0.17.15")
 }
 
 visualizersDependencies {
