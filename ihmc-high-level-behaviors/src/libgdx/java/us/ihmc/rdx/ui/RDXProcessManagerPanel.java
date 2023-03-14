@@ -15,10 +15,11 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
-import us.ihmc.rdx.ui.missionControl.MissionControlProcess;
+import us.ihmc.rdx.ui.processes.RestartableProcess;
 import us.ihmc.rdx.ui.missionControl.processes.*;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.impl.intraprocess.IntraProcessDomain;
+import us.ihmc.rdx.ui.processes.*;
 
 import java.util.ArrayList;
 
@@ -37,7 +38,7 @@ public abstract class RDXProcessManagerPanel
    protected final ImBoolean enableROS1 = new ImBoolean(true);
    protected final ImBoolean logToFile = new ImBoolean(false);
 
-   protected final ArrayList<MissionControlProcess> processes = new ArrayList<>();
+   protected final ArrayList<RestartableProcess> processes = new ArrayList<>();
 
    private final ROS1MasterProcess ros1MasterProcess;
    private final BehaviorModuleProcess behaviorModuleProcess;
@@ -129,7 +130,7 @@ public abstract class RDXProcessManagerPanel
 
       ImGui.checkbox(labels.get("Log to file"), logToFile);
 
-      for (MissionControlProcess process : processes)
+      for (RestartableProcess process : processes)
       {
          process.renderImGuiWidgets();
       }
@@ -151,7 +152,7 @@ public abstract class RDXProcessManagerPanel
       lidarREAProcess.destroy();
 
       // destroy em all just in case
-      for (MissionControlProcess process : processes)
+      for (RestartableProcess process : processes)
       {
          process.destroy();
       }

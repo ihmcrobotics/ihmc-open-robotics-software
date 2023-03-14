@@ -1,10 +1,9 @@
-package us.ihmc.rdx.ui.missionControl.processes;
+package us.ihmc.rdx.ui.processes;
 
-import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
 
-public class LidarREAProcess extends RestartableMissionControlProcess
+public class LidarREAProcess extends RestartableProcess
 {
    private LidarBasedREAStandaloneLauncher lidarBasedREAStandaloneLauncher;
 

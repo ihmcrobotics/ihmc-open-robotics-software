@@ -1,14 +1,13 @@
-package us.ihmc.rdx.ui.missionControl.processes;
+package us.ihmc.rdx.ui.processes;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
-import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 import java.util.Map;
 
-public class KinematicsStreamingToolboxProcess extends RestartableMissionControlProcess
+public class KinematicsStreamingToolboxProcess extends RestartableProcess
 {
    private final DRCRobotModel robotModel;
    private Map<String, Double> initialConfiguration;

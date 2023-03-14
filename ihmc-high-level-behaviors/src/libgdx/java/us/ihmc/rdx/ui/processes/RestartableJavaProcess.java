@@ -1,9 +1,8 @@
-package us.ihmc.rdx.ui.missionControl.processes;
+package us.ihmc.rdx.ui.processes;
 
-import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 
-public class RestartableJavaProcess extends RestartableMissionControlProcess
+public class RestartableJavaProcess extends RestartableProcess
 {
    private final JavaProcessSpawner spawner;
    private final Class<?> mainClass;

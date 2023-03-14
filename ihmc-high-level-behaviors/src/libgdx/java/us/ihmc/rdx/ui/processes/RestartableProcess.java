@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.missionControl;
+package us.ihmc.rdx.ui.processes;
 
 import imgui.internal.ImGui;
 import us.ihmc.commons.thread.ThreadTools;
@@ -8,7 +8,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-public abstract class RestartableMissionControlProcess implements MissionControlProcess
+public abstract class RestartableProcess
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    volatile boolean starting = false;
@@ -30,7 +30,6 @@ public abstract class RestartableMissionControlProcess implements MissionControl
 
    public abstract String getName();
 
-   @Override
    public void renderImGuiWidgets()
    {
       ImGui.text(getName() + ":");
@@ -103,7 +102,6 @@ public abstract class RestartableMissionControlProcess implements MissionControl
       });
    }
 
-   @Override
    public void destroy()
    {
       Stopwatch stopwatch = new Stopwatch().start();
