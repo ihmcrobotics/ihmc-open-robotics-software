@@ -2,6 +2,8 @@ package us.ihmc.perception.tools;
 
 import boofcv.struct.calib.CameraPinhole;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
@@ -13,6 +15,9 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.realsense.BytedecoRealsense;
@@ -25,7 +30,7 @@ import java.time.Instant;
 
 public class PerceptionMessageTools
 {
-   public static void setDepthExtrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessageToPack)
+   public static void setDepthIntrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessageToPack)
    {
       imageMessageToPack.setFocalLengthXPixels((float) sensor.getDepthFocalLengthPixelsX());
       imageMessageToPack.setFocalLengthYPixels((float) sensor.getDepthFocalLengthPixelsY());
@@ -33,7 +38,7 @@ public class PerceptionMessageTools
       imageMessageToPack.setPrincipalPointYPixels((float) sensor.getDepthPrincipalOffsetYPixels());
    }
 
-   public static void setColorExtrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessageToPack)
+   public static void setColorIntrinsicsFromRealsense(BytedecoRealsense sensor, ImageMessage imageMessageToPack)
    {
       imageMessageToPack.setFocalLengthXPixels((float) sensor.getColorFocalLengthPixelsX());
       imageMessageToPack.setFocalLengthYPixels((float) sensor.getColorFocalLengthPixelsY());
@@ -57,31 +62,31 @@ public class PerceptionMessageTools
       cameraPinholeToPack.setCy(imageMessage.getPrincipalPointYPixels());
    }
 
-   public static void publishPNGCompressedDepthImage(Mat depth16UC1Image,
-                                                     ROS2Topic<ImageMessage> topic,
-                                                     ImageMessage depthImageMessage,
-                                                     ROS2Helper helper,
-                                                     FramePose3D cameraPose,
-                                                     Instant aquisitionTime,
-                                                     long sequenceNumber,
-                                                     int height,
-                                                     int width)
+   public static void publishCompressedDepthImage(BytePointer compressedDepthPointer,
+                                                  ROS2Topic<ImageMessage> topic,
+                                                  ImageMessage depthImageMessage,
+                                                  ROS2Helper helper,
+                                                  FramePose3D cameraPose,
+                                                  Instant aquisitionTime,
+                                                  long sequenceNumber,
+                                                  int height,
+                                                  int width,
+                                                  float depthToMetersRatio)
    {
-      BytePointer compressedDepthPointer = new BytePointer();
-      BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
       packImageMessage(depthImageMessage,
-                                           compressedDepthPointer,
-                                           cameraPose,
-                                           aquisitionTime,
-                                           sequenceNumber,
-                                           height,
-                                           width,
-                                           ImageMessageFormat.DEPTH_PNG_16UC1);
+                       compressedDepthPointer,
+                       cameraPose,
+                       aquisitionTime,
+                       sequenceNumber,
+                       height,
+                       width,
+                       depthToMetersRatio);
+
+      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
       helper.publish(topic, depthImageMessage);
    }
 
-   public static void publishJPGCompressedColorImage(Mat color8UC3Image,
-                                                     Mat yuvColorImage,
+   public static void publishJPGCompressedColorImage(BytePointer compressedColorPointer,
                                                      ROS2Topic<ImageMessage> topic,
                                                      ImageMessage colorImageMessage,
                                                      ROS2Helper helper,
@@ -89,18 +94,18 @@ public class PerceptionMessageTools
                                                      Instant aquisitionTime,
                                                      long sequenceNumber,
                                                      int height,
-                                                     int width)
+                                                     int width,
+                                                     float depthToMetersRatio)
    {
-      BytePointer compressedColorPointer = new BytePointer();
-      BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
       packImageMessage(colorImageMessage,
-                                           compressedColorPointer,
-                                           cameraPose,
-                                           aquisitionTime,
-                                           sequenceNumber,
-                                           height,
-                                           width,
-                                           ImageMessageFormat.COLOR_JPEG_YUVI420);
+                       compressedColorPointer,
+                       cameraPose,
+                       aquisitionTime,
+                       sequenceNumber,
+                       height,
+                       width,
+                       depthToMetersRatio);
+      ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
       helper.publish(topic, colorImageMessage);
    }
 
@@ -135,7 +140,6 @@ public class PerceptionMessageTools
       {
          imageMessage.getData().add(dataByteBuffer.get(i));
       }
-
    }
 
    public static void packImageMessageData(BytePointer dataBytePointer, ImageMessage imageMessage)
@@ -154,16 +158,16 @@ public class PerceptionMessageTools
                                        long sequenceNumber,
                                        int height,
                                        int width,
-                                       ImageMessageFormat format)
+                                       float depthToMetersRatio)
    {
       packImageMessageData(dataBytePointer, imageMessage);
-      imageMessage.setFormat(format.ordinal());
       imageMessage.setImageHeight(height);
       imageMessage.setImageWidth(width);
       imageMessage.getPosition().set(cameraPose.getPosition());
       imageMessage.getOrientation().set(cameraPose.getOrientation());
       imageMessage.setSequenceNumber(sequenceNumber);
       MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
+      imageMessage.setDepthDiscretization(depthToMetersRatio);
    }
 
    public static void packVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)
@@ -183,5 +187,36 @@ public class PerceptionMessageTools
       byte[] compressedByteArray = videoPacket.getData().toArray();
       BytedecoOpenCVTools.decompressJPG(compressedByteArray, colorImage);
       BytedecoOpenCVTools.display("Color Image", colorImage, 1);
+   }
+
+   public static void copyToFloatPointer(IDLSequence.Float floatSequence, FloatPointer floatBuffer, int startIndex)
+   {
+      for (int i = 0; i < floatSequence.size(); i++)
+      {
+         floatBuffer.put(i + startIndex, floatSequence.get(i));
+      }
+   }
+
+   public static void copyToLongPointer(IDLSequence.Long longSequence, LongPointer longPointer, int startIndex)
+   {
+      for (int i = 0; i < longSequence.size(); i++)
+      {
+         longPointer.put(i + startIndex, longSequence.get(i));
+      }
+   }
+
+   public static void copyToFloatPointer(Point3D point, FloatPointer floatPointer, int startIndex)
+   {
+      floatPointer.put(startIndex, (float) point.getX());
+      floatPointer.put(startIndex + 1, (float) point.getY());
+      floatPointer.put(startIndex + 2, (float) point.getZ());
+   }
+
+   public static void copyToFloatPointer(Quaternion quaternion, FloatPointer floatPointer, int startIndex)
+   {
+      floatPointer.put(startIndex, (float) quaternion.getX());
+      floatPointer.put(startIndex + 1, (float) quaternion.getY());
+      floatPointer.put(startIndex + 2, (float) quaternion.getZ());
+      floatPointer.put(startIndex + 3, (float) quaternion.getS());
    }
 }
