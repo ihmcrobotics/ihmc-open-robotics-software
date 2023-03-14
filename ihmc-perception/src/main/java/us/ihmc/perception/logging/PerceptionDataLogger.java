@@ -338,24 +338,6 @@ public class PerceptionDataLogger
          });
       }
 
-      // TODO: Make this work with the new ImageMessage message for Blackfly images
-      // Add callback for Blackfly Color images
-      //      LogTools.info("Blackfly Color Enabled: " + channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled());
-      //      if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
-      //      {
-      //         SampleInfo sampleInfo = new SampleInfo();
-      //         byteArrays.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[PerceptionLoggerConstants.BUFFER_SIZE]);
-      //         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
-      //         ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
-      //         {
-      //            subscriber.takeNextData(imageMessage, sampleInfo);
-      //            imageMessageReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).set(imageMessage);
-      //            logColorBlackfly(bigVideoPacketReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).getAndSet(null));
-      //
-      //            LogTools.info("BlackFly Image Received: {}", imageMessage.getAcquisitionTimeSecondsSinceEpoch());
-      //         });
-      //      }
-
       // Add callback for MoCap data
       LogTools.info("MoCap Logging Enabled: " + channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled());
       if (channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
@@ -702,35 +684,14 @@ public class PerceptionDataLogger
 
    public static void main(String[] args)
    {
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-
       String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
       String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
+      String logFileName = HDF5Tools.generateLogFileName();
 
       PerceptionDataLogger logger = new PerceptionDataLogger();
 
       logger.setChannelEnabled(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, true);
-      //      logger.setChannelEnabled(PerceptionLoggerConstants.L515_DEPTH_NAME, true);
-      //      logger.setChannelEnabled(PerceptionLoggerConstants.L515_COLOR_NAME, true);
-
-      //      logger.setChannelEnabled(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, true);
-      //      logger.setChannelEnabled(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, true);
-
-      //      logger.setChannelEnabled(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, true);
-
       logger.startLogging(Paths.get(logDirectory, logFileName).toString(), "Nadia");
-
-      // TEST ROS2 node for Ouster Depth
-
-      //      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, StringTools.titleToSnakeCase("logger_realtime_ros2_node"));
-      //
-      //      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), (message) -> {
-      //         LogTools.info("Message Received: {}", message);
-      //      });
-      //
-      //      ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-      //      executor.scheduleAtFixedRate(realtimeROS2Node::spin, 0, 10, TimeUnit.MILLISECONDS);
    }
 }
 
