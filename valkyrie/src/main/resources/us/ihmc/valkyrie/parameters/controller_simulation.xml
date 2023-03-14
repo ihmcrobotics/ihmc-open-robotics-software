@@ -202,7 +202,7 @@
                         <registry name="ToeOffStepPositionInspector">
                            <parameter name="minStepLengthForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
                            <parameter name="minStepForwardForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.24" />
-                           <parameter name="minStepHeightForToeOff" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
+                           <parameter name="heightChangeForNonFlatStep" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
                         </registry>
                         <parameter name="doToeOffIfPossibleInDoubleSupport" type="BooleanParameter" value="true" />
                         <parameter name="doToeOffIfPossibleInSingleSupport" type="BooleanParameter" value="false" />
