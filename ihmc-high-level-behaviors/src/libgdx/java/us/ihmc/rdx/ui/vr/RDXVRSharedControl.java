@@ -27,6 +27,7 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
@@ -111,30 +112,30 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       // draw spline for the computed trajectories from assistance
       if (replayPreviewCounter == 0)
       {
-         for (String bodyPart : bodyPartReplayMotionMap.keySet())
+         for (Map.Entry<String, List<Pose3DReadOnly>> entryPartMotion : bodyPartReplayMotionMap.entrySet())
          {
-            if (splineGraphics.containsKey(bodyPart)) // if the spline was previously created, meaning we are at the second replay of full preview
-               splineGraphics.get(bodyPart).clear(); // clear it
-            splineGraphics.put(bodyPart, new RDXSplineGraphic());
+            if (splineGraphics.containsKey(entryPartMotion.getKey())) // if the spline was previously created, meaning we are at the second replay of full preview
+               splineGraphics.get(entryPartMotion.getKey()).clear(); // clear it
+            splineGraphics.put(entryPartMotion.getKey(), new RDXSplineGraphic());
             // restart creating the spline from beginning
-            splineGraphics.get(bodyPart).createStart(bodyPartReplayMotionMap.get(bodyPart).get(0).getPosition(), Color.BLUE);
-            speedSplineAdjustmentFactor = (int) Math.floor((1.0 * assistanceStatusList.size()) / (1.0 * bodyPartReplayMotionMap.get(bodyPart).size()));
+            splineGraphics.get(entryPartMotion.getKey()).createStart(entryPartMotion.getValue().get(0).getPosition(), Color.BLUE);
+            speedSplineAdjustmentFactor = (int) Math.floor((1.0 * assistanceStatusList.size()) / (1.0 * entryPartMotion.getValue().size()));
          }
       }
       else
       {
-         for (String bodyPart : bodyPartReplayMotionMap.keySet())
+         for (Map.Entry<String, List<Pose3DReadOnly>> entryPartMotion : bodyPartReplayMotionMap.entrySet())
          {
             // since update() method of kinematics streaming can be faster than processVRInput(), the spline size can be shorter than the status list of the ghost robot
             // we do an approximate speed adjustment consisting in waiting before adding the next point of the spline
             int speedAdjuster = replayPreviewCounter/speedSplineAdjustmentFactor;
-            if (speedAdjuster < bodyPartReplayMotionMap.get(bodyPart).size() - 1)
+            if (speedAdjuster < entryPartMotion.getValue().size() - 1)
             {
-               splineGraphics.get(bodyPart).createAdditionalPoint(bodyPartReplayMotionMap.get(bodyPart).get(speedAdjuster).getPosition(), Color.YELLOW);
+               splineGraphics.get(entryPartMotion.getKey()).createAdditionalPoint(entryPartMotion.getValue().get(speedAdjuster).getPosition(), Color.YELLOW);
             }
-            else if (speedAdjuster == bodyPartReplayMotionMap.get(bodyPart).size() - 1)
+            else if (speedAdjuster == entryPartMotion.getValue().size() - 1)
             {
-               splineGraphics.get(bodyPart).createEnd(Color.BLUE);
+               splineGraphics.get(entryPartMotion.getKey()).createEnd(Color.BLUE);
             }
 
          }
@@ -144,7 +145,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectFrame, objectName);
+      proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame);
 
       if (previewSetToActive)
       {
