@@ -406,9 +406,9 @@ public class ProMPAssistant
    {
       ReferenceFrame frame = objectFrame != null ? objectFrame : ReferenceFrame.getWorldFrame();
       // for each body part generate the mean trajectory of the learned promp
-      for (Map.Entry<String, List<FramePose3D>> entry : bodyPartObservedTrajectoryMap.entrySet())
+      for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
       {
-         entry.setValue(proMPManagers.get(currentTask).generateTaskTrajectory(entry.getKey(), frame));
+         bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart, frame));
          // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
          setStartTrajectories(numberObservations);
       }
@@ -417,8 +417,8 @@ public class ProMPAssistant
    public void setStartTrajectories(int sample)
    {
       doneCurrentTask = false;
-      // for each body part generate the mean trajectory of the learned promp
-      bodyPartTrajectorySampleCounter.replaceAll((bodyPart, oldSample) -> sample);
+      for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
+         bodyPartTrajectorySampleCounter.put(bodyPart, sample);
    }
 
    public boolean readyToPack()
@@ -438,7 +438,7 @@ public class ProMPAssistant
             if (sampleCounter < numberObservations) // this statement is true only during replay preview
             { // replay the observed motion, do not want the unconditioned ProMP mean for the first part
                FramePose3D observedFramePose = observedFramePoseTrajectory.get(sampleCounter);
-               if (objectFrame != null) // change to object frame if one is available
+               if (objectFrame != null) // change back to world frame if before it was changed to object frame
                   observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.getPosition().set(observedFramePose.getPosition());
                framePose.getOrientation().set(observedFramePose.getOrientation());

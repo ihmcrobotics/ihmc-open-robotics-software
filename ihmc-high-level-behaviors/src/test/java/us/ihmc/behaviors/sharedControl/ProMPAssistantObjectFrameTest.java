@@ -91,6 +91,7 @@ public class ProMPAssistantObjectFrameTest
                proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart,  "Door", objectFrame);
             }
             //record frame and store it in csv file
+            framePose.changeFrame(objectFrame);
             Double[] bodyPartTrajectories = new Double[] {framePose.getOrientation().getX(),
                                                           framePose.getOrientation().getY(),
                                                           framePose.getOrientation().getZ(),

@@ -91,9 +91,11 @@ public class TrajectoryRecordReplay<T extends Number>
       dataMatrix.add(localValues);
    }
 
-   /** Useful if we are recording trajectories of different parts but not in the same scope
+   /**
+    * Useful if we are recording trajectories of different parts but not in the same scope
     * and we want to concatenate them into one single row to have a single csv file
-    * rather than having multiple TrajectoryRecordReplay objects and multiple csv files */
+    * rather than having multiple TrajectoryRecordReplay objects and multiple csv files
+    */
    public void concatenateData()
    {
       for (int i = 0; i < dataMatrix.size(); i = i + numberParts)
@@ -108,9 +110,11 @@ public class TrajectoryRecordReplay<T extends Number>
       concatenated = true;
    }
 
-   /** Useful if we are replaying a csv file where multiple parts have been concatenated in one single row
+   /**
+    * Useful if we are replaying a csv file where multiple parts have been concatenated in one single row
     * and we want the info of each part in a separate row.
-    * Not useful if you have different parts with different number of elements */
+    * Not useful if you have different parts with different number of elements
+    */
    private void splitData()
    {
       for (int i = 0; i < dataMatrix.size(); i++)
@@ -141,18 +145,14 @@ public class TrajectoryRecordReplay<T extends Number>
    public void readCSV()
    {
       doneReplaying = false;
-      try
+      try (BufferedReader fileReader = new BufferedReader(new FileReader(filePath)))
       {
-         BufferedReader fileReader = new BufferedReader(new FileReader(filePath));
-         String line = "";
+         String line;
          while ((line = fileReader.readLine()) != null)
          {
-            String[] stringValues = line.split(",");
-            T[] dataValues = newNumberArray(stringValues.length);
-            IntStream.range(0, stringValues.length).forEach(i -> dataValues[i] = setValue(stringValues[i]));
+            T[] dataValues = Stream.of(line.split(",")).map(this::setValue).toArray(this::newNumberArray);
             dataMatrix.add(dataValues);
          }
-         fileReader.close();
       }
       catch (IOException e)
       {
@@ -162,26 +162,17 @@ public class TrajectoryRecordReplay<T extends Number>
 
    public void writeCSV(ArrayList<T[]> dataMatrix)
    {
-      List<String[]> dataLines = new ArrayList<>();
-      for (T[] dataLine : dataMatrix)
-      {
-         String[] stringValues = new String[dataMatrix.get(0).length];
-         Arrays.setAll(stringValues, j -> "" + dataLine[j]);
-         dataLines.add(stringValues);
-      }
-      // if recordFile name has not been set, generate file with current date and time as name
-      String fileName = "";
-      if (recordFileName.isEmpty())
-      {
-         fileName = new SimpleDateFormat("yyMMddHHmmssZ'.csv'").format(new Date());
-         recordFileName = fileName;
-      }
-      else
-         fileName = recordFileName;
+      // If recordFile name has not been set, generate file with current date and time as name
+      String fileName = recordFileName.isEmpty() ? new SimpleDateFormat("yyMMddHHmmssZ'.csv'").format(new Date()) : recordFileName;
       File csvFile = new File(filePath + "/" + fileName);
       try (PrintWriter writer = new PrintWriter(csvFile))
       {
-         dataLines.stream().map(this::convertToCSV).forEach(writer::println);
+         for (T[] dataLine : dataMatrix)
+         {
+            String[] stringValues = Arrays.stream(dataLine).map(this::escapeSpecialCharacters).toArray(String[]::new);
+            String line = String.join(",", stringValues);
+            writer.println(line);
+         }
       }
       catch (IOException e)
       {
@@ -189,20 +180,15 @@ public class TrajectoryRecordReplay<T extends Number>
       }
    }
 
-   private String convertToCSV(String[] data)
+   private String escapeSpecialCharacters(T data)
    {
-      return Stream.of(data).map(this::escapeSpecialCharacters).collect(Collectors.joining(","));
-   }
-
-   private String escapeSpecialCharacters(String data)
-   {
-      String escapedData = data.replaceAll("\\R", " ");
-      if (data.contains(",") || data.contains("\"") || data.contains("'"))
+      String str = String.valueOf(data);
+      if (str.contains(",") || str.contains("\"") || str.contains("\n"))
       {
-         data = data.replace("\"", "\"\"");
-         escapedData = "\"" + data + "\"";
+         str = str.replace("\"", "\"\"");
+         str = "\"" + str + "\"";
       }
-      return escapedData;
+      return str;
    }
 
    private void reset()

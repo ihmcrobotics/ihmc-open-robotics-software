@@ -79,7 +79,7 @@ public class ProMPAssistantWorldFrameTest
                assertTrue(!proMPAssistant.readyToPack());
                FramePose3D observedGoalPose = null; // no observed goal
                //do not change the frame, just observe it in order to generate a prediction later
-               proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart, "PushDoorWorldFrame", observedGoalPose);
+               proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart, "Door", observedGoalPose);
             }
             //record frame and store it in csv file
             Double[] bodyPartTrajectories = new Double[] {framePose.getOrientation().getX(),

@@ -142,6 +142,22 @@ public class ProMPManager
       }
    }
 
+   public void saveLearnedTask()
+   {
+      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
+      String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
+      String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
+      File demoFolder = new File(demoTrainingDirAbs);
+   }
+
+   public void loadPrelearnedTask()
+   {
+      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
+      String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
+      String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
+      File demoFolder = new File(demoTrainingDirAbs);
+   }
+
    public void resetTask()
    {
       for (Map.Entry<String, String> partGeometry : bodyPartsGeometry.entrySet())
@@ -219,7 +235,7 @@ public class ProMPManager
    }
 
    /**
-    * Update the speed of the ProMPs of the task based on observation of a body part trajectory and goal (e.g., RightHand or LeftHand)
+    * Update the speed of the ProMPs of the task based on observation of a body part trajectory AND goal (e.g., RightHand or LeftHand)
     * more accurate but much slower
     */
    public void updateTaskSpeed(List<FramePose3D> observedFrameTrajectory, Pose3DReadOnly observedGoal, String bodyPart)
@@ -474,26 +490,6 @@ public class ProMPManager
          frameList.add(setPose);
       }
       return frameList;
-   }
-
-   public TrajectoryGroup getTrainingTrajectories(String bodyPart)
-   {
-      return trainingTrajectories.get(bodyPart);
-   }
-
-   public HashMap<String, ProMP> getLearnedProMPs()
-   {
-      return learnedProMPs;
-   }
-
-   public ProMP getLearnedProMP(String bodyPart)
-   {
-      return learnedProMPs.get(bodyPart);
-   }
-
-   public String getTaskName()
-   {
-      return taskName;
    }
 
    public HashMap<String, String> getBodyPartsGeometry()
