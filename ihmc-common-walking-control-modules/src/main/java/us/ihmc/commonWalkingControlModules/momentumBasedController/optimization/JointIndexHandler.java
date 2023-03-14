@@ -171,7 +171,7 @@ public class JointIndexHandler
          if (indicesIntoFullBlock == null) // don't do anything for joints that are not in the list
             continue;
 
-         NativeMatrixTools.extractColumns(compactMatrix, fullMatrix, indicesIntoFullBlock);
+         NativeMatrixTools.extractColumns(compactMatrix, indicesIntoCompactBlock, fullMatrix, indicesIntoFullBlock);
       }
    }
 
