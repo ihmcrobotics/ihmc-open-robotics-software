@@ -15,30 +15,44 @@ public final class ProMPUtil
 {
    public static void saveAsCSV(ProMPInfoMapper.EigenMatrixXd dataMatrix, String fileName)
    {
-      List<String[]> dataLines = new ArrayList<>();
-      for (int i = 0; i < dataMatrix.rows(); i++)
+      // Check for null input matrix
+      if (dataMatrix == null)
       {
-         String[] stringLine = new String[(int) dataMatrix.cols()];
-         for (int j = 0; j < dataMatrix.cols(); j++)
-            stringLine[j] = "" + dataMatrix.coeff(i, j);
-         dataLines.add(stringLine);
+         throw new IllegalArgumentException("Input data matrix is null");
       }
+
+      // Create file and directory
       WorkspaceDirectory fileDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
       String fileDirAbs = fileDirectory.getDirectoryPath().toAbsolutePath().toString();
       File csvFile = new File(fileDirAbs + fileName);
-      try (PrintWriter writer = new PrintWriter(csvFile))
+
+      try
       {
-         dataLines.stream().map(s -> convertToCSV(s)).forEach(writer::println);
+         // Create PrintWriter for writing to file
+         PrintWriter writer = new PrintWriter(csvFile);
+
+         // Write data to file
+         for (int i = 0; i < dataMatrix.rows(); i++)
+         {
+            for (int j = 0; j < dataMatrix.cols(); j++)
+            {
+               writer.append(String.valueOf(dataMatrix.coeff(i, j)));
+               if (j < dataMatrix.cols() - 1)
+               {
+                  writer.append(",");
+               }
+            }
+            writer.println();
+         }
+
+         // Close PrintWriter
+         writer.close();
       }
       catch (IOException e)
       {
          e.printStackTrace();
+         throw new RuntimeException("Error writing to file: " + e.getMessage());
       }
-   }
-
-   private static String convertToCSV(String[] data)
-   {
-      return Stream.of(data).collect(Collectors.joining(","));
    }
 
    public static void printMatrix(ProMPInfoMapper.EigenMatrixXd matrix, String name)
@@ -57,7 +71,8 @@ public final class ProMPUtil
 
    public static ProMPInfoMapper.EigenMatrixXd concatenateEigenMatrix(ProMPInfoMapper.EigenMatrixXd matrixA, ProMPInfoMapper.EigenMatrixXd matrixB)
    {
-      ProMPInfoMapper.EigenMatrixXd matrixC = new ProMPInfoMapper.EigenMatrixXd((int) Math.min(matrixA.rows(),matrixB.rows()),(int) (matrixA.cols()+matrixB.cols()));
+      ProMPInfoMapper.EigenMatrixXd matrixC = new ProMPInfoMapper.EigenMatrixXd((int) Math.min(matrixA.rows(), matrixB.rows()),
+                                                                                (int) (matrixA.cols() + matrixB.cols()));
       for (int row = 0; row < (int) matrixC.rows(); row++)
       {
          for (int colA = 0; colA < (int) matrixA.cols(); colA++)
@@ -66,7 +81,7 @@ public final class ProMPUtil
          }
          for (int colB = (int) matrixA.cols(); colB < (int) matrixA.cols() + matrixB.cols(); colB++)
          {
-            matrixC.apply(row, colB).put(matrixB.coeff(row, colB-(int) matrixA.cols()));
+            matrixC.apply(row, colB).put(matrixB.coeff(row, colB - (int) matrixA.cols()));
          }
       }
       return matrixC;
@@ -81,7 +96,7 @@ public final class ProMPUtil
          Trajectory trajectoryRowB = vectorB.get(row);
          ProMPInfoMapper.EigenMatrixXd rowA = trajectoryRowA.matrix();
          ProMPInfoMapper.EigenMatrixXd rowB = trajectoryRowB.matrix();
-         ProMPInfoMapper.EigenMatrixXd rowC = concatenateEigenMatrix(rowA,rowB);
+         ProMPInfoMapper.EigenMatrixXd rowC = concatenateEigenMatrix(rowA, rowB);
          Trajectory trajectoryRowC = new Trajectory(rowC);
          vectorC.put(trajectoryRowC);
       }
