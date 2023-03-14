@@ -3,8 +3,10 @@ package us.ihmc.communication;
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
-import ihmc_common_msgs.msg.dds.SystemResourceUsageMessage;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import mission_control_msgs.msg.dds.SystemAvailableMessage;
+import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
+import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
@@ -111,8 +113,6 @@ public class ROS2Tools
    public static final ROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule(HEIGHT_MAP_MODULE_NAME);
 
    public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
-
-   public static final ROS2Topic<SystemResourceUsageMessage> SYSTEM_RESOURCE_USAGE = IHMC_ROOT.withTypeName(SystemResourceUsageMessage.class);
 
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
    public static final ROS2Topic<PlanarRegionsListMessage> REA_SUPPORT_REGIONS_INPUT = REA.withRobot(null)
@@ -243,6 +243,11 @@ public class ROS2Tools
    public static final ROS2Topic<Empty> PUBLISH_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("publish_lidar_scan").withType(Empty.class);
    public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("publish_height_map").withType(Empty.class);
 
+   /** Mission Control types **/
+   public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withType(SystemAvailableMessage.class);
+   public static final ROS2Topic<SystemServiceStatusMessage> SYSTEM_SERVICE_STATUS = IHMC_ROOT.withModule("asdf").withType(SystemServiceStatusMessage.class);
+//   public static final ROS2Topic<SystemServiceStatusMessage> SYSTEM_SERVICE_STATUS = IHMC_ROOT.withModule(ZED2_NAME).withType(SystemServiceStatusMessage.class).withSuffix("color_stereo");
+
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
    public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getBipedalSupportRegionParametersTopic(String robotName)
@@ -338,6 +343,11 @@ public class ROS2Tools
    public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()
    {
       return typeNamedTopic(DoorParameterPacket.class, ROS2Tools.IHMC_ROOT);
+   }
+
+   public static ROS2Topic<SystemResourceUsageMessage> getSystemResourceUsageTopic(String instanceId)
+   {
+      return typeNamedTopic(SystemResourceUsageMessage.class, IHMC_ROOT.withSuffix(instanceId));
    }
 
    public final static ExceptionHandler RUNTIME_EXCEPTION = e ->
