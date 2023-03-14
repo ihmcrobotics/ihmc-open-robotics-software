@@ -63,22 +63,22 @@ public class RealSenseHardwareManager
 
    public BytedecoRealsense createFullFeaturedL515(String serialNumberToFind)
    {
-      return createBytedecoRealsenseDevice(serialNumberToFind, RealsenseSettingsProfile.L515_COLOR_720P_DEPTH_768P_30HZ);
+      return createBytedecoRealsenseDevice(serialNumberToFind, RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ);
    }
 
    /**
     *  Creates Realsense Device handler.
     *
     *  @param serialNumberToFind   The device serial number found physically printed on the Realsense sensor
-    *  @param settingsProfile The requested device settings
+    *  @param configuration The requested device settings
     *  @return BytedecoRealsense device object for accessing sensor data and config information
     */
-   public BytedecoRealsense createBytedecoRealsenseDevice(String serialNumberToFind, RealsenseSettingsProfile settingsProfile)
+   public BytedecoRealsense createBytedecoRealsenseDevice(String serialNumberToFind, RealsenseConfiguration configuration)
    {
       return createBytedecoRealsenseDevice(serialNumberToFind,
-                                           settingsProfile.getDepthWidth(),
-                                           settingsProfile.getDepthHeight(),
-                                           settingsProfile.getDepthFPS());
+                                           configuration.getDepthWidth(),
+                                           configuration.getDepthHeight(),
+                                           configuration.getDepthFPS());
    }
 
    /**

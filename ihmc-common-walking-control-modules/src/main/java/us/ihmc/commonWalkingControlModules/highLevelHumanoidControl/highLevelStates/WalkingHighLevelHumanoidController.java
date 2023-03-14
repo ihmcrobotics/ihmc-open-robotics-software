@@ -178,7 +178,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       pelvisStatusMessage.setEndEffectorName(pelvis.getName());
 
-      unloadFraction = walkingControllerParameters.enforceSmoothFootUnloading() ? new DoubleParameter("unloadFraction", registry, 0.5) : null;
+      unloadFraction = walkingControllerParameters.enforceSmoothFootUnloading() != null ? new DoubleParameter("unloadFraction", registry, 0.5) : null;
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
 
@@ -245,7 +245,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                    walkingControllerParameters,
                                                    registry);
 
-      touchdownErrorCompensator = new TouchdownErrorCompensator(walkingMessageHandler, controllerToolbox.getReferenceFrames().getSoleFrames(), registry);
+      touchdownErrorCompensator = new TouchdownErrorCompensator(walkingMessageHandler, controllerToolbox.getContactableFeet(), registry);
       stateMachine = setupStateMachine();
 
       double highCoPDampingDuration = walkingControllerParameters.getHighCoPDampingDurationToPreventFootShakies();

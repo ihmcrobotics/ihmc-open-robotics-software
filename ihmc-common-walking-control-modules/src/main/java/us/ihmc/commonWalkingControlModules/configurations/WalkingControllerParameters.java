@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetect
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
@@ -50,15 +51,38 @@ public abstract class WalkingControllerParameters
     */
    public abstract double getOmega0();
 
+   public enum SmoothFootUnloadMethod
+   {
+      HARD_CONSTRAINT, RHO_WEIGHT
+   };
+
    /**
     * Specifies if the desired ground reaction force for the force that is about to swing should
-    * smoothly be brought to zero by adding a inequality constraint on the z-force.
+    * smoothly be brought to zero by either:
+    * <ul>
+    * <li>adding a inequality constraint on the z-force,
+    * <li>or increasing the rho weights.
+    * </ul>
     * 
-    * @return whether to perform smooth unloading before swing or not. Default value is {@code false}.
+    * @return whether to perform smooth unloading before swing or not. Default value is {@code null}
+    *         for disabling the feature.
     */
-   public boolean enforceSmoothFootUnloading()
+   public SmoothFootUnloadMethod enforceSmoothFootUnloading()
    {
-      return false;
+      return null;
+   }
+
+   /**
+    * Only used when {@link #enforceSmoothFootUnloading()} equals
+    * {@code SmoothFootUnloadMethod.RHO_WEIGHT}, it specifies the final rho weight value of the foot
+    * being unloaded.
+    * 
+    * @return the final unloaded rho weight value, should be greater that the default rho weight
+    *         specified in {@link MomentumOptimizationSettings}.
+    */
+   public double getFinalUnloadedRhoWeight()
+   {
+      return 0.001;
    }
 
    /**
@@ -157,9 +181,8 @@ public abstract class WalkingControllerParameters
    public abstract PDGains getCoMHeightControlGains();
 
    /**
-    * Gains used to compute desired accelerations: joint acceleration = kp * (q_des - q) + kd * (v_des - v)
-    * The feedback in acceleration-space is used as an objective in the whole-body QP
-    *
+    * Gains used to compute desired accelerations: joint acceleration = kp * (q_des - q) + kd * (v_des
+    * - v) The feedback in acceleration-space is used as an objective in the whole-body QP
     * <p>
     * Each {@link GroupParameter} contains gains for one joint group:</br>
     * - The name of the joint group that the gain is used for (e.g. Arms).</br>
@@ -176,15 +199,16 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Gains used for low-level joint position control intended to be sent directly to the motor, torque = kp * (q_des - q) + kd * (v_des - v)
-    *
+    * Gains used for low-level joint position control intended to be sent directly to the motor, torque
+    * = kp * (q_des - q) + kd * (v_des - v)
     * <p>
     * Each {@link GroupParameter} contains gains for one joint group:</br>
     * - The name of the joint group that the gain is used for (e.g. Arms).</br>
     * - The gains for the joint group.</br>
     * - The names of all rigid bodies in the joint group.
     * </p>
-    * If a joint is not contained in the list, low-level jointspace control is not supported for that joint.
+    * If a joint is not contained in the list, low-level jointspace control is not supported for that
+    * joint.
     */
    public List<GroupParameter<PIDGainsReadOnly>> getLowLevelJointSpaceControlGains()
    {
@@ -710,8 +734,8 @@ public abstract class WalkingControllerParameters
    public abstract double maximumHeightAboveAnkle();
 
    /**
-    * This is a reduction factor of {@link #maximumHeightAboveAnkle()} that is applied during the exchange phase to the height trajectory when the robot is
-    * stepping down
+    * This is a reduction factor of {@link #maximumHeightAboveAnkle()} that is applied during the
+    * exchange phase to the height trajectory when the robot is stepping down
     */
    public double getMaxLegLengthReductionSteppingDown()
    {
@@ -719,8 +743,8 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * If the step height change is above this value, it indicates that the foot should not be considered "flat", and that the robot is either
-    * stepping up or down
+    * If the step height change is above this value, it indicates that the foot should not be
+    * considered "flat", and that the robot is either stepping up or down
     */
    public double getHeightChangeForNonFlatStep()
    {
@@ -738,9 +762,8 @@ public abstract class WalkingControllerParameters
    /**
     * Whether the height should be controlled with the rate of change of momentum or using a feedback
     * controller on the pelvis. Note that the height of the pelvis should be controlled to set this
-    * flag to {@code false}, i.e. {@code controlPelvisHeightInsteadOfCoMHeight() == true}.
-    *
-    * Fixme does this do what we think it does?
+    * flag to {@code false}, i.e. {@code controlPelvisHeightInsteadOfCoMHeight() == true}. Fixme does
+    * this do what we think it does?
     */
    public boolean controlHeightWithMomentum()
    {
