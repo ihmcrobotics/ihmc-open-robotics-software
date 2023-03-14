@@ -33,11 +33,13 @@ public class ProMPAssistant
 {
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
+   private List<Double> distanceCandidateTasks = new ArrayList<>();
+   private boolean firstObservedBodyPart = true;
    private String currentTask = ""; // detected task
    private int numberObservations = 0; // number of observations used to update the prediction
-   private String bodyPartRecognition = "";
+   private String bodyPartInference = "";
    private String bodyPartGoal = "";
-   private final HashMap<String, String> taskBodyPartRecognitionMap = new HashMap<>();
+   private final HashMap<String, String> taskBodyPartInferenceMap = new HashMap<>();
    private final HashMap<String, String> taskBodyPartGoalMap = new HashMap<>();
    private final HashMap<String, RigidBodyTransform> taskTransformGoalMap = new HashMap<>();
    private FramePose3D taskGoalPose;
@@ -49,7 +51,7 @@ public class ProMPAssistant
    private final AtomicBoolean isLastViaPoint = new AtomicBoolean(false); // check if last observed viapoint before update
    private int testNumber = 0;
    private boolean conditionOnlyLastObservation = true;
-   private final ArrayList<Pose3DReadOnly> observationRecognitionPart = new ArrayList<>();
+   private final ArrayList<Pose3DReadOnly> observationRecognition = new ArrayList<>();
    private boolean isMoving = false;
    private ReferenceFrame objectFrame;
    private double isMovingThreshold = -1;
@@ -58,7 +60,7 @@ public class ProMPAssistant
    {
       String lastContext = "";
       List<String> taskNames = new ArrayList<>();
-      List<String> bodyPartsRecognition = new ArrayList<>();
+      List<String> bodyPartsInference = new ArrayList<>();
       List<String> bodyPartsGoal = new ArrayList<>();
       List<HashMap<String, String>> bodyPartsGeometries = new ArrayList<>();
       List<Point3D> goalToEETranslations = new ArrayList<>();
@@ -90,12 +92,12 @@ public class ProMPAssistant
                   case "context" ->
                   {
                      String context = (String) taskPropertyMap.getValue();
-                     if(!contextTasksMap.containsKey(context))
-                        contextTasksMap.put(context,new ArrayList<>());
+                     if (!contextTasksMap.containsKey(context))
+                        contextTasksMap.put(context, new ArrayList<>());
                      lastContext = context;
                   }
                   case "name" -> taskNames.add((String) taskPropertyMap.getValue());
-                  case "bodyPartForRecognition" -> bodyPartsRecognition.add((String) taskPropertyMap.getValue());
+                  case "bodyPartForInference" -> bodyPartsInference.add((String) taskPropertyMap.getValue());
                   case "bodyPartWithObservableGoal" -> bodyPartsGoal.add((String) taskPropertyMap.getValue());
                   case "translationGoalToEE" ->
                   {
@@ -157,10 +159,8 @@ public class ProMPAssistant
             LogTools.info("Learning ProMPs for task: {}", taskNames.get(i));
             for (HashMap<String, String> bodyPartsGeometry : bodyPartsGeometries)
             {
-               for (String key : bodyPartsGeometry.keySet())
-               {
-                  LogTools.info("     {} {}", key, bodyPartsGeometry.get(key));
-               }
+               for (Map.Entry<String, String> entry : bodyPartsGeometry.entrySet())
+                  LogTools.info("     {} {}", entry.getKey(), entry.getValue());
             }
             proMPManagers.put(taskNames.get(i),
                               new ProMPManager(taskNames.get(i),
@@ -170,7 +170,7 @@ public class ProMPAssistant
                                                numberBasisFunctions,
                                                speedFactor,
                                                numberOfInferredSpeeds));
-            taskBodyPartRecognitionMap.put(taskNames.get(i), bodyPartsRecognition.get(i));
+            taskBodyPartInferenceMap.put(taskNames.get(i), bodyPartsInference.get(i));
             taskBodyPartGoalMap.put(taskNames.get(i), bodyPartsGoal.get(i));
             taskTransformGoalMap.put(taskNames.get(i), new RigidBodyTransform(goalToEERotations.get(i), goalToEETranslations.get(i)));
          }
@@ -188,9 +188,9 @@ public class ProMPAssistant
       }
    }
 
-   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, ReferenceFrame objectFrame, String objectName)
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
    {
-      if (taskDetected(objectName))
+      if (taskDetected(observedPose, bodyPart, objectName, objectFrame))
       {
          if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
          {
@@ -226,9 +226,9 @@ public class ProMPAssistant
       }
    }
 
-   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, FramePose3D objectPose, String objectName)
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, String objectName, FramePose3D objectPose)
    {
-      if (taskDetected(objectName))
+      if (taskDetected(observedPose, bodyPart, objectName, null))
       {
          if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
          {
@@ -264,88 +264,101 @@ public class ProMPAssistant
       }
    }
 
-   private boolean contextDetected(String objectName)
+   // TODO what if someone is lefthanded, or simply wants to use the left hand for that task?
+   //  Learn task for both hands and called them ...L and ...R, check initial pose of hands to determine which one is being used
+   private boolean taskDetected(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
    {
-      if (currentContext.isEmpty() && !objectName.isEmpty())
+      if (currentTask.isEmpty() && !objectName.isEmpty())
       {
          if (contextTasksMap.containsKey(objectName))
          {
-            currentContext = objectName;
-            List<String> candidateTasks = contextTasksMap.get(currentContext);
-            if (candidateTasks.size() > 0)
+            List<String> candidateTasks = contextTasksMap.get(objectName);
+            FramePose3D lastObservedPose = new FramePose3D(observedPose);
+            if (objectFrame != null)
+               lastObservedPose.changeFrame(objectFrame);
+            if (candidateTasks.size() > 1) // more than 1 task in this context
             {
                for (int i = 0; i < candidateTasks.size(); i++)
                {
-                  String candidateTask = candidateTasks.get(i);
-                  // here compute the distance for each cadidate task. current task is the minimum.
-                  proMPManagers.get(candidateTask).computeDistanceAtStart();
-                  // TODO what if someone is lefthanded, or simply wants to use the left hand for that task?
-                  //  Learn task for both hands and called them ...L and ...R, check initial velocity of hands to determine which one is being used
+                  // here compute the distance wrt to initial value for each cadidate task
+                  if (firstObservedBodyPart)
+                  { // compute distance wrt to first body part
+                     distanceCandidateTasks.add(proMPManagers.get(candidateTasks.get(i)).computeInitialDistance(lastObservedPose, bodyPart));
+                     firstObservedBodyPart = false;
+                  }
+                  else
+                  { // compute distance wrt to second body part
+                     distanceCandidateTasks.set(i,
+                                                distanceCandidateTasks.get(i) + proMPManagers.get(candidateTasks.get(i))
+                                                                                             .computeInitialDistance(lastObservedPose, bodyPart));
+                  }
+               }
+               if (!firstObservedBodyPart)
+               { // select task with minimum distance observation - learned mean
+                  currentTask = candidateTasks.get(getMinIndex(distanceCandidateTasks));
                   // get the body part used for recognition for this task
-                  bodyPartRecognition = taskBodyPartRecognitionMap.get(candidateTask);
+                  bodyPartInference = taskBodyPartInferenceMap.get(currentTask);
+                  // get the body part that has to reach a goal for this task
+                  bodyPartGoal = taskBodyPartGoalMap.get(currentTask);
+
+                  // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
+                  (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet().forEach(part -> bodyPartObservedTrajectoryMap.put(part, new ArrayList<>()));
                }
             }
-         }
-         else
-         {
-            LogTools.info("Detected object ({}) does not have any associated learned policy for assistance", objectName);
-            return false;
-         }
-      }
-      return !currentContext.isEmpty();
-   }
-
-   private boolean taskDetected(String objectName)
-   {
-      // call contextDetected here and do the initialization of bodyparts later if task gotten
-      if (currentTask.isEmpty() && !objectName.isEmpty())
-      {
-         if(contextTasksMap.containsKey(objectName))
-         {
-            List<String> candidateTasks = contextTasksMap.get(objectName);
-            if(candidateTasks.size() > 0)
+            else // 1 task in this context
             {
-               // here compute the distance for each cadidate task. current task is the minimum.
-               proMPManagers.get(candidateTasks.get(i)).computeDistanceAtStart();
-               // TODO if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
                currentTask = candidateTasks.get(0);
-               // TODO what if someone is lefthanded, or simply wants to use the left hand for that task?
-               //  Learn task for both hands and called them ...L and ...R, check initial velocity of hands to determine which one is being used
                // get the body part used for recognition for this task
-               bodyPartRecognition = taskBodyPartRecognitionMap.get(currentTask);
+               bodyPartInference = taskBodyPartInferenceMap.get(currentTask);
                // get the body part that has to reach a goal for this task
                bodyPartGoal = taskBodyPartGoalMap.get(currentTask);
 
                // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
-               for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
-                  bodyPartObservedTrajectoryMap.put(bodyPart, new ArrayList<>());
-            }
-            else
-            {
-               LogTools.warn("Detected object ({}) should but does NOT have any associated learned policy for assistance. Check file ProMPAssistant.json", objectName);
-               return false;
+               (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet().forEach(part -> bodyPartObservedTrajectoryMap.put(part, new ArrayList<>()));
             }
          }
-         else
+         else // no tasks in this context
          {
+            firstObservedBodyPart = true;
             LogTools.info("Detected object ({}) does not have any associated learned policy for assistance", objectName);
             return false;
          }
-
       }
       return !currentTask.isEmpty();
    }
 
+   public static int getMinIndex(List<Double> list)
+   {
+      if (list == null || list.isEmpty())
+      {
+         throw new IllegalArgumentException("List cannot be null or empty.");
+      }
+
+      double min = list.get(0);
+      int minIndex = 0;
+
+      for (int i = 1; i < list.size(); i++)
+      {
+         double current = list.get(i);
+         if (current < min)
+         {
+            min = current;
+            minIndex = i;
+         }
+      }
+
+      return minIndex;
+   }
+
    private boolean userIsMoving(Pose3DReadOnly lastObservedPose, String bodyPart)
    {
-      if (bodyPart.equals(bodyPartRecognition) && !isMoving)
+      if (bodyPart.equals(bodyPartInference) && !isMoving)
       {
-         observationRecognitionPart.add(lastObservedPose);
-         if (observationRecognitionPart.size() > 1)
+         observationRecognition.add(lastObservedPose);
+         if (observationRecognition.size() > 1)
          {
-            double distance = (observationRecognitionPart.get(observationRecognitionPart.size() - 1)).getTranslation()
-                                                                                                     .distance(observationRecognitionPart.get(0)
-                                                                                                                                         .getTranslation());
+            double distance = (observationRecognition.get(observationRecognition.size() - 1)).getTranslation()
+                                                                                             .distance(observationRecognition.get(0).getTranslation());
             if (isMovingThreshold < 0)
                isMoving = distance > 0.04;
             else
@@ -358,18 +371,18 @@ public class ProMPAssistant
 
    private void updateTask()
    {
-      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get(bodyPartRecognition), bodyPartRecognition);
+      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get(bodyPartInference), bodyPartInference);
       // update all proMP trajectories based on initial observations (stored observed poses)
-      for (String robotPart : bodyPartObservedTrajectoryMap.keySet())
+      for (Map.Entry<String, List<FramePose3D>> entryPartObservation : bodyPartObservedTrajectoryMap.entrySet())
       {
-         List<FramePose3D> observedTrajectory = bodyPartObservedTrajectoryMap.get(robotPart);
+         List<FramePose3D> observedTrajectory = entryPartObservation.getValue();
          if (conditionOnlyLastObservation)
          {
             if (observedTrajectory.size() > 0)
             {
                isLastViaPoint.set(true);
                proMPManagers.get(currentTask)
-                            .updateTaskTrajectory(robotPart, observedTrajectory.get(observedTrajectory.size() - 1), observedTrajectory.size() - 1);
+                            .updateTaskTrajectory(entryPartObservation.getKey(), observedTrajectory.get(observedTrajectory.size() - 1), observedTrajectory.size() - 1);
             }
          }
          else
@@ -378,7 +391,7 @@ public class ProMPAssistant
             {
                if (i == observedTrajectory.size() - 1)
                   isLastViaPoint.set(true);
-               proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, observedTrajectory.get(i), i);
+               proMPManagers.get(currentTask).updateTaskTrajectory(entryPartObservation.getKey(), observedTrajectory.get(i), i);
             }
          }
       }
@@ -391,13 +404,11 @@ public class ProMPAssistant
 
    private void generateTaskTrajectories()
    {
+      ReferenceFrame frame = objectFrame != null ? objectFrame : ReferenceFrame.getWorldFrame();
       // for each body part generate the mean trajectory of the learned promp
-      for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
+      for (Map.Entry<String, List<FramePose3D>> entry : bodyPartObservedTrajectoryMap.entrySet())
       {
-         if (objectFrame != null)
-            bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart, objectFrame));
-         else
-            bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart, ReferenceFrame.getWorldFrame()));
+         entry.setValue(proMPManagers.get(currentTask).generateTaskTrajectory(entry.getKey(), frame));
          // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
          setStartTrajectories(numberObservations);
       }
@@ -407,8 +418,7 @@ public class ProMPAssistant
    {
       doneCurrentTask = false;
       // for each body part generate the mean trajectory of the learned promp
-      for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
-         bodyPartTrajectorySampleCounter.put(bodyPart, sample);
+      bodyPartTrajectorySampleCounter.replaceAll((bodyPart, oldSample) -> sample);
    }
 
    public boolean readyToPack()
@@ -484,10 +494,11 @@ public class ProMPAssistant
       bodyPartObservedTrajectoryMap.clear();
       bodyPartGeneratedTrajectoryMap.clear();
       bodyPartTrajectorySampleCounter.clear();
-      observationRecognitionPart.clear();
+      observationRecognition.clear();
       doneInitialProcessingTask = false;
       isLastViaPoint.set(false);
       isMoving = false;
+      firstObservedBodyPart = true;
    }
 
    public int getTestNumber()

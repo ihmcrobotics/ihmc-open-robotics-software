@@ -97,6 +97,8 @@ namespace promp {
          */
         double get_mean_end_value(int dof);
 
+        double get_mean_start_value(int dof);
+
     private:
 
         //! vector of loaded trajectories
