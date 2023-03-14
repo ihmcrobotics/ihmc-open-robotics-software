@@ -1,17 +1,14 @@
-#ifndef __ihmc_common_msgs__msg__SystemResourceUsageMessage__idl__
-#define __ihmc_common_msgs__msg__SystemResourceUsageMessage__idl__
+#ifndef __mission_control_msgs__msg__SystemResourceUsageMessage__idl__
+#define __mission_control_msgs__msg__SystemResourceUsageMessage__idl__
 
-module ihmc_common_msgs
+module mission_control_msgs
 {
   module msg
   {
     module dds
     {
 
-      /**
-       * This is part of the IHMC Common message package.
-       */
-      @TypeCode(type="ihmc_common_msgs::msg::dds_::SystemResourceUsageMessage_")
+      @TypeCode(type="mission_control_msgs::msg::dds_::SystemResourceUsageMessage_")
       struct SystemResourceUsageMessage
       {
         /**

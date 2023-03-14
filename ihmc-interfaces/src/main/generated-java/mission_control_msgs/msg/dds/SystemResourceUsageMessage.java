@@ -1,4 +1,4 @@
-package ihmc_common_msgs.msg.dds;
+package mission_control_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
@@ -6,9 +6,6 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-/**
-       * This is part of the IHMC Common message package.
-       */
 public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessage> implements Settable<SystemResourceUsageMessage>, EpsilonComparable<SystemResourceUsageMessage>
 {
    /**

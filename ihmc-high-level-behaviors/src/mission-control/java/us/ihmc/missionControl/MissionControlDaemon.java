@@ -1,7 +1,7 @@
 package us.ihmc.missionControl;
 
-import ihmc_common_msgs.msg.dds.SystemResourceUsageMessage;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
+import mission_control_msgs.msg.dds.SystemAvailableMessage;
+import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -11,70 +11,86 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
+import java.util.UUID;
 
-/**
- * Requires sysstat
- *    sudo apt install sysstat
- *    sudo systemctl enable sysstat
- *    sudo systemctl start sysstat
- */
 public class MissionControlDaemon
 {
+   private final String hostname;
+   private final String instanceId;
+
    private final LinuxResourceMonitor resourceMonitor;
-   private final SysstatNetworkMonitor networkMonitor;
-   private final NVIDIAGPUMonitor gpuUsageMonitor;
+   private SysstatNetworkMonitor networkMonitor; // Optional - requires sysstat
+   private NVIDIAGPUMonitor nvidiaGPUMonitor; // Optional - requires an NVIDIA GPU
+   private List<SystemdServiceMonitor> serviceMonitors = new ArrayList<>();
 
    private final ROS2Node ros2Node;
+   private final IHMCROS2Publisher<SystemAvailableMessage> systemAvailablePublisher;
    private final IHMCROS2Publisher<SystemResourceUsageMessage> systemResourceUsagePublisher;
-
-   private final ExceptionHandlingThreadScheduler updateThreadScheduler;
-   private final ScheduledFuture<?> scheduledFuture;
+   private final List<ExceptionHandlingThreadScheduler> schedulers = new ArrayList<>();
 
    public MissionControlDaemon()
    {
+      hostname = ProcessTools.execSimpleCommandSafe("hostname");
+      instanceId = UUID.randomUUID().toString().substring(0, 5);
+
       resourceMonitor = new LinuxResourceMonitor();
-      networkMonitor = new SysstatNetworkMonitor();
-      gpuUsageMonitor = new NVIDIAGPUMonitor();
 
-      networkMonitor.start();
+      if (MissionControlTools.sysstatAvailable())
+         networkMonitor = new SysstatNetworkMonitor();
+      else
+         LogTools.info("Not using sysstat network monitor");
 
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_daemon");
-      systemResourceUsagePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SYSTEM_RESOURCE_USAGE);
+      if (MissionControlTools.nvidiaGPUAvailable())
+         nvidiaGPUMonitor = new NVIDIAGPUMonitor();
+      else
+         LogTools.info("Not using NVIDIA GPU monitor");
 
-      updateThreadScheduler = new ExceptionHandlingThreadScheduler("MissionControlUpdate", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      scheduledFuture = updateThreadScheduler.schedule(this::update, 0.25);
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_daemon_" + instanceId);
+      systemAvailablePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SYSTEM_AVAILABLE);
+      systemResourceUsagePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemResourceUsageTopic(instanceId));
+
+      ExceptionHandlingThreadScheduler systemAvailablePublisherScheduler = new ExceptionHandlingThreadScheduler("SystemAvailablePublisherScheduler");
+      ExceptionHandlingThreadScheduler systemResourceUsagePublisherScheduler = new ExceptionHandlingThreadScheduler("SystemResourceUsagePublisherScheduler");
+
+      schedulers.add(systemAvailablePublisherScheduler);
+      schedulers.add(systemResourceUsagePublisherScheduler);
+
+      systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.00);
+      systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.25);
+
+      MissionControlTools.findServices().forEach(service -> serviceMonitors.add(new SystemdServiceMonitor(service)));
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
 
-   private void update()
+   private void publishAvailable()
    {
-      if (ros2Node == null)
-         return;
+      SystemAvailableMessage message = new SystemAvailableMessage();
+      message.setHostname(hostname);
+      message.setInstanceId(instanceId);
+      message.setEpochTime(System.currentTimeMillis());
+      systemAvailablePublisher.publish(message);
+   }
 
+   private void publishResourceUsage()
+   {
       SystemResourceUsageMessage message = new SystemResourceUsageMessage();
 
-      resourceMonitor.update();
-
-      // Set memory statistics
+      if (resourceMonitor != null)
       {
+         resourceMonitor.update();
          message.setMemoryUsed(resourceMonitor.getUsedRAMGiB());
          message.setMemoryTotal(resourceMonitor.getTotalRAMGiB());
-      }
-
-      // Set CPU statistics
-      {
          ArrayList<CPUCoreTracker> cpuCoreTrackers = resourceMonitor.getCpuCoreTrackers();
          int cpuCount = cpuCoreTrackers.size();
          message.setCpuCount(cpuCount);
          cpuCoreTrackers.forEach(cpuCoreTracker -> message.getCpuUsages().add(cpuCoreTracker.getPercentUsage()));
       }
 
-      // Set network statistics
+      if (networkMonitor != null)
       {
          Map<String, Float> ifaceRxKbps = networkMonitor.getIfaceRxKbps();
          Map<String, Float> ifaceTxKbps = networkMonitor.getIfaceTxKbps();
@@ -95,52 +111,25 @@ public class MissionControlDaemon
          }
       }
 
-      // Set GPU statistics
+      if (nvidiaGPUMonitor != null)
       {
-         // TODO: support multiple GPUs
-         if (gpuUsageMonitor.getHasNvidiaGPU())
-         {
-            message.setNvidiaGpuCount(1);
-            message.getNvidiaGpuUtilization().add(gpuUsageMonitor.getGpuUsage());
-            message.getNvidiaGpuMemoryUsed().add(gpuUsageMonitor.getMemoryUsed());
-            message.getNvidiaGpuTotalMemory().add(gpuUsageMonitor.getMemoryTotal());
-         }
+         message.setNvidiaGpuCount(1); // TODO: support multiple GPUs
+         message.getNvidiaGpuUtilization().add(nvidiaGPUMonitor.getGpuUsage());
+         message.getNvidiaGpuMemoryUsed().add(nvidiaGPUMonitor.getMemoryUsed());
+         message.getNvidiaGpuTotalMemory().add(nvidiaGPUMonitor.getMemoryTotal());
       }
-
-      System.out.println("publishing...");
 
       // Publish the message
       systemResourceUsagePublisher.publish(message);
    }
 
-   private String getStatus(String serviceName)
-   {
-      String statusOutput = null;
-      try
-      {
-         statusOutput = ProcessTools.execSimpleCommand("systemctl status " + serviceName);
-      }
-      catch (IOException | InterruptedException ignored)
-      {
-      }
-      if (statusOutput == null) return null;
-      String[] lines = statusOutput.split("\\R");
-      if (lines.length < 3)
-      {
-         LogTools.error("Got: {}", statusOutput);
-         return "error parsing systemd status";
-      }
-      else
-      {
-         return lines[2].trim();
-      }
-   }
-
    private void destroy()
    {
       networkMonitor.stop();
-      scheduledFuture.cancel(false);
+      systemAvailablePublisher.destroy();
       systemResourceUsagePublisher.destroy();
+      schedulers.forEach(ExceptionHandlingThreadScheduler::shutdown);
+      serviceMonitors.forEach(SystemdServiceMonitor::destroy);
       ros2Node.destroy();
    }
 
@@ -148,6 +137,12 @@ public class MissionControlDaemon
 
    public static void main(String[] args)
    {
+      if (!System.getProperty("os.name").toLowerCase().contains("linux"))
+      {
+         LogTools.warn("This program is only supported on Linux");
+         return;
+      }
+
       new MissionControlDaemon();
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
