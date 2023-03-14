@@ -189,7 +189,7 @@ public class ICPController implements ICPControllerInterface
 
       safeCoPDistanceToEdge = new DoubleParameter(yoNamePrefix + "SafeCoPDistanceToEdge", registry, icpOptimizationParameters.getSafeCoPDistanceToEdge());
       double defaultMaxAllowedDistanceCMPSupport = walkingControllerParameters != null ? walkingControllerParameters.getMaxAllowedDistanceCMPSupport()
-            : Double.NaN;
+                                                                                       : Double.NaN;
       maxAllowedDistanceCMPSupport = new DoubleParameter(yoNamePrefix + "MaxAllowedDistanceCMPSupport", registry, defaultMaxAllowedDistanceCMPSupport);
 
       integrator = new AngularMomentumIntegrator(yoNamePrefix, icpOptimizationParameters, feedbackGains, controlDT, registry);
@@ -217,13 +217,22 @@ public class ICPController implements ICPControllerInterface
    {
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition feedbackCoP = new YoGraphicPosition(yoNamePrefix
-            + "FeedbackCoP", this.feedbackCoP, 0.005, YoAppearance.Darkorange(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition feedForwardCoP = new YoGraphicPosition(yoNamePrefix
-            + "ReferenceFeedForwardCoP", this.referenceFeedForwardCoP, 0.005, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition feedbackCoP = new YoGraphicPosition(yoNamePrefix + "FeedbackCoP",
+                                                            this.feedbackCoP,
+                                                            0.005,
+                                                            YoAppearance.Darkorange(),
+                                                            YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition feedForwardCoP = new YoGraphicPosition(yoNamePrefix + "ReferenceFeedForwardCoP",
+                                                               this.referenceFeedForwardCoP,
+                                                               0.005,
+                                                               YoAppearance.Red(),
+                                                               YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
-      YoGraphicPosition unconstrainedFeedbackCMP = new YoGraphicPosition(yoNamePrefix
-            + "UnconstrainedFeedbackCMP", this.unconstrainedFeedbackCMP, 0.006, YoAppearance.Purple(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition unconstrainedFeedbackCMP = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCMP",
+                                                                         this.unconstrainedFeedbackCMP,
+                                                                         0.006,
+                                                                         YoAppearance.Purple(),
+                                                                         GraphicType.BALL_WITH_CROSS);
 
       artifactList.add(feedbackCoP.createArtifact());
       artifactList.add(feedForwardCoP.createArtifact());
@@ -232,16 +241,6 @@ public class ICPController implements ICPControllerInterface
       artifactList.setVisible(VISUALIZE);
 
       yoGraphicsListRegistry.registerArtifactList(artifactList);
-   }
-
-   public YoGraphicDefinition createSCS2Visualization()
-   {
-      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(newYoGraphicPoint2D(yoNamePrefix + "FeedbackCoP", feedbackCoP, 0.005, DarkOrange(), CIRCLE_PLUS));
-      group.addChild(newYoGraphicPoint2D(yoNamePrefix + "ReferenceFeedForwardCoP", referenceFeedForwardCoP, 0.005, Red(), CIRCLE_PLUS));
-      group.addChild(newYoGraphicPoint2D(yoNamePrefix + "UnconstrainedFeedbackCMP", unconstrainedFeedbackCMP, 0.006, Purple(), CIRCLE_PLUS));
-      return group;
-
    }
 
    /**
@@ -493,5 +492,17 @@ public class ICPController implements ICPControllerInterface
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
    {
       this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicPoint2D("FeedbackCoP", feedbackCoP, 0.01, DarkOrange(), CIRCLE_PLUS));
+      group.addChild(newYoGraphicPoint2D("ReferenceFeedForwardCoP", referenceFeedForwardCoP, 0.01, Red(), CIRCLE_PLUS));
+      group.addChild(newYoGraphicPoint2D("UnconstrainedFeedbackCMP", unconstrainedFeedbackCMP, 0.012, Purple(), CIRCLE_PLUS));
+      group.setVisible(VISUALIZE);
+      return group;
+
    }
 }
