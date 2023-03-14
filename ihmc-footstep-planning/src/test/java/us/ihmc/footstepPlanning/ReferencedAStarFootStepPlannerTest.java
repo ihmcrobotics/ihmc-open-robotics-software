@@ -24,6 +24,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ReferencedAStarFootStepPlannerTest
 {
+   public static Random random = new Random(163421);
    public static final double EPS_XY = 0.5 * LatticePoint.gridSizeXY;
    public static final double EPS_YAW = 0.5 * LatticePoint.gridSizeYaw;
    public static FootstepPlan NOMINAL_PLAN = null;
@@ -49,8 +50,6 @@ public class ReferencedAStarFootStepPlannerTest
       REQUEST.setReferencePlan(null);
 
       MODULE = new FootstepPlanningModule("testerModule");
-      ReferenceBasedIdealStepCalculator calculator = MODULE.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator();
-      calculator.setUseReferencePlan(false);
       FootstepPlannerOutput outputA = MODULE.handleRequest(REQUEST);
       int numSteps = outputA.getFootstepPlan().getNumberOfSteps();
 
@@ -67,51 +66,44 @@ public class ReferencedAStarFootStepPlannerTest
    @Order(2)
    public void testStepGenerationFromReference()
    {
-      Random random = new Random(54352);
-      int index = random.nextInt() % NOMINAL_PLAN.getNumberOfSteps();
-
+      int index = random.nextInt(NOMINAL_PLAN.getNumberOfSteps() - 1);
+      // this will be referenced
       FootstepPlan perturbedPlan = perturbPlan(NOMINAL_PLAN, index);
-      if (perturbedPlan != null)
+      // set reference plan
+      REQUEST.setReferencePlan(perturbedPlan);
+
+      FramePose3D nominalStepPose = NOMINAL_PLAN.getFootstep(index).getFootstepPose();
+      for (double alpha = 0.0; alpha <= 1.0; alpha += 0.1)
       {
-         REQUEST.setReferencePlan(perturbedPlan);
-         ReferenceBasedIdealStepCalculator calculator = MODULE.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator();
-         calculator.setUseReferencePlan(true);
-         for (double alpha = 0.0; alpha <= 1.0; alpha += 0.1)
-         {
-            calculator.setReferenceAlpha(alpha);
-            FramePose3D outputStepPose = MODULE.handleRequest(REQUEST).getFootstepPlan().getFootstep(index).getFootstepPose();
-            FramePose3D nominalStepPose = NOMINAL_PLAN.getFootstep(index).getFootstepPose();
-            FramePose3D perturbedStepPose = perturbedPlan.getFootstep(index).getFootstepPose();
-            RobotSide side = perturbedPlan.getFootstep(index).getRobotSide();
+         // set alpha
+         MODULE.getFootstepPlannerParameters().setReferencePlanAlpha(alpha);
 
-            Point3D expectedTranslation = new Point3D();
-            expectedTranslation.setX(perturbedStepPose.getX() * alpha + nominalStepPose.getX() * (1 - alpha));
-            expectedTranslation.setY(perturbedStepPose.getY() * alpha + nominalStepPose.getY() * (1 - alpha));
-            double expectedYaw = AngleTools.interpolateAngle(nominalStepPose.getYaw(), perturbedStepPose.getYaw(), alpha);
+         FramePose3D outputStepPose = MODULE.handleRequest(REQUEST).getFootstepPlan().getFootstep(index).getFootstepPose();
 
-            // need to snap to grid
-            DiscreteFootstep expectedStep = new DiscreteFootstep(expectedTranslation.getX(), expectedTranslation.getY(), expectedYaw, side);
+         FramePose3D perturbedStepPose = perturbedPlan.getFootstep(index).getFootstepPose();
+         RobotSide side = perturbedPlan.getFootstep(index).getRobotSide();
 
-            assertTrue("pose does not match expected at alpha: " + alpha,
-                       EuclidCoreTools.epsilonEquals(outputStepPose.getTranslationX(), expectedStep.getX(), EPS_XY) &&
-                                 EuclidCoreTools.epsilonEquals(outputStepPose.getTranslationY(), expectedStep.getY(), EPS_XY) &&
-                                 EuclidCoreTools.epsilonEquals(outputStepPose.getYaw(), expectedStep.getYaw(), EPS_YAW));
-         }
+         Point3D expectedTranslation = new Point3D();
+         expectedTranslation.setX(EuclidCoreTools.interpolate(nominalStepPose.getX(), perturbedStepPose.getX(), alpha));
+         expectedTranslation.setY(EuclidCoreTools.interpolate(nominalStepPose.getY(), perturbedStepPose.getY(), alpha));
+         double expectedYaw = AngleTools.interpolateAngle(nominalStepPose.getYaw(), perturbedStepPose.getYaw(), alpha);
+
+         String msg = "pose does not match expected at alpha: " + alpha + "\noutputPose: " + outputStepPose.getTranslation().toString() + ", yaw: " + outputStepPose.getYaw() +
+                      "\nexpectedPose: x: " + expectedTranslation.getX() + ", y: " + expectedTranslation.getY() + ", yaw: " + expectedYaw;
+         assertTrue(  msg,
+                      EuclidCoreTools.epsilonEquals(outputStepPose.getTranslationX(), expectedTranslation.getX(), EPS_XY) &&
+                      EuclidCoreTools.epsilonEquals(outputStepPose.getTranslationY(), expectedTranslation.getY(), EPS_XY) &&
+                      EuclidCoreTools.epsilonEquals(outputStepPose.getYaw(), expectedYaw, EPS_YAW));
       }
-
    }
-
 
    private FootstepPlan perturbPlan(FootstepPlan plan, int index)
    {
-
-
       // perturb one random step from the given plan. This step will be tested against output from the planner.
       int numSteps = plan.getNumberOfSteps();
       if (index >= 0 && index < numSteps)
       {
          FootstepPlan perturbedPlan = new FootstepPlan(plan);
-         Random random = new Random(123421);
          PlannedFootstep step = perturbedPlan.getFootstep(index);
          Point3D translationToAppend = EuclidCoreRandomTools.nextPoint3D(random, 0.2, 0.2, 0);
          double yawToAppend = EuclidCoreRandomTools.nextDouble(random, Math.PI / 20);

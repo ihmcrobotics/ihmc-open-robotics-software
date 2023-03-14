@@ -337,9 +337,4 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    {
       return get(stopForImpassibilities);
    }
-
-   default boolean getUseReferencePlan()
-   {
-       return get(useReferencePlan);
-   }
 }
