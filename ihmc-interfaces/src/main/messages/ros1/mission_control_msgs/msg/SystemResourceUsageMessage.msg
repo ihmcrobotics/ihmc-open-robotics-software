@@ -1,4 +1,3 @@
-# This is part of the IHMC Common message package.
 
 # ======== System memory statistics ========
 float32 memory_used

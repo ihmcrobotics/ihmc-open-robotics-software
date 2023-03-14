@@ -1,0 +1,23 @@
+#ifndef __mission_control_msgs__msg__SystemServiceStatusMessage__idl__
+#define __mission_control_msgs__msg__SystemServiceStatusMessage__idl__
+
+module mission_control_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="mission_control_msgs::msg::dds_::SystemServiceStatusMessage_")
+      struct SystemServiceStatusMessage
+      {
+        string service_name;
+        string status;
+        long log_line_count;
+        sequence<string> log_lines;
+      };
+    };
+  };
+};
+
+#endif

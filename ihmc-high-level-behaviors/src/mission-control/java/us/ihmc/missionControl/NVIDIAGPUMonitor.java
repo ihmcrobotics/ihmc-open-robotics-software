@@ -4,8 +4,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.processManagement.ProcessTools;
 
-import java.io.IOException;
-
 // TODO: support multiple GPUs
 public class NVIDIAGPUMonitor
 {
@@ -17,25 +15,6 @@ public class NVIDIAGPUMonitor
    private int memoryReserved;
    private int memoryUsed;
    private int memoryFree;
-
-   private boolean hasNvidiaGPU = false;
-
-   public NVIDIAGPUMonitor()
-   {
-      String nvidiaSMI = null;
-      try
-      {
-         nvidiaSMI = ProcessTools.execSimpleCommand("nvidia-smi");
-      }
-      catch (IOException | InterruptedException ignored)
-      {
-      }
-      if (nvidiaSMI != null)
-      {
-         hasNvidiaGPU = true;
-      }
-      LogTools.info("Has NVIDIA GPU: {}", hasNvidiaGPU);
-   }
 
    public int getGpuUsage()
    {
@@ -79,23 +58,7 @@ public class NVIDIAGPUMonitor
 
    public void update()
    {
-      if (!hasNvidiaGPU)
-         return;
-
-      String smiQuery = null;
-      try
-      {
-         smiQuery = ProcessTools.execSimpleCommand("nvidia-smi --query --display=MEMORY,UTILIZATION");
-      }
-      catch (IOException | InterruptedException ignored)
-      {
-      }
-
-      if (smiQuery == null)
-      {
-         hasNvidiaGPU = false;
-         return;
-      }
+      String smiQuery = ProcessTools.execSimpleCommandSafe("nvidia-smi --query --display=MEMORY,UTILIZATION");
 
       String[] lines = smiQuery.split("\n");
 
@@ -153,11 +116,6 @@ public class NVIDIAGPUMonitor
             }
          }
       }
-   }
-
-   public boolean getHasNvidiaGPU()
-   {
-      return hasNvidiaGPU;
    }
 
    public static void main(String[] args)

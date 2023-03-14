@@ -1,4 +1,4 @@
-package ihmc_common_msgs.msg.dds;
+package mission_control_msgs.msg.dds;
 
 /**
 * 
@@ -8,15 +8,15 @@ package ihmc_common_msgs.msg.dds;
 * Do not update this file directly, edit SystemResourceUsageMessage_.idl instead.
 *
 */
-public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.SystemResourceUsageMessage>
+public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<mission_control_msgs.msg.dds.SystemResourceUsageMessage>
 {
-   public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::SystemResourceUsageMessage_";
+   public static final java.lang.String name = "mission_control_msgs::msg::dds_::SystemResourceUsageMessage_";
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +24,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, mission_control_msgs.msg.dds.SystemResourceUsageMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -70,12 +70,12 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data)
+   public final static int getCdrSerializedSize(mission_control_msgs.msg.dds.SystemResourceUsageMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -127,7 +127,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       return current_alignment - initial_alignment;
    }
 
-   public static void write(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_5(data.getMemoryUsed());
 
@@ -169,7 +169,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
 
    }
 
-   public static void read(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setMemoryUsed(cdr.read_type_5());
       	
@@ -192,7 +192,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    }
 
    @Override
-   public final void serialize(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_5("memory_used", data.getMemoryUsed());
       ser.write_type_5("memory_total", data.getMemoryTotal());
@@ -209,7 +209,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, mission_control_msgs.msg.dds.SystemResourceUsageMessage data)
    {
       data.setMemoryUsed(ser.read_type_5("memory_used"));
       data.setMemoryTotal(ser.read_type_5("memory_total"));
@@ -225,15 +225,15 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.read_type_e("nvidia_gpu_utilization", data.getNvidiaGpuUtilization());
    }
 
-   public static void staticCopy(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage src, ihmc_common_msgs.msg.dds.SystemResourceUsageMessage dest)
+   public static void staticCopy(mission_control_msgs.msg.dds.SystemResourceUsageMessage src, mission_control_msgs.msg.dds.SystemResourceUsageMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public ihmc_common_msgs.msg.dds.SystemResourceUsageMessage createData()
+   public mission_control_msgs.msg.dds.SystemResourceUsageMessage createData()
    {
-      return new ihmc_common_msgs.msg.dds.SystemResourceUsageMessage();
+      return new mission_control_msgs.msg.dds.SystemResourceUsageMessage();
    }
    @Override
    public int getTypeSize()
@@ -247,17 +247,17 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       return name;
    }
    
-   public void serialize(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(ihmc_common_msgs.msg.dds.SystemResourceUsageMessage src, ihmc_common_msgs.msg.dds.SystemResourceUsageMessage dest)
+   public void copy(mission_control_msgs.msg.dds.SystemResourceUsageMessage src, mission_control_msgs.msg.dds.SystemResourceUsageMessage dest)
    {
       staticCopy(src, dest);
    }
