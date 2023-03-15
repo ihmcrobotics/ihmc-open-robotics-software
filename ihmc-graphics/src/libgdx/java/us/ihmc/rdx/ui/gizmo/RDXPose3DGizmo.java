@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -28,6 +27,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.RDXFocusBasedCamera;
+import us.ihmc.rdx.imgui.ImGuiInputDouble;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -45,6 +45,7 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.UnitConversions;
 
 import java.util.Random;
 
@@ -112,12 +113,14 @@ public class RDXPose3DGizmo implements RenderableProvider
    private boolean adjustmentNeedsToBeApplied = false;
    private RDXPose3DGizmoAdjustmentFrame translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP;
    private RDXPose3DGizmoAdjustmentFrame rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP;
-   private final ImDouble positionX = new ImDouble();
-   private final ImDouble positionY = new ImDouble();
-   private final ImDouble positionZ = new ImDouble();
-   private final ImDouble yaw = new ImDouble();
-   private final ImDouble pitch = new ImDouble();
-   private final ImDouble roll = new ImDouble();
+   private final ImGuiInputDouble translationStepSizeInput = new ImGuiInputDouble("Translation step size", "%.5f", 0.01);
+   private final ImGuiInputDouble positionXImGuiInput = new ImGuiInputDouble("X", "%.5f");
+   private final ImGuiInputDouble positionYImGuiInput = new ImGuiInputDouble("Y", "%.5f");
+   private final ImGuiInputDouble positionZImGuiInput = new ImGuiInputDouble("Z", "%.5f");
+   private final ImGuiInputDouble rotationStepSizeInput = new ImGuiInputDouble("Rotation step size " + UnitConversions.DEGREE_SYMBOL, "%.5f", 0.5);
+   private final ImGuiInputDouble yawImGuiInput = new ImGuiInputDouble("Yaw " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+   private final ImGuiInputDouble pitchImGuiInput = new ImGuiInputDouble("Pitch " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+   private final ImGuiInputDouble rollImGuiInput = new ImGuiInputDouble("Roll " + UnitConversions.DEGREE_SYMBOL, "%.5f");
 
    public RDXPose3DGizmo()
    {
@@ -544,22 +547,30 @@ public class RDXPose3DGizmo implements RenderableProvider
          rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.LOCAL;
 
       beforeForTranslationAdjustment();
-      positionX.set(adjustmentPose3D.getPosition().getX());
-      positionY.set(adjustmentPose3D.getPosition().getY());
-      positionZ.set(adjustmentPose3D.getPosition().getZ());
-      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("X"), positionX, 0.01, 0.1, "%.5f");
-      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Y"), positionY, 0.01, 0.1, "%.5f");
-      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Z"), positionZ, 0.01, 0.1, "%.5f");
-      adjustmentPose3D.getPosition().set(positionX.get(), positionY.get(), positionZ.get());
+      translationStepSizeInput.render(0.01, 0.1);
+      positionXImGuiInput.setDoubleValue(adjustmentPose3D.getPosition().getX());
+      positionYImGuiInput.setDoubleValue(adjustmentPose3D.getPosition().getY());
+      positionZImGuiInput.setDoubleValue(adjustmentPose3D.getPosition().getZ());
+      adjustmentNeedsToBeApplied |= positionXImGuiInput.render(translationStepSizeInput.getDoubleValue(), 10.0 * translationStepSizeInput.getDoubleValue());
+      adjustmentNeedsToBeApplied |= positionYImGuiInput.render(translationStepSizeInput.getDoubleValue(), 10.0 * translationStepSizeInput.getDoubleValue());
+      adjustmentNeedsToBeApplied |= positionZImGuiInput.render(translationStepSizeInput.getDoubleValue(), 10.0 * translationStepSizeInput.getDoubleValue());
+      adjustmentPose3D.getPosition().set(positionXImGuiInput.getDoubleValue(), positionYImGuiInput.getDoubleValue(), positionZImGuiInput.getDoubleValue());
 
+      rotationStepSizeInput.render(0.5, 3.0);
+      Orientation3DBasics orientationToPrint = beforeForRotationPrintout();
+      double initialYaw = orientationToPrint.getYaw();
+      double initialPitch = orientationToPrint.getPitch();
+      double initialRoll = orientationToPrint.getRoll();
+      yawImGuiInput.setDoubleValue(Math.toDegrees(initialYaw));
+      pitchImGuiInput.setDoubleValue(Math.toDegrees(initialPitch));
+      rollImGuiInput.setDoubleValue(Math.toDegrees(initialRoll));
+      adjustmentNeedsToBeApplied |= yawImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
+      adjustmentNeedsToBeApplied |= pitchImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
+      adjustmentNeedsToBeApplied |= rollImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
       Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
-      yaw.set(orientationToAdjust.getYaw());
-      pitch.set(orientationToAdjust.getPitch());
-      roll.set(orientationToAdjust.getRoll());
-      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Yaw"), yaw, 0.01, 0.1, "%.5f");
-      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Pitch"), pitch, 0.01, 0.1, "%.5f");
-      adjustmentNeedsToBeApplied |= ImGuiTools.volatileInputDouble(labels.get("Roll"), roll, 0.01, 0.1, "%.5f");
-      orientationToAdjust.setYawPitchRoll(yaw.get(), pitch.get(), roll.get());
+      orientationToAdjust.setYawPitchRoll(Math.toRadians(yawImGuiInput.getDoubleValue()) - initialYaw,
+                                          Math.toRadians(pitchImGuiInput.getDoubleValue()) - initialPitch,
+                                          Math.toRadians(rollImGuiInput.getDoubleValue()) - initialRoll);
       afterRotationAdjustment();
 
       ImGui.text("Set to zero in:");
@@ -618,6 +629,38 @@ public class RDXPose3DGizmo implements RenderableProvider
             adjustmentPose3D.changeFrame(camera3D.getCameraFrame());
          }
       }
+   }
+
+   private Orientation3DBasics beforeForRotationPrintout()
+   {
+      switch (rotationAdjustmentFrame)
+      {
+         case WORLD, PARENT, CAMERA, CAMERA_ZUP ->
+         {
+            if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.WORLD)
+            {
+               adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+            }
+            else if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.PARENT)
+            {
+               adjustmentPose3D.changeFrame(parentReferenceFrame);
+            }
+            else if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP)
+            {
+               prepareCameraZUpFrameForAdjustment();
+               adjustmentPose3D.changeFrame(cameraZUpFrameForAdjustment.getReferenceFrame());
+            }
+            else // CAMERA
+            {
+               adjustmentPose3D.changeFrame(camera3D.getCameraFrame());
+            }
+         }
+         default -> // LOCAL
+         {
+            adjustmentPose3D.changeFrame(gizmoFrame);
+         }
+      }
+      return adjustmentPose3D.getOrientation();
    }
 
    private Orientation3DBasics beforeForRotationAdjustment()
