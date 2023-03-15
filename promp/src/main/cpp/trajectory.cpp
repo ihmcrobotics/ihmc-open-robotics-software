@@ -17,9 +17,6 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <fstream>
-using namespace Eigen;
-const static IOFormat CSVFormat(StreamPrecision, DontAlignCols, ", ", "\n");
 
 namespace promp 
 {
