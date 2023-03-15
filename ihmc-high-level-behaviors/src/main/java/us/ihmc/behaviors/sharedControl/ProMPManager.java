@@ -1,5 +1,12 @@
 package us.ihmc.behaviors.sharedControl;
 
+import org.bytedeco.javacpp.annotation.ByRef;
+import org.bytedeco.javacpp.annotation.Cast;
+import org.bytedeco.javacpp.annotation.Const;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -8,7 +15,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.promp.*;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,16 +77,16 @@ public class ProMPManager
    }
 
    /**
-    * Learn the ProMPs for the task based on the demo training trajectories stored in .../promp/etc/demos
-    * learn a ProMP for each bodyPart specified in the constructor of this class
+    * Load prelearned or learn the ProMPs for the task based on the demo training trajectories stored in .../promp/etc/demos
+    * load/learn a ProMP for each bodyPart specified in the constructor of this class
     */
-   public void learnTaskFromDemos()
+   public void loadTaskFromDemos()
    {
       WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
       String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
       String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
       File demoFolder = new File(demoTrainingDirAbs);
-      File[] listOfFiles = demoFolder.listFiles();
+      File[] listOfFiles = demoFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv") && !new File(dir, name).isDirectory());
       List<String> fileListTraining = new ArrayList<>();
       // The trajectories contained in the demos folders represent different demonstration of a given task
       // Several trajectories of different body parts have been recorded
@@ -92,28 +99,31 @@ public class ProMPManager
       for (Map.Entry<String, String> entry : bodyPartsGeometry.entrySet())
       {
          List<Long> dofs = new ArrayList<>();
-         if (entry.getValue().equals("Orientation"))
+         switch (entry.getValue())
          {
-            dofs.add(0L);
-            dofs.add(1L);
-            dofs.add(2L);
-            dofs.add(3L);
-         }
-         else if (entry.getValue().equals("Position"))
-         {
-            dofs.add(4L);
-            dofs.add(5L);
-            dofs.add(6L);
-         }
-         else if (entry.getValue().equals("Pose"))
-         {
-            dofs.add(0L);
-            dofs.add(1L);
-            dofs.add(2L);
-            dofs.add(3L);
-            dofs.add(4L);
-            dofs.add(5L);
-            dofs.add(6L);
+            case "Orientation" ->
+            {
+               dofs.add(0L);
+               dofs.add(1L);
+               dofs.add(2L);
+               dofs.add(3L);
+            }
+            case "Position" ->
+            {
+               dofs.add(4L);
+               dofs.add(5L);
+               dofs.add(6L);
+            }
+            case "Pose" ->
+            {
+               dofs.add(0L);
+               dofs.add(1L);
+               dofs.add(2L);
+               dofs.add(3L);
+               dofs.add(4L);
+               dofs.add(5L);
+               dofs.add(6L);
+            }
          }
          if (entry.getKey().equals("rightHand"))
          {
@@ -129,33 +139,111 @@ public class ProMPManager
          trainingTrajectory.load_csv_trajectories(fileListStringVectorTraining, doFsSizeTVector);
          // make all training trajectories have the same length (= mean length)
          int meanLengthTraining = (int) trainingTrajectory.normalize_length();
+         trainingTrajectories.put(entry.getKey(), trainingTrajectory);
          // get mean end value of quaternion S, will be used to check and eventually change sign of observed goal quaternion
          if (dofs.size() != 3)
             meanEndValueQS = trainingTrajectory.get_mean_end_value(3);
-         trainingTrajectories.put(entry.getKey(), trainingTrajectory);
-         learnedProMPs.put(entry.getKey(), new ProMP(trainingTrajectory, numberBasisFunctions));
-
-         if (logEnabled)
+         // check if file with learned parameters already exists otherwise learn the promps
+         if (isTaskLearned(demoTrainingDirAbs, entry.getKey()))
+            loadPrelearnedTask(demoTrainingDirAbs, entry.getKey());
+         else
          {
-            logger.saveDemosAndLearnedTrajectories(entry.getKey(), learnedProMPs.get(entry.getKey()), trainingTrajectory);
+            learnedProMPs.put(entry.getKey(), new ProMP(trainingTrajectory, numberBasisFunctions));
+            saveLearnedTask(demoTrainingDirAbs, entry.getKey());
+
+            if (logEnabled)
+            {
+               logger.saveDemosAndLearnedTrajectories(entry.getKey(), learnedProMPs.get(entry.getKey()), trainingTrajectory);
+            }
          }
       }
    }
 
-   public void saveLearnedTask()
+   private boolean isTaskLearned(String directoryDemos, String bodyPart)
    {
-      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
-      String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
-      String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
-      File demoFolder = new File(demoTrainingDirAbs);
+      File file = new File(directoryDemos + "/" + bodyPart + ".json");
+
+      return file.exists();
    }
 
-   public void loadPrelearnedTask()
+   public void saveLearnedTask(String directoryName, String bodyPart)
    {
-      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
-      String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
-      String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
-      File demoFolder = new File(demoTrainingDirAbs);
+      JSONObject jsonObject = new JSONObject();
+      // create a JSON array to hold the vector
+      JSONArray weightsArray = new JSONArray();
+      EigenVectorXd weights = learnedProMPs.get(bodyPart).get_weights();
+      for (int i = 0; i < weights.size(); i++)
+         weightsArray.add(weights.coeff(i));
+      jsonObject.put("weights", weightsArray);
+      // create a JSON array to hold the matrix
+      JSONArray covarianceArray = new JSONArray();
+      EigenMatrixXd covariance = learnedProMPs.get(bodyPart).get_covariance();
+      for (int i = 0; i < covariance.rows(); i++)
+      {
+         JSONArray rowArray = new JSONArray();
+         for (int j = 0; j < covariance.cols(); j++)
+         {
+            rowArray.add(covariance.coeff(i, j));
+         }
+         covarianceArray.add(rowArray);
+      }
+      jsonObject.put("covariance", covarianceArray);
+      jsonObject.put("stdBasisFunction", learnedProMPs.get(bodyPart).get_std_bf());
+      jsonObject.put("numSamples", learnedProMPs.get(bodyPart).get_n_samples());
+      jsonObject.put("dims", learnedProMPs.get(bodyPart).get_dims());
+
+      String fileName = directoryName + "/" + bodyPart + ".json";
+      try (FileWriter file = new FileWriter(fileName))
+      {
+         file.write(jsonObject.toJSONString());
+      }
+      catch (IOException e)
+      {
+         LogTools.error("An error occurred while writing learned parameters for task {} to file: {}", taskName, fileName);
+         e.printStackTrace();
+      }
+   }
+
+   public void loadPrelearnedTask(String directoryName, String bodyPart)
+   {
+      String fileName = directoryName + "/" + bodyPart + ".json";
+      try (FileReader reader = new FileReader(fileName))
+      {
+         JSONParser parser = new JSONParser();
+         JSONObject jsonObject = (JSONObject) parser.parse(reader);
+
+         // Parse the JSON object into a ProMP object
+         JSONArray weightsArray = (JSONArray) jsonObject.get("weights");
+         EigenVectorXd weights = new EigenVectorXd(weightsArray.size());
+         for (int i = 0; i < weightsArray.size(); i++)
+         {
+            weights.apply(i).put(((Number) weightsArray.get(i)).doubleValue());
+         }
+
+         JSONArray covWArray = (JSONArray) jsonObject.get("covariance");
+         JSONArray rowArray = (JSONArray) covWArray.get(0);
+         EigenMatrixXd covarianceMatrix = new EigenMatrixXd(covWArray.size(), rowArray.size());
+         for (int i = 0; i < covWArray.size(); i++)
+         {
+            for (int j = 0; j < rowArray.size(); j++)
+            {
+               covarianceMatrix.apply(i, j).put(((Number) rowArray.get(j)).doubleValue());
+            }
+         }
+
+         double stdBasisFunction = ((Number) jsonObject.get("stdBasisFunction")).doubleValue();
+         int numSamples = ((Number) jsonObject.get("numSamples")).intValue();
+         int dims = ((Number) jsonObject.get("dims")).intValue();
+         ProMP promp = new ProMP(weights, covarianceMatrix, stdBasisFunction, numSamples, dims);
+
+         // Add the ProMP object to the map
+         learnedProMPs.put(bodyPart, promp);
+      }
+      catch (IOException | ParseException e)
+      {
+         LogTools.error("An error occurred while reading learned parameters for task {} from file: {}", taskName, fileName);
+         e.printStackTrace();
+      }
    }
 
    public void resetTask()
@@ -184,9 +272,7 @@ public class ProMPManager
       {
          (partProMP.getValue()).update_time_modulation((double) (partProMP.getValue()).get_traj_length() / inferredTimesteps);
          if (logEnabled)
-         {
             logger.saveUpdatedTrajectories(partProMP.getKey(), partProMP.getValue(), "Modulated");
-         }
       }
    }
 
@@ -226,11 +312,8 @@ public class ProMPManager
       for (Map.Entry<String, ProMP> partProMP : learnedProMPs.entrySet())
       {
          (partProMP.getValue()).update_time_modulation((double) (partProMP.getValue()).get_traj_length() / inferredTimesteps);
-
          if (logEnabled)
-         {
             logger.saveUpdatedTrajectories(partProMP.getKey(), partProMP.getValue(), "Modulated");
-         }
       }
    }
 
@@ -270,39 +353,42 @@ public class ProMPManager
    private EigenMatrixXd toEigenMatrix(List<FramePose3D> frameList, String bodyPart)
    {
       EigenMatrixXd matrix = null;
-      if (bodyPartsGeometry.get(bodyPart).equals("Orientation"))
+      switch (bodyPartsGeometry.get(bodyPart))
       {
-         matrix = new EigenMatrixXd(frameList.size(), 4);
-         for (int i = 0; i < matrix.rows(); i++)
+         case "Orientation" ->
          {
-            matrix.apply(i, 0).put(frameList.get(i).getOrientation().getX());
-            matrix.apply(i, 1).put(frameList.get(i).getOrientation().getY());
-            matrix.apply(i, 2).put(frameList.get(i).getOrientation().getZ());
-            matrix.apply(i, 3).put(frameList.get(i).getOrientation().getS());
+            matrix = new EigenMatrixXd(frameList.size(), 4);
+            for (int i = 0; i < matrix.rows(); i++)
+            {
+               matrix.apply(i, 0).put(frameList.get(i).getOrientation().getX());
+               matrix.apply(i, 1).put(frameList.get(i).getOrientation().getY());
+               matrix.apply(i, 2).put(frameList.get(i).getOrientation().getZ());
+               matrix.apply(i, 3).put(frameList.get(i).getOrientation().getS());
+            }
          }
-      }
-      else if (bodyPartsGeometry.get(bodyPart).equals("Position"))
-      {
-         matrix = new EigenMatrixXd(frameList.size(), 3);
-         for (int i = 0; i < matrix.rows(); i++)
+         case "Position" ->
          {
-            matrix.apply(i, 0).put(frameList.get(i).getPosition().getX());
-            matrix.apply(i, 1).put(frameList.get(i).getPosition().getY());
-            matrix.apply(i, 2).put(frameList.get(i).getPosition().getZ());
+            matrix = new EigenMatrixXd(frameList.size(), 3);
+            for (int i = 0; i < matrix.rows(); i++)
+            {
+               matrix.apply(i, 0).put(frameList.get(i).getPosition().getX());
+               matrix.apply(i, 1).put(frameList.get(i).getPosition().getY());
+               matrix.apply(i, 2).put(frameList.get(i).getPosition().getZ());
+            }
          }
-      }
-      else if (bodyPartsGeometry.get(bodyPart).equals("Pose"))
-      {
-         matrix = new EigenMatrixXd(frameList.size(), 7);
-         for (int i = 0; i < matrix.rows(); i++)
+         case "Pose" ->
          {
-            matrix.apply(i, 0).put(frameList.get(i).getOrientation().getX());
-            matrix.apply(i, 1).put(frameList.get(i).getOrientation().getY());
-            matrix.apply(i, 2).put(frameList.get(i).getOrientation().getZ());
-            matrix.apply(i, 3).put(frameList.get(i).getOrientation().getS());
-            matrix.apply(i, 4).put(frameList.get(i).getPosition().getX());
-            matrix.apply(i, 5).put(frameList.get(i).getPosition().getY());
-            matrix.apply(i, 6).put(frameList.get(i).getPosition().getZ());
+            matrix = new EigenMatrixXd(frameList.size(), 7);
+            for (int i = 0; i < matrix.rows(); i++)
+            {
+               matrix.apply(i, 0).put(frameList.get(i).getOrientation().getX());
+               matrix.apply(i, 1).put(frameList.get(i).getOrientation().getY());
+               matrix.apply(i, 2).put(frameList.get(i).getOrientation().getZ());
+               matrix.apply(i, 3).put(frameList.get(i).getOrientation().getS());
+               matrix.apply(i, 4).put(frameList.get(i).getPosition().getX());
+               matrix.apply(i, 5).put(frameList.get(i).getPosition().getY());
+               matrix.apply(i, 6).put(frameList.get(i).getPosition().getZ());
+            }
          }
       }
       return matrix;
@@ -314,39 +400,42 @@ public class ProMPManager
    private EigenVectorXd toEigenVector(FramePose3D framePose, String bodyPart)
    {
       EigenVectorXd vector = null;
-      if (bodyPartsGeometry.get(bodyPart).equals("Orientation"))
+      switch (bodyPartsGeometry.get(bodyPart))
       {
-         vector = new EigenVectorXd(4);
-         for (int i = 0; i < vector.size(); i++)
+         case "Orientation" ->
          {
-            vector.apply(0).put(framePose.getOrientation().getX());
-            vector.apply(1).put(framePose.getOrientation().getY());
-            vector.apply(2).put(framePose.getOrientation().getZ());
-            vector.apply(3).put(framePose.getOrientation().getS());
+            vector = new EigenVectorXd(4);
+            for (int i = 0; i < vector.size(); i++)
+            {
+               vector.apply(0).put(framePose.getOrientation().getX());
+               vector.apply(1).put(framePose.getOrientation().getY());
+               vector.apply(2).put(framePose.getOrientation().getZ());
+               vector.apply(3).put(framePose.getOrientation().getS());
+            }
          }
-      }
-      else if (bodyPartsGeometry.get(bodyPart).equals("Position"))
-      {
-         vector = new EigenVectorXd(3);
-         for (int i = 0; i < vector.size(); i++)
+         case "Position" ->
          {
-            vector.apply(4).put(framePose.getPosition().getX());
-            vector.apply(5).put(framePose.getPosition().getY());
-            vector.apply(6).put(framePose.getPosition().getZ());
+            vector = new EigenVectorXd(3);
+            for (int i = 0; i < vector.size(); i++)
+            {
+               vector.apply(4).put(framePose.getPosition().getX());
+               vector.apply(5).put(framePose.getPosition().getY());
+               vector.apply(6).put(framePose.getPosition().getZ());
+            }
          }
-      }
-      else if (bodyPartsGeometry.get(bodyPart).equals("Pose"))
-      {
-         vector = new EigenVectorXd(7);
-         for (int i = 0; i < vector.size(); i++)
+         case "Pose" ->
          {
-            vector.apply(0).put(framePose.getOrientation().getX());
-            vector.apply(1).put(framePose.getOrientation().getY());
-            vector.apply(2).put(framePose.getOrientation().getZ());
-            vector.apply(3).put(framePose.getOrientation().getS());
-            vector.apply(4).put(framePose.getPosition().getX());
-            vector.apply(5).put(framePose.getPosition().getY());
-            vector.apply(6).put(framePose.getPosition().getZ());
+            vector = new EigenVectorXd(7);
+            for (int i = 0; i < vector.size(); i++)
+            {
+               vector.apply(0).put(framePose.getOrientation().getX());
+               vector.apply(1).put(framePose.getOrientation().getY());
+               vector.apply(2).put(framePose.getOrientation().getZ());
+               vector.apply(3).put(framePose.getOrientation().getS());
+               vector.apply(4).put(framePose.getPosition().getX());
+               vector.apply(5).put(framePose.getPosition().getY());
+               vector.apply(6).put(framePose.getPosition().getZ());
+            }
          }
       }
 
@@ -371,8 +460,7 @@ public class ProMPManager
    public void updateTaskTrajectories(HashMap<String, Pose3DReadOnly> bodyPartObservedPose, int conditioningTimestep)
    {
       // condition ProMP to reach point at given timestep
-      learnedProMPs.keySet()
-                   .forEach(bodyPart -> updateTaskTrajectory(bodyPart, bodyPartObservedPose.get(bodyPart), conditioningTimestep));
+      learnedProMPs.keySet().forEach(bodyPart -> updateTaskTrajectory(bodyPart, bodyPartObservedPose.get(bodyPart), conditioningTimestep));
    }
 
    /**
@@ -404,8 +492,7 @@ public class ProMPManager
    public void updateTaskTrajectoriesGoal(HashMap<String, Pose3DReadOnly> bodyPartObservedPose)
    {
       // condition ProMP to reach end point
-      learnedProMPs.keySet()
-                   .forEach(bodyPart -> updateTaskTrajectoryGoal(bodyPart, bodyPartObservedPose.get(bodyPart)));
+      learnedProMPs.keySet().forEach(bodyPart -> updateTaskTrajectoryGoal(bodyPart, bodyPartObservedPose.get(bodyPart)));
    }
 
    /**
@@ -431,28 +518,31 @@ public class ProMPManager
 
    private void setViaPoint(EigenVectorXd viaPoint, String bodyPart, Pose3DReadOnly observedPose)
    {
-      if (bodyPartsGeometry.get(bodyPart).equals("Position"))
+      switch (bodyPartsGeometry.get(bodyPart))
       {
-         viaPoint.apply(0).put(observedPose.getPosition().getX());
-         viaPoint.apply(1).put(observedPose.getPosition().getY());
-         viaPoint.apply(2).put(observedPose.getPosition().getZ());
-      }
-      else if (bodyPartsGeometry.get(bodyPart).equals("Orientation"))
-      {
-         viaPoint.apply(0).put(observedPose.getOrientation().getX());
-         viaPoint.apply(1).put(observedPose.getOrientation().getY());
-         viaPoint.apply(2).put(observedPose.getOrientation().getZ());
-         viaPoint.apply(3).put(observedPose.getOrientation().getS());
-      }
-      else if (bodyPartsGeometry.get(bodyPart).equals("Pose"))
-      {
-         viaPoint.apply(0).put(observedPose.getOrientation().getX());
-         viaPoint.apply(1).put(observedPose.getOrientation().getY());
-         viaPoint.apply(2).put(observedPose.getOrientation().getZ());
-         viaPoint.apply(3).put(observedPose.getOrientation().getS());
-         viaPoint.apply(4).put(observedPose.getPosition().getX());
-         viaPoint.apply(5).put(observedPose.getPosition().getY());
-         viaPoint.apply(6).put(observedPose.getPosition().getZ());
+         case "Position" ->
+         {
+            viaPoint.apply(0).put(observedPose.getPosition().getX());
+            viaPoint.apply(1).put(observedPose.getPosition().getY());
+            viaPoint.apply(2).put(observedPose.getPosition().getZ());
+         }
+         case "Orientation" ->
+         {
+            viaPoint.apply(0).put(observedPose.getOrientation().getX());
+            viaPoint.apply(1).put(observedPose.getOrientation().getY());
+            viaPoint.apply(2).put(observedPose.getOrientation().getZ());
+            viaPoint.apply(3).put(observedPose.getOrientation().getS());
+         }
+         case "Pose" ->
+         {
+            viaPoint.apply(0).put(observedPose.getOrientation().getX());
+            viaPoint.apply(1).put(observedPose.getOrientation().getY());
+            viaPoint.apply(2).put(observedPose.getOrientation().getZ());
+            viaPoint.apply(3).put(observedPose.getOrientation().getS());
+            viaPoint.apply(4).put(observedPose.getPosition().getX());
+            viaPoint.apply(5).put(observedPose.getPosition().getY());
+            viaPoint.apply(6).put(observedPose.getPosition().getZ());
+         }
       }
    }
 
@@ -474,18 +564,15 @@ public class ProMPManager
       for (int i = 0; i < matrix.rows(); i++)
       {
          FramePose3D setPose = new FramePose3D(frame);
-         if (bodyPartsGeometry.get(bodyPart).equals("Position"))
+         switch (bodyPartsGeometry.get(bodyPart))
          {
-            setPose.getPosition().set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2));
-         }
-         else if (bodyPartsGeometry.get(bodyPart).equals("Orientation"))
-         {
-            setPose.getOrientation().set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2), matrix.coeff(i, 3));
-         }
-         else if (bodyPartsGeometry.get(bodyPart).equals("Pose"))
-         {
-            setPose.getOrientation().set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2), matrix.coeff(i, 3));
-            setPose.getPosition().set(matrix.coeff(i, 4), matrix.coeff(i, 5), matrix.coeff(i, 6));
+            case "Position" -> setPose.getPosition().set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2));
+            case "Orientation" -> setPose.getOrientation().set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2), matrix.coeff(i, 3));
+            case "Pose" ->
+            {
+               setPose.getOrientation().set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2), matrix.coeff(i, 3));
+               setPose.getPosition().set(matrix.coeff(i, 4), matrix.coeff(i, 5), matrix.coeff(i, 6));
+            }
          }
          frameList.add(setPose);
       }
