@@ -19,7 +19,7 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.14")
+   api("us.ihmc:ihmc-convex-optimization:0.17.17")
    api("us.ihmc:ihmc-path-planning:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-perception:source")

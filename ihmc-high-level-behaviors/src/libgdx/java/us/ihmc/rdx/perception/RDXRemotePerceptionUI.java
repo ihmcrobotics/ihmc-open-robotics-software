@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
+import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -14,6 +15,8 @@ public class RDXRemotePerceptionUI
 {
    private final ROS2Helper ros2Helper;
    private final ImGuiPanel panel = new ImGuiPanel("Perception Panel", this::renderImGuiWidgets);
+
+   private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
 
    private final RapidRegionsExtractorParameters rapidRegionsExtractorParameters = new RapidRegionsExtractorParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
@@ -33,6 +36,8 @@ public class RDXRemotePerceptionUI
       this.ros2Helper = ros2Helper;
 
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
+
+      remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
 
       remotePropertySets.registerRemotePropertySet(rapidRegionsExtractorParameters, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(polygonizerParameters, PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS);

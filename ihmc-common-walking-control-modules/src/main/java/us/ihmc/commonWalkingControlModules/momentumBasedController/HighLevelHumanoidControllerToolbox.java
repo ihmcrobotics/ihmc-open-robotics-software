@@ -550,7 +550,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          footForceVector.changeFrame(ReferenceFrame.getWorldFrame());
 
          if (footForceVector.getZ() > minZForceForCoPControlScaling
-               && yoCoPErrorMagnitude.get(robotSide).getDoubleValue() > highCoPDampingErrorTrigger.getDoubleValue())
+             && yoCoPErrorMagnitude.get(robotSide).getDoubleValue() > highCoPDampingErrorTrigger.getDoubleValue())
          {
             atLeastOneFootWithBadCoPControl = true;
          }
@@ -663,7 +663,12 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       }
    }
 
-   public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2D desiredCoPToPack)
+   public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FixedFramePoint3DBasics desiredCoPToPack)
+   {
+      desiredCoPToPack.setMatchingFrame(footDesiredCenterOfPressures.get(contactablePlaneBody), 0.0);
+   }
+
+   public void getDesiredCenterOfPressure(ContactablePlaneBody contactablePlaneBody, FramePoint2DBasics desiredCoPToPack)
    {
       desiredCoPToPack.setIncludingFrame(footDesiredCenterOfPressures.get(contactablePlaneBody));
    }
@@ -1029,7 +1034,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                                                     0.01,
                                                                     ColorDefinitions.Black(),
                                                                     DefaultPoint2DGraphic.DIAMOND));
-      
+
       return group;
    }
 }

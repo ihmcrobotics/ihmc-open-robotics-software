@@ -10,6 +10,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -57,9 +58,11 @@ public class ZED2ColorStereoPublisher
    private final Mat yuvCombinedImage = new Mat();
    private final Mat color8UC3CombinedImage = new Mat();
 
+   private final BytePointer compressedColorPointer = new BytePointer();
+   private final BytePointer compressedDepthPointer = new BytePointer();;
+
    private final ImageMessage colorImageMessage = new ImageMessage();
 
-   private final BytePointer compressedColorPointer = new BytePointer();
    private final String cameraId;
    private final int fps;
    private final ROS2Topic<ImageMessage> colorTopic;
@@ -126,8 +129,9 @@ public class ZED2ColorStereoPublisher
 
          readImage(color8UC3CombinedImage);
 
-         PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3CombinedImage, yuvCombinedImage, colorTopic, colorImageMessage, ros2Helper,
-                                                               cameraPose, now, colorSequenceNumber++, imageHeight, imageWidth);
+         BytedecoOpenCVTools.compressRGBImageJPG(color8UC3CombinedImage, yuvCombinedImage, compressedColorPointer);
+         PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer, colorTopic, colorImageMessage, ros2Helper,
+                                                               cameraPose, now, colorSequenceNumber++, imageHeight, imageWidth, 0.001f);
       }
 
    }

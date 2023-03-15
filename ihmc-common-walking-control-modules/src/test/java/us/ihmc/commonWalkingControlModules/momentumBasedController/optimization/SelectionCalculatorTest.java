@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import java.util.Random;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -83,15 +85,15 @@ public class SelectionCalculatorTest
          weightMatrix.setZAxisWeight(objectiveWeight);
       }
 
-      DMatrixRMaj taskJacobian = new DMatrixRMaj(0, 0);
-      DMatrixRMaj taskObjective = new DMatrixRMaj(0, 0);
+      NativeMatrix taskJacobian = new NativeMatrix(0, 0);
+      NativeMatrix taskObjective = new NativeMatrix(0, 0);
       computeTask(objective, taskJacobian, taskObjective);
 
       SelectionCalculator selectionCalculator = new SelectionCalculator();
 
-      DMatrixRMaj taskJacobianAfterSelection = new DMatrixRMaj(0, 0);
-      DMatrixRMaj taskObjectiveAfterSelection = new DMatrixRMaj(0, 0);
-      DMatrixRMaj taskWeightAfterSelection = new DMatrixRMaj(0, 0);
+      NativeMatrix taskJacobianAfterSelection = new NativeMatrix(0, 0);
+      NativeMatrix taskObjectiveAfterSelection = new NativeMatrix(0, 0);
+      NativeMatrix taskWeightAfterSelection = new NativeMatrix(0, 0);
       selectionCalculator.applySelectionToTask(selectionMatrix, weightMatrix, taskFrame, taskJacobian, taskObjective, taskJacobianAfterSelection,
                                                taskObjectiveAfterSelection, taskWeightAfterSelection);
 
@@ -151,21 +153,22 @@ public class SelectionCalculatorTest
       //      ThreadTools.sleepForever();
    }
 
-   private static void computeTask(Vector3D objective, DMatrixRMaj taskJacobianToPack, DMatrixRMaj taskObjectiveToPack)
+   private static void computeTask(Vector3D objective, NativeMatrix taskJacobianToPack, NativeMatrix taskObjectiveToPack)
    {
       taskJacobianToPack.reshape(3, 3);
-      CommonOps_DDRM.setIdentity(taskJacobianToPack);
+      taskJacobianToPack.zero();
+      taskJacobianToPack.fillDiagonal(1.0);
 
       taskObjectiveToPack.reshape(3, 1);
       objective.get(taskObjectiveToPack);
    }
 
-   private static void addTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight, DMatrixRMaj hToModify,
+   private static void addTask(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight, DMatrixRMaj hToModify,
                                DMatrixRMaj fToModify)
    {
-      SimpleMatrix J = new SimpleMatrix(taskJacobian);
-      SimpleMatrix W = new SimpleMatrix(taskWeight);
-      SimpleMatrix b = new SimpleMatrix(taskObjective);
+      SimpleMatrix J = new SimpleMatrix(new DMatrixRMaj(taskJacobian));
+      SimpleMatrix W = new SimpleMatrix(new DMatrixRMaj(taskWeight));
+      SimpleMatrix b = new SimpleMatrix(new DMatrixRMaj(taskObjective));
 
       SimpleMatrix H = J.transpose().mult(W).mult(J);
       SimpleMatrix f = J.transpose().mult(W).mult(b);
