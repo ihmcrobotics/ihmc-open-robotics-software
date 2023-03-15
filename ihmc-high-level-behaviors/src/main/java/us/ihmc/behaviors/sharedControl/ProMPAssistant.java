@@ -33,7 +33,7 @@ public class ProMPAssistant
 {
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
-   private List<Double> distanceCandidateTasks = new ArrayList<>();
+   private final List<Double> distanceCandidateTasks = new ArrayList<>();
    private boolean firstObservedBodyPart = true;
    private String currentTask = ""; // detected task
    private int numberObservations = 0; // number of observations used to update the prediction
@@ -156,12 +156,6 @@ public class ProMPAssistant
          int numberOfInferredSpeeds = (int) ((long) jsonObject.get("numberOfInferredSpeeds"));
          for (int i = 0; i < taskNames.size(); i++)
          {
-            LogTools.info("Learning ProMPs for task: {}", taskNames.get(i));
-            for (HashMap<String, String> bodyPartsGeometry : bodyPartsGeometries)
-            {
-               for (Map.Entry<String, String> entry : bodyPartsGeometry.entrySet())
-                  LogTools.info("     {} {}", entry.getKey(), entry.getValue());
-            }
             proMPManagers.put(taskNames.get(i),
                               new ProMPManager(taskNames.get(i),
                                                bodyPartsGeometries.get(i),
@@ -173,9 +167,15 @@ public class ProMPAssistant
             taskBodyPartInferenceMap.put(taskNames.get(i), bodyPartsInference.get(i));
             taskBodyPartGoalMap.put(taskNames.get(i), bodyPartsGoal.get(i));
             taskTransformGoalMap.put(taskNames.get(i), new RigidBodyTransform(goalToEERotations.get(i), goalToEETranslations.get(i)));
+            LogTools.info("Loading ProMPs for tasks:");
+            LogTools.info("{}", taskNames.get(i));
+            for (HashMap<String, String> bodyPartsGeometry : bodyPartsGeometries)
+               for (String key : bodyPartsGeometry.keySet())
+                  LogTools.info("     {} {}", key, bodyPartsGeometry.get(key));
          }
-         for (ProMPManager proMPManager : proMPManagers.values())
-            proMPManager.learnTaskFromDemos();
+         for (ProMPManager prompManager : proMPManagers.values())
+            prompManager.loadTaskFromDemos();
+
          LogTools.info("ProMPs are ready to be used!");
       }
       catch (FileNotFoundException ex)
@@ -265,7 +265,7 @@ public class ProMPAssistant
    }
 
    // TODO what if someone is lefthanded, or simply wants to use the left hand for that task?
-   //  Learn task for both hands and called them ...L and ...R, check initial pose of hands to determine which one is being used
+   //  Learn task for both hands and call them ...L and ...R, check initial pose of hands to determine which one is being used
    private boolean taskDetected(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
    {
       if (currentTask.isEmpty() && !objectName.isEmpty())
@@ -499,6 +499,7 @@ public class ProMPAssistant
       isLastViaPoint.set(false);
       isMoving = false;
       firstObservedBodyPart = true;
+      distanceCandidateTasks.clear();
    }
 
    public int getTestNumber()

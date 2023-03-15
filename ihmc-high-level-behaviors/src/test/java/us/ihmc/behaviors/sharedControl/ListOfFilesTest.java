@@ -5,6 +5,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FilenameFilter;
 
 public class ListOfFilesTest
 {
@@ -15,14 +16,14 @@ public class ListOfFilesTest
       try {
          WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
          String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
-         String demoTrainingDirAbs = demoDirAbs + "/PushDoor";
+         String demoTrainingDirAbs = demoDirAbs + "/ReachHandle";
          System.out.println("Folder is: " + demoTrainingDirAbs);
          // Create a file object
          File demoFolder = new File(demoTrainingDirAbs);
 
-         // Get all the names of the files present
+         // Get all the names of the .csv files present
          // in the given directory
-         File[] files = demoFolder.listFiles();
+         File[] files = demoFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv") && !new File(dir, name).isDirectory());
 
          System.out.println("Files are:");
          assertTrue(files.length>0);
