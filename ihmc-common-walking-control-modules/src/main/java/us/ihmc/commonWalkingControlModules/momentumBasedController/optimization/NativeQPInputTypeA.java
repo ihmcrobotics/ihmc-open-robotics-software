@@ -101,6 +101,9 @@ public class NativeQPInputTypeA
       taskJacobian.reshape(taskSize, numberOfVariables);
       taskObjective.reshape(taskSize, 1);
       taskWeightMatrix.reshape(taskSize, taskSize);
+      taskJacobian.zero();
+      taskObjective.zero();
+      taskWeightMatrix.zero();
    }
 
    public void setTaskJacobian(DMatrix taskJacobian)
