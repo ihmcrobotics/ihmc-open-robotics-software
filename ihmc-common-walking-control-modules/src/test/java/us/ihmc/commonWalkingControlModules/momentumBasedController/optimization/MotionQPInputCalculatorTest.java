@@ -59,7 +59,7 @@ public class MotionQPInputCalculatorTest
       CentroidalMomentumRateCalculator centroidalMomentumHandler = new CentroidalMomentumRateCalculator(rootBody, centerOfMassFrame);
       MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, centroidalMomentumHandler, null, jointIndexHandler, null, registry);
 
-      QPInputTypeA motionQPInput = new QPInputTypeA(numberOfDoFs);
+      NativeQPInputTypeA motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
       spatialAccelerationCommand.set(rootBody, endEffector);
       spatialAccelerationCommand.setWeight(random.nextDouble());
@@ -83,8 +83,8 @@ public class MotionQPInputCalculatorTest
          motionQPInputCalculator.initialize();
          motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput);
 
-         pseudoInverseSolver.setA(motionQPInput.taskJacobian);
-         pseudoInverseSolver.solve(motionQPInput.taskObjective, desiredJointAccelerations);
+         pseudoInverseSolver.setA(new DMatrixRMaj(motionQPInput.taskJacobian));
+         pseudoInverseSolver.solve(new DMatrixRMaj(motionQPInput.taskObjective), desiredJointAccelerations);
 
          MultiBodySystemTools.insertJointsState(joints, JointStateType.ACCELERATION, desiredJointAccelerations);
 
@@ -114,8 +114,8 @@ public class MotionQPInputCalculatorTest
          motionQPInputCalculator.initialize();
          motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput);
 
-         pseudoInverseSolver.setA(motionQPInput.taskJacobian);
-         pseudoInverseSolver.solve(motionQPInput.taskObjective, desiredJointAccelerations);
+         pseudoInverseSolver.setA(new DMatrixRMaj(motionQPInput.taskJacobian));
+         pseudoInverseSolver.solve(new DMatrixRMaj(motionQPInput.taskObjective), desiredJointAccelerations);
 
          MultiBodySystemTools.insertJointsState(joints, JointStateType.ACCELERATION, desiredJointAccelerations);
 
