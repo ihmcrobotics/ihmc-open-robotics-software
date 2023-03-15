@@ -126,20 +126,25 @@ public class WorkspacePathTools
                """.formatted(codeSourceDirectory, workingDirectory));
             }
 
-            int lastIndexOfSrc = -1;
-            for (int nameElementIndex = 0; nameElementIndex < codeSourceDirectory.getNameCount(); nameElementIndex++)
-            {
-               if (codeSourceDirectory.getName(nameElementIndex).toString().equals("src"))
-               {
-                  lastIndexOfSrc = nameElementIndex;
-               }
-            }
+            // We want to remove the build folder part of the path.
+            // We do this armed with the knowledge of what the default build folder names are.
+            int lastIndexOfOut = findLastIndexOfPart(codeSourceDirectory, "out"); // Handle IntelliJ
+            int lastIndexOfBin = findLastIndexOfPart(codeSourceDirectory, "bin"); // Handle Eclipse
+            int indexOfBuildFolder = Math.max(lastIndexOfOut, lastIndexOfBin);
 
-            if (lastIndexOfSrc >= 0)
+            if (indexOfBuildFolder >= 0)
             {
-               // Add 2 to keep 'src' and the source set part after 'src' i.e. ../src/main
-               // i.e This removes out/production/classes from [...]/src/main/out/production/classes
-               Path pathBeforeResources = codeSourceDirectory.subpath(0, lastIndexOfSrc + 2);
+               // This removes out/production/classes from [...]project/out/production/classes
+               // This removes out/production/classes from [...]project/src/extra/out/production/classes
+               // This removes bin from [...]project/bin
+               // This removes bin from [...]project/src/extra/bin
+               Path pathBeforeResources = codeSourceDirectory.subpath(0, indexOfBuildFolder);
+
+               // Since src/main gets built in the project folder, we need to add it back.
+               int lastIndexOfSrc = findLastIndexOfPart(codeSourceDirectory, "src");
+               if (lastIndexOfSrc < 0)
+                  pathBeforeResources = pathBeforeResources.resolve("src/main");
+
                LogTools.debug("Path before resources: {}", pathBeforeResources);
 
                Path pathWithResources = pathBeforeResources.resolve("resources").normalize();
@@ -153,16 +158,16 @@ public class WorkspacePathTools
                   if (pathWithResources.getName(pathNameElement).toString().equals(workingDirectory.getName(pathNameElement).toString()))
                   {
                      // We add 1 here, to make sure the directory to assume present
-                     // is closer to the 'src' folder, which is what the other tools assume right now.
+                     // is closer to the build folder, which is what the other tools assume right now.
                      afterLastCommonPathElement = pathNameElement + 1;
                   }
                }
 
-               // Sometimes the working directory is set to within the src folder heirarchy.
-               // In that case, let's back out and make the parent of 'src' our directory to assume present.
-               if (afterLastCommonPathElement >= lastIndexOfSrc)
+               // Sometimes the working directory is set to within the build folder heirarchy.
+               // In that case, let's back out and make the parent of the build folder the directory to assume present.
+               if (afterLastCommonPathElement >= indexOfBuildFolder)
                {
-                  afterLastCommonPathElement = lastIndexOfSrc - 1;
+                  afterLastCommonPathElement = indexOfBuildFolder - 1;
                }
 
                String directoryNameToAssumePresent = pathWithResources.getName(afterLastCommonPathElement).toString();
@@ -176,7 +181,7 @@ public class WorkspacePathTools
             }
             else
             {
-               LogTools.warn("No src folder found.");
+               LogTools.warn("No out or bin folder found and we don't know how to deal with that.");
             }
          }
          else
@@ -190,5 +195,18 @@ public class WorkspacePathTools
       }
 
       return inferredPathComponents;
+   }
+
+   private static int findLastIndexOfPart(Path pathToSearch, String partName)
+   {
+      int lastIndexOfPart = -1;
+      for (int nameElementIndex = 0; nameElementIndex < pathToSearch.getNameCount(); nameElementIndex++)
+      {
+         if (pathToSearch.getName(nameElementIndex).toString().equals(partName))
+         {
+            lastIndexOfPart = nameElementIndex;
+         }
+      }
+      return lastIndexOfPart;
    }
 }

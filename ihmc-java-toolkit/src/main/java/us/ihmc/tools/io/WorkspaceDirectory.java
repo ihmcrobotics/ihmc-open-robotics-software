@@ -10,37 +10,70 @@ import java.util.function.BiConsumer;
 
 public class WorkspaceDirectory
 {
-   private final Class<?> classForLoading;
-   private final Path workspaceDirectory;
-   private final String pathNecessaryForClasspathLoading;
-   private final String pathNecessaryForResourceExploring;
+   private Class<?> classForLoading;
+   private Path workspaceDirectory;
+   private String pathNecessaryForClasspathLoading;
+   private String pathNecessaryForResourceExploring;
+
+   /**
+    * This constructor will infer the correct directory name to assume present and
+    * the subsequent path to the resource folder, with even more robustness than passing
+    * them in your self.
+    */
+   public WorkspaceDirectory(Class<?> classForResourceDirectory)
+   {
+      this(classForResourceDirectory, "");
+
+   }
+
+   /**
+    * This constructor will infer the correct directory name to assume present and
+    * the subsequent path to the resource folder, with even more robustness than passing
+    * them in your self.
+    */
+   public WorkspaceDirectory(Class<?> classForResourceDirectory, String subsequentOrAbsoluteResourcePackagePath)
+   {
+      WorkingDirectoryPathComponents workingDirectoryPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForResourceDirectory);
+      initialize(workingDirectoryPathComponents.getDirectoryNameToAssumePresent(),
+                 workingDirectoryPathComponents.getSubsequentPathToResourceFolder(),
+                 classForResourceDirectory,
+                 subsequentOrAbsoluteResourcePackagePath);
+   }
 
    /**
     * For loading from the root of the resources directory.
     */
    public WorkspaceDirectory(String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
-      this(directoryNameToAssumePresent, subsequentPathToResourceFolder, null, "");
+      initialize(directoryNameToAssumePresent, subsequentPathToResourceFolder, null, "");
    }
 
    public WorkspaceDirectory(String directoryNameToAssumePresent,
                              String subsequentPathToResourceFolder,
                              Class<?> classForResourceDirectory)
    {
-      this(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForResourceDirectory, "");
+      initialize(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForResourceDirectory, "");
    }
 
    public WorkspaceDirectory(String directoryNameToAssumePresent,
                              String subsequentPathToResourceFolder,
                              String subsequentOrAbsoluteResourcePackagePath)
    {
-      this(directoryNameToAssumePresent, subsequentPathToResourceFolder, null, subsequentOrAbsoluteResourcePackagePath);
+      initialize(directoryNameToAssumePresent, subsequentPathToResourceFolder, null, subsequentOrAbsoluteResourcePackagePath);
    }
 
    public WorkspaceDirectory(String directoryNameToAssumePresent,
                              String subsequentPathToResourceFolder,
                              Class<?> classForResourceDirectory,
                              String subsequentOrAbsoluteResourcePackagePath)
+   {
+      initialize(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForResourceDirectory, subsequentOrAbsoluteResourcePackagePath);
+   }
+
+   private void initialize(String directoryNameToAssumePresent,
+                           String subsequentPathToResourceFolder,
+                           Class<?> classForResourceDirectory,
+                           String subsequentOrAbsoluteResourcePackagePath)
    {
       this.classForLoading = classForResourceDirectory;
       String putTogetherResourcePath = "";
