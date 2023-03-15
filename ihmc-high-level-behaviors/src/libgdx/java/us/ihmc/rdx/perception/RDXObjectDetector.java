@@ -17,6 +17,7 @@ import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXVirtualGhostObject;
+import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 
 import java.util.ArrayList;
 
@@ -40,13 +41,15 @@ public class RDXObjectDetector
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerROS2Publisher;
 
    /** Constructor for object detector with simulated camera, which publishes on ROS detected markers */
-   public RDXObjectDetector(RDXObjectDetectionMode detectionMode, ReferenceFrame sensorFrame, ROS2PublishSubscribeAPI ros2)
+   public RDXObjectDetector(RDXObjectDetectionMode detectionMode, RDXHighLevelDepthSensorSimulator objectDetectionSimulator, ROS2PublishSubscribeAPI ros2)
    {
       this.detectionMode = detectionMode;
       if(detectionMode == RDXObjectDetectionMode.SIM_ARUCO)
       {
          arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
-         arUcoMarkerDetection.create(sensorFrame);
+         arUcoMarkerDetection.create(objectDetectionSimulator.getSensorFrame());
+         arUcoMarkerDetection.setSourceImageForDetection(objectDetectionSimulator.getLowLevelSimulator().getRGBA8888ColorImage());
+         arUcoMarkerDetection.setCameraInstrinsics(objectDetectionSimulator.getDepthCameraIntrinsics());
          arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("from Blackfly Right");
 
          for (int id : objectInfo.getMarkersId())
@@ -54,8 +57,8 @@ public class RDXObjectDetector
             arUcoMarkersToTrack.add(new OpenCVArUcoMarker(id, objectInfo.getMarkerSize(id)));
          }
          arUcoMarkerROS2Publisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
-                                                                       arUcoMarkersToTrack, sensorFrame, ros2);
-         arUcoMarkerDetectionUI.create(arUcoMarkerDetection, arUcoMarkersToTrack, sensorFrame);
+                                                                       arUcoMarkersToTrack, objectDetectionSimulator.getSensorFrame(), ros2);
+         arUcoMarkerDetectionUI.create(arUcoMarkerDetection, arUcoMarkersToTrack, objectDetectionSimulator.getSensorFrame());
          panel.addChild(arUcoMarkerDetectionUI.getMainPanel());
 
          objectDetector = new ObjectDetector(objectInfo, arUcoMarkersToTrack);
