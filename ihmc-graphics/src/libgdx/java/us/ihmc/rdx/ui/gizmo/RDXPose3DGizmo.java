@@ -27,10 +27,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.RDXFocusBasedCamera;
-import us.ihmc.rdx.imgui.ImGuiInputDouble;
-import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.input.ImGuiMouseDragData;
@@ -118,9 +115,9 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final ImGuiInputDouble positionYImGuiInput = new ImGuiInputDouble("Y", "%.5f");
    private final ImGuiInputDouble positionZImGuiInput = new ImGuiInputDouble("Z", "%.5f");
    private final ImGuiInputDouble rotationStepSizeInput = new ImGuiInputDouble("Rotation step size " + UnitConversions.DEGREE_SYMBOL, "%.5f", 0.5);
-   private final ImGuiInputDouble yawImGuiInput = new ImGuiInputDouble("Yaw " + UnitConversions.DEGREE_SYMBOL, "%.5f");
-   private final ImGuiInputDouble pitchImGuiInput = new ImGuiInputDouble("Pitch " + UnitConversions.DEGREE_SYMBOL, "%.5f");
-   private final ImGuiInputDouble rollImGuiInput = new ImGuiInputDouble("Roll " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+   private final ImGuiInputDoubleForRotations yawImGuiInput = new ImGuiInputDoubleForRotations("Yaw " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+   private final ImGuiInputDoubleForRotations pitchImGuiInput = new ImGuiInputDoubleForRotations("Pitch " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+   private final ImGuiInputDoubleForRotations rollImGuiInput = new ImGuiInputDoubleForRotations("Roll " + UnitConversions.DEGREE_SYMBOL, "%.5f");
 
    public RDXPose3DGizmo()
    {
@@ -564,14 +561,19 @@ public class RDXPose3DGizmo implements RenderableProvider
       yawImGuiInput.setDoubleValue(Math.toDegrees(initialYaw));
       pitchImGuiInput.setDoubleValue(Math.toDegrees(initialPitch));
       rollImGuiInput.setDoubleValue(Math.toDegrees(initialRoll));
-      adjustmentNeedsToBeApplied |= yawImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
-      adjustmentNeedsToBeApplied |= pitchImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
-      adjustmentNeedsToBeApplied |= rollImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
-      Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
-      orientationToAdjust.setYawPitchRoll(Math.toRadians(yawImGuiInput.getDoubleValue()) - initialYaw,
-                                          Math.toRadians(pitchImGuiInput.getDoubleValue()) - initialPitch,
-                                          Math.toRadians(rollImGuiInput.getDoubleValue()) - initialRoll);
-      afterRotationAdjustment();
+      yawImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
+      pitchImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
+      rollImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
+      boolean rotationStepped = yawImGuiInput.getStepButtonClicked();
+      rotationStepped |= pitchImGuiInput.getStepButtonClicked();
+      rotationStepped |= rollImGuiInput.getStepButtonClicked();
+      adjustmentNeedsToBeApplied |= rotationStepped;
+      if (rotationStepped)
+      {
+         Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
+         orientationToAdjust.setYawPitchRoll(yawImGuiInput.getSteppedAmount(), pitchImGuiInput.getSteppedAmount(), rollImGuiInput.getSteppedAmount());
+         afterRotationAdjustment();
+      }
 
       ImGui.text("Set to zero in:");
       ImGui.sameLine();
