@@ -48,13 +48,13 @@ public class ImGuiGlfwWindow
                                                        classForLoading,
                                                        configurationExtraPath);
 
-      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
       glfwWindowForImGui = new GlfwWindowForImGui(windowTitle);
       layoutManager = new RDXImGuiLayoutManager(classForLoading,
                                                 directoryNameToAssumePresent,
                                                 subsequentPathToResourceFolder,
                                                 configurationExtraPath,
                                                 configurationBaseDirectory);
+      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem(layoutManager);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
       {
@@ -96,7 +96,7 @@ public class ImGuiGlfwWindow
 
       long windowHandle = glfwWindowForImGui.getWindowHandle();
 
-      imGuiWindowAndDockSystem.create(windowHandle, layoutManager);
+      imGuiWindowAndDockSystem.create(windowHandle);
 
       if (create != null)
          create.run();

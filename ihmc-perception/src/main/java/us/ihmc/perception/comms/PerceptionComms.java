@@ -6,6 +6,9 @@ public class PerceptionComms
 {
    private static final String MODULE_NAME = "perception";
 
+   public static final StoredPropertySetROS2TopicPair PERCEPTION_CONFIGURATION_PARAMETERS
+         = new StoredPropertySetROS2TopicPair(MODULE_NAME,"perception_configuration_parameters");
+
    public static final StoredPropertySetROS2TopicPair PERSPECTIVE_RAPID_REGION_PARAMETERS
          = new StoredPropertySetROS2TopicPair(MODULE_NAME,"perspective_rapid_region_parameters");
 

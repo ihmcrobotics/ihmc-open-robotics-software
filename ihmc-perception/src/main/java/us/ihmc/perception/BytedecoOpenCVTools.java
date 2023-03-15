@@ -8,9 +8,15 @@ import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
+import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.VideoPacket;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
 
 import java.awt.image.BufferedImage;
+import java.time.Instant;
 
 public class BytedecoOpenCVTools
 {
@@ -183,21 +189,12 @@ public class BytedecoOpenCVTools
 
    public static void compressImagePNG(Mat image, BytePointer data)
    {
-      Mat depth = null;
-      if (image.type() == opencv_core.CV_32FC1)
-      {
-         depth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC4, image.data());
-      }
-      else
-      {
-         depth = image;
-      }
-      opencv_imgcodecs.imencode(".png", depth, data, compressionParametersPNG);
+      opencv_imgcodecs.imencode(".png", image, data, compressionParametersPNG);
    }
 
-   public static void decompressDepthPNG(byte[] data, Mat image)
+   public static void decompressDepthPNG(BytePointer bytePointer, Mat image)
    {
-      Mat compressedMat = new Mat(1, data.length, opencv_core.CV_8UC1, new BytePointer(data));
+      Mat compressedMat = new Mat(1, (int) bytePointer.limit(), opencv_core.CV_8UC1, bytePointer);
       opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, image);
    }
 
@@ -310,7 +307,7 @@ public class BytedecoOpenCVTools
    {
       opencv_highgui.imshow(tag, image);
       int code = opencv_highgui.waitKeyEx(delay);
-      if (code == 113)
+      if (code == 113) // Keycode for 'q'
       {
          System.exit(0);
       }
@@ -326,11 +323,22 @@ public class BytedecoOpenCVTools
       Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
       Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
 
+      displayDepth.convertTo(displayDepth, opencv_core.CV_8UC1, 0.8, 50);
+      BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
+      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
+
+      opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
+      display(tag, finalDisplayDepth, delay);
+   }
+
+   public static void displayHeightMap(String tag, Mat image, int delay, float scale)
+   {
+      Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
+      Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
 
       BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
 
       opencv_imgproc.threshold(displayDepth, displayDepth, 100, 255, opencv_imgproc.CV_THRESH_TOZERO_INV);
-
       opencv_core.normalize(displayDepth, displayDepth, 255, 0, opencv_core.NORM_MINMAX, opencv_core.CV_8UC1, new Mat());
 
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
@@ -339,16 +347,46 @@ public class BytedecoOpenCVTools
       display(tag, finalDisplayDepth, delay);
    }
 
-   public static Mat decompressImageJPGUsingYUV(byte[] dataArray)
+   public static void packVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)
    {
-      BytePointer messageEncodedBytePointer = new BytePointer(dataArray.length);
-      messageEncodedBytePointer.put(dataArray, 0, dataArray.length);
-      messageEncodedBytePointer.limit(dataArray.length);
+      compressedBytes.asBuffer().get(heapArray, 0, compressedBytes.asBuffer().remaining());
+      packet.setTimestamp(nanoTime);
+      packet.getData().resetQuick();
+      packet.getData().add(heapArray);
+      packet.setImageHeight(height);
+      packet.setImageWidth(width);
+      packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
+   }
 
+   public static void packImageMessage(ImageMessage imageMessage,
+                                       BytePointer data,
+                                       FramePose3D cameraPose,
+                                       Instant aquisitionTime,
+                                       long sequenceNumber,
+                                       int height,
+                                       int width,
+                                       int format)
+   {
+      imageMessage.getData().resetQuick();
+      for (int i = 0; i < data.limit(); i++)
+      {
+         imageMessage.getData().add(data.get(i));
+      }
+      imageMessage.setFormat(format);
+      imageMessage.setImageHeight(height);
+      imageMessage.setImageWidth(width);
+      imageMessage.getPosition().set(cameraPose.getPosition());
+      imageMessage.getOrientation().set(cameraPose.getOrientation());
+      imageMessage.setSequenceNumber(sequenceNumber);
+      MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
+   }
+
+   public static Mat decompressImageJPGUsingYUV(BytePointer messageEncodedBytePointer)
+   {
       Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
       Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
 
-      inputJPEGMat.cols(dataArray.length);
+      inputJPEGMat.cols((int) messageEncodedBytePointer.limit());
       inputJPEGMat.data(messageEncodedBytePointer);
 
       // imdecode takes the longest by far out of all this stuff

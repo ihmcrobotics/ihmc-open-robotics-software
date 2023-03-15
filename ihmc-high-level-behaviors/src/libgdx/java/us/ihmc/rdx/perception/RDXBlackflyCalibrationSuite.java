@@ -354,14 +354,14 @@ public class RDXBlackflyCalibrationSuite
             undistortedImageSize.height(height);
             texture.ensureTextureDimensions(width, height);
 
-            opencv_calib3d.estimateNewCameraMatrixForUndistortRectify(cameraMatrixForUndistortion.getForThreadTwo(),
-                                                                      distortionCoefficientsForUndistortion.getForThreadTwo(),
-                                                                      sourceImageSize,
-                                                                      rectificationTransformation,
-                                                                      newCameraMatrixEstimate,
-                                                                      balanceNewFocalLength.get(),
-                                                                      undistortedImageSize,
-                                                                      fovScaleFocalLengthDivisor.get());
+            opencv_calib3d.fisheyeEstimateNewCameraMatrixForUndistortRectify(cameraMatrixForUndistortion.getForThreadTwo(),
+                                                                             distortionCoefficientsForUndistortion.getForThreadTwo(),
+                                                                             sourceImageSize,
+                                                                             rectificationTransformation,
+                                                                             newCameraMatrixEstimate,
+                                                                             balanceNewFocalLength.get(),
+                                                                             undistortedImageSize,
+                                                                             fovScaleFocalLengthDivisor.get());
 
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("Camera matrix for undistortion:\n");
@@ -377,12 +377,12 @@ public class RDXBlackflyCalibrationSuite
 
             // Fisheye undistortion
             // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#ga167df4b00a6fd55287ba829fbf9913b9
-            opencv_calib3d.undistortImage(imageForUndistortion.getForThreadTwo(),
-                                          texture.getRGBA8Mat(),
-                                          cameraMatrixForUndistortion.getForThreadTwo(),
-                                          distortionCoefficientsForUndistortion.getForThreadTwo(),
-                                          newCameraMatrixEstimate,
-                                          undistortedImageSize);
+            opencv_calib3d.fisheyeUndistortImage(imageForUndistortion.getForThreadTwo(),
+                                                 texture.getRGBA8Mat(),
+                                                 cameraMatrixForUndistortion.getForThreadTwo(),
+                                                 distortionCoefficientsForUndistortion.getForThreadTwo(),
+                                                 newCameraMatrixEstimate,
+                                                 undistortedImageSize);
 
             // TODO: We need to switch to using these. You only need to do
             //   initUndistortRectifyMap once, then remap is fast
@@ -659,15 +659,15 @@ public class RDXBlackflyCalibrationSuite
 
       // Here we use the cv::fisheye version
       // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#gad626a78de2b1dae7489e152a5a5a89e1
-      averageReprojectionError = opencv_calib3d.calibrate(objectPointsMatVector,
-                                                          imagePointsMatVector,
-                                                          imageSize,
-                                                          cameraMatrix,
-                                                          distortionCoefficients,
-                                                          estimatedRotationVectors,
-                                                          estimatedTranslationVectors,
-                                                          flags,
-                                                          terminationCriteria);
+      averageReprojectionError = opencv_calib3d.fisheyeCalibrate(objectPointsMatVector,
+                                                                 imagePointsMatVector,
+                                                                 imageSize,
+                                                                 cameraMatrix,
+                                                                 distortionCoefficients,
+                                                                 estimatedRotationVectors,
+                                                                 estimatedTranslationVectors,
+                                                                 flags,
+                                                                 terminationCriteria);
 
       LogTools.info("Calibration complete!");
       LogTools.info("Number of estimated rotation vectors: {}", estimatedRotationVectors.size());
