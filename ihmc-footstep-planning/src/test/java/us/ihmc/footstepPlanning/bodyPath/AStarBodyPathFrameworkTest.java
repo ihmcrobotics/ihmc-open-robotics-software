@@ -117,6 +117,7 @@ public class AStarBodyPathFrameworkTest
    @AfterEach
    public void tearDown() throws Exception
    {
+      planningModule.destroy();
    }
 
    @Test
