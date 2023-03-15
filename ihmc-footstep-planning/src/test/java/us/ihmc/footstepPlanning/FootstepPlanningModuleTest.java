@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
@@ -381,7 +382,7 @@ public class FootstepPlanningModuleTest
 
       // set alpha for ref calc
       double referenceAlpha = 0.0;
-      planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceAlpha(referenceAlpha);
+      ReferenceBasedIdealStepCalculator.setReferenceAlpha(referenceAlpha);
 
       ArrayList<Pose3D> goalMidFootPoseList = new ArrayList<>();
 
@@ -461,11 +462,11 @@ public class FootstepPlanningModuleTest
          request.setReferencePlan(perturbedPlan);
          for (referenceAlpha = 0.5; referenceAlpha <= 1.0; referenceAlpha+=1.0)
          {
-            planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceAlpha(referenceAlpha);
+            ReferenceBasedIdealStepCalculator.setReferenceAlpha(referenceAlpha);
             plannerOutput = planningModule.handleRequest(request);
             footstepPlannerLogger.logSession();
             FootstepPlan referencedPlan = plannerOutput.getFootstepPlan();
-            double currentAlpha = planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().getReferenceAlpha();
+            double currentAlpha = ReferenceBasedIdealStepCalculator.getReferenceAlpha();
             msg = "yesreference alpha " + currentAlpha +" First two are left right goal pose";
             data.add(msg);
             for (RobotSide robotSide : RobotSide.values)
@@ -503,7 +504,7 @@ public class FootstepPlanningModuleTest
          }
 
          // for alpha = 0, new plan should be exactly the same as original
-         planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceAlpha(0.0);
+         ReferenceBasedIdealStepCalculator.setReferenceAlpha(0.0);
          for (int j = 0; j < 10; ++j)
          {
             plannerOutput = planningModule.handleRequest(request);
@@ -519,7 +520,7 @@ public class FootstepPlanningModuleTest
          // TODO: for alpha = 1.0, new plan should be further away from original but does not mean it will be close to the perturbed(referenced) plan...
          //  how to test?
          request.setReferencePlan(perturbedPlan);
-         planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceAlpha(1.0);
+         ReferenceBasedIdealStepCalculator.setReferenceAlpha(1.0);
          plannerOutput = planningModule.handleRequest(request);
          FootstepPlan referencedPlan_alpha_1 = plannerOutput.getFootstepPlan();
 

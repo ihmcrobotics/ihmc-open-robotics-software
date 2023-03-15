@@ -1,14 +1,12 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameIOTools;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -24,16 +22,19 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    private DirectedGraph<FootstepGraphNode> footstepGraph;
    private DiscreteFootstep nominalIdealStep;
    private final YoBoolean stepSideIncorrect;
+   public static String statusMessage = "Step calculate mode: Nominal";
 
    // TODO add to footstep planner parameters
    /* Weight factor for using reference vs nominal ideal steps. Alpha = 0 means use nominal ideal step, alpha = 1 means use reference value */
-   private double referenceAlpha;
+   public static double referenceAlpha;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   public ReferenceBasedIdealStepCalculator(double referenceAlpha, IdealStepCalculator nominalIdealStepCalculator, YoRegistry registry)
+   public ReferenceBasedIdealStepCalculator(FootstepPlannerParametersBasics footstepPlannerParameters, IdealStepCalculator nominalIdealStepCalculator, YoRegistry registry)
    {
       this.nominalIdealStepCalculator = nominalIdealStepCalculator;
       stepSideIncorrect = new YoBoolean("stepSideIncorrect", registry);
-      this.referenceAlpha = referenceAlpha;
+      this.footstepPlannerParameters = footstepPlannerParameters;
+      referenceAlpha = footstepPlannerParameters.getReferencePlanAlpha();
    }
 
    @Override
@@ -41,8 +42,10 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    {
       nominalIdealStep = nominalIdealStepCalculator.computeIdealStep(stanceNode, startOfSwing);
 
+      setReferenceAlpha(footstepPlannerParameters.getReferencePlanAlpha());
       if (referenceFootstepPlan == null || referenceFootstepPlan.isEmpty() || referenceAlpha == 0.0)
       {
+         statusMessage = "Step calculate mode: Nominal";
          return nominalIdealStep;
       }
 
@@ -53,19 +56,28 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
 
       if (stepIndexInPlan >= referenceFootstepPlan.getNumberOfSteps())
       {
+         statusMessage = "Step calculate mode: Nominal";
          return nominalIdealStep;
       }
 
       PlannedFootstep referenceFootstep = referenceFootstepPlan.getFootstep(stepIndexInPlan);
 
       // TODO: Indexing should match so that referencedStep's side is equal to stance Node's opposite side.
-      //  In case this is not true, we will try to find the closest step from either previous or next step in the reference plan.
+      // In case this is not true, we will try to find the closest step from either previous or next step in the reference plan.
 
       stepSideIncorrect.set(referenceFootstep.getRobotSide() != stanceNode.getRobotSide().getOppositeSide());
       if (stepSideIncorrect.getBooleanValue())
       {
          throw new RuntimeException("Wrong side from reference plan, this should not happen ! ! !");
       }
+
+      // Ensure alpha is within the 0 ~ 1.0 range
+      if (referenceAlpha < 0)
+         referenceAlpha = 0;
+      else if (referenceAlpha > 1.0)
+         referenceAlpha = 1.0;
+
+      statusMessage = "Step calculate mode: Reference (alpha : " + referenceAlpha + " )";
       FramePose3D referenceFootstepPose = referenceFootstep.getFootstepPose();
       LogTools.warn("! ! USING REFERENCE STEP (alpha: {}) ! !", referenceAlpha);
 
@@ -91,13 +103,15 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
       this.footstepGraph = footstepGraph;
    }
 
-   public void setReferenceAlpha(double referenceAlpha)
+   public static void setReferenceAlpha(double alpha)
    {
-      if (referenceAlpha <= 1.0 && referenceAlpha >= 0.0)
-         this.referenceAlpha = referenceAlpha;
+      if (alpha <= 1.0 && alpha >= 0.0)
+      {
+         referenceAlpha = alpha;
+      }
    }
 
-   public double getReferenceAlpha()
+   public static double getReferenceAlpha()
    {
       return referenceAlpha;
    }

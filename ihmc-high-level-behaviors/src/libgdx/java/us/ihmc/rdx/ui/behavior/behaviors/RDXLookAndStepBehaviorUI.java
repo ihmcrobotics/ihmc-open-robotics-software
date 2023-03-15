@@ -18,6 +18,8 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -49,7 +51,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 {
    public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION,
                                                                                         RDXLookAndStepBehaviorUI::new);
-
    private final BehaviorHelper helper;
    private final AtomicReference<ArrayList<MinimalFootstep>> latestPlannedFootsteps;
    private final AtomicReference<ArrayList<MinimalFootstep>> latestCommandedFootsteps;
@@ -93,6 +94,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private ImDouble ballAndArrowX = new ImDouble(7.0);
    private ImDouble ballAndArrowY = new ImDouble(0.5);
    private ImDouble ballAndArrowYaw = new ImDouble(0.1);
+   private ImDoubleWrapper referenceAlpha;
 
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -162,12 +164,12 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
                                                                            helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"),
                                                                            SWING_PLANNER_PARAMETERS);
       stopForImpassibilities = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(), LookAndStepBehaviorParameters.stopForImpassibilities);
+      referenceAlpha = new ImDoubleWrapper(footstepPlannerRemotePropertySet.getStoredPropertySet(), FootstepPlannerParameterKeys.referencePlanAlpha);
    }
 
    @Override
    public void create(RDXBaseUI baseUI)
    {
-
       goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
       goalAffordance.setOnStartPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(true));
       goalAffordance.setOnEndPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(false));
@@ -270,14 +272,19 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
 
-      ImGuiTools.volatileInputDouble("ball_x", ballAndArrowX);
-      ImGuiTools.volatileInputDouble("ball_y", ballAndArrowY);
-      ImGuiTools.volatileInputDouble("ball_yaw", ballAndArrowYaw);
+      ImGui.pushFont(ImGuiTools.getMediumFont());
+      ImGui.text(ReferenceBasedIdealStepCalculator.statusMessage);
+      ImGui.popFont();
 
-      if (ImGui.button(labels.get("send ball to (x,y,yaw), z,roll, pitch are zeros")))
+      referenceAlpha.accessImDouble(alpha ->
       {
-         sendBallToXYYaw();
-      }
+         if (ImGuiTools.volatileInputDouble("Reference alpha", alpha))
+         {
+            ReferenceBasedIdealStepCalculator.setReferenceAlpha(alpha.get());
+            footstepPlannerRemotePropertySet.getStoredPropertySet().set(FootstepPlannerParameterKeys.referencePlanAlpha, alpha.get());
+            footstepPlannerRemotePropertySet.setPropertyChanged();
+         }
+      });
 
 //      footholdVolumePlot.render();
 
@@ -323,11 +330,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 //      {
 //         ImGui.checkbox("Show tuner", showSwingPlanningParametersTuner);
 //      }
-   }
-
-   private void sendBallToXYYaw()
-   {
-      setGoal(new Pose3D(ballAndArrowX.get(), ballAndArrowY.get(), 0, ballAndArrowYaw.get(), 0, 0));
    }
 
    @Override
