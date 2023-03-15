@@ -218,8 +218,7 @@ public class ProMPAssistant
                   updateTask();
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;
-
-                  LogTools.info("Generating prediction ...");
+                  LogTools.info("Generated prediction");
                }
             }
          }
@@ -257,7 +256,7 @@ public class ProMPAssistant
                   updateTask();
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;
-                  LogTools.info("Generating prediction ...");
+                  LogTools.info("Generated prediction");
                }
             }
          }
@@ -272,6 +271,7 @@ public class ProMPAssistant
       {
          if (contextTasksMap.containsKey(objectName))
          {
+            LogTools.info("Starting task detection");
             List<String> candidateTasks = contextTasksMap.get(objectName);
             FramePose3D lastObservedPose = new FramePose3D(observedPose);
             if (objectFrame != null)
@@ -316,6 +316,8 @@ public class ProMPAssistant
                // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
                (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet().forEach(part -> bodyPartObservedTrajectoryMap.put(part, new ArrayList<>()));
             }
+            if(!currentTask.isEmpty())
+               LogTools.info("Found task! {}", currentTask);
          }
          else // no tasks in this context
          {

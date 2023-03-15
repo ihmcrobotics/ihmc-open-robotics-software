@@ -1,6 +1,6 @@
 {
   "testNumberUseOnlyForTesting": 1,
-  "logging" : false,
+  "logging" : true,
   "numberBasisFunctions": 20,
   "numberObservations": 15,
   "conditionOnlyLastObservation": true,
