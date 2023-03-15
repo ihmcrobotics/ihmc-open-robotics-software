@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -98,7 +99,7 @@ public class FootstepPlanGenerator
 
    private FootstepPlan planAndLog(double alpha, FootstepPlanningModule planningModule, FootstepPlannerRequest request, FootstepPlannerLogger logger, String folderName)
    {
-      planningModule.getAStarFootstepPlanner().getReferenceBasedIdealStepCalculator().setReferenceAlpha(alpha);
+      ReferenceBasedIdealStepCalculator.setReferenceAlpha(alpha);
       FootstepPlannerOutput output = planningModule.handleRequest(request);
       FootstepPlan plan = new FootstepPlan(output.getFootstepPlan());
 
