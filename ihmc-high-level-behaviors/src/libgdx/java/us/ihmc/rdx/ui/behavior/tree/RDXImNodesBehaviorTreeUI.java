@@ -44,7 +44,7 @@ public class RDXImNodesBehaviorTreeUI
       }
       catch (NullPointerException e)
       {
-         LogTools.info("return value of PathTools.findDirectoryInline(\"ihmc-open-robotics-software\") is null");
+         LogTools.error("Return value of PathTools.findDirectoryInline(\"ihmc-open-robotics-software\") is null");
          configurationsPath = null;
       }
       ImNodesTools.initialize();
