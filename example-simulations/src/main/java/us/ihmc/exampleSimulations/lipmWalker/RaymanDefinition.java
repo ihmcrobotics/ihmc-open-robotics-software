@@ -49,11 +49,15 @@ public class RaymanDefinition extends RobotDefinition
    public static final double FOOT_LENGTH = FOOT_BACK + FOOT_FORWARD;
    public static final double FOOT_WIDTH = 0.15;
    public static final double FOOT_HEIGHT = 0.051;
-   public static final double FOOT_MASS = 1.0;
+//   public static final double FOOT_MASS = 1.0;
 //   public static final Vector3DReadOnly FOOT_COM = new Vector3D(0.050700, 0.0, -FOOT_HEIGHT / 2);
 //   public static final Vector3DReadOnly FOOT_I = new Vector3D(0.00036326, 0.00152067, 0.00170404);
-   public static final Vector3DReadOnly FOOT_COM = new Vector3D(FOOT_LENGTH / 2, 0.0, -FOOT_HEIGHT / 2);
-   public static final Vector3DReadOnly FOOT_I = new Vector3D(0.001, 0.0035, 0.004);
+//   public static final Vector3DReadOnly FOOT_COM = new Vector3D(FOOT_LENGTH / 2, 0.0, -FOOT_HEIGHT / 2);
+//   public static final Vector3DReadOnly FOOT_I = new Vector3D(0.001, 0.0035, 0.004);
+
+   public static final double FOOT_MASS = 0.414988;
+   public static final Vector3DReadOnly FOOT_COM = new Vector3D(0.050700, 0.0, -0.025500);
+   public static final Vector3DReadOnly FOOT_I = new Vector3D(0.00036326, 0.00152067, 0.00170404);
 
    //etc
    public SideDependentList<RevoluteJointDefinition> footParentJoints = new SideDependentList<>();

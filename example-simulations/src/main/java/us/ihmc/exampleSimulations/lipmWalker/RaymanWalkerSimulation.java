@@ -8,7 +8,7 @@ import us.ihmc.scs2.simulation.robot.Robot;
 public class RaymanWalkerSimulation
 {
    private static final double simDT = 0.0004;
-   private static final double controlDT = simDT;
+   private static final double controlDT = simDT * 100;
 
    public RaymanWalkerSimulation()
    {
@@ -20,6 +20,8 @@ public class RaymanWalkerSimulation
       parameters.setBxy(100.0);
       parameters.setKz(150.0);
       parameters.setBz(50.0);
+//      parameters.setKz(500.0);
+//      parameters.setBz(250.0);
 
       // Instantiate a SCS object
       SimulationConstructionSet2 scs = new SimulationConstructionSet2(SimulationConstructionSet2.contactPointBasedPhysicsEngineFactory(parameters));
@@ -31,11 +33,9 @@ public class RaymanWalkerSimulation
       scs.getGravity().set(0.0, 0.0, -gravityMagnitude);
 
       // This time, we will make the controller run at a slower frequency than the simulation.
-      double controllerDT = 1.0e-2;
 
       // The simulation time step.
-      double simulateDT = 4.0e-4;
-      scs.setDT(simulateDT);
+      scs.setDT(simDT);
       // Set the frequency at which data is logged.
       scs.setBufferRecordTickPeriod(10);
       scs.changeBufferSize(100000);
@@ -47,7 +47,7 @@ public class RaymanWalkerSimulation
       // Add a terrain
       scs.addTerrainObject(new GroundDefinition());
 
-      RaymanController controller = new RaymanController(walker.getControllerInput(), walker.getControllerOutput(), controllerDT, gravityMagnitude, walkerDef);
+      RaymanController controller = new RaymanController(walker.getControllerInput(), walker.getControllerOutput(), controlDT, gravityMagnitude, walkerDef);
 
       controller.initialize();
 //      scs.addYoEntry("walk");
