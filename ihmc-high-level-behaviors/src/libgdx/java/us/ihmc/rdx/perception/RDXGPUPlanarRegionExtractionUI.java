@@ -161,7 +161,6 @@ public class RDXGPUPlanarRegionExtractionUI
       heightMapGraphic = new RDXHeightMapGraphic();
       boundaryPointCloudSwap = new GuidedSwapReference<>(() ->
       {
-
          RDXPointCloudRenderer boundaryPointCloud = new RDXPointCloudRenderer();
          boundaryPointCloud.create(2000000);
          pointCloudRendererShutdown = boundaryPointCloud::dispose;
