@@ -226,7 +226,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
                objectName = objectDetector.getObjectName();
                objectPose = objectDetector.getObjectPose();
                objectFrame = objectDetector.getObjectFrame();
-               objectDetector.setEnabled(false);
+               objectDetector.setEnabled(false); // stop using it during assistance for the moment (will change this once tested more and improved UI rendering)
                LogTools.info("Detected object {} pose: {}", objectName, objectPose);
             }
 
@@ -246,6 +246,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             // reset promp assistance
             proMPAssistant.reset();
             proMPAssistant.setCurrentTaskDone(false);
+            // if object detector was active, reactivate it
+            if(objectDetector != null && !objectName.isEmpty() && !objectDetector.isEnabled())
+               objectDetector.setEnabled(true);
             objectName = "";
             objectPose = null;
             objectFrame = null;
