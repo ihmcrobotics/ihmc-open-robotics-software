@@ -46,7 +46,7 @@ benchmarksDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-convex-optimization:0.17.14")
+   api("us.ihmc:ihmc-convex-optimization:0.17.17")
 }
 
 remotes {

@@ -92,7 +92,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
    public void destroy()
    {
-      loader.destroy();
+      loader.closeLogFile();
    }
 
    protected void renderImGuiWidgetsPartOne()
