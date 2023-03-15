@@ -1,13 +1,12 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import javafx.util.Pair;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -25,47 +24,21 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
-import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
-import us.ihmc.pathPlanning.visibilityGraphs.OcclusionHandlingPathPlanner;
-import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphsTestVisualizerApplication;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +47,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class AStarBodyPathFrameworkTest
 {
@@ -85,6 +57,7 @@ public class AStarBodyPathFrameworkTest
 
    // Whether to start the UI or not.
    private static boolean ENABLE_TIMERS = true;
+   private static boolean GENERATE_LOG_FOR_FAILING_TESTS = true;
 
    private static final double walkerTotalTime = 300.0;
 
@@ -112,6 +85,7 @@ public class AStarBodyPathFrameworkTest
    public void setup()
    {
       DEBUG = (DEBUG && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      GENERATE_LOG_FOR_FAILING_TESTS &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    }
 
    @AfterEach
@@ -389,8 +363,10 @@ public class AStarBodyPathFrameworkTest
       FootstepPlannerOutput output = planningModule.getOutput();
       List<Pose3D> path = output.getBodyPath();
 
-      logger.logSession();
-
+      if (GENERATE_LOG_FOR_FAILING_TESTS)
+      {
+         logger.logSession();
+      }
 
       String errorMessages = basicBodyPathSanityChecks(datasetName, start, goal, path);
 
