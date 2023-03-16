@@ -1,5 +1,6 @@
 package us.ihmc.missionControl;
 
+import us.ihmc.missionControl.resourceMonitor.cpu.CPUCoreTracker;
 import us.ihmc.tools.processManagement.ProcessTools;
 
 import java.util.ArrayList;
