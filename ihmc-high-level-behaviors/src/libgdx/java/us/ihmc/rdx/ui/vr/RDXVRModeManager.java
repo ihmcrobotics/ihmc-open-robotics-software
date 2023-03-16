@@ -138,7 +138,7 @@ public class RDXVRModeManager
       {
          case INPUTS_DISABLED ->
          {
-            ImGui.text("Press right A button to teleport the playspace to the robot's location.");
+            ImGui.text("Press right joystick button to teleport the playspace to the robot's location.");
          }
          case FOOTSTEP_PLACEMENT ->
          {
