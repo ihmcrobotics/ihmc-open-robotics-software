@@ -58,7 +58,7 @@ public class MissionControlDaemon
       schedulers.add(systemAvailablePublisherScheduler);
       schedulers.add(systemResourceUsagePublisherScheduler);
 
-      systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.00);
+      systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.0);
       systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.25);
 
       MissionControlTools.findServices().forEach(service -> serviceMonitors.add(new SystemdServiceMonitor(service)));
