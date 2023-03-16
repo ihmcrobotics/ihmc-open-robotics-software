@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
@@ -15,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlConfigurationCommand;
@@ -89,9 +91,42 @@ public class WalkingCommandConsumer
    {
       this.walkingMessageHandler = walkingMessageHandler;
       this.yoTime = yoTime;
-
-      this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       this.statusMessageOutputManager = statusMessageOutputManager;
+
+      List<Class<? extends Command<?, ?>>> commandsToRegister = new ArrayList<>();
+      commandsToRegister.add(HeadTrajectoryCommand.class);
+      commandsToRegister.add(NeckTrajectoryCommand.class);
+      commandsToRegister.add(NeckDesiredAccelerationsCommand.class);
+      commandsToRegister.add(HeadHybridJointspaceTaskspaceTrajectoryCommand.class);
+      commandsToRegister.add(ChestTrajectoryCommand.class);
+      commandsToRegister.add(SpineTrajectoryCommand.class);
+      commandsToRegister.add(SpineDesiredAccelerationsCommand.class);
+      commandsToRegister.add(ChestHybridJointspaceTaskspaceTrajectoryCommand.class);
+      commandsToRegister.add(PelvisHeightTrajectoryCommand.class);
+      commandsToRegister.add(GoHomeCommand.class);
+      commandsToRegister.add(PelvisOrientationTrajectoryCommand.class);
+      commandsToRegister.add(PelvisTrajectoryCommand.class);
+      commandsToRegister.add(HandTrajectoryCommand.class);
+      commandsToRegister.add(HandWrenchTrajectoryCommand.class);
+      commandsToRegister.add(ArmTrajectoryCommand.class);
+      commandsToRegister.add(ArmDesiredAccelerationsCommand.class);
+      commandsToRegister.add(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
+      commandsToRegister.add(AutomaticManipulationAbortCommand.class);
+      commandsToRegister.add(FootLoadBearingCommand.class);
+      commandsToRegister.add(HandLoadBearingCommand.class);
+      commandsToRegister.add(StopAllTrajectoryCommand.class);
+      commandsToRegister.add(FootTrajectoryCommand.class);
+      commandsToRegister.add(FootstepDataListCommand.class);
+      commandsToRegister.add(PauseWalkingCommand.class);
+      commandsToRegister.add(MomentumTrajectoryCommand.class);
+      commandsToRegister.add(CenterOfMassTrajectoryCommand.class);
+      commandsToRegister.add(AbortWalkingCommand.class);
+      commandsToRegister.add(StepConstraintRegionCommand.class);
+      commandsToRegister.add(StepConstraintsListCommand.class);
+      commandsToRegister.add(PrepareForLocomotionCommand.class);
+      commandsToRegister.add(DirectionalControlInputCommand.class);
+
+      commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, commandsToRegister, yoTime);
 
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
