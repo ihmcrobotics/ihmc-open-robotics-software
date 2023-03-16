@@ -1,8 +1,5 @@
 package us.ihmc.behaviors.sharedControl;
 
-import org.bytedeco.javacpp.annotation.ByRef;
-import org.bytedeco.javacpp.annotation.Cast;
-import org.bytedeco.javacpp.annotation.Const;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -10,7 +7,6 @@ import org.json.simple.parser.ParseException;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.promp.*;
 import us.ihmc.tools.io.WorkspaceDirectory;
@@ -150,11 +146,10 @@ public class ProMPManager
          {
             learnedProMPs.put(entry.getKey(), new ProMP(trainingTrajectory, numberBasisFunctions));
             saveLearnedTask(demoTrainingDirAbs, entry.getKey());
-
-            if (logEnabled)
-            {
-               logger.saveDemosAndLearnedTrajectories(entry.getKey(), learnedProMPs.get(entry.getKey()), trainingTrajectory);
-            }
+         }
+         if (logEnabled)
+         {
+            logger.saveDemosAndLearnedTrajectories(entry.getKey(), learnedProMPs.get(entry.getKey()), trainingTrajectory);
          }
       }
    }
@@ -217,7 +212,7 @@ public class ProMPManager
          EigenVectorXd weights = new EigenVectorXd(weightsArray.size());
          for (int i = 0; i < weightsArray.size(); i++)
          {
-            weights.apply(i).put(((Number) weightsArray.get(i)).doubleValue());
+            weights.apply(i).put(((Double) weightsArray.get(i)).doubleValue());
          }
 
          JSONArray covWArray = (JSONArray) jsonObject.get("covariance");
@@ -225,12 +220,12 @@ public class ProMPManager
          EigenMatrixXd covarianceMatrix = new EigenMatrixXd(covWArray.size(), rowArray.size());
          for (int i = 0; i < covWArray.size(); i++)
          {
+            rowArray = (JSONArray) covWArray.get(i);
             for (int j = 0; j < rowArray.size(); j++)
             {
-               covarianceMatrix.apply(i, j).put(((Number) rowArray.get(j)).doubleValue());
+               covarianceMatrix.apply(i, j).put(((Double) rowArray.get(j)).doubleValue());
             }
          }
-
          double stdBasisFunction = ((Number) jsonObject.get("stdBasisFunction")).doubleValue();
          int numSamples = ((Number) jsonObject.get("numSamples")).intValue();
          int dims = ((Number) jsonObject.get("dims")).intValue();
@@ -478,9 +473,11 @@ public class ProMPManager
       myProMP.condition_via_point(conditioningTimestep, viaPoint);
       if (logEnabled)
       {
+         logger.addViaPoint(bodyPart, viaPoint);
          if (isLastViaPoint.get())
          {
             logger.saveUpdatedTrajectories(bodyPart, myProMP, "Conditioned");
+            logger.saveViaPoints(bodyPart);
             isLastViaPoint.set(false);
          }
       }
