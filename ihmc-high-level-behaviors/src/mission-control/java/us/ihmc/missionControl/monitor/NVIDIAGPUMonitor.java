@@ -1,6 +1,5 @@
-package us.ihmc.missionControl;
+package us.ihmc.missionControl.monitor;
 
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
 // TODO: support multiple GPUs
@@ -116,18 +115,6 @@ public class NVIDIAGPUMonitor extends ProcessOutputMonitor
                LogTools.info("Unable to parse nvidia-smi Utilization");
             }
          }
-      }
-   }
-
-   public static void main(String[] args)
-   {
-      NVIDIAGPUMonitor monitor = new NVIDIAGPUMonitor();
-      monitor.start();
-
-      while (true)
-      {
-         LogTools.info(monitor.getGpuUsage());
-         ThreadTools.sleep(1000);
       }
    }
 }

@@ -6,6 +6,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
+import us.ihmc.missionControl.monitor.NVIDIAGPUMonitor;
+import us.ihmc.missionControl.monitor.SysstatNetworkMonitor;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.processManagement.ProcessTools;
