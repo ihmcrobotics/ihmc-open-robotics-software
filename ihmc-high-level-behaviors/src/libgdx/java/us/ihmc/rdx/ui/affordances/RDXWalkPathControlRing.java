@@ -87,9 +87,6 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private RDXWalkPathType walkPathType = RDXWalkPathType.STRAIGHT;
    private ImGui3DViewInput latestInput;
 
-   // TODO: check if this is ok
-   private FootstepPlan previousFootstepPlan = null;
-
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
@@ -327,11 +324,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       footstepPlannerRequest.setAssumeFlatGround(true);
       footstepPlannerRequest.setSnapGoalSteps(false);
       footstepPlannerRequest.setRequestId(footstepPlannerId.getAndIncrement());
-      if (previousFootstepPlan != null)
-         footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
-      // TODO: run and check
-      previousFootstepPlan = footstepPlannerOutput.getFootstepPlan();
       footstepPlan = footstepPlanToGenerateMeshes = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
    }
 

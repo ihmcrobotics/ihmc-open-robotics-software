@@ -76,8 +76,8 @@ public class FootstepPlannerLogLoader
 
          SortedSet<Path> sortedLogFolderPaths = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
          PathTools.walkFlat(Paths.get(FootstepPlannerLogger.defaultLogsDirectory), (path, type) -> {
-            if (type == BasicPathVisitor.PathType.DIRECTORY)
-                //&& path.getFileName().toString().endsWith(FootstepPlannerLogger.FOOTSTEP_PLANNER_LOG_POSTFIX))
+            if (type == BasicPathVisitor.PathType.DIRECTORY
+                && path.getFileName().toString().endsWith(FootstepPlannerLogger.FOOTSTEP_PLANNER_LOG_POSTFIX))
                sortedLogFolderPaths.add(path);
             return FileVisitResult.CONTINUE;
          });
