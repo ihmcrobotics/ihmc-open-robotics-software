@@ -24,7 +24,7 @@ public class MissionControlDaemon
    private final LinuxResourceMonitor resourceMonitor;
    private SysstatNetworkMonitor networkMonitor; // Optional - requires sysstat
    private NVIDIAGPUMonitor nvidiaGPUMonitor; // Optional - requires an NVIDIA GPU
-   private List<SystemdServiceMonitor> serviceMonitors = new ArrayList<>();
+   private final List<SystemdServiceMonitor> serviceMonitors = new ArrayList<>();
 
    private final ROS2Node ros2Node;
    private final IHMCROS2Publisher<SystemAvailableMessage> systemAvailablePublisher;
