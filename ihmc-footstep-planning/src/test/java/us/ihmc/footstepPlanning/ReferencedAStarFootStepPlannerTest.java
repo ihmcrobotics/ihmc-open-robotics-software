@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import org.apache.xpath.operations.Mod;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -10,9 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
-import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -24,33 +21,30 @@ import static us.ihmc.robotics.Assert.assertTrue;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ReferencedAStarFootStepPlannerTest
 {
-   public static Random random = new Random(163421);
-   public static final double EPS_XY = 0.5 * LatticePoint.gridSizeXY;
-   public static final double EPS_YAW = 0.5 * LatticePoint.gridSizeYaw;
-   public static FootstepPlan NOMINAL_PLAN = null;
-   public static final Pose3D leftNominalGoalPose = new Pose3D(0.6, 0.1, 0.0, 0.0, 0.0, 0.0);
-   public static final Pose3D rightNominalGoalPose = new Pose3D(0.6, -0.1, 0.0, 0.0, 0.0, 0.0);
-   public static FootstepPlannerRequest REQUEST;
-   public static FootstepPlanningModule MODULE;
-   public static boolean TESTED_NOMINAL = false;
+   private static final Random RANDOM = new Random(163421);
+   private static final double EPS_XY = 0.5 * LatticePoint.gridSizeXY;
+   private static final double EPS_YAW = 0.5 * LatticePoint.gridSizeYaw;
+   private static FootstepPlan NOMINAL_PLAN = null;
+   private static final Pose3D leftNominalGoalPose = new Pose3D(0.6, 0.1, 0.0, 0.0, 0.0, 0.0);
+   private static final Pose3D rightNominalGoalPose = new Pose3D(0.6, -0.1, 0.0, 0.0, 0.0, 0.0);
+   private static final FootstepPlannerRequest FOOTSTEP_PLANNER_REQUEST = new FootstepPlannerRequest();
+   private static final FootstepPlanningModule FOOTSTEP_PLANNING_MODULE = new FootstepPlanningModule("testerModule");
 
+   // These tests needs to be tested in the order. Results from 1st test is used in the 2nd test
    @Test
    @Order(1)
    public void testNominalAStarPlanner()
    {
-      REQUEST = new FootstepPlannerRequest();
+      FOOTSTEP_PLANNER_REQUEST.setStartFootPose(RobotSide.LEFT, new Pose3D(0.0, 0.1, 0.0, 0.0, 0.0, 0.0));
+      FOOTSTEP_PLANNER_REQUEST.setStartFootPose(RobotSide.RIGHT, new Pose3D(0.0, -0.1, 0.0, 0.0, 0.0, 0.0));
 
-      REQUEST.setStartFootPose(RobotSide.LEFT, new Pose3D(0.0, 0.1, 0.0, 0.0, 0.0, 0.0));
-      REQUEST.setStartFootPose(RobotSide.RIGHT, new Pose3D(0.0, -0.1, 0.0, 0.0, 0.0, 0.0));
+      FOOTSTEP_PLANNER_REQUEST.setGoalFootPose(RobotSide.LEFT, leftNominalGoalPose);
+      FOOTSTEP_PLANNER_REQUEST.setGoalFootPose(RobotSide.RIGHT, rightNominalGoalPose);
 
-      REQUEST.setGoalFootPose(RobotSide.LEFT, leftNominalGoalPose);
-      REQUEST.setGoalFootPose(RobotSide.RIGHT, rightNominalGoalPose);
+      FOOTSTEP_PLANNER_REQUEST.setRequestedInitialStanceSide(RobotSide.LEFT);
+      FOOTSTEP_PLANNER_REQUEST.setReferencePlan(null);
 
-      REQUEST.setRequestedInitialStanceSide(RobotSide.LEFT);
-      REQUEST.setReferencePlan(null);
-
-      MODULE = new FootstepPlanningModule("testerModule");
-      FootstepPlannerOutput outputA = MODULE.handleRequest(REQUEST);
+      FootstepPlannerOutput outputA = FOOTSTEP_PLANNING_MODULE.handleRequest(FOOTSTEP_PLANNER_REQUEST);
       int numSteps = outputA.getFootstepPlan().getNumberOfSteps();
 
       PlannedFootstep leftFinalStep = outputA.getFootstepPlan().getFootstep(numSteps - 2);
@@ -59,26 +53,25 @@ public class ReferencedAStarFootStepPlannerTest
                  rightNominalGoalPose.epsilonEquals(rightFinalStep.getFootstepPose(), EPS_XY));
 
       NOMINAL_PLAN = outputA.getFootstepPlan();
-      TESTED_NOMINAL = true;
    }
 
    @Test
    @Order(2)
    public void testStepGenerationFromReference()
    {
-      int index = random.nextInt(NOMINAL_PLAN.getNumberOfSteps() - 1);
+      int index = RANDOM.nextInt(NOMINAL_PLAN.getNumberOfSteps() - 1);
       // this will be referenced
       FootstepPlan perturbedPlan = perturbPlan(NOMINAL_PLAN, index);
       // set reference plan
-      REQUEST.setReferencePlan(perturbedPlan);
+      FOOTSTEP_PLANNER_REQUEST.setReferencePlan(perturbedPlan);
 
       FramePose3D nominalStepPose = NOMINAL_PLAN.getFootstep(index).getFootstepPose();
       for (double alpha = 0.0; alpha <= 1.0; alpha += 0.1)
       {
          // set alpha
-         MODULE.getFootstepPlannerParameters().setReferencePlanAlpha(alpha);
+         FOOTSTEP_PLANNING_MODULE.getFootstepPlannerParameters().setReferencePlanAlpha(alpha);
 
-         FramePose3D outputStepPose = MODULE.handleRequest(REQUEST).getFootstepPlan().getFootstep(index).getFootstepPose();
+         FramePose3D outputStepPose = FOOTSTEP_PLANNING_MODULE.handleRequest(FOOTSTEP_PLANNER_REQUEST).getFootstepPlan().getFootstep(index).getFootstepPose();
 
          FramePose3D perturbedStepPose = perturbedPlan.getFootstep(index).getFootstepPose();
          RobotSide side = perturbedPlan.getFootstep(index).getRobotSide();
@@ -105,8 +98,8 @@ public class ReferencedAStarFootStepPlannerTest
       {
          FootstepPlan perturbedPlan = new FootstepPlan(plan);
          PlannedFootstep step = perturbedPlan.getFootstep(index);
-         Point3D translationToAppend = EuclidCoreRandomTools.nextPoint3D(random, 0.2, 0.2, 0);
-         double yawToAppend = EuclidCoreRandomTools.nextDouble(random, Math.PI / 20);
+         Point3D translationToAppend = EuclidCoreRandomTools.nextPoint3D(RANDOM, 0.2, 0.2, 0);
+         double yawToAppend = EuclidCoreRandomTools.nextDouble(RANDOM, Math.PI / 20);
          step.getFootstepPose().appendTranslation(translationToAppend);
          step.getFootstepPose().appendYawRotation(yawToAppend);
          return perturbedPlan;

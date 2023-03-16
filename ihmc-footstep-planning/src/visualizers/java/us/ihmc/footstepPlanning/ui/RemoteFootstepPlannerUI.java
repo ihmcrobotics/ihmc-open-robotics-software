@@ -8,10 +8,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.ApplicationNoModule;
-import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowFootstepPlan;
 
 /**
  * This class provides a visualizer for the remote footstep planner found in the footstep planner toolbox.
@@ -20,7 +17,6 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
  */
 public class RemoteFootstepPlannerUI extends ApplicationNoModule
 {
-
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
 

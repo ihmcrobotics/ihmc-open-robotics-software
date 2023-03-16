@@ -13,6 +13,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInterface
@@ -27,6 +28,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    // TODO add to footstep planner parameters
    /* Weight factor for using reference vs nominal ideal steps. Alpha = 0 means use nominal ideal step, alpha = 1 means use reference value */
    public static double referenceAlpha;
+   public static double previousReferenceAlpha = Double.NaN;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
    public ReferenceBasedIdealStepCalculator(FootstepPlannerParametersBasics footstepPlannerParameters, IdealStepCalculator nominalIdealStepCalculator, YoRegistry registry)
@@ -64,7 +66,6 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
 
       // TODO: Indexing should match so that referencedStep's side is equal to stance Node's opposite side.
       // In case this is not true, we will try to find the closest step from either previous or next step in the reference plan.
-
       stepSideIncorrect.set(referenceFootstep.getRobotSide() != stanceNode.getRobotSide().getOppositeSide());
       if (stepSideIncorrect.getBooleanValue())
       {
@@ -79,7 +80,13 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
 
       statusMessage = "Step calculate mode: Reference (alpha : " + referenceAlpha + " )";
       FramePose3D referenceFootstepPose = referenceFootstep.getFootstepPose();
-      LogTools.warn("! ! USING REFERENCE STEP (alpha: {}) ! !", referenceAlpha);
+
+      if (!Double.isNaN(previousReferenceAlpha) && previousReferenceAlpha != referenceAlpha)
+      {
+         DecimalFormat df = new DecimalFormat("0.00");
+         LogTools.warn("! ! USING REFERENCE STEP (alpha: {}) ! !", df.format(referenceAlpha));
+      }
+
 
       double idealStepX = EuclidCoreTools.interpolate(nominalIdealStep.getX(), referenceFootstepPose.getX(), referenceAlpha);
       double idealStepY = EuclidCoreTools.interpolate(nominalIdealStep.getY(), referenceFootstepPose.getY(), referenceAlpha);
@@ -107,6 +114,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    {
       if (alpha <= 1.0 && alpha >= 0.0)
       {
+         previousReferenceAlpha = referenceAlpha;
          referenceAlpha = alpha;
       }
    }

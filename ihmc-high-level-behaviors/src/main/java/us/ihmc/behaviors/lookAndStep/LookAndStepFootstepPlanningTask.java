@@ -448,9 +448,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setSnapGoalSteps(true);
       footstepPlannerRequest.setMaximumIterations(100);
 
-      // TODO: maybe it could be swing + stance transition duration + 10% ?
-      double expirationTime = 3.0;
-      // TODO check if looks ok (revised after Duncan review)
+      double expirationTime = 1.5 * swingPlannerParameters.getMaximumSwingTime();
       if (successfulPlanExpirationTimer.isRunning(expirationTime)
           && previousFootstepPlan != null
           && previousFootstepPlan.getNumberOfSteps() >= 2)
@@ -459,11 +457,6 @@ public class LookAndStepFootstepPlanningTask
          {
             previousFootstepPlan.remove(0);
          }
-         else
-         {
-            LogTools.warn("stance about to be taken has opposite side from previous plan's first step side");
-         }
-         LogTools.warn("SETTING PREVIOUS PLAN AS REFERENCE . . .");
       }
       else
       {
@@ -575,7 +568,6 @@ public class LookAndStepFootstepPlanningTask
          uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(reducedPlan, "Look and Step Planned"));
 
          updatePlannedFootstepDurations(reducedPlan, startFootPoses);
-//         successfulPlanExpirationTimer.reset();
 
          if (operatorReviewEnabledSupplier.get())
          {

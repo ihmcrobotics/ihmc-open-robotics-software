@@ -30,8 +30,6 @@ public class RDXImNodesBehaviorTreeUI
    private final ArrayList<RDXImNodesTreeNode> allNodesList = new ArrayList<>();
    private int linkIndex = 0;
    private boolean firstRun = true;
-//   private static final Path configurationsPath = PathTools.findDirectoryInline("ihmc-open-robotics-software")
-//                                                           .resolve("ihmc-high-level-behaviors/src/libgdx/resources/imnodeTrees");
    private static Path configurationsPath;
    private final MutableInt pinIndex = new MutableInt(0);
    public boolean drawWidget = true;
