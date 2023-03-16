@@ -16,7 +16,14 @@ public class HybridResourceDirectory extends HybridDirectory
       workspaceDirectory = workspaceResourceDirectory;
    }
 
-   public HybridResourceDirectory(Path externalDirectory, WorkspaceResourceDirectory workspaceResourceDirectory)
+   public HybridResourceDirectory(Path externalDirectory, Class<?> classForWorkspaceResourceDirectory, String workspaceSubsequentOrAbsoluteResourcePackagePath)
+   {
+      this.externalDirectory = externalDirectory;
+      workspaceResourceDirectory = new WorkspaceResourceDirectory(classForWorkspaceResourceDirectory, workspaceSubsequentOrAbsoluteResourcePackagePath);
+      workspaceDirectory = workspaceResourceDirectory;
+   }
+
+   private HybridResourceDirectory(Path externalDirectory, WorkspaceResourceDirectory workspaceResourceDirectory)
    {
       this.externalDirectory = externalDirectory;
       this.workspaceResourceDirectory = workspaceResourceDirectory;

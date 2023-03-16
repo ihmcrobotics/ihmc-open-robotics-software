@@ -8,9 +8,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.*;
 import us.ihmc.tools.string.StringTools;
 
 import java.io.InputStream;
@@ -89,11 +87,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
    private Class<?> basePropertySetClass;
    private String directoryNameToAssumePresent;
    private String subsequentPathToResourceFolder;
-   private final WorkspaceDirectory workspaceDirectory;
+   private final WorkspaceResourceDirectory workspaceDirectory;
    private final String uncapitalizedClassName;
    private final String capitalizedClassName;
-   private WorkspaceFile workspaceLegacyINIFile;
-   private WorkspaceFile workspaceJSONFile;
+   private WorkspaceResourceFile workspaceLegacyINIFile;
+   private WorkspaceResourceFile workspaceJSONFile;
 
    private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
 
@@ -129,7 +127,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       this.basePropertySetClass = basePropertySetClass;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
-      workspaceDirectory = new WorkspaceDirectory(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading);
+      workspaceDirectory = new WorkspaceResourceDirectory(classForLoading);
 
       updateBackingSaveFile(versionSuffix);
       values = new Object[keys.keys().size()];
@@ -344,10 +342,10 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       currentVersionSuffix = versionSuffix;
       legacyFileNameINI = uncapitalizedClassName + currentVersionSuffix + ".ini";
-      workspaceLegacyINIFile = new WorkspaceFile(workspaceDirectory, legacyFileNameINI);
+      workspaceLegacyINIFile = new WorkspaceResourceFile(workspaceDirectory, legacyFileNameINI);
       saveFileNameJSON = basePropertySetClass.getSimpleName() + currentVersionSuffix + ".json";
       LogTools.info("Updated backing save file: {}", saveFileNameJSON);
-      workspaceJSONFile = new WorkspaceFile(workspaceDirectory, saveFileNameJSON);
+      workspaceJSONFile = new WorkspaceResourceFile(workspaceDirectory, saveFileNameJSON);
    }
 
    @Override

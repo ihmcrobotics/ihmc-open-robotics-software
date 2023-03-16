@@ -23,9 +23,7 @@ import us.ihmc.rdx.sceneManager.RDX2DSceneManager;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
-import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,8 +43,8 @@ public class RDXBaseUI2D
    private final String windowTitle;
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private String configurationExtraPath;
-   private final HybridDirectory configurationBaseDirectory;
-   private HybridFile libGDXSettingsFile;
+   private final HybridResourceDirectory configurationBaseDirectory;
+   private HybridResourceFile libGDXSettingsFile;
    private final Stopwatch runTime = new Stopwatch().start();
    private final ImGuiPanelSizeHandler view2DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private ImGui2DViewInput inputCalculator;
@@ -69,11 +67,7 @@ public class RDXBaseUI2D
       this.windowTitle = windowTitle;
 
       configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
-      configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
-                                                       directoryNameToAssumePresent,
-                                                       subsequentPathToResourceFolder,
-                                                       classForLoading,
-                                                       configurationExtraPath);
+      configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading).resolve(configurationExtraPath);
 
       layoutManager = new RDXImGuiLayoutManager(classForLoading,
                                                 directoryNameToAssumePresent,
@@ -84,7 +78,7 @@ public class RDXBaseUI2D
       layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
       {
-         libGDXSettingsFile = new HybridFile(updatedLayoutDirectory, "GDXSettings.json");
+         libGDXSettingsFile = new HybridResourceFile(updatedLayoutDirectory, "GDXSettings.json");
       });
       layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       layoutManager.getLoadListeners().add(loadConfigurationLocation ->
