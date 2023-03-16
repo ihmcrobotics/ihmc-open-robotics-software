@@ -78,6 +78,9 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
          publishStatus(logLinesSplit);
    }
 
+   /**
+    * Split a string list (of log lines) into multiple lists of max size maxListSize
+    */
    private static List<List<String>> splitLogLines(List<String> logLines, int maxListSize)
    {
       List<List<String>> splitEntries = new ArrayList<>();
