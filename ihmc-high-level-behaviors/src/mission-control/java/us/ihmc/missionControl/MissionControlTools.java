@@ -42,7 +42,7 @@ public final class MissionControlTools
     *    `IsMissionControllable=yes`
     * Returns the list of service names that matched.
     */
-   public static List<String> findServices()
+   public static List<String> findSystemdServiceNames()
    {
       List<String> missionControllableServices = new ArrayList<>();
 
