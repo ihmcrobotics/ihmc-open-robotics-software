@@ -61,9 +61,7 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
       // This path isn't absolute for the filesystem, only for the classpath
       // i.e. /us/ihmc/tools/io would need to be us/ihmc/tools/io
       // to append to /path/to/ihmc-java-toolkit/src/test/resources/us/ihmc/tools/io
-      String subsequentPathToResourceDirectory = pathNecessaryForClasspathLoadingString.startsWith("/") ?
-                                                 pathNecessaryForClasspathLoadingString.substring(1) :
-                                                 pathNecessaryForClasspathLoadingString;
+      String subsequentPathToResourceDirectory = pathNecessaryForClasspathLoadingString.substring(1);
       filesystemDirectory = workingDirectoryPathComponents.getParentOfSrcDirectory()
                                                           .resolve(workingDirectoryPathComponents.getSubsequentPathToResourceFolder())
                                                           .resolve(subsequentPathToResourceDirectory);
