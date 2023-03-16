@@ -61,7 +61,7 @@ public class MissionControlDaemon
       systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.0);
       systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.25);
 
-      MissionControlTools.findServices().forEach(service -> serviceMonitors.add(new SystemdServiceMonitor(service)));
+      MissionControlTools.findSystemdServiceNames().forEach(service -> serviceMonitors.add(new SystemdServiceMonitor(service)));
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
