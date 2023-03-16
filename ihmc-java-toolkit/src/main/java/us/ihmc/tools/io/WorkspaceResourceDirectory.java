@@ -75,14 +75,14 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
       ResourceTools.walkResourcesFlat(pathNecessaryForResourceExploring, pathVisitor);
    }
 
-   public List<WorkspaceFile> queryContainedFiles()
+   public List<WorkspaceResourceFile> queryContainedFiles()
    {
-      ArrayList<WorkspaceFile> files = new ArrayList<>();
+      ArrayList<WorkspaceResourceFile> files = new ArrayList<>();
       ResourceTools.walkResourcesFlat(pathNecessaryForResourceExploring, (fileName, pathType) ->
       {
          if (pathType == BasicPathVisitor.PathType.FILE)
          {
-            files.add(new WorkspaceFile(this, fileName));
+            files.add(new WorkspaceResourceFile(this, fileName));
          }
       });
       return files;

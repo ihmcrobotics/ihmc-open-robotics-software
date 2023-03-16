@@ -59,7 +59,7 @@ public class JSONFileTools
       }
    }
 
-   public static void loadUserWithClasspathDefaultFallback(HybridFile hybridFile, Consumer<JsonNode> jsonNodeConsumer)
+   public static void loadUserWithClasspathDefaultFallback(HybridResourceFile hybridFile, Consumer<JsonNode> jsonNodeConsumer)
    {
       InputStream settingsStream;
       if (!Files.exists(hybridFile.getExternalFile()))
@@ -93,7 +93,7 @@ public class JSONFileTools
       }
    }
 
-   public static void load(WorkspaceFile file, Consumer<JsonNode> jsonNodeConsumer)
+   public static void load(WorkspaceResourceFile file, Consumer<JsonNode> jsonNodeConsumer)
    {
       load(file.getClasspathResourceAsStream(), jsonNodeConsumer);
    }

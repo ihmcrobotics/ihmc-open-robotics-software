@@ -29,11 +29,7 @@ import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.WorkingDirectoryPathComponents;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
-import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.WorkspacePathTools;
+import us.ihmc.tools.io.*;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.nio.file.Files;
@@ -99,7 +95,7 @@ public class RDXBaseUI
    private final String windowTitle;
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private String configurationExtraPath;
-   private final HybridDirectory configurationBaseDirectory;
+   private final HybridResourceDirectory configurationBaseDirectory;
    private HybridFile libGDXSettingsFile;
    private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
    private final Stopwatch runTime = new Stopwatch().start();
@@ -154,28 +150,29 @@ public class RDXBaseUI
 
       this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
 
-      // Try to figure out where the resources for this class are
-      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
-      {
-         WorkingDirectoryPathComponents inferredPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForLoading);
-         if (inferredPathComponents != null)
-         {
-            directoryNameToAssumePresent = inferredPathComponents.getDirectoryNameToAssumePresent();
-            subsequentPathToResourceFolder = inferredPathComponents.getSubsequentPathToResourceFolder();
-         }
-      }
+//      // Try to figure out where the resources for this class are
+//      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
+//      {
+//         WorkingDirectoryPathComponents inferredPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForLoading);
+//         if (inferredPathComponents != null)
+//         {
+//            directoryNameToAssumePresent = inferredPathComponents.getDirectoryNameToAssumePresent();
+//            subsequentPathToResourceFolder = inferredPathComponents.getSubsequentPathToResourceFolder();
+//         }
+//      }
 
-      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
+//      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
+//      {
+//         LogTools.warn("We won't be able to write files to version controlled resources, because we probably aren't in a workspace.");
+//      }
+
+      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
+      configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading, "/").resolve(configurationExtraPath);
+
+      if (!configurationBaseDirectory.isWorkspaceFileAccessAvailable())
       {
          LogTools.warn("We won't be able to write files to version controlled resources, because we probably aren't in a workspace.");
       }
-
-      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
-      configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
-                                                       directoryNameToAssumePresent,
-                                                       subsequentPathToResourceFolder,
-                                                       classForLoading,
-                                                       configurationExtraPath);
 
       layoutManager = new RDXImGuiLayoutManager(classForLoading,
                                                 directoryNameToAssumePresent,

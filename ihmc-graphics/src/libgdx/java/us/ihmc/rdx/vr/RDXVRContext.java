@@ -23,10 +23,7 @@ import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.JSONTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.*;
 
 /**
  * Responsible for initializing the VR system, managing rendering surfaces,
@@ -116,8 +113,8 @@ public class RDXVRContext
       width = (int) (widthPointer.get(0) * renderTargetMultiplier);
       height = (int) (heightPointer.get(0) * renderTargetMultiplier);
 
-      WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-graphics/src/libgdx/resources", getClass(), "/vr");
-      WorkspaceFile actionManifestFile = new WorkspaceFile(directory, "actions.json");
+      WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/vr");
+      WorkspaceResourceFile actionManifestFile = new WorkspaceResourceFile(directory, "actions.json");
       JSONFileTools.load(actionManifestFile, node ->
       {
          JSONTools.forEachArrayElement(node, "default_bindings", objectNode ->

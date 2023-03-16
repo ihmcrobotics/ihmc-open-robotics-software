@@ -39,7 +39,7 @@ public class StoredPropertySetJavaGenerator
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.subsequentPathToJavaFolder = subsequentPathToJavaFolder;
 
-      javaDirectory = new WorkspaceDirectory(directoryNameToAssumePresent, subsequentPathToJavaFolder, basePropertySetClass);
+      javaDirectory = new WorkspaceDirectory(directoryNameToAssumePresent, subsequentPathToJavaFolder);
       jsonFileName = basePropertySetClass.getSimpleName() + ".json";
       primaryJavaFile = new WorkspaceFile(javaDirectory, basePropertySetClass.getSimpleName() + ".java");
       basicsJavaFile = new WorkspaceFile(javaDirectory, basePropertySetClass.getSimpleName() + "Basics.java");
