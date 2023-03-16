@@ -6,6 +6,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
+import us.ihmc.missionControl.resourceMonitor.FreeMemoryMonitor;
 import us.ihmc.missionControl.resourceMonitor.NVIDIAGPUMonitor;
 import us.ihmc.missionControl.resourceMonitor.SysstatNetworkMonitor;
 import us.ihmc.missionControl.resourceMonitor.cpu.CPUCoreTracker;
@@ -26,8 +27,8 @@ public class MissionControlDaemon
    private final String hostname;
    private final String instanceId;
 
-   //   private final LinuxResourceMonitor resourceMonitor;
    private ProcStatCPUMonitor cpuMonitor;
+   private FreeMemoryMonitor memoryMonitor;
    private SysstatNetworkMonitor networkMonitor; // Optional - requires sysstat
    private NVIDIAGPUMonitor nvidiaGPUMonitor; // Optional - requires an NVIDIA GPU
    private final List<SystemdServiceMonitor> serviceMonitors = new ArrayList<>();
@@ -43,6 +44,7 @@ public class MissionControlDaemon
       instanceId = UUID.randomUUID().toString().substring(0, 5);
 
       cpuMonitor = new ProcStatCPUMonitor();
+      memoryMonitor = new FreeMemoryMonitor();
 
       if (MissionControlTools.sysstatAvailable())
          networkMonitor = new SysstatNetworkMonitor();
@@ -87,8 +89,8 @@ public class MissionControlDaemon
 
       if (cpuMonitor != null)
       {
-         //         message.setMemoryUsed(resourceMonitor.getUsedRAMGiB());
-         //         message.setMemoryTotal(resourceMonitor.getTotalRAMGiB());
+         message.setMemoryUsed(memoryMonitor.getMemoryUsedGiB());
+         message.setMemoryTotal(memoryMonitor.getMemoryTotalGiB());
          Map<Integer, CPUCoreTracker> cpuCoreTrackers = cpuMonitor.getCpuCoreTrackers();
          int cpuCount = cpuCoreTrackers.size();
          message.setCpuCount(cpuCount);
@@ -151,10 +153,10 @@ public class MissionControlDaemon
       new MissionControlDaemon();
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
-      {
-         running = false;
-         Runtime.getRuntime().halt(0); // Set exit code to 0
-      }));
+                                                      {
+                                                         running = false;
+                                                         Runtime.getRuntime().halt(0); // Set exit code to 0
+                                                      }));
 
       while (running)
       {
