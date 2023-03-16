@@ -1,12 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.Arrays;
-
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
-
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
+import us.ihmc.matrixlib.NativeMatrixTools;
+
+import java.util.Arrays;
 
 /**
  * Configures the QP solver to substitute some of the variables being optimize {@code x} to a set of
@@ -27,7 +25,7 @@ import us.ihmc.matrixlib.MatrixTools;
  * 
  * @author Sylvain Bertrand
  */
-public class QPVariableSubstitution implements QPVariableSubstitutionInterface<DMatrixRMaj>
+public class NativeQPVariableSubstitution implements QPVariableSubstitutionInterface<NativeMatrix>
 {
    /** Refers to the number of elements in {@code x} that are to be substituted. */
    private int numberOfVariablesToSubstitute;
@@ -38,9 +36,9 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
    private TIntArrayList inactiveIndices = new TIntArrayList(4, -1);
 
    /** Refers to the transformation matrix {@code G}. */
-   private final DMatrixRMaj transformation = new DMatrixRMaj(4, 1);
+   private final NativeMatrix transformation = new NativeMatrix(4, 1);
    /** Refers to the bias vector {@code g}. */
-   private final DMatrixRMaj bias = new DMatrixRMaj(4, 1);
+   private final NativeMatrix bias = new NativeMatrix(4, 1);
    /**
     * When {@code true}, the operations related to concatenating and substituting will be simplified
     * assuming that the bias is zero.
@@ -48,13 +46,16 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
    private boolean ignoreBias = false;
 
    // For garbage-free operations during the variable substitution and concatenation
-   private final DMatrixRMaj tempA = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj tempB = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj tempC = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj tempD = new DMatrixRMaj(1, 1);
-   private final DMatrixRMaj tempE = new DMatrixRMaj(1, 1);
+   private final NativeMatrix tempA = new NativeMatrix(1, 1);
+   private final NativeMatrix tempB = new NativeMatrix(1, 1);
+   private final NativeMatrix tempC = new NativeMatrix(1, 1);
+   private final NativeMatrix tempD = new NativeMatrix(1, 1);
+   private final NativeMatrix tempE = new NativeMatrix(1, 1);
 
-   public QPVariableSubstitution()
+   private final NativeMatrix AinTemp = new NativeMatrix(1, 1);
+   private final NativeMatrix binTemp = new NativeMatrix(1, 1);
+
+   public NativeQPVariableSubstitution()
    {
       reset();
    }
@@ -66,13 +67,13 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
    }
 
    @Override
-   public DMatrixRMaj getTransformation()
+   public NativeMatrix getTransformation()
    {
       return transformation;
    }
 
    @Override
-   public DMatrixRMaj getBias()
+   public NativeMatrix getBias()
    {
       return bias;
    }
@@ -106,6 +107,7 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
          variableIndices = new int[numberOfVariablesToSubstitute];
 
       activeIndices.reset();
+      // FIXME this doesn't inherently zero
       transformation.reshape(numberOfVariablesToSubstitute, numberOfVariablesPostSubstitution);
       bias.reshape(numberOfVariablesPostSubstitution, 1);
    }
@@ -120,7 +122,7 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
     * 
     * @param other the other substitution to add to this. Not modified.
     */
-   public void concatenate(QPVariableSubstitutionInterface<DMatrixRMaj> other)
+   public void concatenate(QPVariableSubstitutionInterface<NativeMatrix> other)
    {
       int oldSizeX = numberOfVariablesToSubstitute;
       int oldSizeY = transformation.getNumCols();
@@ -143,14 +145,15 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
       tempA.set(transformation);
       transformation.reshape(newSizeX, newSizeY);
       transformation.zero();
-      CommonOps_DDRM.insert(tempA, transformation, 0, 0);
-      CommonOps_DDRM.insert(other.getTransformation(), transformation, oldSizeX, oldSizeY);
+      transformation.insert(tempA, 0, 0);
+      transformation.insert(other.getTransformation(), oldSizeX, oldSizeY);
 
       if (!ignoreBias)
       {
          // Since bias is a vector, it is safe to reshape it and trust that the coefficients won't be shifted.
          bias.reshape(newSizeX, 1);
-         CommonOps_DDRM.insert(other.getBias(), bias, oldSizeX, 0);
+         bias.zero();
+         bias.insert(other.getBias(), oldSizeX, oldSizeY);
       }
 
       numberOfVariablesToSubstitute = newSizeX;
@@ -220,13 +223,13 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
     * @param H the N-by-N matrix as shown above. Modified.
     * @param f the N-by-1 vector as shown above. Modified.
     */
-   public void applySubstitutionToObjectiveFunction(DMatrixRMaj H, DMatrixRMaj f)
+   public void applySubstitutionToObjectiveFunction(NativeMatrix H, NativeMatrix f)
    {
       // Changing notation to simplify the rest.
-      DMatrixRMaj G = transformation;
-      DMatrixRMaj g = bias;
-      DMatrixRMaj sub_H = tempA;
-      DMatrixRMaj sub_f = tempB;
+      NativeMatrix G = transformation;
+      NativeMatrix g = bias;
+      NativeMatrix sub_H = tempA;
+      NativeMatrix sub_f = tempB;
 
       /*
        * @formatter:off 
@@ -243,11 +246,11 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
 
       // 1. Compute G^T*H
       // Extracting the rows from H to facilitate the operation.
-      DMatrixRMaj GTH = tempC;
+      NativeMatrix GTH = tempC;
       sub_H.reshape(variableIndices.length, H.getNumCols());
-      MatrixTools.extractRows(H, variableIndices, sub_H, 0);
-      GTH.reshape(G.getNumCols(), H.getNumCols());
-      CommonOps_DDRM.multTransA(G, sub_H, GTH);
+      sub_H.zero();
+      NativeMatrixTools.extractRows(H, variableIndices, sub_H, 0);
+      GTH.multTransA(G, sub_H);
 
       // Re-inserting the rows into H. Since there are less rows than when we started, we'll add padding with zeros to prevent changing H size.
       for (int i = 0; i < variableIndices.length; i++)
@@ -255,18 +258,18 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
          int rowH = variableIndices[i];
 
          if (i < GTH.getNumRows())
-            CommonOps_DDRM.extract(GTH, i, i + 1, 0, H.getNumCols(), H, rowH, 0);
+            H.insert(GTH, i, i + 1, 0, H.getNumCols(), rowH, 0);
          else
-            MatrixTools.zeroRow(rowH, H);
+            H.zeroRow(rowH);
       }
 
       // 2. Compute f = G^T*f + G^T*H*g (ignoring the size mismatch between the (H, f) and (G, g)).
-      DMatrixRMaj GTf = tempD;
+      NativeMatrix GTf = tempD;
       sub_f.reshape(G.getNumRows(), 1);
-      CommonOps_DDRM.extract(f, variableIndices, variableIndices.length, sub_f);
+      sub_f.zero();
+      NativeMatrixTools.extract(f, variableIndices, variableIndices.length, sub_f);
       // G^T*f
-      GTf.reshape(G.getNumCols(), 1);
-      CommonOps_DDRM.multTransA(G, sub_f, GTf);
+      GTf.multTransA(G, sub_f);
 
       if (ignoreBias)
       {
@@ -275,13 +278,13 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
       else
       {
          // G^T*H*g
-         DMatrixRMaj sub_GTH = tempE;
+         NativeMatrix sub_GTH = tempE;
          sub_GTH.reshape(G.getNumCols(), variableIndices.length);
-         MatrixTools.extractColumns(GTH, variableIndices, sub_GTH, 0);
-         sub_f.reshape(G.getNumCols(), 1);
-         CommonOps_DDRM.mult(sub_GTH, g, sub_f);
+         sub_GTH.zero();
+         NativeMatrixTools.extractColumns(GTH, variableIndices, sub_GTH, 0);
+         sub_f.mult(sub_GTH, g);
          // G^T*f + G^T*H*g
-         CommonOps_DDRM.addEquals(sub_f, GTf);
+         sub_f.addEquals(GTf);
       }
 
       // Re-inserting the elements into f. Since there are less elements than when we started, we'll add padding with zeros to prevent changing f size.
@@ -290,18 +293,18 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
          int row_f = variableIndices[i];
 
          if (i < sub_f.getNumRows())
-            f.set(row_f, sub_f.get(i));
+            f.setElement(row_f, 0, sub_f, i, 0);
          else
-            f.set(row_f, 0.0);
+            f.set(row_f, 0, 0.0);
       }
 
       // 3. Compute H*G
       // Extracting the columns from H to facilitate the operation.
-      DMatrixRMaj HG = tempC;
+      NativeMatrix HG = tempC;
       sub_H.reshape(H.getNumRows(), variableIndices.length);
-      MatrixTools.extractColumns(H, variableIndices, sub_H, 0);
-      HG.reshape(H.getNumRows(), G.getNumCols());
-      CommonOps_DDRM.mult(sub_H, G, HG);
+      sub_H.zero();
+      NativeMatrixTools.extractColumns(H, variableIndices, sub_H, 0);
+      HG.mult(sub_H, G);
 
       // Re-inserting the columns into H. Since there are less columns than when we started, we'll add padding with zeros to prevent changing H size.
       for (int i = 0; i < variableIndices.length; i++)
@@ -309,9 +312,9 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
          int colH = variableIndices[i];
 
          if (i < HG.getNumCols())
-            CommonOps_DDRM.extract(HG, 0, H.getNumRows(), i, i + 1, H, 0, colH);
+            H.insert(HG, 0, H.getNumRows(), i, i + 1, 0, colH);
          else
-            MatrixTools.zeroRow(colH, H);
+            H.zeroRow(colH);
       }
    }
 
@@ -345,22 +348,22 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
     * @param b the M-by-1 vectors <tt>b<sub>in</sub></tt> or <tt>b<sub>eq</sub></tt> as shown above.
     *          Modified.
     */
-   public void applySubstitutionToLinearConstraint(DMatrixRMaj A, DMatrixRMaj b)
+   public void applySubstitutionToLinearConstraint(NativeMatrix A, NativeMatrix b)
    {
       if (A.getNumRows() == 0)
          return;
 
       // Changing notation to simplify the rest.
-      DMatrixRMaj G = transformation;
-      DMatrixRMaj g = bias;
-      DMatrixRMaj sub_A = tempA;
+      NativeMatrix G = transformation;
+      NativeMatrix g = bias;
+      NativeMatrix sub_A = tempA;
 
       // 1. Compute A*G
-      DMatrixRMaj AG = tempC;
+      NativeMatrix AG = tempC;
       sub_A.reshape(A.getNumRows(), variableIndices.length);
-      MatrixTools.extractColumns(A, variableIndices, sub_A, 0);
-      AG.reshape(A.getNumRows(), G.getNumCols());
-      CommonOps_DDRM.mult(sub_A, G, AG);
+      sub_A.zero();
+      NativeMatrixTools.extractColumns(A, variableIndices, sub_A, 0);
+      AG.mult(sub_A, G);
 
       // Re-inserting the columns into A. Since there are less columns than when we started, we'll add padding with zeros to prevent changing A size.
       for (int i = 0; i < variableIndices.length; i++)
@@ -368,22 +371,21 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
          int colA = variableIndices[i];
 
          if (i < AG.getNumCols())
-            CommonOps_DDRM.extract(AG, 0, A.getNumRows(), i, i + 1, A, 0, colA);
+            A.insert(AG, 0, A.getNumRows(), i, i + 1, 0, colA);
          else
-            MatrixTools.zeroRow(colA, A);
+            A.zeroRow(colA);
       }
 
       if (!ignoreBias)
       {
          // 2. Compute b-A*g
-         DMatrixRMaj Ag = tempB;
-         Ag.reshape(g.getNumRows(), 1);
-         CommonOps_DDRM.mult(sub_A, g, Ag);
+         NativeMatrix Ag = tempB;
+         Ag.mult(sub_A, g);
 
          for (int i = 0; i < variableIndices.length; i++)
          {
             int row_b = variableIndices[i];
-            b.set(row_b, b.get(row_b) - Ag.get(i));
+            b.set(row_b, 0, b.get(row_b, 0) - Ag.get(i, 0));
          }
       }
    }
@@ -424,7 +426,7 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
     * @param Ain  the M-by-N matrix as shown above. Modified.
     * @param bin  the M-by-1 vector as shown above. Modified.
     */
-   public void applySubstitutionToBounds(DMatrixRMaj xMin, DMatrixRMaj xMax, DMatrixRMaj Ain, DMatrixRMaj bin)
+   public void applySubstitutionToBounds(NativeMatrix xMin, NativeMatrix xMax, NativeMatrix Ain, NativeMatrix bin)
    {
       // First verify that the bounds are actually set:
       boolean areBoundsSet = false;
@@ -435,7 +437,7 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
       {
          int variableIndex = variableIndices[activeIndices.get(i)];
 
-         if (Double.isFinite(xMin.get(variableIndex)) || Double.isFinite(xMax.get(variableIndex)))
+         if (Double.isFinite(xMin.get(variableIndex, 0)) || Double.isFinite(xMax.get(variableIndex, 0)))
          {
             areBoundsSet = true;
             break;
@@ -446,22 +448,26 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
          return;
 
       // Changing notation to simplify the rest.
-      DMatrixRMaj G = transformation;
-      DMatrixRMaj g = bias;
+      NativeMatrix G = transformation;
+      NativeMatrix g = bias;
 
       int offset_min = Ain.getNumRows();
       int offset_max = offset_min + activeIndices.size();
 
-      Ain.reshape(Ain.getNumRows() + 2 * activeIndices.size(), Ain.getNumCols(), true);
-      bin.reshape(bin.getNumRows() + 2 * activeIndices.size(), 1, true);
+      AinTemp.set(Ain);
+      binTemp.set(Ain);
+      Ain.reshape(Ain.getNumRows() + 2 * activeIndices.size(), Ain.getNumCols());
+      bin.reshape(bin.getNumRows() + 2 * activeIndices.size(), 1);
+      Ain.insert(AinTemp, 0, 0);
+      bin.insert(binTemp, 0, 0);
 
       for (int i = 0; i < activeIndices.size(); i++)
       {
          int rowAmin = i + offset_min;
          int rowAmax = i + offset_max;
          // Make sure the new rows do not contain old values.
-         MatrixTools.zeroRow(rowAmin, Ain);
-         MatrixTools.zeroRow(rowAmax, Ain);
+         Ain.zeroRow(rowAmin);
+         Ain.zeroRow(rowAmax);
 
          int rowG = activeIndices.get(i);
 
@@ -482,20 +488,20 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
 
          if (ignoreBias)
          {
-            bin.set(row_b_min, -(xMin.get(row_x))); // The lower bound is negated to switch from greater-or-equal to less-or-equal as formulated in the QP.
-            bin.set(row_b_max, xMax.get(row_x));
+            bin.set(row_b_min, 0, -(xMin.get(row_x, 0))); // The lower bound is negated to switch from greater-or-equal to less-or-equal as formulated in the QP.
+            bin.setElement(row_b_max, 0, xMax, row_x, 0);
          }
          else
          {
-            bin.set(row_b_min, -(xMin.get(row_x) - g.get(row_g))); // The lower bound is negated to switch from greater-or-equal to less-or-equal as formulated in the QP.
-            bin.set(row_b_max, xMax.get(row_x) - g.get(row_g));
+            bin.set(row_b_min, 0, -(xMin.get(row_x, 0) - g.get(row_g, 0))); // The lower bound is negated to switch from greater-or-equal to less-or-equal as formulated in the QP.
+            bin.set(row_b_max, 0, xMax.get(row_x, 0) - g.get(row_g, 0));
          }
       }
 
       for (int variableIndex : variableIndices)
       { // Disable indices of xMin and xMax
-         xMin.set(variableIndex, Double.NEGATIVE_INFINITY);
-         xMax.set(variableIndex, Double.POSITIVE_INFINITY);
+         xMin.set(variableIndex, 0, Double.NEGATIVE_INFINITY);
+         xMax.set(variableIndex, 0, Double.POSITIVE_INFINITY);
       }
    }
 
@@ -513,29 +519,29 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
     * 
     * @param x the QP's solution for which the substitution is to be undone. Modified.
     */
-   public void removeSubstitutionToSolution(DMatrixRMaj x)
+   public void removeSubstitutionToSolution(NativeMatrix x)
    {
       // Changing notation to simplify the rest.
-      DMatrixRMaj G = transformation;
-      DMatrixRMaj g = bias;
-      DMatrixRMaj sub_y = tempA;
-      DMatrixRMaj sub_x = tempB;
+      NativeMatrix G = transformation;
+      NativeMatrix g = bias;
+      NativeMatrix sub_y = tempA;
+      NativeMatrix sub_x = tempB;
 
       sub_y.reshape(G.getNumCols(), 1);
-      sub_x.reshape(G.getNumRows(), 1);
+      sub_y.zero();
 
       for (int i = 0; i < G.getNumCols(); i++)
       {
-         sub_y.set(i, x.get(variableIndices[i]));
+         sub_y.setElement(i, 0, x, variableIndices[i], 0);
       }
 
-      CommonOps_DDRM.mult(G, sub_y, sub_x);
+      sub_x.mult(G, sub_y);
       if (!ignoreBias)
-         CommonOps_DDRM.addEquals(sub_x, g);
+         sub_x.addEquals(g);
 
       for (int i = 0; i < sub_x.getNumRows(); i++)
       {
-         x.set(variableIndices[i], sub_x.get(i));
+         x.setElement(variableIndices[i], 0, sub_x, i, 0);
       }
    }
 }
