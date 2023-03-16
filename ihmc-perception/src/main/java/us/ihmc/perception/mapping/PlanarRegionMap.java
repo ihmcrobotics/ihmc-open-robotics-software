@@ -1,6 +1,7 @@
 package us.ihmc.perception.mapping;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -66,6 +67,11 @@ public class PlanarRegionMap
    private final RigidBodyTransform previousTransformToWorld = new RigidBodyTransform();
    private final RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
    private final PlanarRegionsList previousRegions = new PlanarRegionsList();
+
+   private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
+   private final Stopwatch quaternionAveragingStopwatch = new Stopwatch();
+   private final Stopwatch factorGraphStopwatch = new Stopwatch();
+   private final Stopwatch regionMergingStopwatch = new Stopwatch();
 
    private MergingMode merger;
    private MatchingMode matcher;
@@ -658,6 +664,8 @@ public class PlanarRegionMap
 
    public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions, RigidBodyTransform estimatedTransformToWorld)
    {
+      wholeAlgorithmDurationStopwatch.start();
+
       PlanarRegionsList regions = new PlanarRegionsList();
 
       // Remove all regions that are too small
@@ -701,6 +709,8 @@ public class PlanarRegionMap
       }
       else
       {
+         quaternionAveragingStopwatch.start();
+
          transformToPrevious.setIdentity();
 
          LogTools.debug("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
@@ -768,6 +778,9 @@ public class PlanarRegionMap
          LogTools.debug("Estimated Transform to previous: {}", estimatedTransformToPrevious);
          LogTools.debug("Transform to previous: {}", transformToPrevious);
 
+         quaternionAveragingStopwatch.suspend();
+
+         factorGraphStopwatch.start();
          applyFactorGraphBasedSmoothing(finalMap,
                                         graphRegions,
                                         transformToWorld,
@@ -790,26 +803,29 @@ public class PlanarRegionMap
              posteriorRegionsInWorld.addPlanarRegion(region);
           });
 
+         factorGraphStopwatch.suspend();
+
+         regionMergingStopwatch.start();
+
          finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
          processUniqueRegions(finalMap);
-         //PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
-
-         //finalMap.addPlanarRegionsList(regions);
 
          factorGraph.clearISAM2();
          sensorPoseIndex++;
 
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
-
          previousTransformToWorld.set(estimatedTransformToWorld);
 
-         PerceptionDebugTools.printTransform(String.valueOf(sensorPoseIndex), transformToWorld, true);
+         regionMergingStopwatch.suspend();
+         wholeAlgorithmDurationStopwatch.suspend();
 
+         PerceptionDebugTools.printTransform(String.valueOf(sensorPoseIndex), transformToWorld, false);
          LogTools.debug("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
 
          return transformToWorld;
       }
 
+      wholeAlgorithmDurationStopwatch.suspend();
       return null;
    }
 
@@ -902,6 +918,14 @@ public class PlanarRegionMap
    public void setInitialSensorPose(RigidBodyTransform transformToWorld)
    {
       initialTransformToWorld.set(transformToWorld);
+   }
+
+   public void printStatistics()
+   {
+      LogTools.info("Whole Algorithm Duration: " + wholeAlgorithmDurationStopwatch.totalElapsed());
+      LogTools.info("Quaternion Averaging Duration: " + quaternionAveragingStopwatch.totalElapsed());
+      LogTools.info("Factor Graph Duration: " + factorGraphStopwatch.totalElapsed());
+      LogTools.info("Region Merging Duration: " + regionMergingStopwatch.totalElapsed());
    }
 }
 
