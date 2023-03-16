@@ -48,4 +48,9 @@ public class HybridResourceDirectory extends HybridDirectory
       return new HybridResourceDirectory(externalDirectory.resolve(subsequentPathInBothExternalAndWorkspace),
                                          workspaceResourceDirectory.resolve(subsequentPathInBothExternalAndWorkspace));
    }
+
+   /* package private */ WorkspaceResourceDirectory getWorkspaceResourceDirectoryInternal()
+   {
+      return workspaceResourceDirectory;
+   }
 }
