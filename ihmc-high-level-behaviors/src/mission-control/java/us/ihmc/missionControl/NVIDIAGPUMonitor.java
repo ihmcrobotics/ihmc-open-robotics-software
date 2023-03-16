@@ -2,10 +2,9 @@ package us.ihmc.missionControl;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.processManagement.ProcessTools;
 
 // TODO: support multiple GPUs
-public class NVIDIAGPUMonitor
+public class NVIDIAGPUMonitor extends ProcessOutputMonitor
 {
    private int gpuUsage;
    private int memoryUsage;
@@ -15,6 +14,11 @@ public class NVIDIAGPUMonitor
    private int memoryReserved;
    private int memoryUsed;
    private int memoryFree;
+
+   public NVIDIAGPUMonitor()
+   {
+      super("nvidia-smi", "--query", "--display=MEMORY,UTILIZATION");
+   }
 
    public int getGpuUsage()
    {
@@ -56,12 +60,9 @@ public class NVIDIAGPUMonitor
       return memoryFree;
    }
 
-   public void update()
+   @Override
+   public void parse(String[] lines)
    {
-      String smiQuery = ProcessTools.execSimpleCommandSafe("nvidia-smi --query --display=MEMORY,UTILIZATION");
-
-      String[] lines = smiQuery.split("\n");
-
       for (int i = 0; i < lines.length; i++)
       {
          String line = lines[i].trim();
@@ -120,11 +121,12 @@ public class NVIDIAGPUMonitor
 
    public static void main(String[] args)
    {
-      NVIDIAGPUMonitor nvidiagpuMonitor = new NVIDIAGPUMonitor();
+      NVIDIAGPUMonitor monitor = new NVIDIAGPUMonitor();
+      monitor.start();
 
       while (true)
       {
-         nvidiagpuMonitor.update();
+         LogTools.info(monitor.getGpuUsage());
          ThreadTools.sleep(1000);
       }
    }
