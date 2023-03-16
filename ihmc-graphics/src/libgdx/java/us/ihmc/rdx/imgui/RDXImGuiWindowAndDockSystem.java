@@ -140,7 +140,7 @@ public class RDXImGuiWindowAndDockSystem
       imGuiGlfw.newFrame();
       ImGui.newFrame();
 
-      layoutManager.ensureInitialLayoutLoaded();
+      layoutManager.loadInitialLayout();
 
       ImGui.pushFont(imFont);
 
