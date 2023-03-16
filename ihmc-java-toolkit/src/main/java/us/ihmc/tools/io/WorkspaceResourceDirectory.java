@@ -32,8 +32,10 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
     */
    public WorkspaceResourceDirectory(Class<?> classForResourceDirectory)
    {
+      this.classForLoading = classForResourceDirectory;
       WorkingDirectoryPathComponents workingDirectoryPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForResourceDirectory);
       pathNecessaryForClasspathLoading = ResourceTools.getResourcesPathForClass(classForResourceDirectory);
+      pathNecessaryForClasspathLoadingString = pathNecessaryForClasspathLoading.toString();
       filesystemDirectory = workingDirectoryPathComponents.getParentOfSrcDirectory()
                                                           .resolve(workingDirectoryPathComponents.getSubsequentPathToResourceFolder())
                                                           .resolve(pathNecessaryForClasspathLoading);
@@ -52,17 +54,24 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
     */
    public WorkspaceResourceDirectory(Class<?> classForResourceDirectory, String subsequentOrAbsoluteResourcePackagePath)
    {
+      this.classForLoading = classForResourceDirectory;
       WorkingDirectoryPathComponents workingDirectoryPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForResourceDirectory);
       pathNecessaryForClasspathLoading = ResourceTools.getResourcesPathForClass(classForResourceDirectory).resolve(subsequentOrAbsoluteResourcePackagePath);
+      pathNecessaryForClasspathLoadingString = pathNecessaryForClasspathLoading.toString();
+      // This path isn't absolute for the filesystem, only for the classpath
+      // i.e. /us/ihmc/tools/io would need to be us/ihmc/tools/io
+      // to append to /path/to/ihmc-java-toolkit/src/test/resources/us/ihmc/tools/io
+      String subsequentPathToResourceDirectory = pathNecessaryForClasspathLoadingString.startsWith("/") ?
+                                                 pathNecessaryForClasspathLoadingString.substring(1) :
+                                                 pathNecessaryForClasspathLoadingString;
       filesystemDirectory = workingDirectoryPathComponents.getParentOfSrcDirectory()
                                                           .resolve(workingDirectoryPathComponents.getSubsequentPathToResourceFolder())
-                                                          .resolve(pathNecessaryForClasspathLoading);
+                                                          .resolve(subsequentPathToResourceDirectory);
       initialize();
    }
 
    private void initialize()
    {
-      pathNecessaryForClasspathLoadingString = pathNecessaryForClasspathLoading.toString();
       String tempPathNecessaryForResourceExploring = pathNecessaryForClasspathLoadingString;
       if (tempPathNecessaryForResourceExploring.startsWith("/"))
          tempPathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring.replaceFirst("/", "");

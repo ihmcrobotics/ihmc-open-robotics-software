@@ -1,7 +1,6 @@
 package us.ihmc.tools.io;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.log.LogTools;
@@ -13,77 +12,59 @@ import java.util.TreeSet;
 
 public class HybridDirectoryTest
 {
-   @Disabled // This doesn't really work on Bamboo and isn't designed to
    @Test
    public void testConstructors()
    {
       Path dotIHMC = Paths.get(System.getProperty("user.home")).resolve(".ihmc");
       HybridResourceDirectory directory;
       HybridResourceFile file;
-      directory = new HybridResourceDirectory(dotIHMC, HybridDirectoryTest.class, "/");
-      LogTools.info(directory.getWorkspaceDirectory());
-      LogTools.info(directory.getExternalDirectory());
-      LogTools.info(directory.getClassForLoading());
-      LogTools.info(directory.getPathNecessaryForClasspathLoading());
-      file = new HybridResourceFile(directory, "testRootResource.txt");
-      LogTools.info(file.getWorkspaceFile());
-      LogTools.info(file.getExternalFile());
-      LogTools.info(file.getClasspathResource());
 
-//      directory = new HybridResourceDirectory(dotIHMC, openRobotics, subsequentPathToResourceFolder, getClass(), "/");
-//      LogTools.info(directory.getWorkspaceDirectory());
-//      LogTools.info(directory.getExternalDirectory());
-//      LogTools.info(directory.getClassForLoading());
-//      LogTools.info(directory.getPathNecessaryForClasspathLoading());
-//      file = new HybridFile(directory, "testRootResource.txt");
-//      LogTools.info(file.getWorkspaceFile());
-//      LogTools.info(file.getExternalFile());
-//      LogTools.info(file.getClasspathResource());
-//
-//      directory = new HybridResourceDirectory(dotIHMC, openRobotics, subsequentPathToResourceFolder, getClass());
-//      LogTools.info(directory.getWorkspaceDirectory());
-//      LogTools.info(directory.getExternalDirectory());
-//      LogTools.info(directory.getClassForLoading());
-//      LogTools.info(directory.getPathNecessaryForClasspathLoading());
-//      file = new HybridFile(directory, "classLocatedResource.txt");
-//      LogTools.info(file.getWorkspaceFile());
-//      LogTools.info(file.getExternalFile());
-//      LogTools.info(file.getClasspathResource());
-//      file = new HybridFile(directory, "subsequent/classSubsequentResource.txt");
-//      LogTools.info(file.getWorkspaceFile());
-//      LogTools.info(file.getExternalFile());
-//      LogTools.info(file.getClasspathResource());
-//
-//      directory = new HybridDirectory(dotIHMC, openRobotics, subsequentPathToResourceFolder, getClass(), "/root");
-//      LogTools.info(directory.getWorkspaceDirectory());
-//      LogTools.info(directory.getExternalDirectory());
-//      LogTools.info(directory.getClassForLoading());
-//      LogTools.info(directory.getPathNecessaryForClasspathLoading());
-//      file = new HybridFile(directory, "relativeRootResource.txt");
-//      LogTools.info(file.getWorkspaceFile());
-//      LogTools.info(file.getExternalFile());
-//      LogTools.info(file.getClasspathResource());
-//      file = new HybridFile(directory, "subsequent/rootSubsequentResource.txt");
-//      LogTools.info(file.getWorkspaceFile());
-//      LogTools.info(file.getExternalFile());
-//      LogTools.info(file.getClasspathResource());
-//
-//      directory = new HybridDirectory(dotIHMC, openRobotics, subsequentPathToResourceFolder, getClass(), "subsequent");
-//      LogTools.info(directory.getWorkspaceDirectory());
-//      LogTools.info(directory.getExternalDirectory());
-//      LogTools.info(directory.getClassForLoading());
-//      LogTools.info(directory.getPathNecessaryForClasspathLoading());
-//      file = new HybridFile(directory, "classSubsequentResource.txt");
-//      LogTools.info(file.getWorkspaceFile());
-//      LogTools.info(file.getExternalFile());
-//      LogTools.info(file.getClasspathResource());
-//      file = new HybridFile(directory, "purposefullyMisspelledResource.txt");
-//      LogTools.info(file.getWorkspaceFile());
-//      LogTools.info(file.getExternalFile());
-//      LogTools.info(file.getClasspathResource());
+      directory = new HybridResourceDirectory(dotIHMC, HybridDirectoryTest.class);
+      printDirectoryInfo(directory);
+      Assertions.assertEquals("us/ihmc/tools/io", directory.getPathNecessaryForClasspathLoading());
+      Assertions.assertEquals("us.ihmc.tools.io", directory.getPathNecessaryForResourceExploring());
+      file = new HybridResourceFile(directory, "testRootResource.txt");
+      printFileInfo(file);
+
+      directory = new HybridResourceDirectory(dotIHMC, HybridDirectoryTest.class, "/");
+      printDirectoryInfo(directory);
+      Assertions.assertEquals("/", directory.getPathNecessaryForClasspathLoading());
+      Assertions.assertEquals("", directory.getPathNecessaryForResourceExploring());
+      file = new HybridResourceFile(directory, "testRootResource.txt");
+      printFileInfo(file);
+
+      directory = new HybridResourceDirectory(dotIHMC, HybridDirectoryTest.class, "stuff");
+      printDirectoryInfo(directory);
+      Assertions.assertEquals("us/ihmc/tools/io/stuff", directory.getPathNecessaryForClasspathLoading());
+      Assertions.assertEquals("us.ihmc.tools.io.stuff", directory.getPathNecessaryForResourceExploring());
+      file = new HybridResourceFile(directory, "testRootResource.txt");
+      printFileInfo(file);
+
+      directory = new HybridResourceDirectory(dotIHMC, HybridDirectoryTest.class, "stuff/moreStuff");
+      printDirectoryInfo(directory);
+      Assertions.assertEquals("us/ihmc/tools/io/stuff/moreStuff", directory.getPathNecessaryForClasspathLoading());
+      Assertions.assertEquals("us.ihmc.tools.io.stuff.moreStuff", directory.getPathNecessaryForResourceExploring());
+      file = new HybridResourceFile(directory, "testRootResource.txt");
+      printFileInfo(file);
    }
 
-//   @Test
+   private static void printFileInfo(HybridResourceFile file)
+   {
+      LogTools.info("Workspace file: {}", file.getWorkspaceFile());
+      LogTools.info("External file: {}", file.getExternalFile());
+      LogTools.info("Classpath resource: {}", file.getClasspathResource());
+   }
+
+   private static void printDirectoryInfo(HybridResourceDirectory directory)
+   {
+      LogTools.info("Workspace directory: {}", directory.getWorkspaceDirectory());
+      LogTools.info("External directory: {}", directory.getExternalDirectory());
+      LogTools.info("Class for loading: {}", directory.getClassForLoading());
+      LogTools.info("Path necessary for classpath loading: {}", directory.getPathNecessaryForClasspathLoading());
+      LogTools.info("Path necessary for resource exploring: {}", directory.getPathNecessaryForResourceExploring());
+   }
+
+   //   @Test
 //   public void testReadResourcesFromJar()
 //   {
 //      Path dotIHMC = Paths.get(System.getProperty("user.home")).resolve(".ihmc");
