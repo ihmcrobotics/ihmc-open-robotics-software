@@ -1,4 +1,4 @@
-package us.ihmc.missionControl;
+package us.ihmc.missionControl.monitor;
 
 import us.ihmc.log.LogTools;
 
