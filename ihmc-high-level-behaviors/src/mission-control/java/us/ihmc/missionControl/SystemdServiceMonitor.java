@@ -29,7 +29,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_daemon_service");
       serviceStatusPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SYSTEM_SERVICE_STATUS);
       systemServiceStatusPublisherScheduler = new ExceptionHandlingThreadScheduler("SystemServiceStatusPublisherScheduler");
-      systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 1.00);
+      systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 1.0);
    }
 
    public void publishStatus()
