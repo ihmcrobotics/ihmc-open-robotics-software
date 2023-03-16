@@ -450,7 +450,6 @@ public class RDXBaseUI
    {
       imGuiWindowAndDockSystem.dispose();
       vrManager.dispose();
-      primary3DPanel.dispose();
       primaryScene.dispose();
    }
 

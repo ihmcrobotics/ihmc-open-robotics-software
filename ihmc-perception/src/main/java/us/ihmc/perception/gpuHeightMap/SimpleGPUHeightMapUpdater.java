@@ -99,16 +99,11 @@ public class SimpleGPUHeightMapUpdater
 
    public void destroy()
    {
-      if (heightMapProgram != null)
-         heightMapProgram.close();
-      if (zeroValuesKernel != null)
-         zeroValuesKernel.close();
-      if (addPointsFromImageKernel != null)
-         addPointsFromImageKernel.close();
-      if (averageMapKernel != null)
-         averageMapKernel.close();
-      if (computeNormalsKernel != null)
-         computeNormalsKernel.close();
+      heightMapProgram.close();
+      zeroValuesKernel.close();
+      addPointsFromImageKernel.close();
+      averageMapKernel.close();
+      computeNormalsKernel.close();
 
       localizationBuffer.destroy(openCLManager);
       parametersBuffer.destroy(openCLManager);
@@ -131,24 +126,15 @@ public class SimpleGPUHeightMapUpdater
          counterData.releaseReference();
       }
 
-      if (depthImageMeters != null)
-         depthImageMeters.destroy(openCLManager);
-      if (centroidXImage != null)
-         centroidXImage.destroy(openCLManager);
-      if (centroidYImage != null)
-         centroidYImage.destroy(openCLManager);
-      if (centroidZImage != null)
-         centroidZImage.destroy(openCLManager);
-      if (varianceZImage != null)
-         varianceZImage.destroy(openCLManager);
-      if (normalXImage != null)
-         normalXImage.destroy(openCLManager);
-      if (normalYImage != null)
-         normalYImage.destroy(openCLManager);
-      if (normalZImage != null)
-         normalZImage.destroy(openCLManager);
-      if (countImage != null)
-         countImage.destroy(openCLManager);
+      depthImageMeters.destroy(openCLManager);
+      centroidXImage.destroy(openCLManager);
+      centroidYImage.destroy(openCLManager);
+      centroidZImage.destroy(openCLManager);
+      varianceZImage.destroy(openCLManager);
+      normalXImage.destroy(openCLManager);
+      normalYImage.destroy(openCLManager);
+      normalZImage.destroy(openCLManager);
+      countImage.destroy(openCLManager);
 
       openCLManager.destroy();
    }
