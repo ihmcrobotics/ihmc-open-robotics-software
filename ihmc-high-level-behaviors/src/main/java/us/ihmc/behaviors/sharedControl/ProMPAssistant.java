@@ -264,7 +264,6 @@ public class ProMPAssistant
       {
          if (contextTasksMap.containsKey(objectName))
          {
-            LogTools.info("Starting task detection");
             List<String> candidateTasks = contextTasksMap.get(objectName);
             FramePose3D lastObservedPose = new FramePose3D(observedPose);
             if (objectFrame != null)
