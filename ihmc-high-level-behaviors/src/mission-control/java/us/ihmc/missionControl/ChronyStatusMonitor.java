@@ -1,8 +1,6 @@
 package us.ihmc.missionControl;
 
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.tools.processManagement.ProcessTools;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 /**
