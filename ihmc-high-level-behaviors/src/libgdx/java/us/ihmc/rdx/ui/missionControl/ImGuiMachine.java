@@ -17,6 +17,7 @@ import java.text.DecimalFormat;
 
 public class ImGuiMachine
 {
+   private final String instanceId;
    private final String hostname;
    private final ROS2Node ros2Node;
    private SystemResourceUsageMessage lastResourceUsageMessage = new SystemResourceUsageMessage();
@@ -26,6 +27,7 @@ public class ImGuiMachine
 
    public ImGuiMachine(String instanceId, String hostname)
    {
+      this.instanceId = instanceId;
       this.hostname = hostname;
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_machine_" + instanceId);
       ROS2Tools.createCallbackSubscription(ros2Node,
@@ -54,6 +56,16 @@ public class ImGuiMachine
       }
    }
 
+   public String getInstanceId()
+   {
+      return instanceId;
+   }
+
+   public String getHostname()
+   {
+      return hostname;
+   }
+
    public void renderImGuiWidgets()
    {
       ImGui.pushFont(ImGuiTools.getMediumFont());
@@ -70,9 +82,7 @@ public class ImGuiMachine
       for (int i = 0; i < lastResourceUsageMessage.getCpuCount(); i++)
       {
          if (cpuPlot.getPlotLines().size() == i)
-         {
             cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("Core " + i, 30 * 5, 30.0, new DecimalFormat("0.0")));
-         }
 
          ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(lastResourceUsageMessage.getCpuUsages().get(i));
       }
