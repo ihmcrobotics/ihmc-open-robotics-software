@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * Runs a command and reads the process output from stdout.
+ * Provides a generic parse(String[] lines) method for specific implementations.
+ */
 public abstract class ResourceMonitor
 {
    private static final double DEFAULT_READ_PERIOD_SECONDS = 0.25;
