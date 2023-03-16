@@ -15,16 +15,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class SysstatNetworkMonitor
 {
    private final ConcurrentLinkedQueue<Integer> characterQueue = new ConcurrentLinkedQueue<>();
-   private final PausablePeriodicThread sarReaderThread;
 
-   private Map<String, Float> ifaceRxKbps = new ConcurrentHashMap<>();
-   private Map<String, Float> ifaceTxKbps = new ConcurrentHashMap<>();
+   private final Map<String, Float> ifaceRxKbps = new ConcurrentHashMap<>();
+   private final Map<String, Float> ifaceTxKbps = new ConcurrentHashMap<>();
 
    private static volatile boolean running = true;
 
    public SysstatNetworkMonitor()
    {
-      sarReaderThread = new PausablePeriodicThread("sar-reader", 0.2, true, this::processSarOutput);
+      PausablePeriodicThread sarReaderThread = new PausablePeriodicThread("sar-reader", 0.2, true, this::processSarOutput);
       sarReaderThread.start();
       start();
    }
