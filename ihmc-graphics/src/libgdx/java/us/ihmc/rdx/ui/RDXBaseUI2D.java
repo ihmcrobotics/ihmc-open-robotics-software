@@ -66,7 +66,7 @@ public class RDXBaseUI2D
    {
       this.windowTitle = windowTitle;
 
-      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
+      configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading).resolve(configurationExtraPath);
 
       layoutManager = new RDXImGuiLayoutManager(classForLoading,

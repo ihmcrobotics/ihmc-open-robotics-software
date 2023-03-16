@@ -146,7 +146,7 @@ public class WorkspacePathTools
                // This removes out/production/classes from [...]project/src/extra/out/production/classes
                // This removes bin from [...]project/bin
                // This removes bin from [...]project/src/extra/bin
-               Path pathBeforeResources = codeSourceDirectory.subpath(0, indexOfBuildFolder);
+               Path pathBeforeResources = Paths.get("/").resolve(codeSourceDirectory.subpath(0, indexOfBuildFolder));
 
                // Since src/main gets built in the project folder, we need to add it back.
                int lastIndexOfSrc = findLastIndexOfPart(codeSourceDirectory, "src");
@@ -159,7 +159,7 @@ public class WorkspacePathTools
                LogTools.debug("Path with resources: {}", pathWithResources);
 
                int lastIndexOfSrcWithResources = findLastIndexOfPart(pathWithResources, "src");
-               Path parentOfSrcDirectory = pathWithResources.subpath(0, lastIndexOfSrcWithResources);
+               Path parentOfSrcDirectory = Paths.get("/").resolve(pathWithResources.subpath(0, lastIndexOfSrcWithResources));
                Path subsequentPathToResourceFolder = pathWithResources.subpath(lastIndexOfSrcWithResources, pathWithResources.getNameCount());
 
                inferredPathComponents = new WorkingDirectoryPathComponents(parentOfSrcDirectory, subsequentPathToResourceFolder);
