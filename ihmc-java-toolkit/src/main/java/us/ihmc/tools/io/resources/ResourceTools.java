@@ -131,7 +131,7 @@ public class ResourceTools
     */
    public static String getResourcesPathStringForClass(Class<?> clazz)
    {
-      return clazz.getPackage().getName().replaceAll("\\.", "/");
+      return "/" + clazz.getPackage().getName().replaceAll("\\.", "/");
    }
 
    public static String sanitizeResourcePath(String resourcePath)
