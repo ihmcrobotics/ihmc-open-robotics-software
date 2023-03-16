@@ -1,4 +1,4 @@
-package us.ihmc.missionControl.monitor;
+package us.ihmc.missionControl.resourceMonitor;
 
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public abstract class ProcessOutputMonitor
+public abstract class ResourceMonitor
 {
    private static final double DEFAULT_READ_PERIOD_SECONDS = 0.25;
 
@@ -15,12 +15,12 @@ public abstract class ProcessOutputMonitor
    private final PausablePeriodicThread thread;
    private volatile boolean running;
 
-   public ProcessOutputMonitor(String... command)
+   public ResourceMonitor(String... command)
    {
       this(DEFAULT_READ_PERIOD_SECONDS, command);
    }
 
-   public ProcessOutputMonitor(double parsePeriodSeconds, String... command)
+   public ResourceMonitor(double parsePeriodSeconds, String... command)
    {
       this.command = command;
       thread = new PausablePeriodicThread(getClass().getName() + "-Reader-Parser", parsePeriodSeconds, true, () ->
