@@ -1,22 +1,24 @@
 package us.ihmc.tools.io;
 
+import java.nio.file.Path;
+
 public class WorkingDirectoryPathComponents
 {
-   private final String directoryNameToAssumePresent;
-   private final String subsequentPathToResourceFolder;
+   private final Path parentOfSrcDirectory;
+   private final Path subsequentPathToResourceFolder;
 
-   public WorkingDirectoryPathComponents(String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public WorkingDirectoryPathComponents(Path parentOfSrcDirectory, Path subsequentPathToResourceFolder)
    {
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
+      this.parentOfSrcDirectory = parentOfSrcDirectory;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
    }
 
-   public String getDirectoryNameToAssumePresent()
+   public Path getParentOfSrcDirectory()
    {
-      return directoryNameToAssumePresent;
+      return parentOfSrcDirectory;
    }
 
-   public String getSubsequentPathToResourceFolder()
+   public Path getSubsequentPathToResourceFolder()
    {
       return subsequentPathToResourceFolder;
    }

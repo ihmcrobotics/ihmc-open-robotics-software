@@ -116,12 +116,39 @@ public class ResourceTools
       }
    }
 
+   /**
+    * This gets the package part of the class as a Path (with slashes instead of dots)
+    * for use with {@link ClassLoader} methods.
+    */
+   public static Path getResourcesPathForClass(Class<?> clazz)
+   {
+      return Paths.get(getResourcesPathStringForClass(clazz));
+   }
+
+   /**
+    * This gets the package part of the class as a String with slashes instead of dots
+    * for use with {@link ClassLoader} methods.
+    */
+   public static String getResourcesPathStringForClass(Class<?> clazz)
+   {
+      return clazz.getPackage().getName().replaceAll("\\.", "/");
+   }
+
    public static String sanitizeResourcePath(String resourcePath)
    {
       Path resourcePathAsPathRaw = Paths.get(resourcePath);
       Path firstPart = resourcePathAsPathRaw.getName(0);
       Path normalizedAbsoluteResourceFolderPath = firstPart.resolve(firstPart.relativize(resourcePathAsPathRaw).normalize());
       return normalizedAbsoluteResourceFolderPath.toString();
+   }
+
+   /**
+    * For using Paths to access resources supporting Windows.
+    */
+   public static String toResourceAccessStringWithCorrectSeparators(Path path)
+   {
+      // Get rid of Windows \ slashes; they don't work with classloader
+      return path.toString().replaceAll("\\\\", "/");
    }
 
    public static Set<String> listResources()
