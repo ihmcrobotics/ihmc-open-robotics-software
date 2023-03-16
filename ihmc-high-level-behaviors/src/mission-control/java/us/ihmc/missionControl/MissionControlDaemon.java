@@ -8,6 +8,8 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.missionControl.resourceMonitor.NVIDIAGPUMonitor;
 import us.ihmc.missionControl.resourceMonitor.SysstatNetworkMonitor;
+import us.ihmc.missionControl.resourceMonitor.cpu.CPUCoreTracker;
+import us.ihmc.missionControl.resourceMonitor.cpu.ProcStatCPUMonitor;
 import us.ihmc.missionControl.systemd.SystemdServiceMonitor;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -24,7 +26,8 @@ public class MissionControlDaemon
    private final String hostname;
    private final String instanceId;
 
-   private final LinuxResourceMonitor resourceMonitor;
+   //   private final LinuxResourceMonitor resourceMonitor;
+   private ProcStatCPUMonitor cpuMonitor;
    private SysstatNetworkMonitor networkMonitor; // Optional - requires sysstat
    private NVIDIAGPUMonitor nvidiaGPUMonitor; // Optional - requires an NVIDIA GPU
    private final List<SystemdServiceMonitor> serviceMonitors = new ArrayList<>();
@@ -39,7 +42,7 @@ public class MissionControlDaemon
       hostname = ProcessTools.execSimpleCommandSafe("hostname");
       instanceId = UUID.randomUUID().toString().substring(0, 5);
 
-      resourceMonitor = new LinuxResourceMonitor();
+      cpuMonitor = new ProcStatCPUMonitor();
 
       if (MissionControlTools.sysstatAvailable())
          networkMonitor = new SysstatNetworkMonitor();
@@ -82,15 +85,14 @@ public class MissionControlDaemon
    {
       SystemResourceUsageMessage message = new SystemResourceUsageMessage();
 
-      if (resourceMonitor != null)
+      if (cpuMonitor != null)
       {
-         resourceMonitor.update();
-         message.setMemoryUsed(resourceMonitor.getUsedRAMGiB());
-         message.setMemoryTotal(resourceMonitor.getTotalRAMGiB());
-         ArrayList<CPUCoreTracker> cpuCoreTrackers = resourceMonitor.getCpuCoreTrackers();
+         //         message.setMemoryUsed(resourceMonitor.getUsedRAMGiB());
+         //         message.setMemoryTotal(resourceMonitor.getTotalRAMGiB());
+         Map<Integer, CPUCoreTracker> cpuCoreTrackers = cpuMonitor.getCpuCoreTrackers();
          int cpuCount = cpuCoreTrackers.size();
          message.setCpuCount(cpuCount);
-         cpuCoreTrackers.forEach(cpuCoreTracker -> message.getCpuUsages().add(cpuCoreTracker.getPercentUsage()));
+         cpuCoreTrackers.values().forEach(cpuCoreTracker -> message.getCpuUsages().add(cpuCoreTracker.getPercentUsage()));
       }
 
       if (networkMonitor != null)
