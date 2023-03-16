@@ -27,8 +27,8 @@ public class MissionControlDaemon
    private final String hostname;
    private final String instanceId;
 
-   private ProcStatCPUMonitor cpuMonitor;
-   private FreeMemoryMonitor memoryMonitor;
+   private final ProcStatCPUMonitor cpuMonitor;
+   private final FreeMemoryMonitor memoryMonitor;
    private SysstatNetworkMonitor networkMonitor; // Optional - requires sysstat
    private NVIDIAGPUMonitor nvidiaGPUMonitor; // Optional - requires an NVIDIA GPU
    private final List<SystemdServiceMonitor> serviceMonitors = new ArrayList<>();
