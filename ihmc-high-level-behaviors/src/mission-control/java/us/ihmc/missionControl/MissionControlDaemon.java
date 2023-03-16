@@ -153,10 +153,10 @@ public class MissionControlDaemon
       new MissionControlDaemon();
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
-                                                      {
-                                                         running = false;
-                                                         Runtime.getRuntime().halt(0); // Set exit code to 0
-                                                      }));
+      {
+         running = false;
+         Runtime.getRuntime().halt(0); // Set exit code to 0
+      }));
 
       while (running)
       {
