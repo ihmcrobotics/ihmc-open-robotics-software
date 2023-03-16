@@ -44,17 +44,30 @@ public class MissionControlDaemon
       instanceId = UUID.randomUUID().toString().substring(0, 5);
 
       cpuMonitor = new ProcStatCPUMonitor();
+      cpuMonitor.start();
+
       memoryMonitor = new FreeMemoryMonitor();
+      memoryMonitor.start();
 
       if (MissionControlTools.sysstatAvailable())
+      {
          networkMonitor = new SysstatNetworkMonitor();
+         networkMonitor.start();
+      }
       else
+      {
          LogTools.info("Not using sysstat network monitor");
+      }
 
       if (MissionControlTools.nvidiaGPUAvailable())
+      {
          nvidiaGPUMonitor = new NVIDIAGPUMonitor();
+         nvidiaGPUMonitor.start();
+      }
       else
+      {
          LogTools.info("Not using NVIDIA GPU monitor");
+      }
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_daemon_" + instanceId);
       systemAvailablePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SYSTEM_AVAILABLE);
@@ -87,15 +100,12 @@ public class MissionControlDaemon
    {
       SystemResourceUsageMessage message = new SystemResourceUsageMessage();
 
-      if (cpuMonitor != null)
-      {
-         message.setMemoryUsed(memoryMonitor.getMemoryUsedGiB());
-         message.setMemoryTotal(memoryMonitor.getMemoryTotalGiB());
-         Map<Integer, CPUCoreTracker> cpuCoreTrackers = cpuMonitor.getCpuCoreTrackers();
-         int cpuCount = cpuCoreTrackers.size();
-         message.setCpuCount(cpuCount);
-         cpuCoreTrackers.values().forEach(cpuCoreTracker -> message.getCpuUsages().add(cpuCoreTracker.getPercentUsage()));
-      }
+      message.setMemoryUsed(memoryMonitor.getMemoryUsedGiB());
+      message.setMemoryTotal(memoryMonitor.getMemoryTotalGiB());
+      Map<Integer, CPUCoreTracker> cpuCoreTrackers = cpuMonitor.getCpuCoreTrackers();
+      int cpuCount = cpuCoreTrackers.size();
+      message.setCpuCount(cpuCount);
+      cpuCoreTrackers.values().forEach(cpuCoreTracker -> message.getCpuUsages().add(cpuCoreTracker.getPercentUsage()));
 
       if (networkMonitor != null)
       {
