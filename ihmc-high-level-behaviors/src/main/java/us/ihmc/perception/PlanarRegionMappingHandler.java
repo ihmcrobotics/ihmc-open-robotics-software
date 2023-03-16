@@ -370,6 +370,8 @@ public class PlanarRegionMappingHandler
 
       RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
 
+      planarRegionMap.printStatistics();
+
       //planarRegionMap.submitRegionsUsingIterativeReduction(regions);
 
       if (keyframePose != null)
