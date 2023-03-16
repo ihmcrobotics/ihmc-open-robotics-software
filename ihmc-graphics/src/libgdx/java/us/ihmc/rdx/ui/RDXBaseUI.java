@@ -166,7 +166,7 @@ public class RDXBaseUI
 //         LogTools.warn("We won't be able to write files to version controlled resources, because we probably aren't in a workspace.");
 //      }
 
-      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
+      configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading, "/").resolve(configurationExtraPath);
 
       if (!configurationBaseDirectory.isWorkspaceFileAccessAvailable())

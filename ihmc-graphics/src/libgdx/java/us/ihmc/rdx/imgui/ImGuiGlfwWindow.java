@@ -41,7 +41,7 @@ public class ImGuiGlfwWindow
 
    public ImGuiGlfwWindow(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
    {
-      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
+      configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading).resolve(configurationExtraPath);
 
       glfwWindowForImGui = new GlfwWindowForImGui(windowTitle);
