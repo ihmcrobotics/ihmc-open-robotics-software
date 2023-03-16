@@ -11,13 +11,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -69,13 +66,9 @@ public class ProMPAssistant
       // read parameters regarding the properties of available learned tasks from json file
       try
       {
-         WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
-         String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
-         String configurationFile = "/us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
-         String demoDirectory = directoryAbsolutePath + configurationFile;
-         Path pathFile = Paths.get(demoDirectory);
-         LogTools.info("Loading parameters from resource: {}", configurationFile);
-         JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(pathFile.toAbsolutePath().toString()));
+         String fileName = "ProMPAssistant.json";
+         LogTools.info("Loading parameters from resource: {}", fileName);
+         JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream(fileName)));
          testNumber = (int) ((long) jsonObject.get("testNumberUseOnlyForTesting"));
          logEnabled = (boolean) jsonObject.get("logging");
          numberObservations = (int) ((long) jsonObject.get("numberObservations"));
