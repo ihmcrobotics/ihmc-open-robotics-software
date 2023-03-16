@@ -1,4 +1,4 @@
-package us.ihmc.missionControl.monitor;
+package us.ihmc.missionControl.resourceMonitor;
 
 import us.ihmc.log.LogTools;
 
@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 // https://github.com/sysstat/sysstat/wiki#2-questions-related-to-sar-sadc-and-sadf
-public class SysstatNetworkMonitor extends ProcessOutputMonitor
+public class SysstatNetworkMonitor extends ResourceMonitor
 {
    private final Map<String, Float> ifaceRxKbps = new ConcurrentHashMap<>();
    private final Map<String, Float> ifaceTxKbps = new ConcurrentHashMap<>();
