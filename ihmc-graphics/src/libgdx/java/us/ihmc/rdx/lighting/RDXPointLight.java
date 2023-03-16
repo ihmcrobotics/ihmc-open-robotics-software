@@ -100,11 +100,6 @@ public class RDXPointLight
       shader.end();
    }
 
-   public void dispose()
-   {
-      modelBatch.dispose();
-   }
-
    public Point3D getPosition()
    {
       return position;

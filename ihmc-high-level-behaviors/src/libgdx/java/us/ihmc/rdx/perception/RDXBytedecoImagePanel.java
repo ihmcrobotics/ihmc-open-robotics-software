@@ -143,11 +143,6 @@ public class RDXBytedecoImagePanel
       createPixmapFromBytedecoImage(bytedecoImage.getImageWidth(), bytedecoImage.getImageHeight());
    }
 
-   public void destroy(OpenCLManager openCLManager)
-   {
-      bytedecoImage.destroy(openCLManager);
-   }
-
    public RDXImagePanel getImagePanel()
    {
       return imagePanel;
