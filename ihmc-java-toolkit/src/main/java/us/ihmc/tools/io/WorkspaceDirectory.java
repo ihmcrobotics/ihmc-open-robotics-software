@@ -8,6 +8,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+/**
+ * This class is designed for development, when building and running code from source in IntelliJ
+ * or Eclipse, to provide the ability for applications to save files to version controlled
+ * directories.
+ *
+ * The use of this class should therefore be limited to the above scenario. If saving files to
+ * version controlled directories at runtime is not desired, the use another way.
+ * See {@link us.ihmc.commons.nio.FileTools} and {@link ResourceTools}.
+ *
+ * There are a few different ways to use this class. Because the working directory on developers
+ * machines is not consistent, we have to make some assumptions and use a few different strategies
+ * in order to make this work.
+ *
+ * This class may fail to find the correct directory in special circumstances, in which you must
+ * check isFileAccessAvailable() and if that's false, make sure to not try and use this class
+ * from that point on. Please try to not crash the entire application with a null pointer in
+ * that case, but instead just disable the save functionality for the duration of the run.
+ *
+ */
 public class WorkspaceDirectory
 {
    private Class<?> classForLoading;
