@@ -17,6 +17,7 @@ public class WorkspacePathTools
 {
    /**
     * Use this method when applications are being run from source and need to access a project file.
+    * This is necessary because the working directory when running applications is inconsistent.
     *
     * This method will find the directoryNameToAssumePresent and then traverse that path to find
     * the file system path to a resource.
@@ -31,6 +32,25 @@ public class WorkspacePathTools
       Path directoryInline = PathTools.findDirectoryInline(directoryNameToAssumePresent);
       if (directoryInline != null)
          return directoryInline.resolve(subsequentPathToResourceFolder).resolve(resourcePathString).toAbsolutePath().normalize();
+      return null;
+   }
+
+   /**
+    * Use this method when applications are being run from source and need to access a project file.
+    * This is necessary because the working directory when running applications is inconsistent.
+    *
+    * This method will find the directoryNameToAssumePresent and then traverse that path to find
+    * the file system path.
+    *
+    * @param directoryNameToAssumePresent i.e. ihmc-open-robotics-software
+    * @param subsequentPath i.e. ihmc-java-toolkit
+    * @return absolute, normalized path to that directory, or null if fails
+    */
+   public static Path findPath(String directoryNameToAssumePresent, String subsequentPath)
+   {
+      Path directoryInline = PathTools.findDirectoryInline(directoryNameToAssumePresent);
+      if (directoryInline != null)
+         return directoryInline.resolve(subsequentPath).toAbsolutePath().normalize();
       return null;
    }
 
@@ -113,18 +133,6 @@ public class WorkspacePathTools
          {
             Path codeSourceDirectory = Paths.get(locationURI);
             LogTools.debug("Code source directory: {}", codeSourceDirectory);
-            Path workingDirectory = WorkspacePathTools.getWorkingDirectory();
-            LogTools.debug("Working directory: {}", workingDirectory);
-
-            if (codeSourceDirectory.getNameCount() < 1 || workingDirectory.getNameCount() < 1
-             || !codeSourceDirectory.getName(0).toString().equals(workingDirectory.getName(0).toString()))
-            {
-               throw new RuntimeException("""
-               The code source directory and working directory need to share a common root.
-                  Code source path: %s
-                  Working directory: %s
-               """.formatted(codeSourceDirectory, workingDirectory));
-            }
 
             // We want to remove the build folder part of the path.
             // We do this armed with the knowledge of what the default build folder names are.
@@ -150,34 +158,14 @@ public class WorkspacePathTools
                Path pathWithResources = pathBeforeResources.resolve("resources").normalize();
                LogTools.debug("Path with resources: {}", pathWithResources);
 
-               // We go through both working directory and code source directory to find the common part
-               int afterLastCommonPathElement = -1;
-               for (int pathNameElement = 0; pathNameElement < pathWithResources.getNameCount()
-                                          && pathNameElement < workingDirectory.getNameCount(); pathNameElement++)
-               {
-                  if (pathWithResources.getName(pathNameElement).toString().equals(workingDirectory.getName(pathNameElement).toString()))
-                  {
-                     // We add 1 here, to make sure the directory to assume present
-                     // is closer to the build folder, which is what the other tools assume right now.
-                     afterLastCommonPathElement = pathNameElement + 1;
-                  }
-               }
+               int lastIndexOfSrcWithResources = findLastIndexOfPart(pathWithResources, "src");
+               Path parentOfSrcDirectory = pathWithResources.subpath(0, lastIndexOfSrcWithResources);
+               Path subsequentPathToResourceFolder = pathWithResources.subpath(lastIndexOfSrcWithResources, pathWithResources.getNameCount());
 
-               // Sometimes the working directory is set to within the build folder heirarchy.
-               // In that case, let's back out and make the parent of the build folder the directory to assume present.
-               if (afterLastCommonPathElement >= indexOfBuildFolder)
-               {
-                  afterLastCommonPathElement = indexOfBuildFolder - 1;
-               }
+               inferredPathComponents = new WorkingDirectoryPathComponents(parentOfSrcDirectory, subsequentPathToResourceFolder);
 
-               String directoryNameToAssumePresent = pathWithResources.getName(afterLastCommonPathElement).toString();
-               int firstElementOfSubsequentPath = afterLastCommonPathElement + 1;
-               String subsequentPathToResourceFolder
-                     = pathWithResources.subpath(firstElementOfSubsequentPath, pathWithResources.getNameCount()).toString();
-               inferredPathComponents = new WorkingDirectoryPathComponents(directoryNameToAssumePresent, subsequentPathToResourceFolder);
-
-               LogTools.info("Inferred workspace directory components:\n Directory name to assume present: {}\n Subsequent path to resource folder: {}",
-                             directoryNameToAssumePresent, subsequentPathToResourceFolder);
+               LogTools.info("Inferred workspace directory components:\n Parent of src folder: {}\n Subsequent path to resource folder: {}",
+                             parentOfSrcDirectory, subsequentPathToResourceFolder);
             }
             else
             {

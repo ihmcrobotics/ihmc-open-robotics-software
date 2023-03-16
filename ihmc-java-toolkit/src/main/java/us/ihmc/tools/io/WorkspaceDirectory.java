@@ -1,14 +1,14 @@
 package us.ihmc.tools.io;
 
-import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.PathTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiConsumer;
 
 /**
+ * Represents a directory in your source version controlled workspace.
+ *
  * This class is designed for development, when building and running code from source in IntelliJ
  * or Eclipse, to provide the ability for applications to save files to version controlled
  * directories.
@@ -25,123 +25,29 @@ import java.util.function.BiConsumer;
  * check isFileAccessAvailable() and if that's false, make sure to not try and use this class
  * from that point on. Please try to not crash the entire application with a null pointer in
  * that case, but instead just disable the save functionality for the duration of the run.
- *
  */
 public class WorkspaceDirectory
 {
-   private Class<?> classForLoading;
-   private Path workspaceDirectory;
-   private String pathNecessaryForClasspathLoading;
-   private String pathNecessaryForResourceExploring;
+   protected Path filesystemDirectory;
 
-   /**
-    * This constructor will infer the correct directory name to assume present and
-    * the subsequent path to the resource folder, with even more robustness than passing
-    * them in your self.
-    */
-   public WorkspaceDirectory(Class<?> classForResourceDirectory)
+   protected WorkspaceDirectory()
    {
-      this(classForResourceDirectory, "");
 
    }
 
-   /**
-    * This constructor will infer the correct directory name to assume present and
-    * the subsequent path to the resource folder, with even more robustness than passing
-    * them in your self.
-    */
-   public WorkspaceDirectory(Class<?> classForResourceDirectory, String subsequentOrAbsoluteResourcePackagePath)
+   public WorkspaceDirectory(String directoryNameToAssumePresent)
    {
-      WorkingDirectoryPathComponents workingDirectoryPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForResourceDirectory);
-      initialize(workingDirectoryPathComponents.getDirectoryNameToAssumePresent(),
-                 workingDirectoryPathComponents.getSubsequentPathToResourceFolder(),
-                 classForResourceDirectory,
-                 subsequentOrAbsoluteResourcePackagePath);
+      filesystemDirectory = PathTools.findDirectoryInline(directoryNameToAssumePresent);
    }
 
-   /**
-    * For loading from the root of the resources directory.
-    */
-   public WorkspaceDirectory(String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public WorkspaceDirectory(String directoryNameToAssumePresent, String subsequentPath)
    {
-      initialize(directoryNameToAssumePresent, subsequentPathToResourceFolder, null, "");
+      filesystemDirectory = WorkspacePathTools.findPath(directoryNameToAssumePresent, subsequentPath);
    }
 
-   public WorkspaceDirectory(String directoryNameToAssumePresent,
-                             String subsequentPathToResourceFolder,
-                             Class<?> classForResourceDirectory)
+   public WorkspaceDirectory(Path filesystemDirectory)
    {
-      initialize(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForResourceDirectory, "");
-   }
-
-   public WorkspaceDirectory(String directoryNameToAssumePresent,
-                             String subsequentPathToResourceFolder,
-                             String subsequentOrAbsoluteResourcePackagePath)
-   {
-      initialize(directoryNameToAssumePresent, subsequentPathToResourceFolder, null, subsequentOrAbsoluteResourcePackagePath);
-   }
-
-   public WorkspaceDirectory(String directoryNameToAssumePresent,
-                             String subsequentPathToResourceFolder,
-                             Class<?> classForResourceDirectory,
-                             String subsequentOrAbsoluteResourcePackagePath)
-   {
-      initialize(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForResourceDirectory, subsequentOrAbsoluteResourcePackagePath);
-   }
-
-   private void initialize(String directoryNameToAssumePresent,
-                           String subsequentPathToResourceFolder,
-                           Class<?> classForResourceDirectory,
-                           String subsequentOrAbsoluteResourcePackagePath)
-   {
-      this.classForLoading = classForResourceDirectory;
-      String putTogetherResourcePath = "";
-      boolean isAbsolute = subsequentOrAbsoluteResourcePackagePath.startsWith("/");
-      if (!isAbsolute && classForResourceDirectory != null)
-      {
-         putTogetherResourcePath += classForResourceDirectory.getPackage().getName().replaceAll("\\.", "/");
-         putTogetherResourcePath += "/";
-         putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath;
-      }
-      else
-      {
-         if (isAbsolute)
-         {
-            putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath.replaceFirst("/", "");
-         }
-         else
-         {
-            putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath;
-         }
-      }
-      pathNecessaryForClasspathLoading = subsequentOrAbsoluteResourcePackagePath;
-      String tempPathNecessaryForResourceExploring = pathNecessaryForClasspathLoading;
-      if (tempPathNecessaryForResourceExploring.startsWith("/"))
-         tempPathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring.replaceFirst("/", "");
-      tempPathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring.replaceAll("/", ".");
-      pathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring;
-
-      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
-      {
-         workspaceDirectory = null;
-      }
-      else
-      {
-         workspaceDirectory = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent,
-                                                                    subsequentPathToResourceFolder,
-                                                                    putTogetherResourcePath);
-      }
-   }
-
-   private WorkspaceDirectory(Class<?> classForLoading,
-                              Path workspaceDirectory,
-                              String pathNecessaryForClasspathLoading,
-                              String pathNecessaryForResourceExploring)
-   {
-      this.classForLoading = classForLoading;
-      this.workspaceDirectory = workspaceDirectory;
-      this.pathNecessaryForClasspathLoading = pathNecessaryForClasspathLoading;
-      this.pathNecessaryForResourceExploring = pathNecessaryForResourceExploring;
+      this.filesystemDirectory = filesystemDirectory;
    }
 
    /** If the directory is available for reading/writing using files.
@@ -149,45 +55,19 @@ public class WorkspaceDirectory
     *  or the working directory is wrong. */
    public boolean isFileAccessAvailable()
    {
-      return workspaceDirectory != null;
+      return filesystemDirectory != null;
    }
 
-   public void walkResourcesFlat(BiConsumer<String, BasicPathVisitor.PathType> pathVisitor)
-   {
-      ResourceTools.walkResourcesFlat(pathNecessaryForResourceExploring, pathVisitor);
-   }
-
-   public List<WorkspaceFile> queryContainedFiles()
-   {
-      ArrayList<WorkspaceFile> files = new ArrayList<>();
-      ResourceTools.walkResourcesFlat(pathNecessaryForResourceExploring, (fileName, pathType) ->
-      {
-         if (pathType == BasicPathVisitor.PathType.FILE)
-         {
-            files.add(new WorkspaceFile(this, fileName));
-         }
-      });
-      return files;
-   }
-
+   /**
+    * The directory path on the filesystem, if file access is available.
+    *
+    * Warning: You must check isFileAccessAvailable() first before calling this method!
+    *
+    * @return The directory Path on the filesystem or null if file access is not available.
+    */
    public Path getDirectoryPath()
    {
-      return workspaceDirectory;
-   }
-
-   public Class<?> getClassForLoading()
-   {
-      return classForLoading;
-   }
-
-   public String getPathNecessaryForClasspathLoading()
-   {
-      return pathNecessaryForClasspathLoading;
-   }
-
-   public String getPathNecessaryForResourceExploring()
-   {
-      return pathNecessaryForResourceExploring;
+      return filesystemDirectory;
    }
 
    public WorkspaceFile file(String subsequentPathToFile)
@@ -197,9 +77,35 @@ public class WorkspaceDirectory
 
    public WorkspaceDirectory resolve(String subdirectory)
    {
-      return new WorkspaceDirectory(classForLoading,
-                                    workspaceDirectory,
-                                    pathNecessaryForClasspathLoading + "/" + subdirectory,
-                                    pathNecessaryForResourceExploring + "." + subdirectory);
+      if (isFileAccessAvailable())
+      {
+         return new WorkspaceDirectory(filesystemDirectory.resolve(subdirectory));
+      }
+      else
+      {
+         return new WorkspaceDirectory((Path) null);
+      }
+   }
+
+   /**
+    * Used for testing the case where the workspace directory is the src/main source set.
+    * To test properly, you must run with the working directory set to repository-group or ihmc-open-robotics-software
+    * and also run with the working directory set to ihmc-java-toolkit/src/main.
+    */
+   public static void main(String[] args)
+   {
+      WorkspaceDirectory workspaceDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-java-toolkit/src");
+      printTestInfo(workspaceDirectory);
+   }
+
+   private static void printTestInfo(WorkspaceDirectory workspaceDirectory)
+   {
+      LogTools.info("File access available: {}", workspaceDirectory.isFileAccessAvailable() ? "Yes" : "No");
+
+      if (workspaceDirectory.isFileAccessAvailable())
+      {
+         Path directoryPath = workspaceDirectory.getDirectoryPath();
+         LogTools.info("Directory path: {}", directoryPath);
+      }
    }
 }
