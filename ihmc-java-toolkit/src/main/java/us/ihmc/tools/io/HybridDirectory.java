@@ -90,4 +90,9 @@ public class HybridDirectory
       return new HybridDirectory(externalDirectory.resolve(subsequentPathInBothExternalAndWorkspace),
                                  workspaceDirectory.resolve(subsequentPathInBothExternalAndWorkspace));
    }
+
+   /* package private */ WorkspaceDirectory getWorkspaceDirectoryInternal()
+   {
+      return workspaceDirectory;
+   }
 }
