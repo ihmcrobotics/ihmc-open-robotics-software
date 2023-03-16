@@ -15,6 +15,8 @@ import java.util.function.Consumer;
 
 public class SystemdServiceMonitor implements Consumer<List<String>>
 {
+   private static final int MAX_LOG_LINE_MESSAGE_LENGTH = 25;
+
    private final String serviceName;
    private final JournalCtlReader reader;
    private final ROS2Node ros2Node;
@@ -39,7 +41,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
 
    private void publishStatus(List<String> logLines)
    {
-      if (logLines.size() > 25)
+      if (logLines.size() > MAX_LOG_LINE_MESSAGE_LENGTH)
       {
          LogTools.error("Cannot publish log lines with length greater than 25");
          return;
@@ -71,7 +73,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
    @Override
    public void accept(List<String> logLines)
    {
-      for (List<String> logLinesSplit : splitLogLines(logLines, 25))
+      for (List<String> logLinesSplit : splitLogLines(logLines, MAX_LOG_LINE_MESSAGE_LENGTH))
          publishStatus(logLinesSplit);
    }
 
