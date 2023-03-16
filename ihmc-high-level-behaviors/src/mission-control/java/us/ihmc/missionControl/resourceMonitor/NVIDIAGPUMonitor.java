@@ -1,9 +1,9 @@
-package us.ihmc.missionControl.monitor;
+package us.ihmc.missionControl.resourceMonitor;
 
 import us.ihmc.log.LogTools;
 
 // TODO: support multiple GPUs
-public class NVIDIAGPUMonitor extends ProcessOutputMonitor
+public class NVIDIAGPUMonitor extends ResourceMonitor
 {
    private int gpuUsage;
    private int memoryUsage;

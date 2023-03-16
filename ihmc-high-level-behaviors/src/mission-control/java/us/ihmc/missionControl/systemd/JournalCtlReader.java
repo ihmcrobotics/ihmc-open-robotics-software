@@ -1,4 +1,4 @@
-package us.ihmc.missionControl;
+package us.ihmc.missionControl.systemd;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
