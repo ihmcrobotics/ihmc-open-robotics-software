@@ -144,7 +144,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       this.bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       this.swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
-      teleoperationParameters = new RDXTeleoperationParameters(robotRepoName, robotSubsequentPathToResourceFolder, robotModel.getSimpleRobotName());
+      teleoperationParameters = new RDXTeleoperationParameters(robotModel.getSimpleRobotName());
       teleoperationParameters.load();
 
       syncedRobot = communicationHelper.newSyncedRobot();

@@ -34,7 +34,7 @@ public class ProMPAssistantTest
       assertTrue(proMPAssistant.getProMPManager(task)!=null);
       // use a csv file with the trajectories of the hands of the robot for testing
       WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
-      String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
+      String directoryAbsolutePath = directory.getFilesystemDirectory().toAbsolutePath().toString();
       String demoDirectory = directoryAbsolutePath + "/test/PushDoorTest";
       //get test number from config file
       String testFilePath = demoDirectory + "/" + proMPAssistant.getTestNumber() + ".csv";
