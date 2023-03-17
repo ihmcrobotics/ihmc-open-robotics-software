@@ -555,15 +555,24 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       rotationStepSizeInput.render(0.5, 3.0);
       Orientation3DBasics orientationToPrint = beforeForRotationPrintout();
-      double initialYaw = orientationToPrint.getYaw();
-      double initialPitch = orientationToPrint.getPitch();
-      double initialRoll = orientationToPrint.getRoll();
-      yawImGuiInput.setDoubleValue(Math.toDegrees(initialYaw));
-      pitchImGuiInput.setDoubleValue(Math.toDegrees(initialPitch));
-      rollImGuiInput.setDoubleValue(Math.toDegrees(initialRoll));
+      yawImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getYaw()));
+      pitchImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getPitch()));
+      rollImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getRoll()));
       yawImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
       pitchImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
       rollImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
+      boolean inputChanged = yawImGuiInput.getInputChanged();
+      inputChanged |= pitchImGuiInput.getInputChanged();
+      inputChanged |= rollImGuiInput.getInputChanged();
+      adjustmentNeedsToBeApplied |= inputChanged;
+      if (inputChanged)
+      {
+         Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
+         orientationToAdjust.setYawPitchRoll(Math.toRadians(yawImGuiInput.getDoubleValue()),
+                                             Math.toRadians(pitchImGuiInput.getDoubleValue()),
+                                             Math.toRadians(rollImGuiInput.getDoubleValue()));
+         afterRotationSetAbsolute();
+      }
       boolean rotationStepped = yawImGuiInput.getStepButtonClicked();
       rotationStepped |= pitchImGuiInput.getStepButtonClicked();
       rotationStepped |= rollImGuiInput.getStepButtonClicked();
@@ -733,6 +742,37 @@ public class RDXPose3DGizmo implements RenderableProvider
                adjustmentPose3D.changeFrame(camera3D.getCameraFrame());
             }
             adjustmentPose3D.getOrientation().prepend(rotationAdjustmentQuaternion);
+         }
+      }
+   }
+
+   private void afterRotationSetAbsolute()
+   {
+      switch (rotationAdjustmentFrame)
+      {
+         case WORLD, PARENT, CAMERA, CAMERA_ZUP ->
+         {
+            if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.WORLD)
+            {
+               rotationAdjustmentQuaternion.changeFrame(ReferenceFrame.getWorldFrame());
+               adjustmentPose3D.changeFrame(ReferenceFrame.getWorldFrame());
+            }
+            else if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.PARENT)
+            {
+               rotationAdjustmentQuaternion.changeFrame(parentReferenceFrame);
+               adjustmentPose3D.changeFrame(parentReferenceFrame);
+            }
+            else if (rotationAdjustmentFrame == RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP)
+            {
+               rotationAdjustmentQuaternion.changeFrame(cameraZUpFrameForAdjustment.getReferenceFrame());
+               adjustmentPose3D.changeFrame(cameraZUpFrameForAdjustment.getReferenceFrame());
+            }
+            else // CAMERA
+            {
+               rotationAdjustmentQuaternion.changeFrame(camera3D.getCameraFrame());
+               adjustmentPose3D.changeFrame(camera3D.getCameraFrame());
+            }
+            adjustmentPose3D.getOrientation().set(rotationAdjustmentQuaternion);
          }
       }
    }
