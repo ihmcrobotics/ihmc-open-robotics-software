@@ -50,7 +50,8 @@ public class WorkspaceJavaDirectory extends WorkspaceDirectory
       // i.e. /us/ihmc/tools/io would need to be us/ihmc/tools/io
       // to append to /path/to/ihmc-java-toolkit/src/test/resources/us/ihmc/tools/io
       String subsequentPathToJavaDirectory = classpathPath.toString().substring(1);
-      filesystemDirectory = filesystemDirectory.resolve(subsequentPathToJavaDirectory);
+      if (filesystemDirectory != null)
+         filesystemDirectory = filesystemDirectory.resolve(subsequentPathToJavaDirectory);
    }
 
    /**
