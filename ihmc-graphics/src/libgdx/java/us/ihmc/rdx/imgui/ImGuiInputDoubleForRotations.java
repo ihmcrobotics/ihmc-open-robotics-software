@@ -81,7 +81,7 @@ public class ImGuiInputDoubleForRotations
       style.setFramePadding(backupFramePaddingX, framePaddingY);
 
       if (minusClicked)
-         steppedAmount += ctrlHeld ? stepFast : step;
+         steppedAmount -= ctrlHeld ? stepFast : step;
       if (plusClicked)
          steppedAmount += ctrlHeld ? stepFast : step;
 
