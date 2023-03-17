@@ -179,6 +179,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return output;
    }
 
+   public void destroy()
+   {
+      if (useGPU)
+         ((GPUAStarBodyPathPlanner) bodyPathPlannerInterface).destroyOpenCLStuff();
+   }
+
    private void handleRequestInternal(FootstepPlannerRequest request) throws Exception
    {
       this.request.set(request);
@@ -426,6 +432,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       output.setBodyPathPlanningResult(bodyPathPlanningResult);
       output.setFootstepPlanningResult(FootstepPlanningResult.PLANNING);
       output.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.lap());
+      output.setSwingTrajectories(getSwingPlanningModule().getSwingTrajectories());
       statusCallbacks.forEach(callback -> callback.accept(output));
    }
 

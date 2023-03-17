@@ -14,7 +14,7 @@ import us.ihmc.tools.UnitConversions;
 public class RDXSCS2BulletPhysicsDoorDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final RDXSCS2BulletSimulationSession scs2SimulationSession = new RDXSCS2BulletSimulationSession();
+   private final RDXSCS2SimulationSession scs2SimulationSession = new RDXSCS2SimulationSession();
 
    public RDXSCS2BulletPhysicsDoorDemo()
    {

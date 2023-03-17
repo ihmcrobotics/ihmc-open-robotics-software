@@ -15,11 +15,14 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -30,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.Map;
 
-public class RigidBodyControlManager
+public class RigidBodyControlManager implements SCS2YoGraphicHolder
 {
    public static final double INITIAL_GO_HOME_TIME = 2.0;
 
@@ -604,5 +607,16 @@ public class RigidBodyControlManager
    public Object pollStatusToReport()
    {
       return stateMachine.getCurrentState().pollStatusToReport();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(bodyName + "-" + getClass().getSimpleName());
+      group.addChild(taskspaceControlState.getSCS2YoGraphics());
+      if (loadBearingControlState != null)
+         group.addChild(loadBearingControlState.getSCS2YoGraphics());
+      group.addChild(externalWrenchManager.getSCS2YoGraphics());
+      return group.isEmpty() ? null : group;
    }
 }

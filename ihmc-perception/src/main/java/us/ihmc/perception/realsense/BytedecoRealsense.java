@@ -91,9 +91,9 @@ public class BytedecoRealsense
       LogTools.info("Configured Depth Stream of L515 Device. Serial number: {}", serialNumber);
    }
 
-   public void enableColor(RealsenseSettingsProfile settingsProfile)
+   public void enableColor(RealsenseConfiguration realsenseConfiguration)
    {
-      enableColor(settingsProfile.getColorWidth(), settingsProfile.getColorHeight(), settingsProfile.getColorFPS());
+      enableColor(realsenseConfiguration.getColorWidth(), realsenseConfiguration.getColorHeight(), realsenseConfiguration.getColorFPS());
    }
 
    public void enableColor(int colorWidth, int colorHeight, int fps)
@@ -215,6 +215,8 @@ public class BytedecoRealsense
             {
                depthFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(syncedFrames, error);
                realsense2.rs2_get_video_stream_intrinsics(depthFrameStreamProfile, depthStreamIntrinsics, error);
+               checkError(false, "Failed to get depth stream intrinsics.");
+
                LogTools.info("Depth intrinsics: {}", String.format("Depth: fx: %.4f, fy: %.4f, cx: %.4f, cy: %.4f, h: %d, w: %d",
                                                                    depthStreamIntrinsics.fx(),
                                                                    depthStreamIntrinsics.fy(),
@@ -241,6 +243,8 @@ public class BytedecoRealsense
                {
                   colorFrameStreamProfile = realsense2.rs2_get_frame_stream_profile(extractedColorFrame, error);
                   realsense2.rs2_get_video_stream_intrinsics(colorFrameStreamProfile, colorStreamIntrinsics, error);
+                  checkError(false, "Failed to get color stream intrinsics.");
+
                   LogTools.info("Color intrinsics: {}", String.format("Color: fx: %.4f, fy: %.4f, cx: %.4f, cy: %.4f, h: %d, w: %d",
                                                                       colorStreamIntrinsics.fx(),
                                                                       colorStreamIntrinsics.fy(),

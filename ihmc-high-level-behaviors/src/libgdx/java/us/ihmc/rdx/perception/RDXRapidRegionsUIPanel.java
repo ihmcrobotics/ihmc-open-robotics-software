@@ -43,7 +43,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
-   private final ImBoolean renderPointCloud = new ImBoolean(true);
+   private final ImBoolean renderPointCloud = new ImBoolean(false);
 
    private ImGuiPlot wholeAlgorithmDurationPlot;
    private ImGuiPlot numberOfPlanarRegionsPlot;

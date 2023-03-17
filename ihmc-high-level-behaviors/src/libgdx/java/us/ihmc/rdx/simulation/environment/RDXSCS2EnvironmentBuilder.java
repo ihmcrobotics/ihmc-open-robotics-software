@@ -32,6 +32,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.FileVisitResult;
@@ -291,9 +292,8 @@ public class RDXSCS2EnvironmentBuilder extends ImGuiPanel
             ambientLightAmount.set(ambientValue);
             panel3D.getScene().setAmbientLight(ambientLightAmount.get());
          }
-         for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
+         JSONTools.forEachArrayElement(node, "objects", objectNode ->
          {
-            JsonNode objectNode = it.next();
             String objectTypeName = objectNode.get("type").asText();
             RDXSCS2EnvironmentObject object = RDXSCS2EnvironmentObjectLibrary.loadBySimpleClassName(objectTypeName);
 
@@ -314,7 +314,7 @@ public class RDXSCS2EnvironmentBuilder extends ImGuiPanel
             {
                LogTools.warn("Skipping loading object: {}", objectTypeName);
             }
-         }
+         });
       });
    }
 

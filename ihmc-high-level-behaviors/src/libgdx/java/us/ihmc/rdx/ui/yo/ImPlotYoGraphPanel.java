@@ -29,7 +29,7 @@ public class ImPlotYoGraphPanel
    private final String controllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
    private final int bufferSize;
    private final HashMap<String, ArrayList<ImPlotYoGraph>> graphs = new HashMap<>();
-   private final YoVariableClientHelper yoClientHelper = new YoVariableClientHelper(getClass().getSimpleName());
+   private final YoVariableClientHelper yoClientHelper;
    private final ImInt serverSelectedIndex = new ImInt(0);
    private String[] serverGraphGroupNames = new String[0];
    private final HashMap<String, TreeSet<String>> serverGraphGroups = new HashMap<>();
@@ -42,8 +42,14 @@ public class ImPlotYoGraphPanel
 
    public ImPlotYoGraphPanel(String title, int bufferSize)
    {
+      this(title, bufferSize, new YoVariableClientHelper(ImPlotYoGraphPanel.class.getSimpleName()));
+   }
+
+   public ImPlotYoGraphPanel(String title, int bufferSize, YoVariableClientHelper yoClientHelper)
+   {
       this.title = title;
       this.bufferSize = bufferSize;
+      this.yoClientHelper = yoClientHelper;
    }
 
    public void create()
@@ -237,7 +243,7 @@ public class ImPlotYoGraphPanel
    {
       yoClientHelper.disconnect();
       graphs.clear();
-      ImPlot.destroyContext(context);
+      ImPlotTools.destroy();
    }
 
    public String getWindowName()

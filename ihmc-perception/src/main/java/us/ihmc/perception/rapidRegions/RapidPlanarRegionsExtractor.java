@@ -100,13 +100,17 @@ public class RapidPlanarRegionsExtractor
       create(openCLManager, openCLManager.loadProgram("RapidRegionsExtractor"), imageHeight, imageWidth, fx, fy, cx, cy);
    }
 
+   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
+   {
+      create(openCLManager, program, imageHeight, imageWidth, fx, fy, cx, cy, "");
+   }
    /**
     * Creates buffers and kernels for the OpenCL program.
     *
     * @param imageWidth  width of the input depth image
     * @param imageHeight height of the input depth image
     */
-   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy)
+   public void create(OpenCLManager openCLManager, _cl_program program, int imageHeight, int imageWidth, double fx, double fy, double cx, double cy, String version)
    {
       this.sensorModel = SensorModel.PERSPECTIVE;
       this.openCLManager = openCLManager;
@@ -114,7 +118,7 @@ public class RapidPlanarRegionsExtractor
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
-      this.parameters = new RapidRegionsExtractorParameters();
+      this.parameters = new RapidRegionsExtractorParameters(version);
       this.parameters.set(RapidRegionsExtractorParameters.focalLengthXPixels, fx);
       this.parameters.set(RapidRegionsExtractorParameters.focalLengthYPixels, fy);
       this.parameters.set(RapidRegionsExtractorParameters.principalOffsetXPixels, cx);

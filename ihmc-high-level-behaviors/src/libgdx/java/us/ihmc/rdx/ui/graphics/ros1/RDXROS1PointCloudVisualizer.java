@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.graphics.ros1;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
@@ -14,6 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXROS1Visualizer;
 import us.ihmc.log.LogTools;
@@ -22,8 +22,10 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
+import java.util.Set;
+
 @Deprecated
-public class RDXROS1PointCloudVisualizer extends RDXROS1Visualizer implements RenderableProvider
+public class RDXROS1PointCloudVisualizer extends RDXROS1Visualizer
 {
    private static final int MAX_POINTS = 100000;
 
@@ -201,9 +203,9 @@ public class RDXROS1PointCloudVisualizer extends RDXROS1Visualizer implements Re
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive())
+      if (isActive() && sceneLevelCheck(sceneLevels))
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 

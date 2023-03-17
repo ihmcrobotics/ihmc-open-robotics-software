@@ -10,6 +10,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
@@ -24,7 +25,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
    private final ImBoolean inPaintHeight = new ImBoolean(false);
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
-   private final ROS2Heartbeat activeHeartbeat;
 
    public RDXHeightMapVisualizer(ROS2PublishSubscribeAPI ros2)
    {
@@ -35,7 +35,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
       executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), daemon, queueSize);
 
       ros2.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
-      activeHeartbeat = new ROS2Heartbeat(ros2, ROS2Tools.PUBLISH_HEIGHT_MAP);
    }
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
@@ -90,7 +89,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
       {
          gridMapGraphic.update();
       }
-      activeHeartbeat.setAlive(isActive);
    }
 
    @Override
@@ -104,7 +102,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
 
    public void destroy()
    {
-      activeHeartbeat.destroy();
       gridMapGraphic.destroy();
    }
 }
