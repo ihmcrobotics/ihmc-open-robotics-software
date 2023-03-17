@@ -13,9 +13,7 @@ import java.util.Random;
 
 public class ImPlotPlotDemo
 {
-   private final ImGuiGlfwWindow baseUI = new ImGuiGlfwWindow(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final ImGuiGlfwWindow baseUI = new ImGuiGlfwWindow(getClass());
    private ImPlotPlotPanel plotPanel = new ImPlotPlotPanel("Plot Panel");
    private ImPlotPlot trigPlot = new ImPlotPlot();
    private final ImPlotDoublePlotLine sineLine = new ImPlotDoublePlotLine("Sine");

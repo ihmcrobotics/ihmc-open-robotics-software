@@ -462,7 +462,7 @@ public class SCS2AvatarSimulationFactory
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / simulationDT.get());
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / simulationDT.get());
-      int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / robotModel.getSimulateDT());
+      int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
