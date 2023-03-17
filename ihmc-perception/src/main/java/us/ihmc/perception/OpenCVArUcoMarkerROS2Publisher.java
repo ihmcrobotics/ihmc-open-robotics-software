@@ -11,6 +11,9 @@ import us.ihmc.tools.thread.SwapReference;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Used to publish detected ArUco marker poses over ROS 2.
+ */
 public class OpenCVArUcoMarkerROS2Publisher
 {
    private final OpenCVArUcoMarkerDetection arUcoMarkerDetection;
