@@ -67,7 +67,9 @@ public class WorkspaceDirectory
 
    protected void setFilesystemDirectoryToSourceSetDirectory(Class<?> classForFindingSourceSetDirectory, String subsequentPath)
    {
-      filesystemDirectory = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory).resolve(subsequentPath);
+      filesystemDirectory = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory);
+      if (filesystemDirectory != null)
+         filesystemDirectory = filesystemDirectory.resolve(subsequentPath);
    }
 
    /** If the directory is available for reading/writing using files.
