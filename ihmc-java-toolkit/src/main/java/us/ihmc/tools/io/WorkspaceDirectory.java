@@ -45,9 +45,29 @@ public class WorkspaceDirectory
       filesystemDirectory = WorkspacePathTools.findPath(directoryNameToAssumePresent, subsequentPath);
    }
 
+   public WorkspaceDirectory(Class<?> classForFindingSourceSetDirectory)
+   {
+      setFilesystemDirectoryToSourceSetDirectory(classForFindingSourceSetDirectory);
+   }
+
+   public WorkspaceDirectory(Class<?> classForFindingSourceSetDirectory, String subsequentPath)
+   {
+      setFilesystemDirectoryToSourceSetDirectory(classForFindingSourceSetDirectory, subsequentPath);
+   }
+
    public WorkspaceDirectory(Path filesystemDirectory)
    {
       this.filesystemDirectory = filesystemDirectory;
+   }
+
+   protected void setFilesystemDirectoryToSourceSetDirectory(Class<?> classForFindingSourceSetDirectory)
+   {
+      filesystemDirectory = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory);
+   }
+
+   protected void setFilesystemDirectoryToSourceSetDirectory(Class<?> classForFindingSourceSetDirectory, String subsequentPath)
+   {
+      filesystemDirectory = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory).resolve(subsequentPath);
    }
 
    /** If the directory is available for reading/writing using files.

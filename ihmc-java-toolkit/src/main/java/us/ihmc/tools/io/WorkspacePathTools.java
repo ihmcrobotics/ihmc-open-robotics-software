@@ -112,19 +112,19 @@ public class WorkspacePathTools
    }
 
    /**
-    * Uses Java's security functionality to find the source code path and
-    * use it, along with the current working directory, to figure out where
-    * the resources directory is, if possible. This method probably works
-    * for most of our use cases, which is just to save configuration files
-    * to version control from applications as we are developing them.
+    * Uses Java's security functionality to find the source code path and use it to
+    * figure out where the source set directory containing the Java source file is,
+    * if possible. This method probably works for most of our use cases, which is just
+    * to save configuration files to version control from applications as we are
+    * developing them.
     */
-   public static WorkingDirectoryPathComponents inferWorkingDirectoryPathComponents(Class<?> classForLoading)
+   public static Path inferFilesystemSourceSetDirectory(Class<?> classForFindingSourceSetDirectory)
    {
-      WorkingDirectoryPathComponents inferredPathComponents = null;
+      Path inferredSourceSetDirectory = null;
       ProtectionDomain protectionDomain;
       try
       {
-         protectionDomain = classForLoading.getProtectionDomain();
+         protectionDomain = classForFindingSourceSetDirectory.getProtectionDomain();
          CodeSource codeSource = protectionDomain.getCodeSource();
          URL location = codeSource == null ? null : codeSource.getLocation();
          // Going through URI is required to support Windows
@@ -146,23 +146,14 @@ public class WorkspacePathTools
                // This removes out/production/classes from [...]project/src/extra/out/production/classes
                // This removes bin from [...]project/bin
                // This removes bin from [...]project/src/extra/bin
-               Path sourceSetPath = Paths.get("/").resolve(codeSourceDirectory.subpath(0, indexOfBuildFolder));
+               inferredSourceSetDirectory = Paths.get("/").resolve(codeSourceDirectory.subpath(0, indexOfBuildFolder));
 
                // Since src/main gets built in the project folder, we need to add it back.
                int lastIndexOfSrc = findLastIndexOfPart(codeSourceDirectory, "src");
                if (lastIndexOfSrc < 0)
-                  sourceSetPath = sourceSetPath.resolve("src/main");
+                  inferredSourceSetDirectory = inferredSourceSetDirectory.resolve("src/main");
 
-               LogTools.debug("Source set path: {}", sourceSetPath);
-
-               int lastIndexOfSrcInPath = findLastIndexOfPart(sourceSetPath, "src");
-               Path parentOfSrcDirectory = Paths.get("/").resolve(sourceSetPath.subpath(0, lastIndexOfSrcInPath));
-               Path subsequentPathToSourceSet = sourceSetPath.subpath(lastIndexOfSrcInPath, sourceSetPath.getNameCount());
-
-               inferredPathComponents = new WorkingDirectoryPathComponents(parentOfSrcDirectory, subsequentPathToSourceSet);
-
-               LogTools.info("Inferred workspace directory components:\n Parent of src folder: {}\n Source set path: {}",
-                             parentOfSrcDirectory, subsequentPathToSourceSet);
+               LogTools.info("Inferred source set directory:\n {}", inferredSourceSetDirectory);
             }
             else
             {
@@ -179,7 +170,7 @@ public class WorkspacePathTools
          LogTools.error(securityException.getMessage());
       }
 
-      return inferredPathComponents;
+      return inferredSourceSetDirectory;
    }
 
    private static int findLastIndexOfPart(Path pathToSearch, String partName)
