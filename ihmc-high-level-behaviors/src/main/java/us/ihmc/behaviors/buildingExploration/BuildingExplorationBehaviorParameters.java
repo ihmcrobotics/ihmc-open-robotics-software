@@ -14,13 +14,13 @@ public class BuildingExplorationBehaviorParameters extends StoredPropertySet imp
 
    public BuildingExplorationBehaviorParameters()
    {
-      super(keys, BuildingExplorationBehaviorParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      super(keys, BuildingExplorationBehaviorParameters.class);
       load();
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys, BuildingExplorationBehaviorParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, BuildingExplorationBehaviorParameters.class);
       parameters.loadUnsafe();
       parameters.save();
    }

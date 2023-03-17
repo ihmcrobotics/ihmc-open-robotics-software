@@ -18,7 +18,7 @@ public class DoorBehaviorFootstepPlannerParameters extends StoredPropertySet imp
 
    public DoorBehaviorFootstepPlannerParameters(String projectName, String pathToResources, String fileNameSuffix)
    {
-      super(FootstepPlannerParameterKeys.keys, DoorBehaviorFootstepPlannerParameters.class, projectName, pathToResources, fileNameSuffix);
+      super(FootstepPlannerParameterKeys.keys, DoorBehaviorFootstepPlannerParameters.class, fileNameSuffix);
       load();
 
       System.out.println();
@@ -28,9 +28,7 @@ public class DoorBehaviorFootstepPlannerParameters extends StoredPropertySet imp
    public static void main(String[] args)
    {
       StoredPropertySet storedPropertySet = new StoredPropertySet(FootstepPlannerParameterKeys.keys,
-                                                                  DoorBehaviorFootstepPlannerParameters.class,
-                                                                  PROJECT_NAME,
-                                                                  PATH_TO_RESOURCES);
+                                                                  DoorBehaviorFootstepPlannerParameters.class);
       storedPropertySet.loadUnsafe();
       storedPropertySet.save();
    }

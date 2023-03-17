@@ -19,9 +19,6 @@ public class StoredPropertySetJavaGenerator
 {
    private final String jsonFileName;
    private final Class<?> basePropertySetClass;
-   private String directoryNameToAssumePresent;
-   private String subsequentPathToResourceFolder;
-   private String subsequentPathToJavaFolder;
    private final WorkspaceDirectory javaDirectory;
    private final WorkspaceFile primaryJavaFile;
    private final WorkspaceFile basicsJavaFile;
@@ -30,15 +27,9 @@ public class StoredPropertySetJavaGenerator
    private record StoredPropertyFromFile(String titleCasedName, String typeName, String typePrimitiveName, String description) { }
    private final ArrayList<StoredPropertyFromFile> storedPropertiesFromFile = new ArrayList<>();
 
-   public StoredPropertySetJavaGenerator(Class<?> basePropertySetClass,
-                                         String directoryNameToAssumePresent,
-                                         String subsequentPathToResourceFolder,
-                                         String subsequentPathToJavaFolder)
+   public StoredPropertySetJavaGenerator(Class<?> basePropertySetClass)
    {
       this.basePropertySetClass = basePropertySetClass;
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
-      this.subsequentPathToJavaFolder = subsequentPathToJavaFolder;
 
       javaDirectory = new WorkspaceJavaDirectory(basePropertySetClass, "generated-java");
       jsonFileName = basePropertySetClass.getSimpleName() + ".json";
@@ -180,10 +171,6 @@ public class StoredPropertySetJavaGenerator
              */
             public class %2$s extends StoredPropertySet implements %2$sBasics
             {
-               public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "%4$s";
-               public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "%5$s";
-               public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "%6$s";
-               
                public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
                
             %3$s
@@ -200,39 +187,33 @@ public class StoredPropertySetJavaGenerator
                 */
                public %2$s(String versionSpecifier)
                {
-                  this(%2$s.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+                  this(%2$s.class, versionSpecifier);
                }
                
                /**
                 * Loads an alternate version of this property set in other folders.
                 */
-               public %2$s(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+               public %2$s(Class<?> classForLoading, String versionSuffix)
                {
-                  super(keys, classForLoading, %2$s.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+                  super(keys, classForLoading, %2$s.class, versionSuffix);
                   load();
                }
                
                public %2$s(StoredPropertySetReadOnly other)
                {
-                  super(keys, %2$s.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+                  super(keys, %2$s.class, other.getCurrentVersionSuffix());
                   set(other);
                }
                   
                public static void main(String[] args)
                {
-                  StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                                       %2$s.class,
-                                                                       DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                                       SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-                  parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                  StoredPropertySet parameters = new StoredPropertySet(keys, %2$s.class);
+                  parameters.generateJavaFiles();
                }
             }
             """.formatted(basePropertySetClass.getPackage().getName(),
                           basePropertySetClass.getSimpleName(),
                           getParameterKeysStrings(),
-                          directoryNameToAssumePresent,
-                          subsequentPathToResourceFolder,
-                          subsequentPathToJavaFolder,
                           basePropertySetClass.getPackage().getName().replaceAll("\\.", "/"));
 
       FileTools.write(primaryJavaFile.getFilesystemFile(), primaryJavaFileContents.getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);

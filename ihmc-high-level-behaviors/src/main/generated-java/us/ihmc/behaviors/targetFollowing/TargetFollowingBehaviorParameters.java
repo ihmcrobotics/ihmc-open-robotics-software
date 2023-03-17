@@ -33,22 +33,20 @@ public class TargetFollowingBehaviorParameters extends StoredPropertySet impleme
 
    public TargetFollowingBehaviorParameters(String versionSpecifier)
    {
-      super(keys, TargetFollowingBehaviorParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      super(keys, TargetFollowingBehaviorParameters.class, versionSpecifier);
       load();
    }
 
    public TargetFollowingBehaviorParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, TargetFollowingBehaviorParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, TargetFollowingBehaviorParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           TargetFollowingBehaviorParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                                                           TargetFollowingBehaviorParameters.class);
+      parameters.generateJavaFiles();
    }
 }

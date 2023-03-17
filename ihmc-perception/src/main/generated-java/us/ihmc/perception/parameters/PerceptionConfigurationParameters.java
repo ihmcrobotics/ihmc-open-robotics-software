@@ -51,22 +51,20 @@ public class PerceptionConfigurationParameters extends StoredPropertySet impleme
     */
    public PerceptionConfigurationParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
    {
-      super(keys, classForLoading, PerceptionConfigurationParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, PerceptionConfigurationParameters.class, versionSuffix);
       load();
    }
 
    public PerceptionConfigurationParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, PerceptionConfigurationParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, PerceptionConfigurationParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           PerceptionConfigurationParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                                                           PerceptionConfigurationParameters.class);
+      parameters.generateJavaFiles();
    }
 }

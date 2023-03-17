@@ -21,7 +21,7 @@ public class DefaultPawStepPlannerParameters extends StoredPropertySet implement
 
    private DefaultPawStepPlannerParameters(String projectName, String pathToResources, PawStepPlannerParametersReadOnly pawPlannerParameters)
    {
-      super(PawStepPlannerParameterKeys.keys, DefaultPawStepPlannerParameters.class, projectName, pathToResources);
+      super(PawStepPlannerParameterKeys.keys, DefaultPawStepPlannerParameters.class);
 
       if (pawPlannerParameters != null)
       {

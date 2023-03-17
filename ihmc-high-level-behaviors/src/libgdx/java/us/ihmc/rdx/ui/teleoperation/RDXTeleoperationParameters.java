@@ -36,7 +36,7 @@ public class RDXTeleoperationParameters extends StoredPropertySet
 
    public RDXTeleoperationParameters(String robotRepoName, String robotSubsequentPathToResourceFolder, String robotName)
    {
-      super(keys, RDXTeleoperationParameters.class, robotRepoName, robotSubsequentPathToResourceFolder, StringUtils.capitalize(robotName));
+      super(keys, RDXTeleoperationParameters.class, StringUtils.capitalize(robotName));
    }
 
    public double getTrajectoryTime()

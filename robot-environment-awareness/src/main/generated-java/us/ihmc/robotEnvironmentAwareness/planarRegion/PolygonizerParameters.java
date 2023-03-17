@@ -68,22 +68,20 @@ public class PolygonizerParameters extends StoredPropertySet implements Polygoni
 
    public PolygonizerParameters(String versionSpecifier)
    {
-      super(keys, PolygonizerParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      super(keys, PolygonizerParameters.class, versionSpecifier);
       load();
    }
 
    public PolygonizerParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, PolygonizerParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, PolygonizerParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           PolygonizerParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                                                           PolygonizerParameters.class);
+      parameters.generateJavaFiles();
    }
 }

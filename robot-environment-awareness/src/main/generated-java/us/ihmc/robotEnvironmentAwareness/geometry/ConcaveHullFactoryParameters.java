@@ -35,22 +35,20 @@ public class ConcaveHullFactoryParameters extends StoredPropertySet implements C
 
    public ConcaveHullFactoryParameters(String versionSpecifier)
    {
-      super(keys, ConcaveHullFactoryParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      super(keys, ConcaveHullFactoryParameters.class, versionSpecifier);
       load();
    }
 
    public ConcaveHullFactoryParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, ConcaveHullFactoryParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, ConcaveHullFactoryParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           ConcaveHullFactoryParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                                                           ConcaveHullFactoryParameters.class);
+      parameters.generateJavaFiles();
    }
 }

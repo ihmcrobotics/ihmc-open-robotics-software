@@ -21,7 +21,7 @@ public class DefaultSwingPlannerParameters extends StoredPropertySet implements 
 
    private DefaultSwingPlannerParameters(String projectName, String pathToResources, SwingPlannerParametersReadOnly swingPlannerParameters)
    {
-      super(SwingPlannerParameterKeys.keys, DefaultSwingPlannerParameters.class, projectName, pathToResources);
+      super(SwingPlannerParameterKeys.keys, DefaultSwingPlannerParameters.class);
 
       if (swingPlannerParameters != null)
       {
