@@ -380,7 +380,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       if (jsonResourceExists())
       {
-         LogTools.info("Loading parameters from resource: {}/{}", classForLoading.getPackageName().replaceAll("\\.", "/"), saveFileNameJSON);
+         LogTools.info("Loading parameters from resource: {}", workspaceJSONFile.getPathForResourceLoadingPathFiltered());
          JSONFileTools.loadFromClasspath(classForLoading, workspaceJSONFile.getPathForResourceLoadingPathFiltered(), node ->
          {
             if (node instanceof ObjectNode objectNode)
