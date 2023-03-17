@@ -31,7 +31,8 @@ public abstract class ResourceMonitor
       {
          try
          {
-            parse(read());
+            String[] lines = read();
+            parse(lines);
          }
          catch (Exception e)
          {
