@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class PlanarRegionMappingParameters extends StoredPropertySet implements PlanarRegionMappingParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-perception/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-perception/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey updateAlphaTowardsMatch = keys.addDoubleKey("Update Alpha towards match");
@@ -31,6 +27,17 @@ public class PlanarRegionMappingParameters extends StoredPropertySet implements 
    public static final DoubleStoredPropertyKey minimumBoundingBoxSize = keys.addDoubleKey("Minimum bounding box size");
    public static final DoubleStoredPropertyKey planeNoiseVariance = keys.addDoubleKey("Plane noise variance");
    public static final DoubleStoredPropertyKey odometryNoiseVariance = keys.addDoubleKey("Odometry noise variance");
+   public static final DoubleStoredPropertyKey stateEstimatorNoiseVariance = keys.addDoubleKey("State estimator noise variance");
+   public static final DoubleStoredPropertyKey bestMatchAngularThreshold = keys.addDoubleKey("Best match angular threshold");
+   public static final DoubleStoredPropertyKey bestMatchDistanceThreshold = keys.addDoubleKey("Best match distance threshold");
+   public static final DoubleStoredPropertyKey bestMinimumOverlapThreshold = keys.addDoubleKey("Best minimum overlap threshold");
+   public static final DoubleStoredPropertyKey keyframeDistanceThreshold = keys.addDoubleKey("Keyframe distance threshold");
+   public static final DoubleStoredPropertyKey keyframeAngularThreshold = keys.addDoubleKey("Keyframe angular threshold");
+   public static final IntegerStoredPropertyKey icpMaxIterations = keys.addIntegerKey("ICP max iterations");
+   public static final IntegerStoredPropertyKey icpMinMatches = keys.addIntegerKey("ICP min matches");
+   public static final DoubleStoredPropertyKey icpTerminationRatio = keys.addDoubleKey("ICP termination ratio");
+   public static final DoubleStoredPropertyKey icpErrorCutoff = keys.addDoubleKey("ICP error cutoff");
+   public static final IntegerStoredPropertyKey minimumNumberOfTimesMatched = keys.addIntegerKey("Minimum number of times matched");
 
    /**
     * Loads this property set.
@@ -43,32 +50,29 @@ public class PlanarRegionMappingParameters extends StoredPropertySet implements 
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public PlanarRegionMappingParameters(String versionSpecifier)
+   public PlanarRegionMappingParameters(String versionSuffix)
    {
-      this(PlanarRegionMappingParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(PlanarRegionMappingParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public PlanarRegionMappingParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public PlanarRegionMappingParameters(Class<?> classForLoading, String versionSuffix)
    {
-      super(keys, classForLoading, PlanarRegionMappingParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, PlanarRegionMappingParameters.class, versionSuffix);
       load();
    }
 
    public PlanarRegionMappingParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, PlanarRegionMappingParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, PlanarRegionMappingParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           PlanarRegionMappingParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, PlanarRegionMappingParameters.class);
+      parameters.generateJavaFiles();
    }
 }

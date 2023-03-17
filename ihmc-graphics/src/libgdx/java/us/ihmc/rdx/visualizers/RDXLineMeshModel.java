@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -56,6 +57,41 @@ public class RDXLineMeshModel implements RenderableProvider
    public void generateMeshesAsync(ArrayList<Point3D> points, int skip)
    {
       executorService.clearQueueAndExecute(() -> generateMeshes(points, skip));
+   }
+
+   /**
+    * Generates a mesh for the given points. The points are sequentially pairwise connected as 0-1, 2-3, 4-5, etc. This is useful for visualizing
+    * feature correspondences. For example, matching planar region pairs from two different sets of planar regions.
+    * @param points The points to connect pairwise.
+    */
+   public synchronized void generateMeshForMatchLines(ArrayList<Point3DReadOnly> points)
+   {
+      // if we're passing in null, make an empty list
+      if (points == null)
+         points = new ArrayList<>();
+
+      RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
+      for (int i = 0; i < points.size(); i+= 2)
+      {
+         meshBuilder.addLine(points.get(i), points.get(i+1), lineWidth, color);
+      }
+      buildMeshAndCreateModelInstance = () ->
+      {
+         modelBuilder.begin();
+         Mesh mesh = meshBuilder.generateMesh();
+         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
+         Material material = new Material();
+         Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+         material.set(TextureAttribute.createDiffuse(paletteTexture));
+         material.set(ColorAttribute.createDiffuse(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
+         modelBuilder.part(meshPart, material);
+
+         if (lastModel != null)
+            lastModel.dispose();
+
+         lastModel = modelBuilder.end();
+         modelInstance = new ModelInstance(lastModel);
+      };
    }
 
    public synchronized void generateMeshes(ArrayList<Point3D> points, int skip)

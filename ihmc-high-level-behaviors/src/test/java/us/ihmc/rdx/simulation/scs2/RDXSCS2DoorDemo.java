@@ -11,6 +11,9 @@ import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
 
+/**
+ * An SCS 2 simulation of a door hinged on a frame with a lever handle.
+ */
 public class RDXSCS2DoorDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
