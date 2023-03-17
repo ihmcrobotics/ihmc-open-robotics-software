@@ -54,6 +54,7 @@ public class RaymanWalkerSimulation
 //      scs.addYoEntry("measuredCapturePointX");
 //      scs.addYoEntry("measuredCapturePointY");
 //      scs.addYoEntry("measuredCapturePointZ");
+      scs.addYoEntry("walkModeYoEnum");
 
 
       walker.addController(controller);

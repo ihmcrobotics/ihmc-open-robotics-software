@@ -19,7 +19,9 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -28,6 +30,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
@@ -56,6 +59,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -113,7 +117,18 @@ public class RaymanController implements Controller
 
    private final ArrayList<Point3D> leftHipTrajectory = new ArrayList<>();
    private final BagOfBalls leftHipTrajectoryBalls = new BagOfBalls(500, 0.05, "leftHipTrajectory", YoAppearance.Black(), registry, yoGraphicsListRegistry);
-   private int leftHipTrajectoryIndex = 0;
+
+   // this is icp0 or final icp in the backward icp equation
+   private final YoFramePoint3D referenceICP = new YoFramePoint3D("referenceICP", WORLD_FRAME, registry);
+   private final YoFramePoint3D referenceCOM = new YoFramePoint3D("referenceCOM", WORLD_FRAME, registry);
+
+   // walk mode
+
+   private enum WalkMode
+   {
+      ASIMO, LIP
+   }
+   private final YoEnum<WalkMode> walkModeYoEnum = new YoEnum<>("walkMode", registry, WalkMode.class);
 
    private enum WalkingStateEnum
    {
@@ -154,6 +169,9 @@ public class RaymanController implements Controller
 
       ankleDesiredYawPitchRoll = new YoFrameYawPitchRoll("ankleDesiredYawPitchRoll", ReferenceFrame.getWorldFrame(), registry);
       ankleDesiredAngularVelocity = new YoFrameVector3D("ankleDesiredAngularVelocity", ReferenceFrame.getWorldFrame(), registry);
+
+      // Set walk mode here
+      walkModeYoEnum.set(WalkMode.ASIMO);
    }
 
    public YoGraphicDefinition createVisualization()
@@ -527,12 +545,15 @@ public class RaymanController implements Controller
       private final YoFrameVector3D touchdownVelocity;
       private final FramePose3D swingControlFramePose = new FramePose3D();
 
+      private final YoFramePoint3D currentDesiredFootstepPosition;
+
       public SingleSupportState(RobotSide supportSide)
       {
          this.supportSide = supportSide;
          swingSide = supportSide.getOppositeSide();
          initialPosition = new YoFramePoint3D(swingSide.getCamelCaseName() + "SwingStart", WORLD_FRAME, registry);
          desiredFootstepPosition = new YoFramePoint3D(swingSide.getCamelCaseName() + "DesiredFootstep", WORLD_FRAME, registry);
+         currentDesiredFootstepPosition = new YoFramePoint3D(swingSide.getCamelCaseName() + "CurrentDesiredFootstep", WORLD_FRAME, registry);
          touchdownVelocity = new YoFrameVector3D(swingSide.getCamelCaseName() + "TouchdownVelocity", WORLD_FRAME, registry);
          touchdownVelocity.set(0.0, 0.0, -0.1);
 
@@ -567,12 +588,15 @@ public class RaymanController implements Controller
          desiredStepLength.set(0.3);
 
          // Here we compute the position for the next footstep.
-
          initialPosition.setFromReferenceFrame(robotJae.getSoleFrame(swingSide));
          desiredFootstepPosition.setFromReferenceFrame(robotJae.getSoleFrame(swingSide));
          desiredFootstepPosition.setX(supportFootPosition.getX() + desiredStepLength.getValue());
-
          desiredNextFootstepPositionForVisual.set(desiredFootstepPosition);
+
+         // TODO: for now let's make next desired footstep location as reference icp.
+         referenceICP.set(desiredFootstepPosition);
+         referenceCOM.set(robotJae.getCenterOfMassPosition());
+
          // normal
          swingPositionTrajectory.setInitialConditions(initialPosition, new FrameVector3D());
          swingPositionTrajectory.setFinalConditions(desiredFootstepPosition, touchdownVelocity);
@@ -592,16 +616,29 @@ public class RaymanController implements Controller
          addHipTrajectoryPoint();
 
          // During this state, the center of mass is kept right above the support foot.
+         // Mode 1 : ASIMO-like movement of the COM
          FramePoint3D centerOfMassPosition = new FramePoint3D(robotJae.getSoleFrame(supportSide));
          centerOfMassPosition.changeFrame(WORLD_FRAME);
          centerOfMassPosition.setZ(DESIRED_CENTER_OF_MASS_HEIGHT);
          desiredCenterOfMassPoint.set(centerOfMassPosition);
+
+         if (walkModeYoEnum.getValue() == WalkMode.LIP)
+         {
+            // Mode 2 : LIPM-like movement of the COM
+            FramePoint3D comFromTrajectory = evaluateCOMFromMassTrajectory(referenceICP,
+                                                                           soleFrames.get(supportSide).getTransformToWorldFrame().getTranslation(),
+                                                                           referenceCOM,
+                                                                           timeInState);
+            desiredCenterOfMassPoint.set(comFromTrajectory);
+         }
+
 
          FramePoint3D measuredCoMPosition = new FramePoint3D(WORLD_FRAME, toolbox.getCenterOfMassFrame().getTransformToWorldFrame().getTranslation());
          measuredCenterOfMassPoint.set(measuredCoMPosition);
 
          // We pack the center of mass command for the controller core.
          sendCenterOfMassCommand(desiredCenterOfMassPoint);
+
 
          // As in the standing state, the support is specified with the contact state
          // command and zero acceleration command.
@@ -624,6 +661,9 @@ public class RaymanController implements Controller
          FrameVector3D acceleration = new FrameVector3D();
          swingPositionTrajectory.compute(timeInState);
          swingPositionTrajectory.getLinearData(position, velocity, acceleration);
+
+         // store currently desired footstep position to Yo
+         currentDesiredFootstepPosition.set(position);
 
          FrameVector3D takeOffVelocity = new FrameVector3D(WORLD_FRAME, 0.0, 0.0, 0.01);
          if (timeInState <= swingDuration.getValue() * 0.1)
@@ -772,5 +812,32 @@ public class RaymanController implements Controller
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
+   }
+
+   private FramePoint3D evaluateICP(Tuple3DReadOnly icp0, Tuple3DReadOnly support, double t)
+   {
+      // eqn: backwards eta(t) = exp(-w*t) * (eta0 - u) + u
+      double exp_wt = Math.exp(-omega0 * t);
+      FramePoint3D icp = new FramePoint3D();
+      icp.sub(icp0, support);
+      icp.scale(exp_wt);
+      icp.add(support);
+
+      return icp;
+   }
+
+   private FramePoint3D evaluateCOMFromMassTrajectory(Tuple3DReadOnly icp0, Tuple3DReadOnly support, Tuple3DReadOnly com0, double t)
+   {
+      // icp at time t
+      Point3DBasics icp = evaluateICP(icp0, support, t);
+
+      // eqn: forward com(t) = exp(-w*t) * (com0 - icp(t)) + icp(t)
+      FramePoint3D com = new FramePoint3D();
+      double exp_wt = Math.exp(-omega0 * t);
+      com.sub(com0, icp);
+      com.scale(exp_wt);
+      com.add(icp);
+
+      return com;
    }
 }
