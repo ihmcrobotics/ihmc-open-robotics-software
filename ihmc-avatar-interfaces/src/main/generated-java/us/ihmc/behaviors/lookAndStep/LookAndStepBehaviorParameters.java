@@ -232,22 +232,20 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
     */
    public LookAndStepBehaviorParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
    {
-      super(keys, classForLoading, LookAndStepBehaviorParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, LookAndStepBehaviorParameters.class, versionSuffix);
       load();
    }
 
    public LookAndStepBehaviorParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, LookAndStepBehaviorParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, LookAndStepBehaviorParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           LookAndStepBehaviorParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                                                           LookAndStepBehaviorParameters.class);
+      parameters.generateJavaFiles();
    }
 }

@@ -239,22 +239,20 @@ public class AStarBodyPathPlannerParameters extends StoredPropertySet implements
     */
    public AStarBodyPathPlannerParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
    {
-      super(keys, classForLoading, AStarBodyPathPlannerParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, AStarBodyPathPlannerParameters.class, versionSuffix);
       load();
    }
 
    public AStarBodyPathPlannerParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, AStarBodyPathPlannerParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, AStarBodyPathPlannerParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           AStarBodyPathPlannerParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                                                           AStarBodyPathPlannerParameters.class);
+      parameters.generateJavaFiles();
    }
 }

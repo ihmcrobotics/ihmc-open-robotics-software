@@ -25,7 +25,7 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
 
    public ValkyrieFootstepPlannerParameters(String projectName, String pathToResources, String fileNameSuffix)
    {
-      super(FootstepPlannerParameterKeys.keys, ValkyrieFootstepPlannerParameters.class, projectName, pathToResources);
+      super(FootstepPlannerParameterKeys.keys, ValkyrieFootstepPlannerParameters.class);
 
       setCheckForBodyBoxCollisions(false);
       setIdealFootstepWidth(0.2);

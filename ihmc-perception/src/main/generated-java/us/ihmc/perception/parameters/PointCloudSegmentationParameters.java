@@ -56,22 +56,20 @@ public class PointCloudSegmentationParameters extends StoredPropertySet implemen
     */
    public PointCloudSegmentationParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
    {
-      super(keys, classForLoading, PointCloudSegmentationParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, PointCloudSegmentationParameters.class, versionSuffix);
       load();
    }
 
    public PointCloudSegmentationParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, PointCloudSegmentationParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, PointCloudSegmentationParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           PointCloudSegmentationParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                                                           PointCloudSegmentationParameters.class);
+      parameters.generateJavaFiles();
    }
 }

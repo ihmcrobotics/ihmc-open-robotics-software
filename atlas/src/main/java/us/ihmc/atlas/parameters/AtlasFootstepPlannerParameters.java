@@ -26,7 +26,7 @@ public class AtlasFootstepPlannerParameters extends StoredPropertySet implements
 
    public AtlasFootstepPlannerParameters(String projectName, String pathToResources, String fileNameSuffix)
    {
-      super(FootstepPlannerParameterKeys.keys, AtlasFootstepPlannerParameters.class, projectName, pathToResources, fileNameSuffix);
+      super(FootstepPlannerParameterKeys.keys, AtlasFootstepPlannerParameters.class, fileNameSuffix);
       loadUnsafe();
    }
 
@@ -34,9 +34,7 @@ public class AtlasFootstepPlannerParameters extends StoredPropertySet implements
    public static void main(String[] args)
    {
       StoredPropertySet storedPropertySet = new StoredPropertySet(FootstepPlannerParameterKeys.keys,
-                                                                  AtlasFootstepPlannerParameters.class,
-                                                                  PROJECT_NAME,
-                                                                  PATH_TO_RESOURCES);
+                                                                  AtlasFootstepPlannerParameters.class);
       storedPropertySet.loadUnsafe();
       storedPropertySet.save();
    }

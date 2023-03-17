@@ -21,7 +21,7 @@ public class DefaultVisibilityGraphParameters extends StoredPropertySet implemen
 
    private DefaultVisibilityGraphParameters(String projectName, String pathToResources, VisibilityGraphsParametersReadOnly parameters)
    {
-      super(VisibilityGraphParametersKeys.keys, DefaultVisibilityGraphParameters.class, projectName, pathToResources);
+      super(VisibilityGraphParametersKeys.keys, DefaultVisibilityGraphParameters.class);
 
       if (parameters != null)
       {

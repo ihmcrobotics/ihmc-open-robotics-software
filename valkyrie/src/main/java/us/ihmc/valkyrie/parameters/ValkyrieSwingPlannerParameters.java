@@ -23,7 +23,7 @@ public class ValkyrieSwingPlannerParameters extends StoredPropertySet implements
 
    public ValkyrieSwingPlannerParameters(String projectName, String pathToResources, String fileNameSuffix)
    {
-      super(SwingPlannerParameterKeys.keys, ValkyrieSwingPlannerParameters.class, projectName, pathToResources, fileNameSuffix);
+      super(SwingPlannerParameterKeys.keys, ValkyrieSwingPlannerParameters.class, fileNameSuffix);
       loadUnsafe();
    }
 

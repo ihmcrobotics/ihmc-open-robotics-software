@@ -29,13 +29,13 @@ public class SimpleGPUHeightMapParameters extends StoredPropertySet implements S
 
    public SimpleGPUHeightMapParameters()
    {
-      super(keys, SimpleGPUHeightMapParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      super(keys, SimpleGPUHeightMapParameters.class);
       load();
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys, SimpleGPUHeightMapParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, SimpleGPUHeightMapParameters.class);
       parameters.loadUnsafe();
       parameters.save();
    }

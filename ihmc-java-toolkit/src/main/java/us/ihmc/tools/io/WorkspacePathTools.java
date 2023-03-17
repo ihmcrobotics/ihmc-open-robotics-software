@@ -153,7 +153,7 @@ public class WorkspacePathTools
                if (lastIndexOfSrc < 0)
                   inferredSourceSetDirectory = inferredSourceSetDirectory.resolve("src/main");
 
-               LogTools.info("Inferred source set directory:\n {}", inferredSourceSetDirectory);
+               LogTools.info("Inferred source set directory:\n {}", removePathPartsBeforeProjectFolder(inferredSourceSetDirectory));
             }
             else
             {
@@ -171,6 +171,19 @@ public class WorkspacePathTools
       }
 
       return inferredSourceSetDirectory;
+   }
+
+   /**
+    * @param absolutePathInSourceDirectory i.e. /home/user/workspace/project/src/main/java/foo
+    * @return Path from the project directory i.e. project/src/main/java/foo
+    */
+   public static Path removePathPartsBeforeProjectFolder(Path absolutePathInSourceDirectory)
+   {
+      int lastIndexOfSrc = findLastIndexOfPart(absolutePathInSourceDirectory, "src");
+      if (lastIndexOfSrc > 0)
+         return absolutePathInSourceDirectory.subpath(lastIndexOfSrc - 1, absolutePathInSourceDirectory.getNameCount());
+      else
+         return absolutePathInSourceDirectory; // failure, just return original path
    }
 
    private static int findLastIndexOfPart(Path pathToSearch, String partName)

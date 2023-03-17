@@ -32,11 +32,8 @@ import java.util.*;
  * <pre>
  * public static void main(String[] args)
  * {
- *    StoredPropertySet parameters = new StoredPropertySet(keys,
- *                                                         YourStoredPropertySet.class,
- *                                                         DIRECTORY_NAME_TO_ASSUME_PRESENT,
- *                                                         SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
- *    parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+ *    StoredPropertySet parameters = new StoredPropertySet(keys, YourStoredPropertySet.class);
+ *    parameters.generateJavaFiles();
  * }
  * </pre>
  *
@@ -83,10 +80,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
    private String legacyFileNameINI;
    private String saveFileNameJSON;
    private String currentVersionSuffix;
-   private Class<?> classForLoading;
-   private Class<?> basePropertySetClass;
-   private String directoryNameToAssumePresent;
-   private String subsequentPathToResourceFolder;
+   private final Class<?> classForLoading;
+   private final Class<?> basePropertySetClass;
    private final WorkspaceResourceDirectory workspaceDirectory;
    private final String uncapitalizedClassName;
    private final String capitalizedClassName;
@@ -95,29 +90,17 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
    private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
 
-   public StoredPropertySet(StoredPropertyKeyList keys,
-                            Class<?> classForLoading,
-                            String directoryNameToAssumePresent,
-                            String subsequentPathToResourceFolder)
+   public StoredPropertySet(StoredPropertyKeyList keys, Class<?> classForLoading)
    {
-      this(keys, classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, "");
+      this(keys, classForLoading, "");
    }
 
-   public StoredPropertySet(StoredPropertyKeyList keys,
-                            Class<?> classForLoading,
-                            String directoryNameToAssumePresent,
-                            String subsequentPathToResourceFolder,
-                            String versionSuffix)
+   public StoredPropertySet(StoredPropertyKeyList keys, Class<?> classForLoading, String versionSuffix)
    {
-      this(keys, classForLoading, classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      this(keys, classForLoading, classForLoading, versionSuffix);
    }
 
-   public StoredPropertySet(StoredPropertyKeyList keys,
-                            Class<?> classForLoading,
-                            Class<?> basePropertySetClass,
-                            String directoryNameToAssumePresent,
-                            String subsequentPathToResourceFolder,
-                            String versionSuffix)
+   public StoredPropertySet(StoredPropertyKeyList keys, Class<?> classForLoading, Class<?> basePropertySetClass, String versionSuffix)
    {
       this.keys = keys;
       this.uncapitalizedClassName = StringUtils.uncapitalize(basePropertySetClass.getSimpleName());
@@ -125,8 +108,6 @@ public class StoredPropertySet implements StoredPropertySetBasics
       this.classForLoading = classForLoading;
       title = classForLoading.getSimpleName();
       this.basePropertySetClass = basePropertySetClass;
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       workspaceDirectory = new WorkspaceResourceDirectory(classForLoading);
 
       updateBackingSaveFile(versionSuffix);
@@ -141,12 +122,9 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
-   public void generateJavaFiles(String subsequentPathToJavaFolder)
+   public void generateJavaFiles()
    {
-      StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(basePropertySetClass,
-                                                                                    directoryNameToAssumePresent,
-                                                                                    subsequentPathToResourceFolder,
-                                                                                    subsequentPathToJavaFolder);
+      StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(basePropertySetClass);
       if (jsonResourceExists())
       {
          generator.loadFromJSON();
@@ -534,11 +512,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       Path fileForSaving = findFileForSaving();
       if (workspaceDirectory.isFileAccessAvailable())
       {
-         LogTools.info(StringTools.format("Saving parameters to workspace: {}/{}/{}/{}",
-                                          directoryNameToAssumePresent,
-                                          subsequentPathToResourceFolder,
-                                          classForLoading.getPackageName().replaceAll("\\.", "/"),
-                                          saveFileNameJSON));
+         LogTools.info(StringTools.format("Saving parameters to workspace: {}", WorkspacePathTools.removePathPartsBeforeProjectFolder(fileForSaving)));
          FileTools.ensureDirectoryExists(workspaceDirectory.getFilesystemDirectory(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       }
       else

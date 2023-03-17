@@ -68,22 +68,20 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
     */
    public HeightMapParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
    {
-      super(keys, classForLoading, HeightMapParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, HeightMapParameters.class, versionSuffix);
       load();
    }
 
    public HeightMapParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, HeightMapParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           HeightMapParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                                                           HeightMapParameters.class);
+      parameters.generateJavaFiles();
    }
 }

@@ -1,7 +1,5 @@
 package us.ihmc.tools.property;
 
-import us.ihmc.tools.property.*;
-
 /**
  * The JSON file for this property set is located here:
  * ihmc-java-toolkit/src/test/resources/us/ihmc/tools/property/StoredPropertySetTestParameters.json
@@ -57,22 +55,20 @@ public class StoredPropertySetTestParameters extends StoredPropertySet implement
 
    public StoredPropertySetTestParameters(String versionSpecifier)
    {
-      super(keys, StoredPropertySetTestParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      super(keys, StoredPropertySetTestParameters.class, versionSpecifier);
       load();
    }
 
    public StoredPropertySetTestParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, StoredPropertySetTestParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, StoredPropertySetTestParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           StoredPropertySetTestParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                                                           StoredPropertySetTestParameters.class);
+      parameters.generateJavaFiles();
    }
 }

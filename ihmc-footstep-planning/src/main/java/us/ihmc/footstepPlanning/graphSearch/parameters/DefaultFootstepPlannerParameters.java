@@ -21,7 +21,7 @@ public class DefaultFootstepPlannerParameters extends StoredPropertySet implemen
 
    private DefaultFootstepPlannerParameters(String projectName, String pathToResources, FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
-      super(FootstepPlannerParameterKeys.keys, DefaultFootstepPlannerParameters.class, projectName, pathToResources);
+      super(FootstepPlannerParameterKeys.keys, DefaultFootstepPlannerParameters.class);
 
       if (footstepPlannerParameters != null)
       {

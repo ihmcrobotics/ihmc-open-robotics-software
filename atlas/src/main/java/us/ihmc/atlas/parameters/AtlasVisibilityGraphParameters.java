@@ -26,7 +26,7 @@ public class AtlasVisibilityGraphParameters extends StoredPropertySet implements
 
    public AtlasVisibilityGraphParameters(String projectName, String pathToResources, String fileNameSuffix)
    {
-      super(VisibilityGraphParametersKeys.keys, AtlasVisibilityGraphParameters.class, projectName, pathToResources, fileNameSuffix);
+      super(VisibilityGraphParametersKeys.keys, AtlasVisibilityGraphParameters.class, fileNameSuffix);
       loadUnsafe();
    }
 
@@ -34,9 +34,7 @@ public class AtlasVisibilityGraphParameters extends StoredPropertySet implements
    public static void main(String[] args)
    {
       StoredPropertySet storedPropertySet = new StoredPropertySet(VisibilityGraphParametersKeys.keys,
-                                                                  AtlasVisibilityGraphParameters.class,
-                                                                  PROJECT_NAME,
-                                                                  PATH_TO_RESOURCES);
+                                                                  AtlasVisibilityGraphParameters.class);
       storedPropertySet.loadUnsafe();
       storedPropertySet.save();
    }
