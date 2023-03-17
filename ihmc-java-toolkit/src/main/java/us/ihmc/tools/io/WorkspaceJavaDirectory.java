@@ -20,11 +20,11 @@ public class WorkspaceJavaDirectory extends WorkspaceDirectory
     * Example, pass in the class us.ihmc.tools.SomeClass will result in:
     * /path/to/ihmc-open-robotics-software/ihmc-java-toolkit/src/main/java/us/ihmc/tools
     */
-   public WorkspaceJavaDirectory(Class<?> classForJavaDirectory)
+   public WorkspaceJavaDirectory(Class<?> classForJavaDirectory, String javaDirectoryName)
    {
       WorkingDirectoryPathComponents workingDirectoryPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForJavaDirectory);
       classpathPath = ResourceTools.getResourcesPathForClass(classForJavaDirectory);
-      initialize(workingDirectoryPathComponents);
+      initialize(workingDirectoryPathComponents, javaDirectoryName);
    }
 
    /**
@@ -37,21 +37,21 @@ public class WorkspaceJavaDirectory extends WorkspaceDirectory
     * Example, pass in the class us.ihmc.tools.SomeClass, and pass "/stuff/moreStuff" will result in:
     * /path/to/ihmc-open-robotics-software/ihmc-java-toolkit/src/main/java/stuff/moreStuff
     */
-   public WorkspaceJavaDirectory(Class<?> classForJavaDirectory, String subsequentOrAbsoluteJavaPackagePath)
+   public WorkspaceJavaDirectory(Class<?> classForJavaDirectory, String javaDirectoryName, String subsequentOrAbsoluteJavaPackagePath)
    {
       WorkingDirectoryPathComponents workingDirectoryPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForJavaDirectory);
       classpathPath = ResourceTools.getResourcesPathForClass(classForJavaDirectory).resolve(subsequentOrAbsoluteJavaPackagePath);
-      initialize(workingDirectoryPathComponents);
+      initialize(workingDirectoryPathComponents, javaDirectoryName);
    }
 
-   private void initialize(WorkingDirectoryPathComponents workingDirectoryPathComponents)
+   private void initialize(WorkingDirectoryPathComponents workingDirectoryPathComponents, String javaDirectoryName)
    {
       // This path isn't absolute for the filesystem, only for the classpath
       // i.e. /us/ihmc/tools/io would need to be us/ihmc/tools/io
       // to append to /path/to/ihmc-java-toolkit/src/test/resources/us/ihmc/tools/io
       String subsequentPathToJavaDirectory = classpathPath.toString().substring(1);
       filesystemDirectory = workingDirectoryPathComponents.getParentOfSrcDirectory()
-                                                          .resolve(workingDirectoryPathComponents.getSubsequentPathToSourceSet().resolve("java"))
+                                                          .resolve(workingDirectoryPathComponents.getSubsequentPathToSourceSet().resolve(javaDirectoryName))
                                                           .resolve(subsequentPathToJavaDirectory);
    }
 
@@ -62,11 +62,11 @@ public class WorkspaceJavaDirectory extends WorkspaceDirectory
     */
    public static void main(String[] args)
    {
-      WorkspaceJavaDirectory workspaceDirectory = new WorkspaceJavaDirectory(WorkspaceJavaDirectory.class);
+      WorkspaceJavaDirectory workspaceDirectory = new WorkspaceJavaDirectory(WorkspaceJavaDirectory.class, "java");
       printTestInfo(workspaceDirectory);
-      workspaceDirectory = new WorkspaceJavaDirectory(WorkspaceJavaDirectory.class, "/stuff/moreStuff");
+      workspaceDirectory = new WorkspaceJavaDirectory(WorkspaceJavaDirectory.class, "java", "/stuff/moreStuff");
       printTestInfo(workspaceDirectory);
-      workspaceDirectory = new WorkspaceJavaDirectory(WorkspaceJavaDirectory.class, "stuff/moreStuff");
+      workspaceDirectory = new WorkspaceJavaDirectory(WorkspaceJavaDirectory.class, "java", "stuff/moreStuff");
       printTestInfo(workspaceDirectory);
    }
 
