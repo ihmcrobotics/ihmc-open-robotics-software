@@ -7,6 +7,10 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Used with {@link WorkspaceResourceDirectory} to represent a file in the
+ * resources classpath.
+ */
 public class WorkspaceResourceFile extends WorkspaceFile
 {
    private final Class<?> classForLoading;

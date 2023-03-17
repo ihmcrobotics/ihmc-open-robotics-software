@@ -5,6 +5,10 @@ import us.ihmc.commons.nio.BasicPathVisitor;
 import java.nio.file.Path;
 import java.util.function.BiConsumer;
 
+/**
+ * See {@link HybridDirectory}. This class extends that to provide more assistance for
+ * when the directory is in the resources classpath.
+ */
 public class HybridResourceDirectory extends HybridDirectory
 {
    private final WorkspaceResourceDirectory workspaceResourceDirectory;
