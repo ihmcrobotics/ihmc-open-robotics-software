@@ -539,7 +539,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
                                           subsequentPathToResourceFolder,
                                           classForLoading.getPackageName().replaceAll("\\.", "/"),
                                           saveFileNameJSON));
-         FileTools.ensureDirectoryExists(workspaceDirectory.getDirectoryPath(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         FileTools.ensureDirectoryExists(workspaceDirectory.getFilesystemDirectory(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       }
       else
       {
@@ -645,7 +645,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       // Automatically upgrade the stored file to JSON
       if (iniResourceExists() && workspaceLegacyINIFile.isFileAccessAvailable())
       {
-         FileTools.deleteQuietly(workspaceLegacyINIFile.getFilePath());
+         FileTools.deleteQuietly(workspaceLegacyINIFile.getFilesystemFile());
       }
    }
 
@@ -724,7 +724,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       if (workspaceDirectory.isFileAccessAvailable())
       {
-         return workspaceDirectory.getDirectoryPath();
+         return workspaceDirectory.getFilesystemDirectory();
       }
       else
       {

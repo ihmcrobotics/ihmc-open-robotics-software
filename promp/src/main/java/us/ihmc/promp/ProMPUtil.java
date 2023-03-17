@@ -24,7 +24,7 @@ public final class ProMPUtil
          dataLines.add(stringLine);
       }
       WorkspaceDirectory fileDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
-      String fileDirAbs = fileDirectory.getDirectoryPath().toAbsolutePath().toString();
+      String fileDirAbs = fileDirectory.getFilesystemDirectory().toAbsolutePath().toString();
       File csvFile = new File(fileDirAbs + fileName);
       try (PrintWriter writer = new PrintWriter(csvFile))
       {

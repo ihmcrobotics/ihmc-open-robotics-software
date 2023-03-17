@@ -7,17 +7,17 @@ import java.nio.file.Path;
  */
 public class WorkspaceFile
 {
-   private final Path workspaceFile;
+   private final Path filesystemFile;
 
    public WorkspaceFile(WorkspaceDirectory directory, String subsequentPathToFile)
    {
       if (directory.isFileAccessAvailable())
       {
-         workspaceFile = directory.getDirectoryPath().resolve(subsequentPathToFile);
+         filesystemFile = directory.getFilesystemDirectory().resolve(subsequentPathToFile);
       }
       else
       {
-         workspaceFile = null;
+         filesystemFile = null;
       }
    }
 
@@ -26,11 +26,11 @@ public class WorkspaceFile
     *  or the working directory is wrong. */
    public boolean isFileAccessAvailable()
    {
-      return workspaceFile != null;
+      return filesystemFile != null;
    }
 
-   public Path getFilePath()
+   public Path getFilesystemFile()
    {
-      return workspaceFile;
+      return filesystemFile;
    }
 }

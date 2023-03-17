@@ -76,7 +76,7 @@ public class WorkspaceJavaDirectory extends WorkspaceDirectory
 
       if (workspaceDirectory.isFileAccessAvailable())
       {
-         Path directoryPath = workspaceDirectory.getDirectoryPath();
+         Path directoryPath = workspaceDirectory.getFilesystemDirectory();
          LogTools.info("Directory path: {}", directoryPath);
       }
    }

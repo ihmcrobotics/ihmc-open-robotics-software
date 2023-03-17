@@ -39,7 +39,7 @@ public class HybridFile
 
    public Path getFileForWriting()
    {
-      return mode == HybridResourceMode.WORKSPACE ? workspaceFile.getFilePath() : externalFile;
+      return mode == HybridResourceMode.WORKSPACE ? workspaceFile.getFilesystemFile() : externalFile;
    }
 
    public boolean isWritingAvailable()
@@ -63,6 +63,6 @@ public class HybridFile
 
    public Path getWorkspaceFile()
    {
-      return workspaceFile.getFilePath();
+      return workspaceFile.getFilesystemFile();
    }
 }
