@@ -26,7 +26,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
@@ -1315,40 +1314,40 @@ public class MessageTools
       }
    }
 
-   public static void extractIDLSequence(us.ihmc.idl.IDLSequence.Byte idlSequence, ByteBuffer byteBufferToPack)
+   public static void extractIDLSequence(us.ihmc.idl.IDLSequence.Byte sourceIDLSequence, ByteBuffer byteBufferToPack)
    {
-      int numberOfBytes = idlSequence.size();
+      int numberOfBytes = sourceIDLSequence.size();
       byteBufferToPack.rewind();
       byteBufferToPack.limit(byteBufferToPack.capacity());
       for (int i = 0; i < numberOfBytes; i++)
       {
-         byteBufferToPack.put(idlSequence.get(i));
+         byteBufferToPack.put(sourceIDLSequence.get(i));
       }
       byteBufferToPack.flip();
    }
 
-   public static void extractIDLSequenceCastingBytesToInts(us.ihmc.idl.IDLSequence.Byte idlSequence, ByteBuffer byteBufferToPack)
+   public static void extractIDLSequenceCastingBytesToInts(us.ihmc.idl.IDLSequence.Byte sourceIDLSequence, ByteBuffer byteBufferToPack)
    {
-      int numberOfBytes = idlSequence.size();
+      int numberOfBytes = sourceIDLSequence.size();
       byteBufferToPack.rewind();
       byteBufferToPack.limit(byteBufferToPack.capacity());
       for (int i = 0; i < numberOfBytes; i++)
       {
-         byte x = idlSequence.get(i);
+         byte x = sourceIDLSequence.get(i);
          int value = Byte.toUnsignedInt(x);
          byteBufferToPack.putInt(value);
       }
       byteBufferToPack.flip();
    }
 
-   public static void extractIDLSequence(us.ihmc.idl.IDLSequence.Float idlSequence, ByteBuffer byteBufferToPack)
+   public static void extractIDLSequence(us.ihmc.idl.IDLSequence.Float sourceIDLSequence, ByteBuffer byteBufferToPack)
    {
-      int numberOfFloats = idlSequence.size();
+      int numberOfFloats = sourceIDLSequence.size();
       byteBufferToPack.rewind();
       byteBufferToPack.limit(byteBufferToPack.capacity());
       for (int i = 0; i < numberOfFloats; i++)
       {
-         float value = idlSequence.get(i);
+         float value = sourceIDLSequence.get(i);
          byteBufferToPack.putFloat(value);
       }
       byteBufferToPack.flip();
