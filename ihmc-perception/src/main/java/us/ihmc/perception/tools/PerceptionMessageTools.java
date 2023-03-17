@@ -178,19 +178,29 @@ public class PerceptionMessageTools
       BytedecoOpenCVTools.display("Color Image", colorImage, 1);
    }
 
-   public static void copyToFloatPointer(IDLSequence.Float floatSequence, FloatPointer floatBuffer, int startIndex)
+   public static void copyToBytePointer(IDLSequence.Byte sourceIDLSequence, BytePointer pointerToPack)
    {
-      for (int i = 0; i < floatSequence.size(); i++)
+      pointerToPack.position(0);
+      pointerToPack.limit(sourceIDLSequence.size());
+      for (int i = 0; i < sourceIDLSequence.size(); i++)
       {
-         floatBuffer.put(i + startIndex, floatSequence.get(i));
+         pointerToPack.put(i, sourceIDLSequence.get(i));
       }
    }
 
-   public static void copyToLongPointer(IDLSequence.Long longSequence, LongPointer longPointer, int startIndex)
+   public static void copyToFloatPointer(IDLSequence.Float sourceIDLSequence, FloatPointer floatPointerToPack, int startIndex)
    {
-      for (int i = 0; i < longSequence.size(); i++)
+      for (int i = 0; i < sourceIDLSequence.size(); i++)
       {
-         longPointer.put(i + startIndex, longSequence.get(i));
+         floatPointerToPack.put(i + startIndex, sourceIDLSequence.get(i));
+      }
+   }
+
+   public static void copyToLongPointer(IDLSequence.Long sourceIDLSequence, LongPointer longPointerToPack, int startIndex)
+   {
+      for (int i = 0; i < sourceIDLSequence.size(); i++)
+      {
+         longPointerToPack.put(i + startIndex, sourceIDLSequence.get(i));
       }
    }
 
