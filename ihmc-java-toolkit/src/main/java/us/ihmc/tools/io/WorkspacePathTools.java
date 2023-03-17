@@ -12,9 +12,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.util.TreeSet;
 
 public class WorkspacePathTools
 {
+   private static final ThreadLocal<TreeSet<String>> printedInferredSourceSetDirectory = ThreadLocal.withInitial(TreeSet::new);
+
    /**
     * Use this method when applications are being run from source and need to access a project file.
     * This is necessary because the working directory when running applications is inconsistent.
@@ -153,7 +156,13 @@ public class WorkspacePathTools
                if (lastIndexOfSrc < 0)
                   inferredSourceSetDirectory = inferredSourceSetDirectory.resolve("src/main");
 
-               LogTools.info("Inferred source set directory:\n {}", removePathPartsBeforeProjectFolder(inferredSourceSetDirectory));
+               TreeSet<String> classesPrinted = printedInferredSourceSetDirectory.get();
+               boolean printed = classesPrinted.contains(classForFindingSourceSetDirectory.getName());
+               if (!printed)
+               {
+                  classesPrinted.add(classForFindingSourceSetDirectory.getName());
+                  LogTools.info("Inferred source set directory:\n {}", removePathPartsBeforeProjectFolder(inferredSourceSetDirectory));
+               }
             }
             else
             {
