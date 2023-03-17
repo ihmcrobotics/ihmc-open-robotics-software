@@ -580,7 +580,9 @@ public class RDXPose3DGizmo implements RenderableProvider
       if (rotationStepped)
       {
          Orientation3DBasics orientationToAdjust = beforeForRotationAdjustment();
-         orientationToAdjust.setYawPitchRoll(yawImGuiInput.getSteppedAmount(), pitchImGuiInput.getSteppedAmount(), rollImGuiInput.getSteppedAmount());
+         orientationToAdjust.setYawPitchRoll(Math.toRadians(yawImGuiInput.getSteppedAmount()),
+                                             Math.toRadians(pitchImGuiInput.getSteppedAmount()),
+                                             Math.toRadians(rollImGuiInput.getSteppedAmount()));
          afterRotationAdjustment();
       }
 
