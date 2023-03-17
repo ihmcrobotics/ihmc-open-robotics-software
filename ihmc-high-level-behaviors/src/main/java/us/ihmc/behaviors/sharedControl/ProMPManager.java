@@ -4,7 +4,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.promp.*;
-import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -67,8 +66,7 @@ public class ProMPManager
     * learn a ProMP for each bodyPart specified in the constructor of this class */
    public void learnTaskFromDemos()
    {
-      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
-      String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
+      String demoDirAbs = ProMPUtil.getDemosDirectory().toString();
       String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
       File demoFolder = new File(demoTrainingDirAbs);
       File[] listOfFiles = demoFolder.listFiles();
