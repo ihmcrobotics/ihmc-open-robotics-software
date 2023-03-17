@@ -1,6 +1,7 @@
 package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
+import imgui.ImGuiStyle;
 import imgui.ImVec2;
 import imgui.type.ImDouble;
 
@@ -14,8 +15,8 @@ public class ImGuiInputDoubleForRotations
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String label;
-   private final String plusButtonLabel = labels.get(" + ");
-   private final String minusButtonLabel = labels.get(" - ");
+   private final String minusButtonLabel = labels.get("-");
+   private final String plusButtonLabel = labels.get("+");
    private final String format;
    private final String prefixLabel;
    private float prefixTextWidth;
@@ -24,6 +25,7 @@ public class ImGuiInputDoubleForRotations
    private boolean inputChanged = false;
    private boolean stepButtonClicked = false;
    private double steppedAmount = 0.0;
+   private ImGuiStyle style;
 
    public ImGuiInputDoubleForRotations(String label, String format)
    {
@@ -36,6 +38,8 @@ public class ImGuiInputDoubleForRotations
       this.label = labels.getHidden(label);
       this.format = format;
       imDouble = new ImDouble(initialValue);
+
+      style = ImGui.getStyle();
    }
 
    /**
@@ -55,19 +59,26 @@ public class ImGuiInputDoubleForRotations
 
       ImGui.text(prefixLabel);
       ImGui.sameLine();
-      float spaceForButtons = 53.0f;
+      float spaceForButtons = 46.0f;
       ImGui.pushItemWidth(ImGuiTools.getUsableWindowWidth() - prefixTextWidth - spaceForButtons);
       inputChanged = ImGuiTools.volatileInputDouble(label, imDouble, 0.0, 0.0, format);
       ImGui.popItemWidth();
 
-//      ImGui.pushS
+      // This section taken from imgui/imgui_widgets.cpp ImGui::InputScalar
+      float backupFramePaddingX = style.getFramePaddingX();
+      float framePaddingY = style.getFramePaddingY();
+      style.setFramePadding(framePaddingY, framePaddingY); // Make square
+      float frameHeight = ImGui.getFrameHeight();
+
       steppedAmount = 0.0;
       stepButtonClicked = false;
       boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
-      ImGui.sameLine();
-      boolean minusClicked = ImGui.button(minusButtonLabel);
-      ImGui.sameLine();
-      boolean plusClicked = ImGui.button(plusButtonLabel);
+      ImGui.sameLine(0, style.getItemInnerSpacingX());
+      boolean minusClicked = ImGui.button(minusButtonLabel, frameHeight, frameHeight);
+      ImGui.sameLine(0, style.getItemInnerSpacingX());
+      boolean plusClicked = ImGui.button(plusButtonLabel, frameHeight, frameHeight);
+
+      style.setFramePadding(backupFramePaddingX, framePaddingY);
 
       if (minusClicked)
          steppedAmount += ctrlHeld ? stepFast : step;
