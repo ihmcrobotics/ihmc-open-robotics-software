@@ -9,6 +9,7 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -69,6 +70,7 @@ public class ROS2Tools
    public static final String D435_NAME = "d435";
    public static final String ZED2_NAME = "zed2";
    public static final String L515_NAME = "l515";
+   public static final String D455_NAME = "d455";
    public static final String BLACKFLY_NAME = "blackfly";
    public static final String T265_NAME = "t265";
    public static final String MULTISENSE_NAME = "multisense";
@@ -135,6 +137,8 @@ public class ROS2Tools
    public static final ROS2Topic<BigVideoPacket> L515_DEPTH_LARGE = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = IHMC_ROOT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE = IHMC_ROOT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE = IHMC_ROOT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("color");
    public static final ROS2Topic<ImageMessage> TERRAIN_DEBUG_IMAGE
          = IHMC_ROOT.withModule(L515_NAME).withType(ImageMessage.class).withSuffix("terrain_debug_image");
    public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION = IHMC_ROOT.withModule(L515_NAME)
@@ -188,9 +192,9 @@ public class ROS2Tools
                                                                                                  .withSuffix("ouster_lidar");
 
    /** MoCap Topics */
-   public static final ROS2Topic<RigidBodyTransformMessage> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
-                                                                                        .withModule("frame_update")
-                                                                                        .withSuffix("mocap");
+   public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(Pose3D.class)
+                                                                     .withModule("frame_update")
+                                                                     .withSuffix("mocap");
 
    /** Output regions from Lidar (Multisense) from REA */
    public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withTypeName(PlanarRegionsListMessage.class);

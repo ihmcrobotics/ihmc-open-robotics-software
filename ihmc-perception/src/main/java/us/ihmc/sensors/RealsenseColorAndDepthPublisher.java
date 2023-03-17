@@ -1,80 +1,119 @@
 package us.ihmc.sensors;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.MutableBytePointer;
-import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.logging.PerceptionDataLogger;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
+import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
-import us.ihmc.perception.realsense.RealsenseSettingsProfile;
-import us.ihmc.perception.tools.OpenCVJPEGCompression;
-import us.ihmc.perception.tools.OpenCVPNGCompression;
+import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.Throttler;
 
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.function.Supplier;
 
 /**
- * Publishes color and depth images from Realsense devices.
+ * Publishes color and depth from Realsense D435
+ * ----+ L515 Device Configuration: Serial Number: F0245563, Depth Height 768, Depth Width: 1024, Depth FPS: 15, Color Height 720, Color Width: 1280, Color FPS:
+ * 15
+ * ----+ D435: Serial Number: 752112070330, Depth Width: 848, Depth Height: 480, Depth FPS: 30, Color Width: 848, Color Height: 480, Color FPS: 30
+ * <p>
+ * Use this to retrieve files from ihmc-mini-2
+ * rsync -aP ihmc-mini-2:/home/ihmc/.ihmc/logs/perception/20230226_172530_PerceptionLog.hdf5 /home/robotlab/.ihmc/logs/perception/
  */
 public class RealsenseColorAndDepthPublisher
 {
-   private final String serialNumber;
-   private final Activator nativesLoadedActivator;
-   private final ROS2Helper ros2Helper;
+   private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private final RealsenseConfiguration realsenseConfiguration;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
-   private final FramePose3D cameraPose = new FramePose3D();
    private final ROS2Topic<ImageMessage> colorTopic;
    private final ROS2Topic<ImageMessage> depthTopic;
-   private volatile boolean running = true;
-   private final double outputPeriod = UnitConversions.hertzToSeconds(30.0);
+   private final ROS2Helper ros2Helper;
+   private final String serialNumber;
+
+   private final PerceptionConfigurationParameters parameters = new PerceptionConfigurationParameters();
+   private final PerceptionDataLogger perceptionDataLogger = new PerceptionDataLogger();
+   private final BytePointer compressedColorPointer = new BytePointer();
+   private final BytePointer compressedDepthPointer = new BytePointer();;
+   private final FramePose3D colorPoseInDepthFrame = new FramePose3D();
+   private final ImageMessage colorImageMessage = new ImageMessage();
+   private final ImageMessage depthImageMessage = new ImageMessage();
+   private final Quaternion cameraQuaternion = new Quaternion();
+   private final FramePose3D cameraPose = new FramePose3D();
+   private final Point3D cameraPosition = new Point3D();
    private final Throttler throttler = new Throttler();
 
-   private final RealsenseSettingsProfile settingsProfile;
+   private boolean previousLoggerEnabledState = false;
+   private boolean loggerInitialized = false;
+   private volatile boolean running = true;
+
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense realsense;
    private Mat depth16UC1Image;
    private Mat color8UC3Image;
+   private Mat yuvColorImage;
 
-   private final OpenCVPNGCompression pngCompression = new OpenCVPNGCompression();
-   private final OpenCVJPEGCompression jpegCompression = new OpenCVJPEGCompression(80);
-   private final ImageMessage colorImageMessage = new ImageMessage();
-   private final ImageMessage depthImageMessage = new ImageMessage();
+   private final double outputPeriod;
+
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
    public RealsenseColorAndDepthPublisher(String serialNumber,
-                                          RealsenseSettingsProfile settingsProfile,
+                                          RealsenseConfiguration realsenseConfiguration,
                                           ROS2Topic<ImageMessage> depthTopic,
                                           ROS2Topic<ImageMessage> colorTopic,
                                           Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.serialNumber = serialNumber;
-      this.settingsProfile = settingsProfile;
+      this.realsenseConfiguration = realsenseConfiguration;
       this.colorTopic = colorTopic;
       this.depthTopic = depthTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
-      nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
+      outputPeriod = UnitConversions.hertzToSeconds(20.0);
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
+      BytedecoTools.loadOpenCV();
+
+      initializeSensor();
+
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
       ros2Helper = new ROS2Helper(ros2Node);
+
+      LogTools.info("Setting Up ROS2 Property Set Group");
+      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
    }
 
+   /**
+    * Must be called from the sensor-specific calling class, after the sensor and logger initialization have succeeded.
+    */
    public void run()
    {
       while (running)
@@ -84,88 +123,153 @@ public class RealsenseColorAndDepthPublisher
       }
    }
 
+   /**
+    * Update the sensor and logger, and publish the data to ROS2
+    */
    private void update()
    {
-      if (nativesLoadedActivator.poll())
+      if (realsense.readFrameData())
       {
-         if (nativesLoadedActivator.isNewlyActivated())
-         {
-            realSenseHardwareManager = new RealSenseHardwareManager();
-            realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, settingsProfile);
+         realsense.updateDataBytePointers();
 
-            if (realsense.getDevice() == null)
+         Instant acquisitionTime = Instant.now();
+
+         MutableBytePointer depthFrameData = realsense.getDepthFrameData();
+         depth16UC1Image = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
+         PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
+         CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
+
+         MutableBytePointer colorFrameData = realsense.getColorFrameData();
+         color8UC3Image = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, colorFrameData);
+         PerceptionMessageTools.setColorIntrinsicsFromRealsense(realsense, colorImageMessage);
+         CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
+
+         yuvColorImage = new Mat();
+
+         // Important not to store as a field, as update() needs to be called each frame
+         ReferenceFrame cameraFrame = sensorFrameUpdater.get();
+         cameraPose.setToZero(cameraFrame);
+         cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         cameraPosition.set(cameraPose.getPosition());
+         cameraQuaternion.set(cameraPose.getOrientation());
+
+         colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
+
+         BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
+         BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
+
+         if (parameters.getPublishDepth())
+         {
+            PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
+                                                               depthTopic,
+                                                               depthImageMessage,
+                                                               ros2Helper,
+                                                               cameraPose,
+                                                               acquisitionTime,
+                                                               depthSequenceNumber++,
+                                                               realsense.getDepthHeight(),
+                                                               realsense.getDepthWidth(),
+                                                               (float) realsense.getDepthDiscretization());
+         }
+
+         if (parameters.getPublishColor())
+         {
+            PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
+                                                                  colorTopic,
+                                                                  colorImageMessage,
+                                                                  ros2Helper,
+                                                                  colorPoseInDepthFrame,
+                                                                  acquisitionTime,
+                                                                  colorSequenceNumber++,
+                                                                  realsense.getColorHeight(),
+                                                                  realsense.getColorWidth(),
+                                                                  (float) realsense.getDepthDiscretization());
+         }
+
+         if (parameters.getLoggingEnabled())
+         {
+            if (!loggerInitialized)
             {
-               running = false;
-               throw new RuntimeException("Device not found. Set -D<model>.serial.number=00000000000");
+               initializeLogger();
             }
-            realsense.enableColor(settingsProfile);
-            realsense.initialize();
 
-            pngCompression.allocate(realsense.getDepthWidth() * realsense.getDepthHeight() * ImageMessageFormat.DEPTH_PNG_16UC1.getBytesPerPixel());
-            jpegCompression.allocate(realsense.getColorWidth() * realsense.getColorHeight() * ImageMessageFormat.COLOR_JPEG_YUVI420.getBytesPerPixel());
+            long timestamp = Conversions.secondsToNanoseconds(acquisitionTime.getEpochSecond()) + acquisitionTime.getNano();
+
+            perceptionDataLogger.storeLongs(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_POSITION, cameraPosition);
+            perceptionDataLogger.storeFloats(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, cameraQuaternion);
+            perceptionDataLogger.storeBytesFromPointer(PerceptionLoggerConstants.L515_DEPTH_NAME, compressedDepthPointer);
+
+            previousLoggerEnabledState = true;
          }
-
-         if (realsense.readFrameData())
+         else
          {
-            realsense.updateDataBytePointers();
-
-            Instant aquisitionTime = Instant.now();
-
-            MutableBytePointer depthFrameData = realsense.getDepthFrameData();
-            depth16UC1Image = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
-            PerceptionMessageTools.setDepthExtrinsicsFromRealsense(realsense, depthImageMessage);
-
-            MutableBytePointer colorFrameData = realsense.getColorFrameData();
-            color8UC3Image = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, colorFrameData);
-            PerceptionMessageTools.setColorExtrinsicsFromRealsense(realsense, colorImageMessage);
-
-            // Important not to store as a field, as update() needs to be called each frame
-            ReferenceFrame cameraFrame = sensorFrameUpdater.get();
-            cameraPose.setToZero(cameraFrame);
-            cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-            pngCompression.compress(depth16UC1Image);
-            jpegCompression.compressRGB(color8UC3Image);
-
-            PerceptionMessageTools.packImageMessageData(pngCompression.getCompressedData(), depthImageMessage);
-            ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
-            depthImageMessage.setImageHeight(realsense.getDepthHeight());
-            depthImageMessage.setImageWidth(realsense.getDepthWidth());
-            depthImageMessage.getPosition().set(cameraPose.getPosition());
-            depthImageMessage.getOrientation().set(cameraPose.getOrientation());
-            depthImageMessage.setSequenceNumber(depthSequenceNumber++);
-            MessageTools.toMessage(aquisitionTime, depthImageMessage.getAcquisitionTime());
-            depthImageMessage.setFocalLengthXPixels(realsense.getDepthIntrinsicParameters().fx());
-            depthImageMessage.setFocalLengthYPixels(realsense.getDepthIntrinsicParameters().fy());
-            depthImageMessage.setPrincipalPointXPixels(realsense.getDepthIntrinsicParameters().ppx());
-            depthImageMessage.setPrincipalPointYPixels(realsense.getDepthIntrinsicParameters().ppy());
-            depthImageMessage.setDepthDiscretization((float) realsense.getDepthDiscretization());
-            CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-            ros2Helper.publish(depthTopic, depthImageMessage);
-
-            PerceptionMessageTools.packImageMessageData(jpegCompression.getCompressedData(), colorImageMessage);
-            ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(colorImageMessage);
-            colorImageMessage.setImageHeight(realsense.getColorHeight());
-            colorImageMessage.setImageWidth(realsense.getColorWidth());
-            colorImageMessage.getPosition().set(realsense.getDepthToColorTranslation());
-            colorImageMessage.getOrientation().set(realsense.getDepthToColorRotation());
-            colorImageMessage.setSequenceNumber(colorSequenceNumber++);
-            MessageTools.toMessage(aquisitionTime, colorImageMessage.getAcquisitionTime());
-            colorImageMessage.setFocalLengthXPixels(realsense.getColorIntrinsicParameters().fx());
-            colorImageMessage.setFocalLengthYPixels(realsense.getColorIntrinsicParameters().fy());
-            colorImageMessage.setPrincipalPointXPixels(realsense.getColorIntrinsicParameters().ppx());
-            colorImageMessage.setPrincipalPointYPixels(realsense.getColorIntrinsicParameters().ppy());
-            CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
-            ros2Helper.publish(colorTopic, colorImageMessage);
+            if (previousLoggerEnabledState)
+            {
+               perceptionDataLogger.closeLogFile();
+               previousLoggerEnabledState = false;
+               loggerInitialized = false;
+            }
          }
+
+         ros2PropertySetGroup.update();
       }
    }
 
+   /**
+    * Setup everything needed for the realsense sensor to run and output data for color and depth at the desired rate and resolution.
+    */
+   private void initializeSensor()
+   {
+      LogTools.info("Creating Realsense Hardware Manager");
+      realSenseHardwareManager = new RealSenseHardwareManager();
+
+      LogTools.info("Creating Bytedeco Realsense Device");
+      realsense = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
+
+      if (realsense == null)
+      {
+         running = false;
+         throw new RuntimeException("Device could not be initialized.");
+      }
+
+      if (realsense.getDevice() == null)
+      {
+         running = false;
+         throw new RuntimeException("RealSense device not found. Set -D<model>.serial.number=00000000000");
+      }
+
+      realsense.enableColor(realsenseConfiguration);
+      realsense.initialize();
+   }
+
+   /**
+    * Setup everything needed for the perception logger to run and collect data for various sensor signals
+    */
+   private void initializeLogger()
+   {
+      String logFileName = HDF5Tools.generateLogFileName();
+      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+
+      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
+      perceptionDataLogger.addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_POSITION, 3, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addFloatChannel(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 4, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
+      perceptionDataLogger.addImageChannel(PerceptionLoggerConstants.L515_DEPTH_NAME);
+
+      loggerInitialized = true;
+   }
+
+   /**
+    * Must be called in the shutdown hook from the sensor-specific calling class. Handles Ctrl + C based closing gracefully.
+    */
    public void destroy()
    {
       running = false;
       realsense.deleteDevice();
       realSenseHardwareManager.deleteContext();
+      perceptionDataLogger.closeLogFile();
    }
 
    public static void main(String[] args)
@@ -175,10 +279,10 @@ public class RealsenseColorAndDepthPublisher
          Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
       */
 
-      // Tripod: F1121365, F0245563
+      // L515: [F1121365, F0245563], D455: [215122254074]
       String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
       RealsenseColorAndDepthPublisher realsensePublisher = new RealsenseColorAndDepthPublisher(l515SerialNumber,
-                                                                                               RealsenseSettingsProfile.L515_COLOR_720P_DEPTH_768P_30HZ,
+                                                                                               RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
                                                                                                ROS2Tools.L515_DEPTH_IMAGE,
                                                                                                ROS2Tools.L515_COLOR_IMAGE,
                                                                                                ReferenceFrame::getWorldFrame);

@@ -278,8 +278,16 @@ public class HDF5Test
       String datasetId = "bytes";
 
       // There is a 0 in here that causes the problem
-      byte[] writeData = new byte[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f',
-                                      0, -2, -1, 1, 0, 2, 3, 4, Byte.MIN_VALUE, Byte.MAX_VALUE };
+      //byte[] writeData = new byte[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f',
+      //                                0, -2, -1, 1, 0, 2, 3, 4, Byte.MIN_VALUE, Byte.MAX_VALUE };
+
+      byte[] writeData = new byte[10000];
+
+      for (int i = 0; i < writeData.length; i++)
+      {
+         writeData[i] = (byte) i;
+      }
+
       BytePointer dataPointer = new BytePointer(writeData);
 
       byte[] beforeWriteData = new byte[(int) dataPointer.limit()];

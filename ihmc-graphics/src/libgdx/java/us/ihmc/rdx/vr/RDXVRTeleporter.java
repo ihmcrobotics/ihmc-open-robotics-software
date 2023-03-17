@@ -80,7 +80,7 @@ public class RDXVRTeleporter
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
      {
         InputDigitalActionData bButton = controller.getBButtonActionData();
-        InputDigitalActionData aButton = controller.getAButtonActionData();
+        InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
 
         if(bButton.bChanged() && bButton.bState()) //pressed B button
            preparingToTeleport = true;
@@ -103,8 +103,8 @@ public class RDXVRTeleporter
            preparingToTeleport = false;
         }
 
-        // Pressed A button
-        if (robotMidFeetZUpReferenceFrame != null && aButton.bChanged() && !aButton.bState())
+        // Pressed right joystick button
+        if (robotMidFeetZUpReferenceFrame != null && joystickButton.bChanged() && !joystickButton.bState())
         {
            snapToMidFeetZUp(vrContext);
         }
