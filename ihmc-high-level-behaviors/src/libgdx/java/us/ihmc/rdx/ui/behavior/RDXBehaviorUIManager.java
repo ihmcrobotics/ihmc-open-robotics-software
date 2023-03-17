@@ -238,9 +238,4 @@ public class RDXBehaviorUIManager
    {
       return treeViewPanel;
    }
-
-   public RDXImNodesBehaviorTreeUI getImNodeBehaviorTreeUI()
-   {
-      return imNodeBehaviorTreeUI;
-   }
 }
