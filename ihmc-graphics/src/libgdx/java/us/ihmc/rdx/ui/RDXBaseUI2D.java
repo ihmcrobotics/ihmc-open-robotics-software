@@ -57,23 +57,19 @@ public class RDXBaseUI2D
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final RDXImGuiLayoutManager layoutManager;
 
-   public RDXBaseUI2D(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public RDXBaseUI2D(Class<?> classForLoading)
    {
-      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+      this(classForLoading, classForLoading.getSimpleName());
    }
 
-   public RDXBaseUI2D(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public RDXBaseUI2D(Class<?> classForLoading, String windowTitle)
    {
       this.windowTitle = windowTitle;
 
       configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading).resolve(configurationExtraPath);
 
-      layoutManager = new RDXImGuiLayoutManager(classForLoading,
-                                                directoryNameToAssumePresent,
-                                                subsequentPathToResourceFolder,
-                                                configurationExtraPath,
-                                                configurationBaseDirectory);
+      layoutManager = new RDXImGuiLayoutManager(classForLoading, configurationExtraPath, configurationBaseDirectory);
       imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem(layoutManager);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->

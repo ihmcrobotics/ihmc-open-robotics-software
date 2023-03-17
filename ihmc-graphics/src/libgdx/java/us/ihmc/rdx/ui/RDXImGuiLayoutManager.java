@@ -24,8 +24,6 @@ public class RDXImGuiLayoutManager
 {
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private final Class<?> classForLoading;
-   private final String directoryNameToAssumePresent;
-   private final String subsequentPathToResourceFolder;
    private final String configurationExtraPath;
    private final HybridResourceDirectory configurationBaseDirectory;
    private final ArrayList<Consumer<HybridResourceDirectory>> layoutDirectoryUpdatedListeners = new ArrayList<>();
@@ -43,15 +41,9 @@ public class RDXImGuiLayoutManager
    private String currentLayoutName = "Main";
    private ImGuiConfigurationLocation currentConfigurationLocation;
 
-   public RDXImGuiLayoutManager(Class<?> classForLoading,
-                                String directoryNameToAssumePresent,
-                                String subsequentPathToResourceFolder,
-                                String configurationExtraPath,
-                                HybridResourceDirectory configurationBaseDirectory)
+   public RDXImGuiLayoutManager(Class<?> classForLoading, String configurationExtraPath, HybridResourceDirectory configurationBaseDirectory)
    {
       this.classForLoading = classForLoading;
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.configurationExtraPath = configurationExtraPath;
       this.configurationBaseDirectory = configurationBaseDirectory;
       indexLayouts();

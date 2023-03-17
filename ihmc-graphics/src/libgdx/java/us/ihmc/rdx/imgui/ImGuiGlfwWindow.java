@@ -34,22 +34,18 @@ public class ImGuiGlfwWindow
    private final ImBoolean vsync = new ImBoolean(true);
    private final ImInt maxFrameRate = new ImInt(240);
 
-   public ImGuiGlfwWindow(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public ImGuiGlfwWindow(Class<?> classForLoading)
    {
-      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+      this(classForLoading, classForLoading.getSimpleName());
    }
 
-   public ImGuiGlfwWindow(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public ImGuiGlfwWindow(Class<?> classForLoading, String windowTitle)
    {
       configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading).resolve(configurationExtraPath);
 
       glfwWindowForImGui = new GlfwWindowForImGui(windowTitle);
-      layoutManager = new RDXImGuiLayoutManager(classForLoading,
-                                                directoryNameToAssumePresent,
-                                                subsequentPathToResourceFolder,
-                                                configurationExtraPath,
-                                                configurationBaseDirectory);
+      layoutManager = new RDXImGuiLayoutManager(classForLoading, configurationExtraPath, configurationBaseDirectory);
       imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem(layoutManager);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
