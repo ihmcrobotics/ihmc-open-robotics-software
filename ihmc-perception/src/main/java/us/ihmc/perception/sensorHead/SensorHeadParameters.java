@@ -54,6 +54,9 @@ public class SensorHeadParameters
    /** Helps detect IDs more consistently, looks more at the center of each ArUco bit, discarding the ouster parts. */
    public static final double PERSPECTIVE_REMOVE_IGNORED_MARGIN_PER_CELL = 0.3;
 
+   /**
+    * Blackfly fisheye pose is tuned relative to Ouster here, by using the RDXBlackflyCalibrationSuite, visual alignment, and CAD measurement.
+    */
    public static final RigidBodyTransform FISHEYE_TO_OUSTER_TRANSFORM = new RigidBodyTransform();
    static
    {
