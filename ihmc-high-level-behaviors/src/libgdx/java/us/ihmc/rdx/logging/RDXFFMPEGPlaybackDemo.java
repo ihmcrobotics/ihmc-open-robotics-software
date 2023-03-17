@@ -85,7 +85,7 @@ public class RDXFFMPEGPlaybackDemo
             if (nativesLoadedActivator.poll())
             {
                if (nativesLoadedActivator.isNewlyActivated())
-                  loadVideo(exampleVideo.getFilePath().toString());
+                  loadVideo(exampleVideo.getFilesystemFile().toString());
             }
 
             if (imagePanel != null && !seeking)

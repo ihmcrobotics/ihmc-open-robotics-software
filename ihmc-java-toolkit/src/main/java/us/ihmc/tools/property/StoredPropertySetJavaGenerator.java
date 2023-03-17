@@ -234,8 +234,8 @@ public class StoredPropertySetJavaGenerator
                           subsequentPathToJavaFolder,
                           basePropertySetClass.getPackage().getName().replaceAll("\\.", "/"));
 
-      FileTools.write(primaryJavaFile.getFilePath(), primaryJavaFileContents.getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      LogTools.info("Generated successfully: {}", primaryJavaFile.getFilePath());
+      FileTools.write(primaryJavaFile.getFilesystemFile(), primaryJavaFileContents.getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      LogTools.info("Generated successfully: {}", primaryJavaFile.getFilesystemFile());
 
       String basicsJavaFileContents =
       """
@@ -252,8 +252,8 @@ public class StoredPropertySetJavaGenerator
       %3$s}
       """.formatted(basePropertySetClass.getPackage().getName(), basePropertySetClass.getSimpleName(), getParameterSetterStrings());
 
-      FileTools.write(basicsJavaFile.getFilePath(), basicsJavaFileContents.getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      LogTools.info("Generated successfully: {}", basicsJavaFile.getFilePath());
+      FileTools.write(basicsJavaFile.getFilesystemFile(), basicsJavaFileContents.getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      LogTools.info("Generated successfully: {}", basicsJavaFile.getFilesystemFile());
 
       String readOnlyJavaFileContents =
       """
@@ -272,11 +272,11 @@ public class StoredPropertySetJavaGenerator
       %3$s}
       """.formatted(basePropertySetClass.getPackage().getName(), basePropertySetClass.getSimpleName(), getParameterGetterStrings(), basePropertySetClass.getPackage().getName());
 
-      FileTools.write(readOnlyJavaFile.getFilePath(),
+      FileTools.write(readOnlyJavaFile.getFilesystemFile(),
                       readOnlyJavaFileContents.getBytes(),
                       WriteOption.TRUNCATE,
                       DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      LogTools.info("Generated successfully: {}", readOnlyJavaFile.getFilePath());
+      LogTools.info("Generated successfully: {}", readOnlyJavaFile.getFilesystemFile());
    }
 
    private String getParameterKeysStrings()

@@ -72,12 +72,12 @@ public class HybridDirectory
 
    public Path getDirectoryForWriting()
    {
-      return mode == HybridResourceMode.WORKSPACE ? workspaceDirectory.getDirectoryPath() : externalDirectory;
+      return mode == HybridResourceMode.WORKSPACE ? workspaceDirectory.getFilesystemDirectory() : externalDirectory;
    }
 
    public Path getWorkspaceDirectory()
    {
-      return workspaceDirectory.getDirectoryPath();
+      return workspaceDirectory.getFilesystemDirectory();
    }
 
    public Path getExternalDirectory()

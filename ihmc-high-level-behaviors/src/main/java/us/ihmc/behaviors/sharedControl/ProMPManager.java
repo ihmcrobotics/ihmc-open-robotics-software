@@ -68,7 +68,7 @@ public class ProMPManager
    public void learnTaskFromDemos()
    {
       WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
-      String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
+      String demoDirAbs = demoDir.getFilesystemDirectory().toAbsolutePath().toString();
       String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
       File demoFolder = new File(demoTrainingDirAbs);
       File[] listOfFiles = demoFolder.listFiles();

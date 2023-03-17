@@ -127,7 +127,7 @@ public class RDXVRContext
          });
       });
       LogTools.info("Using VR controller model: {}", controllerModel);
-      VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilePath().toString());
+      VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilesystemFile().toString());
 
       VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
       headset.initSystem();

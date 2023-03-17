@@ -167,7 +167,7 @@ public class JSONFileTools
 
    public static boolean save(WorkspaceFile workspaceFile, Consumer<ObjectNode> rootConsumer)
    {
-      return save(workspaceFile.getFilePath(), rootConsumer);
+      return save(workspaceFile.getFilesystemFile(), rootConsumer);
    }
 
    public static boolean save(Path settingsPath, Consumer<ObjectNode> rootConsumer)

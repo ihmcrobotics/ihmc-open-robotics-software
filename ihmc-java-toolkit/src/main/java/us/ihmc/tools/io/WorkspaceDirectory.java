@@ -65,7 +65,7 @@ public class WorkspaceDirectory
     *
     * @return The directory Path on the filesystem or null if file access is not available.
     */
-   public Path getDirectoryPath()
+   public Path getFilesystemDirectory()
    {
       return filesystemDirectory;
    }
@@ -104,7 +104,7 @@ public class WorkspaceDirectory
 
       if (workspaceDirectory.isFileAccessAvailable())
       {
-         Path directoryPath = workspaceDirectory.getDirectoryPath();
+         Path directoryPath = workspaceDirectory.getFilesystemDirectory();
          LogTools.info("Directory path: {}", directoryPath);
       }
    }

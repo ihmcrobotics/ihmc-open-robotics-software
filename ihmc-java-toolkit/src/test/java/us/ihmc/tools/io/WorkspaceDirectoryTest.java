@@ -16,7 +16,7 @@ public class WorkspaceDirectoryTest
 
       if (workspaceDirectory.isFileAccessAvailable())
       {
-         Path directoryPath = workspaceDirectory.getDirectoryPath();
+         Path directoryPath = workspaceDirectory.getFilesystemDirectory();
          LogTools.info("Directory path: {}", directoryPath);
          Assertions.assertNotNull(directoryPath, "Directory path is null");
       }
@@ -30,7 +30,7 @@ public class WorkspaceDirectoryTest
 
       if (workspaceDirectory.isFileAccessAvailable())
       {
-         Path directoryPath = workspaceDirectory.getDirectoryPath();
+         Path directoryPath = workspaceDirectory.getFilesystemDirectory();
          LogTools.info("Directory path: {}", directoryPath);
          Assertions.assertNotNull(directoryPath, "Directory path is null");
       }
@@ -90,7 +90,7 @@ public class WorkspaceDirectoryTest
 
    private static void printFileInfo(WorkspaceResourceFile file)
    {
-      LogTools.info("File path: {}", file.getFilePath());
+      LogTools.info("File path: {}", file.getFilesystemFile());
       LogTools.info("Path for resource loading: {}", file.getPathForResourceLoadingPathFiltered());
       LogTools.info("Classpath resource: {}", file.getClasspathResource());
    }
@@ -98,7 +98,7 @@ public class WorkspaceDirectoryTest
    private static void printDirectoryInfo(WorkspaceResourceDirectory directory)
    {
       LogTools.info("File access available: {}", directory.isFileAccessAvailable() ? "Yes" : "No");
-      LogTools.info("Directory path: {}", directory.getDirectoryPath());
+      LogTools.info("Directory path: {}", directory.getFilesystemDirectory());
       LogTools.info("Class for loading: {}", directory.getClassForLoading());
       LogTools.info("Path necessary for classpath loading: {}", directory.getPathNecessaryForClasspathLoading());
       LogTools.info("Path necessary for resource exploring: {}", directory.getPathNecessaryForResourceExploring());
@@ -107,6 +107,6 @@ public class WorkspaceDirectoryTest
    private static void printDirectoryInfo(WorkspaceJavaDirectory directory)
    {
       LogTools.info("File access available: {}", directory.isFileAccessAvailable() ? "Yes" : "No");
-      LogTools.info("Directory path: {}", directory.getDirectoryPath());
+      LogTools.info("Directory path: {}", directory.getFilesystemDirectory());
    }
 }
