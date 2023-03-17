@@ -10,6 +10,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.WorkspaceJavaDirectory;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class StoredPropertySetJavaGenerator
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.subsequentPathToJavaFolder = subsequentPathToJavaFolder;
 
-      javaDirectory = new WorkspaceDirectory(directoryNameToAssumePresent, subsequentPathToJavaFolder);
+      javaDirectory = new WorkspaceJavaDirectory(basePropertySetClass, "generated-java");
       jsonFileName = basePropertySetClass.getSimpleName() + ".json";
       primaryJavaFile = new WorkspaceFile(javaDirectory, basePropertySetClass.getSimpleName() + ".java");
       basicsJavaFile = new WorkspaceFile(javaDirectory, basePropertySetClass.getSimpleName() + "Basics.java");

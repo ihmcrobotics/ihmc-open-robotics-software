@@ -84,7 +84,7 @@ public class WorkspaceDirectoryTest
    {
       WorkspaceJavaDirectory workspaceJavaDirectory;
 
-      workspaceJavaDirectory = new WorkspaceJavaDirectory(WorkspaceJavaDirectory.class);
+      workspaceJavaDirectory = new WorkspaceJavaDirectory(WorkspaceJavaDirectory.class, "java");
       printDirectoryInfo(workspaceJavaDirectory);
    }
 
