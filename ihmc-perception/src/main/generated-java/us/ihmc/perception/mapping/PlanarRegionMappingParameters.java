@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class PlanarRegionMappingParameters extends StoredPropertySet implements PlanarRegionMappingParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-perception/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-perception/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey updateAlphaTowardsMatch = keys.addDoubleKey("Update Alpha towards match");
@@ -54,15 +50,15 @@ public class PlanarRegionMappingParameters extends StoredPropertySet implements 
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public PlanarRegionMappingParameters(String versionSpecifier)
+   public PlanarRegionMappingParameters(String versionSuffix)
    {
-      this(PlanarRegionMappingParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(PlanarRegionMappingParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public PlanarRegionMappingParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public PlanarRegionMappingParameters(Class<?> classForLoading, String versionSuffix)
    {
       super(keys, classForLoading, PlanarRegionMappingParameters.class, versionSuffix);
       load();
@@ -76,8 +72,7 @@ public class PlanarRegionMappingParameters extends StoredPropertySet implements 
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           PlanarRegionMappingParameters.class);
+      StoredPropertySet parameters = new StoredPropertySet(keys, PlanarRegionMappingParameters.class);
       parameters.generateJavaFiles();
    }
 }

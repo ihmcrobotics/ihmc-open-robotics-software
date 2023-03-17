@@ -9,17 +9,7 @@ public class DefaultSwingPlannerParameters extends StoredPropertySet implements 
       this(null);
    }
 
-   public DefaultSwingPlannerParameters(String projectName, String pathToResources) // for robots and UIs that want their own defaults and saves
-   {
-      this(projectName, pathToResources, null);
-   }
-
-   public DefaultSwingPlannerParameters(SwingPlannerParametersReadOnly swingPlannerParametersReadOnly) // for message passing or temp access
-   {
-      this("ihmc-open-robotics-software", "ihmc-footstep-planning/src/main/resources", swingPlannerParametersReadOnly);
-   }
-
-   private DefaultSwingPlannerParameters(String projectName, String pathToResources, SwingPlannerParametersReadOnly swingPlannerParameters)
+   private DefaultSwingPlannerParameters(SwingPlannerParametersReadOnly swingPlannerParameters)
    {
       super(SwingPlannerParameterKeys.keys, DefaultSwingPlannerParameters.class);
 

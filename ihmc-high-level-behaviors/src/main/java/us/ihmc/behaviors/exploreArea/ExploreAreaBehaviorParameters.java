@@ -17,9 +17,7 @@ public class ExploreAreaBehaviorParameters extends StoredPropertySet
 
    public ExploreAreaBehaviorParameters()
    {
-      super(keys,
-            ExploreAreaBehaviorParameters.class);
-
+      super(keys, ExploreAreaBehaviorParameters.class);
       load();
    }
 

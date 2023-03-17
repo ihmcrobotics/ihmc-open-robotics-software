@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class PolygonizerParameters extends StoredPropertySet implements PolygonizerParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "robot-environment-awareness/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "robot-environment-awareness/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    /**
@@ -61,14 +57,28 @@ public class PolygonizerParameters extends StoredPropertySet implements Polygoni
     */
    public static final BooleanStoredPropertyKey cutNarrowPassage = keys.addBooleanKey("Cut narrow passage");
 
+   /**
+    * Loads this property set.
+    */
    public PolygonizerParameters()
    {
       this("");
    }
 
-   public PolygonizerParameters(String versionSpecifier)
+   /**
+    * Loads an alternate version of this property set in the same folder.
+    */
+   public PolygonizerParameters(String versionSuffix)
    {
-      super(keys, PolygonizerParameters.class, versionSpecifier);
+      this(PolygonizerParameters.class, versionSuffix);
+   }
+
+   /**
+    * Loads an alternate version of this property set in other folders.
+    */
+   public PolygonizerParameters(Class<?> classForLoading, String versionSuffix)
+   {
+      super(keys, classForLoading, PolygonizerParameters.class, versionSuffix);
       load();
    }
 
@@ -80,8 +90,7 @@ public class PolygonizerParameters extends StoredPropertySet implements Polygoni
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           PolygonizerParameters.class);
+      StoredPropertySet parameters = new StoredPropertySet(keys, PolygonizerParameters.class);
       parameters.generateJavaFiles();
    }
 }

@@ -10,12 +10,14 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.*;
 import us.ihmc.tools.string.StringTools;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class StoredPropertySetJavaGenerator
 {
    private final String jsonFileName;
    private final Class<?> basePropertySetClass;
+   private final Path jsonFilePath;
    private final WorkspaceDirectory javaDirectory;
    private final WorkspaceFile primaryJavaFile;
    private final WorkspaceFile basicsJavaFile;
@@ -24,9 +26,10 @@ public class StoredPropertySetJavaGenerator
    private record StoredPropertyFromFile(String titleCasedName, String typeName, String typePrimitiveName, String description) { }
    private final ArrayList<StoredPropertyFromFile> storedPropertiesFromFile = new ArrayList<>();
 
-   public StoredPropertySetJavaGenerator(Class<?> basePropertySetClass, Class<?> classForLoading)
+   public StoredPropertySetJavaGenerator(Class<?> basePropertySetClass, Class<?> classForLoading, Path jsonFilePath)
    {
       this.basePropertySetClass = basePropertySetClass;
+      this.jsonFilePath = jsonFilePath;
 
       javaDirectory = new WorkspaceJavaDirectory(classForLoading, "generated-java");
       jsonFileName = basePropertySetClass.getSimpleName() + ".json";
@@ -182,9 +185,9 @@ public class StoredPropertySetJavaGenerator
                /**
                 * Loads an alternate version of this property set in the same folder.
                 */
-               public %2$s(String versionSpecifier)
+               public %2$s(String versionSuffix)
                {
-                  this(%2$s.class, versionSpecifier);
+                  this(%2$s.class, versionSuffix);
                }
                
                /**
@@ -211,7 +214,7 @@ public class StoredPropertySetJavaGenerator
             """.formatted(basePropertySetClass.getPackage().getName(),
                           basePropertySetClass.getSimpleName(),
                           getParameterKeysStrings(),
-                          WorkspacePathTools.removePathPartsBeforeProjectFolder(primaryJavaFile.getFilesystemFile()));
+                          jsonFilePath);
 
       FileTools.write(primaryJavaFile.getFilesystemFile(), primaryJavaFileContents.getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       LogTools.info("Generated successfully: {}", WorkspacePathTools.removePathPartsBeforeProjectFolder(primaryJavaFile.getFilesystemFile()));

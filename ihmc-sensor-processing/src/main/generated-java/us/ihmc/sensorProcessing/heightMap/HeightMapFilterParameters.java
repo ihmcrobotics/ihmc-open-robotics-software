@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class HeightMapFilterParameters extends StoredPropertySet implements HeightMapFilterParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-sensor-processing/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-sensor-processing/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    /**
@@ -56,15 +52,15 @@ public class HeightMapFilterParameters extends StoredPropertySet implements Heig
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public HeightMapFilterParameters(String versionSpecifier)
+   public HeightMapFilterParameters(String versionSuffix)
    {
-      this(HeightMapFilterParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(HeightMapFilterParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public HeightMapFilterParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public HeightMapFilterParameters(Class<?> classForLoading, String versionSuffix)
    {
       super(keys, classForLoading, HeightMapFilterParameters.class, versionSuffix);
       load();
@@ -78,8 +74,7 @@ public class HeightMapFilterParameters extends StoredPropertySet implements Heig
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           HeightMapFilterParameters.class);
+      StoredPropertySet parameters = new StoredPropertySet(keys, HeightMapFilterParameters.class);
       parameters.generateJavaFiles();
    }
 }

@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class RapidRegionsExtractorParameters extends StoredPropertySet implements RapidRegionsExtractorParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-perception/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-perception/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final IntegerStoredPropertyKey normalPackRange = keys.addIntegerKey("Normal pack range");
@@ -55,15 +51,15 @@ public class RapidRegionsExtractorParameters extends StoredPropertySet implement
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public RapidRegionsExtractorParameters(String versionSpecifier)
+   public RapidRegionsExtractorParameters(String versionSuffix)
    {
-      this(RapidRegionsExtractorParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(RapidRegionsExtractorParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public RapidRegionsExtractorParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public RapidRegionsExtractorParameters(Class<?> classForLoading, String versionSuffix)
    {
       super(keys, classForLoading, RapidRegionsExtractorParameters.class, versionSuffix);
       load();
@@ -77,8 +73,7 @@ public class RapidRegionsExtractorParameters extends StoredPropertySet implement
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           RapidRegionsExtractorParameters.class);
+      StoredPropertySet parameters = new StoredPropertySet(keys, RapidRegionsExtractorParameters.class);
       parameters.generateJavaFiles();
    }
 }

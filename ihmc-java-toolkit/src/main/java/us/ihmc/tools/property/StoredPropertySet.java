@@ -124,7 +124,9 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
    public void generateJavaFiles()
    {
-      StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(basePropertySetClass, classForLoading);
+      StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(basePropertySetClass,
+                                                                                    classForLoading,
+                                                                                    WorkspacePathTools.removePathPartsBeforeProjectFolder(findFileForSaving()));
       if (jsonResourceExists())
       {
          generator.loadFromJSON();
