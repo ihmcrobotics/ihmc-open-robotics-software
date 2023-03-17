@@ -7,7 +7,6 @@ import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
@@ -19,17 +18,15 @@ public class ImGuiMachine
 {
    private final String instanceId;
    private final String hostname;
-   private final ROS2Node ros2Node;
    private SystemResourceUsageMessage lastResourceUsageMessage = new SystemResourceUsageMessage();
 
    /* ImGui elements */
    private final ImPlotPlot cpuPlot = new ImPlotPlot();
 
-   public ImGuiMachine(String instanceId, String hostname)
+   public ImGuiMachine(String instanceId, String hostname, ROS2Node ros2Node)
    {
       this.instanceId = instanceId;
       this.hostname = hostname;
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_machine_" + instanceId);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            ROS2Tools.getSystemResourceUsageTopic(instanceId),
                                            subscriber -> lastResourceUsageMessage = subscriber.takeNextData());
@@ -90,10 +87,5 @@ public class ImGuiMachine
       plotWidth -= 1.0f;
 
       ImGui.sameLine();
-   }
-
-   public void destroy()
-   {
-      ros2Node.destroy();
    }
 }
