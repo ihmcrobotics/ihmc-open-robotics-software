@@ -1,9 +1,8 @@
-package us.ihmc.valkyrie;
+package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -11,9 +10,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.io.File;
 import java.util.ArrayList;
 
-public class FootstepPlanGenerator
+/*
+Use this to generate footsteps with nominal and referenced AStar for debugging / visualizing.
+View the generated logs from RemoteFootstepPlannerUI
+ */
+
+public class ReferencedAStarFootstepGeneratorForDebugging
 {
-   public FootstepPlanGenerator()
+   public ReferencedAStarFootstepGeneratorForDebugging()
    {
       ArrayList<FootstepPlan> referenced_output_plans = new ArrayList<>();
 
@@ -112,6 +116,8 @@ public class FootstepPlanGenerator
 
    public static void main(String[] args)
    {
-      new FootstepPlanGenerator();
+      new ReferencedAStarFootstepGeneratorForDebugging();
    }
 }
+
+
