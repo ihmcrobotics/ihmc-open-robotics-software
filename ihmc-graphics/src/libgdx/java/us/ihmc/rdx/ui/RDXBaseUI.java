@@ -122,12 +122,12 @@ public class RDXBaseUI
 
    public RDXBaseUI()
    {
-      this(0, null, null, null);
+      this(0, null);
    }
 
    public RDXBaseUI(String windowTitle)
    {
-      this(0, null, null, windowTitle);
+      this(0, windowTitle);
    }
 
    /**
@@ -135,13 +135,8 @@ public class RDXBaseUI
     *
     * @param additionalStackHeightForFindingCaller This is if you have something that sets up a RDXBaseUI for another class.
     *                                              We want the highest level calling class to be the one used for loading resources.
-    * @param directoryNameToAssumePresent Directory that's either a part present in the working directory of an immediate child.
-    * @param subsequentPathToResourceFolder The subsequent path to the resources folder from the directory assumed to be present.
     */
-   /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller,
-                                  String directoryNameToAssumePresent,
-                                  String subsequentPathToResourceFolder,
-                                  String windowTitle)
+   /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller, String windowTitle)
    {
       StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
       Class<?> classForLoading = ExceptionTools.handle(() -> Class.forName(stackTraceElements[3 + additionalStackHeightForFindingCaller].getClassName()),
@@ -149,22 +144,6 @@ public class RDXBaseUI
       LogTools.info("Using class for loading resources: {}", classForLoading.getName());
 
       this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
-
-//      // Try to figure out where the resources for this class are
-//      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
-//      {
-//         WorkingDirectoryPathComponents inferredPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForLoading);
-//         if (inferredPathComponents != null)
-//         {
-//            directoryNameToAssumePresent = inferredPathComponents.getDirectoryNameToAssumePresent();
-//            subsequentPathToResourceFolder = inferredPathComponents.getSubsequentPathToResourceFolder();
-//         }
-//      }
-
-//      if (directoryNameToAssumePresent == null || subsequentPathToResourceFolder == null)
-//      {
-//         LogTools.warn("We won't be able to write files to version controlled resources, because we probably aren't in a workspace.");
-//      }
 
       configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading, "/").resolve(configurationExtraPath);
@@ -174,11 +153,7 @@ public class RDXBaseUI
          LogTools.warn("We won't be able to write files to version controlled resources, because we probably aren't in a workspace.");
       }
 
-      layoutManager = new RDXImGuiLayoutManager(classForLoading,
-                                                directoryNameToAssumePresent,
-                                                subsequentPathToResourceFolder,
-                                                configurationExtraPath,
-                                                configurationBaseDirectory);
+      layoutManager = new RDXImGuiLayoutManager(classForLoading, configurationExtraPath, configurationBaseDirectory);
       imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem(layoutManager);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
