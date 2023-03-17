@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class ConcaveHullFactoryParameters extends StoredPropertySet implements ConcaveHullFactoryParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "robot-environment-awareness/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "robot-environment-awareness/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey edgeLengthThreshold = keys.addDoubleKey("Edge length threshold");
@@ -28,29 +24,40 @@ public class ConcaveHullFactoryParameters extends StoredPropertySet implements C
    public static final IntegerStoredPropertyKey maxNumberOfIterations = keys.addIntegerKey("Max number of iterations");
    public static final DoubleStoredPropertyKey triangulationTolerance = keys.addDoubleKey("Triangulation tolerance");
 
+   /**
+    * Loads this property set.
+    */
    public ConcaveHullFactoryParameters()
    {
       this("");
    }
 
-   public ConcaveHullFactoryParameters(String versionSpecifier)
+   /**
+    * Loads an alternate version of this property set in the same folder.
+    */
+   public ConcaveHullFactoryParameters(String versionSuffix)
    {
-      super(keys, ConcaveHullFactoryParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(ConcaveHullFactoryParameters.class, versionSuffix);
+   }
+
+   /**
+    * Loads an alternate version of this property set in other folders.
+    */
+   public ConcaveHullFactoryParameters(Class<?> classForLoading, String versionSuffix)
+   {
+      super(keys, classForLoading, ConcaveHullFactoryParameters.class, versionSuffix);
       load();
    }
 
    public ConcaveHullFactoryParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, ConcaveHullFactoryParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, ConcaveHullFactoryParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           ConcaveHullFactoryParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, ConcaveHullFactoryParameters.class);
+      parameters.generateJavaFiles();
    }
 }

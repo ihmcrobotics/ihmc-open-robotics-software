@@ -34,9 +34,9 @@ public class RDXTeleoperationParameters extends StoredPropertySet
    public static final BooleanStoredPropertyKey replanSwingTrajectoriesOnChange = keys.addBooleanKey("Replan swing trajectories on change");
    public static final BooleanStoredPropertyKey isPSIAdjustable = keys.addBooleanKey("Is PSI adjustable");
 
-   public RDXTeleoperationParameters(String robotRepoName, String robotSubsequentPathToResourceFolder, String robotName)
+   public RDXTeleoperationParameters(String robotName)
    {
-      super(keys, RDXTeleoperationParameters.class, robotRepoName, robotSubsequentPathToResourceFolder, StringUtils.capitalize(robotName));
+      super(keys, RDXTeleoperationParameters.class, StringUtils.capitalize(robotName));
    }
 
    public double getTrajectoryTime()
