@@ -1,11 +1,11 @@
 {
   "testNumberUseOnlyForTesting": 1,
-  "logging" : true,
+  "logging" : false,
   "numberBasisFunctions": 20,
-  "numberObservations": 15,
+  "numberObservations": 5,
   "conditionOnlyLastObservation": false,
+  "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
-  "numberOfInferredSpeeds": 30,
   "tasks":[
     {
       "context": "Door",

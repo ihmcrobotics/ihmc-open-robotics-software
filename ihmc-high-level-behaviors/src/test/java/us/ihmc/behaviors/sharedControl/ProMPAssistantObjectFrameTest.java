@@ -66,7 +66,7 @@ public class ProMPAssistantObjectFrameTest
       trajectoryRecorder.setRecordFileName("generatedMotion.csv");
       LogTools.info("Processing trajectory ...");
 
-      while (!trajectoryPlayer.hasDoneReplay())
+      while (!proMPAssistant.isCurrentTaskDone())
       {
          for (String bodyPart : bodyParts)
          {
@@ -99,7 +99,8 @@ public class ProMPAssistantObjectFrameTest
                                                           framePose.getPosition().getX(),
                                                           framePose.getPosition().getY(),
                                                           framePose.getPosition().getZ()};
-            trajectoryRecorder.record(bodyPartTrajectories);
+            if(!proMPAssistant.isCurrentTaskDone())
+               trajectoryRecorder.record(bodyPartTrajectories);
          }
       }
       //concatenate each set point of hands in single row

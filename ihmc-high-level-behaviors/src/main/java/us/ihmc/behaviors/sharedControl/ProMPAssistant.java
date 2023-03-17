@@ -7,6 +7,8 @@ import org.json.simple.parser.ParseException;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -28,6 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ProMPAssistant
 {
+   private static final int INTERPOLATION_SAMPLES = 5;
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
    private final List<Double> distanceCandidateTasks = new ArrayList<>();
@@ -47,6 +50,7 @@ public class ProMPAssistant
    private boolean doneCurrentTask = false; // used to communicate to higher level classes that the task has been completed
    private final AtomicBoolean isLastViaPoint = new AtomicBoolean(false); // check if last observed viapoint before update
    private int testNumber = 0;
+   private int numberOfInferredSpeeds = 0;
    private boolean conditionOnlyLastObservation = true;
    private final ArrayList<Pose3DReadOnly> observationRecognition = new ArrayList<>();
    private boolean isMoving = false;
@@ -146,7 +150,7 @@ public class ProMPAssistant
          }
          int numberBasisFunctions = (int) ((long) jsonObject.get("numberBasisFunctions"));
          long speedFactor = ((long) jsonObject.get("allowedIncreaseDecreaseSpeedFactor"));
-         int numberOfInferredSpeeds = (int) ((long) jsonObject.get("numberOfInferredSpeeds"));
+         numberOfInferredSpeeds = (int) ((long) jsonObject.get("numberOfInferredSpeeds"));
          for (int i = 0; i < taskNames.size(); i++)
          {
             proMPManagers.put(taskNames.get(i),
@@ -178,6 +182,84 @@ public class ProMPAssistant
       catch (IOException | ParseException e)
       {
          throw new RuntimeException(e);
+      }
+   }
+
+   public void framePoseToPack(FramePose3D framePose, String bodyPart)
+   {
+      if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart))
+      { // if bodyPart is used in current task
+         List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedTrajectoryMap.get(bodyPart);
+
+         int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
+         if (sampleCounter < numberObservations)
+         {
+            FramePose3D observedFramePose = bodyPartObservedTrajectoryMap.get(bodyPart).get(sampleCounter);
+            if (objectFrame != null)
+               observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            framePose.getPosition().set(observedFramePose.getPosition());
+            framePose.getOrientation().set(observedFramePose.getOrientation());
+            // take the next sample from the trajectory next time
+            bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
+         }
+         else if (sampleCounter < generatedFramePoseTrajectory.size() - 1)
+         {
+            // pack the frame using the trajectory generated from prediction
+            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter + 1); // +1 to avoid discontinuity due to imprecision in conditioning
+            List<FramePose3D> observations = bodyPartObservedTrajectoryMap.get(bodyPart);
+            FramePose3D lastObservedFramePose = observations.get(observations.size()-1);
+            if (objectFrame != null) // change back to world frame if before it was changed to object frame
+            {
+               generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+               lastObservedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            }
+
+            double alpha = (double)(sampleCounter - numberObservations) / (INTERPOLATION_SAMPLES);
+            if (alpha > 1.0)
+            {
+               framePose.getPosition().set(generatedFramePose.getPosition());
+               framePose.getOrientation().set(generatedFramePose.getOrientation());
+            }
+            else
+            { // interpolate gradually last observation to prediction
+               FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
+               arbitratedFrameOrientation.set((1 - alpha) * lastObservedFramePose.getOrientation().getX() + alpha * generatedFramePose.getOrientation().getX(),
+                                              (1 - alpha) * lastObservedFramePose.getOrientation().getY() + alpha * generatedFramePose.getOrientation().getY(),
+                                              (1 - alpha) * lastObservedFramePose.getOrientation().getZ() + alpha * generatedFramePose.getOrientation().getZ(),
+                                              (1 - alpha) * lastObservedFramePose.getOrientation().getS() + alpha * generatedFramePose.getOrientation().getS());
+               FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
+               arbitratedFramePosition.setX((1 - alpha) * lastObservedFramePose.getPosition().getX() + alpha * generatedFramePose.getPosition().getX());
+               arbitratedFramePosition.setY((1 - alpha) * lastObservedFramePose.getPosition().getY() + alpha * generatedFramePose.getPosition().getY());
+               arbitratedFramePosition.setZ((1 - alpha) * lastObservedFramePose.getPosition().getZ() + alpha * generatedFramePose.getPosition().getZ());
+               framePose.getPosition().set(arbitratedFramePosition);
+               framePose.getOrientation().set(arbitratedFrameOrientation);
+            }
+            // take the next sample from the trajectory next time
+            bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
+         }
+         else
+         { // motion is over
+            // check that inferred timesteps are not lower than the observed setpoints.
+            if (generatedFramePoseTrajectory.size() < numberObservations)
+            {
+               // the predicted motion is already over before being available and assistance should be exited
+               String configurationFile = "us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
+               LogTools.warn(
+                     "The predicted motion results being faster than the time set to observe it. You can either decrease the number of required observations or increase the range of possible inferred speeds in {}",
+                     configurationFile);
+            }
+            else
+            {
+               // take previous sample (frame) to avoid jump when exiting assistance mode
+               FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter - 1);
+               if (objectFrame != null)
+                  generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+               framePose.getPosition().set(generatedFramePose.getPosition());
+               framePose.getOrientation().set(generatedFramePose.getOrientation());
+            }
+            // exit assistance mode
+            doneCurrentTask = true;
+         }
       }
    }
 
@@ -236,7 +318,7 @@ public class ProMPAssistant
                // store observed pose
                bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
                // update the proMP prediction according to observations and generate mean trajectory
-               if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
+               if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations + 1) // if observed a sufficient number of poses
                {
                   if (!bodyPartGoal.isEmpty() && objectPose != null) // if there is an observable goal this body part can reach
                   {
@@ -365,7 +447,8 @@ public class ProMPAssistant
 
    private void updateTask()
    {
-      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get(bodyPartInference), bodyPartInference);
+      if (numberOfInferredSpeeds > 0)
+         proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get(bodyPartInference), bodyPartInference);
       // update all proMP trajectories based on initial observations (stored observed poses)
       for (Map.Entry<String, List<FramePose3D>> entryPartObservation : bodyPartObservedTrajectoryMap.entrySet())
       {
@@ -404,7 +487,7 @@ public class ProMPAssistant
       {
          bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart, frame));
          // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
-         setStartTrajectories(numberObservations);
+         setStartTrajectories(numberObservations+1);
       }
    }
 
@@ -418,61 +501,6 @@ public class ProMPAssistant
    public boolean readyToPack()
    {
       return doneInitialProcessingTask;
-   }
-
-   public void framePoseToPack(FramePose3D framePose, String bodyPart)
-   {
-      if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart))
-      { // if bodyPart is used in current task
-         List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedTrajectoryMap.get(bodyPart);
-         List<FramePose3D> observedFramePoseTrajectory = bodyPartObservedTrajectoryMap.get(bodyPart);
-         int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
-         if (sampleCounter < generatedFramePoseTrajectory.size())
-         {
-            if (sampleCounter < numberObservations) // this statement is true only during replay preview
-            { // replay the observed motion, do not want the unconditioned ProMP mean for the first part
-               FramePose3D observedFramePose = observedFramePoseTrajectory.get(sampleCounter);
-               if (objectFrame != null) // change back to world frame if before it was changed to object frame
-                  observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               framePose.getPosition().set(observedFramePose.getPosition());
-               framePose.getOrientation().set(observedFramePose.getOrientation());
-            }
-            else
-            { // pack the frame using the trajectory generated from prediction
-               FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter);
-               if (objectFrame != null) // change back to world frame if before it was changed to object frame
-                  generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               framePose.getPosition().set(generatedFramePose.getPosition());
-               framePose.getOrientation().set(generatedFramePose.getOrientation());
-            }
-
-            // take the next sample from the trajectory next time
-            bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
-         }
-         else
-         { // motion is over
-            // check that inferred timesteps are not lower than the observed setpoints.
-            if (generatedFramePoseTrajectory.size() < numberObservations)
-            {
-               // the predicted motion is already over before being available and assistance should be exited
-               String configurationFile = "us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
-               LogTools.warn(
-                     "The predicted motion results being faster than the time set to observe it. You can either decrease the number of required observations or increase the range of possible inferred speeds in {}",
-                     configurationFile);
-            }
-            else
-            {
-               // take previous sample (frame) to avoid jump when exiting assistance mode
-               FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter - 1);
-               if (objectFrame != null)
-                  generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               framePose.getPosition().set(generatedFramePose.getPosition());
-               framePose.getOrientation().set(generatedFramePose.getOrientation());
-            }
-            // exit assistance mode
-            doneCurrentTask = true;
-         }
-      }
    }
 
    public void reset()
