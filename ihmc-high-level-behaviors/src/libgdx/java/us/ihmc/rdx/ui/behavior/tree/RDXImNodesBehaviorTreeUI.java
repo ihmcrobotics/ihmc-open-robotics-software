@@ -162,6 +162,6 @@ public class RDXImNodesBehaviorTreeUI
 
    public void destroy()
    {
-      ImNodes.destroyContext();
+      ImNodesTools.destroy();
    }
 }

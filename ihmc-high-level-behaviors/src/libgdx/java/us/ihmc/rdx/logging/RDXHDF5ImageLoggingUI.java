@@ -14,6 +14,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -31,7 +32,7 @@ import java.util.Date;
  */
 public class RDXHDF5ImageLoggingUI
 {
-   public static final String FILE_SUFFIX = "Images" + HDF5Tools.HDF5_FILE_EXTENSION;
+   public static final String FILE_SUFFIX = "Images" + PerceptionLoggerConstants.HDF5_FILE_EXTENSION;
    public static final String IMAGE_GROUP_NAME = "image";
    public static final String ENCODING_NAME = "encoding";
 

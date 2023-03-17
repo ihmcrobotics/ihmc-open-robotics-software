@@ -16,6 +16,15 @@ public final class ImPlotTools
 
    private static ImPlotContext context = null;
 
+   public static void destroy()
+   {
+      if (context != null)
+      {
+         ImPlot.destroyContext(context);
+         context = null;
+      }
+   }
+
    /**
     * We are assuming we don't ever need more than one context.
     */

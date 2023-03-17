@@ -607,7 +607,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       rollCostMapBuffer.resize(totalEdges, openCLManager);
       traversibilityCostMapBuffer.resize(totalEdges, openCLManager);
       edgeCostMapBuffer.resize(totalEdges, openCLManager);
-      heuristicCostMapBuffer.resize(totalEdges, openCLManager);
+      heuristicCostMapBuffer.resize(totalNodes, openCLManager);
    }
 
 
@@ -1051,6 +1051,13 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       openCLManager.setKernelArgument(computeHeuristicCostKernel, 2, heuristicCostMapBuffer.getOpenCLBufferObject());
 
       int totalCells = nodesPerSide * nodesPerSide;
+      if (heightMapParametersBuffer.getBackingDirectFloatBuffer().limit() != 6)
+         throw new RuntimeException("Bad height map parameters buffer length");
+      if (pathPlanningParametersBuffer.getBackingDirectFloatBuffer().limit() != 31)
+         throw new RuntimeException("Bad path planning parameters buffer length");
+      if (heuristicCostMapBuffer.getBackingDirectFloatBuffer().limit() != totalCells)
+         throw new RuntimeException("Bad buffer length");
+
       openCLManager.execute1D(computeHeuristicCostKernel, totalCells);
 
       heuristicCostMapBuffer.readOpenCLBufferObject(openCLManager);
