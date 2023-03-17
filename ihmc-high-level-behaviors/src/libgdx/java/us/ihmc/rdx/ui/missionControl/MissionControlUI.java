@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.missionControl;
 
+import imgui.ImGui;
 import mission_control_msgs.msg.dds.SystemAvailableMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory;
@@ -20,12 +21,6 @@ public class MissionControlUI
 
    public MissionControlUI()
    {
-      ImGuiGlfwWindow imGuiGlfwWindow = new ImGuiGlfwWindow(getClass(), "Mission Control 3");
-      imGuiGlfwWindow.runWithSinglePanel(this::renderImGuiWidgets);
-
-      ExceptionHandlingThreadScheduler updateMachinesScheduler = new ExceptionHandlingThreadScheduler("UpdateMachinesScheduler");
-      updateMachinesScheduler.schedule(this::updateMachines, 1.00);
-
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_ui");
 
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.SYSTEM_AVAILABLE, subscriber ->
@@ -34,6 +29,12 @@ public class MissionControlUI
          String machineInstanceId = message.getInstanceIdAsString();
          lastSystemAvailableMessage.put(machineInstanceId, message);
       });
+
+      ImGuiGlfwWindow imGuiGlfwWindow = new ImGuiGlfwWindow(getClass(), "Mission Control 3");
+      imGuiGlfwWindow.runWithSinglePanel(this::renderImGuiWidgets);
+
+      ExceptionHandlingThreadScheduler updateMachinesScheduler = new ExceptionHandlingThreadScheduler("UpdateMachinesScheduler");
+      updateMachinesScheduler.schedule(this::updateMachines, 1.0);
    }
 
    private void updateMachines()
@@ -50,7 +51,7 @@ public class MissionControlUI
          // Check for new machines
          if (!expired && !machines.containsKey(machineInstanceId))
          {
-            ImGuiMachine machine = new ImGuiMachine(machineInstanceId, message.getHostnameAsString());
+            ImGuiMachine machine = new ImGuiMachine(machineInstanceId, message.getHostnameAsString(), ros2Node);
             machines.put(machineInstanceId, machine);
          }
          else if (expired)
@@ -63,7 +64,10 @@ public class MissionControlUI
    private void renderImGuiWidgets()
    {
       for (ImGuiMachine machine : machines.values())
+      {
          machine.renderImGuiWidgets();
+         ImGui.newLine();
+      }
    }
 
    public static void main(String[] args)
