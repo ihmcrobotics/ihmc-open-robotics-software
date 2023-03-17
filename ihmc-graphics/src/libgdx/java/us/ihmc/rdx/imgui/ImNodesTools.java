@@ -25,13 +25,4 @@ public class ImNodesTools
             ImNodes.styleColorsLight();
       }
    }
-
-   public static void destroy()
-   {
-      if (INITIALIZED)
-      {
-         ImNodes.destroyContext();
-         INITIALIZED = false;
-      }
-   }
 }
