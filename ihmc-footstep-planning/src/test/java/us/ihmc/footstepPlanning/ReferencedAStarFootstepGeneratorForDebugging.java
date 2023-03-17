@@ -103,7 +103,7 @@ public class ReferencedAStarFootstepGeneratorForDebugging
 
    private FootstepPlan planAndLog(double alpha, FootstepPlanningModule planningModule, FootstepPlannerRequest request, FootstepPlannerLogger logger, String folderName)
    {
-      ReferenceBasedIdealStepCalculator.setReferenceAlpha(alpha);
+      planningModule.getFootstepPlannerParameters().setReferencePlanAlpha(alpha);
       FootstepPlannerOutput output = planningModule.handleRequest(request);
       FootstepPlan plan = new FootstepPlan(output.getFootstepPlan());
 
