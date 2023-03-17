@@ -30,12 +30,12 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
     * Example, pass in the class us.ihmc.tools.SomeClass will result in:
     * /path/to/ihmc-open-robotics-software/ihmc-java-toolkit/src/main/resources/us/ihmc/tools
     */
-   public WorkspaceResourceDirectory(Class<?> classForResourceDirectory)
+   public WorkspaceResourceDirectory(Class<?> classForFindingSourceSetDirectory)
    {
-      this.classForLoading = classForResourceDirectory;
-      WorkingDirectoryPathComponents workingDirectoryPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForResourceDirectory);
-      pathNecessaryForClasspathLoading = ResourceTools.getResourcesPathForClass(classForResourceDirectory);
-      initialize(workingDirectoryPathComponents);
+      this.classForLoading = classForFindingSourceSetDirectory;
+      setFilesystemDirectoryToSourceSetDirectory(classForFindingSourceSetDirectory, "resources");
+      pathNecessaryForClasspathLoading = ResourceTools.getResourcesPathForClass(classForFindingSourceSetDirectory);
+      initialize();
    }
 
    /**
@@ -48,24 +48,22 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
     * Example, pass in the class us.ihmc.tools.SomeClass, and pass "/stuff/moreStuff" will result in:
     * /path/to/ihmc-open-robotics-software/ihmc-java-toolkit/src/main/resources/stuff/moreStuff
     */
-   public WorkspaceResourceDirectory(Class<?> classForResourceDirectory, String subsequentOrAbsoluteResourcePackagePath)
+   public WorkspaceResourceDirectory(Class<?> classForFindingSourceSetDirectory, String subsequentOrAbsoluteResourcePackagePath)
    {
-      this.classForLoading = classForResourceDirectory;
-      WorkingDirectoryPathComponents workingDirectoryPathComponents = WorkspacePathTools.inferWorkingDirectoryPathComponents(classForResourceDirectory);
-      pathNecessaryForClasspathLoading = ResourceTools.getResourcesPathForClass(classForResourceDirectory).resolve(subsequentOrAbsoluteResourcePackagePath);
-      initialize(workingDirectoryPathComponents);
+      this.classForLoading = classForFindingSourceSetDirectory;
+      setFilesystemDirectoryToSourceSetDirectory(classForFindingSourceSetDirectory, "resources");
+      pathNecessaryForClasspathLoading = ResourceTools.getResourcesPathForClass(classForFindingSourceSetDirectory).resolve(subsequentOrAbsoluteResourcePackagePath);
+      initialize();
    }
 
-   private void initialize(WorkingDirectoryPathComponents workingDirectoryPathComponents)
+   private void initialize()
    {
       pathNecessaryForClasspathLoadingString = pathNecessaryForClasspathLoading.toString();
       // This path isn't absolute for the filesystem, only for the classpath
       // i.e. /us/ihmc/tools/io would need to be us/ihmc/tools/io
       // to append to /path/to/ihmc-java-toolkit/src/test/resources/us/ihmc/tools/io
       String subsequentPathToResourceDirectory = pathNecessaryForClasspathLoadingString.substring(1);
-      filesystemDirectory = workingDirectoryPathComponents.getParentOfSrcDirectory()
-                                                          .resolve(workingDirectoryPathComponents.getSubsequentPathToSourceSet().resolve("resources"))
-                                                          .resolve(subsequentPathToResourceDirectory);
+      filesystemDirectory = filesystemDirectory.resolve(subsequentPathToResourceDirectory);
       String tempPathNecessaryForResourceExploring = pathNecessaryForClasspathLoadingString;
       if (tempPathNecessaryForResourceExploring.startsWith("/"))
          tempPathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring.replaceFirst("/", "");

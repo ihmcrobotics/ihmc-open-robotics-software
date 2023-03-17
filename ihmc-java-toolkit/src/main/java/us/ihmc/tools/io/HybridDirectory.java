@@ -28,18 +28,6 @@ public class HybridDirectory
 
    }
 
-   public HybridDirectory(Path externalDirectory, String workspaceDirectoryNameToAssumePresent)
-   {
-      this.externalDirectory = externalDirectory;
-      workspaceDirectory = new WorkspaceDirectory(workspaceDirectoryNameToAssumePresent);
-   }
-
-   public HybridDirectory(Path externalDirectory, String workspaceDirectoryNameToAssumePresent, String workspaceSubsequentPath)
-   {
-      this.externalDirectory = externalDirectory;
-      workspaceDirectory = new WorkspaceDirectory(workspaceDirectoryNameToAssumePresent, workspaceSubsequentPath);
-   }
-
    public HybridDirectory(Path externalDirectory, Path workspaceDirectory)
    {
       this.externalDirectory = externalDirectory;
