@@ -2,6 +2,9 @@ package us.ihmc.tools.io;
 
 import java.nio.file.Path;
 
+/**
+ * Used with {@link HybridDirectory} to represent a file.
+ */
 public class HybridFile
 {
    protected Path externalFile;

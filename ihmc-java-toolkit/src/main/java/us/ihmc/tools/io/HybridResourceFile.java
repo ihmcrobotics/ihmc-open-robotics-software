@@ -11,6 +11,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.function.Consumer;
 
+/**
+ * See {@link HybridFile}. This class extends that to provide additional assistance when
+ * that file is a resource in the resources classpath.
+ */
 public class HybridResourceFile extends HybridFile
 {
    private final WorkspaceResourceFile workspaceResourceFile;
