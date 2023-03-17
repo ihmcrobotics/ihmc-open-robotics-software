@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
-import rosgraph_msgs.Log;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -26,18 +25,15 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    private final YoBoolean stepSideIncorrect;
    public static String statusMessage = "Step calculate mode: Nominal";
 
-   // TODO add to footstep planner parameters
-   /* Weight factor for using reference vs nominal ideal steps. Alpha = 0 means use nominal ideal step, alpha = 1 means use reference value */
-   public static double referenceAlpha;
-   public static double previousReferenceAlpha = Double.NaN;
+   // This will be used to query what reference alpha to use.
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private static final double DEFAULT_ALPHA = 0.7;
 
    public ReferenceBasedIdealStepCalculator(FootstepPlannerParametersBasics footstepPlannerParameters, IdealStepCalculator nominalIdealStepCalculator, YoRegistry registry)
    {
       this.nominalIdealStepCalculator = nominalIdealStepCalculator;
       stepSideIncorrect = new YoBoolean("stepSideIncorrect", registry);
       this.footstepPlannerParameters = footstepPlannerParameters;
-      referenceAlpha = footstepPlannerParameters.getReferencePlanAlpha();
    }
 
    @Override
@@ -45,7 +41,7 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    {
       nominalIdealStep = nominalIdealStepCalculator.computeIdealStep(stanceNode, startOfSwing);
 
-      setReferenceAlpha(footstepPlannerParameters.getReferencePlanAlpha());
+      double referenceAlpha = footstepPlannerParameters.getReferencePlanAlpha();
       if (referenceFootstepPlan == null || referenceFootstepPlan.isEmpty() || referenceAlpha == 0.0)
       {
          statusMessage = "Step calculate mode: Nominal";
@@ -74,22 +70,17 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
          return nominalIdealStep;
       }
 
+      // For any reason if alpha is not a number, set it to default value.
+      if (Double.isNaN(referenceAlpha))
+         referenceAlpha = DEFAULT_ALPHA;
       // Ensure alpha is within the 0 ~ 1.0 range
-      if (referenceAlpha < 0)
+      else if (referenceAlpha < 0)
          referenceAlpha = 0;
       else if (referenceAlpha > 1.0)
          referenceAlpha = 1.0;
 
       statusMessage = "Step calculate mode: Reference (alpha : " + referenceAlpha + " )";
       FramePose3D referenceFootstepPose = referenceFootstep.getFootstepPose();
-
-      // Calculator will only print log when alpha value is changed by operator
-      if (previousReferenceAlpha != referenceAlpha)
-      {
-         DecimalFormat df = new DecimalFormat("0.00");
-         LogTools.warn("! ! ! Using reference step with new alpha value: {} ! ! !", df.format(referenceAlpha));
-      }
-
 
       double idealStepX = EuclidCoreTools.interpolate(nominalIdealStep.getX(), referenceFootstepPose.getX(), referenceAlpha);
       double idealStepY = EuclidCoreTools.interpolate(nominalIdealStep.getY(), referenceFootstepPose.getY(), referenceAlpha);
@@ -111,20 +102,6 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    public void setFootstepGraph(DirectedGraph<FootstepGraphNode> footstepGraph)
    {
       this.footstepGraph = footstepGraph;
-   }
-
-   public static void setReferenceAlpha(double alpha)
-   {
-      if (alpha <= 1.0 && alpha >= 0.0)
-      {
-         previousReferenceAlpha = referenceAlpha;
-         referenceAlpha = alpha;
-      }
-   }
-
-   public static double getReferenceAlpha()
-   {
-      return referenceAlpha;
    }
 
    public DiscreteFootstep getNominalIdealStep()

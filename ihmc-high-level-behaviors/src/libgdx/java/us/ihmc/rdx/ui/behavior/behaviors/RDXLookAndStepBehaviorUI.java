@@ -278,7 +278,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       {
          if (ImGuiTools.volatileInputDouble("Reference alpha", alpha))
          {
-            ReferenceBasedIdealStepCalculator.setReferenceAlpha(alpha.get());
             footstepPlannerRemotePropertySet.getStoredPropertySet().set(FootstepPlannerParameterKeys.referencePlanAlpha, alpha.get());
             footstepPlannerRemotePropertySet.setPropertyChanged();
          }
