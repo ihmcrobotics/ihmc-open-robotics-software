@@ -575,11 +575,6 @@ public class RDXBehaviorActionSequenceEditor
       return name;
    }
 
-   public ImBoolean getEnabled()
-   {
-      return enabled;
-   }
-
    public WorkspaceResourceFile getWorkspaceFile()
    {
       return workspaceFile;
