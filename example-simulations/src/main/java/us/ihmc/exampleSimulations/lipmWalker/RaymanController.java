@@ -595,7 +595,7 @@ public class RaymanController implements Controller
 
          // TODO: for now let's make next desired footstep location as reference icp.
          referenceICP.set(desiredFootstepPosition);
-         referenceCOM.set(robotJae.getCenterOfMassPosition());
+         referenceCOM.set(measuredCoMPosition);
 
          // normal
          swingPositionTrajectory.setInitialConditions(initialPosition, new FrameVector3D());
@@ -616,11 +616,15 @@ public class RaymanController implements Controller
          addHipTrajectoryPoint();
 
          // During this state, the center of mass is kept right above the support foot.
-         // Mode 1 : ASIMO-like movement of the COM
-         FramePoint3D centerOfMassPosition = new FramePoint3D(robotJae.getSoleFrame(supportSide));
-         centerOfMassPosition.changeFrame(WORLD_FRAME);
-         centerOfMassPosition.setZ(DESIRED_CENTER_OF_MASS_HEIGHT);
-         desiredCenterOfMassPoint.set(centerOfMassPosition);
+
+         if (walkModeYoEnum.getValue() == WalkMode.ASIMO)
+         {
+            // Mode 1 : ASIMO-like movement of the COM
+            FramePoint3D centerOfMassPosition = new FramePoint3D(robotJae.getSoleFrame(supportSide));
+            centerOfMassPosition.changeFrame(WORLD_FRAME);
+            centerOfMassPosition.setZ(DESIRED_CENTER_OF_MASS_HEIGHT);
+            desiredCenterOfMassPoint.set(centerOfMassPosition);
+         }
 
          if (walkModeYoEnum.getValue() == WalkMode.LIP)
          {
