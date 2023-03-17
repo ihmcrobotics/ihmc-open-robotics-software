@@ -15,8 +15,9 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.Comparator;
 import java.util.TreeSet;
@@ -25,7 +26,7 @@ public class RDXBehaviorActionSequenceUI
 {
    private final ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private WorkspaceDirectory behaviorSequenceStorageDirectory;
+   private WorkspaceResourceDirectory behaviorSequenceStorageDirectory;
    private RDX3DPanel panel3D;
    private DRCRobotModel robotModel;
    private ROS2Node ros2Node;
@@ -34,7 +35,7 @@ public class RDXBehaviorActionSequenceUI
    private final ImString newSequenceName = new ImString("", 100);
    private final TreeSet<RDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(RDXBehaviorActionSequenceEditor::getName));
 
-   public void create(WorkspaceDirectory behaviorSequenceStorageDirectory,
+   public void create(WorkspaceResourceDirectory behaviorSequenceStorageDirectory,
                       RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
@@ -82,7 +83,7 @@ public class RDXBehaviorActionSequenceUI
 
    private void reindexSequences()
    {
-      for (WorkspaceFile queryContainedFile : behaviorSequenceStorageDirectory.queryContainedFiles())
+      for (WorkspaceResourceFile queryContainedFile : behaviorSequenceStorageDirectory.queryContainedFiles())
       {
          boolean alreadyLoaded = false;
          for (var editor : editors)

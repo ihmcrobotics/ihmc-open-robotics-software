@@ -8,11 +8,10 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
+import us.ihmc.tools.io.HybridResourceDirectory;
 import us.ihmc.tools.io.HybridResourceMode;
 
 import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -25,17 +24,15 @@ public class RDXImGuiLayoutManager
 {
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private final Class<?> classForLoading;
-   private final String directoryNameToAssumePresent;
-   private final String subsequentPathToResourceFolder;
    private final String configurationExtraPath;
-   private final HybridDirectory configurationBaseDirectory;
-   private final ArrayList<Consumer<HybridDirectory>> layoutDirectoryUpdatedListeners = new ArrayList<>();
+   private final HybridResourceDirectory configurationBaseDirectory;
+   private final ArrayList<Consumer<HybridResourceDirectory>> layoutDirectoryUpdatedListeners = new ArrayList<>();
    private final ArrayList<Function<ImGuiConfigurationLocation, Boolean>> loadListeners = new ArrayList<>();
    private final ArrayList<Consumer<ImGuiConfigurationLocation>> saveListeners = new ArrayList<>();
-   private HybridDirectory layoutDirectory;
+   private HybridResourceDirectory layoutDirectory;
    private boolean needToReindexLayouts = false;
    private boolean firstIndex = true;
-   private boolean firstLoad = true;
+   private boolean layoutHasBeenLoadedOnce = false;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString userHomeLayoutNameToSave = new ImString(100);
    private final ImString versionControlLayoutNameToSave = new ImString(100);
@@ -44,15 +41,9 @@ public class RDXImGuiLayoutManager
    private String currentLayoutName = "Main";
    private ImGuiConfigurationLocation currentConfigurationLocation;
 
-   public RDXImGuiLayoutManager(Class<?> classForLoading,
-                                String directoryNameToAssumePresent,
-                                String subsequentPathToResourceFolder,
-                                String configurationExtraPath,
-                                HybridDirectory configurationBaseDirectory)
+   public RDXImGuiLayoutManager(Class<?> classForLoading, String configurationExtraPath, HybridResourceDirectory configurationBaseDirectory)
    {
       this.classForLoading = classForLoading;
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.configurationExtraPath = configurationExtraPath;
       this.configurationBaseDirectory = configurationBaseDirectory;
       indexLayouts();
@@ -230,15 +221,24 @@ public class RDXImGuiLayoutManager
 
    public void applyLayoutDirectory()
    {
-      layoutDirectory = new HybridDirectory(dotIHMCDirectory,
-                                            directoryNameToAssumePresent,
-                                            subsequentPathToResourceFolder,
-                                            classForLoading,
-                                                 configurationExtraPath + (currentLayoutName.equals("Main") ? "" : "/" + currentLayoutName
-                                                                                                                   + "Layout"));
-      for (Consumer<HybridDirectory> layoutDirectoryUpdatedListener : layoutDirectoryUpdatedListeners)
+      layoutDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading, "/")
+            .resolve(configurationExtraPath + (currentLayoutName.equals("Main") ? "" : "/" + currentLayoutName + "Layout"));
+      for (Consumer<HybridResourceDirectory> layoutDirectoryUpdatedListener : layoutDirectoryUpdatedListeners)
       {
          layoutDirectoryUpdatedListener.accept(layoutDirectory);
+      }
+   }
+
+   /**
+    * Should only be called by before rendering the first ImGui frame.
+    */
+   public void loadInitialLayout()
+   {
+      if (!layoutHasBeenLoadedOnce)
+      {
+         layoutHasBeenLoadedOnce = true;
+         LogTools.info(1, "Loading layout.");
+         reloadLayoutInternal();
       }
    }
 
@@ -248,15 +248,15 @@ public class RDXImGuiLayoutManager
     */
    public void reloadLayout()
    {
-      if (firstLoad)
-      {
-         firstLoad = false;
-         LogTools.info(1, "Loading layout.");
-      }
-      else
+      if (layoutHasBeenLoadedOnce)
       {
          LogTools.info(1, "Reloading layout.");
+         reloadLayoutInternal();
       }
+   }
+
+   private void reloadLayoutInternal()
+   {
       applyLayoutDirectory();
       loadConfiguration(currentConfigurationLocation);
    }
@@ -266,12 +266,12 @@ public class RDXImGuiLayoutManager
       return currentConfigurationLocation;
    }
 
-   public HybridDirectory getLayoutDirectory()
+   public HybridResourceDirectory getLayoutDirectory()
    {
       return layoutDirectory;
    }
 
-   public ArrayList<Consumer<HybridDirectory>> getLayoutDirectoryUpdatedListeners()
+   public ArrayList<Consumer<HybridResourceDirectory>> getLayoutDirectoryUpdatedListeners()
    {
       return layoutDirectoryUpdatedListeners;
    }

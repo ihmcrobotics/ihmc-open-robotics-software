@@ -37,10 +37,7 @@ public class ImGuiSSHJShellUI
 
    public ImGuiSSHJShellUI()
    {
-      ImGuiGlfwWindow imGuiGlfwWindow = new ImGuiGlfwWindow(getClass(),
-                                                            "ihmc-open-robotics-software",
-                                                            "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                            "SSHJ Shell");
+      ImGuiGlfwWindow imGuiGlfwWindow = new ImGuiGlfwWindow(getClass(), "SSHJ Shell");
       imGuiGlfwWindow.runWithSinglePanel(this::renderImGuiWidgets);
 
       standardOut.resize(bufferSize.get());

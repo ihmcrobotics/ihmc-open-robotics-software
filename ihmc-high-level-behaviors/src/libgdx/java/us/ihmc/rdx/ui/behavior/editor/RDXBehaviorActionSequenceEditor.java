@@ -28,10 +28,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.JSONTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.*;
 
 import java.util.LinkedList;
 import java.util.UUID;
@@ -42,7 +39,7 @@ public class RDXBehaviorActionSequenceEditor
    private ImGuiPanel panel;
    private final ImBoolean automaticExecution = new ImBoolean(false);
    private String name;
-   private final WorkspaceFile workspaceFile;
+   private final WorkspaceResourceFile workspaceFile;
    private final LinkedList<RDXBehaviorAction> actionSequence = new LinkedList<>();
    private String pascalCasedName;
    private RDX3DPanel panel3D;
@@ -62,18 +59,18 @@ public class RDXBehaviorActionSequenceEditor
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
 
-   public RDXBehaviorActionSequenceEditor(WorkspaceFile fileToLoadFrom)
+   public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom)
    {
       this.workspaceFile = fileToLoadFrom;
       loadNameFromFile();
       afterNameDetermination();
    }
 
-   public RDXBehaviorActionSequenceEditor(String name, WorkspaceDirectory storageDirectory)
+   public RDXBehaviorActionSequenceEditor(String name, WorkspaceResourceDirectory storageDirectory)
    {
       this.name = name;
       afterNameDetermination();
-      this.workspaceFile = new WorkspaceFile(storageDirectory, pascalCasedName + ".json");
+      this.workspaceFile = new WorkspaceResourceFile(storageDirectory, pascalCasedName + ".json");
    }
 
    public void afterNameDetermination()
@@ -578,7 +575,12 @@ public class RDXBehaviorActionSequenceEditor
       return name;
    }
 
-   public WorkspaceFile getWorkspaceFile()
+   public ImBoolean getEnabled()
+   {
+      return enabled;
+   }
+
+   public WorkspaceResourceFile getWorkspaceFile()
    {
       return workspaceFile;
    }

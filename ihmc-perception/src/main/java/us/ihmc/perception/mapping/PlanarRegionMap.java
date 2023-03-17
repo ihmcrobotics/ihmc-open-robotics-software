@@ -4,22 +4,22 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.tools.PlanarRegionCuttingTools;
+import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.perception.slamWrapper.SlamWrapper;
 import us.ihmc.perception.tools.PerceptionEuclidTools;
-import us.ihmc.perception.tools.PerceptionPrintTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * PlanarRegionMap computes a planar region map using planar region and odometry measurements. The map can be built using either filter-based
@@ -44,8 +44,28 @@ public class PlanarRegionMap
 
    int sensorPoseIndex = 0;
 
-   float planeNoise = 0.01f;
+   float planeNoise = 0.001f;
    float odomNoise = 0.00001f;
+   float IQANoise = 0.00001f;
+
+   private final float[] IQANoiseArray = new float[] {IQANoise, IQANoise, IQANoise, IQANoise, IQANoise, IQANoise};
+   private final float[] odomNoiseArray = new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise};
+
+   private boolean initialized = false;
+   private boolean modified = false;
+   private int uniqueRegionsFound = 0;
+   private int currentTimeIndex = 0;
+   private int uniqueIDtracker = 1;
+
+   private final RigidBodyTransform currentToPreviousSensorTransform = new RigidBodyTransform();
+   private final RigidBodyTransform previousSensorToWorldFrameTransform = new RigidBodyTransform();
+   private final RigidBodyTransform worldToPreviousSensorFrameTransform = new RigidBodyTransform();
+   private final RigidBodyTransform sensorToWorldTransformPrior = new RigidBodyTransform();
+   private final RigidBodyTransform sensorToWorldTransformPosterior = new RigidBodyTransform();
+   private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform previousTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
+   private final PlanarRegionsList previousRegions = new PlanarRegionsList();
 
    private MergingMode merger;
    private MatchingMode matcher;
@@ -53,31 +73,16 @@ public class PlanarRegionMap
    private PlanarRegionMappingParameters parameters;
    private SlamWrapper.FactorGraphExternal factorGraph;
 
-   private final RigidBodyTransform currentToPreviousSensorTransform = new RigidBodyTransform();
-
-   private final RigidBodyTransform previousSensorToWorldFrameTransform = new RigidBodyTransform();
-   private final RigidBodyTransform worldToPreviousSensorFrameTransform = new RigidBodyTransform();
-
-   RigidBodyTransform sensorToWorldFrameTransformPrior = new RigidBodyTransform();
-   RigidBodyTransform sensorToWorldTransformPosterior = new RigidBodyTransform();
-
-
-   private boolean initialized = false;
-   private boolean modified = false;
-   private int uniqueRegionsFound = 0;
-   private int uniqueIDtracker = 1;
-
-   private final TIntArrayList mapIDs = new TIntArrayList();
-   private final TIntArrayList incomingIDs = new TIntArrayList();
-
+   private final ArrayList<PlanarRegionKeyframe> keyframes = new ArrayList<>();
    private final HashMap<Integer, TIntArrayList> incomingToMapMatches = new HashMap<>();
    private final HashMap<Integer, TIntArrayList> mapToIncomingMatches = new HashMap<>();
-
+   private final TIntArrayList mapIDs = new TIntArrayList();
+   private final TIntArrayList incomingIDs = new TIntArrayList();
    private final HashSet<Integer> mapRegionIDSet = new HashSet<>();
+
 
    private PlanarRegionsList finalMap;
 
-   private int currentTimeIndex = 0;
 
    public PlanarRegionMap(boolean useSmoothingMerger)
    {
@@ -142,20 +147,21 @@ public class PlanarRegionMap
       }
 
       // Compute relative (t) to (t-1) transform
-      currentToPreviousSensorTransform.set(frameRegions.getSensorToWorldFrameTransform());
-      currentToPreviousSensorTransform.multiply(worldToPreviousSensorFrameTransform);
+      if (initialized)
+      {
+         currentToPreviousSensorTransform.set(frameRegions.getSensorToWorldFrameTransform());
+         currentToPreviousSensorTransform.multiply(worldToPreviousSensorFrameTransform);
+      }
 
       // Compute the new prior (t_prior) transform
-      sensorToWorldFrameTransformPrior.set(currentToPreviousSensorTransform);
-      sensorToWorldFrameTransformPrior.multiply(sensorToWorldTransformPosterior);
+      sensorToWorldTransformPrior.set(frameRegions.getSensorToWorldFrameTransform());
 
       LogTools.debug("Current to Previous: \n{}", currentToPreviousSensorTransform);
-      LogTools.debug("Sensor To World [Prior]: \n{}", sensorToWorldFrameTransformPrior);
-      LogTools.debug("Sensor To World [Posterior]: \n{}", sensorToWorldTransformPosterior);
+      LogTools.debug("Sensor To World [Prior]: \n{}", sensorToWorldTransformPrior);
 
       // Generate regions in world frame with prior transform
       priorRegionsInWorld.addPlanarRegionsList(regionsInSensorFrame.copy());
-      priorRegionsInWorld.applyTransform(sensorToWorldFrameTransformPrior);
+      priorRegionsInWorld.applyTransform(sensorToWorldTransformPrior);
 
       modified = true;
 
@@ -168,14 +174,17 @@ public class PlanarRegionMap
             region.setRegionId(-uniqueIDtracker++);
       }
 
-      PerceptionPrintTools.printRegionIDs("Incoming", priorRegionsInWorld);
+      PerceptionDebugTools.printRegionIDs("Incoming", priorRegionsInWorld, true);
 
       if (!initialized)
       {
          finalMap.addPlanarRegionsList(priorRegionsInWorld);
+
+         LogTools.debug("Merge Mode: {}", merger);
+
          if (merger == MergingMode.SMOOTHING)
          {
-            initializeFactorGraphForSmoothing(finalMap, sensorToWorldFrameTransformPrior);
+            initializeFactorGraphForSmoothing(finalMap, sensorToWorldTransformPrior);
          }
          sensorToWorldTransformPosterior.set(frameRegions.getSensorToWorldFrameTransform());
 
@@ -183,21 +192,28 @@ public class PlanarRegionMap
       }
       else
       {
-         PerceptionPrintTools.printRegionIDs("Map", finalMap);
+//         PerceptionPrintTools.printRegionIDs("Map", finalMap);
 
-         PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap, priorRegionsInWorld, incomingToMapMatches,
+         PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
+                                                       priorRegionsInWorld,
+                                                       incomingToMapMatches,
                                                        (float) parameters.getMinimumOverlapThreshold(),
                                                        (float) parameters.getSimilarityThresholdBetweenNormals(),
                                                        (float) parameters.getOrthogonalDistanceThreshold(),
                                                        (float) parameters.getMinimumBoundingBoxSize());
 
-         PerceptionPrintTools.printMatches("Cross Matches", finalMap, priorRegionsInWorld, incomingToMapMatches);
+//         PerceptionPrintTools.printMatches("Cross Matches", finalMap, priorRegionsInWorld, incomingToMapMatches);
 
          if (merger == MergingMode.SMOOTHING)
          {
             // Find the optimal transform for incoming regions before merge
-            applyFactorGraphBasedSmoothing(finalMap, regionsInSensorFrame.copy(), sensorToWorldFrameTransformPrior,
-                                           currentToPreviousSensorTransform, incomingToMapMatches, sensorPoseIndex);
+            applyFactorGraphBasedSmoothing(finalMap,
+                                           regionsInSensorFrame.copy(),
+                                           sensorToWorldTransformPrior,
+                                           currentToPreviousSensorTransform,
+                                           currentToPreviousSensorTransform,
+                                           incomingToMapMatches,
+                                           sensorPoseIndex);
 
             // Extract the optimal transform from the factor graph
             double[] transformArray = new double[16];
@@ -207,13 +223,12 @@ public class PlanarRegionMap
 
             // Transform the incoming regions to the map frame with the optimal transform
             posteriorRegionsInWorld.clear();
-            regionsInSensorFrame.copy().getPlanarRegionsAsList().forEach(region -> {
-               region.applyTransform(sensorToWorldTransformPosterior);
-               posteriorRegionsInWorld.addPlanarRegion(region);
-            });
+            regionsInSensorFrame.copy().getPlanarRegionsAsList().forEach(region ->
+                                                                         {
+                                                                            region.applyTransform(sensorToWorldTransformPosterior);
+                                                                            posteriorRegionsInWorld.addPlanarRegion(region);
+                                                                         });
 
-            LogTools.debug("Estimated Transform: \n{}", frameRegions.getSensorToWorldFrameTransform());
-            LogTools.debug("Sensor To World [Prior]: \n{}", sensorToWorldFrameTransformPrior);
             LogTools.debug("Sensor To World [Posterior (Optimized)]: \n{}", sensorToWorldTransformPosterior);
          }
 
@@ -305,11 +320,11 @@ public class PlanarRegionMap
    }
 
    private static void addIncomingRegionsToGraph(PlanarRegionsList map,
-                                                PlanarRegionsList incoming,
-                                                PlanarRegionGraph graphToUpdate,
-                                                float normalThreshold,
-                                                float normalDistanceThreshold,
-                                                float distanceThreshold)
+                                                 PlanarRegionsList incoming,
+                                                 PlanarRegionGraph graphToUpdate,
+                                                 float normalThreshold,
+                                                 float normalDistanceThreshold,
+                                                 float distanceThreshold)
    {
       PlanarRegionTools planarRegionTools = new PlanarRegionTools();
 
@@ -347,17 +362,6 @@ public class PlanarRegionMap
                if (wasMatched)
                   wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) <= distanceThreshold;
 
-               //LogTools.debug(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
-               //                            mapRegionIndex,
-               //                            mapRegion.getRegionId(),
-               //                            newRegion.getRegionId(),
-               //                            normalSimilarity,
-               //                            normalThreshold,
-               //                            normalDistance,
-               //                            normalDistanceThreshold,
-               //                            originDistance,
-               //                            distanceThreshold) + ": [{}]", wasMatched);
-
                if (wasMatched)
                {
                   graphToUpdate.addEdge(mapRegion, newRegion);
@@ -371,7 +375,11 @@ public class PlanarRegionMap
       }
    }
 
-   private static void checkMapRegionsForOverlap(PlanarRegionGraph graphToUpdate, float normalThreshold, float normalDistanceThreshold, float distanceThreshold, float minBoxSize)
+   private static void checkMapRegionsForOverlap(PlanarRegionGraph graphToUpdate,
+                                                 float normalThreshold,
+                                                 float normalDistanceThreshold,
+                                                 float distanceThreshold,
+                                                 float minBoxSize)
    {
       List<PlanarRegion> mapRegions = graphToUpdate.getAsPlanarRegionsList().getPlanarRegionsAsList();
 
@@ -383,7 +391,13 @@ public class PlanarRegionMap
          {
             PlanarRegion regionB = mapRegions.get(idB);
 
-            boolean wasMatched = PlanarRegionSLAMTools.checkRegionsForOverlap(regionA, regionB, normalThreshold, normalDistanceThreshold, distanceThreshold, minBoxSize);
+            boolean wasMatched = PlanarRegionSLAMTools.checkRegionsForOverlap(regionA,
+                                                                              regionB,
+                                                                              normalThreshold,
+                                                                              normalDistanceThreshold,
+                                                                              distanceThreshold,
+                                                                              minBoxSize,
+                                                                              false);
 
             if (wasMatched)
             {
@@ -430,7 +444,8 @@ public class PlanarRegionMap
                                                                    (float) parameters.getSimilarityThresholdBetweenNormals(),
                                                                    (float) parameters.getOrthogonalDistanceThreshold(),
                                                                    (float) parameters.getMinimumOverlapThreshold(),
-                                                                   (float) parameters.getMinimumBoundingBoxSize()))
+                                                                   (float) parameters.getMinimumBoundingBoxSize(),
+                                                                   false))
                   {
                      // Request a merge for parent and child regions. If they don't merge, pick the parent if it belongs to the map (based on sign of ID)
                      if (PlanarRegionSLAMTools.mergeRegionIntoParentUsingFilter(parentRegion, childRegion, parameters.getUpdateAlphaTowardsMatch()))
@@ -440,6 +455,8 @@ public class PlanarRegionMap
                         // Generate ID for the merged region
                         int finalId = generatePostMergeId(parentRegion.getRegionId(), childRegion.getRegionId());
                         parentRegion.setRegionId(finalId);
+                        parentRegion.setTickOfLastMeasurement(currentTimeIndex);
+                        parentRegion.incrementNumberOfTimesMatched();
                         changed = true;
 
                         map.getPlanarRegionsAsList().remove(childRegion);
@@ -477,16 +494,22 @@ public class PlanarRegionMap
    }
 
    private void applyFactorGraphBasedSmoothing(PlanarRegionsList mapRegionList,
-                                              PlanarRegionsList incomingRegionList,
-                                              RigidBodyTransform sensorToWorldTransformPrior,
-                                              RigidBodyTransform currentToPreviousTransform,
-                                              HashMap<Integer, TIntArrayList> matches,
-                                              int poseIndex)
+                                               PlanarRegionsList incomingRegionList,
+                                               RigidBodyTransform sensorToWorldTransformPrior,
+                                               RigidBodyTransform currentToPreviousTransform,
+                                               RigidBodyTransform estimatedTransformToPrevious,
+                                               HashMap<Integer, TIntArrayList> matches,
+                                               int poseIndex)
    {
       LogTools.debug("------------------------------- Performing Factor Graph Based Smoothing ---------------------------------");
 
       LogTools.debug("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
+      factorGraph.createOdometryNoiseModel(IQANoiseArray);
       factorGraph.addOdometryFactorSE3(poseIndex, PerceptionEuclidTools.toArray(currentToPreviousTransform));
+
+      LogTools.debug("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
+      factorGraph.createOdometryNoiseModel(odomNoiseArray);
+      factorGraph.addOdometryFactorSE3(poseIndex, PerceptionEuclidTools.toArray(estimatedTransformToPrevious));
 
       LogTools.debug("Adding Pose Initial Value: {}", poseIndex);
       factorGraph.setPoseInitialValueSE3(poseIndex, PerceptionEuclidTools.toArray(sensorToWorldTransformPrior));
@@ -498,7 +521,7 @@ public class PlanarRegionMap
 
          int landmarkId = findBestMatchIndex(incomingId, mapRegionList, matches.get(incomingIndex));
 
-         if(landmarkId > 0)
+         if (landmarkId > 0)
          {
             LogTools.debug("Best Match: Incoming({}) -> Map({})", incomingId, landmarkId);
             insertLandmarkFactorAndValue(incomingRegion, sensorToWorldTransformPrior, poseIndex, landmarkId);
@@ -508,15 +531,12 @@ public class PlanarRegionMap
       LogTools.debug("Solving factor graph");
       factorGraph.optimizeISAM2((byte) 4);
 
-      factorGraph.printResults();
+//      factorGraph.printResults();
 
       LogTools.debug("+++++++++ --------- +++++++++ Done (Smoothing) +++++++++ --------- +++++++++");
    }
 
-   public void insertLandmarkFactorAndValue(PlanarRegion childRegion,
-                                            RigidBodyTransform sensorToWorldTransformPrior,
-                                            int poseId,
-                                            int landmarkId)
+   public void insertLandmarkFactorAndValue(PlanarRegion childRegion, RigidBodyTransform sensorToWorldTransformPrior, int poseId, int landmarkId)
    {
 
       // Get origin and normal in sensor frame.
@@ -553,29 +573,35 @@ public class PlanarRegionMap
       LogTools.debug("------------------------------- Initializing Factor Graph ---------------------------------");
 
       // Set up the factor graph noise models
-      odomNoise = (float) parameters.getOdometryNoiseVariance();
+      IQANoise = (float) parameters.getOdometryNoiseVariance();
+      odomNoise = (float) parameters.getStateEstimatorNoiseVariance();
       planeNoise = (float) parameters.getPlaneNoiseVariance();
 
-      factorGraph.createOdometryNoiseModel(new float[] {odomNoise, odomNoise, odomNoise, odomNoise, odomNoise, odomNoise});
+      Arrays.fill(IQANoiseArray, IQANoise);
+      Arrays.fill(odomNoiseArray, odomNoise);
+
+      factorGraph.createOdometryNoiseModel(IQANoiseArray);
       factorGraph.createOrientedPlaneNoiseModel(new float[] {planeNoise, planeNoise, planeNoise});
 
-      factorGraph.addPriorPoseFactorSE3(0, PerceptionEuclidTools.toArray(transform));
-      factorGraph.setPoseInitialValueSE3(0, PerceptionEuclidTools.toArray(transform));
+      factorGraph.addPriorPoseFactorSE3(sensorPoseIndex, PerceptionEuclidTools.toArray(transform));
+      factorGraph.setPoseInitialValueSE3(sensorPoseIndex, PerceptionEuclidTools.toArray(transform));
 
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {
          // Get origin and normal in sensor frame.
-         Point3D childOrigin = new Point3D();
-         Vector3D childNormal = new Vector3D();
-         region.getOrigin(childOrigin);
-         region.getNormal(childNormal);
+         Point3D origin = new Point3D();
+         Vector3D normal = new Vector3D();
+         region.getOrigin(origin);
+         region.getNormal(normal);
 
          // Insert plane factor based on planar region normal and origin in sensor frame
-         double localDot = childOrigin.dot(childNormal);
-         float[] plane = new float[] {childNormal.getX32(), childNormal.getY32(), childNormal.getZ32(), (float) -localDot};
-         factorGraph.addOrientedPlaneFactor(region.getRegionId(), 0, plane);
+         double localDot = origin.dot(normal);
+         float[] plane = new float[] {normal.getX32(), normal.getY32(), normal.getZ32(), (float) -localDot};
+         factorGraph.addOrientedPlaneFactor(region.getRegionId(), sensorPoseIndex, plane);
          factorGraph.setOrientedPlaneInitialValue(region.getRegionId(), plane);
       }
+
+      sensorPoseIndex++;
 
       LogTools.debug("+++++++++ --------- +++++++++ Done (Smoothing Initialization) +++++++++ --------- +++++++++");
    }
@@ -599,11 +625,11 @@ public class PlanarRegionMap
    private int generatePostMergeId(int parentIndex, int childIndex)
    {
       int idToReturn = 0;
-      if(parentIndex == 0)
+      if (parentIndex == 0)
       {
          idToReturn = childIndex;
       }
-      else if(childIndex == 0)
+      else if (childIndex == 0)
       {
          idToReturn = parentIndex;
       }
@@ -630,12 +656,205 @@ public class PlanarRegionMap
       return idToReturn;
    }
 
+   public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions, RigidBodyTransform estimatedTransformToWorld)
+   {
+      PlanarRegionsList regions = new PlanarRegionsList();
+
+      // Remove all regions that are too small
+      for (PlanarRegion region : incomingRegions.getPlanarRegionsAsList())
+      {
+         if (region.getArea() > parameters.getMinimumPlanarRegionArea())
+            regions.addPlanarRegion(region);
+      }
+
+      currentTimeIndex++;
+      boolean isKeyframe = false;
+      RigidBodyTransform transformToPrevious = new RigidBodyTransform();
+
+      LogTools.debug("Registering regions: " + regions.getNumberOfPlanarRegions() + " regions");
+
+      for (PlanarRegion region : regions.getPlanarRegionsAsList())
+      {
+         if (!initialized)
+            region.setRegionId(uniqueIDtracker++);
+         else
+            region.setRegionId(-uniqueIDtracker++);
+      }
+
+      if(!initialized)
+      {
+         // L515-only
+         //initialTransformToWorld.set(new RigidBodyTransform(new Quaternion(0.0, Math.toRadians(60.0), 0.0), new Point3D()));
+         initialTransformToWorld.set(estimatedTransformToWorld);
+         previousTransformToWorld.set(initialTransformToWorld);
+
+         previousRegions.addPlanarRegionsList(regions.copy());
+
+         regions.applyTransform(initialTransformToWorld);
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, initialTransformToWorld, regions.copy()));
+         finalMap.addPlanarRegionsList(regions);
+
+         initializeFactorGraphForSmoothing(regions, initialTransformToWorld);
+
+         initialized = true;
+         //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, new RigidBodyTransform()));
+      }
+      else
+      {
+         transformToPrevious.setIdentity();
+
+         LogTools.debug("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
+         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousRegions, regions.copy(), transformToPrevious, parameters);
+
+//         PerceptionPrintTools.printTransform("Transform to previous", transformToPrevious);
+
+         if (!valid)
+         {
+//            LogTools.warn("[FAILED] Last Index: {}, Current Index: {}", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
+//            return null;
+         }
+
+         //isKeyframe = performKeyframeCheck(transformToPrevious);
+
+         isKeyframe = true;
+      }
+
+      if (isKeyframe)
+      {
+         previousRegions.clear();
+         previousRegions.addPlanarRegionsList(regions.copy());
+
+         RigidBodyTransform transformToWorld = new RigidBodyTransform(transformToPrevious);
+         transformToWorld.multiply(keyframes.get(keyframes.size() - 1).getTransformToWorld());
+
+         regions.applyTransform(transformToWorld);
+
+         RigidBodyTransform residualTransform = new RigidBodyTransform();
+         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(finalMap, regions.copy(), residualTransform, parameters);
+
+         if (valid)
+         {
+            transformToWorld.preMultiply(residualTransform);
+            regions.applyTransform(residualTransform);
+         }
+
+         //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, transformToWorld));
+         //transformToWorld.set(sensorToWorldTransformPosterior);
+
+//         PerceptionPrintTools.printRegionIDs("Regions", regions);
+//         PerceptionPrintTools.printRegionIDs("Map", finalMap);
+
+         PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
+                                                       regions,
+                                                       incomingToMapMatches,
+                                                       (float) parameters.getMinimumOverlapThreshold(),
+                                                       (float) parameters.getSimilarityThresholdBetweenNormals(),
+                                                       (float) parameters.getOrthogonalDistanceThreshold(),
+                                                       (float) parameters.getMinimumBoundingBoxSize());
+
+//         PerceptionPrintTools.printMatches("Cross Matches", finalMap, regions, incomingToMapMatches);
+
+         RigidBodyTransform transformToSensor = new RigidBodyTransform(transformToWorld);
+         transformToSensor.invert();
+
+         PlanarRegionsList graphRegions = regions.copy();
+         graphRegions.applyTransform(transformToSensor);
+
+         // Compute state estimator based odometry
+         previousTransformToWorld.invert();
+         estimatedTransformToPrevious.set(previousTransformToWorld);
+         estimatedTransformToPrevious.multiply(estimatedTransformToWorld);
+
+         LogTools.debug("Estimated Transform to previous: {}", estimatedTransformToPrevious);
+         LogTools.debug("Transform to previous: {}", transformToPrevious);
+
+         applyFactorGraphBasedSmoothing(finalMap,
+                                        graphRegions,
+                                        transformToWorld,
+                                        transformToPrevious,
+                                        estimatedTransformToPrevious,
+                                        incomingToMapMatches,
+                                        sensorPoseIndex);
+
+         // Extract the optimal transform from the factor graph
+         double[] transformArray = new double[16];
+         factorGraph.getPoseById(sensorPoseIndex, transformArray);
+
+         transformToWorld.set(transformArray);
+
+         // Transform the incoming regions to the map frame with the optimal transform
+         PlanarRegionsList posteriorRegionsInWorld = new PlanarRegionsList();
+         graphRegions.getPlanarRegionsAsList().forEach(region ->
+          {
+             region.applyTransform(transformToWorld);
+             posteriorRegionsInWorld.addPlanarRegion(region);
+          });
+
+         finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
+         processUniqueRegions(finalMap);
+         //PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
+
+         //finalMap.addPlanarRegionsList(regions);
+
+         factorGraph.clearISAM2();
+         sensorPoseIndex++;
+
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
+
+         previousTransformToWorld.set(estimatedTransformToWorld);
+
+         PerceptionDebugTools.printTransform(String.valueOf(sensorPoseIndex), transformToWorld, true);
+
+         LogTools.debug("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
+
+         return transformToWorld;
+      }
+
+      return null;
+   }
+
+   private boolean performKeyframeCheck(RigidBodyTransform transformToPrevious)
+   {
+      // Add a keyframe if either the translation or rotation is large enough in separate if blocks
+      Point3D euler = new Point3D();
+      Vector3DBasics translation = transformToPrevious.getTranslation();
+      transformToPrevious.getRotation().getEuler(euler);
+
+      PerceptionDebugTools.printTransform("ICP", transformToPrevious, false);
+
+      boolean isKeyframe = (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
+
+      if (translation.norm() > parameters.getKeyframeDistanceThreshold())
+         LogTools.warn("[Keyframe] High Translation: " + translation.norm());
+
+      if (euler.norm() > parameters.getKeyframeAngularThreshold())
+         LogTools.warn("[Keyframe] High Rotation: " + euler.norm());
+
+      return isKeyframe;
+   }
+
+   public void performMapCleanUp()
+   {
+      PlanarRegionCuttingTools.chopOffExtraPartsFromIntersectingPairs(finalMap);
+
+      for (PlanarRegion region : finalMap.getPlanarRegionsAsList())
+      {
+         if ((currentTimeIndex - region.getTickOfLastMeasurement() > 5) // Region has not been matched enough in a while. Not good region.
+             && (region.getNumberOfTimesMatched() < parameters.getMinimumNumberOfTimesMatched())) // Region has not been matched enough
+         {
+            finalMap.getPlanarRegionsAsList().remove(region);
+         }
+      }
+   }
+
    private void processUniqueRegions(PlanarRegionsList map)
    {
       LogTools.debug("------------------------------- Processing Unique Region IDs ---------------------------------");
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {
          region.setRegionId(Math.abs(region.getRegionId()));
+         region.incrementNumberOfTimesMatched();
+         region.setTickOfLastMeasurement(currentTimeIndex);
       }
       LogTools.debug("+++++++++ --------- +++++++++ Done (Processing Unique Region IDs) +++++++++ --------- +++++++++");
    }
@@ -678,6 +897,11 @@ public class PlanarRegionMap
       double[] landmark = new double[4];
       factorGraph.getPlanarLandmarkById(landmarkId, landmark);
       return new Vector4D(landmark);
+   }
+
+   public void setInitialSensorPose(RigidBodyTransform transformToWorld)
+   {
+      initialTransformToWorld.set(transformToWorld);
    }
 }
 

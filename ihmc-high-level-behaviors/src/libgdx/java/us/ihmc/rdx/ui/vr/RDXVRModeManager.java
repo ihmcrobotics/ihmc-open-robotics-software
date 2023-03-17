@@ -35,6 +35,7 @@ public class RDXVRModeManager
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXVRMode mode = RDXVRMode.INPUTS_DISABLED;
+   private RDXPanelPlacementMode panelPlacementMode = RDXPanelPlacementMode.MANUAL_PLACEMENT;
    private boolean renderPanel;
    private final ImBoolean showFloatingVideoPanel = new ImBoolean(false);
    private final Notification showFloatVideoPanelNotification = new Notification();
@@ -66,17 +67,6 @@ public class RDXVRModeManager
    public void processVRInput(RDXVRContext vrContext)
    {
       renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
-
-      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-      {
-         if (mode == RDXVRMode.INPUTS_DISABLED && controller.getAButtonActionData().bChanged() && !controller.getAButtonActionData().bState())
-         {
-            vrContext.teleport(transform ->
-            {
-               syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToDesiredFrame(transform, ReferenceFrame.getWorldFrame());
-            });
-         }
-      });
 
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
@@ -111,6 +101,20 @@ public class RDXVRModeManager
          if (showFloatingVideoPanel.get())
             showFloatVideoPanelNotification.set();
       }
+      if (showFloatingVideoPanel.get())
+      {
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Manually place"), panelPlacementMode == RDXPanelPlacementMode.MANUAL_PLACEMENT))
+         {
+            panelPlacementMode = RDXPanelPlacementMode.MANUAL_PLACEMENT;
+         }
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Follow headset"), panelPlacementMode == RDXPanelPlacementMode.FOLLOW_HEADSET))
+         {
+            panelPlacementMode = RDXPanelPlacementMode.FOLLOW_HEADSET;
+         }
+      }
+
       if (ImGui.radioButton(labels.get("Inputs disabled"), mode == RDXVRMode.INPUTS_DISABLED))
       {
          mode = RDXVRMode.INPUTS_DISABLED;
@@ -134,7 +138,7 @@ public class RDXVRModeManager
       {
          case INPUTS_DISABLED ->
          {
-            ImGui.text("Press right A button to teleport the playspace to the robot's location.");
+            ImGui.text("Press right joystick button to teleport the playspace to the robot's location.");
          }
          case FOOTSTEP_PLACEMENT ->
          {
@@ -198,6 +202,11 @@ public class RDXVRModeManager
    public Notification getShowFloatVideoPanelNotification()
    {
       return showFloatVideoPanelNotification;
+   }
+
+   public RDXPanelPlacementMode getVideoPanelPlacementMode()
+   {
+      return panelPlacementMode;
    }
 
    public RDXVRHandPlacedFootstepMode getHandPlacedFootstepMode()

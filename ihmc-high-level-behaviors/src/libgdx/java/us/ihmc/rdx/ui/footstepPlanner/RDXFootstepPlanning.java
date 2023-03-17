@@ -13,16 +13,15 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
@@ -52,6 +51,7 @@ public class RDXFootstepPlanning
    private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerParametersReadOnly> footstepPlannerParametersReference = new AtomicReference<>();
    private final AtomicReference<AStarBodyPathPlannerParametersReadOnly> bodyPathPlannerParametersReference = new AtomicReference<>();
+   private final AtomicReference<SwingPlannerParametersReadOnly> swingFootPlannerParametersReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerOutput> outputReference = new AtomicReference<>();
    private final RDXTeleoperationParameters teleoperationParameters;
 
@@ -119,6 +119,9 @@ public class RDXFootstepPlanning
       AStarBodyPathPlannerParametersReadOnly bodyPathPlannerParameters = bodyPathPlannerParametersReference.getAndSet(null);
       if (bodyPathPlannerParameters != null)
          footstepPlanner.getAStarBodyPathPlannerParameters().set(bodyPathPlannerParameters);
+      SwingPlannerParametersReadOnly swingFootPlannerParameters = swingFootPlannerParametersReference.getAndSet(null);
+      if (swingFootPlannerParameters != null)
+         footstepPlanner.getSwingPlannerParameters().set(swingFootPlannerParameters);
 
       setGoalFootPosesFromMidFeetPose(footstepPlannerParameters, goalPose);
       setStanceSideToClosestToGoal(goalPose);
@@ -230,6 +233,11 @@ public class RDXFootstepPlanning
    public void setBodyPathPlannerParameters(AStarBodyPathPlannerParametersReadOnly bodyPathPlannerParameters)
    {
       this.bodyPathPlannerParametersReference.set(bodyPathPlannerParameters);
+   }
+
+   public void setSwingFootPlannerParameters(SwingPlannerParametersReadOnly swingPlannerParametersReadOnly)
+   {
+      this.swingFootPlannerParametersReference.set(swingPlannerParametersReadOnly);
    }
 
    public boolean isReadyToWalk()
