@@ -16,24 +16,34 @@ import us.ihmc.tools.property.*;
  */
 public class TargetFollowingBehaviorParameters extends StoredPropertySet implements TargetFollowingBehaviorParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-high-level-behaviors/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-high-level-behaviors/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey minimumDistanceToKeepFromTarget = keys.addDoubleKey("Minimum distance to keep from target");
    public static final DoubleStoredPropertyKey lookAndStepGoalUpdatePeriod = keys.addDoubleKey("Look and step goal update period");
    public static final DoubleStoredPropertyKey testLoopRadius = keys.addDoubleKey("Test loop radius");
 
+   /**
+    * Loads this property set.
+    */
    public TargetFollowingBehaviorParameters()
    {
       this("");
    }
 
-   public TargetFollowingBehaviorParameters(String versionSpecifier)
+   /**
+    * Loads an alternate version of this property set in the same folder.
+    */
+   public TargetFollowingBehaviorParameters(String versionSuffix)
    {
-      super(keys, TargetFollowingBehaviorParameters.class, versionSpecifier);
+      this(TargetFollowingBehaviorParameters.class, versionSuffix);
+   }
+
+   /**
+    * Loads an alternate version of this property set in other folders.
+    */
+   public TargetFollowingBehaviorParameters(Class<?> classForLoading, String versionSuffix)
+   {
+      super(keys, classForLoading, TargetFollowingBehaviorParameters.class, versionSuffix);
       load();
    }
 
@@ -45,8 +55,7 @@ public class TargetFollowingBehaviorParameters extends StoredPropertySet impleme
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           TargetFollowingBehaviorParameters.class);
+      StoredPropertySet parameters = new StoredPropertySet(keys, TargetFollowingBehaviorParameters.class);
       parameters.generateJavaFiles();
    }
 }

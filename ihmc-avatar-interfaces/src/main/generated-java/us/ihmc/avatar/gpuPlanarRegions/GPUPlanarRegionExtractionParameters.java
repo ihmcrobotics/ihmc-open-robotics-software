@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class GPUPlanarRegionExtractionParameters extends StoredPropertySet implements GPUPlanarRegionExtractionParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-avatar-interfaces/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-avatar-interfaces/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey mergeDistanceThreshold = keys.addDoubleKey("Merge distance threshold");
@@ -42,14 +38,28 @@ public class GPUPlanarRegionExtractionParameters extends StoredPropertySet imple
    public static final IntegerStoredPropertyKey boundaryMinPatches = keys.addIntegerKey("Boundary min patches");
    public static final DoubleStoredPropertyKey regionGrowthFactor = keys.addDoubleKey("Region growth factor");
 
+   /**
+    * Loads this property set.
+    */
    public GPUPlanarRegionExtractionParameters()
    {
       this("");
    }
 
-   public GPUPlanarRegionExtractionParameters(String versionSpecifier)
+   /**
+    * Loads an alternate version of this property set in the same folder.
+    */
+   public GPUPlanarRegionExtractionParameters(String versionSuffix)
    {
-      super(keys, GPUPlanarRegionExtractionParameters.class, versionSpecifier);
+      this(GPUPlanarRegionExtractionParameters.class, versionSuffix);
+   }
+
+   /**
+    * Loads an alternate version of this property set in other folders.
+    */
+   public GPUPlanarRegionExtractionParameters(Class<?> classForLoading, String versionSuffix)
+   {
+      super(keys, classForLoading, GPUPlanarRegionExtractionParameters.class, versionSuffix);
       load();
    }
 
@@ -61,8 +71,7 @@ public class GPUPlanarRegionExtractionParameters extends StoredPropertySet imple
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           GPUPlanarRegionExtractionParameters.class);
+      StoredPropertySet parameters = new StoredPropertySet(keys, GPUPlanarRegionExtractionParameters.class);
       parameters.generateJavaFiles();
    }
 }

@@ -9,17 +9,7 @@ public class DefaultVisibilityGraphParameters extends StoredPropertySet implemen
       this(null);
    }
 
-   public DefaultVisibilityGraphParameters(String projectName, String pathToResources) // for robots and UIs that want their own defaults and saves
-   {
-      this(projectName, pathToResources, null);
-   }
-
-   public DefaultVisibilityGraphParameters(VisibilityGraphsParametersReadOnly parameters) // for message passing or temp access
-   {
-      this("ihmc-open-robotics-software", "ihmc-path-planning/src/main/resources", parameters);
-   }
-
-   private DefaultVisibilityGraphParameters(String projectName, String pathToResources, VisibilityGraphsParametersReadOnly parameters)
+   private DefaultVisibilityGraphParameters(VisibilityGraphsParametersReadOnly parameters)
    {
       super(VisibilityGraphParametersKeys.keys, DefaultVisibilityGraphParameters.class);
 

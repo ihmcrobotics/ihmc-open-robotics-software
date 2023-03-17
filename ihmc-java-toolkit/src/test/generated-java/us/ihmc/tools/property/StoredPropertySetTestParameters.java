@@ -1,5 +1,7 @@
 package us.ihmc.tools.property;
 
+import us.ihmc.tools.property.*;
+
 /**
  * The JSON file for this property set is located here:
  * ihmc-java-toolkit/src/test/resources/us/ihmc/tools/property/StoredPropertySetTestParameters.json
@@ -14,10 +16,6 @@ package us.ihmc.tools.property;
  */
 public class StoredPropertySetTestParameters extends StoredPropertySet implements StoredPropertySetTestParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-java-toolkit/src/test/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-java-toolkit/src/test/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final BooleanStoredPropertyKey theFirstBooleanProperty = keys.addBooleanKey("The first boolean property");
@@ -48,14 +46,28 @@ public class StoredPropertySetTestParameters extends StoredPropertySet implement
     */
    public static final IntegerStoredPropertyKey integerPropertyWithDiscreteValidValues = keys.addIntegerKey("Integer property with discrete valid values");
 
+   /**
+    * Loads this property set.
+    */
    public StoredPropertySetTestParameters()
    {
       this("");
    }
 
-   public StoredPropertySetTestParameters(String versionSpecifier)
+   /**
+    * Loads an alternate version of this property set in the same folder.
+    */
+   public StoredPropertySetTestParameters(String versionSuffix)
    {
-      super(keys, StoredPropertySetTestParameters.class, versionSpecifier);
+      this(StoredPropertySetTestParameters.class, versionSuffix);
+   }
+
+   /**
+    * Loads an alternate version of this property set in other folders.
+    */
+   public StoredPropertySetTestParameters(Class<?> classForLoading, String versionSuffix)
+   {
+      super(keys, classForLoading, StoredPropertySetTestParameters.class, versionSuffix);
       load();
    }
 
@@ -67,8 +79,7 @@ public class StoredPropertySetTestParameters extends StoredPropertySet implement
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           StoredPropertySetTestParameters.class);
+      StoredPropertySet parameters = new StoredPropertySet(keys, StoredPropertySetTestParameters.class);
       parameters.generateJavaFiles();
    }
 }
