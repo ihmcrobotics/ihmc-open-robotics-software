@@ -52,7 +52,8 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
    {
       this.classForLoading = classForFindingSourceSetDirectory;
       setFilesystemDirectoryToSourceSetDirectory(classForFindingSourceSetDirectory, "resources");
-      pathNecessaryForClasspathLoading = ResourceTools.getResourcesPathForClass(classForFindingSourceSetDirectory).resolve(subsequentOrAbsoluteResourcePackagePath);
+      pathNecessaryForClasspathLoading = ResourceTools.getResourcesPathForClass(classForFindingSourceSetDirectory)
+                                                      .resolve(subsequentOrAbsoluteResourcePackagePath);
       initialize();
    }
 
@@ -63,7 +64,8 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
       // i.e. /us/ihmc/tools/io would need to be us/ihmc/tools/io
       // to append to /path/to/ihmc-java-toolkit/src/test/resources/us/ihmc/tools/io
       String subsequentPathToResourceDirectory = pathNecessaryForClasspathLoadingString.substring(1);
-      filesystemDirectory = filesystemDirectory.resolve(subsequentPathToResourceDirectory);
+      if (filesystemDirectory != null)
+         filesystemDirectory = filesystemDirectory.resolve(subsequentPathToResourceDirectory);
       String tempPathNecessaryForResourceExploring = pathNecessaryForClasspathLoadingString;
       if (tempPathNecessaryForResourceExploring.startsWith("/"))
          tempPathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring.replaceFirst("/", "");
