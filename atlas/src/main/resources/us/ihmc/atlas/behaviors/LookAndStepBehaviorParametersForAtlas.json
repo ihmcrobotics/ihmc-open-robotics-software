@@ -35,5 +35,4 @@
   "Acceptable incomplete footsteps" : 1,
   "Horizon from debris to stop" : 1.8,
   "Stop for impassibilities" : true,
-  "Use reference plan" : false
 }

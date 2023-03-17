@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
+import rosgraph_msgs.Log;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -69,7 +70,8 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
       stepSideIncorrect.set(referenceFootstep.getRobotSide() != stanceNode.getRobotSide().getOppositeSide());
       if (stepSideIncorrect.getBooleanValue())
       {
-         throw new RuntimeException("Wrong side from reference plan, this should not happen ! ! !");
+         LogTools.error("Wrong side from reference plan, this should not happen ! ! !");
+         return nominalIdealStep;
       }
 
       // Ensure alpha is within the 0 ~ 1.0 range
@@ -81,10 +83,11 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
       statusMessage = "Step calculate mode: Reference (alpha : " + referenceAlpha + " )";
       FramePose3D referenceFootstepPose = referenceFootstep.getFootstepPose();
 
-      if (!Double.isNaN(previousReferenceAlpha) && previousReferenceAlpha != referenceAlpha)
+      // Calculator will only print log when alpha value is changed by operator
+      if (previousReferenceAlpha != referenceAlpha)
       {
          DecimalFormat df = new DecimalFormat("0.00");
-         LogTools.warn("! ! USING REFERENCE STEP (alpha: {}) ! !", df.format(referenceAlpha));
+         LogTools.warn("! ! ! Using reference step with new alpha value: {} ! ! !", df.format(referenceAlpha));
       }
 
 
