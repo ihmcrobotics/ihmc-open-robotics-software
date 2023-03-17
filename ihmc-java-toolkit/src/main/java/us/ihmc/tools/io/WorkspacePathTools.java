@@ -146,26 +146,23 @@ public class WorkspacePathTools
                // This removes out/production/classes from [...]project/src/extra/out/production/classes
                // This removes bin from [...]project/bin
                // This removes bin from [...]project/src/extra/bin
-               Path pathBeforeResources = Paths.get("/").resolve(codeSourceDirectory.subpath(0, indexOfBuildFolder));
+               Path sourceSetPath = Paths.get("/").resolve(codeSourceDirectory.subpath(0, indexOfBuildFolder));
 
                // Since src/main gets built in the project folder, we need to add it back.
                int lastIndexOfSrc = findLastIndexOfPart(codeSourceDirectory, "src");
                if (lastIndexOfSrc < 0)
-                  pathBeforeResources = pathBeforeResources.resolve("src/main");
+                  sourceSetPath = sourceSetPath.resolve("src/main");
 
-               LogTools.debug("Path before resources: {}", pathBeforeResources);
+               LogTools.debug("Source set path: {}", sourceSetPath);
 
-               Path pathWithResources = pathBeforeResources.resolve("resources").normalize();
-               LogTools.debug("Path with resources: {}", pathWithResources);
+               int lastIndexOfSrcInPath = findLastIndexOfPart(sourceSetPath, "src");
+               Path parentOfSrcDirectory = Paths.get("/").resolve(sourceSetPath.subpath(0, lastIndexOfSrcInPath));
+               Path subsequentPathToSourceSet = sourceSetPath.subpath(lastIndexOfSrcInPath, sourceSetPath.getNameCount());
 
-               int lastIndexOfSrcWithResources = findLastIndexOfPart(pathWithResources, "src");
-               Path parentOfSrcDirectory = Paths.get("/").resolve(pathWithResources.subpath(0, lastIndexOfSrcWithResources));
-               Path subsequentPathToResourceFolder = pathWithResources.subpath(lastIndexOfSrcWithResources, pathWithResources.getNameCount());
+               inferredPathComponents = new WorkingDirectoryPathComponents(parentOfSrcDirectory, subsequentPathToSourceSet);
 
-               inferredPathComponents = new WorkingDirectoryPathComponents(parentOfSrcDirectory, subsequentPathToResourceFolder);
-
-               LogTools.info("Inferred workspace directory components:\n Parent of src folder: {}\n Subsequent path to resource folder: {}",
-                             parentOfSrcDirectory, subsequentPathToResourceFolder);
+               LogTools.info("Inferred workspace directory components:\n Parent of src folder: {}\n Source set path: {}",
+                             parentOfSrcDirectory, subsequentPathToSourceSet);
             }
             else
             {

@@ -18,7 +18,7 @@ public class WorkingDirectoryPathComponents
       return parentOfSrcDirectory;
    }
 
-   public Path getSubsequentPathToResourceFolder()
+   public Path getSubsequentPathToSourceSet()
    {
       return subsequentPathToResourceFolder;
    }
