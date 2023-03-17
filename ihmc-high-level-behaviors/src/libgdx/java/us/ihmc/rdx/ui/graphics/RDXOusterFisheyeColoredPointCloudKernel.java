@@ -125,8 +125,6 @@ public class RDXOusterFisheyeColoredPointCloudKernel
       floatParameters.setParameter(pointSize);
       floatParameters.setParameter((float) levelOfColorDetail);
       floatParameters.setParameter(useSensorColor && fisheyeImage != null);
-//      ousterToWorldTransformCorrected.set(ousterToWorldTransform);
-//      ousterToWorldTransformCorrected.preMultiply(NettyOuster.INTRINSIC_TRANSFORM_CORRECTION);
       ousterToWorldTransformParameter.setParameter(ousterToWorldTransform);
 
       // It appears you've got to write something to the OpenCL argument even if you don't use it,
