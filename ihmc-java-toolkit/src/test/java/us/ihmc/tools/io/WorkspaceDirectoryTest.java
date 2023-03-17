@@ -77,8 +77,15 @@ public class WorkspaceDirectoryTest
       file = new WorkspaceResourceFile(directory, "classFurtherSubsequentResource.txt");
       printFileInfo(file);
       Assertions.assertNotNull(file.getClasspathResource());
+   }
 
+   @Test
+   public void testWorkspaceJavaDirectory()
+   {
+      WorkspaceJavaDirectory workspaceJavaDirectory;
 
+      workspaceJavaDirectory = new WorkspaceJavaDirectory(WorkspaceJavaDirectory.class);
+      printDirectoryInfo(workspaceJavaDirectory);
    }
 
    private static void printFileInfo(WorkspaceResourceFile file)
@@ -95,5 +102,11 @@ public class WorkspaceDirectoryTest
       LogTools.info("Class for loading: {}", directory.getClassForLoading());
       LogTools.info("Path necessary for classpath loading: {}", directory.getPathNecessaryForClasspathLoading());
       LogTools.info("Path necessary for resource exploring: {}", directory.getPathNecessaryForResourceExploring());
+
+   }
+   private static void printDirectoryInfo(WorkspaceJavaDirectory directory)
+   {
+      LogTools.info("File access available: {}", directory.isFileAccessAvailable() ? "Yes" : "No");
+      LogTools.info("Directory path: {}", directory.getDirectoryPath());
    }
 }
