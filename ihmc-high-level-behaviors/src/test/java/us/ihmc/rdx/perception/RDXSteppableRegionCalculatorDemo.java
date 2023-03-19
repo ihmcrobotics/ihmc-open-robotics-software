@@ -17,15 +17,15 @@ import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.live.RDXHeightMapVisualizer;
-import us.ihmc.rdx.ui.graphics.live.RDXSteppableRegionsVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.Activator;
 
 public class RDXSteppableRegionCalculatorDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private Activator nativesLoadedActivator;
    private RDXHighLevelDepthSensorSimulator ouster;
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
@@ -57,14 +57,14 @@ public class RDXSteppableRegionCalculatorDemo
       // Configure the height map visualizer
       globalVisualizersUI = new RDXGlobalVisualizersPanel();
 
-      RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer("Height Map");
+      RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
       heightMapVisualizer.setActive(true);
       RDXSteppableRegionsVisualizer steppableRegionsVisualizer = new RDXSteppableRegionsVisualizer("Steppable Regions");
       steppableRegionsVisualizer.setActive(true);
 
       baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
-      baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.MODEL);
-      baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.VIRTUAL);
+//      baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.MODEL);
+//      baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.VIRTUAL);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {

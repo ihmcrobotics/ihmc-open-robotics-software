@@ -33,12 +33,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class InverseKinematicsOptimizationControlModule
+public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final InverseKinematicsQPSolver qpSolver;
@@ -261,5 +263,11 @@ public class InverseKinematicsOptimizationControlModule
          boundCalculator.considerJointVelocityLimits(command.getJointVelocityLimitMode() == ActivationState.ENABLED);
       if (command.hasComputeJointTorques())
          computeJointTorques.set(command.getComputeJointTorques() == ActivationState.ENABLED);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

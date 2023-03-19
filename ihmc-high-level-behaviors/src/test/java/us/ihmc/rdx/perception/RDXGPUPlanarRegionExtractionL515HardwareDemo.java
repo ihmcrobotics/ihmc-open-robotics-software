@@ -17,9 +17,7 @@ import us.ihmc.tools.thread.Activator;
 
 public class RDXGPUPlanarRegionExtractionL515HardwareDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private Activator nativesLoadedActivator;
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RealSenseHardwareManager realSenseHardwareManager;
@@ -94,7 +92,7 @@ public class RDXGPUPlanarRegionExtractionL515HardwareDemo
                      baseUI.getLayoutManager().reloadLayout();
                   }
 
-                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
+                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthDiscretization(), 0.0);
                   gpuPlanarRegionExtraction.extractPlanarRegions();
                }
             }

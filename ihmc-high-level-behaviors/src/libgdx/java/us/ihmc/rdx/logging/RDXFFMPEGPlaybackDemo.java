@@ -2,41 +2,67 @@ package us.ihmc.rdx.logging;
 
 import imgui.ImGui;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
-import imgui.type.ImInt;
+import imgui.flag.ImGuiDataType;
+import imgui.type.ImLong;
 import org.bytedeco.ffmpeg.ffmpeg;
 import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXCVImagePanel;
+import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 import us.ihmc.tools.thread.Activator;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.io.File;
 import java.nio.ByteOrder;
 
+/**
+ * This demo allows to open video files like MP4, WebM, etc, play them back and scrub through them
+ * frame by frame.
+ */
 public class RDXFFMPEGPlaybackDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
-   private final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   private final String logDirectory = IHMCCommonPaths.LOGS_DIRECTORY + File.separator;
 
-   //example.webm contains licensing information at attribution.txt in same directory. Used with permission from https://en.wikipedia.org/wiki/File:Schlossbergbahn.webm
-   private final WorkspaceFile exampleVideo = new WorkspaceFile(new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                                       "ihmc-high-level-behaviors/src/main/resources/us/ihmc/gdx/logging"),
-                                                                "example.webm");
+   // example.webm contains licensing information at attribution.txt in same directory.
+   // Used with permission from https://en.wikipedia.org/wiki/File:Schlossbergbahn.webm
+   private final WorkspaceResourceFile exampleVideo = new WorkspaceResourceFile(new WorkspaceResourceDirectory(getClass()), "example.webm");
 
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
-   private RDXCVImagePanel imagePanel;
+   private final RDXBaseUI baseUI = new RDXBaseUI();
+   private RDXBytedecoImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private FFMPEGVideoPlaybackManager video;
    private boolean videoReload;
-   private final ImInt location = new ImInt();
-   private final ImInt manualSeekLocation = new ImInt();
-   private boolean isScrubbing;
-   private boolean wasPausedBeforeScrub;
+   private final ImLong currentFrame = new ImLong();
+   private final ImLong currentTimebaseUnit = new ImLong();
+   private final ResettableExceptionHandlingExecutorService seekThread = MissingThreadTools.newSingleThreadExecutor("WalkPathControlPlanning", true, 1);
+   private final Notification frameSeekRequested = new Notification();
+   private final Notification timestampSeekRequested = new Notification();
+   private volatile boolean seeking = false;
+   private double numberOfFramesDouble;
+   private long numberOfFrames;
+   private double videoDuration;
+   private double timeBase;
+   private double frameRate;
+   private long numberOfFramesAVStream;
+   private long startTime;
+   private double currentTimestamp;
+   private double currentFrameDouble;
+   private FFMPEGFileReader fileReader;
+   private long duration;
+   private int width;
+   private int height;
+   private double framePeriod;
+   private long periodInTimeBase;
 
    public RDXFFMPEGPlaybackDemo()
    {
@@ -59,11 +85,31 @@ public class RDXFFMPEGPlaybackDemo
             if (nativesLoadedActivator.poll())
             {
                if (nativesLoadedActivator.isNewlyActivated())
-                  loadVideo(exampleVideo.getFilePath().toString());
+                  loadVideo(exampleVideo.getFilesystemFile().toString());
             }
 
-            if (imagePanel != null)
+            if (imagePanel != null && !seeking)
                imagePanel.draw();
+
+            // Don't overload the process seeking; throttle it down
+            if (frameSeekRequested.poll())
+            {
+               seeking = true;
+               seekThread.clearQueueAndExecute(() ->
+               {
+                  video.seekFrame(currentFrame.get());
+                  seeking = false;
+               });
+            }
+            if (timestampSeekRequested.poll())
+            {
+               seeking = true;
+               seekThread.clearQueueAndExecute(() ->
+               {
+                  video.seek(currentTimebaseUnit.get());
+                  seeking = false;
+               });
+            }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -71,7 +117,7 @@ public class RDXFFMPEGPlaybackDemo
             if (videoReload)
             {
                videoReload = false;
-               baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
+               baseUI.getImGuiPanelManager().addPanel(imagePanel.getImagePanel());
                baseUI.getLayoutManager().reloadLayout();
             }
          }
@@ -85,81 +131,150 @@ public class RDXFFMPEGPlaybackDemo
 
             video = new FFMPEGVideoPlaybackManager(file);
             if (imagePanel == null)
-               imagePanel = new RDXCVImagePanel("Playback Video", video.getImage());
+               imagePanel = new RDXBytedecoImagePanel("Playback Video", video.getImage());
             else
                imagePanel.resize(video.getImage());
-            video.play();
+            video.seek(0);
             videoReload = true;
+
+            numberOfFramesDouble = video.calculateNumberOfFrames();
+            videoDuration = video.calculateVideoDuration();
+            timeBase = video.calculateTimeBaseSeconds();
+            frameRate = video.calculateAverageFramerateHz();
+            framePeriod = video.calculateVideoFramePeriod();
+            numberOfFrames = Math.round(numberOfFramesDouble);
+            width = video.getWidth();
+            height = video.getHeight();
+            periodInTimeBase = Math.round(framePeriod / timeBase);
+
+            fileReader = (FFMPEGFileReader) video.getFile();
+            numberOfFramesAVStream = fileReader.getAVStream().nb_frames();
+            startTime = fileReader.getStartTime();
+            duration = fileReader.getDuration();
          }
 
          private void renderImGuiWidgets()
          {
-            ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
-
-            ImGui.separator();
-
-            if (ImGui.button("Select new file..."))
+            if (ImGui.button(labels.get("Select new file...")))
                ImGuiFileDialog.openDialog("chooseVideo", "Select video file", ".*", logDirectory, "", 1, 0, 0);
 
             if (ImGuiFileDialog.display("chooseVideo", 0, 400, 200, 4000, 2000))
             {
                if (ImGuiFileDialog.isOk())
-                  loadVideo((String) ImGuiFileDialog.getSelection().values().toArray()[0]); //Stupid but necessary
+                  loadVideo((String) ImGuiFileDialog.getSelection().values().toArray()[0]); // Stupid but necessary
 
                ImGuiFileDialog.close();
             }
 
             ImGui.separator();
 
-            if (video != null)
-               ImGui.text("Resolution: " + video.getWidth() + " x " + video.getHeight());
-
-            if (video != null)
+            if (video != null && !video.isAStream())
             {
-               if (video.hasDuration())
+               ImGui.text("Resolution: " + width + " x " + height);
+               if (!seeking)
                {
-                  //FFMPEG freaks out of you seek to the end but there isn't a great way to fix that
-                  if (ImGui.sliderInt("##videoProgress", location.getData(), 0, (int) (video.getVideoDurationInMillis())))
-                  {
-                     isScrubbing = true;
-                     wasPausedBeforeScrub = video.isPaused();
-                     video.pause();
-                  }
-                  else
-                  {
-                     if (isScrubbing)
-                     {
-                        video.seek(location.get());
-                        if (!wasPausedBeforeScrub)
-                           video.play();
-
-                        isScrubbing = false;
-                     }
-                     else
-                        location.set((int) video.getCurrentTimestampInMillis());
-                  }
+                  currentTimestamp = video.getCurrentTimestamp();
+                  currentFrameDouble = currentTimestamp / video.calculateVideoFramePeriod();
+                  currentFrame.set((long) Math.floor(currentFrameDouble));
+                  currentTimebaseUnit.set(video.getCurrentTimestampInMillis());
                }
 
-               if (ImGui.button("Play"))
-                  video.play();
+               ImGui.text(String.format("Framerate: %.1f Hz, Frame period %.2f ms, Video duration: %.3f s, Number of frames: %.3f",
+                                        frameRate,
+                                        framePeriod,
+                                        videoDuration,
+                                        numberOfFramesDouble));
+
+               ImGui.text(String.format("ffmpeg: Time base: %.6f s, Start time: %d, Average frame rate: %.3f, Number of frames (if known): %d",
+                                        timeBase, startTime, frameRate, numberOfFramesAVStream));
+
+               ImGui.text(String.format("Current frame: %.3f / %.3f", currentFrameDouble, numberOfFramesDouble));
+               ImGui.text(String.format("Current timestamp: %.6f s / %.6f s", currentTimestamp, videoDuration));
+
+               // FFMPEG freaks out of you seek to the end but there isn't a great way to fix that
+               if (ImGui.sliderScalar(labels.get("Frame number"), ImGuiDataType.U32, currentFrame, 0, numberOfFrames))
+               { // location value changed
+                  frameSeekRequested.set();
+               }
                ImGui.sameLine();
-               if (ImGui.button("Pause"))
-                  video.pause();
-
-               if (video.hasDuration())
+               if (ImGui.button(labels.get("<")))
                {
-                  ImGui.sameLine();
-                  ImGui.text(video.getCurrentTimestampInMillis() / 1000 + "s of " + video.getVideoDurationInMillis() / 1000 + 's');
-
-                  ImGui.inputInt("##SeekBox", manualSeekLocation);
-                  ImGui.sameLine();
-                  if (ImGui.button("Seek"))
+                  if (currentFrame.get() > 0)
                   {
-                     location.set(manualSeekLocation.get());
-                     video.seek(location.get());
+                     currentFrame.set(currentFrame.get() - 1);
+                     frameSeekRequested.set();
                   }
+               }
+               ImGuiTools.previousWidgetTooltip("Go to previous frame");
+               ImGui.sameLine();
+               if (ImGui.button(labels.get(">")))
+               {
+                  if (currentFrame.get() < numberOfFrames)
+                  {
+                     currentFrame.set(currentFrame.get() + 1);
+                     frameSeekRequested.set();
+                  }
+               }
+               ImGuiTools.previousWidgetTooltip("Go to next frame");
+               ImGui.sameLine();
+               ImGui.pushItemWidth(80.0f);
+               if (ImGuiTools.volatileInputLong(labels.get("Seek frame"), currentFrame))
+               {
+                  frameSeekRequested.set();
+               }
+               ImGui.popItemWidth();
+
+               if (ImGui.sliderScalar(labels.get("Timebase unit"), ImGuiDataType.U32, currentTimebaseUnit, 0, duration))
+               { // location value changed
+                  timestampSeekRequested.set();
+               }
+               ImGui.sameLine();
+               if (ImGui.button(labels.get("<")))
+               {
+                  if (currentTimebaseUnit.get() > 0)
+                  {
+                     currentTimebaseUnit.set(currentTimebaseUnit.get() - 1);
+                     timestampSeekRequested.set();
+                  }
+               }
+               ImGuiTools.previousWidgetTooltip("Go to previous timebase unit");
+               ImGui.sameLine();
+               if (ImGui.button(labels.get(">")))
+               {
+                  if (currentTimebaseUnit.get() < duration)
+                  {
+                     currentTimebaseUnit.set(currentTimebaseUnit.get() + 1);
+                     timestampSeekRequested.set();
+                  }
+               }
+               ImGuiTools.previousWidgetTooltip("Go to next timebase unit");
+               ImGui.sameLine();
+               ImGui.pushItemWidth(80.0f);
+               if (ImGuiTools.volatileInputLong(labels.get("Seek timebase unit"), currentTimebaseUnit, periodInTimeBase))
+               {
+                  timestampSeekRequested.set();
+               }
+               ImGui.popItemWidth();
+
+               if (!seeking)
+               {
+                  if (ImGui.button(labels.get("Play")))
+                     video.play();
+                  ImGui.sameLine();
+                  if (ImGui.button(labels.get("Pause")))
+                     video.pause();
+               }
+               else
+               {
+                  ImGui.text("Seeking...");
                }
             }
+            else if (video != null && video.isAStream())
+            {
+               ImGui.text("Video is a stream.");
+            }
+
+            ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
          }
 
          @Override

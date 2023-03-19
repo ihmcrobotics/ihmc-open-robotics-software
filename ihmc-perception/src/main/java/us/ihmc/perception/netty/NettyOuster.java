@@ -12,7 +12,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.memory.NativeMemoryTools;
+import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.io.*;
 import java.net.Socket;
@@ -29,7 +29,10 @@ import java.util.function.Consumer;
  *
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
  * Software User Manual: https://data.ouster.io/downloads/software-user-manual/software-user-manual-v2p0.pdf
- * 
+ *
+ * To connect to the Ouster, type in os-122221003063.local into the browser, finding the serial number
+ * from the Confluence page: https://confluence.ihmc.us/display/PER/In-House+Perception+Sensors+Tracker
+ *
  * To test, use the GNU netcat command:
  * netcat -ul 7502
  *
@@ -162,8 +165,13 @@ public class NettyOuster
          }
       });
 
-      // Ouster OS0-128 uses about 1.5 MB for the buffer, so let's set the allocator to 2 MB to leave a little wiggle room
-      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(Conversions.megabytesToBytes(2)));
+      // Ouster OS0-128 at 2048x10 sends 3,186,688 bytes per revolution, at 10 Hz, is ~31.9 MB/s (~255 Mb/s)
+      // We tried lots of options, including lower and higher sizes, 4 MB seemed to be a sweet spot.
+      // Lower values resulted in the beginning part of the image being cut off.
+      // Higher values resulted in intermitent dropouts of parts of the scan lines throughout the entire image.
+      // We tried the AdaptiveRecvByteBufAllocator, but depending on the initial values, we see the same behavior.
+      // The AdaptiveRecvByteBufAllocator never seemed to adapt at all. 
+      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(Conversions.megabytesToBytes(4)));
    }
 
    private void configureTCP()

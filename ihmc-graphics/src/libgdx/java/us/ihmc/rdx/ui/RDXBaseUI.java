@@ -12,6 +12,7 @@ import imgui.type.ImInt;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.time.Stopwatch;
@@ -28,9 +29,7 @@ import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
-import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.*;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.nio.file.Files;
@@ -96,7 +95,7 @@ public class RDXBaseUI
    private final String windowTitle;
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private String configurationExtraPath;
-   private final HybridDirectory configurationBaseDirectory;
+   private final HybridResourceDirectory configurationBaseDirectory;
    private HybridFile libGDXSettingsFile;
    private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
    private final Stopwatch runTime = new Stopwatch().start();
@@ -121,28 +120,41 @@ public class RDXBaseUI
    private Path themeFilePath;
    private final String shadePrefix = "shade=";
 
-   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public RDXBaseUI()
    {
-      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+      this(0, null);
    }
 
-   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public RDXBaseUI(String windowTitle)
    {
-      this.windowTitle = windowTitle;
+      this(0, windowTitle);
+   }
 
-      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
-      configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
-                                                       directoryNameToAssumePresent,
-                                                       subsequentPathToResourceFolder,
-                                                       classForLoading,
-                                                       configurationExtraPath);
+   /**
+    * Typically you won't need this method. It's package private unless we find a use for it.
+    *
+    * @param additionalStackHeightForFindingCaller This is if you have something that sets up a RDXBaseUI for another class.
+    *                                              We want the highest level calling class to be the one used for loading resources.
+    */
+   /* package private*/ RDXBaseUI(int additionalStackHeightForFindingCaller, String windowTitle)
+   {
+      StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+      Class<?> classForLoading = ExceptionTools.handle(() -> Class.forName(stackTraceElements[3 + additionalStackHeightForFindingCaller].getClassName()),
+                                                       DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      LogTools.info("Using class for loading resources: {}", classForLoading.getName());
 
-      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
-      layoutManager = new RDXImGuiLayoutManager(classForLoading,
-                                                directoryNameToAssumePresent,
-                                                subsequentPathToResourceFolder,
-                                                configurationExtraPath,
-                                                configurationBaseDirectory);
+      this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
+
+      configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
+      configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading, "/").resolve(configurationExtraPath);
+
+      if (!configurationBaseDirectory.isWorkspaceFileAccessAvailable())
+      {
+         LogTools.warn("We won't be able to write files to version controlled resources, because we probably aren't in a workspace.");
+      }
+
+      layoutManager = new RDXImGuiLayoutManager(classForLoading, configurationExtraPath, configurationBaseDirectory);
+      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem(layoutManager);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
       {
@@ -211,7 +223,7 @@ public class RDXBaseUI
       primary3DPanel.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
       primaryScene.addCoordinateFrame(0.3);
 
-      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), layoutManager);
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 

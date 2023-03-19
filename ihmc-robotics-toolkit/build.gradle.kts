@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -32,15 +32,15 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.19.1")
    api("us.ihmc:euclid-frame-shape:0.19.1")
    api("us.ihmc:euclid-shape:0.19.1")
-   api("us.ihmc:mecano:17-0.11.5")
-   api("us.ihmc:mecano-yovariables:17-0.11.5")
+   api("us.ihmc:mecano:17-0.11.6")
+   api("us.ihmc:mecano-yovariables:17-0.11.6")
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:ihmc-messager-kryo:0.1.7")
-   api("us.ihmc:ihmc-matrix-library:0.18.8")
-   api("us.ihmc:ihmc-graphics-description:0.19.8")
-   api("us.ihmc:simulation-construction-set-utilities:0.22.10")
+   api("us.ihmc:ihmc-matrix-library:0.18.9")
+   api("us.ihmc:ihmc-graphics-description:0.20.0")
+   api("us.ihmc:simulation-construction-set-utilities:0.23.0")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
-   api("us.ihmc:scs2-definition:17-0.12.1")
+   api("us.ihmc:scs2-definition:17-0.13.2")
    // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
 }
 
@@ -50,7 +50,7 @@ testDependencies {
    api("org.hamcrest:hamcrest:2.2")
 
    api("us.ihmc:euclid-test:0.19.1")
-   api("us.ihmc:simulation-construction-set:0.22.10")
-   api("us.ihmc:ihmc-matrix-library-test:0.18.8")
+   api("us.ihmc:simulation-construction-set:0.23.0")
+   api("us.ihmc:ihmc-matrix-library-test:0.18.9")
    api("us.ihmc:ihmc-commons-testing:0.32.0")
 }

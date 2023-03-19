@@ -1,7 +1,11 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -21,8 +25,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -88,6 +97,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
    private final int maxNumberOfSwingWaypoints;
    private boolean visualize = true;
+   private final String namePrefix;
 
    public TwoWaypointSwingGenerator(String namePrefix,
                                     double minSwingHeight,
@@ -109,7 +119,15 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
                                     YoRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, customWaypointAngleThreshold, maxNumberOfSwingWaypoints, worldFrame, parentRegistry, yoGraphicsListRegistry);
+      this(namePrefix,
+           minSwingHeight,
+           maxSwingHeight,
+           defaultSwingHeight,
+           customWaypointAngleThreshold,
+           maxNumberOfSwingWaypoints,
+           worldFrame,
+           parentRegistry,
+           yoGraphicsListRegistry);
    }
 
    public TwoWaypointSwingGenerator(String namePrefix,
@@ -142,6 +160,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
                                     YoRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.namePrefix = namePrefix;
       this.maxNumberOfSwingWaypoints = maxNumberOfSwingWaypoints;
 
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
@@ -427,10 +446,11 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final Point2D tempPoint = new Point2D();
 
    /**
-    * Given the start and end point of the swing as well as the position of the stance foot this method will compute
-    * whether the nominal swing trajectory will be close to the stance foot. This is an indication that self collision
-    * between swing and stance leg will occur. In that case a offset vector is computed and packed that will contain
-    * a swing trajectory adjustment that will avoid this.
+    * Given the start and end point of the swing as well as the position of the stance foot this method
+    * will compute whether the nominal swing trajectory will be close to the stance foot. This is an
+    * indication that self collision between swing and stance leg will occur. In that case a offset
+    * vector is computed and packed that will contain a swing trajectory adjustment that will avoid
+    * this.
     */
    private boolean computeSwingAdjustment(FramePoint3D pointA, FramePoint3D pointB, FramePoint3D stance, Vector2D offsetToPack)
    {
@@ -500,13 +520,15 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    }
 
    /**
-    * Calling this method will enable a simple collision avoidance heuristic in the swing generator: if a straight line in the xy plane
-    * from the start to the end of the swing is too close to the stance position the trajectory waypoints will be adjusted. To activate
-    * this, additional information has to be provided as arguments to this method.
+    * Calling this method will enable a simple collision avoidance heuristic in the swing generator: if
+    * a straight line in the xy plane from the start to the end of the swing is too close to the stance
+    * position the trajectory waypoints will be adjusted. To activate this, additional information has
+    * to be provided as arguments to this method.
     *
     * @param swingSide           the side of the robot that this swing trajectory will be executed on
     * @param stanceZUpFrame      the zup frame located at the stance foot sole
-    * @param minDistanceToStance the minimum clearance that the swing should have from the stance foot sole point in the xy plane
+    * @param minDistanceToStance the minimum clearance that the swing should have from the stance foot
+    *                            sole point in the xy plane
     */
    public void enableStanceCollisionAvoidance(RobotSide swingSide, ReferenceFrame stanceZUpFrame, double minDistanceToStance)
    {
@@ -701,5 +723,22 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private FramePoint3D createNewWaypoint()
    {
       return new FramePoint3D(trajectoryFrame);
+   }
+
+   public EnumMap<Axis3D, ArrayList<YoPolynomial>> getSwingTrajectory()
+   {
+      return trajectory.getTrajectories();
+   }
+
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(trajectory.getSCS2YoGraphics());
+      if (waypointViz != null)
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D(namePrefix + "Waypoint",
+                                                                            waypointViz.getPositions(),
+                                                                            0.02,
+                                                                            ColorDefinitions.White()));
+      return group;
    }
 }

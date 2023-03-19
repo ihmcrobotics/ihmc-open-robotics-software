@@ -90,7 +90,6 @@ public class SimpleGPUHeightMapUpdater
       this.normalZImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
       this.countImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_8UC1);
 
-      openCLManager.create();
       heightMapProgram = openCLManager.loadProgram("SimpleGPUHeightMap");
       zeroValuesKernel = openCLManager.createKernel(heightMapProgram, "zeroValuesKernel");
       addPointsFromImageKernel = openCLManager.createKernel(heightMapProgram, "addPointsFromImageKernel");
@@ -109,12 +108,23 @@ public class SimpleGPUHeightMapUpdater
       localizationBuffer.destroy(openCLManager);
       parametersBuffer.destroy(openCLManager);
       intrinsicsBuffer.destroy(openCLManager);
-      openCLManager.releaseBufferObject(centroidData);
-      openCLManager.releaseBufferObject(varianceData);
-      openCLManager.releaseBufferObject(counterData);
-      centroidData.releaseReference();
-      varianceData.releaseReference();
-      counterData.releaseReference();
+      if (centroidData != null)
+      {
+         openCLManager.releaseBufferObject(centroidData);
+         centroidData.releaseReference();
+      }
+
+      if (varianceData != null)
+      {
+         openCLManager.releaseBufferObject(varianceData);
+         varianceData.releaseReference();
+      }
+
+      if (counterData != null)
+      {
+         openCLManager.releaseBufferObject(counterData);
+         counterData.releaseReference();
+      }
 
       depthImageMeters.destroy(openCLManager);
       centroidXImage.destroy(openCLManager);
@@ -272,8 +282,6 @@ public class SimpleGPUHeightMapUpdater
       openCLManager.enqueueReadImage(normalXImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalXImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(normalYImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalYImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(normalZImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalZImage.getBytedecoByteBufferPointer());
-
-      openCLManager.finish();
    }
 
    private void updateMapObject(double centerX, double centerY)

@@ -16,11 +16,13 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -53,7 +55,9 @@ public class AStarFootstepPlanner
    private final FootstepChecker checker;
    private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
    private final IdealStepCalculator idealStepCalculator;
+   private final ReferenceBasedIdealStepCalculator referenceBasedIdealStepCalculator;
    private final FootstepPlannerCompletionChecker completionChecker;
+   private final FootstepCostCalculator stepCostCalculator;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
 
    private final FootstepPlannerEdgeData edgeData;
@@ -95,13 +99,17 @@ public class AStarFootstepPlanner
 
       this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, registry);
-      this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, idealStepCalculator, footPolygons);
+      this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(footstepPlannerParameters, idealStepCalculator, registry);
+      this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, referenceBasedIdealStepCalculator, footPolygons);
 
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
-      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
+      stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, referenceBasedIdealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
+
 
       this.iterationConductor = new AStarFootstepPlannerIterationConductor(expansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
       this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, iterationConductor, distanceAndYawHeuristics, snapper);
+
+      referenceBasedIdealStepCalculator.setFootstepGraph(iterationConductor.getGraph());
 
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
       this.edgeData = new FootstepPlannerEdgeData(allVariables.size());
@@ -189,6 +197,15 @@ public class AStarFootstepPlanner
       }
 
       // Start planning loop
+      if (request.getReferencePlan() == null)
+      {
+         referenceBasedIdealStepCalculator.clearReferencePlan();
+      }
+      else
+      {
+         referenceBasedIdealStepCalculator.setReferenceFootstepPlan(request.getReferencePlan());
+      }
+
       while (true)
       {
          iterations++;
@@ -336,9 +353,12 @@ public class AStarFootstepPlanner
       {
          loggedData = new FootstepPlannerIterationData();
          loggedData.setParentNode(iterationData.getParentNode());
-         DiscreteFootstep idealFootstep = idealStepCalculator.computeIdealStep(iterationData.getParentNode().getSecondStep(),
-                                                                                  iterationData.getParentNode().getFirstStep());
+         referenceBasedIdealStepCalculator.setFootstepGraph(iterationConductor.getGraph());
+         DiscreteFootstep idealFootstep = referenceBasedIdealStepCalculator.computeIdealStep(iterationData.getParentNode().getSecondStep(),
+                                                                                             iterationData.getParentNode().getFirstStep());
+         DiscreteFootstep nominalIdealStep = referenceBasedIdealStepCalculator.getNominalIdealStep();
          loggedData.setIdealChildNode(new FootstepGraphNode(iterationData.getParentNode().getSecondStep(), idealFootstep));
+         loggedData.setNominalIdealChildNode(new FootstepGraphNode(iterationData.getParentNode().getSecondStep(), nominalIdealStep));
          loggedData.setParentEndSnapData(snapper.snapFootstep(iterationData.getParentNode().getSecondStep()));
          loggedData.setParentStartSnapData(snapper.snapFootstep(iterationData.getParentNode().getFirstStep()));
          this.iterationData.add(loggedData);
@@ -510,5 +530,11 @@ public class AStarFootstepPlanner
    {
       snapper.setHeightMapData(heightMapData);
       checker.setHeightMapData(heightMapData);
+      stepCostCalculator.setHeightMapData(heightMapData);
+   }
+
+   public ReferenceBasedIdealStepCalculator getReferenceBasedIdealStepCalculator()
+   {
+      return referenceBasedIdealStepCalculator;
    }
 }

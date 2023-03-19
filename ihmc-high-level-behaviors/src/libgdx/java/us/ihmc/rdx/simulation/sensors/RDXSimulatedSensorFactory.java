@@ -103,7 +103,7 @@ public class RDXSimulatedSensorFactory
 
    public static RDXHighLevelDepthSensorSimulator createRealsenseL515(ReferenceFrame sensorFrame, LongSupplier timestampSupplier)
    {
-      double publishRateHz = 4.0;
+      double publishRateHz = 20.0;
       double verticalFOV = 55.0;
       int imageWidth = 1024;
       int imageHeight = 768;

@@ -89,5 +89,6 @@ public class VisualizationController
    public void reset()
    {
       messager.submitMessage(GlobalReset, true);
+      messager.submitMessage(ShowFootstepPlan, true);
    }
 }

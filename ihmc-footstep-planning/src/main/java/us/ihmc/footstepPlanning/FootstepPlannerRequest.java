@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -15,6 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepPlannerRequest
 {
@@ -124,6 +127,11 @@ public class FootstepPlannerRequest
     */
    private SwingPlannerType swingPlannerType = SwingPlannerType.NONE;
 
+   /**
+    * Reference footstep plan. When provided, the planner will try to match this plan by having the cost function's minima be at these steps.
+    */
+   private FootstepPlan referencePlan = null;
+
    public FootstepPlannerRequest()
    {
       clear();
@@ -152,6 +160,7 @@ public class FootstepPlannerRequest
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
       swingPlannerType = SwingPlannerType.NONE;
+      referencePlan = null;
    }
 
    public void setRequestId(int requestId)
@@ -294,6 +303,14 @@ public class FootstepPlannerRequest
       this.swingPlannerType = swingPlannerType;
    }
 
+   public void setReferencePlan(FootstepPlanReadOnly referencePlan)
+   {
+      if (referencePlan == null)
+         this.referencePlan = null;
+      else
+         this.referencePlan = new FootstepPlan(referencePlan);
+   }
+
    public int getRequestId()
    {
       return requestId;
@@ -399,6 +416,18 @@ public class FootstepPlannerRequest
       return swingPlannerType;
    }
 
+   public FootstepPlan getReferencePlan()
+   {
+      return referencePlan;
+   }
+
+   public boolean hasReferenceFootstepPlan()
+   {
+      return referencePlan != null;
+   }
+
+   // TODO add ROS field if needed. probably should be added to be loggable
+
    public void setFromPacket(FootstepPlanningRequestPacket requestPacket)
    {
       clear();
@@ -425,6 +454,7 @@ public class FootstepPlannerRequest
          setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
       setStatusPublishPeriod(requestPacket.getStatusPublishPeriod());
+      setReferencePlan(FootstepDataMessageConverter.convertToFootstepPlan(requestPacket.getReferencePlan()));
 
       SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(requestPacket.getRequestedSwingPlanner());
       if (swingPlannerType != null)
@@ -470,7 +500,7 @@ public class FootstepPlannerRequest
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
       }
 
-      if(getPlanarRegionsList() != null)
+      if (getPlanarRegionsList() != null)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
          requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
@@ -479,6 +509,11 @@ public class FootstepPlannerRequest
       if (getHeightMapMessage() != null)
       {
          requestPacket.getHeightMapMessage().set(getHeightMapMessage());
+      }
+
+      if (referencePlan != null && !referencePlan.isEmpty())
+      {
+         requestPacket.getReferencePlan().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(referencePlan, -1.0, -1.0));
       }
    }
 
@@ -520,5 +555,8 @@ public class FootstepPlannerRequest
       }
 
       this.heightMapMessage = other.heightMapMessage;
+
+      if (other.referencePlan != null)
+         this.referencePlan = new FootstepPlan(other.referencePlan);
    }
 }

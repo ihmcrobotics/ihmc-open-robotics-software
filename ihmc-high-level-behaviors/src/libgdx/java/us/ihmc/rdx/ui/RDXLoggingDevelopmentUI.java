@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
-import us.ihmc.avatar.logging.PlanarRegionsListBuffer;
+import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.tools.BoxesDemoModel;
@@ -37,7 +37,7 @@ public class RDXLoggingDevelopmentUI
    private IntraprocessYoVariableLogger yoLogger;
    private YoBuffer yoBuffer;
 
-   private PlanarRegionsListBuffer planarRegionsListBuffer;
+   private PlanarRegionsReplayBuffer planarRegionsReplayBuffer;
    private PlanarRegionsListLogger planarRegionsListLogger;
 
    private PlanarRegionsList regions;
@@ -58,7 +58,7 @@ public class RDXLoggingDevelopmentUI
    public RDXLoggingDevelopmentUI()
    {
       LogTools.info("Starting UI");
-      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
+      baseUI = new RDXBaseUI(WINDOW_NAME);
 
       random = new Random();
 
@@ -72,7 +72,7 @@ public class RDXLoggingDevelopmentUI
       yoBuffer = new YoBuffer(MAX_TICK_LENGTH);
       yoBuffer.addVariable(planarRegionsID);
 
-      planarRegionsListBuffer = new PlanarRegionsListBuffer(MAX_TICK_LENGTH);
+      planarRegionsReplayBuffer = new PlanarRegionsReplayBuffer(MAX_TICK_LENGTH);
 
       timer = new Timer();
       stopwatch = new Stopwatch();
@@ -120,7 +120,7 @@ public class RDXLoggingDevelopmentUI
 
 
                   long time = System.currentTimeMillis();
-                  planarRegionsListBuffer.putAndTick(time, regions);
+                  planarRegionsReplayBuffer.putAndTick(time, regions);
                   planarRegionsListLogger.update(time, regions);
                }
             }, 50, TICK_PERIOD);
@@ -131,7 +131,7 @@ public class RDXLoggingDevelopmentUI
          {
             baseUI.renderBeforeOnScreenUI();
 
-            PlanarRegionsList list = planarRegionsListBuffer.get(t.get());
+            PlanarRegionsList list = (PlanarRegionsList) planarRegionsReplayBuffer.get(t.get());
             if (list != null)
                planarRegionsGraphic.generateMeshesAsync(list);
             planarRegionsGraphic.update();

@@ -35,6 +35,9 @@ public class ImGuiTools
    public static final int GDX_TO_IMGUI_KEY_CODE_OFFSET = GLFW.GLFW_KEY_A - Input.Keys.A;
    public static final float FLOAT_MIN = -3.40282346638528859811704183484516925e+38F / 2.0f;
    public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
+   /** This is used so a scroll area can end reasonably for long scrolls so stuff below it can be accessed. */
+   public static final float REASONABLE_HEIGHT_FOR_A_SCROLL_AREA = 150.0f;
+   public static final int MAX_STRING_SIZE_FOR_PATH = 1024;
 
    private static ImFont consoleFont;
    private static ImFont smallFont;
@@ -181,6 +184,21 @@ public class ImGuiTools
       int inputTextFlags = ImGuiInputTextFlags.None;
       inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
       return ImGui.inputDouble(label, imDouble, step, stepFast, format, inputTextFlags);
+   }
+
+   public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue);
+   }
+
+   public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue, String format)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format);
+   }
+
+   public static boolean sliderDouble(String label, ImDouble imDouble, double minValue, double maxValue, String format, int imGuiSliderFlags)
+   {
+      return ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, minValue, maxValue, format, imGuiSliderFlags);
    }
 
    /**
