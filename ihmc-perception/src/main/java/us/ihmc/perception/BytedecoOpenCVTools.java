@@ -288,6 +288,14 @@ public class BytedecoOpenCVTools
       LogTools.info(matToString(name, image));
    }
 
+   public static void printMatVector(String name, MatVector matVector)
+   {
+      for (int i = 0; i < matVector.size(); i++)
+      {
+         LogTools.info(matToString("%s %d:".formatted(name, i), matVector.get(i)) + "\n");
+      }
+   }
+
    public static String matToString(String name, Mat image)
    {
       StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
@@ -300,6 +308,8 @@ public class BytedecoOpenCVTools
                matString.append(image.ptr(i, j).getShort()).append("\t");
             if (image.type() == opencv_core.CV_64FC1)
                matString.append("%.5f\t".formatted(image.ptr(i, j).getDouble()));
+            if (image.type() == opencv_core.CV_32FC2)
+               matString.append("%.5f\t%.5f\t\t".formatted(image.ptr(i, j).getFloat(), image.ptr(i, j).getFloat(Float.BYTES)));
          }
          matString.append("\n");
       }
