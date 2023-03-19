@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -1333,5 +1334,31 @@ public class EuclidCoreMissingTools
       E.set(3,0,-qz); E.set(3,1, qy); E.set(3,2,-qx); E.set(3,3, qs);
       
       return E;
+   }
+
+   public static void setYawPitchRollDegrees(Orientation3DBasics orientation3DBasics, double yaw, double pitch, double roll)
+   {
+      orientation3DBasics.setYawPitchRoll(Math.toRadians(yaw), Math.toRadians(pitch), Math.toRadians(roll));
+   }
+
+   public static String getYawPitchRollStringDegrees(Orientation3DBasics orientation3DBasics)
+   {
+      String degreeSymbol = "\u00B0";
+      // Degree symbol placed at the end so you don't have to remove it when copy and pasting
+      return EuclidCoreIOTools.getYawPitchRollString(EuclidCoreIOTools.DEFAULT_FORMAT,
+                                                     Math.toDegrees(orientation3DBasics.getYaw()),
+                                                     Math.toDegrees(orientation3DBasics.getPitch()),
+                                                     Math.toDegrees(orientation3DBasics.getRoll())) + degreeSymbol;
+   }
+
+   public static String getYawPitchRollValuesStringDegrees(Orientation3DBasics orientation3DBasics)
+   {
+      String degreeSymbol = "\u00B0";
+      // Degree symbol placed at the end so you don't have to remove it when copy and pasting
+      return EuclidCoreIOTools.getStringOf("(", ")", ", ",
+                                           EuclidCoreIOTools.DEFAULT_FORMAT,
+                                           Math.toDegrees(orientation3DBasics.getYaw()),
+                                           Math.toDegrees(orientation3DBasics.getPitch()),
+                                           Math.toDegrees(orientation3DBasics.getRoll())) + degreeSymbol;
    }
 }

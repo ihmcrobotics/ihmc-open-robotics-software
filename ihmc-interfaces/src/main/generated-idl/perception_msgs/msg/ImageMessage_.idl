@@ -49,7 +49,7 @@ module perception_msgs
         /**
          * The image format. Ordinal of OpenCVImageFormat
          */
-        unsigned short format;
+        octet format;
         /**
          * Position of the focal point at sensor data aquisition
          */
@@ -59,19 +59,9 @@ module perception_msgs
          */
         geometry_msgs::msg::dds::Quaternion orientation;
         /**
-         * Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
+         * Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
          */
-        boolean is_pinhole_camera_model;
-        /**
-         * Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
-         */
-        boolean is_equidistant_fisheye_camera_model;
-        /**
-         * If the camera model is the Ouster camera model.
-         * With the Ouster camera model, the vertical and horizonal fields of view
-         * are used instead of the focal length and principal point parameters.
-         */
-        boolean is_ouster_camera_model;
+        octet camera_model;
         /**
          * Horizontal focal length in units of pixels (Fx)
          */
@@ -89,13 +79,17 @@ module perception_msgs
          */
         float principal_point_y_pixels;
         /**
-         * If Ouster camera model, the vertical field of view in radians
+         * If Ouster camera model, the pixel offsets used to re-stagger the depth image.
          */
-        float ouster_vertical_field_of_view;
+        sequence<octet, 128> ouster_pixel_shifts;
         /**
-         * If Ouster camera model, the horizontal field of view in radians
+         * If Ouster camera model, the calibrated beam altitude angles used to get 3D points.
          */
-        float ouster_horizontal_field_of_view;
+        sequence<float, 128> ouster_beam_altitude_angles;
+        /**
+         * If Ouster camera model, the calibrated beam azimuth angles used to get 3D points.
+         */
+        sequence<float, 128> ouster_beam_azimuth_angles;
       };
     };
   };

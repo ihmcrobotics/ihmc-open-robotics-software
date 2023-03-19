@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.comms.ImageMessageFormat;
 
 import java.awt.image.BufferedImage;
 import java.time.Instant;
@@ -282,20 +283,23 @@ public class BytedecoOpenCVTools
       return "unknown image type";
    }
 
-   public static void printMat(Mat image, String prefix)
+   public static void printMat(String name, Mat image)
    {
-      LogTools.info(matToString(image, prefix));
+      LogTools.info(matToString(name, image));
    }
 
-   public static String matToString(Mat image, String prefix)
+   public static String matToString(String name, Mat image)
    {
-      StringBuilder matString = new StringBuilder("Mat: [" + prefix + "] \n");
+      StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
 
       for (int i = 0; i < image.rows(); i++)
       {
          for (int j = 0; j < image.cols(); j++)
          {
-            matString.append(image.ptr(i, j).getShort()).append("\t");
+            if (image.type() == opencv_core.CV_16UC1)
+               matString.append(image.ptr(i, j).getShort()).append("\t");
+            if (image.type() == opencv_core.CV_64FC1)
+               matString.append("%.5f\t".formatted(image.ptr(i, j).getDouble()));
          }
          matString.append("\n");
       }
@@ -365,14 +369,14 @@ public class BytedecoOpenCVTools
                                        long sequenceNumber,
                                        int height,
                                        int width,
-                                       int format)
+                                       ImageMessageFormat format)
    {
       imageMessage.getData().resetQuick();
       for (int i = 0; i < data.limit(); i++)
       {
          imageMessage.getData().add(data.get(i));
       }
-      imageMessage.setFormat(format);
+      format.packMessageFormat(imageMessage);
       imageMessage.setImageHeight(height);
       imageMessage.setImageWidth(width);
       imageMessage.getPosition().set(cameraPose.getPosition());

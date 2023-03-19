@@ -3,6 +3,7 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.tools.thread.SwapReference;
@@ -10,6 +11,9 @@ import us.ihmc.tools.thread.SwapReference;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Used to publish detected ArUco marker poses over ROS 2.
+ */
 public class OpenCVArUcoMarkerROS2Publisher
 {
    private final OpenCVArUcoMarkerDetection arUcoMarkerDetection;
@@ -56,6 +60,6 @@ public class OpenCVArUcoMarkerROS2Publisher
          }
       }
 
-      ros2.publish(BehaviorSequencePerceptionManager.ARUCO_MARKER_POSES, arUcoMarkerPoses);
+      ros2.publish(ROS2Tools.ARUCO_MARKER_POSES, arUcoMarkerPoses);
    }
 }

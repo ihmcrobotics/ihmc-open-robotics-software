@@ -1,7 +1,7 @@
-#define HORIZONTAL_FIELD_OF_VIEW 0
-#define VERTICAL_FIELD_OF_VIEW 1
-#define DEPTH_IMAGE_WIDTH 2
-#define DEPTH_IMAGE_HEIGHT 3
+#define DEPTH_IMAGE_WIDTH 0
+#define DEPTH_IMAGE_HEIGHT 1
+#define LIDAR_ORIGIN_TO_BEAM_ORIGIN 2
+#define DISCRETE_RESOLUTION 3
 #define GRADIENT_MODE 4
 #define USE_SINUSOIDAL_GRADIENT 5
 #define POINT_SIZE 6
@@ -18,7 +18,12 @@
 #define GRADIENT_MODE_WORLD_Z 0
 #define GRADIENT_MODE_SENSOR_X 1
 
+#define TWO_PI_F 2.0f * M_PI_F
+
 kernel void computeVertexBuffer(global float* parameters,
+                                global int* pixelShifts,
+                                global float* altitudeAngles,
+                                global float* azimuthAngles,
                                 global float* ousterToWorldTransform,
                                 read_only image2d_t discretizedDepthImage,
                                 global float* fisheyeParameters,
@@ -30,42 +35,36 @@ kernel void computeVertexBuffer(global float* parameters,
    int y = get_global_id(1);
 
    // Adds points above and below the lidar point symetrically
-   // for the purpose of displaying more color details
+   // for the purpose of displaying more color details.
    int totalVerticalPointsForColorDetail = 1 + 2 * parameters[LEVEL_OF_COLOR_DETAIL];
    int ousterY = y / totalVerticalPointsForColorDetail;
 
-   float discreteResolution = 0.001f;
-   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, ousterY)).x * discreteResolution;
+   // Undo depth image pixel shifts. Using the azimuth angles is more precise.
+   int unshiftedX = x;
+   unshiftedX += pixelShifts[ousterY];
+   if (unshiftedX < 0)
+      unshiftedX += parameters[DEPTH_IMAGE_WIDTH];
+   if (unshiftedX > parameters[DEPTH_IMAGE_WIDTH] - 1)
+      unshiftedX -= parameters[DEPTH_IMAGE_WIDTH];
 
-   int xFromCenter = -x - (parameters[DEPTH_IMAGE_WIDTH] / 2); // flip
-   int yFromCenter = ousterY - (parameters[DEPTH_IMAGE_HEIGHT] / 2);
+   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (unshiftedX, ousterY)).x * parameters[DISCRETE_RESOLUTION];
 
-   float angleXFromCenter = xFromCenter / (float) parameters[DEPTH_IMAGE_WIDTH] * parameters[HORIZONTAL_FIELD_OF_VIEW];
-   float angleYFromCenter = yFromCenter / (float) parameters[DEPTH_IMAGE_HEIGHT] * parameters[VERTICAL_FIELD_OF_VIEW];
+   float encoderAngle = 2.0f * M_PI_F * (1.0f - ((float) x / (float) parameters[DEPTH_IMAGE_WIDTH]));
+   float azimuthAngle = -azimuthAngles[ousterY];
 
-   // Create additional rotation only transform
-   float16 angledRotationMatrix = newRotationMatrix();
-   angledRotationMatrix = setToPitchOrientation(angleYFromCenter, angledRotationMatrix);
-   angledRotationMatrix = prependYawRotation(angleXFromCenter, angledRotationMatrix);
-
-   float3 beamFramePoint = (float3) (eyeDepthInMeters, 0.0f, 0.0f);
-   float3 origin = (float3) (0.0f, 0.0f, 0.0f);
-   float3 rotationMatrixRow0 = (float3) (angledRotationMatrix.s0, angledRotationMatrix.s1, angledRotationMatrix.s2);
-   float3 rotationMatrixRow1 = (float3) (angledRotationMatrix.s3, angledRotationMatrix.s4, angledRotationMatrix.s5);
-   float3 rotationMatrixRow2 = (float3) (angledRotationMatrix.s6, angledRotationMatrix.s7, angledRotationMatrix.s8);
-
-   float3 ousterFramePoint = transformPoint3D32_2(beamFramePoint, rotationMatrixRow0, rotationMatrixRow1, rotationMatrixRow2, origin);
-
-   float pointSize = parameters[POINT_SIZE] * eyeDepthInMeters;
+   // Adjust the altitude angle to add points above and below for color detail
    int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - parameters[LEVEL_OF_COLOR_DETAIL];
-   float verticalPointOffsetLocalZ = verticalColorDetailOffsetIndex * pointSize / 2.0f;
-   float3 colorDetailPointOffsetLocalFrame = (float3) (0.0, 0.0, verticalPointOffsetLocalZ);
-   float3 colorDetailPointOffset = transformPoint3D32_2(colorDetailPointOffsetLocalFrame,
-                                                        rotationMatrixRow0,
-                                                        rotationMatrixRow1,
-                                                        rotationMatrixRow2,
-                                                        origin);
-   ousterFramePoint += colorDetailPointOffset;
+   float altitudeStep = M_PI_F / 2.0 / (totalVerticalPointsForColorDetail * parameters[DEPTH_IMAGE_HEIGHT]);
+   float altitudeAdjustment = verticalColorDetailOffsetIndex * altitudeStep;
+
+   float altitudeAngle = altitudeAngles[ousterY] + altitudeAdjustment;
+
+   // This uses the model from the user manual
+   float beamLength = eyeDepthInMeters - parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN]; // Subtract the length of the sensor arm
+   float3 ousterFramePoint = (float3)
+      (-beamLength * cos(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * cos(encoderAngle),
+       -beamLength * sin(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * sin(encoderAngle),
+       beamLength * sin(altitudeAngle));
 
    float3 worldFramePoint = transformPoint3D32(ousterFramePoint, ousterToWorldTransform);
 
@@ -135,5 +134,5 @@ kernel void computeVertexBuffer(global float* parameters,
    pointCloudVertexBuffer[pointStartIndex + 4] = pointColor.y;
    pointCloudVertexBuffer[pointStartIndex + 5] = pointColor.z;
    pointCloudVertexBuffer[pointStartIndex + 6] = pointColor.w;
-   pointCloudVertexBuffer[pointStartIndex + 7] = pointSize;
+   pointCloudVertexBuffer[pointStartIndex + 7] = parameters[POINT_SIZE] * eyeDepthInMeters;
 }

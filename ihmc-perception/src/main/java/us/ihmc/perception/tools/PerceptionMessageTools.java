@@ -123,23 +123,12 @@ public class PerceptionMessageTools
 
    public static void extractImageMessageData(ImageMessage imageMessage, ByteBuffer dataByteBuffer)
    {
-      int numberOfBytes = imageMessage.getData().size();
-      dataByteBuffer.rewind();
-      dataByteBuffer.limit(dataByteBuffer.capacity());
-      for (int i = 0; i < numberOfBytes; i++)
-      {
-         dataByteBuffer.put(imageMessage.getData().get(i));
-      }
-      dataByteBuffer.flip();
+      MessageTools.extractIDLSequence(imageMessage.getData(), dataByteBuffer);
    }
 
    public static void packImageMessageData(ByteBuffer dataByteBuffer, ImageMessage imageMessage)
    {
-      imageMessage.getData().resetQuick();
-      for (int i = 0; i < dataByteBuffer.limit(); i++)
-      {
-         imageMessage.getData().add(dataByteBuffer.get(i));
-      }
+      MessageTools.packIDLSequence(dataByteBuffer, imageMessage.getData());
    }
 
    public static void packImageMessageData(BytePointer dataBytePointer, ImageMessage imageMessage)
@@ -189,19 +178,29 @@ public class PerceptionMessageTools
       BytedecoOpenCVTools.display("Color Image", colorImage, 1);
    }
 
-   public static void copyToFloatPointer(IDLSequence.Float floatSequence, FloatPointer floatBuffer, int startIndex)
+   public static void copyToBytePointer(IDLSequence.Byte sourceIDLSequence, BytePointer pointerToPack)
    {
-      for (int i = 0; i < floatSequence.size(); i++)
+      pointerToPack.position(0);
+      pointerToPack.limit(sourceIDLSequence.size());
+      for (int i = 0; i < sourceIDLSequence.size(); i++)
       {
-         floatBuffer.put(i + startIndex, floatSequence.get(i));
+         pointerToPack.put(i, sourceIDLSequence.get(i));
       }
    }
 
-   public static void copyToLongPointer(IDLSequence.Long longSequence, LongPointer longPointer, int startIndex)
+   public static void copyToFloatPointer(IDLSequence.Float sourceIDLSequence, FloatPointer floatPointerToPack, int startIndex)
    {
-      for (int i = 0; i < longSequence.size(); i++)
+      for (int i = 0; i < sourceIDLSequence.size(); i++)
       {
-         longPointer.put(i + startIndex, longSequence.get(i));
+         floatPointerToPack.put(i + startIndex, sourceIDLSequence.get(i));
+      }
+   }
+
+   public static void copyToLongPointer(IDLSequence.Long sourceIDLSequence, LongPointer longPointerToPack, int startIndex)
+   {
+      for (int i = 0; i < sourceIDLSequence.size(); i++)
+      {
+         longPointerToPack.put(i + startIndex, sourceIDLSequence.get(i));
       }
    }
 
