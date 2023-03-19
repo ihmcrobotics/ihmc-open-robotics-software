@@ -25,6 +25,7 @@ public class WalkingFootstepTracker
 {
    private final ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
    private volatile int completedIndex = 0;
+   private volatile int totalStepsCompleted = 0;
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
@@ -51,15 +52,18 @@ public class WalkingFootstepTracker
                   break;
                }
             }
+
+            totalStepsCompleted++;
          }
 
-         LogTools.info(format("{} footstep completed. Completion: {}/{} -> {}/{}. ID: {}",
+         LogTools.info(format("{} footstep completed. Completion: {}/{} -> {}/{}. ID: {} Total steps completed: {}",
                               RobotSide.fromByte(footstepStatusMessage.getRobotSide()),
                               priorNumerator,
                               priorDenominator,
                               completedIndex,
                               footsteps.size(),
-                              footstepStatusMessage.getSequenceId()));
+                              footstepStatusMessage.getSequenceId(),
+                              totalStepsCompleted));
       }
    }
 

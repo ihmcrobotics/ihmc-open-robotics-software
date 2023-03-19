@@ -26,6 +26,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -34,12 +35,14 @@ import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGai
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDSE3Gains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class HighLevelControlManagerFactory
+public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
 {
    public static final String weightRegistryName = "MomentumOptimizationSettings";
    public static final String jointspaceGainRegistryName = "JointspaceGains";
@@ -67,7 +70,8 @@ public class HighLevelControlManagerFactory
    private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
-   private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
+   private final Map<String, PIDGainsReadOnly> jointspaceHighLevelGainMap = new HashMap<>();
+   private final Map<String, PIDGainsReadOnly> jointspaceLowLevelGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspacePositionGainMap = new HashMap<>();
 
@@ -106,7 +110,8 @@ public class HighLevelControlManagerFactory
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
 
       // Transform weights and gains to their parameterized versions.
-      ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
+      ParameterTools.extractJointGainMap(walkingControllerParameters.getHighLevelJointSpaceControlGains(), jointspaceHighLevelGainMap, jointGainRegistry);
+      ParameterTools.extractJointGainMap(walkingControllerParameters.getLowLevelJointSpaceControlGains(), jointspaceLowLevelGainMap, jointGainRegistry);
       ParameterTools.extract3DGainMap("Orientation",
                                       walkingControllerParameters.getTaskspaceOrientationControlGains(),
                                       taskspaceOrientationGainMap,
@@ -247,7 +252,7 @@ public class HighLevelControlManagerFactory
                                                                     yoTime,
                                                                     graphicsListRegistry,
                                                                     registry);
-      manager.setGains(jointGainMap);
+      manager.setGains(jointspaceHighLevelGainMap, jointspaceLowLevelGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
@@ -307,9 +312,7 @@ public class HighLevelControlManagerFactory
       PID3DGainsReadOnly pelvisGains = taskspaceOrientationGainMap.get(pelvisName);
       Vector3DReadOnly pelvisAngularWeight = taskspaceAngularWeightMap.get(pelvisName);
 
-      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains,
-                                                              controllerToolbox,
-                                                              registry);
+      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, controllerToolbox, registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       return pelvisOrientationManager;
@@ -395,5 +398,25 @@ public class HighLevelControlManagerFactory
       }
 
       return new FeedbackControllerTemplate(ret);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (balanceManager != null)
+         group.addChild(balanceManager.getSCS2YoGraphics());
+      if (centerOfMassHeightManager != null)
+         group.addChild(centerOfMassHeightManager.getSCS2YoGraphics());
+      if (feetManager != null)
+         group.addChild(feetManager.getSCS2YoGraphics());
+      if (pelvisOrientationManager != null)
+         group.addChild(pelvisOrientationManager.getSCS2YoGraphics());
+      if (rigidBodyManagerMapByBodyName != null)
+      {
+         for (RigidBodyControlManager rigidBodyControlManager : rigidBodyManagerMapByBodyName.values())
+            group.addChild(rigidBodyControlManager.getSCS2YoGraphics());
+      }
+      return group;
    }
 }

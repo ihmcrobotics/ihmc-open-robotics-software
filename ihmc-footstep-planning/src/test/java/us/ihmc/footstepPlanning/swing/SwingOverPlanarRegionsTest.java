@@ -32,10 +32,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -55,6 +52,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
@@ -298,6 +296,7 @@ public class SwingOverPlanarRegionsTest
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
                                                                          new DefaultVisibilityGraphParameters(),
+                                                                         new AStarBodyPathPlannerParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          swingPlannerParameters,
                                                                          walkingControllerParameters,
@@ -361,7 +360,11 @@ public class SwingOverPlanarRegionsTest
          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
       }
 
-      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses(), SwingPlannerType.TWO_WAYPOINT_POSITION);
+      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(),
+                                                                    HeightMapMessageTools.unpackMessage(request.getHeightMapMessage()),
+                                                                    footstepPlan,
+                                                                    request.getStartFootPoses(),
+                                                                    SwingPlannerType.TWO_WAYPOINT_POSITION);
 
       boolean wasAdjusted = expander.wereWaypointsAdjusted();
       if (wasAdjusted)
@@ -675,12 +678,6 @@ public class SwingOverPlanarRegionsTest
 
          @Override
          public double maximumHeightAboveAnkle()
-         {
-            return 0;
-         }
-
-         @Override
-         public double defaultOffsetHeightAboveAnkle()
          {
             return 0;
          }

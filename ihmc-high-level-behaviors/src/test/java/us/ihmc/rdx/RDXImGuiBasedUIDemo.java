@@ -4,9 +4,11 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImString;
 import org.apache.logging.log4j.Level;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -19,16 +21,14 @@ import java.time.LocalDateTime;
 
 public class RDXImGuiBasedUIDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  "Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("Demo");
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
    private final ImGuiLogWidget logWidget = new ImGuiLogWidget("Log");
    private long renderCount = 0;
    private final ImBoolean option = new ImBoolean();
    private int pressCount = 0;
+   private final ImString textForArea = new ImString();
 
    public RDXImGuiBasedUIDemo()
    {
@@ -70,7 +70,7 @@ public class RDXImGuiBasedUIDemo
             RDX3DPanelToolbarButton hoverboardButton = baseUI.getPrimary3DPanel().addToolbarButton();
             hoverboardButton.loadAndSetIcon("icons/hoverboard.png");
 
-            RDX3DPanel second3DPanel = new RDX3DPanel("Second 3D View", 2, true);
+            RDX3DPanel second3DPanel = new RDX3DPanel("Second 3D View", true);
             baseUI.add3DPanel(second3DPanel);
 
             logWidget.submitEntry(Level.WARN, "WARN at " + LocalDateTime.now());
@@ -78,6 +78,8 @@ public class RDXImGuiBasedUIDemo
             logWidget.submitEntry(Level.DEBUG, "DEBUG at " + LocalDateTime.now());
             logWidget.submitEntry(Level.FATAL, "FATAL at " + LocalDateTime.now());
             logWidget.submitEntry(Level.TRACE, "TRACE at " + LocalDateTime.now());
+
+            textForArea.set("Text for area");
          }
 
          @Override
@@ -121,6 +123,7 @@ public class RDXImGuiBasedUIDemo
       logWidget.renderImGuiWidgets();
 
       ImGui.text("Toolbar button press count: " + pressCount);
+      ImGuiTools.inputText("Text area", textForArea);
    }
 
    private void renderWindow2()

@@ -14,7 +14,9 @@ import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
@@ -37,7 +39,7 @@ public class ContactableShape
    private final RigidBodyTransform shapeToWorldFrameTransform = new RigidBodyTransform();
    private final RigidBodyTransform worldToShapeFrameTransform = new RigidBodyTransform();
 
-   private final ConvexPolytope3D polytopeInShapeFrame = new ConvexPolytope3D();
+   private final Box3D polytopeInShapeFrame = new Box3D();
    private final BoundingBox3D shapeBoundingBoxInWorld = new BoundingBox3D();
 
    /* Only used if shape is a box */
@@ -138,7 +140,7 @@ public class ContactableShape
       }
    }
 
-   public boolean detectPolytopeContact(List<FramePoint3DReadOnly> contactPoints, double distanceThreshold, ConvexPolytope3DReadOnly contactablePolytope)
+   public boolean detectEnvironmentContact(List<FramePoint3DReadOnly> contactPoints, double distanceThreshold, FrameBox3DReadOnly contactablePolytope, Vector3D contactNormalToSet)
    {
       // Collision check in shape frame
       FrameShape3DReadOnly collisionShape = collidable.getShape();
@@ -151,14 +153,25 @@ public class ContactableShape
 
       collisionDetector.evaluateCollision(polytopeInShapeFrame, collisionShape, collisionResult);
 
-      if (collisionResult.areShapesColliding())
+      boolean contactDetected = collisionResult.getSignedDistance() < distanceThreshold;
+      if (contactDetected)
       {
-         FramePoint3D contactPoint = new FramePoint3D(collisionShapeFrame, collisionResult.getPointOnB());
+         FramePoint3D contactPoint = new FramePoint3D(collisionShapeFrame, collisionResult.getPointOnA());
          contactPoint.changeFrame(ReferenceFrame.getWorldFrame());
          contactPoints.add(contactPoint);
+
+         FrameVector3D contactNormal = new FrameVector3D(collisionShapeFrame);
+         contactNormal.sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
+
+         if (collisionResult.areShapesColliding())
+            contactNormal.negate();
+
+         contactNormal.normalize();
+         contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
+         contactNormalToSet.set(contactNormal);
       }
 
-      return collisionResult.areShapesColliding();
+      return contactDetected;
    }
 
    public BoundingBox3DReadOnly getShapeBoundingBox()

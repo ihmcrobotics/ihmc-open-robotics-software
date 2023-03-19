@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Con
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -79,5 +80,11 @@ public class ComponentBasedFootstepDataMessageGenerator implements HumanoidStepp
    public ContinuousStepGenerator getContinuousStepGenerator()
    {
       return continuousStepGenerator;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return continuousStepGenerator.getSCS2YoGraphics();
    }
 }

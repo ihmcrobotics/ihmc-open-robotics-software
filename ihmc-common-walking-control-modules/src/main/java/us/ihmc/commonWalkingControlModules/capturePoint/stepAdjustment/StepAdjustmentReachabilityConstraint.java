@@ -8,13 +8,17 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -22,7 +26,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class StepAdjustmentReachabilityConstraint
+public class StepAdjustmentReachabilityConstraint implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -346,5 +350,15 @@ public class StepAdjustmentReachabilityConstraint
    public FrameConvexPolygon2DReadOnly getTotalReachabilityHull(RobotSide supportSide)
    {
       return totalReachabilityHulls.get(supportSide);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("ReachabilityRegion", reachabilityPolygon, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("ForwardReachabilityRegion", forwardCrossOverReachability, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPolygon2D("BackwardReachabilityRegion", backwardCrossOverReachability, ColorDefinitions.Blue()));
+      return group;
    }
 }

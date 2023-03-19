@@ -14,7 +14,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
@@ -90,6 +92,7 @@ public class FootstepPlannerMessagerAPI
 
    // Parameters
    public static final Topic<FootstepPlannerParametersReadOnly> PlannerParameters = topic("PlannerParameters");
+   public static final Topic<AStarBodyPathPlannerParametersReadOnly> AStarBodyPathPlannerParameters = topic("AStarBodyPathPlannerParameters");
    public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
    public static final Topic<SwingPlannerParametersReadOnly> SwingPlannerParameters = topic("SwingPlannerParameters");
    public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParameters = topic("BipedalSupportRegionsParameters");
@@ -146,6 +149,8 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<SwingPlannerType> RequestedSwingPlannerType = topic("RequestedSwingPlannerType");
    public static final Topic<Boolean> PlanSingleStep = topic("PlanSingleStep");
 
+   public static final Topic<FootstepPlan> ReferencePlan = topic("ReferencePlan");
+
    // Robot control
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");
 
@@ -197,6 +202,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StanceStepToVisualize = topic("StanceStepToVisualize");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> TouchdownStepToVisualize = topic("TouchdownStepToVisualize");
    public static final Topic<RigidBodyTransform> LoggedIdealStep = topic("LoggedIdealStep");
+   public static final Topic<RigidBodyTransform> LoggedNominalIdealStep = topic("LoggedNominalIdealStep");
    public static final Topic<List<Box3D>> LoggedCollisionBoxes = topic("LoggedCollisionBoxes");
 
    public static final Topic<Boolean> ShowLoggedStartOfSwingStep = topic("ShowLoggedStartOfSwingStep");
@@ -205,11 +211,13 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowLoggedSnappedCandidateStep = topic("ShowLoggedSnappedCandidateStep");
    public static final Topic<Boolean> ShowLoggedWiggledCandidateStep = topic("ShowLoggedWiggledCandidateStep");
    public static final Topic<Boolean> ShowLoggedIdealStep = topic("ShowLoggedIdealStep");
+   public static final Topic<Boolean> ShowLoggedNominalIdealStep = topic("ShowLoggedNominalIdealStep");
    public static final Topic<Boolean> ShowBodyBox = topic("ShowBodyBox");
    public static final Topic<Boolean> ShowHeightMap = topic("ShowHeightMap");
 
    public static final Topic<Pair<BodyPathLatticePoint, Double>> BodyPathStartNodeToVisualize = topic("BodyPathStartNodeToVisualize");
    public static final Topic<Pair<BodyPathLatticePoint, Double>> BodyPathCandidateNodeToVisualize = topic("BodyPathCandidateNodeToVisualize");
+   public static final Topic<Boolean> ShowBodyPathPlanData = topic("ShowBodyPathPlanData");
 
    // Test dashboard, only displayed if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");

@@ -21,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
@@ -32,6 +33,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -44,6 +46,8 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
+
+import java.util.Set;
 
 public class RDXVRKinematicsStreamingMode
 {
@@ -72,11 +76,13 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
-   private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled);
+   private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled, 2);
+   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(streamToController, kinematicsRecorder.isReplayingEnabled());
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
    private int rightIndex = -1;
+   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
    public RDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -143,6 +149,8 @@ public class RDXVRKinematicsStreamingMode
 
    public void processVRInput(RDXVRContext vrContext)
    {
+      if(controllerModel == RDXVRControllerModel.UNKNOWN)
+         controllerModel = vrContext.getControllerModel();
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
          InputDigitalActionData aButton = controller.getAButtonActionData();
@@ -159,9 +167,15 @@ public class RDXVRKinematicsStreamingMode
             sendHandCommand(RobotSide.LEFT, handConfiguration);
          }
 
-         // Check if left B button is pressed in order to trigger recording or replay of motion
+         // Check if left joystick is pressed in order to trigger recording or replay of motion
+         InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
+         kinematicsRecorder.processRecordReplayInput(joystickButton);
+         if(kinematicsRecorder.isReplayingEnabled().get())
+            wakeUpToolbox();
+
+         // Check if left B button is pressed in order to trigger shared control assistance
          InputDigitalActionData bButton = controller.getBButtonActionData();
-         kinematicsRecorder.processRecordReplayInput(bButton);
+         sharedControlAssistant.processInput(bButton);
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -194,28 +208,36 @@ public class RDXVRKinematicsStreamingMode
          });
       }
 
+
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
             vrContext.getController(side).runIfConnected(controller ->
-            {
+            {  //TODO edit this part to include other robot parts (e.g., feet, elbows, chest?)
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
                message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
                tempFramePose.setToZero(handDesiredControlFrames.get(side).getReferenceFrame());
                tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
+               kinematicsRecorder.framePoseToRecord(tempFramePose);
                if (kinematicsRecorder.isReplaying())
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
+               else if (sharedControlAssistant.isActive())
+               {
+                  if(sharedControlAssistant.readyToPack())
+                     sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
+                  else
+                     sharedControlAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
+               }
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
                message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
                                                                                  side.negateIfLeftSide(Math.PI / 2.0),
                                                                                  side.negateIfLeftSide(Math.PI / 2.0));
                toolboxInputMessage.getInputs().add().set(message);
-               kinematicsRecorder.framePoseToRecord(tempFramePose);
             });
          }
 
@@ -285,8 +307,16 @@ public class RDXVRKinematicsStreamingMode
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Toggle IK tracking enabled: Right A button");
-      ImGui.text("Toggle stream to controller: Left A button");
+      if (controllerModel == RDXVRControllerModel.FOCUS3)
+      {
+         ImGui.text("Toggle IK tracking enabled: A button");
+         ImGui.text("Toggle stream to controller: X button");
+      }
+      else
+      {
+         ImGui.text("Toggle IK tracking enabled: Right A button");
+         ImGui.text("Toggle stream to controller: Left A button");
+      }
 
       kinematicsStreamingToolboxProcess.renderImGuiWidgets();
       ghostRobotGraphic.renderImGuiWidgets();
@@ -310,10 +340,16 @@ public class RDXVRKinematicsStreamingMode
          sleepToolbox();
       }
       // add widgets for recording/replaying motion in VR
-      ImGui.text("Start/Stop recording: Press Right B button");
+      ImGui.text("Start/Stop recording: Press Left Joystick");
       kinematicsRecorder.renderRecordWidgets(labels);
-      ImGui.text("Start/Stop replay: Press Right B button (cannot stream/record if replay)");
+      ImGui.text("Start/Stop replay: Press Left Joystick (cannot stream/record if replay)");
       kinematicsRecorder.renderReplayWidgets(labels);
+      // add widget for using shared control assistance in VR
+      if (controllerModel == RDXVRControllerModel.FOCUS3)
+         ImGui.text("Toggle shared control assistance: Y button");
+      else
+         ImGui.text("Toggle shared control assistance: Left B button");
+      sharedControlAssistant.renderWidgets(labels);
       if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
@@ -365,10 +401,10 @@ public class RDXVRKinematicsStreamingMode
       ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(robotModel.getSimpleRobotName()), toolboxStateMessage);
    }
 
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (status.hasReceivedFirstMessage())
-         ghostRobotGraphic.getRenderables(renderables, pool);
+         ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
       if (showReferenceFrameGraphics.get())
       {
 //         headsetFrameGraphic.getRenderables(renderables, pool);

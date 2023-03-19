@@ -46,6 +46,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -55,7 +59,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class WholeBodyInverseDynamicsSolver
+public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 {
    /**
     * Switch to using the {@link DynamicsMatrixCalculator} instead of the
@@ -109,6 +113,8 @@ public class WholeBodyInverseDynamicsSolver
    private final YoBoolean areJointTorqueLimitsConsidered;
 
    private final double controlDT;
+   private final ExecutionTimer setupTimer;
+   private final ExecutionTimer outputTimer;
 
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -135,7 +141,7 @@ public class WholeBodyInverseDynamicsSolver
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
       wrenchVisualizer = toolbox.getWrenchVisualizer();
 
-      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(controlDT, registry);
+      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(toolbox.getRootBody(), controlDT, registry);
 
       yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
       yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
@@ -150,12 +156,16 @@ public class WholeBodyInverseDynamicsSolver
       areJointTorqueLimitsConsidered = new YoBoolean("areJointTorqueLimitsConsidered", registry);
       areJointTorqueLimitsConsidered.set(toolbox.getOptimizationSettings().areJointTorqueLimitsConsidered());
 
+      setupTimer = new ExecutionTimer("inverseDynamicsSetupTimer", registry);
+      outputTimer = new ExecutionTimer("inverseDynamicsOutputTimer", registry);
+
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
       optimizationControlModule.initialize();
+      jointAccelerationIntegrationCalculator.resetJointParameters();
 
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {
@@ -194,6 +204,7 @@ public class WholeBodyInverseDynamicsSolver
 
    public void compute()
    {
+      setupTimer.startMeasurement();
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {
          dynamicsMatrixCalculator.compute();
@@ -205,6 +216,7 @@ public class WholeBodyInverseDynamicsSolver
          dynamicsMatrixCalculator.compute();
          optimizationControlModule.setupTorqueMinimizationCommand();
       }
+      setupTimer.stopMeasurement();
 
       if (!optimizationControlModule.compute())
       {
@@ -212,6 +224,7 @@ public class WholeBodyInverseDynamicsSolver
          // Don't crash and burn. Instead do the best you can with what you have.
          // Or maybe just use the previous ticks solution.
       }
+      outputTimer.startMeasurement();
       MomentumModuleSolution momentumModuleSolution = optimizationControlModule.getMomentumModuleSolution();
 
       DMatrixRMaj jointAccelerations = momentumModuleSolution.getJointAccelerations();
@@ -298,6 +311,7 @@ public class WholeBodyInverseDynamicsSolver
       planeContactWrenchProcessor.compute(externalWrenchSolution);
       if (wrenchVisualizer != null)
          wrenchVisualizer.visualize(externalWrenchSolution);
+      outputTimer.stopMeasurement();
    }
 
    private final DMatrixRMaj kinematicLoopJointTau = new DMatrixRMaj(4, 1);
@@ -453,5 +467,13 @@ public class WholeBodyInverseDynamicsSolver
    public JointBasics[] getJointsToOptimizeFors()
    {
       return jointsToOptimizeFor;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(optimizationControlModule.getSCS2YoGraphics());
+      return group;
    }
 }

@@ -68,7 +68,26 @@ public class RDX3DPanel
    private float windowDrawMinY;
    private float windowDrawMaxX;
    private float windowDrawMaxY;
+   private float windowPositionX;
+   private float windowPositionY;
 
+  public RDX3DPanel(String panelName)
+   {
+      this(panelName, RDXBaseUI.ANTI_ALIASING, true);
+   }
+
+   /**
+    * @param addFocusSphere show the little red sphere used to tell where the camera focus is
+    */
+   public RDX3DPanel(String panelName, boolean addFocusSphere)
+   {
+      this(panelName, RDXBaseUI.ANTI_ALIASING, addFocusSphere);
+   }
+
+   /**
+    * @param antiAliasing 1, 2, or 4
+    * @param addFocusSphere show the little red sphere used to tell where the camera focus is
+    */
    public RDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
       this.panelName = panelName;
@@ -112,8 +131,8 @@ public class RDX3DPanel
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
 
-         float windowPositionX = ImGui.getWindowPosX();
-         float windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
+         windowPositionX = ImGui.getWindowPosX();
+         windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
          windowSizeX = ImGui.getWindowSizeX();
          windowSizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
          renderSizeX = windowSizeX * antiAliasing;
@@ -409,5 +428,30 @@ public class RDX3DPanel
    public void setModelSceneMouseCollisionEnabled(boolean modelSceneMouseCollisionEnabled)
    {
       this.modelSceneMouseCollisionEnabled = modelSceneMouseCollisionEnabled;
+   }
+
+   public float getWindowSizeX()
+   {
+      return windowSizeX;
+   }
+
+   public float getWindowPositionX()
+   {
+      return windowPositionX;
+   }
+
+   public float getWindowPositionY()
+   {
+      return windowPositionY;
+   }
+
+   public RDX3DPanelToolbar getToolbar()
+   {
+      return toolbar;
+   }
+
+   public String getPanelName()
+   {
+      return panelName;
    }
 }

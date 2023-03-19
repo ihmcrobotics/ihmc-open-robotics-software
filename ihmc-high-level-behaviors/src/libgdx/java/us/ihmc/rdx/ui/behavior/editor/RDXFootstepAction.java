@@ -66,7 +66,7 @@ public class RDXFootstepAction implements RDXBehaviorAction
    public void setSide(RobotSide side, boolean authoring)
    {
       this.side = side;
-      String footBodyName = (side == RobotSide.LEFT) ? "l_foot" : "r_foot";
+      String footBodyName = syncedRobot.getFullRobotModel().getFoot(side).getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(footBodyName));
       highlightModel = new RDXInteractableHighlightModel(modelFileName);
       ankleToSoleFrameTransform.set(robotModel.getJointMap().getSoleToParentFrameTransform(side));
@@ -81,7 +81,7 @@ public class RDXFootstepAction implements RDXBehaviorAction
    @Override
    public void update()
    {
-      poseGizmo.updateTransforms();
+      poseGizmo.update();
       poseGizmo.getGizmoFrame().getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
       highlightModel.setPose(tempTransform, ankleToSoleFrameTransform);
    }

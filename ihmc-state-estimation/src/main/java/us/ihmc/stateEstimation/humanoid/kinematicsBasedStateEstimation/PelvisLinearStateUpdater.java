@@ -20,12 +20,15 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
 import us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoFrameVector3D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -50,7 +53,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * 
  * @author Sylvain
  */
-public class PelvisLinearStateUpdater
+public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 {
    private static final double minForceZInPercentThresholdToFilterFoot = 0.0;
    private static final double maxForceZInPercentThresholdToFilterFoot = 0.45;
@@ -701,5 +704,14 @@ public class PelvisLinearStateUpdater
    public List<RigidBodyBasics> getCurrentListOfTrustedFeet()
    {
       return listOfTrustedFeet;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(kinematicsBasedLinearStateCalculator.getSCS2YoGraphics());
+      group.addChild(imuBasedLinearStateCalculator.getSCS2YoGraphics());
+      return group;
    }
 }

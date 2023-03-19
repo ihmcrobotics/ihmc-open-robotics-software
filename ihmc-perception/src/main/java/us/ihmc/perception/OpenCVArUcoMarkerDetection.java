@@ -6,8 +6,9 @@ import org.bytedeco.opencv.global.opencv_aruco;
 import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_aruco.DetectorParameters;
-import org.bytedeco.opencv.opencv_aruco.Dictionary;
+import org.bytedeco.opencv.global.opencv_objdetect;
+import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
+import org.bytedeco.opencv.opencv_objdetect.Dictionary;
 import org.bytedeco.opencv.opencv_aruco.EstimateParameters;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -24,7 +25,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.SwapReference;
-import us.ihmc.tools.thread.ZeroCopySwapReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,15 +32,13 @@ import java.util.function.Consumer;
 
 public class OpenCVArUcoMarkerDetection
 {
-   public static final int DEFAULT_DICTIONARY = opencv_aruco.DICT_4X4_100;
+   public static final int DEFAULT_DICTIONARY = opencv_objdetect.DICT_4X4_100;
 
    private Dictionary dictionary;
-   private BytedecoImage sourceColorImage;
-   private boolean alphaRemovalMode;
    private ReferenceFrame sensorFrame;
    private final FramePose3D markerPose = new FramePose3D();
    private final Object inputImageSync = new Object();
-   private ZeroCopySwapReference<BytedecoImage> rgb888ColorImage;
+   private SwapReference<BytedecoImage> rgb8ImageForDetection;
    private final Object detectionDataSync = new Object();
    private SwapReference<MatVector> corners;
    private SwapReference<Mat> ids;
@@ -62,29 +60,21 @@ public class OpenCVArUcoMarkerDetection
    private final SwapReference<Stopwatch> stopwatch = new SwapReference<>(() -> new Stopwatch().start());
    private boolean enabled = true;
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-   private int imageWidth;
-   private int imageHeight;
    private Scalar defaultBorderColor;
+   private BytedecoImage optionalSourceColorImage;
 
-   public void create(BytedecoImage sourceColorImage, CameraPinholeBrown depthCameraIntrinsics, ReferenceFrame sensorFrame)
+   public void create(ReferenceFrame sensorFrame)
    {
-      this.sourceColorImage = sourceColorImage;
-
-      // ArUco library doesn't support alpha channel being in there
-      alphaRemovalMode = sourceColorImage.getBytedecoOpenCVMat().type() == opencv_core.CV_8UC4;
       this.sensorFrame = sensorFrame;
-      imageWidth = sourceColorImage.getImageWidth();
-      imageHeight = sourceColorImage.getImageHeight();
-      rgb888ColorImage = new ZeroCopySwapReference<>(() -> new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3));
 
-      dictionary = opencv_aruco.getPredefinedDictionary(DEFAULT_DICTIONARY);
+      dictionary = opencv_objdetect.getPredefinedDictionary(DEFAULT_DICTIONARY);
       corners = new SwapReference<>(MatVector::new);
       ids = new SwapReference<>(Mat::new);
       rejectedImagePoints = new SwapReference<>(MatVector::new);
-      detectorParameters = DetectorParameters.create();
+      detectorParameters = new DetectorParameters();
       detectorParameters.markerBorderBits(2);
-      estimateParameters = EstimateParameters.create();
-      cameraMatrix = new Mat(3, 3, opencv_core.CV_32FC1);
+      estimateParameters = new EstimateParameters();
+      cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
       distortionCoefficients = new Mat(1, 4, opencv_core.CV_32FC1);
       distortionCoefficients.ptr(0, 0).putFloat(0.0f);
       distortionCoefficients.ptr(0, 1).putFloat(0.0f);
@@ -97,50 +87,67 @@ public class OpenCVArUcoMarkerDetection
       translationVectors = new Mat();
       objectPoints = new Mat();
       defaultBorderColor = new Scalar(0, 0, 255, 0);
+   }
 
-      cameraMatrix.ptr(0, 0).putFloat((float) depthCameraIntrinsics.getFx());
-      cameraMatrix.ptr(0, 1).putFloat(0.0f);
-      cameraMatrix.ptr(0, 2).putFloat((float) depthCameraIntrinsics.getCx());
-      cameraMatrix.ptr(1, 0).putFloat(0.0f);
-      cameraMatrix.ptr(1, 1).putFloat((float) depthCameraIntrinsics.getFy());
-      cameraMatrix.ptr(1, 2).putFloat((float) depthCameraIntrinsics.getCy());
-      cameraMatrix.ptr(2, 0).putFloat(0.0f);
-      cameraMatrix.ptr(2, 1).putFloat(0.0f);
-      cameraMatrix.ptr(2, 2).putFloat(1.0f);
+   public void setSourceImageForDetection(BytedecoImage optionalSourceColorImage)
+   {
+      this.optionalSourceColorImage = optionalSourceColorImage;
+   }
+
+   public void setCameraInstrinsics(CameraPinholeBrown depthCameraIntrinsics)
+   {
+      opencv_core.setIdentity(cameraMatrix);
+      cameraMatrix.ptr(0, 0).putDouble(depthCameraIntrinsics.getFx());
+      cameraMatrix.ptr(1, 1).putDouble(depthCameraIntrinsics.getFy());
+      cameraMatrix.ptr(0, 2).putDouble(depthCameraIntrinsics.getCx());
+      cameraMatrix.ptr(1, 2).putDouble(depthCameraIntrinsics.getCy());
    }
 
    public void update()
    {
+      update(optionalSourceColorImage);
+   }
+
+   public void update(BytedecoImage sourceColorImage)
+   {
       if (enabled)
       {
-         rgb888ColorImage.accessOnHighPriorityThread(rgb888ColorImage ->
+         if (rgb8ImageForDetection == null)
          {
-            if (alphaRemovalMode)
+            rgb8ImageForDetection = new SwapReference<>(() -> new BytedecoImage(sourceColorImage.getImageWidth(),
+                                                                                sourceColorImage.getImageHeight(),
+                                                                                opencv_core.CV_8UC3));
+         }
+
+         synchronized (rgb8ImageForDetection)
+         {
+            rgb8ImageForDetection.getForThreadOne().ensureDimensionsMatch(sourceColorImage);
+
+            if (sourceColorImage.getBytedecoOpenCVMat().type() == opencv_core.CV_8UC4)
             {
+               // ArUco library doesn't support alpha channel being in there
                opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(),
-                                       rgb888ColorImage.getBytedecoOpenCVMat(),
-                                       opencv_imgproc.COLOR_RGBA2RGB);
+                                       rgb8ImageForDetection.getForThreadOne().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGBA2RGB);
             }
             else
             {
-               sourceColorImage.getBytedecoOpenCVMat().copyTo(rgb888ColorImage.getBytedecoOpenCVMat());
+               sourceColorImage.getBytedecoOpenCVMat().copyTo(rgb8ImageForDetection.getForThreadOne().getBytedecoOpenCVMat());
             }
-         });
+         }
 
+         // TODO: Throttle this, extract lambda
          executorService.clearQueueAndExecute(() ->
          {
             synchronized (inputImageSync)
             {
-               stopwatch.getForThreadOne().lap();
-               rgb888ColorImage.accessOnLowPriorityThread(rgb888ColorImage ->
-               {
-                  opencv_aruco.detectMarkers(rgb888ColorImage.getBytedecoOpenCVMat(),
-                                             dictionary,
-                                             corners.getForThreadOne(),
-                                             ids.getForThreadOne(),
-                                             detectorParameters,
-                                             rejectedImagePoints.getForThreadOne());
-               });
+               stopwatch.getForThreadOne().lap(); // TODO: Stopwatch swap reference is done incorrectly
+               opencv_aruco.detectMarkers(rgb8ImageForDetection.getForThreadTwo().getBytedecoOpenCVMat(),
+                                          dictionary,
+                                          corners.getForThreadOne(),
+                                          ids.getForThreadOne(),
+                                          detectorParameters,
+                                          rejectedImagePoints.getForThreadOne());
+               rgb8ImageForDetection.swap();
                stopwatch.getForThreadOne().suspend();
             }
 
@@ -161,6 +168,15 @@ public class OpenCVArUcoMarkerDetection
                }
             }
          });
+      }
+   }
+
+   public void getCopyOfSourceRGBImage(BytedecoImage imageToPack)
+   {
+      synchronized (rgb8ImageForDetection)
+      {
+         imageToPack.ensureDimensionsMatch(rgb8ImageForDetection.getForThreadOne());
+         rgb8ImageForDetection.getForThreadOne().getBytedecoOpenCVMat().copyTo(imageToPack.getBytedecoOpenCVMat());
       }
    }
 
@@ -259,7 +275,7 @@ public class OpenCVArUcoMarkerDetection
    {
       synchronized (detectionDataSync)
       {
-         opencv_aruco.drawDetectedMarkers(imageForDrawing, corners.getForThreadTwo(), ids.getForThreadTwo(), borderColor);
+         opencv_objdetect.drawDetectedMarkers(imageForDrawing, corners.getForThreadTwo(), ids.getForThreadTwo(), borderColor);
       }
    }
 
@@ -267,7 +283,7 @@ public class OpenCVArUcoMarkerDetection
    {
       synchronized (detectionDataSync)
       {
-         opencv_aruco.drawDetectedMarkers(imageForDrawing, rejectedImagePoints.getForThreadTwo());
+         opencv_objdetect.drawDetectedMarkers(imageForDrawing, rejectedImagePoints.getForThreadTwo());
       }
    }
 
@@ -282,24 +298,14 @@ public class OpenCVArUcoMarkerDetection
       }
    }
 
+   public Mat getCameraMatrix()
+   {
+      return cameraMatrix;
+   }
+
    public long getNumberOfRejectedPoints()
    {
       return rejectedImagePoints.getForThreadTwo().size();
-   }
-
-   public void getImageOfDetection(Mat imageToPack)
-   {
-      rgb888ColorImage.accessOnHighPriorityThread(rgb888ColorImage -> rgb888ColorImage.getBytedecoOpenCVMat().copyTo(imageToPack));
-   }
-
-   public int getImageWidth()
-   {
-      return imageWidth;
-   }
-
-   public int getImageHeight()
-   {
-      return imageHeight;
    }
 
    public DetectorParameters getDetectorParameters()

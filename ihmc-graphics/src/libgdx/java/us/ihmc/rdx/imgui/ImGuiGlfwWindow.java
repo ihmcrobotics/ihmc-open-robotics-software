@@ -7,11 +7,11 @@ import imgui.type.ImInt;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.rdx.ui.RDXImGuiPerspectiveManager;
+import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
+import us.ihmc.tools.io.HybridResourceDirectory;
+import us.ihmc.tools.io.HybridResourceFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
@@ -22,57 +22,52 @@ import java.util.function.Consumer;
 public class ImGuiGlfwWindow
 {
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
-   private String configurationExtraPath;
-   private final HybridDirectory configurationBaseDirectory;
-   private HybridFile windowSettingsFile;
+   private final String configurationExtraPath;
+   private final HybridResourceDirectory configurationBaseDirectory;
+   private HybridResourceFile windowSettingsFile;
    private final FrequencyCalculator fpsCalculator = new FrequencyCalculator();
    private final Stopwatch runTime = new Stopwatch().start();
    private String[] iconPaths = null;
    private final GlfwWindowForImGui glfwWindowForImGui;
    private final RDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
-   private final RDXImGuiPerspectiveManager perspectiveManager;
+   private final RDXImGuiLayoutManager layoutManager;
    private final ImBoolean vsync = new ImBoolean(true);
    private final ImInt maxFrameRate = new ImInt(240);
 
-   public ImGuiGlfwWindow(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public ImGuiGlfwWindow(Class<?> classForLoading)
    {
-      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+      this(classForLoading, classForLoading.getSimpleName());
    }
 
-   public ImGuiGlfwWindow(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public ImGuiGlfwWindow(Class<?> classForLoading, String windowTitle)
    {
-      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
-      configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
-                                                       directoryNameToAssumePresent,
-                                                       subsequentPathToResourceFolder,
-                                                       classForLoading,
-                                                       configurationExtraPath);
+      configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
+      configurationBaseDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading).resolve(configurationExtraPath);
 
-      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
       glfwWindowForImGui = new GlfwWindowForImGui(windowTitle);
-      perspectiveManager = new RDXImGuiPerspectiveManager(classForLoading,
-                                                          directoryNameToAssumePresent,
-                                                          subsequentPathToResourceFolder,
-                                                          configurationExtraPath,
-                                                          configurationBaseDirectory);
-      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
-      perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(updatedPerspectiveDirectory ->
+      layoutManager = new RDXImGuiLayoutManager(classForLoading, configurationExtraPath, configurationBaseDirectory);
+      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem(layoutManager);
+      layoutManager.getLayoutDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
+      layoutManager.getLayoutDirectoryUpdatedListeners().add(updatedLayoutDirectory ->
       {
-         windowSettingsFile = new HybridFile(updatedPerspectiveDirectory, "WindowSettings.json");
+         windowSettingsFile = new HybridResourceFile(updatedLayoutDirectory, "WindowSettings.json");
       });
-      perspectiveManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
-      perspectiveManager.getLoadListeners().add(loadConfigurationLocation ->
+      layoutManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
+      layoutManager.getLoadListeners().add(loadConfigurationLocation ->
       {
          windowSettingsFile.setMode(loadConfigurationLocation.toHybridResourceMode());
-         JSONFileTools.load(windowSettingsFile.getInputStream(), jsonNode ->
+         return windowSettingsFile.getInputStream(inputStream ->
          {
-            int width = jsonNode.get("windowWidth").asInt();
-            int height = jsonNode.get("windowHeight").asInt();
-            glfwWindowForImGui.setWindowSize(width, height);
+            JSONFileTools.load(inputStream, jsonNode ->
+            {
+               int width = jsonNode.get("windowWidth").asInt();
+               int height = jsonNode.get("windowHeight").asInt();
+               glfwWindowForImGui.setWindowSize(width, height);
+            });
          });
       });
-      perspectiveManager.getSaveListeners().add(this::saveApplicationSettings);
-      perspectiveManager.applyPerspectiveDirectory();
+      layoutManager.getSaveListeners().add(this::saveApplicationSettings);
+      layoutManager.applyLayoutDirectory();
    }
 
    public void run(Runnable create, Runnable render, Runnable dispose)
@@ -123,7 +118,7 @@ public class ImGuiGlfwWindow
    private void renderMenuBar()
    {
       ImGui.beginMainMenuBar();
-      perspectiveManager.renderImGuiPerspectiveMenu();
+      layoutManager.renderImGuiLayoutMenu();
       if (ImGui.beginMenu("Panels"))
       {
          imGuiWindowAndDockSystem.renderMenuDockPanelItems();
@@ -163,7 +158,7 @@ public class ImGuiGlfwWindow
          root.put("windowWidth", glfwWindowForImGui.getWindowWidth());
          root.put("windowHeight", glfwWindowForImGui.getWindowHeight());
       };
-      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
+      if (saveConfigurationLocation.isVersionControl())
       {
          LogTools.info("Saving window settings to {}", windowSettingsFile.getWorkspaceFile().toString());
          JSONFileTools.save(windowSettingsFile.getWorkspaceFile(), rootConsumer);

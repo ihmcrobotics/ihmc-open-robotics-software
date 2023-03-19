@@ -6,6 +6,8 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class PlanarRegionTestTools
 {
@@ -42,6 +44,10 @@ public class PlanarRegionTestTools
       expected.getTransformToWorld(expectedTransform);
       actual.getTransformToWorld(actualTransform);
       EuclidCoreTestTools.assertGeometricallyEquals(expectedTransform, actualTransform, epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(expected.getNormal(), actual.getNormal(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(expected.getPoint(), actual.getPoint(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(expected.getBoundingBox3dInWorld(), actual.getBoundingBox3dInWorld(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(expected.getConvexHull(), actual.getConvexHull(), epsilon);
 
       assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullSize());
 
@@ -57,9 +63,21 @@ public class PlanarRegionTestTools
       {
          ConvexPolygon2D expectedConvexPolygon = expected.getConvexPolygon(i);
          ConvexPolygon2D actualConvexPolygon = actual.getConvexPolygon(i);
-         assertEquals(expectedConvexPolygon.getNumberOfVertices(), actualConvexPolygon.getNumberOfVertices());
-         assertTrue(expectedConvexPolygon.geometricallyEquals(actualConvexPolygon, epsilon));
+
+         EuclidCoreTestTools.assertGeometricallyEquals(expectedConvexPolygon, actualConvexPolygon, epsilon);
       }
+   }
+
+   public PlanarRegion getTestRegion()
+   {
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(-0.1, 0.1);
+      convexPolygon.addVertex(0.1, 0.1);
+      convexPolygon.addVertex(0.1, -0.1);
+      convexPolygon.addVertex(-0.1, -0.1);
+      convexPolygon.update();
+
+      return new PlanarRegion(new RigidBodyTransform(new Quaternion(0.0, -Math.PI / 2, 0.0), new Point3D(1.0, 0.0, 0.0)), convexPolygon);
    }
 }
 

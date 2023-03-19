@@ -35,28 +35,40 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       create(storedPropertySet, () -> { });
    }
 
+   public void create(StoredPropertySetBasics storedPropertySet, boolean buildSelectorForMultipleVersions)
+   {
+      create(storedPropertySet, buildSelectorForMultipleVersions, () -> { });
+   }
+
    public void create(StoredPropertySetBasics storedPropertySet, Runnable onParametersUpdatedCallback)
+   {
+      create(storedPropertySet, true, onParametersUpdatedCallback);
+   }
+
+   /**
+    * This method allows to decide whether to make some radio buttons that allow you to switch between
+    * versions of a stored property set. That is, if there's several suffixes found, in addition to the
+    * possibility that one without a suffix is found, which we call the "Primary" version.
+    */
+   public void create(StoredPropertySetBasics storedPropertySet, boolean buildSelectorForMultipleVersions, Runnable onParametersUpdatedCallback)
    {
       this.storedPropertySet = storedPropertySet;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
 
-      Path saveFileDirectory = storedPropertySet.findSaveFileDirectory();
-      PathTools.walkFlat(saveFileDirectory, (path, pathType) ->
+      if (buildSelectorForMultipleVersions)
       {
-         String fileName = path.getFileName().toString();
-         String prefix = storedPropertySet.getCapitalizedClassName();
-         String extension = ".json";
-         if (pathType == BasicPathVisitor.PathType.FILE && fileName.startsWith(prefix) && fileName.endsWith(extension))
+         Path saveFileDirectory = storedPropertySet.findSaveFileDirectory();
+         PathTools.walkFlat(saveFileDirectory, (path, pathType) ->
          {
-            versions.add(fileName.replaceAll(extension, "").substring(prefix.length()));
-         }
-         return FileVisitResult.CONTINUE;
-      });
-      String currentWorkingVersion = versions.first();
-      if (!storedPropertySet.getCurrentVersionSuffix().equals(currentWorkingVersion))
-      {
-         storedPropertySet.updateBackingSaveFile(currentWorkingVersion);
-         storedPropertySet.load();
+            String fileName = path.getFileName().toString();
+            String prefix = storedPropertySet.getCapitalizedClassName();
+            String extension = ".json";
+            if (pathType == BasicPathVisitor.PathType.FILE && fileName.startsWith(prefix) && fileName.endsWith(extension))
+            {
+               versions.add(fileName.replaceAll(extension, "").substring(prefix.length()));
+            }
+            return FileVisitResult.CONTINUE;
+         });
       }
 
       for (StoredPropertyKey<?> propertyKey : storedPropertySet.getKeyList().keys())
@@ -111,12 +123,12 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          ImGui.text(storedPropertySet.getCurrentVersionSuffix());
       }
 
-      if (ImGui.button("Load"))
+      if (ImGui.button(labels.get("Load")))
       {
          load();
       }
       ImGui.sameLine();
-      if (ImGui.button("Save"))
+      if (ImGui.button(labels.get("Save")))
       {
          storedPropertySet.save();
       }

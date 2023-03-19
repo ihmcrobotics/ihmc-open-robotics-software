@@ -27,6 +27,7 @@ public class PlanarRegionFootstepPlanSnapper implements FootstepPlanAdjustment
 
    // temp variables for calculation
    private final FramePose2D unsnappedPose = new FramePose2D();
+   private final FramePose3D snappedPose = new FramePose3D();
 
    public PlanarRegionFootstepPlanSnapper(SideDependentList<ConvexPolygon2D> footPolygons,
                                           SteppableRegionsProvider steppableRegionsProvider,

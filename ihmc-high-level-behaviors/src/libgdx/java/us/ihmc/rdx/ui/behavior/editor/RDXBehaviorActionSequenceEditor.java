@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
@@ -24,11 +23,8 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.*;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,7 +34,7 @@ public class RDXBehaviorActionSequenceEditor
    private ImGuiPanel panel;
    private final ImBoolean enabled = new ImBoolean(false);
    private String name;
-   private final WorkspaceFile workspaceFile;
+   private final WorkspaceResourceFile workspaceFile;
    private final LinkedList<RDXBehaviorAction> actionSequence = new LinkedList<>();
    private String pascalCasedName;
    private RDX3DPanel panel3D;
@@ -51,18 +47,18 @@ public class RDXBehaviorActionSequenceEditor
    private ROS2ControllerHelper ros2ControllerHelper;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
 
-   public RDXBehaviorActionSequenceEditor(WorkspaceFile fileToLoadFrom)
+   public RDXBehaviorActionSequenceEditor(WorkspaceResourceFile fileToLoadFrom)
    {
       this.workspaceFile = fileToLoadFrom;
       loadNameFromFile();
       afterNameDetermination();
    }
 
-   public RDXBehaviorActionSequenceEditor(String name, WorkspaceDirectory storageDirectory)
+   public RDXBehaviorActionSequenceEditor(String name, WorkspaceResourceDirectory storageDirectory)
    {
       this.name = name;
       afterNameDetermination();
-      this.workspaceFile = new WorkspaceFile(storageDirectory, pascalCasedName + ".json");
+      this.workspaceFile = new WorkspaceResourceFile(storageDirectory, pascalCasedName + ".json");
    }
 
    public void afterNameDetermination()
@@ -98,9 +94,8 @@ public class RDXBehaviorActionSequenceEditor
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
       JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
       {
-         for (Iterator<JsonNode> actionNodeIterator = jsonNode.withArray("actions").elements(); actionNodeIterator.hasNext(); )
+         JSONTools.forEachArrayElement(jsonNode, "actions", actionNode ->
          {
-            JsonNode actionNode = actionNodeIterator.next();
             String actionType = actionNode.get("type").asText();
             if (actionType.equals(RDXWalkAction.class.getSimpleName()))
             {
@@ -142,7 +137,7 @@ public class RDXBehaviorActionSequenceEditor
                RDXFootstepAction action = addFootstepAction();
                action.loadFromFile(actionNode);
             }
-         }
+         });
       });
       playbackNextIndex = 0;
    }
@@ -474,7 +469,7 @@ public class RDXBehaviorActionSequenceEditor
       return enabled;
    }
 
-   public WorkspaceFile getWorkspaceFile()
+   public WorkspaceResourceFile getWorkspaceFile()
    {
       return workspaceFile;
    }

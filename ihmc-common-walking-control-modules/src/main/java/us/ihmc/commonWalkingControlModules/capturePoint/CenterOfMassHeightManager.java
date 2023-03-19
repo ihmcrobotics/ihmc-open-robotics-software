@@ -3,7 +3,11 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.*;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.HeightThroughKneeControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisAndCenterOfMassHeightControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlMode;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -14,10 +18,13 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeight
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -36,7 +43,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
  * The PelvisHeightTrajectoryCommand uses a pdController to compute the Linear Momentum Z and sends a momentum command to the controller core
  * If you want to the controller to manage the pelvis height while walking use the PelvisHeightTrajectoryCommand.
  */
-public class CenterOfMassHeightManager
+public class CenterOfMassHeightManager implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final StateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> stateMachine;
@@ -200,6 +207,9 @@ public class CenterOfMassHeightManager
          return;
       }
 
+      // Without this, the walking height will resume from its last desired which can be quite different.
+      if (stateMachine.getCurrentStateKey() != PelvisHeightControlMode.WALKING_CONTROLLER)
+         centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
       centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
       requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
@@ -306,5 +316,15 @@ public class CenterOfMassHeightManager
    public TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {
       return stateMachine.getCurrentState().pollStatusToReport();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(centerOfMassHeightControlState.getSCS2YoGraphics());
+      group.addChild(heightControlThroughKneesState.getSCS2YoGraphics());
+      group.addChild(pelvisHeightControlState.getSCS2YoGraphics());
+      return group;
    }
 }

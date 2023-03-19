@@ -92,7 +92,7 @@ public class RDXSelectablePose3DGizmo
       }
       else
       {
-         poseGizmo.updateTransforms();
+         poseGizmo.update();
       }
    }
 

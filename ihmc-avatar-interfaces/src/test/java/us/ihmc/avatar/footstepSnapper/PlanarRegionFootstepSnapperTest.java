@@ -2,12 +2,15 @@ package us.ihmc.avatar.footstepSnapper;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
 import org.junit.jupiter.api.Test;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.avatar.footstepPlanning.PlanarRegionEndToEndConversionTest;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
 import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConstraintOptimizerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -22,10 +25,19 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTestTools;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class PlanarRegionFootstepSnapperTest
@@ -194,6 +206,7 @@ public class PlanarRegionFootstepSnapperTest
       snapper.adjustFootstep(stanceFootPose, steppingBackAndYawingPose, RobotSide.LEFT, dataMessage);
       snappedPoseBackAndYawing.getPosition().set(dataMessage.getLocation());
       snappedPoseBackAndYawing.getOrientation().set(dataMessage.getOrientation());
+
       EuclidFrameTestTools.assertEquals(expectedPoseBackAndYawing, snappedPoseBackAndYawing, 1e-5);
    }
 
@@ -323,9 +336,124 @@ public class PlanarRegionFootstepSnapperTest
          snapper.adjustFootstep(stanceFootPose, step3Pose, RobotSide.LEFT, dataMessage);
          snapped3Pose.getPosition().set(dataMessage.getLocation());
          snapped3Pose.getOrientation().set(dataMessage.getOrientation());
+
          EuclidFrameTestTools.assertEquals(expectedPose3, snapped3Pose, 1e-5);
       }
    }
+
+
+   @Test
+   public void testSimpleBlockWithOutlierRegions()
+   {
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+      footPolygon.addVertex(0.1, 0.05);
+      footPolygon.addVertex(0.1, -0.05);
+      footPolygon.addVertex(-0.1, 0.05);
+      footPolygon.addVertex(-0.1, -0.05);
+      footPolygon.update();
+
+      SimpleSteppableRegionsCalculator steppableRegionsCalculator = new SimpleSteppableRegionsCalculator();
+      PlanarRegionFootstepSnapper snapper = new PlanarRegionFootstepSnapper(new SideDependentList<>(footPolygon, footPolygon),
+                                                                            steppableRegionsCalculator,
+                                                                            new SteppingEnvironmentalConstraintParameters(),
+                                                                            new YoRegistry("test"));
+
+      ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
+      groundPolygon.addVertex(1.0, 1.0);
+      groundPolygon.addVertex(1.0, -1.0);
+      groundPolygon.addVertex(-1.0, -1.0);
+      groundPolygon.addVertex(-1.0, 1.0);
+      groundPolygon.update();
+
+      ConvexPolygon2D blockPolygon = new ConvexPolygon2D();
+      blockPolygon.addVertex(0.15, 0.15);
+      blockPolygon.addVertex(0.15, -0.15);
+      blockPolygon.addVertex(-0.15, -0.15);
+      blockPolygon.addVertex(-0.15, 0.15);
+      blockPolygon.update();
+
+      RigidBodyTransform groundTransform = new RigidBodyTransform();
+      PlanarRegion groundRegion = new PlanarRegion(groundTransform, groundPolygon);
+
+      RigidBodyTransform blockTransform = new RigidBodyTransform();
+      blockTransform.getTranslation().set(0.3, 0.4, 0.25);
+      PlanarRegion blockRegion = new PlanarRegion(blockTransform, blockPolygon);
+
+      List<DataSet> allDatasets = DataSetIOTools.loadDataSets(PlanarRegionEndToEndConversionTest.buildFilter(PlanarRegionEndToEndConversionTest.getTestableFilter()));
+      int iters = 20;
+      Random random = new Random(1738L);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         steppableRegionsCalculator.consume(getPlanarRegionCommandWithOutlierData(random, allDatasets, groundRegion, blockRegion));
+
+         FramePose2D poseOnGround = new FramePose2D();
+         FramePose2D poseOnBlockEdge = new FramePose2D();
+         FramePose2D poseOnBlock = new FramePose2D();
+
+         poseOnGround.set(-0.15, 0.0, 0.0);
+         poseOnBlock.set(0.3, 0.4, 0.0);
+         poseOnBlockEdge.set(0.2, 0.25, 0.0);
+
+         FramePose3D snappedPoseOnGround = new FramePose3D();
+         FramePose3D snappedPoseOnBlockEdge = new FramePose3D();
+         FramePose3D snappedPoseOnBlock = new FramePose3D();
+
+         FramePose3D expectedPoseOnGround = new FramePose3D();
+         FramePose3D expectedPoseOnBlockEdge = new FramePose3D();
+         FramePose3D expectedPoseOnBlock = new FramePose3D();
+
+         expectedPoseOnGround.set(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.15, 0.0, 0.0), new FrameQuaternion());
+         expectedPoseOnBlock.set(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.3, 0.4, 0.25), new FrameQuaternion());
+         expectedPoseOnBlockEdge.set(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.25, 0.3, 0.25), new FrameQuaternion());
+
+         String failureMessage = "Failed on iteration " + iter;
+
+         FootstepDataMessage dataMessage = new FootstepDataMessage();
+
+         snapper.adjustFootstep(new FramePose3D(), poseOnGround, RobotSide.LEFT, dataMessage);
+         snappedPoseOnGround.getPosition().set(dataMessage.getLocation());
+         snappedPoseOnGround.getOrientation().set(dataMessage.getOrientation());
+         EuclidFrameTestTools.assertEquals(failureMessage, expectedPoseOnGround, snappedPoseOnGround, 1e-5);
+
+         snapper.adjustFootstep(new FramePose3D(), poseOnBlock, RobotSide.LEFT, dataMessage);
+         snappedPoseOnBlock.getPosition().set(dataMessage.getLocation());
+         snappedPoseOnBlock.getOrientation().set(dataMessage.getOrientation());
+         EuclidFrameTestTools.assertEquals(failureMessage, expectedPoseOnBlock, snappedPoseOnBlock, 1e-5);
+
+         snapper.adjustFootstep(new FramePose3D(), poseOnBlockEdge, RobotSide.LEFT, dataMessage);
+         snappedPoseOnBlockEdge.getPosition().set(dataMessage.getLocation());
+         snappedPoseOnBlockEdge.getOrientation().set(dataMessage.getOrientation());
+         EuclidFrameTestTools.assertEquals(failureMessage, expectedPoseOnBlockEdge, snappedPoseOnBlockEdge, 1e-5);
+      }
+   }
+
+   private static PlanarRegionsListCommand getPlanarRegionCommandWithOutlierData(Random random, List<DataSet> allDatasetsForOutliers, PlanarRegion... realRegions)
+   {
+      PlanarRegionsList planarRegionsForNoise = allDatasetsForOutliers.get(RandomNumbers.nextInt(random, 0, allDatasetsForOutliers.size() - 1)).getPlanarRegionsList();
+      RigidBodyTransform transformForNoise = new RigidBodyTransform();
+      transformForNoise.getTranslation().set(100.0, 100.0, -20.0);
+      ArrayList<PlanarRegion> regionsToSend = new ArrayList<>();
+      planarRegionsForNoise.getPlanarRegionsAsList().forEach(region ->
+                                                             {
+                                                                PlanarRegion regionCopy = region.copy();
+                                                                regionCopy.applyTransform(transformForNoise);
+                                                                regionsToSend.add(regionCopy);
+                                                             });
+
+      for (PlanarRegion realRegion : realRegions)
+      {
+         int indexToInsert = RandomNumbers.nextInt(random, 0, planarRegionsForNoise.getNumberOfPlanarRegions() - 1);
+         regionsToSend.add(indexToInsert, realRegion);
+      }
+
+      PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(new PlanarRegionsList(regionsToSend));
+      PlanarRegionsListCommand listCommand = new PlanarRegionsListCommand();
+      listCommand.setFromMessage(message);
+
+      return listCommand;
+   }
+
 
    private static ConvexPolygon2D createFootPolygonForTest()
    {

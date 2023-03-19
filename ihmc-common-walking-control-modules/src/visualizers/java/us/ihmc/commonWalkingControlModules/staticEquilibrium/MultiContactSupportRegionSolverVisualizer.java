@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 public class MultiContactSupportRegionSolverVisualizer
 {
    private static final boolean showSupportRegion = true;
+   private static final double visualizationScale = 2e-4;
 
    public MultiContactSupportRegionSolverVisualizer(MultiContactSupportRegionSolverInput input)
    {

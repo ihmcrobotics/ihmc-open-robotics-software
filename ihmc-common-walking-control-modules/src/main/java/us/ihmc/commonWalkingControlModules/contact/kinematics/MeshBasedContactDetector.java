@@ -3,23 +3,19 @@ package us.ihmc.commonWalkingControlModules.contact.kinematics;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -53,8 +49,7 @@ public class MeshBasedContactDetector
    protected final Map<RigidBodyBasics, List<ContactableShape>> contactableRigidBodyCollidables = new HashMap<>();
    protected final Map<RigidBodyBasics, List<DetectedContactPoint>> allContactPoints = new HashMap<>();
 
-   private PlanarRegionsList planarRegionsList = null;
-   private final HashMap<PlanarRegion, ConvexPolytope3DReadOnly> contactableVolumeMap = new HashMap<>();
+   private List<FrameShape3DReadOnly> environmentShapes = null;
    private final MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
 
    public MeshBasedContactDetector(RigidBodyBasics rootBody,
@@ -124,17 +119,17 @@ public class MeshBasedContactDetector
          List<FramePoint3DReadOnly> contactFramePoints = new ArrayList<>();
          List<DetectedContactPoint> contactPoints = this.allContactPoints.get(contactableRigidBodies.get(i));
 
-         /* Limit to one plane contact per rigid body */
+         /* Limit to one shape contact per rigid body */
          Vector3D contactNormal = new Vector3D();
 
          for (int j = 0; j < rigidBodyCollidables.size(); j++)
          {
-            if (rigidBodyCollidables.get(j).detectFlatGroundContact(contactFramePoints, flatGroundHeightThreshold))
-            {
-               contactNormal.set(Axis3D.Z);
-               break;
-            }
-            else if (detectPlanarRegionContact(rigidBodyCollidables.get(j), contactFramePoints, contactNormal))
+//            if (rigidBodyCollidables.get(j).detectFlatGroundContact(contactFramePoints, flatGroundHeightThreshold))
+//            {
+//               contactNormal.set(Axis3D.Z);
+//               break;
+//            }
+            if (detectEnvironmentContact(rigidBodyCollidables.get(j), contactFramePoints, contactNormal))
             {
                break;
             }
@@ -184,29 +179,23 @@ public class MeshBasedContactDetector
       }
    }
 
-   private boolean detectPlanarRegionContact(ContactableShape contactableShape, List<FramePoint3DReadOnly> contactFramePoints, Vector3D contactNormal)
+   private boolean detectEnvironmentContact(ContactableShape contactableShape, List<FramePoint3DReadOnly> contactFramePoints, Vector3D contactNormal)
    {
-      if (planarRegionsList == null || planarRegionsList.isEmpty())
+      if (environmentShapes == null || environmentShapes.isEmpty())
       {
          return false;
       }
 
       BoundingBox3DReadOnly shapeBoundingBox = contactableShape.getShapeBoundingBox();
 
-      for (int k = 0; k < planarRegionsList.getNumberOfPlanarRegions(); k++)
+      for (int k = 0; k < environmentShapes.size(); k++)
       {
-         ConvexPolytope3DReadOnly contactablePolytope = contactableVolumeMap.get(planarRegionsList.getPlanarRegion(k));
-         if (!shapeBoundingBox.intersectsExclusive(contactablePolytope.getBoundingBox()))
+         FrameShape3DReadOnly environmentShape = environmentShapes.get(k);
+         if (!shapeBoundingBox.intersectsExclusive(environmentShape.getBoundingBox()))
             continue;
 
-         if (contactableShape.detectPolytopeContact(contactFramePoints, contactThreshold.getDoubleValue(), contactablePolytope))
+         if (contactableShape.detectEnvironmentContact(contactFramePoints, contactThreshold.getDoubleValue(), (FrameBox3DReadOnly) environmentShape, contactNormal))
          {
-            contactNormal.set(planarRegionsList.getPlanarRegion(k).getNormal());
-            FramePoint3D bodyFixedFrame = new FramePoint3D(contactableShape.getCollidable().getRigidBody().getBodyFixedFrame());
-            bodyFixedFrame.changeFrame(ReferenceFrame.getWorldFrame());
-            bodyFixedFrame.applyTransform(planarRegionsList.getPlanarRegion(k).getTransformToLocal());
-            if (bodyFixedFrame.getZ() < 0.0)
-               contactNormal.negate();
             return true;
          }
       }
@@ -214,36 +203,9 @@ public class MeshBasedContactDetector
       return false;
    }
 
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   public void setEnvironmentShapes(List<FrameShape3DReadOnly> environmentShapes)
    {
-      this.planarRegionsList = planarRegionsList;
-      contactableVolumeMap.clear();
-
-      if (planarRegionsList == null)
-         return;
-
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegion region = planarRegionsList.getPlanarRegion(i);
-         ConvexPolytope3D contactablePolytope = new ConvexPolytope3D();
-
-         ConvexPolygon2D convexHull = region.getConvexHull();
-         for (double sign : new double[]{-1.0, 1.0})
-         {
-            for (int j = 0; j < convexHull.getNumberOfVertices(); j++)
-            {
-               Point3D vertex = new Point3D(convexHull.getVertex(j).getX(), convexHull.getVertex(j).getY(), sign * contactThreshold.getValue());
-               vertex.applyTransform(region.getTransformToWorld());
-               contactablePolytope.addVertex(vertex);
-            }
-         }
-         contactableVolumeMap.put(region, contactablePolytope);
-      }
-   }
-
-   public HashMap<PlanarRegion, ConvexPolytope3DReadOnly> getContactableVolumeMap()
-   {
-      return contactableVolumeMap;
+      this.environmentShapes = environmentShapes;
    }
 
    public void updateBalanceStatus(MultiContactBalanceStatus multiContactBalanceStatus)

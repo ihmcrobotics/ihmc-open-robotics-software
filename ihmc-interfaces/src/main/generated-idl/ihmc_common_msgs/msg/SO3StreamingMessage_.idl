@@ -13,7 +13,7 @@ module ihmc_common_msgs
     {
 
       /**
-       * This message is part of the collection of platform-independent ROS messages.
+       * This is part of the IHMC Common message package.
        * It is a lightweight version of SO3TrajectoryMessage designed for streaming.
        */
       @TypeCode(type="ihmc_common_msgs::msg::dds_::SO3StreamingMessage_")

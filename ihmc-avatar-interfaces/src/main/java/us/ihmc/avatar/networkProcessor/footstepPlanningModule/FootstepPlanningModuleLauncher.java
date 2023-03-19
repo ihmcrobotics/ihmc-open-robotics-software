@@ -87,6 +87,7 @@ public class FootstepPlanningModuleLauncher
 
       return new FootstepPlanningModule(moduleName,
                                         visibilityGraphsParameters,
+                                        robotModel.getAStarBodyPathPlannerParameters(),
                                         footstepPlannerParameters,
                                         swingPlannerParameters,
                                         walkingControllerParameters,
