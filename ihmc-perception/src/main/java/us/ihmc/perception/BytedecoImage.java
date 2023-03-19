@@ -265,7 +265,12 @@ public class BytedecoImage
       return pointerForAccessSpeed.getFloat(getLinearizedIndex(row, column) * Float.BYTES);
    }
 
-   public int getInt(int column, int row)
+   /**
+    * Retrieve an int from the image.
+    *
+    * This uses a precalulated pointer to allow for faster access.
+    */
+   public int getInt(int row, int column)
    {
       return pointerForAccessSpeed.getInt((getLinearizedIndex(row, column)) * Float.BYTES);
    }
