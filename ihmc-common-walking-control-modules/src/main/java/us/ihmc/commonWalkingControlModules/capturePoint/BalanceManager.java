@@ -413,7 +413,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       footstepTimings.add(timing);
    }
 
-   public void setPlanarRegionStepConstraintHandler(StepConstraintRegionHandler planarRegionStepConstraint)
+   public void setStepConstraintRegionsHandler(StepConstraintRegionHandler planarRegionStepConstraint)
    {
       this.stepConstraintRegionHandler = planarRegionStepConstraint;
    }
