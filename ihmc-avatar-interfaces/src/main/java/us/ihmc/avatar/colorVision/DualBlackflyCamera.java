@@ -5,7 +5,6 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -35,7 +34,6 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 
 public class DualBlackflyCamera
