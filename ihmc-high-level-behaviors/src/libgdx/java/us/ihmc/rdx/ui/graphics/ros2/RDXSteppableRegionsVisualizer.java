@@ -107,7 +107,7 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive())
+      if (isActive() && sceneLevelCheck(sceneLevels))
       {
          steppableRegionGraphic.getRenderables(renderables, pool);
       }
