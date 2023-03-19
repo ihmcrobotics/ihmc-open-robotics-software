@@ -22,8 +22,6 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
-import java.util.function.Consumer;
-
 public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControllerPluginFactory
 {
    StepGeneratorCommandInputManager getStepGeneratorCommandInputManager();

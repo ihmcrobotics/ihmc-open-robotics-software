@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.Constrain
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConvexStepConstraintOptimizer;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -30,7 +29,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +67,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    // This is the transform that takes the foot pose from zero pitch, roll, and height, onto the planar region at that point.
    private final RigidBodyTransform snapTransform = new RigidBodyTransform();
    private final PlanarRegion regionToSnapTo = new PlanarRegion();
+
+   // These are the step constraint regions to be used by the footstep. Theoretically, it could be a list, but in practice, it's just the single region
    private final StepConstraintRegion constraintRegion = new StepConstraintRegion();
    private final List<StepConstraintRegion> constraintRegionList = new ArrayList<>();
    {
@@ -114,7 +114,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footstepAtSameHeightAsStanceFoot.setZ(stanceFootPose.getZ());
       footstepAtSameHeightAsStanceFoot.getOrientation().set(footstepPoseToAdjust.getOrientation());
 
-      resetStepConstraingRegionMesage(stepConstraint);
+      resetStepConstrainingRegionMessage(stepConstraint);
 
       if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty())
       {
@@ -229,9 +229,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       // TODO this isn't necessary yet, since we can't pack the polygons
 //      cropFootholdToMatchRegion(solePose, footStepPolygonInSoleFrame, regionToSnapTo, snappedFootstepPolygonToPack);
 
-      // If we've snapped, go ahead and set the step constraint.
+      // If we've snapped successfully, go ahead and set the step constraint.
       if (!solePose.containsNaN())
       {
+         // convert the planar region to the constraint region.
          StepConstraintListConverter.convertPlanarRegionToStepConstraintRegion(regionToSnapTo, constraintRegion);
          // The list object here already contains the constraint region by default.
          StepConstraintMessageConverter.convertToStepConstraintsListMessage(constraintRegionList, stepConstraint);
@@ -468,7 +469,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       return highestRegion;
    }
 
-   private static void resetStepConstraingRegionMesage(StepConstraintsListMessage constraintsListMessage)
+   private static void resetStepConstrainingRegionMessage(StepConstraintsListMessage constraintsListMessage)
    {
       constraintsListMessage.setSequenceId(-1);
       constraintsListMessage.getRegionNormal().clear();
