@@ -282,7 +282,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
-         boolean shouldCheckStepForReachability = shouldCheckPlanForReachability || command.getFootstep(i).getShouldCheckForReacahbility();
+         boolean shouldCheckStepForReachability = shouldCheckPlanForReachability || command.getFootstep(i).getShouldCheckForReachability();
          setFootstepTiming(command.getFootstep(i),
                            command.getExecutionTiming(),
                            upcomingFootstepTimings.add(),
