@@ -34,9 +34,10 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
       String caller = callerStackElement.getFileName() + ":" + callerStackElement.getLineNumber();
       ThreadTools.startAThread(() ->
       {
-         int tries = 5;
-         while (!isConnected() && tries > 0 && connecting.getValue())
+         int numberOfTriesLeft = 5;
+         while (!isConnected() && numberOfTriesLeft > 0 && connecting.getValue())
          {
+            --numberOfTriesLeft;
             try
             {
                LogTools.info(caller + ": Connecting to {}:{}", hostname, port);
@@ -45,9 +46,15 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
             }
             catch (RuntimeException e)
             {
-               LogTools.warn(caller + ": Couldn't connect to {}:{}. {} Trying again...", hostname, port, e.getMessage());
-               ThreadTools.sleep(1000);
-               --tries;
+               if (numberOfTriesLeft > 0)
+               {
+                  LogTools.warn("%s: Couldn't connect to %s:%d. Trying again %d more time(s).\n\t%s".formatted(caller, hostname, port, numberOfTriesLeft, e.getMessage()));
+                  ThreadTools.sleep(1000);
+               }
+               else
+               {
+                  LogTools.warn("%s: Couldn't connect to %s:%d. Giving up.\n\t%s".formatted(caller, hostname, port, e.getMessage()));
+               }
             }
          }
          connecting.setValue(false);
