@@ -3,6 +3,7 @@ package us.ihmc.rdx.simulation.environment.object.objects.door;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
+import us.ihmc.perception.objects.DoorModelParameters;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Cylinder3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
@@ -63,7 +64,7 @@ public class DoorLeverHandleDefinition extends RigidBodyDefinition
       CollisionShapeDefinition cylinderCollisionShapeDefinition2 = new CollisionShapeDefinition();
       cylinderCollisionShapeDefinition2.setGeometryDefinition(cylinderDefinition);
       cylinderCollisionShapeDefinition2.getOriginPose().set(new YawPitchRoll(0.0, 0.0, -Math.toRadians(90.0)),
-                                                            new Point3D(DoorDefinition.DOOR_PANEL_THICKNESS + 0.045, -length / 2.0, 0.0));
+                                                            new Point3D(DoorModelParameters.DOOR_PANEL_THICKNESS + 0.045, -length / 2.0, 0.0));
       addCollisionShapeDefinition(cylinderCollisionShapeDefinition2);
    }
 }

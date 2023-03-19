@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.objects.ArUcoMarkerObject;
 import us.ihmc.perception.objects.DetectedObjectPublisher;
+import us.ihmc.perception.objects.DoorModelParameters;
 import us.ihmc.perception.objects.DoorPerceptionManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Topic;
@@ -50,14 +51,19 @@ public class BehaviorSequencePerceptionManager
    );
 
    public static final long PUSH_DOOR_MARKER_ID = 1;
-   public static final RigidBodyTransform PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER = new RigidBodyTransform(
-         new YawPitchRoll(0.0, 0.0, 0.0),
-         new Point3D(0.0, 0.678702 + 0.005 - 0.006, 1.14141 + 0.02)
-   );
    public static final RigidBodyTransform PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER = new RigidBodyTransform(
          new YawPitchRoll(0.0, 0.0, 0.0),
-         new Point3D(0.0, 0.678702, 1.14141)
+         new Point3D(-DoorModelParameters.DOOR_PANEL_THICKNESS / 2.0,
+                     -DoorModelParameters.ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Y_IN_PANEL_FRAME,
+                     -DoorModelParameters.ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Z_IN_PANEL_FRAME)
    );
+   public static final RigidBodyTransform PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER = new RigidBodyTransform(PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER);
+   static
+   {
+      PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER.getTranslation().add(0.0,
+                                                               -DoorModelParameters.DOOR_FRAME_HINGE_OFFSET,
+                                                               -DoorModelParameters.DOOR_PANEL_GROUND_GAP_HEIGHT);
+   }
 
    public static final long BOX_MARKER_ID = 2;
    public static final double BOX_MARKER_WIDTH = 0.210101;
