@@ -28,7 +28,6 @@ import us.ihmc.robotics.random.RandomGeometry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterface<PlanarRegion>
 {
@@ -149,8 +148,6 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-
-      concaveHullsVertices.clear();
 
       convexPolygons.clear();
       for (int i = 0; i < planarRegionConvexPolygons.size(); i++)

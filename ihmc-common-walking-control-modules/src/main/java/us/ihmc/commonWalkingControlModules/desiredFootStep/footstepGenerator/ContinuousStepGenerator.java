@@ -396,83 +396,17 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       // Update the visualizers
       for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
       {
-         int vizualizerIndex = i / 2;
+         int visualizerIndex = i / 2;
          List<FootstepVisualizer> footstepVisualizers = footstepSideDependentVisualizers.get(swingSide);
 
-         if (vizualizerIndex < footstepVisualizers.size())
+         if (visualizerIndex < footstepVisualizers.size())
          {
             FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
 
             nextFootstepPose3D.getPosition().set(footstepData.getLocation());
             nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
 
-            FootstepVisualizer footstepVisualizer = footstepVisualizers.get(vizualizerIndex);
-            nextFootstepPose3DViz.setIncludingFrame(nextFootstepPose3D);
-            nextFootstepPose3DViz.appendTranslation(0.0, 0.0, -0.005); // Sink the viz slightly so it is below the controller footstep viz.
-            footstepVisualizer.update(nextFootstepPose3DViz);
-         }
-      }
-
-      // adjust the whole footstep plan for the environment
-      if (footstepPlanAdjustment != null)
-      {
-         footstepPlanAdjustment.adjustFootstepPlan(currentSupportFootPose, startingIndexToAdjust, footstepDataListMessage);
-
-         if (startingIndexToAdjust == 0)
-         {
-            previousFootstepPose.set(currentSupportFootPose);
-            footstepPose2D.set(currentSupportFootPose);
-         }
-         else
-         {
-            FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(startingIndexToAdjust - 1);
-            previousFootstepPose.getPosition().set(footstepData.getLocation());
-            previousFootstepPose.getOrientation().set(footstepData.getOrientation());
-            footstepPose2D.set(previousFootstepPose);
-         }
-      }
-
-      // run through and make sure these adjusted steps are valid.
-      for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
-      {
-         FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
-         nextFootstepPose2D.getPosition().set(footstepData.getLocation());
-         nextFootstepPose2D.getOrientation().set(footstepData.getOrientation());
-         nextFootstepPose3D.getPosition().set(footstepData.getLocation());
-         nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
-         swingSide = RobotSide.fromByte(footstepData.getRobotSide());
-
-         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
-         {
-            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, footstepData);
-            nextFootstepPose3D.getPosition().set(footstepData.getLocation());
-            nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
-
-            // remove all the other steps after the invalid one.
-            while (footstepDataListMessage.getFootstepDataList().size() > i + 1)
-            {
-               footstepDataListMessage.getFootstepDataList().remove(i + 1);
-            }
-         }
-
-         previousFootstepPose.set(nextFootstepPose3D);
-         footstepPose2D.set(nextFootstepPose3D);
-      }
-
-      // Update the visualizers
-      for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
-      {
-         int vizualizerIndex = i / 2;
-         List<FootstepVisualizer> footstepVisualizers = footstepSideDependentVisualizers.get(swingSide);
-
-         if (vizualizerIndex < footstepVisualizers.size())
-         {
-            FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
-
-            nextFootstepPose3D.getPosition().set(footstepData.getLocation());
-            nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
-
-            FootstepVisualizer footstepVisualizer = footstepVisualizers.get(vizualizerIndex);
+            FootstepVisualizer footstepVisualizer = footstepVisualizers.get(visualizerIndex);
             nextFootstepPose3DViz.setIncludingFrame(nextFootstepPose3D);
             nextFootstepPose3DViz.appendTranslation(0.0, 0.0, -0.005); // Sink the viz slightly so it is below the controller footstep viz.
             footstepVisualizer.update(nextFootstepPose3DViz);
