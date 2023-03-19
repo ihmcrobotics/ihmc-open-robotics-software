@@ -89,3 +89,4 @@ public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXVisualizer
          }
       }
    }
+}
