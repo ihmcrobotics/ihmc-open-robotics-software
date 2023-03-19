@@ -20,6 +20,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.ROS2Node;
@@ -30,7 +31,7 @@ public class RDXSteppableRegionCalculatorDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private Activator nativesLoadedActivator;
-   private RDXHighLevelDepthSensorSimulator ouster;
+   private RDXHighLevelDepthSensorSimulator ousterLidarSimulator;
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXPose3DGizmo ousterPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
@@ -130,15 +131,21 @@ public class RDXSteppableRegionCalculatorDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  ouster = RDXSimulatedSensorFactory.createOusterLidar(ousterPoseGizmo.getGizmoFrame(), () -> 0L);
-                  ouster.setupForROS2PointCloud(realtimeRos2Node, ROS2Tools.OUSTER_LIDAR_SCAN);
-                  ouster.setSensorEnabled(true);
-                  ouster.setRenderPointCloudDirectly(true);
-                  ouster.setPublishPointCloudROS2(true);
-                  ouster.setDebugCoordinateFrame(false);
+                  ousterLidarSimulator = RDXSimulatedSensorFactory.createOusterLidar(ousterPoseGizmo.getGizmoFrame(), () -> 0L);
+                  ousterLidarSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.OUSTER_LIDAR_SCAN);
+                  ousterLidarSimulator.setSensorEnabled(true);
+                  ousterLidarSimulator.setRenderPointCloudDirectly(true);
+                  ousterLidarSimulator.setPublishPointCloudROS2(true);
+                  ousterLidarSimulator.setDebugCoordinateFrame(false);
 
-                  baseUI.getImGuiPanelManager().addPanel(ouster);
-                  baseUI.getPrimaryScene().addRenderableProvider(ouster::getRenderables);
+                  RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
+                                                                                                           ros2Node,
+                                                                                                           ROS2Tools.OUSTER_LIDAR_SCAN);
+                  ousterPointCloudVisualizer.setSubscribed(true);
+                  globalVisualizersUI.addVisualizer(ousterPointCloudVisualizer);
+
+                  baseUI.getImGuiPanelManager().addPanel(ousterLidarSimulator);
+                  baseUI.getPrimaryScene().addRenderableProvider(ousterLidarSimulator::getRenderables);
 
                   baseUI.getImGuiPanelManager().addPanel(steppableRegionsUI.getBasePanel());
 
@@ -147,7 +154,7 @@ public class RDXSteppableRegionCalculatorDemo
                   heightMap.start();
                }
 
-               ouster.render(baseUI.getPrimaryScene());
+               ousterLidarSimulator.render(baseUI.getPrimaryScene());
 
                heightMap.update();
                steppableRegionsUpdater.compute();
@@ -175,7 +182,7 @@ public class RDXSteppableRegionCalculatorDemo
             heightMapUI.destroy();
             steppableRegionsUpdater.destroy();
             steppableRegionsUI.destroy();
-            ouster.dispose();
+            ousterLidarSimulator.dispose();
 
             super.dispose();
          }
