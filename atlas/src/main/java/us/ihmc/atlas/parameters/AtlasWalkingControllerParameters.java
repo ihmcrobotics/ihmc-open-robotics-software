@@ -80,9 +80,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       momentumOptimizationSettings = new AtlasMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
 
-      minimumHeightAboveGround = jointMap.getModelScale() * (0.625 + 0.08);
-      nominalHeightAboveGround = jointMap.getModelScale() * (0.705 + 0.08);
-      maximumHeightAboveGround = jointMap.getModelScale() * (0.736 + 0.08);
+      minimumHeightAboveGround = jointMap.getModelScale() * (0.625 + 0.08) + 0.084;
+      nominalHeightAboveGround = jointMap.getModelScale() * (0.705 + 0.08) + 0.084;
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.736 + 0.08) + 0.084;
 
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -241,18 +241,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public double defaultOffsetHeightAboveAnkle()
-   {
-      double defaultOffset = runningOnRealRobot ? 0.035 : 0.0;
-      return defaultOffset * jointMap.getModelScale();
-   }
-
-   public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
-   {
-      this.nominalHeightAboveGround = nominalHeightAboveAnkle;
-   }
-
-   @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
       return jointMap.getPhysicalProperties().getShinLength() + jointMap.getPhysicalProperties().getThighLength();
@@ -278,7 +266,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getHighLevelJointSpaceControlGains()
    {
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
       jointspaceGains.add(new GroupParameter<>("SpineJoints", jointMap.getSpineJointNamesAsStrings()));

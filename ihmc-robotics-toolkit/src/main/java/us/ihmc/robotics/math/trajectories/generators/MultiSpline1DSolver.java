@@ -285,6 +285,12 @@ public class MultiSpline1DSolver
          else
             return null;
       }
+
+      @Override
+      public String toString()
+      {
+         return "[index=" + index + ", t=" + t + ", x=" + x + ", xd=" + xd + ", w=" + w + ", wd=" + wd + "]";
+      }
    }
 
    public class Spline1DSegment
@@ -473,6 +479,12 @@ public class MultiSpline1DSolver
             return splineSegments.get(index - 1);
          else
             return null;
+      }
+
+      @Override
+      public String toString()
+      {
+         return "[index=" + index + ", numberOfCoefficients=" + numberOfCoefficients + "]";
       }
    }
 

@@ -15,9 +15,7 @@ import us.ihmc.tools.thread.Activator;
 
 public class RDXGPUPlanarRegionExtractionDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private Activator nativesLoadedActivator;
    private RDXHighLevelDepthSensorSimulator l515;
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
@@ -83,16 +81,17 @@ public class RDXGPUPlanarRegionExtractionDemo
                                                    cameraIntrinsics.getFx(),
                                                    cameraIntrinsics.getFy(),
                                                    cameraIntrinsics.getCx(),
-                                                   cameraIntrinsics.getCy());
+                                                   cameraIntrinsics.getCy(),
+                                                   l515PoseGizmo.getGizmoFrame());
                   gpuPlanarRegionExtraction.getEnabled().set(true);
                   baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
                   baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
 
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  baseUI.getLayoutManager().reloadLayout();
                }
 
                l515.render(baseUI.getPrimaryScene());
-               gpuPlanarRegionExtraction.extractPlanarRegions(l515PoseGizmo.getGizmoFrame());
+               gpuPlanarRegionExtraction.extractPlanarRegions();
             }
 
             baseUI.renderBeforeOnScreenUI();

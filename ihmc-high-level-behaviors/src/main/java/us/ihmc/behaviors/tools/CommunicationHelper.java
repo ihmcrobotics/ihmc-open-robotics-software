@@ -10,7 +10,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.avatar.ros2.ROS2ControllerPublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
@@ -165,6 +165,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
       ros2Helper.subscribeViaCallback(topic, callback);
+   }
+
+   @Override
+   public <T> void createPublisher(ROS2Topic<T> topic)
+   {
+      ros2Helper.createPublisher(topic);
    }
 
    @Override

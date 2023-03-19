@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -221,11 +219,8 @@ public class HeuristicICPControllerTest
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
-      FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
-      FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
-
-      controller.getDesiredCMP(desiredCMP);
-      controller.getDesiredCoP(desiredCoP);
+      FramePoint2D desiredCMP = new FramePoint2D(controller.getDesiredCMP());
+      FramePoint2D desiredCoP = new FramePoint2D(controller.getDesiredCoP());
 
       expectedControlICPVelocity.sub(currentICP, desiredCMP);
       expectedControlICPVelocity.scale(omega);
@@ -313,11 +308,8 @@ public class HeuristicICPControllerTest
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
-      FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
-      FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
-
-      controller.getDesiredCMP(desiredCMP);
-      controller.getDesiredCoP(desiredCoP);
+      FramePoint2D desiredCMP = new FramePoint2D(controller.getDesiredCMP());
+      FramePoint2D desiredCoP = new FramePoint2D(controller.getDesiredCoP());
 
       expectedControlICPVelocity.sub(currentICP, desiredCMP);
       expectedControlICPVelocity.scale(omega);
@@ -387,11 +379,8 @@ public class HeuristicICPControllerTest
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FrameVector2D expectedControlICPVelocity = new FrameVector2D(worldFrame);
-      FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
-      FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
-
-      controller.getDesiredCMP(desiredCMP);
-      controller.getDesiredCoP(desiredCoP);
+      FramePoint2D desiredCMP = new FramePoint2D(controller.getDesiredCMP());
+      FramePoint2D desiredCoP = new FramePoint2D(controller.getDesiredCoP());
 
       expectedControlICPVelocity.sub(currentICP, desiredCMP);
       expectedControlICPVelocity.scale(omega);
@@ -455,10 +444,7 @@ public class HeuristicICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, finalICP, perfectCMP, currentICP, currentCoM, omega);
 
-      FramePoint2D desiredCMP = new FramePoint2D();
-      controller.getDesiredCMP(desiredCMP);
-
-      Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
+      Assert.assertTrue(controller.getDesiredCMP().epsilonEquals(perfectCMP, epsilon));
    }
 
    private static SideDependentList<FootSpoof> setupContactableFeet(double footLength, double footWidth, double totalWidth)

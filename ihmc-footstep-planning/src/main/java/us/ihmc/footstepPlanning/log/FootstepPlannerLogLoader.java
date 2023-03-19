@@ -2,6 +2,8 @@ package us.ihmc.footstepPlanning.log;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessagePubSubType;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import toolbox_msgs.msg.dds.*;
@@ -41,6 +43,7 @@ public class FootstepPlannerLogLoader
 {
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
+   private final JSONSerializer<StoredPropertySetMessage> bodyPathParametersSerializer = new JSONSerializer<>(new StoredPropertySetMessagePubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
@@ -168,6 +171,16 @@ public class FootstepPlannerLogLoader
          log.getFootstepParametersPacket().set(footstepParametersSerializer.deserialize(jsonNode.toString()));
          footstepParametersPacketInputStream.close();
 
+         // load body path parameters packet
+         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
+         if (bodyPathParametersFile.exists())
+         {
+            InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
+            jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
+            log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
+            bodyPathParametersPacketInputStream.close();
+         }
+
          // load swing parameters packet
          File swingParametersFile = new File(logDirectory, FootstepPlannerLogger.swingParametersFileName);
          if (swingParametersFile.exists())
@@ -202,6 +215,7 @@ public class FootstepPlannerLogLoader
             FootstepPlannerIterationData iterationData = new FootstepPlannerIterationData();
             iterationData.setParentNode(readNode(dataFileReader.readLine()));
             iterationData.setIdealChildNode(readNode(dataFileReader.readLine()));
+            iterationData.setNominalIdealChildNode(readNode(dataFileReader.readLine()));
             int edges = getIntCSV(true, dataFileReader.readLine())[0];
             readSnapData(iterationData.getParentStartSnapData(), dataFileReader);
             readSnapData(iterationData.getParentEndSnapData(), dataFileReader);

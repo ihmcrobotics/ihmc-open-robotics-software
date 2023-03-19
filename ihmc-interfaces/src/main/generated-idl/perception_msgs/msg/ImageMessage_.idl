@@ -1,0 +1,104 @@
+#ifndef __perception_msgs__msg__ImageMessage__idl__
+#define __perception_msgs__msg__ImageMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Image message. It has a large capacity.
+       * It's recommended to reuse instances to avoid excessive memory allocation.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::ImageMessage_")
+      struct ImageMessage
+      {
+        /**
+         * Sequence number. Used for detecting out of order or dropped messages
+         */
+        unsigned long sequence_number;
+        /**
+         * The instant right after we got data from the sensor. Used to measure delay between processes
+         */
+        ihmc_common_msgs::msg::dds::InstantMessage acquisition_time;
+        /**
+         * Image width in pixels
+         */
+        unsigned short image_width;
+        /**
+         * Image height in pixels
+         */
+        unsigned short image_height;
+        /**
+         * Depth discretization unit length.
+         * This is used when this image is a depth image. The image will be represented
+         * in data as unsigned integers where the units are this distance.
+         * For instance a depth pixel value of 2 and discretization value of 0.1 would
+         * indicate a depth of 0.2 meters.
+         */
+        float depth_discretization;
+        /**
+         * The raw data for the image
+         */
+        sequence<octet, 25000000> data;
+        /**
+         * The image format. Ordinal of OpenCVImageFormat
+         */
+        unsigned short format;
+        /**
+         * Position of the focal point at sensor data aquisition
+         */
+        geometry_msgs::msg::dds::Point position;
+        /**
+         * Orientation of the focal point at sensor data aquisition
+         */
+        geometry_msgs::msg::dds::Quaternion orientation;
+        /**
+         * Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
+         */
+        boolean is_pinhole_camera_model;
+        /**
+         * Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
+         */
+        boolean is_equidistant_fisheye_camera_model;
+        /**
+         * If the camera model is the Ouster camera model.
+         * With the Ouster camera model, the vertical and horizonal fields of view
+         * are used instead of the focal length and principal point parameters.
+         */
+        boolean is_ouster_camera_model;
+        /**
+         * Horizontal focal length in units of pixels (Fx)
+         */
+        float focal_length_x_pixels;
+        /**
+         * Vertical focal length in units of pixels (Fx)
+         */
+        float focal_length_y_pixels;
+        /**
+         * Principal point X in units of pixels (Cx)
+         */
+        float principal_point_x_pixels;
+        /**
+         * Principal point Y in units of pixels (Cy)
+         */
+        float principal_point_y_pixels;
+        /**
+         * If Ouster camera model, the vertical field of view in radians
+         */
+        float ouster_vertical_field_of_view;
+        /**
+         * If Ouster camera model, the horizontal field of view in radians
+         */
+        float ouster_horizontal_field_of_view;
+      };
+    };
+  };
+};
+
+#endif

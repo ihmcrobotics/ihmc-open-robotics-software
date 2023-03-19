@@ -75,8 +75,6 @@ public class AtlasSimulationWithCamera
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     robotModel.getSensorInformation().getFeetForceSensorNames(),
                                                                                                     robotModel.getSensorInformation()
-                                                                                                              .getFeetContactSensorNames(),
-                                                                                                    robotModel.getSensorInformation()
                                                                                                               .getWristForceSensorNames(),
                                                                                                     robotModel.getHighLevelControllerParameters(),
                                                                                                     robotModel.getWalkingControllerParameters(),

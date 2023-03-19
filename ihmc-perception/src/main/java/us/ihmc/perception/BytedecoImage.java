@@ -5,6 +5,7 @@ import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.perception.tools.NativeMemoryTools;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -105,8 +106,7 @@ public class BytedecoImage
       }
       else
       {
-         this.backingDirectByteBuffer = ByteBuffer.allocateDirect(imageWidth * imageHeight * bytesPerPixel);
-         this.backingDirectByteBuffer.order(ByteOrder.nativeOrder());
+         this.backingDirectByteBuffer = NativeMemoryTools.allocate(imageWidth * imageHeight * bytesPerPixel);
       }
 
       bytedecoByteBufferPointer = new MutableBytePointer(this.backingDirectByteBuffer);
@@ -140,6 +140,11 @@ public class BytedecoImage
 
    public void createOpenCLImage(OpenCLManager openCLManager, int flags)
    {
+      if (openCLChannelOrder == OpenCL.CL_RGB)
+      {
+         throw new RuntimeException("OpenCL will throw CL_OUT_OF_RESOURCES unless you use RGBA and CV_8UC4."
+                                    + "It's probably something about memory alignment on hardware. Just include the alpha channel.");
+      }
       openCLImageObjectFlags = flags;
       openCLImageObject = openCLManager.createImage(flags, openCLChannelOrder, openCLChannelDataType, imageWidth, imageHeight, bytedecoByteBufferPointer);
    }
@@ -168,6 +173,11 @@ public class BytedecoImage
       if (isBackedByExternalByteBuffer)
       {
          backingDirectByteBuffer = externalByteBuffer;
+         if (backingDirectByteBuffer.capacity() < imageWidth * imageHeight * bytesPerPixel)
+         {
+            throw new RuntimeException("Externally managed byte buffer large enough."
+                                       + "Resize it before calling this resize method.");
+         }
       }
       else
       {
@@ -182,6 +192,30 @@ public class BytedecoImage
       if (openCLObjectCreated)
       {
          createOpenCLImage(openCLManager, openCLImageObjectFlags);
+      }
+   }
+
+   /**
+    * Resizes this image to match the dimensions of other if necessary.
+    *
+    * Warning: Assumes we are not using OpenCL on this image and this BytedecoImage is not
+    *   backed by an external buffer.
+    */
+   public void ensureDimensionsMatch(BytedecoImage other)
+   {
+      ensureDimensionsMatch(other, null);
+   }
+
+   /**
+    * Resizes this image to match the dimensions of other if necessary.
+    *
+    * // FIXME: Broken for external byte buffers
+    */
+   public void ensureDimensionsMatch(BytedecoImage other, OpenCLManager openCLManager)
+   {
+      if (!BytedecoOpenCVTools.dimensionsMatch(this, other))
+      {
+         resize(other.getImageWidth(), other.getImageHeight(), openCLManager, backingDirectByteBuffer);
       }
    }
 
@@ -221,18 +255,56 @@ public class BytedecoImage
       return imageHeight;
    }
 
-   public float getFloat(int x, int y)
+   /**
+    * Retrieve a float from the image.
+    *
+    * This uses a precalulated pointer to allow for faster access.
+    */
+   public float getFloat(int row, int column)
    {
-      return pointerForAccessSpeed.getFloat(((long) y * imageWidth + x) * Float.BYTES);
+      return pointerForAccessSpeed.getFloat(getLinearizedIndex(row, column) * Float.BYTES);
    }
 
-   public int getByteAsInteger(int x, int y)
+   /**
+    * Set a float in the image.
+    *
+    * This uses a precalulated pointer to allow for faster access.
+    */
+   public void setValue(int row, int column, float value)
    {
-      return Byte.toUnsignedInt(pointerForAccessSpeed.get((long) y * imageWidth + x));
+      pointerForAccessSpeed.putFloat(getLinearizedIndex(row, column) * Float.BYTES, value);
    }
 
+   /**
+    * Retrieve a byte from the image. The value of the byte is given as a positive value
+    * in and int.
+    *
+    * This uses a precalulated pointer to allow for faster access.
+    */
+   public int getByteAsInteger(int row, int column)
+   {
+      return Byte.toUnsignedInt(pointerForAccessSpeed.get(getLinearizedIndex(row, column)));
+   }
+
+   /**
+    * Retrieve a byte from the image. The value of the byte is given as a positive value
+    * in and int.
+    */
    public int getByteAsInteger(int byteIndex)
    {
       return Byte.toUnsignedInt(backingDirectByteBuffer.get(byteIndex));
+   }
+
+   /**
+    * Calculate the index for the data entry located at (column, row). This handles whether the image is row major or column major.
+    */
+   private long getLinearizedIndex(int row, int column)
+   {
+      return (long) row * imageWidth + column;
+   }
+
+   public BytePointer getPointerForAccessSpeed()
+   {
+      return pointerForAccessSpeed;
    }
 }

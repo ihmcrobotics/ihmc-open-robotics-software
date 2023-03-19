@@ -13,6 +13,7 @@ public class ImGuiUniqueLabelMap
    private static final HashMap<String, AtomicInteger> CLASS_TO_INDEX = new HashMap<>();
 
    private final HashMap<String, String> namesToLabels = new HashMap<>();
+   private final HashMap<String, String> hiddenNamesToLabels = new HashMap<>();
    private final int index;
    private final String classSimpleName;
 
@@ -41,7 +42,13 @@ public class ImGuiUniqueLabelMap
 
    public String getHidden(String hiddenQualifier)
    {
-      return get("###" + hiddenQualifier);
+      String label = hiddenNamesToLabels.get(hiddenQualifier);
+      if (label == null)
+      {
+         label = "###" + classSimpleName + index + ":" + hiddenQualifier;
+         hiddenNamesToLabels.put(hiddenQualifier, label);
+      }
+      return label;
    }
 
    public String get(String visibleLabel, String hiddenQualifier)

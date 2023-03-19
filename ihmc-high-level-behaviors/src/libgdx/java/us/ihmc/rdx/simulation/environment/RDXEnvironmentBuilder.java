@@ -36,6 +36,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.FileVisitResult;
@@ -51,7 +52,7 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
    private Path selectedEnvironmentFile = null;
    private final TreeSet<Path> environmentFiles = new TreeSet<>(Comparator.comparing(path -> path.getFileName().toString()));
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString saveString = new ImString("", 100);
+   private final ImString saveString = new ImString(256);
    private final Point3D tempTranslation = new Point3D();
    private final Quaternion tempOrientation = new Quaternion();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -322,9 +323,8 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
             ambientLightAmount.set(ambientValue);
             panel3D.getScene().setAmbientLight(ambientLightAmount.get());
          }
-         for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
+         JSONTools.forEachArrayElement(node, "objects", objectNode ->
          {
-            JsonNode objectNode = it.next();
             String objectTypeName = objectNode.get("type").asText();
             RDXEnvironmentObject object = RDXEnvironmentObjectLibrary.loadBySimpleClassName(objectTypeName);
 
@@ -346,7 +346,7 @@ public class RDXEnvironmentBuilder extends ImGuiPanel
             {
                LogTools.warn("Skipping loading object: {}", objectTypeName);
             }
-         }
+         });
       });
    }
 

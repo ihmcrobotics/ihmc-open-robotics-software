@@ -1,8 +1,0 @@
-<?xml version="1.0" ?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="neck_joint_rotation_axes">
-
-<xacro:property name="LowerNeckPitchRotationAxis" value="0 1 0"/>
-<xacro:property name="NeckYawRotationAxis" value="0 0 1"/>
-<xacro:property name="UpperNeckPitchRotationAxis" value="0 1 0"/>
-
-</robot>

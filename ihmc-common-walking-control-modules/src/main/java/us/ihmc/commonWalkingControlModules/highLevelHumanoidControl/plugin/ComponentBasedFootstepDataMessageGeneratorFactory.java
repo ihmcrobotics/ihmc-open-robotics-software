@@ -181,10 +181,9 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       if (useHeadingAndVelocityScriptField.get())
       {
-         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT,
-                                                                                            timeProvider,
-                                                                                            headingAndVelocityEvaluationScriptParametersField.get(),
-                                                                                            registryField.get());
+         HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParametersField.hasValue() ? headingAndVelocityEvaluationScriptParametersField.get()
+                                                                                                                                : null;
+         HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT, timeProvider, parameters, registryField.get());
          continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
          continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
          updatables.add(script);
@@ -200,8 +199,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
          continuousStepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
          walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                        commandInputManager::setHighLevelStateChangeStatusMessage);
-         walkingStatusMessageOutputManager.attachStatusMessageListener(WalkingStatusMessage.class,
-                                                                       commandInputManager::setWalkingStatus);
+         walkingStatusMessageOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, commandInputManager::setWalkingStatus);
          walkingStatusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, commandInputManager::consumeFootstepStatus);
          commandInputManager.setFootstepStatusListener(walkingStatusMessageOutputManager);
 

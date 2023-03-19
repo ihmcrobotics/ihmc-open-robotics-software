@@ -253,6 +253,9 @@ public class MultiStepCaptureRegionCalculator
          }
       }
 
+      if (closestIndex == -1)
+         throw new RuntimeException("Unable to find the closest index");
+
       if (equivalentlyCloseIndex == -1)
       { // The vertex isn't on a parallel edge, so it's just that vertex.
          stepToPack.setAndNegate(initialReachabilityRegion.getVertex(closestIndex));

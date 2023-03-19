@@ -63,21 +63,34 @@ public class RealSenseHardwareManager
 
    public BytedecoRealsense createFullFeaturedL515(String serialNumberToFind)
    {
-      return createFullFeaturedL515(serialNumberToFind, 1024, 768, 30);
+      return createBytedecoRealsenseDevice(serialNumberToFind, RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ);
    }
 
-   public BytedecoRealsense createFullFeaturedL515(String serialNumberToFind, int depthWidth, int depthHeight, int fps)
+   /**
+    *  Creates Realsense Device handler.
+    *
+    *  @param serialNumberToFind   The device serial number found physically printed on the Realsense sensor
+    *  @param configuration The requested device settings
+    *  @return BytedecoRealsense device object for accessing sensor data and config information
+    */
+   public BytedecoRealsense createBytedecoRealsenseDevice(String serialNumberToFind, RealsenseConfiguration configuration)
    {
-      String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
-      return new BytedecoRealsense(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, depthWidth, depthHeight, fps);
+      return createBytedecoRealsenseDevice(serialNumberToFind,
+                                           configuration.getDepthWidth(),
+                                           configuration.getDepthHeight(),
+                                           configuration.getDepthFPS());
    }
 
-   public BytedecoRealsense createD435(String serialNumberToFind)
-   {
-      return createD435(serialNumberToFind, 848, 480, 30);
-   }
-
-   public BytedecoRealsense createD435(String serialNumberToFind, int depthWidth, int depthHeight, int fps)
+   /**
+   *  Creates Realsense Device handler.
+   *
+   *  @param serialNumberToFind   The device serial number found physically printed on the Realsense sensor
+   *  @param depthWidth The width of the depth maps to be requested from the sensor firmware
+   *  @param depthHeight  The height of depth maps to be requested from the sensor firmware
+   *  @param fps Frames Per Second which is the frequency of update to be requested from the sensor firmware
+   *  @return BytedecoRealsense device object for accessing sensor data and config information
+   */
+   public BytedecoRealsense createBytedecoRealsenseDevice(String serialNumberToFind, int depthWidth, int depthHeight, int fps)
    {
       String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
       return new BytedecoRealsense(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, depthWidth, depthHeight, fps);

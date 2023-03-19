@@ -1,8 +1,13 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -51,6 +56,8 @@ public class CaptureRegionSafetyHeuristics
    private final DoubleProvider reachabilityLimit;
 
    private final FrameVector2D forwardVector = new FrameVector2D();
+   private final FrameVector2D tempVector = new FrameVector2D();
+   private final FramePoint2D croppedPoint = new FramePoint2D();
 
    public CaptureRegionSafetyHeuristics(DoubleProvider reachabilityLimit, YoRegistry parentRegistry)
    {
@@ -102,7 +109,7 @@ public class CaptureRegionSafetyHeuristics
       projectVerticesTowardsTheMiddle(stanceSide, captureRegion);
 
       if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion))
-         projectVerticesVisibleToStanceInward();
+         projectVerticesVisibleToStanceAwayFromTheFoot();
 
       saferCaptureRegion.update();
 
@@ -142,7 +149,7 @@ public class CaptureRegionSafetyHeuristics
    /**
     * This method projects the visible vertices into the  capture region by a distance of {@link #extraDistanceToStepFromStanceFoot}.
     */
-   private void projectVerticesVisibleToStanceInward()
+   private void projectVerticesVisibleToStanceAwayFromTheFoot()
    {
       // if it's zero, don't bother projecting
       if (extraDistanceToStepFromStanceFoot.getValue() <= 0.0)
@@ -156,11 +163,11 @@ public class CaptureRegionSafetyHeuristics
          vectorToVertex.sub(vertexToProject, stancePosition);
 
          // if you're already near the reachability limit, don't do any projection, it's just likely to mess you up.
-         if (vectorToVertex.length() > reachabilityLimit.getValue() - 0.2 * extraDistanceToStepFromStanceFoot.getValue())
+         if (vectorToVertex.norm() > reachabilityLimit.getValue() - 0.42 * extraDistanceToStepFromStanceFoot.getValue())
             continue;
 
          // Compute the maximum distance that the vertex can be projected along the line before hitting the reachability limit.
-         double maxProjectionDistance = Math.max(findMaximumProjectionDistance(vectorToVertex.length(),
+         double maxProjectionDistance = Math.max(findMaximumProjectionDistance(vectorToVertex.norm(),
                                                                                reachabilityLimit.getValue(),
                                                                                vectorToVertex.angle(lineOfMinimalAction.getDirection())), 0.0);
 
@@ -168,6 +175,68 @@ public class CaptureRegionSafetyHeuristics
          vertexToProject.scaleAdd(Math.min(maxProjectionDistance, extraDistanceToStepFromStanceFoot.getValue()),
                                   lineOfMinimalAction.getDirection(),
                                   vertexToProject);
+         saferCaptureRegion.notifyVerticesChanged();
+      }
+
+      saferCaptureRegion.update();
+      boolean notifyOfUpdate = false;
+
+      boolean visibleIndicesAreClockWise = checkIfClockWiseOrdered(verticesVisibleFromStance, saferCaptureRegion);
+      int firstVisibleIndex = visibleIndicesAreClockWise ? 0 : verticesVisibleFromStance.size() - 1;
+      int lastVisibleIndex = visibleIndicesAreClockWise ? verticesVisibleFromStance.size() - 1 : 0;
+
+      // make sure the first vertex doesn't cause a "wrinkle" by overextending the outer edge of the polygon.
+      {
+         int firstVertexIndex = saferCaptureRegion.getClosestVertexIndex(verticesVisibleFromStance.get(firstVisibleIndex));
+         Point2DReadOnly previousVertex = saferCaptureRegion.getPreviousVertex(firstVertexIndex);
+         Point2DReadOnly previousPreviousVertex = saferCaptureRegion.getPreviousVertex(saferCaptureRegion.getPreviousVertexIndex(firstVertexIndex));
+         tempVector.sub(previousVertex, previousPreviousVertex);
+         croppedPoint.setReferenceFrame(saferCaptureRegion.getReferenceFrame());
+         if (EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(previousVertex,
+                                                                       tempVector,
+                                                                       saferCaptureRegion.getVertex(firstVertexIndex),
+                                                                       saferCaptureRegion.getNextVertex(firstVertexIndex),
+                                                                       croppedPoint))
+         {
+            saferCaptureRegion.getVertexUnsafe(firstVertexIndex).set(croppedPoint);
+            notifyOfUpdate = true;
+         }
+      }
+
+      // make sure the last vertex doesn't cause a "wrinkle" by overextending the outer edge of the polygon.
+      {
+         int lastVertexIndex = saferCaptureRegion.getClosestVertexIndex(verticesVisibleFromStance.get(lastVisibleIndex));
+         Point2DReadOnly nextVertex = saferCaptureRegion.getNextVertex(lastVertexIndex);
+         Point2DReadOnly nextNextVertex = saferCaptureRegion.getNextVertex(saferCaptureRegion.getNextVertexIndex(lastVertexIndex));
+         tempVector.sub(nextVertex, nextNextVertex);
+         croppedPoint.setReferenceFrame(saferCaptureRegion.getReferenceFrame());
+         if (EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(nextVertex,
+                                                                           tempVector,
+                                                                           saferCaptureRegion.getVertex(lastVertexIndex),
+                                                                           saferCaptureRegion.getPreviousVertex(lastVertexIndex),
+                                                                           croppedPoint))
+         {
+            saferCaptureRegion.getVertexUnsafe(lastVertexIndex).set(croppedPoint);
+            notifyOfUpdate = true;
+         }
+      }
+
+      if (notifyOfUpdate)
+         saferCaptureRegion.notifyVerticesChanged();
+   }
+
+   private static boolean checkIfClockWiseOrdered(List<? extends Point2DReadOnly> points, ConvexPolygon2DReadOnly captureRegion)
+   {
+      if (points.size() < 2)
+         return true;
+      else if (points.size() > 2)
+         return EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(points.get(2), points.get(0), points.get(1));
+      else
+      {
+         if (captureRegion.getClosestVertexIndex(points.get(1)) > captureRegion.getClosestVertexIndex(points.get(0)))
+            return captureRegion.isClockwiseOrdered();
+         else
+            return !captureRegion.isClockwiseOrdered();
       }
    }
 
@@ -179,10 +248,10 @@ public class CaptureRegionSafetyHeuristics
       double A = maxDistanceToProjectedPoint;
       double a = Math.PI - Math.abs(projectionAngle);
       double B = distanceToPointToProject;
-      double b = Math.asin(B * Math.sin(a) / A);
+      double sinA = Math.sin(a);
+      double b = Math.asin(B * sinA / A);
       double c = Math.PI - b - a;
-
-      return Math.sqrt(A * A + B * B - 2.0 * A * B * Math.cos(c));
+      return Math.sin(c) * A / sinA;
    }
 
    /**
@@ -218,9 +287,8 @@ public class CaptureRegionSafetyHeuristics
 
       for (int i = 0; i < saferCaptureRegion.getNumberOfVertices(); i++)
       {
-         lineOfMinimalAction.orthogonalProjection(saferCaptureRegion.getVertex(i), projectedPoint);
-
          FixedFramePoint2DBasics safeVertex = saferCaptureRegion.getVertexUnsafe(i);
+         lineOfMinimalAction.orthogonalProjection(safeVertex, projectedPoint);
 
          // check if the vertex is on the inside. If it is, use the distance for inside points. If it's not, use the distance for all the other points.
          boolean isPointOnInside = lineOfMinimalAction.isPointOnSideOfLine(safeVertex, insideSideOfLine == RobotSide.LEFT);
@@ -231,16 +299,25 @@ public class CaptureRegionSafetyHeuristics
          if (distanceToProjectedPoint < maxProjectionDistance)
             safeVertex.set(projectedPoint);
          else
-            safeVertex.interpolate(saferCaptureRegion.getVertex(i), projectedPoint, maxProjectionDistance / distanceToProjectedPoint);
+            safeVertex.interpolate(safeVertex, projectedPoint, maxProjectionDistance / distanceToProjectedPoint);
+
+         saferCaptureRegion.notifyVerticesChanged();
 
          // make sure that the project points don't end up outside the actual capture region by projecting them back in if they are.
          if (!originalCaptureRegion.isPointInside(safeVertex))
             originalCaptureRegion.orthogonalProjection(safeVertex);
       }
+
+      saferCaptureRegion.update();
    }
 
    public FrameConvexPolygon2DReadOnly getCaptureRegionWithSafetyMargin()
    {
       return yoSafetyBiasedCaptureRegion;
+   }
+
+   public FrameLine2DReadOnly getLineOfMinimalAction()
+   {
+      return yoLineOfMinimalAction;
    }
 }

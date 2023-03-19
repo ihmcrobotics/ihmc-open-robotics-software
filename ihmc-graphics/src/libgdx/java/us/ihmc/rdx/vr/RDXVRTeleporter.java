@@ -44,6 +44,9 @@ public class RDXVRTeleporter
    private final Color color = Color.WHITE;
    private double lastTouchpadY = Double.NaN;
 
+   // Reference frame of mid-feet to be set from syncedRobot (used for teleporting vr viewPoint to robot position)
+   private ReferenceFrame robotMidFeetZUpReferenceFrame = null;
+
    public void create(RDXVRContext context)
    {
       double ringThickness = 0.005;
@@ -75,85 +78,112 @@ public class RDXVRTeleporter
    private void processVRInput(RDXVRContext vrContext)
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+     {
+        InputDigitalActionData bButton = controller.getBButtonActionData();
+        InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
+
+        if(bButton.bChanged() && bButton.bState()) //pressed B button
+           preparingToTeleport = true;
+        else if(bButton.bChanged() && !bButton.bState())
+        {
+           vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+           {
+              xyYawHeadsetToTeleportTransform.setIdentity();
+              vrContext.getHeadset().runIfConnected(headset -> // teleport such that your headset ends up where you're trying to go
+              {
+                 headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                 xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+                 xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+              });
+              teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+              teleportIHMCZUpToIHMCZUpWorld.invert();
+              proposedTeleportPose.get(tempTransform);
+              tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+           });
+           preparingToTeleport = false;
+        }
+
+        // Pressed right joystick button
+        if (robotMidFeetZUpReferenceFrame != null && joystickButton.bChanged() && !joystickButton.bState())
+        {
+           snapToMidFeetZUp(vrContext);
+        }
+        else if (preparingToTeleport) // holding B button
+        {
+           // Ray teleport
+           pickRay.setToZero(controller.getXForwardZUpControllerFrame());
+           pickRay.getDirection().set(Axis3D.X);
+           pickRay.changeFrame(ReferenceFrame.getWorldFrame());
+
+           pickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
+           pickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+           currentPlayArea.setToZero(vrContext.getTeleportFrameIHMCZUp());
+           currentPlayArea.changeFrame(ReferenceFrame.getWorldFrame());
+
+           currentPlayAreaPlane.getNormal().set(Axis3D.Z);
+           currentPlayAreaPlane.getPoint().set(currentPlayArea.getPosition());
+
+           currentPlayAreaPlane.intersectionWith(pickRay, planeRayIntesection);
+
+           controllerZAxisVector.setIncludingFrame(controller.getXForwardZUpControllerFrame(), Axis3D.Z);
+           controllerZAxisVector.changeFrame(ReferenceFrame.getWorldFrame());
+
+           controllerZAxisProjectedToPlanePoint.set(planeRayIntesection);
+           controllerZAxisProjectedToPlanePoint.add(controllerZAxisVector);
+           currentPlayAreaPlane.orthogonalProjection(controllerZAxisProjectedToPlanePoint);
+
+           orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint,planeRayIntesection );
+
+           proposedTeleportPose.setToZero(ReferenceFrame.getWorldFrame());
+           proposedTeleportPose.getPosition().set(planeRayIntesection);
+           EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X,
+                                                                      orientationDeterminationVector,
+                                                                      proposedTeleportPose.getOrientation());
+
+           lineLength = pickRayPose.getPosition().distance(proposedTeleportPose.getPosition());
+           RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
+
+           pickRayPose.get(tempTransform);
+           LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
+           proposedTeleportPose.get(tempTransform);
+           LibGDXTools.toLibGDX(tempTransform, ring.transform);
+           LibGDXTools.toLibGDX(tempTransform, arrow.transform);
+        }
+
+        if (controller.getTouchpadTouchedActionData().bState())
+        {
+           double y = controller.getTouchpadActionData().y();
+           if (!Double.isNaN(lastTouchpadY))
+           {
+              double delta = y - lastTouchpadY;
+              vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(delta * 0.3));
+           }
+           lastTouchpadY = y;
+        }
+        else
+        {
+           lastTouchpadY = Double.NaN;
+        }
+     });
+   }
+
+   private void snapToMidFeetZUp(RDXVRContext vrContext)
+   {
+      vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
       {
-         InputDigitalActionData bButton = controller.getBButtonActionData();
-         preparingToTeleport = bButton.bState();
-         boolean bChanged = bButton.bChanged();
-
-         if (preparingToTeleport || bChanged)
+         xyYawHeadsetToTeleportTransform.setIdentity();
+         vrContext.getHeadset().runIfConnected(headset -> // teleport such that your headset ends up where you're trying to go
          {
-            pickRay.setToZero(controller.getXForwardZUpControllerFrame());
-            pickRay.getDirection().set(Axis3D.X);
-            pickRay.changeFrame(ReferenceFrame.getWorldFrame());
-
-            pickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
-            pickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-            currentPlayArea.setToZero(vrContext.getTeleportFrameIHMCZUp());
-            currentPlayArea.changeFrame(ReferenceFrame.getWorldFrame());
-
-            currentPlayAreaPlane.getNormal().set(Axis3D.Z);
-            currentPlayAreaPlane.getPoint().set(currentPlayArea.getPosition());
-
-            currentPlayAreaPlane.intersectionWith(pickRay, planeRayIntesection);
-
-            controllerZAxisVector.setIncludingFrame(controller.getXForwardZUpControllerFrame(), Axis3D.Z);
-            controllerZAxisVector.changeFrame(ReferenceFrame.getWorldFrame());
-
-            controllerZAxisProjectedToPlanePoint.set(planeRayIntesection);
-            controllerZAxisProjectedToPlanePoint.add(controllerZAxisVector);
-            currentPlayAreaPlane.orthogonalProjection(controllerZAxisProjectedToPlanePoint);
-
-            orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint,planeRayIntesection );
-
-            proposedTeleportPose.setToZero(ReferenceFrame.getWorldFrame());
-            proposedTeleportPose.getPosition().set(planeRayIntesection);
-            EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X,
-                                                                       orientationDeterminationVector,
-                                                                       proposedTeleportPose.getOrientation());
-
-            lineLength = pickRayPose.getPosition().distance(proposedTeleportPose.getPosition());
-            RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
-
-            pickRayPose.get(tempTransform);
-            LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
-            proposedTeleportPose.get(tempTransform);
-            LibGDXTools.toLibGDX(tempTransform, ring.transform);
-            LibGDXTools.toLibGDX(tempTransform, arrow.transform);
-         }
-
-         if (!preparingToTeleport && bChanged)
-         {
-            vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
-            {
-               xyYawHeadsetToTeleportTransform.setIdentity();
-               vrContext.getHeadset().runIfConnected(headset -> // teleport such that your headset ends up where you're trying to go
-               {
-                  headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-                  xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
-                  xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-               });
-               teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
-               teleportIHMCZUpToIHMCZUpWorld.invert();
-               proposedTeleportPose.get(tempTransform);
-               tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
-            });
-         }
-
-         if (controller.getTouchpadTouchedActionData().bState())
-         {
-            double y = controller.getTouchpadActionData().y();
-            if (!Double.isNaN(lastTouchpadY))
-            {
-               double delta = y - lastTouchpadY;
-               vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(delta * 0.3));
-            }
-            lastTouchpadY = y;
-         }
-         else
-         {
-            lastTouchpadY = Double.NaN;
-         }
+            headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+            xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+            xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+      });
+      teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+      teleportIHMCZUpToIHMCZUpWorld.invert();
+      // set tempTransform to incoming rigidbodyTransform.
+      tempTransform.set(robotMidFeetZUpReferenceFrame.getTransformToWorldFrame());
+      tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
       });
    }
 
@@ -166,5 +196,10 @@ public class RDXVRTeleporter
          ring.getRenderables(renderables, pool);
          arrow.getRenderables(renderables, pool);
       }
+   }
+
+   public void setRobotMidFeetZUpReferenceFrame(ReferenceFrame robotMidFeetZUpReferenceFrame)
+   {
+      this.robotMidFeetZUpReferenceFrame = robotMidFeetZUpReferenceFrame;
    }
 }

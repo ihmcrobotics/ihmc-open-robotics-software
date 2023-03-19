@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.log;
 
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessagePubSubType;
 import org.apache.commons.lang3.tuple.Pair;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -45,7 +47,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
-   /** package-private */ static final String defaultLogsDirectory;
+   private static final int RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP = 500;
+   public static final String defaultLogsDirectory;
    static
    {
       String incomingLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator;
@@ -61,11 +64,12 @@ public class FootstepPlannerLogger
       }
       defaultLogsDirectory = incomingLogsDirectory;
    }
-   /** package-private */ static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
+   public static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
    // File names
    static final String requestPacketFileName = "RequestPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
+   static final String bodyPathParametersFileName = "BodyPathParametersPacket.json";
    static final String swingParametersFileName = "SwingParametersPacket.json";
    static final String statusPacketFileName = "StatusPacket.json";
    static final String headerFileName = "Header.txt";
@@ -82,11 +86,13 @@ public class FootstepPlannerLogger
 
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
+   private final StoredPropertySetMessage bodyPathParametersPacket = new StoredPropertySetMessage();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
    private final FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
 
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersPacketSerializer = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
+   private final JSONSerializer<StoredPropertySetMessage> bodyPathParametersPacketSerializer = new JSONSerializer<>(new StoredPropertySetMessagePubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingPlannerParametersPacketSerializer = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
@@ -115,11 +121,19 @@ public class FootstepPlannerLogger
       return logSession(defaultLogsDirectory);
    }
 
-   public static void deleteOldLogs(int numberOflogsToKeep)
+   /** Keeps around the recommended number of logs. */
+   public static void deleteOldLogs()
    {
-      deleteOldLogs(numberOflogsToKeep, defaultLogsDirectory);
+      deleteOldLogs(RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP, defaultLogsDirectory);
    }
 
+   /** Keeps around the recommended number of logs. */
+   public static void deleteOldLogs(String directory)
+   {
+      deleteOldLogs(RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP, directory);
+   }
+
+   /** It's recommended to leave quite a few logs around, otherwise, we diminish the usefulness of the logging. */
    public static void deleteOldLogs(int numberOflogsToKeep, String directory)
    {
       SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
@@ -170,6 +184,12 @@ public class FootstepPlannerLogger
          FootstepPlannerMessageTools.copyParametersToPacket(footstepParametersPacket, planner.getFootstepPlannerParameters());
          byte[] serializedFootstepParameters = footstepParametersPacketSerializer.serializeToBytes(footstepParametersPacket);
          writeToFile(footstepParametersPacketFile, serializedFootstepParameters);
+
+         // log body path planner parameters packet
+         String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
+         planner.getAStarBodyPathPlannerParameters().getAllAsStrings().forEach(value -> bodyPathParametersPacket.getStrings().add(value));
+         byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
+         writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
 
          // log swing parameters packet
          String swingParametersPacketFile = sessionDirectory + swingParametersFileName;
@@ -253,6 +273,7 @@ public class FootstepPlannerLogger
             fileWriter.write("Iteration " + i + newLine);
             writeNode(1, "parentNode", iterationData.getParentNode());
             writeNode(1, "idealStep", iterationData.getIdealChildNode());
+            writeNode(1, "nominalIdealStep", iterationData.getNominalIdealChildNode());
             writeLine(1, "edges:" + iterationData.getChildNodes().size());
             writeSnapData(1, iterationData.getParentStartSnapData());
             writeSnapData(1, iterationData.getParentEndSnapData());
@@ -290,7 +311,7 @@ public class FootstepPlannerLogger
          return false;
       }
 
-      // Log footstep planner iteration data
+      // Log body path planner iteration data
       try
       {
          File plannerDataFile = new File(sessionDirectory + astarBodyPathPlanFileName);
@@ -336,7 +357,7 @@ public class FootstepPlannerLogger
       }
       catch (Exception e)
       {
-         LogTools.error("Error logging footstep planner data");
+         LogTools.error("Error logging body path planner data");
          fileWriter = null;
          outputStream = null;
          printStream = null;

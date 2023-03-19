@@ -213,6 +213,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    {
       updateTransforms();
 
+      boolean isWindowHovered = input.isWindowHovered();
       int yawMouseButton = ImGuiMouseButton.Right;
       ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
       ImGuiMouseDragData yawDragData = input.getMouseDragData(yawMouseButton);
@@ -227,19 +228,19 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       {
          if (isRingHovered)
          {
-            if(yawDragData.getDragJustStarted())
+            if (yawDragData.getDragJustStarted())
             {
                clockFaceDragAlgorithm.reset();
                yawDragData.setObjectBeingDragged(this);
             }
-            else if(translateDragData.getDragJustStarted())
+            else if (translateDragData.getDragJustStarted())
             {
                translateDragData.setObjectBeingDragged(this);
             }
          }
 
          isBeingManipulated = (yawDragData.getObjectBeingDragged() == this && rightButtonDown)
-                              || (translateDragData.getObjectBeingDragged() == this && leftButtonDown);
+                           || (translateDragData.getObjectBeingDragged() == this && leftButtonDown);
          if (isBeingManipulated)
          {
             isNewlyModified = true;
@@ -268,66 +269,69 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             }
          }
 
-         // keyboard based controls
-         boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
-         boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
-         boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
-         boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
-         boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
-         isNewlyModified |= anyArrowHeld;
-         boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
-         boolean altHeld = ImGui.getIO().getKeyAlt();
-         boolean shiftHeld = ImGui.getIO().getKeyShift();
-         double deltaTime = Gdx.graphics.getDeltaTime();
-
-         if (altHeld) // orientation
+         if (isWindowHovered)
          {
-            double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
-            if (leftArrowHeld) // yaw +
-            {
-               transformToParent.getRotation().appendYawRotation(amount);
-            }
-            if (rightArrowHeld) // yaw -
-            {
-               transformToParent.getRotation().appendYawRotation(-amount);
-            }
-         }
-         else if (anyArrowHeld) // translation (only the arrow keys do the moving)
-         {
-            transformFromKeyboardTransformationToWorld.setToZero();
-            transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
-            keyboardTransformationFrame.update();
-            tempFramePose3D.setToZero(keyboardTransformationFrame);
+            // keyboard based controls
+            boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
+            boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
+            boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
+            boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
+            boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
+            isNewlyModified |= anyArrowHeld;
+            boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
+            boolean altHeld = ImGui.getIO().getKeyAlt();
+            boolean shiftHeld = ImGui.getIO().getKeyShift();
+            double deltaTime = Gdx.graphics.getDeltaTime();
 
-            double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
-            if (upArrowHeld && !ctrlHeld) // x +
+            if (altHeld) // orientation
             {
-               tempFramePose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
+               double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
+               if (leftArrowHeld) // yaw +
+               {
+                  transformToParent.getRotation().appendYawRotation(amount);
+               }
+               if (rightArrowHeld) // yaw -
+               {
+                  transformToParent.getRotation().appendYawRotation(-amount);
+               }
             }
-            if (downArrowHeld && !ctrlHeld) // x -
+            else if (anyArrowHeld) // translation (only the arrow keys do the moving)
             {
-               tempFramePose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
-            }
-            if (leftArrowHeld) // y +
-            {
-               tempFramePose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
-            }
-            if (rightArrowHeld) // y -
-            {
-               tempFramePose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
-            }
-            if (upArrowHeld && ctrlHeld) // z +
-            {
-               tempFramePose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
-            }
-            if (downArrowHeld && ctrlHeld) // z -
-            {
-               tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
-            }
+               transformFromKeyboardTransformationToWorld.setToZero();
+               transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
+               keyboardTransformationFrame.update();
+               tempFramePose3D.setToZero(keyboardTransformationFrame);
 
-            tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-            tempFramePose3D.get(tempTransform);
-            transformToParent.getTranslation().add(tempTransform.getTranslation());
+               double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
+               if (upArrowHeld && !ctrlHeld) // x +
+               {
+                  tempFramePose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
+               }
+               if (downArrowHeld && !ctrlHeld) // x -
+               {
+                  tempFramePose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
+               }
+               if (leftArrowHeld) // y +
+               {
+                  tempFramePose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
+               }
+               if (rightArrowHeld) // y -
+               {
+                  tempFramePose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
+               }
+               if (upArrowHeld && ctrlHeld) // z +
+               {
+                  tempFramePose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
+               }
+               if (downArrowHeld && ctrlHeld) // z -
+               {
+                  tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
+               }
+
+               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+               tempFramePose3D.get(tempTransform);
+               transformToParent.getTranslation().add(tempTransform.getTranslation());
+            }
          }
       }
 
