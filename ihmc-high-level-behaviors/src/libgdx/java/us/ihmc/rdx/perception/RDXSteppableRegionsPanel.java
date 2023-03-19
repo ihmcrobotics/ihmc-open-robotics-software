@@ -11,6 +11,7 @@ import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculationModule;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
@@ -36,11 +37,12 @@ public class RDXSteppableRegionsPanel
 
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
    private int cellsPerSide;
-   private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
+   private final SteppableRegionCalculatorParameters parameters;
 
-   public RDXSteppableRegionsPanel(ROS2Helper ros2Helper)
+   public RDXSteppableRegionsPanel(ROS2Helper ros2Helper, SteppableRegionCalculatorParametersReadOnly defaultParameters)
    {
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
+      parameters = new SteppableRegionCalculatorParameters(defaultParameters);
       remotePropertySets.registerRemotePropertySet(parameters, SteppableRegionsAPI.PARAMETERS);
    }
 
@@ -49,7 +51,7 @@ public class RDXSteppableRegionsPanel
       imguiPanel = new ImGuiPanel("Steppable Region Extraction", this::renderImGuiWidgetsPanel);
 
       cellsPerSide = 100;
-      for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
+      for (int i = 0; i < parameters.getYawDiscretizations(); i++)
       {
          RDXMatImagePanel steppabilityPanel = new RDXMatImagePanel("Raw Steppability " + i, cellsPerSide, cellsPerSide, false);
          RDXMatImagePanel panel = new RDXMatImagePanel("Steppable Regions " + i, cellsPerSide, cellsPerSide, false);
@@ -87,7 +89,7 @@ public class RDXSteppableRegionsPanel
       if (newSize != cellsPerSide)
       {
          cellsPerSide = newSize;
-         for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
+         for (int i = 0; i < parameters.getYawDiscretizations(); i++)
          {
             steppableRegionsPanels.get(i).resize(newSize, newSize);
             steppabilityPanels.get(i).resize(newSize, newSize);
@@ -103,7 +105,7 @@ public class RDXSteppableRegionsPanel
 
       resize(debugImagesMessage.getRegionImages().get(0).getImageWidth());
 
-      for (int yaw = 0; yaw < SteppableRegionsCalculationModule.yawDiscretizations; yaw++)
+      for (int yaw = 0; yaw < parameters.getYawDiscretizations(); yaw++)
       {
          RDXMatImagePanel panel = steppableRegionsPanels.get(yaw);
          if (panel.getImagePanel().getIsShowing().get() && drawPatches.get())

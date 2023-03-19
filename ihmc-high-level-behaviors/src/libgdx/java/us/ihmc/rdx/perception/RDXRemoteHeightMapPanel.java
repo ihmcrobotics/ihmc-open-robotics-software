@@ -2,19 +2,14 @@ package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
-import imgui.flag.ImGuiButtonFlags;
-import imgui.flag.ImGuiMouseButton;
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.OpenCLManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.ImGuiVideoPanel;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -38,8 +33,7 @@ public class RDXRemoteHeightMapPanel
    private final HeightMapStateRequestMessage clearMessage = new HeightMapStateRequestMessage();
    private final AtomicReference<HeightMapMessage> latestMessage = new AtomicReference<>(null);
 
-   private final OpenCLManager openCLManager;
-   private RDXCVImagePanel heightMapPanel;
+   private RDXMatImagePanel heightMapPanel;
 
    public RDXRemoteHeightMapPanel(ROS2Helper ros2Helper)
    {
@@ -48,9 +42,6 @@ public class RDXRemoteHeightMapPanel
       remotePropertySets.registerRemotePropertySet(heightMapParameters, HeightMapAPI.PARAMETERS);
       remotePropertySets.registerRemotePropertySet(heightMapFilterParameters, HeightMapAPI.FILTER_PARAMETERS);
 
-      openCLManager = new OpenCLManager();
-
-
       pauseMessage.setRequestPause(true);
       resumeMessage.setRequestResume(true);
       clearMessage.setRequestClear(true);
@@ -58,10 +49,9 @@ public class RDXRemoteHeightMapPanel
 
    public void create()
    {
-      openCLManager.create();
-      heightMapPanel = new RDXCVImagePanel("Height Map Image", 50, 50);
-      heightMapPanel.resize(50, 50, openCLManager);
-      panel.addChild(heightMapPanel.getVideoPanel());
+      heightMapPanel = new RDXMatImagePanel("Height Map Image", 50, 50, false);
+      heightMapPanel.resize(50, 50);
+      panel.addChild(heightMapPanel.getImagePanel());
    }
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
@@ -71,14 +61,14 @@ public class RDXRemoteHeightMapPanel
 
    private void drawHeightMapPanel(HeightMapMessage heightMapMessage)
    {
-      if (heightMapMessage == null || !heightMapPanel.getVideoPanel().getIsShowing().get())
+      if (heightMapMessage == null || !heightMapPanel.getImagePanel().getIsShowing().get())
          return;
 
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       int size = heightMapData.getCellsPerAxis();
-      if (heightMapPanel.getBytedecoImage().getImageHeight() != size)
+      if (heightMapPanel.getImage().arrayHeight() != size)
       {
-         heightMapPanel.resize(size, size, openCLManager);
+         heightMapPanel.resize(size, size);
       }
 
       for (int x = 0; x < size; x++)
@@ -88,7 +78,7 @@ public class RDXRemoteHeightMapPanel
             int row = size - x - 1;
             int col = size - y - 1;
             Color color = RDXGridMapGraphic.computeColorFromHeight(heightMapData.getHeightAt(x, y));
-            BytePointer pixel = heightMapPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(row, col);
+            BytePointer pixel = heightMapPanel.getImage().ptr(row, col);
             int r = (int) (color.r * 255);
             int g = (int) (color.g * 255);
             int b = (int) (color.b * 255);
@@ -97,7 +87,7 @@ public class RDXRemoteHeightMapPanel
             pixel.put(2, (byte) b);
          }
       }
-      heightMapPanel.draw();
+      heightMapPanel.display();
    }
 
    public void update()

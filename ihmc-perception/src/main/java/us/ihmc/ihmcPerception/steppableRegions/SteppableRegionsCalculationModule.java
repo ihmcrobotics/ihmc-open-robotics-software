@@ -30,7 +30,6 @@ import java.util.function.Consumer;
 
 public class SteppableRegionsCalculationModule
 {
-   public static final int yawDiscretizations = 5;
    public static final float footWidth = 0.12f;
    public static final float footLength = 0.22f;
 
@@ -43,7 +42,7 @@ public class SteppableRegionsCalculationModule
    private final ConcaveHullFactoryParameters concaveHullParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
 
-   private final SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
+   private final SteppableRegionCalculatorParameters parameters;
    private final OpenCLFloatParameters steppableParameters = new OpenCLFloatParameters();
    private final OpenCLFloatParameters yaw = new OpenCLFloatParameters();
    private final BytedecoImage heightMapImage = new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1);
@@ -65,6 +64,13 @@ public class SteppableRegionsCalculationModule
 
    public SteppableRegionsCalculationModule()
    {
+      this(new SteppableRegionCalculatorParameters());
+   }
+
+   public SteppableRegionsCalculationModule(SteppableRegionCalculatorParametersReadOnly defaultParameters)
+   {
+      this.parameters = new SteppableRegionCalculatorParameters(defaultParameters);
+
       // Load all the native data on the thread. This effectively just loads all the bytedeco stuff to be used by the planner
       var nativeLoader = BytedecoTools.loadNativesOnAThread();
       boolean doneLoading = false;
@@ -248,6 +254,11 @@ public class SteppableRegionsCalculationModule
       }
 
       openCLManager.destroy();
+   }
+
+   public int getYawDiscretizations()
+   {
+      return parameters.getYawDiscretizations();
    }
 
    private void resize(int cellsPerSide)

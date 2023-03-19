@@ -15,14 +15,15 @@ import java.util.function.Consumer;
 
 public class SteppableRegionsUpdater
 {
-   private final SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
+   private final SteppableRegionsCalculationModule steppableRegionsCalculationModule;
 
    private final AtomicReference<HeightMapMessage> latestHeightMapMessageReference = new AtomicReference<>();
    private final AtomicReference<SteppableRegionCalculatorParametersReadOnly> latestParameters = new AtomicReference<>();
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-   public SteppableRegionsUpdater()
+   public SteppableRegionsUpdater(SteppableRegionCalculatorParametersReadOnly steppableRegionsParameters)
    {
+      steppableRegionsCalculationModule = new SteppableRegionsCalculationModule(steppableRegionsParameters);
    }
 
    public void submitLatestHeightMapMessage(HeightMapMessage heightMapMessage)

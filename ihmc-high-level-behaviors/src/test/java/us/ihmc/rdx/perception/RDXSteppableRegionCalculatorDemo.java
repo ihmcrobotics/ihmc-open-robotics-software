@@ -9,6 +9,8 @@ import us.ihmc.ihmcPerception.heightMap.RemoteHeightMapUpdater;
 import us.ihmc.ihmcPerception.steppableRegions.RemoteSteppableRegionsUpdater;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -20,6 +22,7 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.Activator;
 
@@ -43,14 +46,17 @@ public class RDXSteppableRegionCalculatorDemo
       CommunicationMode ros2CommunicationMode = CommunicationMode.INTERPROCESS;
 
       RealtimeROS2Node realtimeRos2Node = ROS2Tools.createRealtimeROS2Node(ros2CommunicationMode.getPubSubImplementation(), "simulation_ui_realtime");
-      ROS2Helper ros2Helper = new ROS2Helper(realtimeRos2Node);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "simulation_ui_realtime");
+      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+
       heightMap = new RemoteHeightMapUpdater(ReferenceFrame::getWorldFrame, realtimeRos2Node);
       heightMap.getParameters().setMaxZ(1.5);
 
       heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
-      steppableRegionsUI = new RDXSteppableRegionsPanel(ros2Helper);
 
-      steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(realtimeRos2Node);
+      SteppableRegionCalculatorParametersReadOnly defaultSteppableParameters = new SteppableRegionCalculatorParameters();
+      steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2Node, defaultSteppableParameters);
+      steppableRegionsUI = new RDXSteppableRegionsPanel(ros2Helper, defaultSteppableParameters);
 
       baseUI.getImGuiPanelManager().addPanel(heightMapUI.getPanel());
 
@@ -63,8 +69,7 @@ public class RDXSteppableRegionCalculatorDemo
       steppableRegionsVisualizer.setActive(true);
 
       baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
-//      baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.MODEL);
-//      baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.VIRTUAL);
+      baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -91,7 +96,7 @@ public class RDXSteppableRegionCalculatorDemo
 
             steppableRegionsUI.getEnabled().set(true);
 
-            new IHMCROS2Callback<>(realtimeRos2Node, ROS2Tools.HEIGHT_MAP_OUTPUT, message ->
+            new IHMCROS2Callback<>(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT, message ->
             {
                heightMapVisualizer.acceptHeightMapMessage(message);
                heightMapUI.acceptHeightMapMessage(message);
@@ -99,8 +104,8 @@ public class RDXSteppableRegionCalculatorDemo
                steppableRegionsUpdater.submitLatestHeightMapMessage(message);
             });
 
-            new IHMCROS2Callback<>(realtimeRos2Node, SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT, steppableRegionsVisualizer::acceptSteppableRegionsCollection);
-            new IHMCROS2Callback<>(realtimeRos2Node,
+            new IHMCROS2Callback<>(ros2Node, SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT, steppableRegionsVisualizer::acceptSteppableRegionsCollection);
+            new IHMCROS2Callback<>(ros2Node,
                                    SteppableRegionsAPI.STEPPABLE_REGIONS_DEBUG_OUTPUT,
                                    steppableRegionsUI::setLatestSteppableRegionDebugImagesToRender);
 
@@ -164,6 +169,7 @@ public class RDXSteppableRegionCalculatorDemo
             baseUI.dispose();
             environmentBuilder.destroy();
             realtimeRos2Node.destroy();
+            ros2Node.destroy();
             globalVisualizersUI.destroy();
             heightMapVisualizer.destroy();
             heightMapUI.destroy();
