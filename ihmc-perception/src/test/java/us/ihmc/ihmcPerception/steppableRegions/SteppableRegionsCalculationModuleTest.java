@@ -34,9 +34,11 @@ public class SteppableRegionsCalculationModuleTest
       steppableRegionsCalculationModule.compute(heightMap);
       SteppableRegionsListCollection regions = steppableRegionsCalculationModule.getSteppableRegionsListCollection();
 
-      assertEquals(SteppableRegionsCalculationModule.yawDiscretizations, regions.getDiscretizations());
+      int yawDiscretizations = steppableRegionsCalculationModule.getYawDiscretizations();
 
-      for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
+      assertEquals(yawDiscretizations, regions.getDiscretizations());
+
+      for (int i = 0; i < yawDiscretizations; i++)
       {
          assertTrue(regions.getSteppableRegions(i).getSteppableRegion(0).getConvexHullInRegionFrame().isPointInside(extremumValue, extremumValue));
          assertTrue(regions.getSteppableRegions(i).getSteppableRegion(0).getConvexHullInRegionFrame().isPointInside(extremumValue, -extremumValue));
