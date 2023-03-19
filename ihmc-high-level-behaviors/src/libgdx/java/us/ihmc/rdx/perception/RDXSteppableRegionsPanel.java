@@ -3,12 +3,12 @@ package us.ihmc.rdx.perception;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculationModule;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -31,8 +31,8 @@ public class RDXSteppableRegionsPanel
    private final ImBoolean drawPatches = new ImBoolean(true);
 
    private ImGuiPanel imguiPanel;
-   private final List<RDXCVImagePanel> steppabilityPanels = new ArrayList<>();
-   private final List<RDXCVImagePanel> steppableRegionsPanels = new ArrayList<>();
+   private final List<RDXMatImagePanel> steppabilityPanels = new ArrayList<>();
+   private final List<RDXMatImagePanel> steppableRegionsPanels = new ArrayList<>();
 
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
    private int cellsPerSide;
@@ -46,18 +46,17 @@ public class RDXSteppableRegionsPanel
 
    public void create()
    {
-      openCLManager.create();
       imguiPanel = new ImGuiPanel("Steppable Region Extraction", this::renderImGuiWidgetsPanel);
 
       cellsPerSide = 100;
       for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
       {
-         RDXCVImagePanel steppabilityPanel = new RDXCVImagePanel("Raw Steppability " + i, cellsPerSide, cellsPerSide);
-         RDXCVImagePanel panel = new RDXCVImagePanel("Steppable Regions " + i, cellsPerSide, cellsPerSide);
+         RDXMatImagePanel steppabilityPanel = new RDXMatImagePanel("Raw Steppability " + i, cellsPerSide, cellsPerSide, false);
+         RDXMatImagePanel panel = new RDXMatImagePanel("Steppable Regions " + i, cellsPerSide, cellsPerSide, false);
          steppabilityPanels.add(steppabilityPanel);
          steppableRegionsPanels.add(panel);
-         imguiPanel.addChild(steppabilityPanel.getVideoPanel());
-         imguiPanel.addChild(panel.getVideoPanel());
+         imguiPanel.addChild(steppabilityPanel.getImagePanel());
+         imguiPanel.addChild(panel.getImagePanel());
       }
    }
 
@@ -90,8 +89,8 @@ public class RDXSteppableRegionsPanel
          cellsPerSide = newSize;
          for (int i = 0; i < SteppableRegionsCalculationModule.yawDiscretizations; i++)
          {
-            steppableRegionsPanels.get(i).resize(newSize, newSize, openCLManager);
-            steppabilityPanels.get(i).resize(newSize, newSize, openCLManager);
+            steppableRegionsPanels.get(i).resize(newSize, newSize);
+            steppabilityPanels.get(i).resize(newSize, newSize);
          }
       }
    }
@@ -106,21 +105,21 @@ public class RDXSteppableRegionsPanel
 
       for (int yaw = 0; yaw < SteppableRegionsCalculationModule.yawDiscretizations; yaw++)
       {
-         RDXCVImagePanel panel = steppableRegionsPanels.get(yaw);
-         if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
+         RDXMatImagePanel panel = steppableRegionsPanels.get(yaw);
+         if (panel.getImagePanel().getIsShowing().get() && drawPatches.get())
          {
-            BytedecoImage image = panel.getBytedecoImage();
+            Mat image = panel.getImage();
 
             SteppableRegionDebugImageMessage regionImage = debugImagesMessage.getRegionImages().get(yaw);
 
-            if (image.getImageHeight() != regionImage.getImageHeight() || image.getImageWidth() != regionImage.getImageWidth())
+            if (image.arrayHeight() != regionImage.getImageHeight() || image.arrayWidth() != regionImage.getImageWidth())
                throw new RuntimeException("Sizes don't match");
 
             for (int row = 0; row < regionImage.getImageHeight(); row++)
             {
                for (int col = 0; col < regionImage.getImageWidth(); col++)
                {
-                  BytePointer pointer = image.getBytedecoOpenCVMat().ptr(row, col);
+                  BytePointer pointer = image.ptr(row, col);
                   for (int j = 0; j < 3; j++)
                   {
                      int index = row * regionImage.getImageWidth() + col;
@@ -132,16 +131,16 @@ public class RDXSteppableRegionsPanel
          }
 
          panel = steppabilityPanels.get(yaw);
-         if (panel.getVideoPanel().getIsShowing().get() && drawPatches.get())
+         if (panel.getImagePanel().getIsShowing().get() && drawPatches.get())
          {
-            BytedecoImage image = panel.getBytedecoImage();
+            Mat image = panel.getImage();
             SteppableRegionDebugImageMessage steppabilityImage = debugImagesMessage.getSteppabilityImages().get(yaw);
 
             for (int row = 0; row < steppabilityImage.getImageHeight(); row++)
             {
                for (int col = 0; col < steppabilityImage.getImageWidth(); col++)
                {
-                  BytePointer pointer = image.getBytedecoOpenCVMat().ptr(row, col);
+                  BytePointer pointer = image.ptr(row, col);
                   for (int j = 0; j < 3; j++)
                   {
                      int index = row * steppabilityImage.getImageWidth() + col;
@@ -158,8 +157,8 @@ public class RDXSteppableRegionsPanel
 
    private void draw2DPanels()
    {
-      steppableRegionsPanels.forEach(RDXCVImagePanel::draw);
-      steppabilityPanels.forEach(RDXCVImagePanel::draw);
+      steppableRegionsPanels.forEach(RDXMatImagePanel::display);
+      steppabilityPanels.forEach(RDXMatImagePanel::display);
    }
 
    private void renderImGuiWidgetsPanel()
