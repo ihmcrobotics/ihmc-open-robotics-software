@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.tools.yo;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableClient;
@@ -18,6 +19,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
    private YoVariablesUpdatedListener listener;
    private YoVariableClient yoVariableClient;
    private final MutableBoolean connecting = new MutableBoolean(false);
+   private final Notification connectedNotification = new Notification();
 
    public YoVariableClientHelper(String registryName)
    {
@@ -43,6 +45,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
                LogTools.info(caller + ": Connecting to {}:{}", hostname, port);
                yoVariableClient.start(hostname, port);
                LogTools.info(caller + ": Connected to {}:{}", hostname, port);
+               connectedNotification.set();
             }
             catch (RuntimeException e)
             {
@@ -225,5 +228,10 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
             return variable == null ? "" : variable.getDescription();
          }
       };
+   }
+
+   public Notification getConnectedNotification()
+   {
+      return connectedNotification;
    }
 }
