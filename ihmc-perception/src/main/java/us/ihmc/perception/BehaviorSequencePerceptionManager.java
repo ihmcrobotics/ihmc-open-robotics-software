@@ -24,7 +24,6 @@ import java.util.function.BiConsumer;
 public class BehaviorSequencePerceptionManager
 {
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("perception_manager");
-   public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
    public static final ROS2Topic<DetectedObjectMessage> DETECTED_PULL_DOOR_FRAME
          = BASE_TOPIC.withType(DetectedObjectMessage.class).withSuffix("detected_pull_door_frame");
    public static final ROS2Topic<DetectedObjectMessage> DETECTED_PULL_DOOR_PANEL
@@ -52,11 +51,11 @@ public class BehaviorSequencePerceptionManager
 
    public static final long PUSH_DOOR_MARKER_ID = 1;
    public static final RigidBodyTransform PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER = new RigidBodyTransform(
-         new YawPitchRoll(0.0, 0.0, Math.toRadians(180.0)),
+         new YawPitchRoll(0.0, 0.0, 0.0),
          new Point3D(0.0, 0.678702 + 0.005 - 0.006, 1.14141 + 0.02)
    );
    public static final RigidBodyTransform PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER = new RigidBodyTransform(
-         new YawPitchRoll(0.0, 0.0, Math.toRadians(180.0)),
+         new YawPitchRoll(0.0, 0.0, 0.0),
          new Point3D(0.0, 0.678702, 1.14141)
    );
 
@@ -80,7 +79,7 @@ public class BehaviorSequencePerceptionManager
    {
       ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_manager");
 
-      arUcoMarkerPosesSubscription = ros2.subscribe(ARUCO_MARKER_POSES);
+      arUcoMarkerPosesSubscription = ros2.subscribe(ROS2Tools.ARUCO_MARKER_POSES);
 
       pullDoorManager = new DoorPerceptionManager(PULL_DOOR_MARKER_ID, "Pull", cameraFrame);
       pullDoorManager.getDoorFrame().setObjectTransformToMarker(transform -> transform.set(PULL_DOOR_FRAME_TRANSFORM_TO_MARKER));
