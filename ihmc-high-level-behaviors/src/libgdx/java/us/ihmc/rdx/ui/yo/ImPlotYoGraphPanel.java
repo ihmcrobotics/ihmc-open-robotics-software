@@ -239,6 +239,11 @@ public class ImPlotYoGraphPanel
       return modifiableYoDouble;
    }
 
+   public YoVariableClientHelper getYoClientHelper()
+   {
+      return yoClientHelper;
+   }
+
    public void destroy()
    {
       yoClientHelper.disconnect();

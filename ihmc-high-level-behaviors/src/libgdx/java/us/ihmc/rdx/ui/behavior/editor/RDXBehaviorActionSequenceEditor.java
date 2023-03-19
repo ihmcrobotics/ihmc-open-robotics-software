@@ -105,6 +105,7 @@ public class RDXBehaviorActionSequenceEditor
    public void loadActionsFromFile()
    {
       actionSequence.clear();
+      executionNextIndexStatus = 0;
       loading = true;
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
       JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
