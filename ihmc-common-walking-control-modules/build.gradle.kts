@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -28,7 +28,7 @@ mainDependencies {
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-trajectory-optimization:source")
    api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.14")
+   api("us.ihmc:ihmc-convex-optimization:0.17.17")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 //   api("us.ihmc:ihmc-footstep-planning:source")
@@ -41,13 +41,13 @@ testDependencies {
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
-   api("us.ihmc:ihmc-convex-optimization-test:0.17.14")
+   api("us.ihmc:ihmc-convex-optimization-test:0.17.17")
 }
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.22.10")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.12.1")
+   api("us.ihmc:simulation-construction-set:0.23.0")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.13.2")
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("base", javaFXVersion))

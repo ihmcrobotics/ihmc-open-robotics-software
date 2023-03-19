@@ -18,6 +18,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.RegionFeaturesProvider;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
@@ -91,15 +92,18 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    @Override
    public void registerStereoVisionPointCloudHandler(NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.D435_POINT_CLOUD,
-                                           stereoVisionPointCloudHandler);
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.D435_POINT_CLOUD, stereoVisionPointCloudHandler);
    }
 
    @Override
    public void registerStereoVisionPointCloudHandler(Messager messager, NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
    {
-      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.STEREO_POINT_CLOUD, StereoVisionPointCloudMessage.class, stereoVisionPointCloudHandler);
+      new REAModuleROS2Subscription<>(ros2Node,
+                                      messager,
+                                      REASourceType.STEREO_POINT_CLOUD,
+                                      StereoVisionPointCloudMessage.class,
+                                      stereoVisionPointCloudHandler,
+                                      ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override

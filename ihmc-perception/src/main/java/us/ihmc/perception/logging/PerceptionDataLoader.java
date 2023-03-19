@@ -2,70 +2,152 @@ package us.ihmc.perception.logging;
 
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 
-import java.io.File;
-import java.nio.FloatBuffer;
-
-import static org.bytedeco.opencv.global.opencv_highgui.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class PerceptionDataLoader
 {
+   private HashMap<String, PerceptionLogChannel> channels;
+
+   private final HDF5Tools hdf5Tools = new HDF5Tools();
    private HDF5Manager hdf5Manager;
    private String filePath;
 
-   public PerceptionDataLoader(String filePath)
+   public PerceptionDataLoader()
    {
-      this.filePath = filePath;
-      hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
+      channels = new HashMap<>();
    }
 
-   public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points, int rows, int cols)
+   private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
+                                                                                                        getClass(),
+                                                                                                        ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+
+   public void openLogFile(String filePath)
    {
-      HDF5Tools.loadPointCloud(hdf5Manager.getGroup(namespace), index, points, rows, cols);
+      LogTools.info("Loading Perception Log: {}", filePath);
+      if (Files.exists(Paths.get(filePath)))
+      {
+         this.filePath = filePath;
+         hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
+         channels.clear();
+      }
+      else
+      {
+         LogTools.warn("Log file does not exist: {}", filePath);
+      }
    }
 
-   public FloatBuffer loadCompressedPointCloud(String namespace, int index)
+   public void addByteChannel(String channelName, int frameSize, int blockSize)
    {
-      Group group = hdf5Manager.getGroup(namespace);
-      byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
-
-      LogTools.info("Byte Array: {} {} {}", compressedByteArray[0], compressedByteArray[1], compressedByteArray[2]);
-
-      return null;
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new BytePointer(PerceptionLoggerConstants.BYTE_BUFFER_SIZE)));
    }
 
-   public void loadImage(String namespace, int index, Mat mat)
+   public void addFloatChannel(String channelName, int frameSize, int blockSize)
    {
-      //      ThreadTools.startAThread(()->{
-      LogTools.info("Loading Image: {} {}", namespace, index);
-
-      Group group = hdf5Manager.getGroup(namespace);
-      byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
-
-      mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(compressedByteArray));
-
-      LogTools.info("Completed Loading Image: {} {} {}", index, compressedByteArray.length);
-      //      }, "perception_data_loader -> " + namespace);
+      channels.put(channelName,
+                   new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new FloatPointer(PerceptionLoggerConstants.FLOAT_BUFFER_SIZE)));
    }
 
-   public void loadDepth(String namespace, int index, Mat mat)
+   public void addLongChannel(String channelName, int frameSize, int blockSize)
    {
-      LogTools.info("Loading Image: {} {}", namespace, index);
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new LongPointer(PerceptionLoggerConstants.LONG_BUFFER_SIZE)));
+   }
 
-      Group group = hdf5Manager.getGroup(namespace);
-      byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
+   public void addIntChannel(String channelName, int frameSize, int blockSize)
+   {
+      channels.put(channelName, new PerceptionLogChannel(channelName, 0, 0, frameSize, blockSize, new IntPointer(PerceptionLoggerConstants.INT_BUFFER_SIZE)));
+   }
 
-//      LogTools.info("Depth: {}", Arrays.toString(compressedByteArray));
+   public void addImageChannel(String channelName)
+   {
+      channels.put(channelName,
+                   new PerceptionLogChannel(channelName,
+                                            0,
+                                            0,
+                                            PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE,
+                                            1,
+                                            new BytePointer(PerceptionLoggerConstants.COMPRESSED_IMAGE_BUFFER_SIZE)));
+   }
 
-      BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
+   public void loadPoint3DList(String namespace, ArrayList<Point3D> points)
+   {
+      //      executorService.submit(() ->
+      //      {
+      int count = (int) hdf5Manager.getCount(namespace);
+      LogTools.info("[{}] Total Point3D Blocks: {}", namespace, count);
 
-      LogTools.info("Completed Loading Image: {} {}", index, compressedByteArray.length);
+      for (int index = 0; index < count; index++)
+      {
+         float[] pointFloatArray = new float[3 * PerceptionLoggerConstants.LEGACY_BLOCK_SIZE];
+         loadFloatArray(namespace, index, pointFloatArray);
+
+         for (int i = 0; i < pointFloatArray.length / 3; i++)
+         {
+            //LogTools.info("Point: {}, {}, {}", pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]);
+            points.add(new Point3D(pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]));
+         }
+      }
+
+      LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
+      //      });
+   }
+
+   public void loadQuaternionList(String namespace, ArrayList<Quaternion> quaternions)
+   {
+      //      executorService.submit(() ->
+      //        {
+      int count = (int) hdf5Manager.getCount(namespace);
+      for (int index = 0; index < count; index++)
+      {
+         float[] pointFloatArray = new float[4 * PerceptionLoggerConstants.LEGACY_BLOCK_SIZE];
+         loadFloatArray(namespace, index, pointFloatArray);
+
+         for (int i = 0; i < pointFloatArray.length / 4; i++)
+         {
+            quaternions.add(new Quaternion(pointFloatArray[i * 4], pointFloatArray[i * 4 + 1], pointFloatArray[i * 4 + 2], pointFloatArray[i * 4 + 3]));
+         }
+      }
+
+      LogTools.info("[{}] Total Quaternions Loaded: {}", namespace, quaternions.size());
+      //        });
+   }
+
+   public void loadFloatArray(String namespace, int index, float[] array)
+   {
+      Group group = hdf5Manager.openOrGetGroup(namespace);
+      hdf5Tools.loadFloatArray(group, index, array);
+   }
+
+   public void loadCompressedColor(String namespace, int index, Mat mat)
+   {
+      Group group = hdf5Manager.openOrGetGroup(namespace);
+      BytePointer bytePointer = new BytePointer(10);
+      hdf5Tools.loadBytes(group, index, bytePointer);
+      mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(bytePointer));
+   }
+
+   public void loadCompressedDepth(String namespace, int index, BytePointer bytePointer, Mat mat)
+   {
+      Group group = hdf5Manager.openOrGetGroup(namespace);
+      hdf5Tools.loadBytes(group, index, bytePointer);
+
+      BytedecoOpenCVTools.decompressDepthPNG(bytePointer, mat);
    }
 
    public String getFilePath()
@@ -73,55 +155,42 @@ public class PerceptionDataLoader
       return filePath;
    }
 
+   public HashMap<String, PerceptionLogChannel> getChannels()
+   {
+      return channels;
+   }
+
    public HDF5Manager getHDF5Manager()
    {
       return hdf5Manager;
    }
 
+   public void closeLogFile()
+   {
+      hdf5Manager.closeFile();
+   }
+
    public static void main(String[] args)
    {
-      String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
-      String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "experimental.hdf5";
+      String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
+      String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
+      String logFileName = "20230228_145121_PerceptionLog.hdf5";
 
-      PerceptionDataLoader loader = new PerceptionDataLoader(LOG_DIRECTORY + logFileName);
+      PerceptionDataLoader loader = new PerceptionDataLoader();
+      loader.openLogFile(Paths.get(logDirectory, logFileName).toString());
 
-      long totalColor = loader.getHDF5Manager().getCount("/l515/color/");
+      long total = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.L515_DEPTH_NAME);
 
-      Mat colorImage = new Mat();
-      Mat depthImage = new Mat(720, 1280, opencv_core.CV_16UC1);
-      LogTools.info("Total Images: {}", totalColor);
+      BytePointer bytePointer = new BytePointer(PerceptionLoggerConstants.FLOAT_BUFFER_SIZE);
 
-      for (int i = 0; i < totalColor; i++)
+      Mat depthImage = new Mat(768, 1280, opencv_core.CV_16UC1);
+      LogTools.info("Total Images: {}", total);
+
+      for (int i = 0; i < total; i++)
       {
-         LogTools.info("Loading Index: {}/{}", i, totalColor);
-         loader.loadImage("/l515/color/", i, colorImage);
-
-
-         long begin_load = System.nanoTime();
-         loader.loadDepth("/l515/depth/", i, depthImage);
-         long end_load = System.nanoTime();
-
-         LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
-
-         long begin_decompress = System.nanoTime();
-         Mat displayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC1);
-         Mat finalDisplayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC3);
-
-         BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
-         BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
-         long end_decompress = System.nanoTime();
-
-         LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
-         LogTools.info("Decompression Time: {} ms",(end_decompress - begin_decompress) / 1e6f);
-
-         imshow("/l515/color", colorImage);
-         imshow("/l515/depth", finalDisplayDepth);
-         int code = waitKeyEx(300);
-         if (code == 113)
-         {
-            System.exit(0);
-         }
+         LogTools.info("Loading Index: {}/{}", i, 10);
+         loader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, i, bytePointer, depthImage);
+         BytedecoOpenCVTools.displayDepth("L515 Depth", depthImage, 1);
       }
    }
 }

@@ -16,7 +16,7 @@ public class ConcatenateCSVTest
       try
       {
          WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
-         String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
+         String directoryAbsolutePath = directory.getFilesystemDirectory().toAbsolutePath().toString();
          String demoTrainingDirectory = directoryAbsolutePath + "/test/PushDoorLeftRightHand";
          // Create a file object
          File demoFolder = new File(demoTrainingDirectory);

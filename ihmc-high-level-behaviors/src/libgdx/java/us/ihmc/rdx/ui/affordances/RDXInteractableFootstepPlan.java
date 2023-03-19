@@ -2,41 +2,40 @@ package us.ihmc.rdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import imgui.ImGui;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Manages and assists with the operator placement of footsteps.
@@ -54,6 +53,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private SideDependentList<ConvexPolygon2D> defaultPolygons;
    private RDXTeleoperationParameters teleoperationParameters;
 
+   private final AtomicReference<HeightMapMessage> heightMapReference = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsListMessage> planarRegionsListReference = new AtomicReference<>();
+   private final AtomicReference<SwingPlannerParametersReadOnly> swingPlannerParametersReference = new AtomicReference<>();
+
+   private int previousPlanLength;
    private boolean wasPlanUpdated = false;
 
    public void create(RDXBaseUI baseUI,
@@ -94,12 +98,17 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void setPlanarRegionsList(PlanarRegionsListMessage planarRegionsList)
    {
-      swingPlanningModule.setPlanarRegionList(planarRegionsList);
+      planarRegionsListReference.set(planarRegionsList);
    }
 
    public void setHeightMapMessage(HeightMapMessage heightMapMessage)
    {
-      swingPlanningModule.setHeightMapData(heightMapMessage);
+      heightMapReference.set(heightMapMessage);
+   }
+
+   public void setSwingPlannerParameters(SwingPlannerParametersReadOnly swingPlannarParameters)
+   {
+      swingPlannerParametersReference.set(swingPlannarParameters);
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -171,11 +180,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    }
 
    // NOTE: using RecyclingList to update planned footsteps. Make sure this only gets called when new plan comes in.
-   public void updateFromPlan(FootstepPlan footstepPlan)
+   public void updateFromPlan(FootstepPlan footstepPlan, List< EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
    {
       for (RDXInteractableFootstep step : footsteps)
       {
-         step.getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
+         step.reset();
       }
       footsteps.clear();
 
@@ -183,7 +192,20 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          PlannedFootstep plannedStep = footstepPlan.getFootstep(i);
          RDXInteractableFootstep addedStep = footsteps.add();
-         addedStep.updateFromPlannedStep(baseUI, plannedStep, i);
+         addedStep.reset();
+         EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory;
+         if (swingTrajectories == null)
+         {
+            swingTrajectory = null;
+         }
+         else
+         {
+            if (i < swingTrajectories.size())
+               swingTrajectory = swingTrajectories.get(i);
+            else
+               swingTrajectory = null;
+         }
+         addedStep.updateFromPlannedStep(baseUI, plannedStep, swingTrajectory, i);
       }
 
       wasPlanUpdated = true;
@@ -191,6 +213,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void update()
    {
+
       // Update footsteps in the list, and the one being placed
       for (int i = 0; i < footsteps.size(); i++)
       {
@@ -199,10 +222,24 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       if (selectedFootstep != null)
          selectedFootstep.update();
 
-      stepChecker.update(footsteps);
+      // check if the plan grew in length
+      wasPlanUpdated |= previousPlanLength < footsteps.size();
       wasPlanUpdated |= pollIfAnyStepWasUpdated();
-      if (wasPlanUpdated)
+      previousPlanLength = footsteps.size();
+
+      stepChecker.update(footsteps);
+      if (wasPlanUpdated && teleoperationParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
+         PlanarRegionsListMessage planarRegionsList = planarRegionsListReference.getAndSet(null);
+         if (planarRegionsList != null)
+            swingPlanningModule.setPlanarRegionList(planarRegionsList);
+         HeightMapMessage heightMapMessage = heightMapReference.getAndSet(null);
+         if (heightMapMessage != null)
+            swingPlanningModule.setHeightMapData(heightMapMessage);
+         SwingPlannerParametersReadOnly swingPlannerParameters = swingPlannerParametersReference.getAndSet(null);
+         if (swingPlannerParameters != null)
+            swingPlanningModule.setSwingPlannerParameters(swingPlannerParameters);
+
          swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
          wasPlanUpdated = false;
       }

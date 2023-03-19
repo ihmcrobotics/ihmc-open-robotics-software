@@ -1,22 +1,8 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import net.jpountz.lz4.LZ4Compressor;
-import net.jpountz.lz4.LZ4Decompressor;
-import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FastDecompressor;
-import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
@@ -25,10 +11,15 @@ import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.PerceptionMessageTools;
-import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
+import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
+
+import java.nio.FloatBuffer;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class PointCloudData
 {
@@ -55,6 +46,7 @@ public class PointCloudData
          colors = null;
       }
    }
+
    public PointCloudData(PointCloud2 rosPointCloud2, int maxSize, boolean hasColors)
    {
       timestamp = rosPointCloud2.getHeader().getStamp().totalNsecs();
@@ -114,13 +106,14 @@ public class PointCloudData
       colors = null;
    }
 
-   public PointCloudData(PerceptionMessageTools perceptionMessageTools, ImageMessage sensorData)
+   public PointCloudData(HeightMapKernel heightMapKernel, ImageMessage sensorData)
    {
-      timestamp = Conversions.secondsToNanoseconds(sensorData.getAcquisitionTime().getSecondsSinceEpoch()) + sensorData.getAcquisitionTime().getAdditionalNanos();
+      timestamp = Conversions.secondsToNanoseconds(sensorData.getAcquisitionTime().getSecondsSinceEpoch())
+                  + sensorData.getAcquisitionTime().getAdditionalNanos();
       numberOfPoints = sensorData.getImageHeight() * sensorData.getImageWidth();
       colors = null;
 
-      pointCloud = perceptionMessageTools.unpackDepthImage(sensorData, Math.PI / 2.0, 2.0 * Math.PI);
+      pointCloud = heightMapKernel.unpackDepthImage(sensorData, Math.PI / 2.0, 2.0 * Math.PI);
    }
 
    public PointCloudData(Instant instant, int numberOfPoints, FloatBuffer pointCloudBuffer)
@@ -134,7 +127,6 @@ public class PointCloudData
       for (int i = 0; i < numberOfPoints; i++)
          pointCloud[i] = new Point3D(pointCloudBuffer.get(), pointCloudBuffer.get(), pointCloudBuffer.get());
    }
-
 
    public long getTimestamp()
    {

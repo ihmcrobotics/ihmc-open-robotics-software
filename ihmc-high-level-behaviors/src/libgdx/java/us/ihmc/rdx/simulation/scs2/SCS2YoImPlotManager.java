@@ -1,6 +1,5 @@
 package us.ihmc.rdx.simulation.scs2;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
@@ -13,14 +12,11 @@ import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.rdx.ui.yo.*;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
-import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.*;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class SCS2YoImPlotManager
 {
@@ -31,7 +27,7 @@ public class SCS2YoImPlotManager
    private ImGuiPanel parentPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString panelToCreateName = new ImString("", 100);
-   private HybridFile configurationFile;
+   private HybridResourceFile configurationFile;
    private boolean layoutReloadQueued = false;
    private int delayedLayoutReloadCounter = 0;
 
@@ -84,9 +80,9 @@ public class SCS2YoImPlotManager
       loadConfiguration(layoutManager.getCurrentConfigurationLocation());
    }
 
-   private void updateConfigurationFile(HybridDirectory layoutDirectory)
+   private void updateConfigurationFile(HybridResourceDirectory layoutDirectory)
    {
-      configurationFile = new HybridFile(layoutDirectory, getClass().getSimpleName() + ".json");
+      configurationFile = new HybridResourceFile(layoutDirectory, getClass().getSimpleName() + ".json");
    }
 
    private boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
@@ -98,23 +94,20 @@ public class SCS2YoImPlotManager
          plotPanels.clear();
          JSONFileTools.load(inputStream, node ->
          {
-            for (Iterator<JsonNode> panelNodeIterator = node.withArray("panels").elements(); panelNodeIterator.hasNext(); )
+            JSONTools.forEachArrayElement(node, "panels", panelNode ->
             {
-               JsonNode panelNode = panelNodeIterator.next();
                String panelName = panelNode.get("name").asText();
                ImPlotModifiableYoPlotPanel plotPanel = addPlotPanel(panelName);
-               for (Iterator<JsonNode> plotsNodeInterator = panelNode.withArray("plots").elements(); plotsNodeInterator.hasNext(); )
+               JSONTools.forEachArrayElement(panelNode, "plots", plotNode ->
                {
-                  JsonNode plotNode = plotsNodeInterator.next();
                   ImPlotModifiableYoPlot imPlotModifiableYoPlot = plotPanel.addPlot();
-                  for (Iterator<JsonNode> variablesNodeInterator = plotNode.withArray("variables").elements(); variablesNodeInterator.hasNext(); )
+                  JSONTools.forEachArrayElement(plotNode, "variables", variableNode ->
                   {
-                     JsonNode variableNode = variablesNodeInterator.next();
                      // We are using getRootRegistry which is the session's working copy; i.e. not linked
                      imPlotModifiableYoPlot.addVariable(yoManager.getRootRegistry().findVariable(variableNode.get("variableName").asText()), false);
-                  }
-               }
-            }
+                  });
+               });
+            });
          });
       });
    }

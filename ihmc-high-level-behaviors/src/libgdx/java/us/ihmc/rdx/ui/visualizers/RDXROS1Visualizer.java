@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.visualizers;
 
 import us.ihmc.utilities.ros.RosNodeInterface;
 
+@Deprecated
 public abstract class RDXROS1Visualizer extends RDXVisualizer implements RDXROS1VisualizerInterface
 {
    private boolean currentlySubscribed = false;

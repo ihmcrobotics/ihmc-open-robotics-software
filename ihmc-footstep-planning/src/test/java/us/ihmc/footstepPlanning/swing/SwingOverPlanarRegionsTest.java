@@ -683,12 +683,6 @@ public class SwingOverPlanarRegionsTest
          }
 
          @Override
-         public double defaultOffsetHeightAboveAnkle()
-         {
-            return 0;
-         }
-
-         @Override
          public SteppingParameters getSteppingParameters()
          {
             return getTestSteppingParameters();

@@ -10,14 +10,29 @@ import org.bytedeco.spinnaker.Spinnaker_C.spinNodeHandle;
 import org.bytedeco.spinnaker.Spinnaker_C.spinNodeMapHandle;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.UnitConversions;
 
 import static us.ihmc.perception.spinnaker.SpinnakerTools.assertNoError;
 
 /**
  * Good reference: http://softwareservices.flir.com/BFS-U3-04S2/latest/Model/public/
+ *
+ * If you don't have it set on boot (didn't use official Spinnaker installation procedure) then
+ * you need to run the following command before using this class. It will make sure the USB
+ * buffers are large enough to handle the Blackfly stably.
+ * <pre>sudo sh -c 'echo 2047 > /sys/module/usbcore/parameters/usbfs_memory_mb'</pre>
+ *
+ * Confluence page: https://confluence.ihmc.us/display/PER/Blackfly+Cameras
  */
 public class SpinnakerBlackfly
 {
+   public static final double BFLY_U3_23S6C_WIDTH_PIXELS = 1920.0;
+   public static final double BFLY_U3_23S6C_HEIGHT_PIXELS = 1200.0;
+   // https://www.flir.com/products/blackfly-usb3/?model=BFLY-U3-23S6C-C&vertical=machine+vision&segment=iis
+   public static final double BFLY_U3_23S6C_CMOS_SENSOR_FORMAT = UnitConversions.inchesToMeters(1.0 / 1.2);
+   public static final double BFLY_U3_23S6C_CMOS_SENSOR_WIDTH = 0.01067;
+   public static final double BFLY_U3_23S6C_CMOS_SENSOR_HEIGHT = 0.00800;
+
    private final spinCamera spinCamera;
    private final String serialNumber;
    private spinNodeMapHandle transportLayerDeviceNodeMap = null;
