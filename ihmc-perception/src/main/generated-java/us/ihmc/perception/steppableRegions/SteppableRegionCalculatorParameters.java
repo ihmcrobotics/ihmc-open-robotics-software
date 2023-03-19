@@ -48,30 +48,28 @@ public class SteppableRegionCalculatorParameters extends StoredPropertySet imple
     */
    public SteppableRegionCalculatorParameters(String versionSpecifier)
    {
-      this(SteppableRegionCalculatorParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(SteppableRegionCalculatorParameters.class, versionSpecifier);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public SteppableRegionCalculatorParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public SteppableRegionCalculatorParameters(Class<?> classForLoading, String versionSuffix)
    {
-      super(keys, classForLoading, SteppableRegionCalculatorParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, SteppableRegionCalculatorParameters.class, versionSuffix);
       load();
    }
 
    public SteppableRegionCalculatorParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, SteppableRegionCalculatorParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, SteppableRegionCalculatorParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           SteppableRegionCalculatorParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+                                                           SteppableRegionCalculatorParameters.class);
+      parameters.generateJavaFiles();
    }
 }

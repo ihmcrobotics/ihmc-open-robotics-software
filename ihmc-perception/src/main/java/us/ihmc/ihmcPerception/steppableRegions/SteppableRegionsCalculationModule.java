@@ -14,10 +14,10 @@ import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionDataHolder;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionsEnvironmentModel;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
-import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
+import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -55,7 +55,7 @@ public class SteppableRegionsCalculationModule
    private final List<BytedecoImage> snapNormalZImages = new ArrayList<>();
    private final List<BytedecoImage> steppabilityConnections = new ArrayList<>();
 
-   private final SteppableRegionsListCollection regionCollection = new SteppableRegionsListCollection(yawDiscretizations);
+   private final SteppableRegionsListCollection regionCollection;
    private final List<SteppableRegionsEnvironmentModel> regionEnvironments = new ArrayList<>();
 
    private int cellsPerSide;
@@ -72,7 +72,9 @@ public class SteppableRegionsCalculationModule
       openCLManager = new OpenCLManager();
       concaveHullParameters.setEdgeLengthThreshold(1.0);
 
-      for (int i = 0; i < yawDiscretizations; i++)
+      regionCollection = new SteppableRegionsListCollection(parameters.getYawDiscretizations());
+
+      for (int i = 0; i < parameters.getYawDiscretizations(); i++)
       {
          steppabilityImages.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
          snapHeightImages.add(new BytedecoImage(defaultCells, defaultCells, opencv_core.CV_32FC1));
@@ -127,14 +129,12 @@ public class SteppableRegionsCalculationModule
    {
       this.cellsPerSide = cellsPerSide;
 
-      openCLManager.create();
-
       steppableRegionsProgram = openCLManager.loadProgram("SteppableRegions", "HeightMapUtils.cl");
       computeSteppabilityKernel = openCLManager.createKernel(steppableRegionsProgram, "computeSteppability");
       computeSteppabilityConnectionsKernel = openCLManager.createKernel(steppableRegionsProgram, "computeSteppabilityConnections");
 
       heightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-      for (int i = 0; i < yawDiscretizations; i++)
+      for (int i = 0; i < parameters.getYawDiscretizations(); i++)
       {
          steppabilityImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          snapHeightImages.get(i).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
@@ -162,7 +162,7 @@ public class SteppableRegionsCalculationModule
 
       regionCollection.clear();
       regionEnvironments.clear();
-      for (int yawValue = 0; yawValue < yawDiscretizations; yawValue++)
+      for (int yawValue = 0; yawValue < parameters.getYawDiscretizations(); yawValue++)
       {
          yaw.setParameter((float) yawValue);
          yaw.writeOpenCLBufferObject(openCLManager);
@@ -190,9 +190,7 @@ public class SteppableRegionsCalculationModule
          snapNormalZImages.get(yawValue).readOpenCLImage(openCLManager);
          steppabilityConnections.get(yawValue).readOpenCLImage(openCLManager);
 
-         openCLManager.finish();
-
-         double yawAngle = ((double) yawValue) / (yawDiscretizations - 1) * Math.PI;
+         double yawAngle = ((double) yawValue) / (parameters.getYawDiscretizations() - 1) * Math.PI;
 
          SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(
                steppabilityImages.get(yawValue),
@@ -218,7 +216,7 @@ public class SteppableRegionsCalculationModule
       timer.suspend();
 
       SteppableRegionDebugImagesMessage debugImagesMessage = new SteppableRegionDebugImagesMessage();
-      for (int i = 0; i < yawDiscretizations; i++)
+      for (int i = 0; i < parameters.getYawDiscretizations(); i++)
       {
          generateSteppableRegionDebugImage(i, debugImagesMessage.getRegionImages().add());
          generateSteppabilityDebugImage(i, debugImagesMessage.getSteppabilityImages().add());
@@ -239,7 +237,7 @@ public class SteppableRegionsCalculationModule
       computeSteppabilityConnectionsKernel.releaseReference();
 
       heightMapImage.destroy(openCLManager);
-      for (int i = 0; i < yawDiscretizations; i++)
+      for (int i = 0; i < parameters.getYawDiscretizations(); i++)
       {
          steppabilityImages.get(i).destroy(openCLManager);
          snapHeightImages.get(i).destroy(openCLManager);
@@ -260,7 +258,7 @@ public class SteppableRegionsCalculationModule
       this.cellsPerSide = cellsPerSide;
 
       heightMapImage.resize(cellsPerSide, cellsPerSide, openCLManager, null);
-      for (int i = 0; i < yawDiscretizations; i++)
+      for (int i = 0; i < parameters.getYawDiscretizations(); i++)
       {
          steppabilityImages.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
          steppabilityConnections.get(i).resize(cellsPerSide, cellsPerSide, openCLManager, null);
@@ -298,7 +296,7 @@ public class SteppableRegionsCalculationModule
             int x = size - imageRow;
             int y = size - imageColumn;
             // the x and y values are switched between the world coordinates and the image coordinates
-            heightMapImage.setFloat(imageRow, imageColumn, (float) heightMapData.getHeightAt(x, y));
+            heightMapImage.setValue(imageRow, imageColumn, (float) heightMapData.getHeightAt(x, y));
          }
       }
       heightMapImage.writeOpenCLImage(openCLManager);
