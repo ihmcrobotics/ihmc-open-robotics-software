@@ -13,7 +13,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.OpenCVImageFormat;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -82,7 +82,12 @@ public class OusterDepthPublisher
       compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
    }
 
-   public void extractCompressAndPublish(ReferenceFrame ousterSensorFrame, OusterDepthExtractionKernel depthExtractionKernel, Instant acquisitionInstant)
+   public void extractCompressAndPublish(ReferenceFrame ousterSensorFrame,
+                                         OusterDepthExtractionKernel depthExtractionKernel,
+                                         Instant acquisitionInstant,
+                                         ByteBuffer pixelShiftBuffer,
+                                         ByteBuffer beamAltitudeAnglesBuffer,
+                                         ByteBuffer beamAzimuthAnglesBuffer)
    {
       // Important not to store as a field, as update() needs to be called each frame
       cameraPose.setToZero(ousterSensorFrame);
@@ -108,9 +113,10 @@ public class OusterDepthPublisher
       outputImageMessage.setSequenceNumber(sequenceNumber++);
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);
-      outputImageMessage.setIsOusterCameraModel(true);
-      outputImageMessage.setOusterVerticalFieldOfView((float) (Math.PI / 2.0));
-      outputImageMessage.setOusterHorizontalFieldOfView((float) (2.0 * Math.PI));
+      CameraModel.OUSTER.packMessageFormat(outputImageMessage);
+      MessageTools.packIDLSequenceCastingIntsToBytes(pixelShiftBuffer, outputImageMessage.getOusterPixelShifts());
+      MessageTools.packIDLSequence(beamAltitudeAnglesBuffer, outputImageMessage.getOusterBeamAltitudeAngles());
+      MessageTools.packIDLSequence(beamAzimuthAnglesBuffer, outputImageMessage.getOusterBeamAzimuthAngles());
       imagePublisher.publish(outputImageMessage);
 
       if (lidarScanPublisher != null && publishLidarScan.get())

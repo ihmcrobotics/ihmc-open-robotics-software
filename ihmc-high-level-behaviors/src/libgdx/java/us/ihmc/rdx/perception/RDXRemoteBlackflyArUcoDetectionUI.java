@@ -1,24 +1,13 @@
 package us.ihmc.rdx.perception;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
-import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.BehaviorSequencePerceptionManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.HashMap;
 
 public class RDXRemoteBlackflyArUcoDetectionUI
 {
@@ -33,9 +22,6 @@ public class RDXRemoteBlackflyArUcoDetectionUI
    private final ImPlotDoublePlot encodingDurationPlot;
    private final IHMCROS2Input<Float64> copyDurationInput;
    private final ImPlotDoublePlot copyDurationPlot;
-   private final TypedNotification<ArUcoMarkerPoses> arUcoPoseROS2Notification = new TypedNotification<>();
-   private final HashMap<Long, RDXModelInstance> markerPoseCoordinateFrames = new HashMap<>();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public RDXRemoteBlackflyArUcoDetectionUI(ROS2Helper ros2Helper)
    {
@@ -52,8 +38,6 @@ public class RDXRemoteBlackflyArUcoDetectionUI
       encodingDurationPlot = new ImPlotDoublePlot("Encoding duration", 30);
       copyDurationInput = ros2Helper.subscribe(DualBlackflyComms.COPY_DURATION);
       copyDurationPlot = new ImPlotDoublePlot("Copy duration", 30);
-
-      ros2Helper.subscribeViaCallback(BehaviorSequencePerceptionManager.ARUCO_MARKER_POSES, arUcoPoseROS2Notification::set);
    }
 
    public void update()
@@ -69,26 +53,6 @@ public class RDXRemoteBlackflyArUcoDetectionUI
          encodingDurationPlot.addValue(encodingDurationInput.getLatest().getData());
          copyDurationPlot.addValue(copyDurationInput.getLatest().getData());
       }
-
-      ArUcoMarkerPoses markerPoses;
-      if (arUcoPoseROS2Notification.poll())
-      {
-         markerPoses = arUcoPoseROS2Notification.read();
-
-         for (int i = 0; i < markerPoses.getMarkerId().size(); i++)
-         {
-            long markerID = markerPoses.getMarkerId().get(i);
-            RDXModelInstance markerPoseFrame = markerPoseCoordinateFrames.get(markerID);
-            if (markerPoseFrame == null)
-            {
-               markerPoseFrame = new RDXModelInstance(RDXModelBuilder.createCoordinateFrame(0.4));
-               markerPoseCoordinateFrames.put(markerID, markerPoseFrame);
-            }
-
-            tempTransform.set(markerPoses.getOrientation().get(i), markerPoses.getPosition().get(i));
-            markerPoseFrame.setTransformToWorldFrame(tempTransform);
-         }
-      }
    }
 
    public void renderImGuiWidgets()
@@ -101,14 +65,6 @@ public class RDXRemoteBlackflyArUcoDetectionUI
       convertColorDurationPlot.renderImGuiWidgets();
       encodingDurationPlot.renderImGuiWidgets();
       copyDurationPlot.renderImGuiWidgets();
-   }
-
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      for (RDXModelInstance markerPoseCoordinateFrame : markerPoseCoordinateFrames.values())
-      {
-         markerPoseCoordinateFrame.getRenderables(renderables, pool);
-      }
    }
 
    public void destroy()

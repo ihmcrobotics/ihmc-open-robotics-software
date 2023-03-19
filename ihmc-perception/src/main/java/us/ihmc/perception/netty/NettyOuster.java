@@ -11,6 +11,7 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
 
@@ -47,6 +48,10 @@ public class NettyOuster
 {
    public static final int TCP_PORT = 7501;
    public static final int UDP_PORT = 7502;
+
+   /** Ouster produces ranges as unsigned integers in millimeters, so this is just a conversion to meters. */
+   public static final float DISCRETE_RESOLUTION = 0.001f;
+   public static final int MAX_POINTS_PER_COLUMN = 128;
 
    public static final int BITS_PER_BYTE = 8;
 
@@ -98,9 +103,13 @@ public class NettyOuster
    private int columnsPerFrame;
    public static final int MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM = 16;
    private ByteBuffer pixelShiftBuffer;
+   private float lidarOriginToBeamOrigin;
+   private ByteBuffer beamAltitudeAnglesBuffer;
+   private ByteBuffer beamAzimuthAnglesBuffer;
    private int measurementBlockSize;
    private int udpDatagramsPerFrame;
    private int lidarFrameSizeBytes;
+   private final RigidBodyTransform spindleCenterToBaseTransform = new RigidBodyTransform();
 
    private volatile boolean tryingTCP = false;
    private volatile boolean tcpInitialized = false;
@@ -139,7 +148,7 @@ public class NettyOuster
                   tryingTCP = false;
                }, "TCPConfiguration");
             }
-            else
+            if (tcpInitialized)
             {
                ByteBuf content = packet.content();
 
@@ -176,63 +185,90 @@ public class NettyOuster
 
    private void configureTCP()
    {
-      performQuery("get_lidar_data_format", jsonResponse ->
+      performQuery("get_lidar_data_format", rootNode ->
       {
-         try
+         pixelsPerColumn = rootNode.get("pixels_per_column").asInt();
+         columnsPerFrame = rootNode.get("columns_per_frame").asInt();
+         measurementBlockSize = HEADER_BLOCK_BYTES + (pixelsPerColumn * CHANNEL_DATA_BLOCK_BYTES) + MEASUREMENT_BLOCK_STATUS_BYTES;
+         udpDatagramsPerFrame = columnsPerFrame / MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM;
+         lidarFrameSizeBytes = MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM * measurementBlockSize * udpDatagramsPerFrame;
+
+         LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, UDP datagrams per frame: {}",
+                       pixelsPerColumn,
+                       columnsPerFrame,
+                       udpDatagramsPerFrame);
+         LogTools.info("Measurement block size (B): {}, Lidar frame size (B): {}", measurementBlockSize, lidarFrameSizeBytes);
+
+         lidarFrameByteBuffer = ByteBuffer.allocateDirect(lidarFrameSizeBytes);
+
+         JsonNode pixelShiftNode = rootNode.get("pixel_shift_by_row");
+         pixelShiftBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
+         for (int i = 0; i < pixelsPerColumn; i++)
          {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(jsonResponse);
-
-            pixelsPerColumn = root.get("pixels_per_column").asInt();
-            columnsPerFrame = root.get("columns_per_frame").asInt();
-            measurementBlockSize = HEADER_BLOCK_BYTES + (pixelsPerColumn * CHANNEL_DATA_BLOCK_BYTES) + MEASUREMENT_BLOCK_STATUS_BYTES;
-            udpDatagramsPerFrame = columnsPerFrame / MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM;
-            lidarFrameSizeBytes = MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM * measurementBlockSize * udpDatagramsPerFrame;
-
-            LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, UDP datagrams per frame: {}",
-                          pixelsPerColumn,
-                          columnsPerFrame,
-                          udpDatagramsPerFrame);
-            LogTools.info("Measurement block size (B): {}, Lidar frame size (B): {}", measurementBlockSize, lidarFrameSizeBytes);
-
-            lidarFrameByteBuffer = ByteBuffer.allocateDirect(lidarFrameSizeBytes);
-
-            JsonNode pixelShiftNode = root.get("pixel_shift_by_row");
-            pixelShiftBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
-            for (int i = 0; i < pixelsPerColumn; i++)
-            {
-               pixelShiftBuffer.putInt(pixelShiftNode.get(i).asInt());
-            }
-            pixelShiftBuffer.rewind();
+            pixelShiftBuffer.putInt(pixelShiftNode.get(i).asInt());
          }
-         catch (JsonProcessingException jsonProcessingException)
-         {
-            LogTools.error(jsonProcessingException.getMessage());
-         }
+         pixelShiftBuffer.rewind();
+         int[] pixelShiftsArray = new int[pixelsPerColumn];
+         pixelShiftBuffer.asIntBuffer().get(pixelShiftsArray);
+         LogTools.debug("Pixel shifts: {}", pixelShiftsArray);
+         pixelShiftBuffer.rewind();
       });
 
-      performQuery("get_config_param active", jsonResponse ->
+      performQuery("get_config_param active", rootNode ->
       {
-         try
-         {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(jsonResponse);
+         // Lidar mode contains the frequency like 1024x20 or 2048x10
+         lidarMode = rootNode.get("lidar_mode").asText();
+         LogTools.info("Lidar mode: {}", lidarMode);
+      });
 
-            // Lidar mode contains the frequency like 1024x20 or 2048x10
-            lidarMode = root.get("lidar_mode").asText();
-            LogTools.info("Lidar mode: {}", lidarMode);
-         }
-         catch (JsonProcessingException jsonProcessingException)
+      performQuery("get_beam_intrinsics", rootNode ->
+      {
+         // Convert to meters
+         lidarOriginToBeamOrigin = (float) rootNode.get("lidar_origin_to_beam_origin_mm").asDouble() / 1000.0f;
+         LogTools.info("Lidar origin to beam origin: {}", lidarOriginToBeamOrigin);
+         JsonNode beamAltitudeAnglesNode = rootNode.get("beam_altitude_angles");
+         JsonNode beamAzimuthAnglesNode = rootNode.get("beam_azimuth_angles");
+         beamAltitudeAnglesBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
+         beamAzimuthAnglesBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
+         for (int i = 0; i < pixelsPerColumn; i++)
          {
-            LogTools.error(jsonProcessingException.getMessage());
+            beamAltitudeAnglesBuffer.putFloat((float) Math.toRadians(beamAltitudeAnglesNode.get(i).asDouble()));
+            beamAzimuthAnglesBuffer.putFloat((float) Math.toRadians(beamAzimuthAnglesNode.get(i).asDouble()));
          }
+         beamAltitudeAnglesBuffer.rewind();
+         beamAzimuthAnglesBuffer.rewind();
+         float[] altitudeAnglesArray = new float[pixelsPerColumn];
+         float[] azimuthAnglesArray = new float[pixelsPerColumn];
+         beamAltitudeAnglesBuffer.asFloatBuffer().get(altitudeAnglesArray);
+         beamAzimuthAnglesBuffer.asFloatBuffer().get(azimuthAnglesArray);
+         LogTools.debug("Altitude angles: {}", altitudeAnglesArray);
+         LogTools.debug("Azimuth angles: {}", azimuthAnglesArray);
+         beamAltitudeAnglesBuffer.rewind();
+         beamAzimuthAnglesBuffer.rewind();
+      });
+
+      performQuery("get_lidar_intrinsics", rootNode ->
+      {
+         JsonNode lidarToSensorTransformNode = rootNode.get("lidar_to_sensor_transform");
+         spindleCenterToBaseTransform.getRotation().setAndNormalize(lidarToSensorTransformNode.get(0).asDouble(),
+                                                                    lidarToSensorTransformNode.get(1).asDouble(),
+                                                                    lidarToSensorTransformNode.get(2).asDouble(),
+                                                                    lidarToSensorTransformNode.get(4).asDouble(),
+                                                                    lidarToSensorTransformNode.get(5).asDouble(),
+                                                                    lidarToSensorTransformNode.get(6).asDouble(),
+                                                                    lidarToSensorTransformNode.get(8).asDouble(),
+                                                                    lidarToSensorTransformNode.get(9).asDouble(),
+                                                                    lidarToSensorTransformNode.get(10).asDouble());
+         spindleCenterToBaseTransform.getTranslation().set(lidarToSensorTransformNode.get(3).asDouble(),
+                                                           lidarToSensorTransformNode.get(7).asDouble(),
+                                                           lidarToSensorTransformNode.get(11).asDouble());
       });
 
       LogTools.info("Ouster is initialized.");
       tcpInitialized = true;
    }
 
-   private void performQuery(String command, Consumer<String> responseConsumer)
+   private void performQuery(String command, Consumer<JsonNode> rootNodeConsumer)
    {
       LogTools.info("Attempting to query host " + sanitizededHostAddress + " with command " + command);
 
@@ -263,7 +299,16 @@ public class NettyOuster
          LogTools.info("Unbound from TCP port " + TCP_PORT);
       }
 
-      responseConsumer.accept(jsonResponse);
+      try
+      {
+         ObjectMapper mapper = new ObjectMapper();
+         JsonNode rootNode = mapper.readTree(jsonResponse);
+         rootNodeConsumer.accept(rootNode);
+      }
+      catch (JsonProcessingException jsonProcessingException)
+      {
+         LogTools.error(jsonProcessingException.getMessage());
+      }
    }
 
    /**
@@ -326,6 +371,21 @@ public class NettyOuster
    public ByteBuffer getPixelShiftBuffer()
    {
       return pixelShiftBuffer;
+   }
+
+   public ByteBuffer getBeamAltitudeAnglesBuffer()
+   {
+      return beamAltitudeAnglesBuffer;
+   }
+
+   public ByteBuffer getBeamAzimuthAnglesBuffer()
+   {
+      return beamAzimuthAnglesBuffer;
+   }
+
+   public float getLidarOriginToBeamOrigin()
+   {
+      return lidarOriginToBeamOrigin;
    }
 
    public int getColumnsPerFrame()

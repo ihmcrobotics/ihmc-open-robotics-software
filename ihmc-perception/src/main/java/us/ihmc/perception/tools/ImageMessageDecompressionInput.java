@@ -5,8 +5,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 
-import java.nio.ByteBuffer;
-
 /**
  * This class is used to streamline feeding image data from ROS 2
  * into OpenCV. Since it's got some state to prevent allocations,
@@ -14,24 +12,19 @@ import java.nio.ByteBuffer;
  */
 public class ImageMessageDecompressionInput
 {
-   private ByteBuffer decompressionInputBuffer;
    private BytePointer decompressionInputBytePointer;
    private Mat decompressionInputMat;
 
    public void setup(int uncompressedImageSizeBytes)
    {
-      decompressionInputBuffer = NativeMemoryTools.allocate(uncompressedImageSizeBytes);
-      decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
+      decompressionInputBytePointer = new BytePointer(uncompressedImageSizeBytes);
       decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
    }
 
    public void extract(ImageMessage imageMessage)
    {
       int numberOfBytes = imageMessage.getData().size();
-      PerceptionMessageTools.extractImageMessageData(imageMessage, decompressionInputBuffer);
-
-      decompressionInputBytePointer.position(0);
-      decompressionInputBytePointer.limit(numberOfBytes);
+      PerceptionMessageTools.copyToBytePointer(imageMessage.getData(), decompressionInputBytePointer);
 
       decompressionInputMat.cols(numberOfBytes);
       decompressionInputMat.data(decompressionInputBytePointer);

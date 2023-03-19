@@ -54,7 +54,7 @@ public class RDXBlackflyCalibrationPatternDemo
                      while (running)
                      {
                         blackflyReader.readBlackflyImage();
-                        calibrationPatternDetectionUI.copyInSourceImage(blackflyReader.getBayerRGImage());
+                        calibrationPatternDetectionUI.copyBayerBGImage(blackflyReader.getBayerBGImage());
                      }
                   }, "CameraRead");
                }
