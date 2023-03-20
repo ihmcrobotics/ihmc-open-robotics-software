@@ -77,7 +77,6 @@ public class DualBlackflyCamera
    private long sequenceNumber = 0;
    private List<OpenCVArUcoMarker> arUcoMarkersToTrack;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
 
    public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot)
