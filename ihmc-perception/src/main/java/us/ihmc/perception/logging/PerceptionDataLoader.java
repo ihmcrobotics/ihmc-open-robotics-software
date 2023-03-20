@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
@@ -190,7 +191,7 @@ public class PerceptionDataLoader
       {
          LogTools.info("Loading Index: {}/{}", i, 10);
          loader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, i, bytePointer, depthImage);
-         BytedecoOpenCVTools.displayDepth("L515 Depth", depthImage, 1);
+         PerceptionDebugTools.displayDepth("L515 Depth", depthImage, 1);
       }
    }
 }
