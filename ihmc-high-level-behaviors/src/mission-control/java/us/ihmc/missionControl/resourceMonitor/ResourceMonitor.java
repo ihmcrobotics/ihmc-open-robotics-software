@@ -1,5 +1,6 @@
 package us.ihmc.missionControl.resourceMonitor;
 
+import org.apache.logging.log4j.util.Strings;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -16,7 +17,7 @@ import java.util.List;
  */
 public abstract class ResourceMonitor
 {
-   private static final double DEFAULT_READ_PERIOD_SECONDS = 0.25;
+   private static final double DEFAULT_READ_PERIOD_SECONDS = 1.0;
 
    private final double parsePeriodSeconds;
    private final String[] command;
@@ -68,7 +69,10 @@ public abstract class ResourceMonitor
       new Thread(() ->
       {
          ThreadTools.sleep((long) (parsePeriodSeconds * 1000));
-         process.destroy();
+         if (process.isAlive())
+         {
+            process.destroy();
+         }
       }).start();
 
       List<String> lines = new ArrayList<>();
