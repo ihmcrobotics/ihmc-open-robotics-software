@@ -1,11 +1,14 @@
 package us.ihmc.missionControl.resourceMonitor;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Runs a command and reads the process output from stdout.
@@ -15,6 +18,7 @@ public abstract class ResourceMonitor
 {
    private static final double DEFAULT_READ_PERIOD_SECONDS = 0.25;
 
+   private final double parsePeriodSeconds;
    private final String[] command;
    private final PausablePeriodicThread thread;
    private volatile boolean running;
@@ -26,6 +30,7 @@ public abstract class ResourceMonitor
 
    public ResourceMonitor(double parsePeriodSeconds, String... command)
    {
+      this.parsePeriodSeconds = parsePeriodSeconds;
       this.command = command;
       thread = new PausablePeriodicThread(getClass().getName() + "-Reader-Parser", parsePeriodSeconds, true, () ->
       {
@@ -53,44 +58,33 @@ public abstract class ResourceMonitor
       running = false;
    }
 
-   // TODO: cleanup
    public String[] read() throws IOException, InterruptedException
    {
       ProcessBuilder processBuilder = new ProcessBuilder(command);
-
+      processBuilder.redirectErrorStream(true);
       Process process = processBuilder.start();
-      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-      ConcurrentLinkedQueue<Integer> characterQueue = new ConcurrentLinkedQueue<>();
-
-      int read;
-      while ((read = bufferedReader.read()) > -1 && running)
+      // Destroy the process after the parse period has expired
+      new Thread(() ->
       {
-         characterQueue.add(read);
-      }
+         ThreadTools.sleep((long) (parsePeriodSeconds * 1000));
+         process.destroy();
+      }).start();
 
-      process.destroy();
-      process.waitFor();
+      List<String> lines = new ArrayList<>();
 
-      final String[] lines;
-
-      if (!characterQueue.isEmpty())
+      try (InputStream inputStream = process.getInputStream(); BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream)))
       {
-         StringBuilder output = new StringBuilder();
-         while (!characterQueue.isEmpty())
+         String line;
+         while ((line = reader.readLine()) != null && process.isAlive() && running)
          {
-            output.append((char) ((int) characterQueue.poll()));
+            lines.add(line);
          }
-
-         String outputString = output.toString();
-         lines = outputString.split("\n");
-      }
-      else
-      {
-         lines = new String[] {};
       }
 
-      return lines;
+      String[] lineArray = new String[lines.size()];
+      lines.toArray(lineArray);
+      return lineArray;
    }
 
    public abstract void parse(String[] lines);
