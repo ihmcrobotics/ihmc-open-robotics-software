@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.logging.HDF5Tools;
@@ -136,12 +137,12 @@ public class RealsenseColorAndDepthPublisher
          MutableBytePointer depthFrameData = realsense.getDepthFrameData();
          depth16UC1Image = new Mat(realsense.getDepthHeight(), realsense.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
          PerceptionMessageTools.setDepthIntrinsicsFromRealsense(realsense, depthImageMessage);
-         depthImageMessage.setIsPinholeCameraModel(true);
+         CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
 
          MutableBytePointer colorFrameData = realsense.getColorFrameData();
          color8UC3Image = new Mat(realsense.getColorHeight(), realsense.getColorWidth(), opencv_core.CV_8UC3, colorFrameData);
          PerceptionMessageTools.setColorIntrinsicsFromRealsense(realsense, colorImageMessage);
-         colorImageMessage.setIsPinholeCameraModel(true);
+         CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
 
          yuvColorImage = new Mat();
 

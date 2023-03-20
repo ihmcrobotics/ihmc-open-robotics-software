@@ -26,7 +26,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
@@ -37,6 +36,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
+import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1278,5 +1278,78 @@ public class MessageTools
    {
       return TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
                                       imageMessage.getAcquisitionTime().getAdditionalNanos());
+   }
+
+   public static void packIDLSequence(ByteBuffer sourceBuffer, us.ihmc.idl.IDLSequence.Byte sequenceToPack)
+   {
+      // It is important to call resetQuick, which does not set the full sequence to zeros
+      sequenceToPack.resetQuick();
+      // A lot of data goes through here. We wish we could do a direct memcopy, but our message data is on the Java heap.
+      for (int i = 0; i < sourceBuffer.limit(); i++)
+      {
+         sequenceToPack.add(sourceBuffer.get(i));
+      }
+   }
+
+   public static void packIDLSequenceCastingIntsToBytes(ByteBuffer sourceBuffer, us.ihmc.idl.IDLSequence.Byte sequenceToPack)
+   {
+      sequenceToPack.resetQuick();
+      int numberOfIntegers = sourceBuffer.limit() / Integer.BYTES;
+      for (int i = 0; i < numberOfIntegers; i++)
+      {
+         sequenceToPack.add((byte) sourceBuffer.getInt(i * Integer.BYTES));
+      }
+   }
+
+   public static void packIDLSequence(ByteBuffer sourceBuffer, us.ihmc.idl.IDLSequence.Float sequenceToPack)
+   {
+      // It is important to call resetQuick, which does not set the full sequence to zeros
+      sequenceToPack.resetQuick();
+      // A lot of data goes through here. We wish we could do a direct memcopy, but our message data is on the Java heap.
+      int numberOfFloats = sourceBuffer.limit() / java.lang.Float.BYTES;
+      for (int i = 0; i < numberOfFloats; i++)
+      {
+         float sourceFloat = sourceBuffer.getFloat(i * java.lang.Float.BYTES);
+         sequenceToPack.add(sourceFloat);
+      }
+   }
+
+   public static void extractIDLSequence(us.ihmc.idl.IDLSequence.Byte sourceIDLSequence, ByteBuffer byteBufferToPack)
+   {
+      int numberOfBytes = sourceIDLSequence.size();
+      byteBufferToPack.rewind();
+      byteBufferToPack.limit(byteBufferToPack.capacity());
+      for (int i = 0; i < numberOfBytes; i++)
+      {
+         byteBufferToPack.put(sourceIDLSequence.get(i));
+      }
+      byteBufferToPack.flip();
+   }
+
+   public static void extractIDLSequenceCastingBytesToInts(us.ihmc.idl.IDLSequence.Byte sourceIDLSequence, ByteBuffer byteBufferToPack)
+   {
+      int numberOfBytes = sourceIDLSequence.size();
+      byteBufferToPack.rewind();
+      byteBufferToPack.limit(byteBufferToPack.capacity());
+      for (int i = 0; i < numberOfBytes; i++)
+      {
+         byte x = sourceIDLSequence.get(i);
+         int value = Byte.toUnsignedInt(x);
+         byteBufferToPack.putInt(value);
+      }
+      byteBufferToPack.flip();
+   }
+
+   public static void extractIDLSequence(us.ihmc.idl.IDLSequence.Float sourceIDLSequence, ByteBuffer byteBufferToPack)
+   {
+      int numberOfFloats = sourceIDLSequence.size();
+      byteBufferToPack.rewind();
+      byteBufferToPack.limit(byteBufferToPack.capacity());
+      for (int i = 0; i < numberOfFloats; i++)
+      {
+         float value = sourceIDLSequence.get(i);
+         byteBufferToPack.putFloat(value);
+      }
+      byteBufferToPack.flip();
    }
 }
