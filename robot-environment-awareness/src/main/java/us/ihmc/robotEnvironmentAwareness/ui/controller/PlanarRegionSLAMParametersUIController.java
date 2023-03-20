@@ -17,18 +17,10 @@ public class PlanarRegionSLAMParametersUIController extends REABasicUIController
    @FXML
    private TableView<ParametersTableRow> parameterTable;
 
-   public void setupParameters(String configurationProject)
+   public void setupParameters()
    {
-      if (configurationProject != null)
-      {
-         slamParameters = new PlanarRegionSLAMParameters("ForLiveMap", configurationProject);
-      }
-      else
-      {
-         slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
-      }
+      slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
       javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(slamParameters);
-
    }
 
    public void bindControls()

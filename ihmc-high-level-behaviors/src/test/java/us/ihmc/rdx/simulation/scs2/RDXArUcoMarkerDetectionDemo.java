@@ -119,7 +119,7 @@ public class RDXArUcoMarkerDetectionDemo
             WorkspaceFile testImageFile = new WorkspaceFile(new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                                    "ihmc-high-level-behaviors/src/test/resources"),
                                                             "testArUcoDetection.jpg");
-            Mat readImage = opencv_imgcodecs.imread(testImageFile.getFilePath().toString());
+            Mat readImage = opencv_imgcodecs.imread(testImageFile.getFilesystemFile().toString());
             testRGB888ColorImage = new BytedecoImage(readImage);
          }
 

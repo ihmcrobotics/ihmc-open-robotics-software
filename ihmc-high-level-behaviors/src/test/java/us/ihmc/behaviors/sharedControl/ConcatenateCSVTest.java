@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.sharedControl;
 
+import us.ihmc.promp.ProMPUtil;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
-import us.ihmc.tools.io.WorkspaceDirectory;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -15,9 +15,8 @@ public class ConcatenateCSVTest
    {
       try
       {
-         WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
-         String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
-         String demoTrainingDirectory = directoryAbsolutePath + "/test/PushDoorLeftRightHand";
+         String etcDirectory = ProMPUtil.getEtcDirectory().toString();
+         String demoTrainingDirectory = etcDirectory + "/test/PushDoorLeftRightHand";
          // Create a file object
          File demoFolder = new File(demoTrainingDirectory);
 
@@ -38,12 +37,12 @@ public class ConcatenateCSVTest
             System.out.println(data.size());
             assertTrue(data.get(0).length == 7); // check columns are 7dofs (orientation + position) = frame pose
             trajectoryRecorder.concatenateData();
-            trajectoryRecorder.setPath(directoryAbsolutePath + "/test", false); // false = do not reset trajectoryRecorder after changing path
+            trajectoryRecorder.setPath(etcDirectory + "/test", false); // false = do not reset trajectoryRecorder after changing path
             trajectoryRecorder.writeCSV(trajectoryRecorder.getConcatenatedData());
 
             // try to open saved file and check if data has been concatenated successfully
             TrajectoryRecordReplay<Double> trajectoryReplay = new TrajectoryRecordReplay<>(Double.class,
-                                                                                           directoryAbsolutePath + "/test/"
+                                                                                           etcDirectory + "/test/"
                                                                                            + trajectoryRecorder.getRecordFileName(),
                                                                                            numberOfParts);
             System.out.println(trajectoryReplay.getPath());

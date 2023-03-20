@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class PointCloudSegmentationParameters extends StoredPropertySet implements PointCloudSegmentationParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-perception/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-perception/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    /**
@@ -46,32 +42,29 @@ public class PointCloudSegmentationParameters extends StoredPropertySet implemen
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public PointCloudSegmentationParameters(String versionSpecifier)
+   public PointCloudSegmentationParameters(String versionSuffix)
    {
-      this(PointCloudSegmentationParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(PointCloudSegmentationParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public PointCloudSegmentationParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public PointCloudSegmentationParameters(Class<?> classForLoading, String versionSuffix)
    {
-      super(keys, classForLoading, PointCloudSegmentationParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, PointCloudSegmentationParameters.class, versionSuffix);
       load();
    }
 
    public PointCloudSegmentationParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, PointCloudSegmentationParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, PointCloudSegmentationParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           PointCloudSegmentationParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, PointCloudSegmentationParameters.class);
+      parameters.generateJavaFiles();
    }
 }

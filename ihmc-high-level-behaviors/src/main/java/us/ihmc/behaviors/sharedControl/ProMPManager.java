@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.promp.*;
-import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -78,8 +77,7 @@ public class ProMPManager
     */
    public void loadTaskFromDemos()
    {
-      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
-      String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
+      String demoDirAbs = ProMPUtil.getDemosDirectory().toString();
       String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
       File demoFolder = new File(demoTrainingDirAbs);
       File[] listOfFiles = demoFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv") && !new File(dir, name).isDirectory());
