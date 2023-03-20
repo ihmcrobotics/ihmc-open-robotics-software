@@ -423,6 +423,11 @@ public class BytedecoOpenCVTools
       return a.getImageWidth() == b.getImageWidth() && a.getImageHeight() == b.getImageHeight();
    }
 
+   public static boolean dimensionsMatch(Mat a, int imageWidth, int imageHeight)
+   {
+      return a.cols() == imageWidth && a.rows() == imageHeight;
+   }
+
    /**
     * Puts 3 floats in a Mat that is an array of Float3s i.e. type == CV_32FC3
     * Assumes Mat is continuous. i.e. Mat::isContinuous == true

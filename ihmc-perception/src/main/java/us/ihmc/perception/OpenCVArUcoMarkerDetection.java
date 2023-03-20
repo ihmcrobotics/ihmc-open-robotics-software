@@ -2,20 +2,19 @@ package us.ihmc.perception;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntIntHashMap;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_objdetect;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_objdetect.ArucoDetector;
 import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 import org.bytedeco.opencv.opencv_objdetect.Dictionary;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_objdetect.RefineParameters;
-import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -23,6 +22,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.tools.Timer;
+import us.ihmc.tools.thread.SwapReference;
+import us.ihmc.tools.thread.Throttler;
 
 import java.util.function.Consumer;
 
@@ -34,38 +36,34 @@ public class OpenCVArUcoMarkerDetection
    private Dictionary dictionary;
    private ReferenceFrame sensorFrame;
    private final FramePose3D markerPose = new FramePose3D();
-   private BytedecoImage rgb8ImageForDetection;
-   private MatVector corners;
-   private Mat ids;
-   private MatVector rejectedImagePoints;
-   private DetectorParameters detectorParameters;
+   private SwapReference<OpenCVArUcoMakerDetectionSwapData> detectionSwapReference;
+   private DetectorParameters detectorParametersForTuners;
    private Mat cameraMatrix;
    private Mat distortionCoefficients;
    private final TIntArrayList detectedIDs = new TIntArrayList();
-   private final TIntIntHashMap markerIDToCornersIndexMap = new TIntIntHashMap();
    private Mat rotationVector;
    private Mat rotationMatrix;
    private final LinearTransform3D euclidLinearTransform = new LinearTransform3D();
    private Mat translationVector;
    private final Point3D euclidPosition = new Point3D();
    private Mat objectPoints;
-   private final Stopwatch stopwatch = new Stopwatch().start();
    private boolean enabled = true;
    private Scalar defaultBorderColor;
    private BytedecoImage optionalSourceColorImage;
    private BytePointer objectPointsDataPointer;
+   private boolean running = true;
+   private final Timer timer = new Timer();
+   private final Throttler throttler = new Throttler();
 
    public void create(ReferenceFrame sensorFrame)
    {
       this.sensorFrame = sensorFrame;
 
       dictionary = opencv_objdetect.getPredefinedDictionary(DEFAULT_DICTIONARY);
-      corners = new MatVector(new Mat(1, 1, opencv_core.CV_32FC2));
-      ids = new Mat();
-      rejectedImagePoints = new MatVector(new Mat(1, 1, opencv_core.CV_32FC2));
-      detectorParameters = new DetectorParameters();
+      detectionSwapReference = new SwapReference<>(OpenCVArUcoMakerDetectionSwapData::new);
+      detectorParametersForTuners = new DetectorParameters();
       // We don't need refine parameters
-      arucoDetector = new ArucoDetector(dictionary, detectorParameters, (RefineParameters) null);
+      arucoDetector = new ArucoDetector(dictionary, detectionSwapReference.getForThreadOne().getDetectorParameters(), (RefineParameters) null);
       cameraMatrix = new Mat(3, 3, opencv_core.CV_64F);
       distortionCoefficients = new Mat(1, 4, opencv_core.CV_32FC1);
       distortionCoefficients.ptr(0, 0).putFloat(0.0f);
@@ -79,6 +77,8 @@ public class OpenCVArUcoMarkerDetection
       objectPoints = new Mat(4, 1, opencv_core.CV_32FC3);
       objectPointsDataPointer = objectPoints.ptr();
       defaultBorderColor = new Scalar(0, 0, 255, 0);
+
+      ThreadTools.startAsDaemon(this::detectMarkersOnAsynchronousThread, "ArUcoMarkerDetection");
    }
 
    public void setSourceImageForDetection(BytedecoImage optionalSourceColorImage)
@@ -104,51 +104,76 @@ public class OpenCVArUcoMarkerDetection
    {
       if (enabled)
       {
-         if (rgb8ImageForDetection == null)
+         timer.reset();
+
+         synchronized (detectionSwapReference)
          {
-            rgb8ImageForDetection = new BytedecoImage(sourceColorImage.getImageWidth(), sourceColorImage.getImageHeight(), opencv_core.CV_8UC3);
+            OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadTwo();
+
+            data.ensureImageInitialized(sourceColorImage.getImageWidth(), sourceColorImage.getImageHeight());
+            data.getRgb8ImageForDetection().ensureDimensionsMatch(sourceColorImage);
+
+            if (sourceColorImage.getBytedecoOpenCVMat().type() == opencv_core.CV_8UC4)
+            {
+               // ArUco library doesn't support alpha channel being in there
+               opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(),
+                                       data.getRgb8ImageForDetection().getBytedecoOpenCVMat(),
+                                       opencv_imgproc.COLOR_RGBA2RGB);
+            }
+            else
+            {
+               sourceColorImage.getBytedecoOpenCVMat().copyTo(data.getRgb8ImageForDetection().getBytedecoOpenCVMat());
+            }
+
+            OpenCVArUcoMarkerDetectionParametersTools.copy(detectorParametersForTuners, data.getDetectorParameters());
+
+            detectedIDs.clear();
+            data.getMarkerIDToCornersIndexMap().clear();
+            for (int i = 0; i < data.getIds().rows(); i++)
+            {
+               int markerID = data.getIds().ptr(i, 0).getInt();
+               detectedIDs.add(markerID);
+               data.getMarkerIDToCornersIndexMap().put(markerID, i);
+            }
          }
+      }
+   }
 
-         rgb8ImageForDetection.ensureDimensionsMatch(sourceColorImage);
-
-         if (sourceColorImage.getBytedecoOpenCVMat().type() == opencv_core.CV_8UC4)
+   private void detectMarkersOnAsynchronousThread()
+   {
+      while (running)
+      {
+         if (throttler.run(0.05) && timer.isRunning(0.5))
          {
-            // ArUco library doesn't support alpha channel being in there
-            opencv_imgproc.cvtColor(sourceColorImage.getBytedecoOpenCVMat(), rgb8ImageForDetection.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGBA2RGB);
-         }
-         else
-         {
-            sourceColorImage.getBytedecoOpenCVMat().copyTo(rgb8ImageForDetection.getBytedecoOpenCVMat());
-         }
+            OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadOne();
 
-         stopwatch.lap();
-         arucoDetector.setDetectorParameters(detectorParameters);
-         arucoDetector.detectMarkers(rgb8ImageForDetection.getBytedecoOpenCVMat(),
-                                     corners,
-                                     ids,
-                                     rejectedImagePoints);
-         stopwatch.suspend();
+            if (data.getRgb8ImageForDetection() != null)
+            {
+               data.getStopwatch().lap();
+               arucoDetector.setDetectorParameters(data.getDetectorParameters());
+               arucoDetector.detectMarkers(data.getRgb8ImageForDetection().getBytedecoOpenCVMat(),
+                                           data.getCorners(),
+                                           data.getIds(),
+                                           data.getRejectedImagePoints());
+               data.getStopwatch().suspend();
+               data.setHasDetected(true);
+            }
 
-         detectedIDs.clear();
-         markerIDToCornersIndexMap.clear();
-         for (int i = 0; i < ids.rows(); i++)
-         {
-            int markerID = ids.ptr(i, 0).getInt();
-            detectedIDs.add(markerID);
-            markerIDToCornersIndexMap.put(markerID, i);
+            detectionSwapReference.swap();
          }
       }
    }
 
    public void getCopyOfSourceRGBImage(BytedecoImage imageToPack)
    {
+      BytedecoImage rgb8ImageForDetection = detectionSwapReference.getForThreadTwo().getRgb8ImageForDetection();
       imageToPack.ensureDimensionsMatch(rgb8ImageForDetection);
       rgb8ImageForDetection.getBytedecoOpenCVMat().copyTo(imageToPack.getBytedecoOpenCVMat());
    }
 
    public boolean isDetected(OpenCVArUcoMarker marker)
    {
-      return markerIDToCornersIndexMap.containsKey(marker.getId());
+      return detectionSwapReference.getForThreadTwo().getMarkerIDToCornersIndexMap().containsKey(marker.getId());
    }
 
    public FramePose3DBasics getPose(OpenCVArUcoMarker marker)
@@ -190,8 +215,12 @@ public class OpenCVArUcoMarkerDetection
          BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 2, 0.0f, 0.0f, 0.0f);
          BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 3, 0.0f, (float) -marker.getSideLength(), 0.0f);
 
-         Mat markerCorners = corners.get(markerIDToCornersIndexMap.get(marker.getId()));
-         opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
+         synchronized (detectionSwapReference)
+         {
+            OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadTwo();
+            Mat markerCorners = data.getCorners().get(data.getMarkerIDToCornersIndexMap().get(marker.getId()));
+            opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
+         }
 
          // ???
          double rx = rotationVector.ptr(0).getDouble();
@@ -231,11 +260,13 @@ public class OpenCVArUcoMarkerDetection
 
    public void drawDetectedMarkers(Mat imageForDrawing, Scalar borderColor)
    {
-      opencv_objdetect.drawDetectedMarkers(imageForDrawing, corners, ids, borderColor);
+      OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadTwo();
+      opencv_objdetect.drawDetectedMarkers(imageForDrawing, data.getCorners(), data.getIds(), borderColor);
    }
 
    public void drawRejectedPoints(Mat imageForDrawing)
    {
+      MatVector rejectedImagePoints = detectionSwapReference.getForThreadTwo().getRejectedImagePoints();
       opencv_objdetect.drawDetectedMarkers(imageForDrawing, rejectedImagePoints);
    }
 
@@ -247,6 +278,11 @@ public class OpenCVArUcoMarkerDetection
       }
    }
 
+   public void destroy()
+   {
+      running = false;
+   }
+
    public Mat getCameraMatrix()
    {
       return cameraMatrix;
@@ -254,17 +290,21 @@ public class OpenCVArUcoMarkerDetection
 
    public long getNumberOfRejectedPoints()
    {
-      return rejectedImagePoints.size();
+      synchronized (detectionSwapReference)
+      {
+         MatVector rejectedImagePoints = detectionSwapReference.getForThreadTwo().getRejectedImagePoints();
+         return rejectedImagePoints.size();
+      }
    }
 
    public DetectorParameters getDetectorParameters()
    {
-      return detectorParameters;
+      return detectorParametersForTuners;
    }
 
    public double getTimeTakenToDetect()
    {
-      return stopwatch.lapElapsed();
+      return detectionSwapReference.getForThreadTwo().getStopwatch().lapElapsed();
    }
 
    public void setEnabled(boolean enabled)
@@ -272,8 +312,18 @@ public class OpenCVArUcoMarkerDetection
       this.enabled = enabled;
    }
 
+   public Object getSyncObject()
+   {
+      return detectionSwapReference;
+   }
+
    public Mat getIds()
    {
-      return ids;
+      return detectionSwapReference.getForThreadTwo().getIds();
+   }
+
+   public boolean getHasDetected()
+   {
+      return detectionSwapReference.getForThreadTwo().getHasDetected();
    }
 }
