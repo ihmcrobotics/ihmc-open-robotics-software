@@ -1,5 +1,6 @@
 package us.ihmc.missionControl.resourceMonitor;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
 import java.util.Map;
@@ -13,7 +14,7 @@ public class SysstatNetworkMonitor extends ResourceMonitor
 
    public SysstatNetworkMonitor()
    {
-      super("sar", "-n", "DEV", "3");
+      super(2.0, "sar", "-n", "DEV", "1");
    }
 
    public Map<String, Float> getIfaceRxKbps()
@@ -39,10 +40,14 @@ public class SysstatNetworkMonitor extends ResourceMonitor
       // Loop through each line
       for (int i = 0; i < lines.length; i++)
       {
-         if (i < 2)
-            continue; // Skip the table header
+         String line = lines[i];
 
-         String[] values = lines[i].split("\\s+");
+         if (!line.matches("\\d+:\\d+:\\d.*"))
+            continue; // Ignore any line that doesn't begin with a time
+         if (line.contains("IFACE"))
+            continue; // Ignore the table header
+
+         String[] values = line.split("\\s+");
 
          String time;
          String ampm;
@@ -86,6 +91,29 @@ public class SysstatNetworkMonitor extends ResourceMonitor
             LogTools.info("Unable to parse rx/tx from sar network stats table");
             return;
          }
+      }
+   }
+
+   public static void main(String[] args)
+   {
+      SysstatNetworkMonitor monitor = new SysstatNetworkMonitor();
+      monitor.start();
+
+      while (true)
+      {
+         LogTools.info("rx");
+         for (Map.Entry<String, Float> entry : monitor.getIfaceRxKbps().entrySet())
+         {
+            LogTools.info("\tiface " + entry.getKey() + " " + entry.getValue());
+         }
+
+         LogTools.info("tx");
+         for (Map.Entry<String, Float> entry : monitor.getIfaceTxKbps().entrySet())
+         {
+            LogTools.info("\tiface " + entry.getKey() + " " + entry.getValue());
+         }
+
+         ThreadTools.sleep(1000);
       }
    }
 }
