@@ -18,6 +18,7 @@ import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.UnitConversions;
@@ -145,7 +146,7 @@ public class RealsenseColorAndDepthLogger
             BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthBytePointer);
             perceptionDataLogger.storeBytesFromPointer(depthChannelName, compressedDepthBytePointer);
 
-            BytedecoOpenCVTools.displayDepth("Depth", depth16UC1Image, 1);
+            PerceptionDebugTools.displayDepth("Depth", depth16UC1Image, 1);
 
             //BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorBytePointer);
             //perceptionDataLogger.storeBytesFromPointer(colorChannelName, compressedDepthBytePointer);
