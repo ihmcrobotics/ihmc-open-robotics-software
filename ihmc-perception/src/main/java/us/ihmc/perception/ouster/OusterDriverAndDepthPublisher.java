@@ -108,6 +108,11 @@ public class OusterDriverAndDepthPublisher
          humanoidReferenceFrames.getOusterLidarFrame().getTransformToDesiredFrame(ousterSensorFrame.getTransformToParent(), ReferenceFrame.getWorldFrame());
          ousterSensorFrame.getReferenceFrame().update();
       }
-      depthPublisher.extractCompressAndPublish(ousterSensorFrame.getReferenceFrame(), depthExtractionKernel, ouster.getAquisitionInstant());
+      depthPublisher.extractCompressAndPublish(ousterSensorFrame.getReferenceFrame(),
+                                               depthExtractionKernel,
+                                               ouster.getAquisitionInstant(),
+                                               ouster.getPixelShiftBuffer(),
+                                               ouster.getBeamAltitudeAnglesBuffer(),
+                                               ouster.getBeamAzimuthAnglesBuffer());
    }
 }

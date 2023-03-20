@@ -20,8 +20,8 @@ import java.util.function.BiConsumer;
 
 public class ObjectDetector
 {
-   private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("object_detector");
-   public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
+   private final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("object_detector");
+   public final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
 
    private final IHMCROS2Input<ArUcoMarkerPoses> arUcoMarkerPosesSubscription;
    private final ROS2Helper ros2;
@@ -59,7 +59,6 @@ public class ObjectDetector
                //TODO - EXTENSION TO SIMULTANEOUS DETECTION MULTIPLE OBJECTS
                // if multiple objects detected,
                // use VR eye tracking to see what we are focusing on (closer object to where the eye is focusing)
-               // highlight selected object and user confirms with button A, rejects button B
                //               objectWithArUcoMarker.add(new ArUcoMarkerObject(marker.getId(),arUcoInfo)); // get object with attached marker
                objectWithArUcoMarker = new ArUcoMarkerObject(objectId, objectInfo);
                // get marker pose in camera frame

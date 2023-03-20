@@ -52,7 +52,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (25000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -60,10 +60,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -72,9 +68,11 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (128 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (128 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (128 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -107,7 +105,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       current_alignment += (data.getData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
@@ -117,12 +115,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -136,9 +128,15 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getOusterPixelShifts().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getOusterBeamAltitudeAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getOusterBeamAzimuthAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
 
@@ -160,15 +158,11 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       cdr.write_type_e(data.getData());else
           throw new RuntimeException("data field exceeds the maximum length");
 
-      cdr.write_type_3(data.getFormat());
+      cdr.write_type_9(data.getFormat());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
-      cdr.write_type_7(data.getIsPinholeCameraModel());
-
-      cdr.write_type_7(data.getIsEquidistantFisheyeCameraModel());
-
-      cdr.write_type_7(data.getIsOusterCameraModel());
+      cdr.write_type_9(data.getCameraModel());
 
       cdr.write_type_5(data.getFocalLengthXPixels());
 
@@ -178,9 +172,17 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       cdr.write_type_5(data.getPrincipalPointYPixels());
 
-      cdr.write_type_5(data.getOusterVerticalFieldOfView());
+      if(data.getOusterPixelShifts().size() <= 128)
+      cdr.write_type_e(data.getOusterPixelShifts());else
+          throw new RuntimeException("ouster_pixel_shifts field exceeds the maximum length");
 
-      cdr.write_type_5(data.getOusterHorizontalFieldOfView());
+      if(data.getOusterBeamAltitudeAngles().size() <= 128)
+      cdr.write_type_e(data.getOusterBeamAltitudeAngles());else
+          throw new RuntimeException("ouster_beam_altitude_angles field exceeds the maximum length");
+
+      if(data.getOusterBeamAzimuthAngles().size() <= 128)
+      cdr.write_type_e(data.getOusterBeamAzimuthAngles());else
+          throw new RuntimeException("ouster_beam_azimuth_angles field exceeds the maximum length");
 
    }
 
@@ -196,15 +198,11 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       data.setDepthDiscretization(cdr.read_type_5());
       	
       cdr.read_type_e(data.getData());	
-      data.setFormat(cdr.read_type_3());
+      data.setFormat(cdr.read_type_9());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
-      data.setIsPinholeCameraModel(cdr.read_type_7());
-      	
-      data.setIsEquidistantFisheyeCameraModel(cdr.read_type_7());
-      	
-      data.setIsOusterCameraModel(cdr.read_type_7());
+      data.setCameraModel(cdr.read_type_9());
       	
       data.setFocalLengthXPixels(cdr.read_type_5());
       	
@@ -214,10 +212,9 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       	
       data.setPrincipalPointYPixels(cdr.read_type_5());
       	
-      data.setOusterVerticalFieldOfView(cdr.read_type_5());
-      	
-      data.setOusterHorizontalFieldOfView(cdr.read_type_5());
-      	
+      cdr.read_type_e(data.getOusterPixelShifts());	
+      cdr.read_type_e(data.getOusterBeamAltitudeAngles());	
+      cdr.read_type_e(data.getOusterBeamAzimuthAngles());	
 
    }
 
@@ -231,20 +228,19 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       ser.write_type_3("image_height", data.getImageHeight());
       ser.write_type_5("depth_discretization", data.getDepthDiscretization());
       ser.write_type_e("data", data.getData());
-      ser.write_type_3("format", data.getFormat());
+      ser.write_type_9("format", data.getFormat());
       ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.write_type_7("is_pinhole_camera_model", data.getIsPinholeCameraModel());
-      ser.write_type_7("is_equidistant_fisheye_camera_model", data.getIsEquidistantFisheyeCameraModel());
-      ser.write_type_7("is_ouster_camera_model", data.getIsOusterCameraModel());
+      ser.write_type_9("camera_model", data.getCameraModel());
       ser.write_type_5("focal_length_x_pixels", data.getFocalLengthXPixels());
       ser.write_type_5("focal_length_y_pixels", data.getFocalLengthYPixels());
       ser.write_type_5("principal_point_x_pixels", data.getPrincipalPointXPixels());
       ser.write_type_5("principal_point_y_pixels", data.getPrincipalPointYPixels());
-      ser.write_type_5("ouster_vertical_field_of_view", data.getOusterVerticalFieldOfView());
-      ser.write_type_5("ouster_horizontal_field_of_view", data.getOusterHorizontalFieldOfView());
+      ser.write_type_e("ouster_pixel_shifts", data.getOusterPixelShifts());
+      ser.write_type_e("ouster_beam_altitude_angles", data.getOusterBeamAltitudeAngles());
+      ser.write_type_e("ouster_beam_azimuth_angles", data.getOusterBeamAzimuthAngles());
    }
 
    @Override
@@ -257,20 +253,19 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       data.setImageHeight(ser.read_type_3("image_height"));
       data.setDepthDiscretization(ser.read_type_5("depth_discretization"));
       ser.read_type_e("data", data.getData());
-      data.setFormat(ser.read_type_3("format"));
+      data.setFormat(ser.read_type_9("format"));
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      data.setIsPinholeCameraModel(ser.read_type_7("is_pinhole_camera_model"));
-      data.setIsEquidistantFisheyeCameraModel(ser.read_type_7("is_equidistant_fisheye_camera_model"));
-      data.setIsOusterCameraModel(ser.read_type_7("is_ouster_camera_model"));
+      data.setCameraModel(ser.read_type_9("camera_model"));
       data.setFocalLengthXPixels(ser.read_type_5("focal_length_x_pixels"));
       data.setFocalLengthYPixels(ser.read_type_5("focal_length_y_pixels"));
       data.setPrincipalPointXPixels(ser.read_type_5("principal_point_x_pixels"));
       data.setPrincipalPointYPixels(ser.read_type_5("principal_point_y_pixels"));
-      data.setOusterVerticalFieldOfView(ser.read_type_5("ouster_vertical_field_of_view"));
-      data.setOusterHorizontalFieldOfView(ser.read_type_5("ouster_horizontal_field_of_view"));
+      ser.read_type_e("ouster_pixel_shifts", data.getOusterPixelShifts());
+      ser.read_type_e("ouster_beam_altitude_angles", data.getOusterBeamAltitudeAngles());
+      ser.read_type_e("ouster_beam_azimuth_angles", data.getOusterBeamAzimuthAngles());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.ImageMessage src, perception_msgs.msg.dds.ImageMessage dest)
