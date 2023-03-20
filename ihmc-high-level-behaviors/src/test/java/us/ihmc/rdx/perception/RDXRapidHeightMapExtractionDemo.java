@@ -18,12 +18,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -231,9 +231,9 @@ public class RDXRapidHeightMapExtractionDemo
          rapidHeightMapUpdater.setModified(false);
          rapidHeightMapUpdater.setProcessing(false);
 
-         BytedecoOpenCVTools.displayHeightMap("Output Height Map",
-                                              rapidHeightMapUpdater.getOutputHeightMapImage().getBytedecoOpenCVMat(),
-                                              1,
+         PerceptionDebugTools.displayHeightMap("Output Height Map",
+                                               rapidHeightMapUpdater.getOutputHeightMapImage().getBytedecoOpenCVMat(),
+                                               1,
                                               1 / (0.3f + 0.20f * rapidHeightMapUpdater.getCellSizeXYInMeters()));
       }
    }
