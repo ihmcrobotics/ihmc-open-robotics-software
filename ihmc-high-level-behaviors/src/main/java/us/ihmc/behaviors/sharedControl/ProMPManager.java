@@ -1,5 +1,8 @@
 package us.ihmc.behaviors.sharedControl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -9,8 +12,13 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.promp.*;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -161,39 +169,36 @@ public class ProMPManager
 
    public void saveLearnedTask(String directoryName, String bodyPart)
    {
-      JSONObject jsonObject = new JSONObject();
-      // create a JSON array to hold the vector
-      JSONArray weightsArray = new JSONArray();
-      EigenVectorXd weights = learnedProMPs.get(bodyPart).get_weights();
-      for (int i = 0; i < weights.size(); i++)
-         weightsArray.add(weights.coeff(i));
-      jsonObject.put("weights", weightsArray);
-      // create a JSON array to hold the matrix
-      JSONArray covarianceArray = new JSONArray();
-      EigenMatrixXd covariance = learnedProMPs.get(bodyPart).get_covariance();
-      for (int i = 0; i < covariance.rows(); i++)
+      WorkspaceDirectory directory = new WorkspaceDirectory(directoryName);
+      WorkspaceFile file = new WorkspaceFile(directory, bodyPart + ".json");
+      if (file.isFileAccessAvailable())
       {
-         JSONArray rowArray = new JSONArray();
-         for (int j = 0; j < covariance.cols(); j++)
+         JSONFileTools.save(file, root ->
          {
-            rowArray.add(covariance.coeff(i, j));
-         }
-         covarianceArray.add(rowArray);
-      }
-      jsonObject.put("covariance", covarianceArray);
-      jsonObject.put("stdBasisFunction", learnedProMPs.get(bodyPart).get_std_bf());
-      jsonObject.put("numSamples", learnedProMPs.get(bodyPart).get_n_samples());
-      jsonObject.put("dims", learnedProMPs.get(bodyPart).get_dims());
+            ObjectMapper objectMapper = new ObjectMapper();
+            // add weights array
+            ArrayNode weightsArray = root.putArray("weights");
+            EigenVectorXd weights = learnedProMPs.get(bodyPart).get_weights();
+            for (int i = 0; i < weights.size(); i++) {
+               weightsArray.add(weights.coeff(i));
+            }
 
-      String fileName = directoryName + "/" + bodyPart + ".json";
-      try (FileWriter file = new FileWriter(fileName))
-      {
-         file.write(jsonObject.toJSONString());
-      }
-      catch (IOException e)
-      {
-         LogTools.error("An error occurred while writing learned parameters for task {} to file: {}", taskName, fileName);
-         e.printStackTrace();
+            // add covariance matrix
+            ArrayNode covarianceArray = root.putArray("covariance");
+            EigenMatrixXd covariance = learnedProMPs.get(bodyPart).get_covariance();
+            for (int i = 0; i < covariance.rows(); i++) {
+               ArrayNode rowArray = objectMapper.createArrayNode();
+               for (int j = 0; j < covariance.cols(); j++) {
+                  rowArray.add(covariance.coeff(i, j));
+               }
+               covarianceArray.add(rowArray);
+            }
+
+            // add remaining properties
+            root.put("stdBasisFunction", learnedProMPs.get(bodyPart).get_std_bf());
+            root.put("numSamples", learnedProMPs.get(bodyPart).get_n_samples());
+            root.put("dims", learnedProMPs.get(bodyPart).get_dims());
+         });
       }
    }
 
