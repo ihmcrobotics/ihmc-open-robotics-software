@@ -27,7 +27,7 @@ public class RDXArUcoMarkerDetectionDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Activator nativesLoadedActivator;
    private RDXEnvironmentBuilder environmentBuilder;
-   private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
+   private RDXPose3DGizmo sensorPoseGizmo;
    private RDXHighLevelDepthSensorSimulator cameraSensor;
    private BytedecoImage testRGB888ColorImage;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
@@ -51,6 +51,7 @@ public class RDXArUcoMarkerDetectionDemo
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             environmentBuilder.loadEnvironment("DoorsForArUcoTesting.json");
 
+            sensorPoseGizmo = new RDXPose3DGizmo();
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
