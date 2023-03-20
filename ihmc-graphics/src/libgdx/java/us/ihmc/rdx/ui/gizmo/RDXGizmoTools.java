@@ -27,4 +27,7 @@ public class RDXGizmoTools
    public static final double INITIAL_FINE_ROTATION = 0.5;
    /** A coarse nudge amount. */
    public static final double INITIAL_COARSE_ROTATION = INITIAL_FINE_ROTATION * FINE_TO_COARSE_MULTIPLIER;
+
+   /** How much the zoom has to change to rebuild the gizmo mesh, if doing that. A millimeter is plenty. */
+   public static final double ZOOM_RESIZE_EPSILON = 1e-3;
 }
