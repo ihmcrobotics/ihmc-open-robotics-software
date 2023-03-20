@@ -60,12 +60,12 @@ public class ProMPAssistant
    public ProMPAssistant()
    {
       String lastContext = "";
-      List<String> taskNames = new ArrayList<>();
-      List<String> bodyPartsInference = new ArrayList<>();
-      List<String> bodyPartsGoal = new ArrayList<>();
-      List<HashMap<String, String>> bodyPartsGeometries = new ArrayList<>();
-      List<Point3D> goalToEETranslations = new ArrayList<>();
-      List<Quaternion> goalToEERotations = new ArrayList<>();
+      String[] taskNames;
+      String[] bodyPartsInference;
+      String[] bodyPartsGoal;
+      HashMap<String, String>[] bodyPartsGeometries;
+      Point3D[] goalToEETranslations;
+      Quaternion[] goalToEERotations;
       boolean logEnabled;
       // read parameters regarding the properties of available learned tasks from json file
       try
@@ -79,10 +79,17 @@ public class ProMPAssistant
          conditionOnlyLastObservation = (boolean) jsonObject.get("conditionOnlyLastObservation");
          // getting tasks
          JSONArray tasksArray = (JSONArray) jsonObject.get("tasks");
+         int size = tasksArray.size();
+         taskNames = new String[size];
+         bodyPartsInference = new String[size];
+         bodyPartsGoal = new String[size];
+         bodyPartsGeometries = new HashMap[size];
+         goalToEETranslations = new Point3D[size];
+         goalToEERotations = new Quaternion[size];
          // iterating tasks
-         for (Object taskObject : tasksArray)
+         for (int i=0; i<size; i++)
          {
-            for (Map.Entry taskPropertyMap : (Iterable<Map.Entry>) ((Map) taskObject).entrySet())
+            for (Map.Entry taskPropertyMap : (Iterable<Map.Entry>) ((Map) tasksArray.get(i)).entrySet())
             {
                switch (taskPropertyMap.getKey().toString())
                {
@@ -93,26 +100,18 @@ public class ProMPAssistant
                         contextTasksMap.put(context, new ArrayList<>());
                      lastContext = context;
                   }
-                  case "name" -> taskNames.add((String) taskPropertyMap.getValue());
-                  case "bodyPartForInference" -> bodyPartsInference.add((String) taskPropertyMap.getValue());
-                  case "bodyPartWithObservableGoal" -> bodyPartsGoal.add((String) taskPropertyMap.getValue());
+                  case "name" -> taskNames[i] = (String) taskPropertyMap.getValue();
+                  case "bodyPartForInference" -> bodyPartsInference[i] = (String) taskPropertyMap.getValue();
+                  case "bodyPartWithObservableGoal" -> bodyPartsGoal[i] = (String) taskPropertyMap.getValue();
                   case "translationGoalToEE" ->
                   {
                      JSONArray translationArray = (JSONArray) taskPropertyMap.getValue();
-                     Iterator translationIterator = translationArray.iterator();
-                     List<Double> translation = new ArrayList<>(3);
-                     while (translationIterator.hasNext())
-                        translation.add((Double) translationIterator.next());
-                     goalToEETranslations.add(new Point3D(translation.get(0), translation.get(1), translation.get(2)));
+                     goalToEETranslations[i]= new Point3D((double) translationArray.get(0), (double) translationArray.get(1), (double) translationArray.get(2));
                   }
                   case "rotationGoalToEE" ->
                   {
                      JSONArray rotationArray = (JSONArray) taskPropertyMap.getValue();
-                     Iterator rotationIterator = rotationArray.iterator();
-                     List<Double> rotation = new ArrayList<>(4);
-                     while (rotationIterator.hasNext())
-                        rotation.add((Double) rotationIterator.next());
-                     goalToEERotations.add(new Quaternion(rotation.get(0), rotation.get(1), rotation.get(2), rotation.get(3)));
+                     goalToEERotations[i]= new Quaternion((double) rotationArray.get(0), (double) rotationArray.get(1), (double) rotationArray.get(2), (double) rotationArray.get(3));
                   }
                   case "bodyParts" ->
                   {
@@ -130,42 +129,39 @@ public class ProMPAssistant
                            {
                               case "name" -> name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
                               case "geometry" -> geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
-                              default ->
-                              {
-                              }
                            }
                         });
-                        for (int i = 0; i < name.size(); i++)
-                           bodyPartsGeometry.put(name.get(i), geometry.get(i));
+                        for (int j = 0; j < name.size(); j++)
+                           bodyPartsGeometry.put(name.get(j), geometry.get(j));
                      }
-                     bodyPartsGeometries.add(bodyPartsGeometry);
+                     bodyPartsGeometries[i] = bodyPartsGeometry;
                   }
                   default ->
                   {
                   }
                }
             }
-            // in contextTaskMap add the last task to the last context
-            contextTasksMap.get(lastContext).add(taskNames.get(taskNames.size() - 1));
+            // in contextTaskMap add task to last parsed context
+            contextTasksMap.get(lastContext).add(taskNames[i]);
          }
          int numberBasisFunctions = (int) ((long) jsonObject.get("numberBasisFunctions"));
          long speedFactor = ((long) jsonObject.get("allowedIncreaseDecreaseSpeedFactor"));
          numberOfInferredSpeeds = (int) ((long) jsonObject.get("numberOfInferredSpeeds"));
-         for (int i = 0; i < taskNames.size(); i++)
+         for (int i = 0; i < size; i++)
          {
-            proMPManagers.put(taskNames.get(i),
-                              new ProMPManager(taskNames.get(i),
-                                               bodyPartsGeometries.get(i),
+            proMPManagers.put(taskNames[i],
+                              new ProMPManager(taskNames[i],
+                                               bodyPartsGeometries[i],
                                                logEnabled,
                                                isLastViaPoint,
                                                numberBasisFunctions,
                                                speedFactor,
                                                numberOfInferredSpeeds));
-            taskBodyPartInferenceMap.put(taskNames.get(i), bodyPartsInference.get(i));
-            taskBodyPartGoalMap.put(taskNames.get(i), bodyPartsGoal.get(i));
-            taskTransformGoalMap.put(taskNames.get(i), new RigidBodyTransform(goalToEERotations.get(i), goalToEETranslations.get(i)));
+            taskBodyPartInferenceMap.put(taskNames[i], bodyPartsInference[i]);
+            taskBodyPartGoalMap.put(taskNames[i], bodyPartsGoal[i]);
+            taskTransformGoalMap.put(taskNames[i], new RigidBodyTransform(goalToEERotations[i], goalToEETranslations[i]));
             LogTools.info("Loading ProMPs for tasks:");
-            LogTools.info("{}", taskNames.get(i));
+            LogTools.info("{}", taskNames[i]);
             for (HashMap<String, String> bodyPartsGeometry : bodyPartsGeometries)
                for (String key : bodyPartsGeometry.keySet())
                   LogTools.info("     {} {}", key, bodyPartsGeometry.get(key));
