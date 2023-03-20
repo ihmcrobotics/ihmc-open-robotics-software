@@ -1,16 +1,13 @@
 package us.ihmc.perception.objects;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 
 public class ObjectInfo
@@ -28,15 +25,14 @@ public class ObjectInfo
    public ObjectInfo()
    {
       // read parameters regarding the properties of available objects with ArUco markers attached
-      try
+      String configurationFile = "ObjectsInfo.json";
+      LogTools.info("Loading parameters from resource: {}", configurationFile);
+      WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/us/ihmc/perception/objects");
+      WorkspaceResourceFile file = new WorkspaceResourceFile(directory, configurationFile);
+      JSONFileTools.load(file, jsonNode ->
       {
-         String configurationFile = "ObjectsInfo.json";
-         LogTools.info("Loading parameters from resource: {}", configurationFile);
-
-         JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream(configurationFile)));
-         // getting objects
-         JSONArray objectsArray = (JSONArray) jsonObject.get("objects");
-         int size = objectsArray.size();
+         JsonNode objectsArrayNode = jsonNode.get("objects");
+         int size = objectsArrayNode.size();
          objectNames = new String[size];
          markerSizes = new double[size];
          markerToBodyTranslations = new double[size][3];
@@ -46,76 +42,60 @@ public class ObjectInfo
          //iterating objects
          for (int i=0; i<size; i++)
          {
-            for (Map.Entry objectPropertyMap : (Iterable<Map.Entry>) ((Map) objectsArray.get(i)).entrySet())
-            {
-               switch (objectPropertyMap.getKey().toString())
-               {
-                  case "name" -> objectNames[i] = (String) objectPropertyMap.getValue();
-                  case "properties" ->
-                  {
-                     JSONArray propertiesArray = (JSONArray) objectPropertyMap.getValue();
-                     // iterate over properties
-                     for (Object propertyObject : propertiesArray)
-                     {
-                        for (Map.Entry propertiesMap : (Iterable<Map.Entry>) ((Map) propertyObject).entrySet())
-                        {
-                           switch (propertiesMap.getKey().toString())
-                           {
-                              case "markerId" -> markerIds.add((int) ((long) propertiesMap.getValue()));
-                              case "markerSize" -> markerSizes[i] = (double) propertiesMap.getValue();
-                              case "translationMarkerToMainBody" ->
-                              {
-                                 JSONArray translationArray = (JSONArray) propertiesMap.getValue();
-                                 for (int j=0; j<3; j++)
-                                    markerToBodyTranslations[i][j] = (double) translationArray.get(j);
+            JsonNode objectNode = objectsArrayNode.get(i);
+            Iterator<Map.Entry<String, JsonNode>> objectFields = objectNode.fields();
+            while (objectFields.hasNext()) {
+               Map.Entry<String, JsonNode> objectPropertyMap = objectFields.next();
+               switch (objectPropertyMap.getKey()) {
+                  case "name" -> objectNames[i] = objectPropertyMap.getValue().asText();
+                  case "properties" -> {
+                     JsonNode propertiesArrayNode = objectPropertyMap.getValue();
+                     for (JsonNode propertyObject : propertiesArrayNode) {
+                        Iterator<Map.Entry<String, JsonNode>> propertyFields = propertyObject.fields();
+                        while (propertyFields.hasNext()) {
+                           Map.Entry<String, JsonNode> propertiesMap = propertyFields.next();
+                           switch (propertiesMap.getKey()) {
+                              case "markerId" -> markerIds.add(propertiesMap.getValue().asInt());
+                              case "markerSize" -> markerSizes[i] = propertiesMap.getValue().asDouble();
+                              case "translationMarkerToMainBody" -> {
+                                 JsonNode translationArrayNode = propertiesMap.getValue();
+                                 for (int j = 0; j < 3; j++) {
+                                    markerToBodyTranslations[i][j] = translationArrayNode.get(j).asDouble();
+                                 }
                               }
                               case "yawPitchRollMarkerToMainBody" ->
                               {
-                                 JSONArray rotationArray = (JSONArray) propertiesMap.getValue();
+                                 JsonNode rotationArrayNode = propertiesMap.getValue();
                                  for (int j=0; j<3; j++)
-                                    markerToBodyRotations[i][j] = (double) rotationArray.get(j);
+                                    markerToBodyRotations[i][j] = rotationArrayNode.get(j).asDouble();
                               }
                               case "translationMainBodyToAppendix" ->
                               {
-                                 JSONArray translationArray = (JSONArray) propertiesMap.getValue();
+                                 JsonNode translationArrayNode = propertiesMap.getValue();
                                  for (int j=0; j<3; j++)
-                                    bodyToAppendixTranslations[i][j] = (double) translationArray.get(j);
+                                    bodyToAppendixTranslations[i][j] = (double) translationArrayNode.get(j).asDouble();
                               }
                               case "yawPitchRollMainBodyToAppendix" ->
                               {
-                                 JSONArray rotationArray = (JSONArray) propertiesMap.getValue();
+                                 JsonNode rotationArrayNode = propertiesMap.getValue();
                                  for (int j=0; j<3; j++)
-                                    bodyToAppendixRotations[i][j] = (double) rotationArray.get(j);
+                                    bodyToAppendixRotations[i][j] = (double) rotationArrayNode.get(j).asDouble();
                               }
                               case "virtualMainBodyFileName" ->
                               {
                                  // insert in the hashmap the last objectName and the filename
-                                 virtualBodyFileName.put(objectNames[i], (String) propertiesMap.getValue());
+                                 virtualBodyFileName.put(objectNames[i], propertiesMap.getValue().asText());
                               }
                               case "virtualAppendixFileName" ->
-                                    virtualAppendixFileName.put(objectNames[i], (String) propertiesMap.getValue());
-                              default ->
-                              {
-                              }
+                                    virtualAppendixFileName.put(objectNames[i], propertiesMap.getValue().asText());
                            }
                         }
                      }
                   }
-                  default ->
-                  {
-                  }
                }
             }
          }
-      }
-      catch (FileNotFoundException ex)
-      {
-         ex.printStackTrace();
-      }
-      catch (IOException | ParseException e)
-      {
-         throw new RuntimeException(e);
-      }
+      });
    }
 
    public List<Integer> getMarkersId()

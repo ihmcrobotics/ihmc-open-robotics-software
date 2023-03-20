@@ -1,9 +1,6 @@
 package us.ihmc.behaviors.sharedControl;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,10 +10,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -59,78 +56,75 @@ public class ProMPAssistant
 
    public ProMPAssistant()
    {
-      String lastContext = "";
-      String[] taskNames;
-      String[] bodyPartsInference;
-      String[] bodyPartsGoal;
-      HashMap<String, String>[] bodyPartsGeometries;
-      Point3D[] goalToEETranslations;
-      Quaternion[] goalToEERotations;
-      boolean logEnabled;
       // read parameters regarding the properties of available learned tasks from json file
-      try
+      String configurationFile = "ProMPAssistant.json";
+      LogTools.info("Loading parameters from resource: {}", configurationFile);
+      WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/us/ihmc/behaviors/sharedControl");
+      WorkspaceResourceFile file = new WorkspaceResourceFile(directory, configurationFile);
+      JSONFileTools.load(file, jsonNode ->
       {
-         String fileName = "ProMPAssistant.json";
-         LogTools.info("Loading parameters from resource: {}", fileName);
-         JSONObject jsonObject = (JSONObject) new JSONParser().parse(new InputStreamReader(getClass().getResourceAsStream(fileName)));
-         testNumber = (int) ((long) jsonObject.get("testNumberUseOnlyForTesting"));
-         logEnabled = (boolean) jsonObject.get("logging");
-         numberObservations = (int) ((long) jsonObject.get("numberObservations"));
-         conditionOnlyLastObservation = (boolean) jsonObject.get("conditionOnlyLastObservation");
+         testNumber = jsonNode.get("testNumberUseOnlyForTesting").asInt();
+         boolean logEnabled = jsonNode.get("logging").asBoolean();
+         numberObservations = jsonNode.get("numberObservations").asInt();
+         conditionOnlyLastObservation = jsonNode.get("conditionOnlyLastObservation").asBoolean();
          // getting tasks
-         JSONArray tasksArray = (JSONArray) jsonObject.get("tasks");
-         int size = tasksArray.size();
-         taskNames = new String[size];
-         bodyPartsInference = new String[size];
-         bodyPartsGoal = new String[size];
-         bodyPartsGeometries = new HashMap[size];
-         goalToEETranslations = new Point3D[size];
-         goalToEERotations = new Quaternion[size];
-         // iterating tasks
-         for (int i=0; i<size; i++)
+         JsonNode tasksArrayNode = jsonNode.get("tasks");
+         int size = tasksArrayNode.size();
+         String[] taskNames = new String[size];
+         String[] bodyPartsInference = new String[size];
+         String[] bodyPartsGoal = new String[size];
+         HashMap<String, String>[] bodyPartsGeometries = new HashMap[size];
+         Point3D[] goalToEETranslations = new Point3D[size];
+         Quaternion[] goalToEERotations = new Quaternion[size];
+         String lastContext = "";
+         for (int i = 0; i < size; i++)
          {
-            for (Map.Entry taskPropertyMap : (Iterable<Map.Entry>) ((Map) tasksArray.get(i)).entrySet())
+            JsonNode taskNode = tasksArrayNode.get(i);
+            Iterator<Map.Entry<String, JsonNode>> taskFields = taskNode.fields();
+            while (taskFields.hasNext())
             {
-               switch (taskPropertyMap.getKey().toString())
+               Map.Entry<String, JsonNode> taskPropertyMap = taskFields.next();
+               switch (taskPropertyMap.getKey())
                {
                   case "context" ->
                   {
-                     String context = (String) taskPropertyMap.getValue();
+                     String context = taskPropertyMap.getValue().asText();
                      if (!contextTasksMap.containsKey(context))
                         contextTasksMap.put(context, new ArrayList<>());
                      lastContext = context;
                   }
-                  case "name" -> taskNames[i] = (String) taskPropertyMap.getValue();
-                  case "bodyPartForInference" -> bodyPartsInference[i] = (String) taskPropertyMap.getValue();
-                  case "bodyPartWithObservableGoal" -> bodyPartsGoal[i] = (String) taskPropertyMap.getValue();
+                  case "name" -> taskNames[i] = taskPropertyMap.getValue().asText();
+                  case "bodyPartForInference" -> bodyPartsInference[i] = taskPropertyMap.getValue().asText();
+                  case "bodyPartWithObservableGoal" -> bodyPartsGoal[i] = taskPropertyMap.getValue().asText();
                   case "translationGoalToEE" ->
                   {
-                     JSONArray translationArray = (JSONArray) taskPropertyMap.getValue();
-                     goalToEETranslations[i]= new Point3D((double) translationArray.get(0), (double) translationArray.get(1), (double) translationArray.get(2));
+                     JsonNode translationArrayNode = taskPropertyMap.getValue();
+                     goalToEETranslations[i] = new Point3D(translationArrayNode.get(0).asDouble(),
+                                                           translationArrayNode.get(1).asDouble(),
+                                                           translationArrayNode.get(2).asDouble());
                   }
                   case "rotationGoalToEE" ->
                   {
-                     JSONArray rotationArray = (JSONArray) taskPropertyMap.getValue();
-                     goalToEERotations[i]= new Quaternion((double) rotationArray.get(0), (double) rotationArray.get(1), (double) rotationArray.get(2), (double) rotationArray.get(3));
+                     JsonNode rotationArrayNode = taskPropertyMap.getValue();
+                     goalToEERotations[i] = new Quaternion(rotationArrayNode.get(0).asDouble(),
+                                                           rotationArrayNode.get(1).asDouble(),
+                                                           rotationArrayNode.get(2).asDouble(),
+                                                           rotationArrayNode.get(3).asDouble());
                   }
-                  case "bodyParts" ->
-                  {
-                     JSONArray bodyPartsArray = (JSONArray) taskPropertyMap.getValue();
+                  case "bodyParts" -> {
+                     JsonNode bodyPartsArrayNode = taskPropertyMap.getValue();
                      HashMap<String, String> bodyPartsGeometry = new HashMap<>();
-                     //parse body parts
-                     for (Object bodyPartObject : bodyPartsArray)
-                     {
-                        JSONObject jsonBodyPartObject = (JSONObject) bodyPartObject;
+                     for (JsonNode bodyPartObject : bodyPartsArrayNode) {
+                        Iterator<Map.Entry<String, JsonNode>> bodyPartFields = bodyPartObject.fields();
                         List<String> name = new ArrayList<>();
                         List<String> geometry = new ArrayList<>();
-                        jsonBodyPartObject.keySet().forEach(bodyPartProperty ->
-                        {
-                           switch (bodyPartProperty.toString())
-                           {
-                              case "name" -> name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
-                              case "geometry" -> geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
+                        while (bodyPartFields.hasNext()) {
+                           Map.Entry<String, JsonNode> bodyPartProperty = bodyPartFields.next();
+                           switch (bodyPartProperty.getKey()) {
+                              case "name" -> name.add(bodyPartProperty.getValue().asText());
+                              case "geometry" -> geometry.add(bodyPartProperty.getValue().asText());
                            }
-                        });
+                        }
                         for (int j = 0; j < name.size(); j++)
                            bodyPartsGeometry.put(name.get(j), geometry.get(j));
                      }
@@ -144,15 +138,14 @@ public class ProMPAssistant
             // in contextTaskMap add task to last parsed context
             contextTasksMap.get(lastContext).add(taskNames[i]);
          }
-         int numberBasisFunctions = (int) ((long) jsonObject.get("numberBasisFunctions"));
-         long speedFactor = ((long) jsonObject.get("allowedIncreaseDecreaseSpeedFactor"));
-         numberOfInferredSpeeds = (int) ((long) jsonObject.get("numberOfInferredSpeeds"));
+         int numberBasisFunctions = jsonNode.get("numberBasisFunctions").asInt();
+         long speedFactor = jsonNode.get("allowedIncreaseDecreaseSpeedFactor").asLong();
+         numberOfInferredSpeeds = jsonNode.get("numberOfInferredSpeeds").asInt();
          for (int i = 0; i < size; i++)
          {
             proMPManagers.put(taskNames[i],
                               new ProMPManager(taskNames[i],
-                                               bodyPartsGeometries[i],
-                                               logEnabled,
+                                               bodyPartsGeometries[i], logEnabled,
                                                isLastViaPoint,
                                                numberBasisFunctions,
                                                speedFactor,
@@ -170,15 +163,7 @@ public class ProMPAssistant
             prompManager.loadTaskFromDemos();
 
          LogTools.info("ProMPs are ready to be used!");
-      }
-      catch (FileNotFoundException ex)
-      {
-         ex.printStackTrace();
-      }
-      catch (IOException | ParseException e)
-      {
-         throw new RuntimeException(e);
-      }
+      });
    }
 
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
