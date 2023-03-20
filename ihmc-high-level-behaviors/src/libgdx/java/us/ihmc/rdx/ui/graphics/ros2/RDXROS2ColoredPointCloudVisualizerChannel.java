@@ -6,9 +6,12 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.tools.ImageMessageDecompressionInput;
+import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
@@ -18,6 +21,8 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.SwapReference;
+
+import java.nio.ByteBuffer;
 
 /**
  * The common part of the depth and color channels.
@@ -49,11 +54,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private final RotationMatrix rotationMatrixToWorld = new RotationMatrix();
    private final Vector3D translationToWorld = new Vector3D();
    private float depthDiscretization;
-   private boolean isPinholeCameraModel;
-   private boolean isEquidistantFisheyeCameraModel;
-   private boolean isOusterCameraModel;
-   private float ousterHorizontalFieldOfView;
-   private float ousterVerticalFieldOfView;
+   private CameraModel cameraModel;
+   private final ByteBuffer ousterPixelShiftsBuffer = NativeMemoryTools.allocate(Integer.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
+   private final ByteBuffer ousterBeamAltitudeAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
+   private final ByteBuffer ousterBeamAzimuthAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
 
    public RDXROS2ColoredPointCloudVisualizerChannel(String name, ROS2Topic<ImageMessage> topic)
    {
@@ -116,11 +120,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
          sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
          delayPlot.addValue(MessageTools.calculateDelay(imageMessage));
 
-         isPinholeCameraModel = imageMessage.getIsPinholeCameraModel();
-         isEquidistantFisheyeCameraModel = imageMessage.getIsEquidistantFisheyeCameraModel();
-         isOusterCameraModel = imageMessage.getIsOusterCameraModel();
-         ousterHorizontalFieldOfView = imageMessage.getOusterHorizontalFieldOfView();
-         ousterVerticalFieldOfView = imageMessage.getOusterVerticalFieldOfView();
+         cameraModel = CameraModel.getCameraModel(imageMessage);
+         MessageTools.extractIDLSequenceCastingBytesToInts(imageMessage.getOusterPixelShifts(), ousterPixelShiftsBuffer);
+         MessageTools.extractIDLSequence(imageMessage.getOusterBeamAltitudeAngles(), ousterBeamAltitudeAnglesBuffer);
+         MessageTools.extractIDLSequence(imageMessage.getOusterBeamAzimuthAngles(), ousterBeamAzimuthAnglesBuffer);
       }
    }
 
@@ -211,28 +214,23 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       return depthDiscretization;
    }
 
-   public boolean getIsPinholeCameraModel()
+   public CameraModel getCameraModel()
    {
-      return isPinholeCameraModel;
+      return cameraModel;
    }
 
-   public boolean getIsEquidistantFisheyeCameraModel()
+   public ByteBuffer getOusterPixelShiftsBuffer()
    {
-      return isEquidistantFisheyeCameraModel;
+      return ousterPixelShiftsBuffer;
    }
 
-   public boolean getIsOusterCameraModel()
+   public ByteBuffer getOusterBeamAltitudeAnglesBuffer()
    {
-      return isOusterCameraModel;
+      return ousterBeamAltitudeAnglesBuffer;
    }
 
-   public float getOusterHorizontalFieldOfView()
+   public ByteBuffer getOusterBeamAzimuthAnglesBuffer()
    {
-      return ousterHorizontalFieldOfView;
-   }
-
-   public float getOusterVerticalFieldOfView()
-   {
-      return ousterVerticalFieldOfView;
+      return ousterBeamAzimuthAnglesBuffer;
    }
 }
