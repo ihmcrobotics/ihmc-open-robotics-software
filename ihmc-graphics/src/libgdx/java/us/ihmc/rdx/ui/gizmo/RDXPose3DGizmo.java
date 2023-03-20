@@ -729,7 +729,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    /**
     * Call after performing an adjustment on the orientation returned by {@link #beforeForRotationAdjustment}
     * @param prepend true if the adjustment is meant to be a nudge, false if the adjustment is meant to fully replace
-    *                the current orientation. Use the contants {@link #SET_ABSOLUTE} and {@link #PREPEND}.
+    *                the current orientation. Use the constants {@link #SET_ABSOLUTE} and {@link #PREPEND}.
     */
    private void afterRotationAdjustment(boolean prepend)
    {
