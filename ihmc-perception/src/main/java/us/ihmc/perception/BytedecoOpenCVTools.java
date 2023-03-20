@@ -351,40 +351,6 @@ public class BytedecoOpenCVTools
       display(tag, finalDisplayDepth, delay);
    }
 
-   public static void packVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)
-   {
-      compressedBytes.asBuffer().get(heapArray, 0, compressedBytes.asBuffer().remaining());
-      packet.setTimestamp(nanoTime);
-      packet.getData().resetQuick();
-      packet.getData().add(heapArray);
-      packet.setImageHeight(height);
-      packet.setImageWidth(width);
-      packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
-   }
-
-   public static void packImageMessage(ImageMessage imageMessage,
-                                       BytePointer data,
-                                       FramePose3D cameraPose,
-                                       Instant aquisitionTime,
-                                       long sequenceNumber,
-                                       int height,
-                                       int width,
-                                       ImageMessageFormat format)
-   {
-      imageMessage.getData().resetQuick();
-      for (int i = 0; i < data.limit(); i++)
-      {
-         imageMessage.getData().add(data.get(i));
-      }
-      format.packMessageFormat(imageMessage);
-      imageMessage.setImageHeight(height);
-      imageMessage.setImageWidth(width);
-      imageMessage.getPosition().set(cameraPose.getPosition());
-      imageMessage.getOrientation().set(cameraPose.getOrientation());
-      imageMessage.setSequenceNumber(sequenceNumber);
-      MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
-   }
-
    public static Mat decompressImageJPGUsingYUV(BytePointer messageEncodedBytePointer)
    {
       Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
