@@ -332,6 +332,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.footholdAreaWeight, footholdAreaWeight);
    }
 
+   default void setReferencePlanAlpha(double referencePlanAlpha)
+   {
+      set(FootstepPlannerParameterKeys.referencePlanAlpha, referencePlanAlpha);
+   }
+
    default void setDistanceFromPathTolerance(double tolerance)
    {
       set(distanceFromPathTolerance, tolerance);

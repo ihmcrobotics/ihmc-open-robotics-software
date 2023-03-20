@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class HeightMapParameters extends StoredPropertySet implements HeightMapParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-sensor-processing/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-sensor-processing/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    /**
@@ -58,32 +54,29 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public HeightMapParameters(String versionSpecifier)
+   public HeightMapParameters(String versionSuffix)
    {
-      this(HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(HeightMapParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public HeightMapParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public HeightMapParameters(Class<?> classForLoading, String versionSuffix)
    {
-      super(keys, classForLoading, HeightMapParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, HeightMapParameters.class, versionSuffix);
       load();
    }
 
    public HeightMapParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, HeightMapParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           HeightMapParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, HeightMapParameters.class);
+      parameters.generateJavaFiles();
    }
 }

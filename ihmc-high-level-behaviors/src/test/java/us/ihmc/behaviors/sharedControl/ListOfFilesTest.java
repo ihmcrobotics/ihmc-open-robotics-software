@@ -1,11 +1,10 @@
 package us.ihmc.behaviors.sharedControl;
 
-import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.promp.ProMPUtil;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FilenameFilter;
 
 public class ListOfFilesTest
 {
@@ -14,8 +13,7 @@ public class ListOfFilesTest
    {
       // try-catch block to handle exceptions
       try {
-         WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
-         String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
+         String demoDirAbs = ProMPUtil.getDemosDirectory().toString();
          String demoTrainingDirAbs = demoDirAbs + "/ReachHandle";
          System.out.println("Folder is: " + demoTrainingDirAbs);
          // Create a file object

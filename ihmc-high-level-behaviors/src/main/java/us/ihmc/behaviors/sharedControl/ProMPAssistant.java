@@ -536,11 +536,6 @@ public class ProMPAssistant
       isMovingThreshold = distance;
    }
 
-   public void setCurrentTaskDone(boolean doneCurrentTask)
-   {
-      this.doneCurrentTask = doneCurrentTask;
-   }
-
    public boolean isCurrentTaskDone()
    {
       return this.doneCurrentTask;

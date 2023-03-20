@@ -4,8 +4,8 @@ import org.junit.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.promp.ProMPUtil;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
-import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,9 +33,8 @@ public class ProMPAssistantWorldFrameTest
       assertTrue(myManager != null);
       assertTrue(proMPAssistant.getProMPManager(task) != null);
       // use a csv file with the trajectories of the hands of the robot for testing
-      WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
-      String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
-      String demoDirectory = directoryAbsolutePath + "/test/PushDoorWorldFrameTest";
+      String etcDirectory = ProMPUtil.getEtcDirectory().toString();
+      String demoDirectory = etcDirectory + "/test/PushDoorWorldFrameTest";
       //get test number from config file
       String testFilePath = demoDirectory + "/" + proMPAssistant.getTestNumber() + ".csv";
       //copy test file to have it always under same name for faster plotting
@@ -53,7 +52,7 @@ public class ProMPAssistantWorldFrameTest
       List<String> bodyParts = new ArrayList<>();
       bodyParts.add("leftHand");
       bodyParts.add("rightHand");
-      TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, directoryAbsolutePath, bodyParts.size());
+      TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, etcDirectory, bodyParts.size());
       trajectoryRecorder.setRecordFileName("generatedMotion.csv");
       LogTools.info("Processing trajectory ...");
 
@@ -102,7 +101,7 @@ public class ProMPAssistantWorldFrameTest
       trajectoryRecorder.saveRecording();
 
       LogTools.info("Test completed successfully!");
-      LogTools.info("You can visualize the ProMPs plots by running the file {}/1Dplots_ProMPAssistantTest.py", directoryAbsolutePath);
-      LogTools.info("You can use file {}/{} as a replay file in Kinematics Streaming Mode", directoryAbsolutePath, recordFile);
+      LogTools.info("You can visualize the ProMPs plots by running the file {}/1Dplots_ProMPAssistantTest.py", etcDirectory);
+      LogTools.info("You can use file {}/{} as a replay file in Kinematics Streaming Mode", etcDirectory, recordFile);
    }
 }

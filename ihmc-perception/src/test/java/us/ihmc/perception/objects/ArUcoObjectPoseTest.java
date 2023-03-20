@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -15,7 +14,6 @@ import us.ihmc.perception.OpenCVArUcoMarker;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertTrue;
 import static us.ihmc.euclid.tools.EuclidCoreTestTools.assertGeometricallyEquals;
 import static us.ihmc.robotics.Assert.assertEquals;
 
