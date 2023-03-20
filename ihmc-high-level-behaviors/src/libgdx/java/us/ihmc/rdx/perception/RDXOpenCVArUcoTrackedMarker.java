@@ -3,14 +3,14 @@ package us.ihmc.rdx.perception;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
 
-public class RDXOpenCVArUcoMarkerTrackedID
+public class RDXOpenCVArUcoTrackedMarker
 {
    private final int id;
    private boolean currentlyDetected = false;
    private final ImPlotPlot detectedPlot = new ImPlotPlot(30);
    private final ImPlotDoublePlotLine detectedPlotLine = new ImPlotDoublePlotLine("Detected");
 
-   public RDXOpenCVArUcoMarkerTrackedID(int id)
+   public RDXOpenCVArUcoTrackedMarker(int id)
    {
       this.id = id;
       detectedPlot.getPlotLines().add(detectedPlotLine);

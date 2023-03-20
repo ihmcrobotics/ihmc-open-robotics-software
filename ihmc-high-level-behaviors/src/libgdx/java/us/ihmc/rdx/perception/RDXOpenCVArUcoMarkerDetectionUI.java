@@ -33,8 +33,8 @@ public class RDXOpenCVArUcoMarkerDetectionUI
    private final String namePostfix;
    private ReferenceFrame cameraFrame;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-   private final ArrayList<RDXOpenCVArUcoMarkerTrackedID> trackedIDs = new ArrayList<>();
-   private final HashMap<Integer, RDXOpenCVArUcoMarkerTrackedID> idToTrackedIDMap = new HashMap<>();
+   private final ArrayList<RDXOpenCVArUcoTrackedMarker> trackedMarkers = new ArrayList<>();
+   private final HashMap<Integer, RDXOpenCVArUcoTrackedMarker> idToTrackedMarkerMap = new HashMap<>();
    private BytedecoImage imageForDrawing;
    private RDXMatImagePanel markerImagePanel;
    private final ImGuiPanel mainPanel;
@@ -168,26 +168,26 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       ImGui.text("Image width: " + imageForDrawing.getImageWidth() + " height: " + imageForDrawing.getImageHeight());
       detectionDurationPlot.render();
       ImGui.text("Detected ArUco Markers:");
-      for (RDXOpenCVArUcoMarkerTrackedID trackedID : trackedIDs)
+      for (RDXOpenCVArUcoTrackedMarker trackedMarker : trackedMarkers)
       {
-         trackedID.setCurrentlyDetected(false);
+         trackedMarker.setCurrentlyDetected(false);
       }
       arUcoMarkerDetection.forEachDetectedID(id ->
       {
-         RDXOpenCVArUcoMarkerTrackedID trackedID = idToTrackedIDMap.get(id);
-         if (trackedID == null)
+         RDXOpenCVArUcoTrackedMarker trackedMarker = idToTrackedMarkerMap.get(id);
+         if (trackedMarker == null)
          {
-            trackedID = new RDXOpenCVArUcoMarkerTrackedID(id);
-            idToTrackedIDMap.put(id, trackedID);
-            trackedIDs.add(trackedID);
+            trackedMarker = new RDXOpenCVArUcoTrackedMarker(id);
+            idToTrackedMarkerMap.put(id, trackedMarker);
+            trackedMarkers.add(trackedMarker);
          }
-         trackedID.setCurrentlyDetected(true);
+         trackedMarker.setCurrentlyDetected(true);
       });
-      for (RDXOpenCVArUcoMarkerTrackedID trackedID : trackedIDs)
+      for (RDXOpenCVArUcoTrackedMarker trackedMarker : trackedMarkers)
       {
-         ImGui.text("ID: " + trackedID.getId());
+         ImGui.text("ID: " + trackedMarker.getId());
          ImGui.sameLine();
-         trackedID.renderPlotLine();
+         trackedMarker.renderPlotLine();
       }
 
       ImGui.text("Rejected image points: " + arUcoMarkerDetection.getNumberOfRejectedPoints());
