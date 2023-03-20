@@ -243,7 +243,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       {
          arUcoMarkerDetection.getDetectorParameters().minDistanceToBorder(minDistanceToBorder.get());
       }
-      if (ImGui.inputInt(labels.get("markerBorderBits(1)"), markerBorderBits))
+      if (ImGui.inputInt(labels.get("markerBorderBits (1)"), markerBorderBits))
       {
          arUcoMarkerDetection.getDetectorParameters().markerBorderBits(markerBorderBits.get());
       }
