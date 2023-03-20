@@ -272,4 +272,14 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    {
       return subscribed.get();
    }
+
+   public void setPointSize(float pointSize)
+   {
+      this.pointSize.set(pointSize);
+   }
+
+   public void setLevelOfColorDetail(int levelOfColorDetail)
+   {
+      this.levelOfColorDetail.set(levelOfColorDetail);
+   }
 }
