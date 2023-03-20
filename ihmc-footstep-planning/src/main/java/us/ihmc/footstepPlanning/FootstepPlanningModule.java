@@ -179,6 +179,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return output;
    }
 
+   public void destroy()
+   {
+      if (useGPU)
+         ((GPUAStarBodyPathPlanner) bodyPathPlannerInterface).destroyOpenCLStuff();
+   }
+
    private void handleRequestInternal(FootstepPlannerRequest request) throws Exception
    {
       this.request.set(request);

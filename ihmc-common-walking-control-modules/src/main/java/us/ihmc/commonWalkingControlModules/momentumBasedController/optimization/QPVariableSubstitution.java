@@ -27,20 +27,20 @@ import us.ihmc.matrixlib.MatrixTools;
  * 
  * @author Sylvain Bertrand
  */
-public class QPVariableSubstitution
+public class QPVariableSubstitution implements QPVariableSubstitutionInterface<DMatrixRMaj>
 {
    /** Refers to the number of elements in {@code x} that are to be substituted. */
-   public int numberOfVariablesToSubstitute;
+   private int numberOfVariablesToSubstitute;
    /** Refers to the index of each element in {@code x} that is to be substituted. */
-   public int[] variableIndices = new int[4];
+   private int[] variableIndices = new int[4];
    /** Refers to the indices of each element in {@code y} that represent the actuated joints. */
-   public TIntArrayList activeIndices = new TIntArrayList(4, -1);
+   private TIntArrayList activeIndices = new TIntArrayList(4, -1);
    private TIntArrayList inactiveIndices = new TIntArrayList(4, -1);
 
    /** Refers to the transformation matrix {@code G}. */
-   public final DMatrixRMaj transformation = new DMatrixRMaj(4, 1);
+   private final DMatrixRMaj transformation = new DMatrixRMaj(4, 1);
    /** Refers to the bias vector {@code g}. */
-   public final DMatrixRMaj bias = new DMatrixRMaj(4, 1);
+   private final DMatrixRMaj bias = new DMatrixRMaj(4, 1);
    /**
     * When {@code true}, the operations related to concatenating and substituting will be simplified
     * assuming that the bias is zero.
@@ -57,6 +57,36 @@ public class QPVariableSubstitution
    public QPVariableSubstitution()
    {
       reset();
+   }
+
+   @Override
+   public int getNumberOfVariablesToSubstitute()
+   {
+      return numberOfVariablesToSubstitute;
+   }
+
+   @Override
+   public DMatrixRMaj getTransformation()
+   {
+      return transformation;
+   }
+
+   @Override
+   public DMatrixRMaj getBias()
+   {
+      return bias;
+   }
+
+   @Override
+   public int[] getVariableIndices()
+   {
+      return variableIndices;
+   }
+
+   @Override
+   public TIntArrayList getActiveIndices()
+   {
+      return activeIndices;
    }
 
    public void reset()
@@ -90,37 +120,37 @@ public class QPVariableSubstitution
     * 
     * @param other the other substitution to add to this. Not modified.
     */
-   public void concatenate(QPVariableSubstitution other)
+   public void concatenate(QPVariableSubstitutionInterface<DMatrixRMaj> other)
    {
       int oldSizeX = numberOfVariablesToSubstitute;
       int oldSizeY = transformation.getNumCols();
-      int newSizeX = oldSizeX + other.numberOfVariablesToSubstitute;
-      int newSizeY = oldSizeY + other.transformation.getNumCols();
+      int newSizeX = oldSizeX + other.getNumberOfVariablesToSubstitute();
+      int newSizeY = oldSizeY + other.getTransformation().getNumCols();
 
       if (variableIndices.length < newSizeX)
          variableIndices = Arrays.copyOf(variableIndices, newSizeX);
 
-      for (int i = 0; i < other.numberOfVariablesToSubstitute; i++)
+      for (int i = 0; i < other.getNumberOfVariablesToSubstitute(); i++)
       {
-         variableIndices[i + oldSizeX] = other.variableIndices[i];
+         variableIndices[i + oldSizeX] = other.getVariableIndices()[i];
       }
 
-      for (int i = 0; i < other.activeIndices.size(); i++)
+      for (int i = 0; i < other.getActiveIndices().size(); i++)
       {
-         activeIndices.add(other.activeIndices.get(i) + oldSizeX);
+         activeIndices.add(other.getActiveIndices().get(i) + oldSizeX);
       }
 
       tempA.set(transformation);
       transformation.reshape(newSizeX, newSizeY);
       transformation.zero();
       CommonOps_DDRM.insert(tempA, transformation, 0, 0);
-      CommonOps_DDRM.insert(other.transformation, transformation, oldSizeX, oldSizeY);
+      CommonOps_DDRM.insert(other.getTransformation(), transformation, oldSizeX, oldSizeY);
 
       if (!ignoreBias)
       {
          // Since bias is a vector, it is safe to reshape it and trust that the coefficients won't be shifted.
          bias.reshape(newSizeX, 1);
-         CommonOps_DDRM.insert(other.bias, bias, oldSizeX, 0);
+         CommonOps_DDRM.insert(other.getBias(), bias, oldSizeX, 0);
       }
 
       numberOfVariablesToSubstitute = newSizeX;

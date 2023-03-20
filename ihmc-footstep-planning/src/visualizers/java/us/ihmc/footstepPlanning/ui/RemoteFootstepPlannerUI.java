@@ -17,7 +17,6 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
  */
 public class RemoteFootstepPlannerUI extends ApplicationNoModule
 {
-
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
 
