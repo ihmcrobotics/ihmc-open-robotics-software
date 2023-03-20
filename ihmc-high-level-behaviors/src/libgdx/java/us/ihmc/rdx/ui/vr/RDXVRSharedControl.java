@@ -192,8 +192,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       else // if user did not use the preview or preview has been validated
       {
          // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
-         if (proMPAssistant.isCurrentTaskDone())  // do not want the assistant to keep recomputing trajectories for the same task over and over
+         if (!enabledIKStreaming.get()) //prevent jump by first disabling streaming to controller and then shared control
             setEnabled(false);
+         if (proMPAssistant.isCurrentTaskDone())
+            enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
       }
    }
 
@@ -241,11 +243,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          }
          else // deactivated
          {
-            if (proMPAssistant.readyToPack()) // if the shared control had started to pack frame poses
-               enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
             // reset promp assistance
             proMPAssistant.reset();
-            proMPAssistant.setCurrentTaskDone(false);
             // if object detector was active, reactivate it
             if(objectDetector != null && !objectName.isEmpty() && !objectDetector.isEnabled())
                objectDetector.setEnabled(true);
@@ -311,5 +310,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public boolean isFirstPreview()
    {
       return firstPreview;
+   }
+
+   public boolean isCurrentTaskDone()
+   {
+      return proMPAssistant.isCurrentTaskDone();
    }
 }

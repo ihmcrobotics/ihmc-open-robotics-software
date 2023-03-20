@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ProMPAssistant
 {
-   private static final int INTERPOLATION_SAMPLES = 5;
+   private static final int INTERPOLATION_SAMPLES = 10;
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); // proMPManagers stores a proMPManager for each task
    private final HashMap<String, List<String>> contextTasksMap = new HashMap<>(); // map to store all the tasks available for each context (object)
    private final List<Double> distanceCandidateTasks = new ArrayList<>();
@@ -221,7 +221,7 @@ public class ProMPAssistant
                framePose.getOrientation().set(generatedFramePose.getOrientation());
             }
             else
-            { // interpolate gradually last observation to prediction
+            { // gradually interpolate last observation to prediction
                FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
                arbitratedFrameOrientation.set((1 - alpha) * lastObservedFramePose.getOrientation().getX() + alpha * generatedFramePose.getOrientation().getX(),
                                               (1 - alpha) * lastObservedFramePose.getOrientation().getY() + alpha * generatedFramePose.getOrientation().getY(),
@@ -251,12 +251,13 @@ public class ProMPAssistant
             else
             {
                // take previous sample (frame) to avoid jump when exiting assistance mode
-               FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter - 1);
+               FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(generatedFramePoseTrajectory.size() - 1);
                if (objectFrame != null)
                   generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.getPosition().set(generatedFramePose.getPosition());
                framePose.getOrientation().set(generatedFramePose.getOrientation());
             }
+            LogTools.info("Assistance completed");
             // exit assistance mode
             doneCurrentTask = true;
          }
@@ -511,6 +512,7 @@ public class ProMPAssistant
          proMPManagers.get(currentTask).resetTask();
          currentTask = "";
       }
+      doneCurrentTask = false;
       taskGoalPose = null;
       objectFrame = null;
       bodyPartObservedTrajectoryMap.clear();
