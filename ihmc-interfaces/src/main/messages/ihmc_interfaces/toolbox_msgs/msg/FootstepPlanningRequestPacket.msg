@@ -64,6 +64,9 @@ float64 status_publish_period 1.0
 # Specifies swing planner to use. See the above enumeration
 byte requested_swing_planner 0
 
+# Reference plan to be used in ReferenceBasedIdealStepCalculator.
+controller_msgs/FootstepDataListMessage reference_plan
+
 # Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
 # For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
 bool generate_log
