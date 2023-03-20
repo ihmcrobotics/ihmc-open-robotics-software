@@ -21,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -413,7 +414,7 @@ public class RDXPose3DGizmo implements RenderableProvider
       if (resizeAutomatically.get())
       {
          LibGDXTools.toEuclid(camera3D.position, cameraPosition);
-         if (lastDistanceToCamera != distanceToCamera)
+         if (!EuclidCoreTools.epsilonEquals(lastDistanceToCamera, distanceToCamera, RDXGizmoTools.ZOOM_RESIZE_EPSILON))
          {
             lastDistanceToCamera = distanceToCamera;
             recreateGraphics();
