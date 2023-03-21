@@ -16,7 +16,7 @@ public class RDXDoorPanelObject extends RDXEnvironmentObject
    public RDXDoorPanelObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load("environmentObjects/door/doorPanel/DoorPanelWithFiducialsMirrored.g3dj");
+      Model realisticModel = RDXModelLoader.load("environmentObjects/door/doorPanel/DoorPanelWithFiducials.g3dj");
       setRealisticModel(realisticModel);
 
       double sizeX = 0.0508; // centered on X
