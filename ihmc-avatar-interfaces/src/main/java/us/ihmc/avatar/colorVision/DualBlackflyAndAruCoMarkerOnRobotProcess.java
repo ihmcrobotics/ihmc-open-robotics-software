@@ -142,6 +142,6 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
    public static void main(String[] args)
    {
-      //      SpinnakerTools.printAllConnectedDevicesInformation();
+//      SpinnakerTools.printAllConnectedDevicesInformation();
    }
 }
