@@ -71,7 +71,7 @@ public class ImGuiConsoleArea
       ImGui.popFont();
    }
 
-   public void acceptNewText(String newText)
+   public void acceptLine(String newText)
    {
       int previousCursorLine = textEditor.getCursorPositionLine();
       int previousCursorColumn = textEditor.getCursorPositionColumn();
@@ -80,7 +80,7 @@ public class ImGuiConsoleArea
       boolean isAutoScroll = previousCursorLine == lastLineIndex && previousCursorColumn == endOfLastLineColumn;
       textEditor.setCursorPosition(lastLineIndex, endOfLastLineColumn);
       textEditor.setReadOnly(false);
-      textEditor.insertText(newText);
+      textEditor.insertText(newText + "\n");
       textEditor.setReadOnly(true);
       if (!isAutoScroll)
          textEditor.setCursorPosition(previousCursorLine, previousCursorColumn);
