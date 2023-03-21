@@ -6,7 +6,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.imgui.ImGuiGlfwWindow;
-import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
@@ -21,7 +20,7 @@ public class MissionControlUI
    private final Map<UUID, ImGuiMachine> machines = new HashMap<>();
    private final ROS2Node ros2Node;
 
-   private ImGuiGlfwWindow window;
+   private final ImGuiGlfwWindow window;
 
    public MissionControlUI()
    {
@@ -46,18 +45,9 @@ public class MissionControlUI
 
       window = new ImGuiGlfwWindow(getClass(), "Mission Control 3");
 
-      // Setup panels
+      ThreadTools.startAThread(() -> window.run(null, () ->
       {
-         ImGuiPanel mainPanel = new ImGuiPanel("Machines", this::renderImGuiWidgets);
-         mainPanel.getIsShowing().set(true);
-         window.getImGuiDockSystem().getPanelManager().addPanel(mainPanel);
-
-//         ImGuiPanel selectedMachinePanel = new ImGuiPanel("##machine", this::renderImGuiWidgets);
-//         selectedMachinePanel.getIsShowing().set(true);
-//         imGuiGlfwWindow.getImGuiDockSystem().getPanelManager().addPanel(selectedMachinePanel);
-      }
-
-      ThreadTools.startAThread(() -> window.run(null, () -> { }, () -> System.exit(0)), "test");
+      }, () -> System.exit(0)), getClass().getName());
 
       ExceptionHandlingThreadScheduler updateMachinesScheduler = new ExceptionHandlingThreadScheduler("UpdateMachinesScheduler");
       updateMachinesScheduler.schedule(this::updateMachines, 1.0);
@@ -88,11 +78,6 @@ public class MissionControlUI
                removed.destroy();
          }
       }
-   }
-
-   private void renderImGuiWidgets()
-   {
-
    }
 
    public static void main(String[] args)
