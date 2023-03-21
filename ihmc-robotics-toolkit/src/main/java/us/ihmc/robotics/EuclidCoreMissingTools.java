@@ -1336,11 +1336,18 @@ public class EuclidCoreMissingTools
       return E;
    }
 
+   /**
+    * Sets the yaw pitch roll but the doubles are given in degrees.
+    */
    public static void setYawPitchRollDegrees(Orientation3DBasics orientation3DBasics, double yaw, double pitch, double roll)
    {
       orientation3DBasics.setYawPitchRoll(Math.toRadians(yaw), Math.toRadians(pitch), Math.toRadians(roll));
    }
 
+   /**
+    * Get the orientation as yaw pitch roll String but they are in degrees.
+    * Says yaw-pitch-roll.
+    */
    public static String getYawPitchRollStringDegrees(Orientation3DBasics orientation3DBasics)
    {
       String degreeSymbol = "\u00B0";
@@ -1351,6 +1358,10 @@ public class EuclidCoreMissingTools
                                                      Math.toDegrees(orientation3DBasics.getRoll())) + degreeSymbol;
    }
 
+   /**
+    * Get the orientation as yaw pitch roll String but they are in degrees.
+    * Doesn't say yaw-pitch-roll.
+    */
    public static String getYawPitchRollValuesStringDegrees(Orientation3DBasics orientation3DBasics)
    {
       String degreeSymbol = "\u00B0";

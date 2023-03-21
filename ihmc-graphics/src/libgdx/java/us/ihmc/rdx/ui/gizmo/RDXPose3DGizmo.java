@@ -21,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -413,7 +414,7 @@ public class RDXPose3DGizmo implements RenderableProvider
       if (resizeAutomatically.get())
       {
          LibGDXTools.toEuclid(camera3D.position, cameraPosition);
-         if (lastDistanceToCamera != distanceToCamera)
+         if (!EuclidCoreTools.epsilonEquals(lastDistanceToCamera, distanceToCamera, RDXGizmoTools.ZOOM_RESIZE_EPSILON))
          {
             lastDistanceToCamera = distanceToCamera;
             recreateGraphics();
@@ -546,23 +547,26 @@ public class RDXPose3DGizmo implements RenderableProvider
          rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.LOCAL;
 
       beforeForTranslationAdjustment();
-      translationStepSizeInput.render(0.01, 0.1);
+      translationStepSizeInput.render(RDXGizmoTools.INITIAL_SMALL_STEP, RDXGizmoTools.INITIAL_BIG_STEP);
       positionXImGuiInput.setDoubleValue(adjustmentPose3D.getPosition().getX());
       positionYImGuiInput.setDoubleValue(adjustmentPose3D.getPosition().getY());
       positionZImGuiInput.setDoubleValue(adjustmentPose3D.getPosition().getZ());
-      adjustmentNeedsToBeApplied |= positionXImGuiInput.render(translationStepSizeInput.getDoubleValue(), 10.0 * translationStepSizeInput.getDoubleValue());
-      adjustmentNeedsToBeApplied |= positionYImGuiInput.render(translationStepSizeInput.getDoubleValue(), 10.0 * translationStepSizeInput.getDoubleValue());
-      adjustmentNeedsToBeApplied |= positionZImGuiInput.render(translationStepSizeInput.getDoubleValue(), 10.0 * translationStepSizeInput.getDoubleValue());
+      adjustmentNeedsToBeApplied |= positionXImGuiInput.render(translationStepSizeInput.getDoubleValue(),
+                                                               RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * translationStepSizeInput.getDoubleValue());
+      adjustmentNeedsToBeApplied |= positionYImGuiInput.render(translationStepSizeInput.getDoubleValue(),
+                                                               RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * translationStepSizeInput.getDoubleValue());
+      adjustmentNeedsToBeApplied |= positionZImGuiInput.render(translationStepSizeInput.getDoubleValue(),
+                                                               RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * translationStepSizeInput.getDoubleValue());
       adjustmentPose3D.getPosition().set(positionXImGuiInput.getDoubleValue(), positionYImGuiInput.getDoubleValue(), positionZImGuiInput.getDoubleValue());
 
-      rotationStepSizeInput.render(0.5, 3.0);
+      rotationStepSizeInput.render(RDXGizmoTools.INITIAL_FINE_ROTATION, RDXGizmoTools.INITIAL_COARSE_ROTATION);
       Orientation3DBasics orientationToPrint = getOrientationInAdjustmentFrame();
       yawImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getYaw()));
       pitchImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getPitch()));
       rollImGuiInput.setDoubleValue(Math.toDegrees(orientationToPrint.getRoll()));
-      yawImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
-      pitchImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
-      rollImGuiInput.render(rotationStepSizeInput.getDoubleValue(), 10.0 * rotationStepSizeInput.getDoubleValue());
+      yawImGuiInput.render(rotationStepSizeInput.getDoubleValue(), RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * rotationStepSizeInput.getDoubleValue());
+      pitchImGuiInput.render(rotationStepSizeInput.getDoubleValue(), RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * rotationStepSizeInput.getDoubleValue());
+      rollImGuiInput.render(rotationStepSizeInput.getDoubleValue(), RDXGizmoTools.FINE_TO_COARSE_MULTIPLIER * rotationStepSizeInput.getDoubleValue());
       boolean inputChanged = yawImGuiInput.getInputChanged();
       inputChanged |= pitchImGuiInput.getInputChanged();
       inputChanged |= rollImGuiInput.getInputChanged();
@@ -729,7 +733,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    /**
     * Call after performing an adjustment on the orientation returned by {@link #beforeForRotationAdjustment}
     * @param prepend true if the adjustment is meant to be a nudge, false if the adjustment is meant to fully replace
-    *                the current orientation. Use the contants {@link #SET_ABSOLUTE} and {@link #PREPEND}.
+    *                the current orientation. Use the constants {@link #SET_ABSOLUTE} and {@link #PREPEND}.
     */
    private void afterRotationAdjustment(boolean prepend)
    {

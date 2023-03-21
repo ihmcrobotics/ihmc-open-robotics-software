@@ -215,6 +215,7 @@ public class FootstepPlannerLogLoader
             FootstepPlannerIterationData iterationData = new FootstepPlannerIterationData();
             iterationData.setParentNode(readNode(dataFileReader.readLine()));
             iterationData.setIdealChildNode(readNode(dataFileReader.readLine()));
+            iterationData.setNominalIdealChildNode(readNode(dataFileReader.readLine()));
             int edges = getIntCSV(true, dataFileReader.readLine())[0];
             readSnapData(iterationData.getParentStartSnapData(), dataFileReader);
             readSnapData(iterationData.getParentEndSnapData(), dataFileReader);

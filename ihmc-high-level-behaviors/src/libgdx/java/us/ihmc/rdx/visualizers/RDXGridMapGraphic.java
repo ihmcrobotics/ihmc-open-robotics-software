@@ -27,7 +27,6 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntFunction;
 import java.util.function.IntToDoubleFunction;

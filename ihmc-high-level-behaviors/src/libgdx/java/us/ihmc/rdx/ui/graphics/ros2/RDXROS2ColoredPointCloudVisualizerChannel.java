@@ -20,6 +20,8 @@ import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.nio.ByteBuffer;
@@ -39,10 +41,11 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    protected final SwapReference<ImageMessageDecompressionInput> decompressionInputSwapReference = new SwapReference<>(ImageMessageDecompressionInput::new);
+   private final ResettableExceptionHandlingExecutorService channelDecompressionThreadExecutor;
+   private final Runnable decompressionAsynchronousThread = this::decompressionAsynchronousThread;
    private boolean initialized = false;
-   protected final Notification subscribedImageAvailable = new Notification();
-   protected final Notification readyForDecompression = new Notification();
-   protected final Notification decompressedImageReady = new Notification();
+   private final Notification subscribedImageAvailable = new Notification();
+   private final Notification decompressedImageReady = new Notification();
    private volatile boolean receivedOne = false;
    protected int imageWidth;
    protected int imageHeight;
@@ -65,6 +68,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 
       frequencyPlot = new ImPlotFrequencyPlot(name + " Hz", 30);
       delayPlot = new ImPlotDoublePlot(name + " Delay", 30);
+
+      boolean daemon = true;
+      int queueSize = 1;
+      channelDecompressionThreadExecutor = MissingThreadTools.newSingleThreadExecutor("ChannelDecompressionThread", daemon, queueSize);
    }
 
    public void subscribe(RealtimeROS2Node realtimeROS2Node, Object imageMessagesSyncObject)
@@ -112,9 +119,13 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
          translationToWorld.set(imageMessage.getPosition());
          rotationMatrixToWorld.set(imageMessage.getOrientation());
 
+         // We decompress outside of the incoming message synchronization block.
+         // Using an internal swap reference to the unpacked data, we can allow ROS 2
+         // to not have to wait for compression to finish and also not have to copy
+         // the unpacked result to a decompression input buffer.
          decompressionInputSwapReference.getForThreadOne().extract(imageMessage);
          decompressionInputSwapReference.swap();
-         readyForDecompression.set();
+         channelDecompressionThreadExecutor.clearQueueAndExecute(decompressionAsynchronousThread);
 
          messageSizeReadout.update(imageMessage.getData().size());
          sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
@@ -127,7 +138,22 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       }
    }
 
+   private void decompressionAsynchronousThread()
+   {
+      decompress();
+      decompressedImageReady.set();
+   }
+
    protected abstract void initialize(OpenCLManager openCLManager);
+
+   protected abstract void decompress();
+
+   protected abstract Object getDecompressionAccessSyncObject();
+
+   public void destroy()
+   {
+      channelDecompressionThreadExecutor.destroy();
+   }
 
    public ROS2Topic<ImageMessage> getTopic()
    {
