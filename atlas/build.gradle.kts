@@ -34,7 +34,7 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.19.1")
    api("us.ihmc:euclid-shape:0.19.1")
    api("us.ihmc:euclid-frame-shape:0.19.1")
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.4")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.0")
    api("us.ihmc:ihmc-humanoid-behaviors:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-simple-whole-body-walking:source")
