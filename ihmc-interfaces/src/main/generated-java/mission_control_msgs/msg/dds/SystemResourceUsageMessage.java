@@ -48,7 +48,7 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
    /**
             * [n] : total memory for nth GPU
             */
-   public us.ihmc.idl.IDLSequence.Float  nvidia_gpu_total_memory_;
+   public us.ihmc.idl.IDLSequence.Float  nvidia_gpu_memory_total_;
    /**
             * [n] : utilization for nth GPU
             */
@@ -65,7 +65,7 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
 
       nvidia_gpu_memory_used_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
-      nvidia_gpu_total_memory_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
+      nvidia_gpu_memory_total_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
       nvidia_gpu_utilization_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
@@ -94,7 +94,7 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       nvidia_gpu_count_ = other.nvidia_gpu_count_;
 
       nvidia_gpu_memory_used_.set(other.nvidia_gpu_memory_used_);
-      nvidia_gpu_total_memory_.set(other.nvidia_gpu_total_memory_);
+      nvidia_gpu_memory_total_.set(other.nvidia_gpu_memory_total_);
       nvidia_gpu_utilization_.set(other.nvidia_gpu_utilization_);
    }
 
@@ -216,9 +216,9 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
    /**
             * [n] : total memory for nth GPU
             */
-   public us.ihmc.idl.IDLSequence.Float  getNvidiaGpuTotalMemory()
+   public us.ihmc.idl.IDLSequence.Float  getNvidiaGpuMemoryTotal()
    {
-      return nvidia_gpu_total_memory_;
+      return nvidia_gpu_memory_total_;
    }
 
 
@@ -268,7 +268,7 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.nvidia_gpu_memory_used_, other.nvidia_gpu_memory_used_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.nvidia_gpu_total_memory_, other.nvidia_gpu_total_memory_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.nvidia_gpu_memory_total_, other.nvidia_gpu_memory_total_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.nvidia_gpu_utilization_, other.nvidia_gpu_utilization_, epsilon)) return false;
 
@@ -300,7 +300,7 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       if(this.nvidia_gpu_count_ != otherMyClass.nvidia_gpu_count_) return false;
 
       if (!this.nvidia_gpu_memory_used_.equals(otherMyClass.nvidia_gpu_memory_used_)) return false;
-      if (!this.nvidia_gpu_total_memory_.equals(otherMyClass.nvidia_gpu_total_memory_)) return false;
+      if (!this.nvidia_gpu_memory_total_.equals(otherMyClass.nvidia_gpu_memory_total_)) return false;
       if (!this.nvidia_gpu_utilization_.equals(otherMyClass.nvidia_gpu_utilization_)) return false;
 
       return true;
@@ -332,8 +332,8 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       builder.append(this.nvidia_gpu_count_);      builder.append(", ");
       builder.append("nvidia_gpu_memory_used=");
       builder.append(this.nvidia_gpu_memory_used_);      builder.append(", ");
-      builder.append("nvidia_gpu_total_memory=");
-      builder.append(this.nvidia_gpu_total_memory_);      builder.append(", ");
+      builder.append("nvidia_gpu_memory_total=");
+      builder.append(this.nvidia_gpu_memory_total_);      builder.append(", ");
       builder.append("nvidia_gpu_utilization=");
       builder.append(this.nvidia_gpu_utilization_);
       builder.append("}");
