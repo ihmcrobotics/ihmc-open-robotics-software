@@ -6,12 +6,12 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.missionControl.MissionControlTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class SystemdServiceMonitor implements Consumer<List<String>>
@@ -19,18 +19,20 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
    private static final int MAX_LOG_LINE_MESSAGE_LENGTH = 25;
 
    private final String serviceName;
-   private final JournalCtlReader reader;
    private final ROS2Node ros2Node;
+   private final JournalCtlReader reader;
    private final IHMCROS2Publisher<SystemServiceStatusMessage> serviceStatusPublisher;
 
    private final ExceptionHandlingThreadScheduler systemServiceStatusPublisherScheduler;
 
-   public SystemdServiceMonitor(String serviceName)
+   public SystemdServiceMonitor(UUID instanceId, String serviceName, ROS2Node ros2Node)
    {
       this.serviceName = serviceName;
+      this.ros2Node = ros2Node;
       reader = new JournalCtlReader(serviceName, this);
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_daemon_service");
-      serviceStatusPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SYSTEM_SERVICE_STATUS);
+      serviceStatusPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                         ROS2Tools.getSystemServiceStatusTopic(instanceId),
+                                                         ROS2Tools.getSystemServiceStatusQosProfile());
       systemServiceStatusPublisherScheduler = new ExceptionHandlingThreadScheduler("SystemServiceStatusPublisherScheduler");
       systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 1.0);
    }

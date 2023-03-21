@@ -24,8 +24,15 @@ import java.util.UUID;
 
 public class MissionControlDaemon
 {
+
+   /**
+    * The hostname of the system
+    */
    private final String hostname;
-   private final String instanceId;
+   /**
+    * A unique ID for the instance of this daemon
+    */
+   private final UUID instanceId;
 
    private final ProcStatCPUMonitor cpuMonitor;
    private final FreeMemoryMonitor memoryMonitor;
@@ -41,7 +48,7 @@ public class MissionControlDaemon
    public MissionControlDaemon()
    {
       hostname = ProcessTools.execSimpleCommandSafe("hostname");
-      instanceId = UUID.randomUUID().toString().substring(0, 5);
+      instanceId = UUID.randomUUID();
 
       cpuMonitor = new ProcStatCPUMonitor();
       cpuMonitor.start();
@@ -69,7 +76,8 @@ public class MissionControlDaemon
          LogTools.info("Not using NVIDIA GPU monitor");
       }
 
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_daemon_" + instanceId);
+      String ros2NodeName = "mission_control_daemon_" + instanceId.toString().replace("-", ""); // ROS2 node names cannot have dashes
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ros2NodeName);
       systemAvailablePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SYSTEM_AVAILABLE);
       systemResourceUsagePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemResourceUsageTopic(instanceId));
 
@@ -82,7 +90,11 @@ public class MissionControlDaemon
       systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.0);
       systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.25);
 
-      MissionControlTools.findSystemdServiceNames().forEach(service -> serviceMonitors.add(new SystemdServiceMonitor(service)));
+      MissionControlTools.findSystemdServiceNames().forEach(service ->
+      {
+         LogTools.info("Watching systemd service: " + service);
+         serviceMonitors.add(new SystemdServiceMonitor(instanceId, service, ros2Node));
+      });
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
@@ -91,7 +103,7 @@ public class MissionControlDaemon
    {
       SystemAvailableMessage message = new SystemAvailableMessage();
       message.setHostname(hostname);
-      message.setInstanceId(instanceId);
+      message.setInstanceId(instanceId.toString());
       message.setEpochTime(System.currentTimeMillis());
       systemAvailablePublisher.publish(message);
    }

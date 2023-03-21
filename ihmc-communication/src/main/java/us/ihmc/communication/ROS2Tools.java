@@ -23,6 +23,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -255,6 +256,7 @@ public class ROS2Tools
    public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withType(SystemAvailableMessage.class);
    public static final ROS2Topic<SystemServiceStatusMessage> SYSTEM_SERVICE_STATUS = IHMC_ROOT.withModule("asdf").withType(SystemServiceStatusMessage.class);
 //   public static final ROS2Topic<SystemServiceStatusMessage> SYSTEM_SERVICE_STATUS = IHMC_ROOT.withModule(ZED2_NAME).withType(SystemServiceStatusMessage.class).withSuffix("color_stereo");
+   public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withModule("mission_control").withType(SystemAvailableMessage.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
@@ -353,9 +355,35 @@ public class ROS2Tools
       return typeNamedTopic(DoorParameterPacket.class, ROS2Tools.IHMC_ROOT);
    }
 
-   public static ROS2Topic<SystemResourceUsageMessage> getSystemResourceUsageTopic(String instanceId)
+   /**
+    * Get system resource usage topic for Mission Control
+    * @param instanceId of the Mission Control Daemon
+    * @return the ROS2Topic the daemon will use for system resource usage messages
+    */
+   public static ROS2Topic<SystemResourceUsageMessage> getSystemResourceUsageTopic(UUID instanceId)
    {
-      return typeNamedTopic(SystemResourceUsageMessage.class, IHMC_ROOT.withSuffix(instanceId));
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemResourceUsageMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   /**
+    * Get system service status topic for Mission Control
+    * @param instanceId of the Mission Control Daemon
+    * @return the ROS2Topic the daemon will use for system service status messages
+    */
+   public static ROS2Topic<SystemServiceStatusMessage> getSystemServiceStatusTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemServiceStatusMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   /**
+    * Get the system service status QOS profile for Mission Control
+    * @return the ROS2QosProfile with history
+    */
+   public static ROS2QosProfile getSystemServiceStatusQosProfile()
+   {
+      return ROS2QosProfile.KEEP_HISTORY(100);
    }
 
    public final static ExceptionHandler RUNTIME_EXCEPTION = e ->
