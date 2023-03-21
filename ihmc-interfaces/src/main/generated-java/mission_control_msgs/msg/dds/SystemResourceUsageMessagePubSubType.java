@@ -116,7 +116,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getNvidiaGpuTotalMemory().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getNvidiaGpuMemoryTotal().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -159,9 +159,9 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_e(data.getNvidiaGpuMemoryUsed());else
           throw new RuntimeException("nvidia_gpu_memory_used field exceeds the maximum length");
 
-      if(data.getNvidiaGpuTotalMemory().size() <= 100)
-      cdr.write_type_e(data.getNvidiaGpuTotalMemory());else
-          throw new RuntimeException("nvidia_gpu_total_memory field exceeds the maximum length");
+      if(data.getNvidiaGpuMemoryTotal().size() <= 100)
+      cdr.write_type_e(data.getNvidiaGpuMemoryTotal());else
+          throw new RuntimeException("nvidia_gpu_memory_total field exceeds the maximum length");
 
       if(data.getNvidiaGpuUtilization().size() <= 100)
       cdr.write_type_e(data.getNvidiaGpuUtilization());else
@@ -186,7 +186,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setNvidiaGpuCount(cdr.read_type_2());
       	
       cdr.read_type_e(data.getNvidiaGpuMemoryUsed());	
-      cdr.read_type_e(data.getNvidiaGpuTotalMemory());	
+      cdr.read_type_e(data.getNvidiaGpuMemoryTotal());	
       cdr.read_type_e(data.getNvidiaGpuUtilization());	
 
    }
@@ -204,7 +204,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_e("iface_tx_kbps", data.getIfaceTxKbps());
       ser.write_type_2("nvidia_gpu_count", data.getNvidiaGpuCount());
       ser.write_type_e("nvidia_gpu_memory_used", data.getNvidiaGpuMemoryUsed());
-      ser.write_type_e("nvidia_gpu_total_memory", data.getNvidiaGpuTotalMemory());
+      ser.write_type_e("nvidia_gpu_memory_total", data.getNvidiaGpuMemoryTotal());
       ser.write_type_e("nvidia_gpu_utilization", data.getNvidiaGpuUtilization());
    }
 
@@ -221,7 +221,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.read_type_e("iface_tx_kbps", data.getIfaceTxKbps());
       data.setNvidiaGpuCount(ser.read_type_2("nvidia_gpu_count"));
       ser.read_type_e("nvidia_gpu_memory_used", data.getNvidiaGpuMemoryUsed());
-      ser.read_type_e("nvidia_gpu_total_memory", data.getNvidiaGpuTotalMemory());
+      ser.read_type_e("nvidia_gpu_memory_total", data.getNvidiaGpuMemoryTotal());
       ser.read_type_e("nvidia_gpu_utilization", data.getNvidiaGpuUtilization());
    }
 

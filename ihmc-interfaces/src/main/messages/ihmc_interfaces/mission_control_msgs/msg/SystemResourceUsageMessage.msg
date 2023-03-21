@@ -21,6 +21,6 @@ int32 nvidia_gpu_count
 #   [n] : memory used for nth GPU
 float32[] nvidia_gpu_memory_used
 #   [n] : total memory for nth GPU
-float32[] nvidia_gpu_total_memory
+float32[] nvidia_gpu_memory_total
 #   [n] : utilization for nth GPU
 float32[] nvidia_gpu_utilization
