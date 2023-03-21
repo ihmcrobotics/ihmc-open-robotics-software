@@ -160,7 +160,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      if(controllerModel == RDXVRControllerModel.UNKNOWN)
+      if (controllerModel == RDXVRControllerModel.UNKNOWN)
          controllerModel = vrContext.getControllerModel();
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
@@ -272,7 +272,7 @@ public class RDXVRKinematicsStreamingMode
 //                                                                                               ReferenceFrame.getWorldFrame()));
 //            toolboxInputMessage.getInputs().add().set(message);
 //         });
-         if(enabled.get())
+         if (enabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
@@ -314,7 +314,7 @@ public class RDXVRKinematicsStreamingMode
             ghostFullRobotModel.getElevator().updateFramesRecursively();
 
             // update preview assistance
-            if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if preview is enabled
+            if (sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if preview is enabled
             {
                if (sharedControlAssistant.isFirstPreview()) // first preview
                {
@@ -442,7 +442,7 @@ public class RDXVRKinematicsStreamingMode
       if (status.hasReceivedFirstMessage())
       {
          ghostRobotGraphic.getRenderables(renderables, pool,sceneLevels);
-         if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
+         if (sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
          {
             sharedControlAssistant.getGhostPreviewGraphic().getRenderables(renderables, pool, sceneLevels);
             var splineGraphics = sharedControlAssistant.getSplinePreviewGraphic();
