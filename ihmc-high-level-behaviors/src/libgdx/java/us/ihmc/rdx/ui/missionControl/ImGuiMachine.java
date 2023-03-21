@@ -182,12 +182,10 @@ public class ImGuiMachine
                   float rx = message.getIfaceRxKbps().get(j);
                   float tx = message.getIfaceTxKbps().get(j);
 
-                  // If the plot line represents rx
                   if (plotLineName.contains("rx"))
-                     plotLine.addValue(rx);
-                     // If the plot line represents tx
+                     plotLine.addValue(rx); // If the plot line represents rx
                   else if (plotLineName.contains("tx"))
-                     plotLine.addValue(tx);
+                     plotLine.addValue(tx); // If the plot line represents tx
                }
             }
          }
