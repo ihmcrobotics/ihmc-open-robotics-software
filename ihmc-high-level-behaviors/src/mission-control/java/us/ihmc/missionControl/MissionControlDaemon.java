@@ -145,7 +145,7 @@ public class MissionControlDaemon
          message.setNvidiaGpuCount(1); // TODO: support multiple GPUs
          message.getNvidiaGpuUtilization().add(nvidiaGPUMonitor.getGpuUsage());
          message.getNvidiaGpuMemoryUsed().add(nvidiaGPUMonitor.getMemoryUsed());
-         message.getNvidiaGpuTotalMemory().add(nvidiaGPUMonitor.getMemoryTotal());
+         message.getNvidiaGpuMemoryTotal().add(nvidiaGPUMonitor.getMemoryTotal());
       }
 
       // Publish the message

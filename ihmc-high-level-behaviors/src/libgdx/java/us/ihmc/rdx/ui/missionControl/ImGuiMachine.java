@@ -124,7 +124,7 @@ public class ImGuiMachine
             plot.setFlags(plotFlags);
             plot.setXFlags(plotAxisXFlags);
             plot.setYFlags(plotAxisYFlags);
-            float totalGpuMemory = message.getNvidiaGpuTotalMemory().get(gpuIndex);
+            float totalGpuMemory = message.getNvidiaGpuMemoryTotal().get(gpuIndex);
             plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, totalGpuMemory, ImGuiCond.Always));
             plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ") memory usage (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
             plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ") memory total (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
@@ -161,7 +161,7 @@ public class ImGuiMachine
             ImPlotPlot vramPlot = vramPlots.get(i);
             ((ImPlotDoublePlotLine) gpuPlot.getPlotLines().get(i)).addValue(message.getNvidiaGpuUtilization().get(i));
             ((ImPlotDoublePlotLine) vramPlot.getPlotLines().get(0)).addValue(message.getNvidiaGpuMemoryUsed().get(i));
-            ((ImPlotDoublePlotLine) vramPlot.getPlotLines().get(1)).addValue(message.getNvidiaGpuTotalMemory().get(i));
+            ((ImPlotDoublePlotLine) vramPlot.getPlotLines().get(1)).addValue(message.getNvidiaGpuMemoryTotal().get(i));
          }
 
          // Network
