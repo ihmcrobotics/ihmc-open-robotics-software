@@ -10,16 +10,15 @@ public class ImGuiMachineService
    private final String serviceName;
    private String status;
    private final ImGuiPanel panel;
+   private final ImGuiConsoleArea consoleArea;
 
-   public ImGuiMachineService(String serviceName, UUID instanceId)
+   public ImGuiMachineService(String serviceName, String hostname, UUID instanceId, ImGuiPanel machinePanel)
    {
       this.serviceName = serviceName;
-      panel = new ImGuiPanel(serviceName + "##" + instanceId);
-   }
+      panel = new ImGuiPanel(serviceName + "##" + instanceId, this::renderImGuiWidgets);
+      consoleArea = new ImGuiConsoleArea();
 
-   public String getServiceName()
-   {
-      return serviceName;
+      machinePanel.addChild(panel);
    }
 
    public String getStatus()
@@ -32,17 +31,13 @@ public class ImGuiMachineService
       this.status = status;
    }
 
-   public ImGuiPanel getPanel()
-   {
-      return panel;
-   }
-
    public void acceptLogLines(List<String> logLines)
    {
+      logLines.forEach(consoleArea::acceptLine);
    }
 
    public void renderImGuiWidgets()
    {
-
+      consoleArea.renderImGuiWidgets();
    }
 }

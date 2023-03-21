@@ -200,9 +200,14 @@ public class ImGuiMachine
       final ImGuiMachineService service;
 
       if (!services.containsKey(serviceName))
-         service = new ImGuiMachineService(serviceName, instanceId);
+      {
+         service = new ImGuiMachineService(serviceName, hostname, instanceId, panel);
+         services.put(serviceName, service);
+      }
       else
+      {
          service = services.get(serviceName);
+      }
 
       service.setStatus(message.getStatusAsString());
 
@@ -223,6 +228,10 @@ public class ImGuiMachine
    public void renderImGuiWidgets()
    {
       // Render service statuses & buttons
+//      for (ImGuiMachineService service : services.values())
+//      {
+//         service.renderImGuiWidgets();
+//      }
 
       // Render usage graphs
       cpuPlot.render();
