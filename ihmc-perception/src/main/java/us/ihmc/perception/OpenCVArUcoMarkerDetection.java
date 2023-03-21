@@ -136,37 +136,37 @@ public class OpenCVArUcoMarkerDetection
 
          // TODO: Throttle this, extract lambda
          executorService.clearQueueAndExecute(() ->
-                                              {
-                                                 synchronized (inputImageSync)
-                                                 {
-                                                    stopwatch.getForThreadOne().lap(); // TODO: Stopwatch swap reference is done incorrectly
-                                                    opencv_aruco.detectMarkers(rgb8ImageForDetection.getForThreadTwo().getBytedecoOpenCVMat(),
-                                                                               dictionary,
-                                                                               corners.getForThreadOne(),
-                                                                               ids.getForThreadOne(),
-                                                                               detectorParameters,
-                                                                               rejectedImagePoints.getForThreadOne());
-                                                    rgb8ImageForDetection.swap();
-                                                    stopwatch.getForThreadOne().suspend();
-                                                 }
+         {
+            synchronized (inputImageSync)
+            {
+               stopwatch.getForThreadOne().lap(); // TODO: Stopwatch swap reference is done incorrectly
+               opencv_aruco.detectMarkers(rgb8ImageForDetection.getForThreadTwo().getBytedecoOpenCVMat(),
+                                     dictionary,
+                                     corners.getForThreadOne(),
+                                     ids.getForThreadOne(),
+                                     detectorParameters,
+                                     rejectedImagePoints.getForThreadOne());
+               rgb8ImageForDetection.swap();
+               stopwatch.getForThreadOne().suspend();
+            }
 
-                                                 synchronized (detectionDataSync)
-                                                 {
-                                                    corners.swap();
-                                                    ids.swap();
-                                                    rejectedImagePoints.swap();
-                                                    stopwatch.swap();
+            synchronized (detectionDataSync)
+            {
+               corners.swap();
+               ids.swap();
+               rejectedImagePoints.swap();
+               stopwatch.swap();
 
-                                                    idsAsList.clear();
-                                                    idToCornersMap.clear();
-                                                    for (int i = 0; i < ids.getForThreadTwo().rows(); i++)
-                                                    {
-                                                       int markerID = ids.getForThreadTwo().ptr(i, 0).getInt();
-                                                       idsAsList.add(markerID);
-                                                       idToCornersMap.put(markerID, corners.getForThreadTwo().get(i));
-                                                    }
-                                                 }
-                                              });
+               idsAsList.clear();
+               idToCornersMap.clear();
+               for (int i = 0; i < ids.getForThreadTwo().rows(); i++)
+               {
+                  int markerID = ids.getForThreadTwo().ptr(i, 0).getInt();
+                  idsAsList.add(markerID);
+                  idToCornersMap.put(markerID, corners.getForThreadTwo().get(i));
+               }
+            }
+         });
       }
    }
 
