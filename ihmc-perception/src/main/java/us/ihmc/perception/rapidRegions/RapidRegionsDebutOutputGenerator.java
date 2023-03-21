@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.nio.FloatBuffer;
 
@@ -272,7 +272,7 @@ public class RapidRegionsDebutOutputGenerator
       if (!enabled)
          return;
 
-      BytedecoOpenCVTools.display("Debug Output", debugImage, delay);
+      PerceptionDebugTools.display("Debug Output", debugImage, delay);
    }
 
    public Mat getDebugImage()

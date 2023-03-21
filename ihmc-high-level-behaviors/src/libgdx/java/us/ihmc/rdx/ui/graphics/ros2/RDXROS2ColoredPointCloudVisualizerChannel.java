@@ -6,9 +6,12 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.tools.ImageMessageDecompressionInput;
+import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
@@ -17,7 +20,11 @@ import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.SwapReference;
+
+import java.nio.ByteBuffer;
 
 /**
  * The common part of the depth and color channels.
@@ -34,10 +41,11 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    protected final SwapReference<ImageMessageDecompressionInput> decompressionInputSwapReference = new SwapReference<>(ImageMessageDecompressionInput::new);
+   private final ResettableExceptionHandlingExecutorService channelDecompressionThreadExecutor;
+   private final Runnable decompressionAsynchronousThread = this::decompressionAsynchronousThread;
    private boolean initialized = false;
-   protected final Notification subscribedImageAvailable = new Notification();
-   protected final Notification readyForDecompression = new Notification();
-   protected final Notification decompressedImageReady = new Notification();
+   private final Notification subscribedImageAvailable = new Notification();
+   private final Notification decompressedImageReady = new Notification();
    private volatile boolean receivedOne = false;
    protected int imageWidth;
    protected int imageHeight;
@@ -49,11 +57,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private final RotationMatrix rotationMatrixToWorld = new RotationMatrix();
    private final Vector3D translationToWorld = new Vector3D();
    private float depthDiscretization;
-   private boolean isPinholeCameraModel;
-   private boolean isEquidistantFisheyeCameraModel;
-   private boolean isOusterCameraModel;
-   private float ousterHorizontalFieldOfView;
-   private float ousterVerticalFieldOfView;
+   private CameraModel cameraModel;
+   private final ByteBuffer ousterPixelShiftsBuffer = NativeMemoryTools.allocate(Integer.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
+   private final ByteBuffer ousterBeamAltitudeAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
+   private final ByteBuffer ousterBeamAzimuthAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
 
    public RDXROS2ColoredPointCloudVisualizerChannel(String name, ROS2Topic<ImageMessage> topic)
    {
@@ -61,6 +68,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 
       frequencyPlot = new ImPlotFrequencyPlot(name + " Hz", 30);
       delayPlot = new ImPlotDoublePlot(name + " Delay", 30);
+
+      boolean daemon = true;
+      int queueSize = 1;
+      channelDecompressionThreadExecutor = MissingThreadTools.newSingleThreadExecutor("ChannelDecompressionThread", daemon, queueSize);
    }
 
    public void subscribe(RealtimeROS2Node realtimeROS2Node, Object imageMessagesSyncObject)
@@ -108,23 +119,41 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
          translationToWorld.set(imageMessage.getPosition());
          rotationMatrixToWorld.set(imageMessage.getOrientation());
 
+         // We decompress outside of the incoming message synchronization block.
+         // Using an internal swap reference to the unpacked data, we can allow ROS 2
+         // to not have to wait for compression to finish and also not have to copy
+         // the unpacked result to a decompression input buffer.
          decompressionInputSwapReference.getForThreadOne().extract(imageMessage);
          decompressionInputSwapReference.swap();
-         readyForDecompression.set();
+         channelDecompressionThreadExecutor.clearQueueAndExecute(decompressionAsynchronousThread);
 
          messageSizeReadout.update(imageMessage.getData().size());
          sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
          delayPlot.addValue(MessageTools.calculateDelay(imageMessage));
 
-         isPinholeCameraModel = imageMessage.getIsPinholeCameraModel();
-         isEquidistantFisheyeCameraModel = imageMessage.getIsEquidistantFisheyeCameraModel();
-         isOusterCameraModel = imageMessage.getIsOusterCameraModel();
-         ousterHorizontalFieldOfView = imageMessage.getOusterHorizontalFieldOfView();
-         ousterVerticalFieldOfView = imageMessage.getOusterVerticalFieldOfView();
+         cameraModel = CameraModel.getCameraModel(imageMessage);
+         MessageTools.extractIDLSequenceCastingBytesToInts(imageMessage.getOusterPixelShifts(), ousterPixelShiftsBuffer);
+         MessageTools.extractIDLSequence(imageMessage.getOusterBeamAltitudeAngles(), ousterBeamAltitudeAnglesBuffer);
+         MessageTools.extractIDLSequence(imageMessage.getOusterBeamAzimuthAngles(), ousterBeamAzimuthAnglesBuffer);
       }
    }
 
+   private void decompressionAsynchronousThread()
+   {
+      decompress();
+      decompressedImageReady.set();
+   }
+
    protected abstract void initialize(OpenCLManager openCLManager);
+
+   protected abstract void decompress();
+
+   protected abstract Object getDecompressionAccessSyncObject();
+
+   public void destroy()
+   {
+      channelDecompressionThreadExecutor.destroy();
+   }
 
    public ROS2Topic<ImageMessage> getTopic()
    {
@@ -211,28 +240,23 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       return depthDiscretization;
    }
 
-   public boolean getIsPinholeCameraModel()
+   public CameraModel getCameraModel()
    {
-      return isPinholeCameraModel;
+      return cameraModel;
    }
 
-   public boolean getIsEquidistantFisheyeCameraModel()
+   public ByteBuffer getOusterPixelShiftsBuffer()
    {
-      return isEquidistantFisheyeCameraModel;
+      return ousterPixelShiftsBuffer;
    }
 
-   public boolean getIsOusterCameraModel()
+   public ByteBuffer getOusterBeamAltitudeAnglesBuffer()
    {
-      return isOusterCameraModel;
+      return ousterBeamAltitudeAnglesBuffer;
    }
 
-   public float getOusterHorizontalFieldOfView()
+   public ByteBuffer getOusterBeamAzimuthAnglesBuffer()
    {
-      return ousterHorizontalFieldOfView;
-   }
-
-   public float getOusterVerticalFieldOfView()
-   {
-      return ousterVerticalFieldOfView;
+      return ousterBeamAzimuthAnglesBuffer;
    }
 }

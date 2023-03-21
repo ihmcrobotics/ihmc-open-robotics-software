@@ -1,6 +1,5 @@
 package us.ihmc.avatar.colorVision;
 
-import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -16,5 +15,4 @@ public class DualBlackflyComms
    public static final ROS2Topic<Float64> CONVERT_COLOR_DURATION = BASE_TOPIC.withType(Float64.class).withSuffix("right_convert_color_duration");
    public static final ROS2Topic<Float64> ENCODING_DURATION = BASE_TOPIC.withType(Float64.class).withSuffix("right_encoding_duration");
    public static final ROS2Topic<Float64> COPY_DURATION = BASE_TOPIC.withType(Float64.class).withSuffix("right_copy_duration");
-   public static final ROS2Topic<ArUcoMarkerPoses> FRAME_POSE = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("frame_pose");
 }

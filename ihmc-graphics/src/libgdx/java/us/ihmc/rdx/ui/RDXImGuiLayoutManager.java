@@ -8,7 +8,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
+import us.ihmc.tools.io.HybridResourceDirectory;
 import us.ihmc.tools.io.HybridResourceMode;
 
 import java.nio.file.FileVisitResult;
@@ -24,14 +24,12 @@ public class RDXImGuiLayoutManager
 {
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private final Class<?> classForLoading;
-   private final String directoryNameToAssumePresent;
-   private final String subsequentPathToResourceFolder;
    private final String configurationExtraPath;
-   private final HybridDirectory configurationBaseDirectory;
-   private final ArrayList<Consumer<HybridDirectory>> layoutDirectoryUpdatedListeners = new ArrayList<>();
+   private final HybridResourceDirectory configurationBaseDirectory;
+   private final ArrayList<Consumer<HybridResourceDirectory>> layoutDirectoryUpdatedListeners = new ArrayList<>();
    private final ArrayList<Function<ImGuiConfigurationLocation, Boolean>> loadListeners = new ArrayList<>();
    private final ArrayList<Consumer<ImGuiConfigurationLocation>> saveListeners = new ArrayList<>();
-   private HybridDirectory layoutDirectory;
+   private HybridResourceDirectory layoutDirectory;
    private boolean needToReindexLayouts = false;
    private boolean firstIndex = true;
    private boolean layoutHasBeenLoadedOnce = false;
@@ -43,15 +41,9 @@ public class RDXImGuiLayoutManager
    private String currentLayoutName = "Main";
    private ImGuiConfigurationLocation currentConfigurationLocation;
 
-   public RDXImGuiLayoutManager(Class<?> classForLoading,
-                                String directoryNameToAssumePresent,
-                                String subsequentPathToResourceFolder,
-                                String configurationExtraPath,
-                                HybridDirectory configurationBaseDirectory)
+   public RDXImGuiLayoutManager(Class<?> classForLoading, String configurationExtraPath, HybridResourceDirectory configurationBaseDirectory)
    {
       this.classForLoading = classForLoading;
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.configurationExtraPath = configurationExtraPath;
       this.configurationBaseDirectory = configurationBaseDirectory;
       indexLayouts();
@@ -229,13 +221,9 @@ public class RDXImGuiLayoutManager
 
    public void applyLayoutDirectory()
    {
-      layoutDirectory = new HybridDirectory(dotIHMCDirectory,
-                                            directoryNameToAssumePresent,
-                                            subsequentPathToResourceFolder,
-                                            classForLoading,
-                                                 configurationExtraPath + (currentLayoutName.equals("Main") ? "" : "/" + currentLayoutName
-                                                                                                                   + "Layout"));
-      for (Consumer<HybridDirectory> layoutDirectoryUpdatedListener : layoutDirectoryUpdatedListeners)
+      layoutDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading, "/")
+            .resolve(configurationExtraPath + (currentLayoutName.equals("Main") ? "" : "/" + currentLayoutName + "Layout"));
+      for (Consumer<HybridResourceDirectory> layoutDirectoryUpdatedListener : layoutDirectoryUpdatedListeners)
       {
          layoutDirectoryUpdatedListener.accept(layoutDirectory);
       }
@@ -278,12 +266,12 @@ public class RDXImGuiLayoutManager
       return currentConfigurationLocation;
    }
 
-   public HybridDirectory getLayoutDirectory()
+   public HybridResourceDirectory getLayoutDirectory()
    {
       return layoutDirectory;
    }
 
-   public ArrayList<Consumer<HybridDirectory>> getLayoutDirectoryUpdatedListeners()
+   public ArrayList<Consumer<HybridResourceDirectory>> getLayoutDirectoryUpdatedListeners()
    {
       return layoutDirectoryUpdatedListeners;
    }

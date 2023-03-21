@@ -116,7 +116,7 @@ public class InverseDynamicsQPSolver
       solver_Aeq.reshape(problemSize, problemSize);
       solver_beq.reshape(problemSize, 1);
       solver_Ain = qpSolver.getAinUnsafe();
-      solver_bin = qpSolver.getAinUnsafe();
+      solver_bin = qpSolver.getBinUnsafe();
       solver_Ain.reshape(problemSize, problemSize);
       solver_bin.reshape(problemSize, 1);
 

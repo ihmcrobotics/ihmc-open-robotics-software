@@ -14,7 +14,7 @@ public class ListOfFilesTest
       // try-catch block to handle exceptions
       try {
          WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
-         String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
+         String demoDirAbs = demoDir.getFilesystemDirectory().toAbsolutePath().toString();
          String demoTrainingDirAbs = demoDirAbs + "/PushDoor";
          System.out.println("Folder is: " + demoTrainingDirAbs);
          // Create a file object

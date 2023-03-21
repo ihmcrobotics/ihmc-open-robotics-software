@@ -56,10 +56,18 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
          LogTools.info("Adding Blackfly LEFT with serial number: {}", LEFT_SERIAL_NUMBER);
          blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER, syncedRobot));
       }
+      else
+      {
+         LogTools.warn("No serial number for left Blackfly specified. The sensor will not be available.");
+      }
       if (!RIGHT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly RIGHT with serial number: {}", RIGHT_SERIAL_NUMBER);
          blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER, syncedRobot));
+      }
+      else
+      {
+         LogTools.warn("No serial number for right Blackfly specified. The sensor will not be available.");
       }
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");

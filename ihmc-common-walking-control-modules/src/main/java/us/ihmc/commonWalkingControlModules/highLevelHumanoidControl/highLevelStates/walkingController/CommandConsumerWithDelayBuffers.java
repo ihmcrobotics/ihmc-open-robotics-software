@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -31,14 +28,13 @@ public class CommandConsumerWithDelayBuffers
    private final Map<Class<? extends Command<?, ?>>, RecyclingArrayList<? extends Command<?, ?>>> outgoingCommands = new HashMap<>();
    private final Map<Class<?>, PriorityQueue<Command<?, ?>>> priorityQueues = new HashMap<>();
    private final Map<Class<? extends Settable<?>>, Class<? extends Command<?,?>>> messageToCommandMap = new HashMap<>();
-   private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands;
+   private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands = new ArrayList<>();
 
-   public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, YoDouble yoTime)
+   public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, List<Class<? extends Command<?, ?>>> commandsToRegister, YoDouble yoTime)
    {
       this.yoTime = yoTime;
       this.commandInputManager = commandInputManager;
-      listOfSupportedCommands = commandInputManager.getListOfSupportedCommands();
-      registerNewCommands(listOfSupportedCommands);
+      registerNewCommands(commandsToRegister);
    }
    
    @SuppressWarnings("unchecked")
@@ -47,19 +43,25 @@ public class CommandConsumerWithDelayBuffers
       for (int i = 0; i < commandClasses.size(); i++)
       {
          Class<? extends Command<?, ?>> commandClass = commandClasses.get(i);
-         registerNewCommand((Class<C>) commandClass);
 
-         Builder<? extends Command<?, ?>> commandConstructor = CommandInputManager.createBuilderWithEmptyConstructor(commandClass);
-         Command<?, ?> command = commandConstructor.newInstance();
-         messageToCommandMap.put(command.getMessageClass(), commandClass);
+         if (!commandInputManager.getListOfSupportedCommands().contains(commandClass))
+            LogTools.error("The command type {} is not supported by the CommandInputManager.", commandClass.getSimpleName());
+         else
+            registerNewCommand((Class<C>) commandClass);
       }
    }
 
    private <C extends Command<C, M>, M extends Settable<M>> void registerNewCommand(Class<C> commandClass)
    {
+      listOfSupportedCommands.add(commandClass);
+
+      Builder<? extends Command<?, ?>> commandConstructor = CommandInputManager.createBuilderWithEmptyConstructor(commandClass);
+      Command<?, ?> command = commandConstructor.newInstance();
+      CommandExecutionTimeComparator commandComparator = new CommandExecutionTimeComparator();
+
+      messageToCommandMap.put(command.getMessageClass(), commandClass);
       queuedCommands.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
       outgoingCommands.put(commandClass, new RecyclingArrayList<>(NUMBER_OF_COMMANDS_TO_QUEUE, commandClass));
-      CommandExecutionTimeComparator commandComparator = new CommandExecutionTimeComparator();
       priorityQueues.put(commandClass, new PriorityQueue<Command<?, ?>>(NUMBER_OF_COMMANDS_TO_QUEUE, commandComparator));
    }
    

@@ -1,27 +1,25 @@
 package us.ihmc.tools.io;
 
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.log.LogTools;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.function.Consumer;
 
+/**
+ * Used with {@link HybridDirectory} to represent a file.
+ */
 public class HybridFile
 {
-   private final WorkspaceFile workspaceFile;
-   private final Path externalFile;
-   private HybridResourceMode mode = HybridResourceMode.WORKSPACE;
+   protected Path externalFile;
+   protected WorkspaceFile workspaceFile;
+   protected HybridResourceMode mode = HybridResourceMode.WORKSPACE;
+
+   protected HybridFile()
+   {
+
+   }
 
    public HybridFile(HybridDirectory directory, String subsequentPathToFile)
    {
-      workspaceFile = new WorkspaceFile(directory.getInternalWorkspaceDirectory(), subsequentPathToFile);
       externalFile = directory.getExternalDirectory().resolve(subsequentPathToFile);
+      workspaceFile = new WorkspaceFile(directory.getWorkspaceDirectoryInternal(), subsequentPathToFile);
    }
 
    /** If the directory is available for reading/writing using files.
@@ -44,55 +42,7 @@ public class HybridFile
 
    public Path getFileForWriting()
    {
-      return mode == HybridResourceMode.WORKSPACE ? workspaceFile.getFilePath() : externalFile;
-   }
-
-   /**
-    * Get this file as an input stream, if possible, and close it afterwards.
-    *
-    * @return if the input stream was consumed successfully
-    */
-   public boolean getInputStream(Consumer<InputStream> inputStreamGetter)
-   {
-      boolean success = false;
-      try (InputStream inputStream = getInputStreamUnsafe())
-      {
-         if (inputStream != null)
-         {
-            inputStreamGetter.accept(inputStream);
-            success = true;
-         }
-         else
-         {
-            LogTools.error(1, "Input stream is null"); // Print caller info to help identify issues
-         }
-      }
-      catch (IOException ioException)
-      {
-         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(ioException);
-      }
-      return success;
-   }
-
-   private InputStream getInputStreamUnsafe()
-   {
-      return mode == HybridResourceMode.WORKSPACE ?
-            getClasspathResourceAsStream() :
-            ExceptionTools.handle(() -> new FileInputStream(externalFile.toFile()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-   }
-
-   public boolean isInputStreamAvailable()
-   {
-      boolean isInputStreamAvailable;
-      if (mode == HybridResourceMode.WORKSPACE)
-      {
-         isInputStreamAvailable = workspaceFile.getClasspathResource() != null;
-      }
-      else
-      {
-         isInputStreamAvailable = Files.exists(externalFile);
-      }
-      return isInputStreamAvailable;
+      return mode == HybridResourceMode.WORKSPACE ? workspaceFile.getFilesystemFile() : externalFile;
    }
 
    public boolean isWritingAvailable()
@@ -109,28 +59,6 @@ public class HybridFile
       return isWritingAvailable;
    }
 
-   public String getLocationOfResourceForReading()
-   {
-      if (mode == HybridResourceMode.WORKSPACE)
-      {
-         return "Resource: " + getPathForResourceLoadingPathFiltered();
-      }
-      else
-      {
-         return "File: " + externalFile.toString();
-      }
-   }
-
-   public InputStream getClasspathResourceAsStream()
-   {
-      return workspaceFile.getClasspathResourceAsStream();
-   }
-
-   public URL getClasspathResource()
-   {
-      return workspaceFile.getClasspathResource();
-   }
-
    public Path getExternalFile()
    {
       return externalFile;
@@ -138,11 +66,6 @@ public class HybridFile
 
    public Path getWorkspaceFile()
    {
-      return workspaceFile.getFilePath();
-   }
-
-   public String getPathForResourceLoadingPathFiltered()
-   {
-      return workspaceFile.getPathForResourceLoadingPathFiltered();
+      return workspaceFile.getFilesystemFile();
    }
 }
