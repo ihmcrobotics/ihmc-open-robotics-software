@@ -86,7 +86,7 @@ public class promp extends us.ihmc.promp.presets.ProMPInfoMapper {
 
 // #include <promp/io/csv_reader.hpp>
 // #include <promp/trajectory.hpp>
-// Targeting ..\TrajectoryGroup.java
+// Targeting ../TrajectoryGroup.java
 
 
 
