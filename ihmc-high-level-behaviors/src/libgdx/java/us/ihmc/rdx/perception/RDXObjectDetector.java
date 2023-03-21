@@ -44,7 +44,7 @@ public class RDXObjectDetector
    public RDXObjectDetector(RDXObjectDetectionMode detectionMode, RDXHighLevelDepthSensorSimulator objectDetectionSimulator, ROS2PublishSubscribeAPI ros2)
    {
       this.detectionMode = detectionMode;
-      if(detectionMode == RDXObjectDetectionMode.SIM_ARUCO)
+      if (detectionMode == RDXObjectDetectionMode.SIM_ARUCO)
       {
          arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
          arUcoMarkerDetection.create(objectDetectionSimulator.getSensorFrame());
@@ -69,7 +69,7 @@ public class RDXObjectDetector
    public RDXObjectDetector(RDXObjectDetectionMode detectionMode)
    {
       this.detectionMode = detectionMode;
-      if(detectionMode == RDXObjectDetectionMode.REAL_ARUCO)
+      if (detectionMode == RDXObjectDetectionMode.REAL_ARUCO)
       {
          for (int id : objectInfo.getMarkersId())
             arUcoMarkersToTrack.add(new OpenCVArUcoMarker(id, objectInfo.getMarkerSize(id)));
@@ -81,7 +81,7 @@ public class RDXObjectDetector
    {
       if (enabled.get())
       {
-         if(detectionMode == RDXObjectDetectionMode.SIM_ARUCO)
+         if (detectionMode == RDXObjectDetectionMode.SIM_ARUCO)
          {
             arUcoMarkerDetection.update();
             arUcoMarkerROS2Publisher.update();
