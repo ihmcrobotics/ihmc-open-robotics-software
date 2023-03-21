@@ -50,10 +50,9 @@ public class ArmJointAnglesActionData implements BehaviorActionData
    {
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
-
       for (int i = 0; i < NUMBER_OF_JOINTS; i++)
       {
-         message.getJointAngles()[i] = jointAngles[i];
+         jointAngles[i] = message.getJointAngles()[i];
       }
    }
 
