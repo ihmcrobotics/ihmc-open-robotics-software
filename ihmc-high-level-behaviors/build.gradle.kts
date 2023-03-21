@@ -20,7 +20,6 @@ mainDependencies {
       exclude(group = "org.lwjgl.lwjgl") // exclude lwjgl 2
    }
    api("us.ihmc:promp:source")
-   api("com.googlecode.json-simple:json-simple:1.1.1")
 }
 
 javafxDependencies {

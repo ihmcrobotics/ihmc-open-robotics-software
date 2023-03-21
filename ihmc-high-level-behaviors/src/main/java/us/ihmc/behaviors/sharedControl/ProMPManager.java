@@ -1,12 +1,8 @@
 package us.ihmc.behaviors.sharedControl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,7 +11,6 @@ import us.ihmc.promp.*;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -179,16 +174,19 @@ public class ProMPManager
             // add weights array
             ArrayNode weightsArray = root.putArray("weights");
             EigenVectorXd weights = learnedProMPs.get(bodyPart).get_weights();
-            for (int i = 0; i < weights.size(); i++) {
+            for (int i = 0; i < weights.size(); i++)
+            {
                weightsArray.add(weights.coeff(i));
             }
 
             // add covariance matrix
             ArrayNode covarianceArray = root.putArray("covariance");
             EigenMatrixXd covariance = learnedProMPs.get(bodyPart).get_covariance();
-            for (int i = 0; i < covariance.rows(); i++) {
+            for (int i = 0; i < covariance.rows(); i++)
+            {
                ArrayNode rowArray = objectMapper.createArrayNode();
-               for (int j = 0; j < covariance.cols(); j++) {
+               for (int j = 0; j < covariance.cols(); j++)
+               {
                   rowArray.add(covariance.coeff(i, j));
                }
                covarianceArray.add(rowArray);
@@ -204,44 +202,36 @@ public class ProMPManager
 
    public void loadPrelearnedTask(String directoryName, String bodyPart)
    {
-      String fileName = directoryName + "/" + bodyPart + ".json";
-      try (FileReader reader = new FileReader(fileName))
+      WorkspaceDirectory directory = new WorkspaceDirectory(directoryName);
+      WorkspaceFile file = new WorkspaceFile(directory, bodyPart + ".json");
+      Path filePath = file.getFilesystemFile();
+      JSONFileTools.load(filePath, jsonNode ->
       {
-         JSONParser parser = new JSONParser();
-         JSONObject jsonObject = (JSONObject) parser.parse(reader);
+         JsonNode weightsArrayNode = jsonNode.get("weights");
+         EigenVectorXd weights = new EigenVectorXd(weightsArrayNode.size());
+         for (int i = 0; i < weightsArrayNode.size(); i++)
+            weights.apply(i).put(weightsArrayNode.get(i).asDouble());
 
-         // Parse the JSON object into a ProMP object
-         JSONArray weightsArray = (JSONArray) jsonObject.get("weights");
-         EigenVectorXd weights = new EigenVectorXd(weightsArray.size());
-         for (int i = 0; i < weightsArray.size(); i++)
-         {
-            weights.apply(i).put(((Double) weightsArray.get(i)).doubleValue());
-         }
-
-         JSONArray covWArray = (JSONArray) jsonObject.get("covariance");
-         JSONArray rowArray = (JSONArray) covWArray.get(0);
-         EigenMatrixXd covarianceMatrix = new EigenMatrixXd(covWArray.size(), rowArray.size());
-         for (int i = 0; i < covWArray.size(); i++)
-         {
-            rowArray = (JSONArray) covWArray.get(i);
-            for (int j = 0; j < rowArray.size(); j++)
-            {
-               covarianceMatrix.apply(i, j).put(((Double) rowArray.get(j)).doubleValue());
+         JsonNode covWArrayNode = jsonNode.get("covariance");
+         int numRows = covWArrayNode.size();
+         int numCols = covWArrayNode.get(0).size();
+         EigenMatrixXd covarianceMatrix = new EigenMatrixXd(numRows, numCols);
+         for (int i = 0; i < numRows; i++) {
+            JsonNode rowArrayNode = covWArrayNode.get(i);
+            for (int j = 0; j < numCols; j++) {
+               covarianceMatrix.apply(i, j).put(rowArrayNode.get(j).asDouble());
             }
          }
-         double stdBasisFunction = ((Number) jsonObject.get("stdBasisFunction")).doubleValue();
-         int numSamples = ((Number) jsonObject.get("numSamples")).intValue();
-         int dims = ((Number) jsonObject.get("dims")).intValue();
-         ProMP promp = new ProMP(weights, covarianceMatrix, stdBasisFunction, numSamples, dims);
 
+         double stdBasisFunction = jsonNode.get("stdBasisFunction").asDouble();
+         int numSamples = jsonNode.get("numSamples").asInt();
+         int dims = jsonNode.get("dims").asInt();
+
+         // Create a ProMP object with the retrieved values
+         ProMP promp = new ProMP(weights, covarianceMatrix, stdBasisFunction, numSamples, dims);
          // Add the ProMP object to the map
          learnedProMPs.put(bodyPart, promp);
-      }
-      catch (IOException | ParseException e)
-      {
-         LogTools.error("An error occurred while reading learned parameters for task {} from file: {}", taskName, fileName);
-         e.printStackTrace();
-      }
+      });
    }
 
    public void resetTask()

@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ObjectInfoTest
 {
