@@ -1,8 +1,8 @@
 {
   "dockspacePanels" : {
-    "Machine View" : true
+    "Machine View" : false
   },
   "windows" : {
-    "Main Panel" : true
+    "Machines" : false
   }
 }
