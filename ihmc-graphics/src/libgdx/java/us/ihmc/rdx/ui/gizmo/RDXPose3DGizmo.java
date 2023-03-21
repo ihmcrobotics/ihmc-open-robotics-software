@@ -113,14 +113,14 @@ public class RDXPose3DGizmo implements RenderableProvider
    private static final boolean PREPEND = true;
    private RDXPose3DGizmoAdjustmentFrame translationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP;
    private RDXPose3DGizmoAdjustmentFrame rotationAdjustmentFrame = RDXPose3DGizmoAdjustmentFrame.CAMERA_ZUP;
-   private final ImGuiInputDouble translationStepSizeInput = new ImGuiInputDouble("Translation step size", "%.5f", 0.01);
-   private final ImGuiInputDouble positionXImGuiInput = new ImGuiInputDouble("X", "%.5f");
-   private final ImGuiInputDouble positionYImGuiInput = new ImGuiInputDouble("Y", "%.5f");
-   private final ImGuiInputDouble positionZImGuiInput = new ImGuiInputDouble("Z", "%.5f");
-   private final ImGuiInputDouble rotationStepSizeInput = new ImGuiInputDouble("Rotation step size " + UnitConversions.DEGREE_SYMBOL, "%.5f", 0.5);
-   private final ImGuiInputDoubleForRotations yawImGuiInput = new ImGuiInputDoubleForRotations("Yaw " + UnitConversions.DEGREE_SYMBOL, "%.5f");
-   private final ImGuiInputDoubleForRotations pitchImGuiInput = new ImGuiInputDoubleForRotations("Pitch " + UnitConversions.DEGREE_SYMBOL, "%.5f");
-   private final ImGuiInputDoubleForRotations rollImGuiInput = new ImGuiInputDoubleForRotations("Roll " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+   private ImGuiInputDouble translationStepSizeInput;
+   private ImGuiInputDouble positionXImGuiInput;
+   private ImGuiInputDouble positionYImGuiInput;
+   private ImGuiInputDouble positionZImGuiInput;
+   private ImGuiInputDouble rotationStepSizeInput;
+   private ImGuiInputDoubleForRotations yawImGuiInput;
+   private ImGuiInputDoubleForRotations pitchImGuiInput;
+   private ImGuiInputDoubleForRotations rollImGuiInput;
 
    public RDXPose3DGizmo()
    {
@@ -169,6 +169,14 @@ public class RDXPose3DGizmo implements RenderableProvider
 
    public void create(RDX3DPanel panel3D)
    {
+      translationStepSizeInput = new ImGuiInputDouble("Translation step size", "%.5f", 0.01);
+      positionXImGuiInput = new ImGuiInputDouble("X", "%.5f");
+      positionYImGuiInput = new ImGuiInputDouble("Y", "%.5f");
+      positionZImGuiInput = new ImGuiInputDouble("Z", "%.5f");
+      rotationStepSizeInput = new ImGuiInputDouble("Rotation step size " + UnitConversions.DEGREE_SYMBOL, "%.5f", 0.5);
+      yawImGuiInput = new ImGuiInputDoubleForRotations("Yaw " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+      pitchImGuiInput = new ImGuiInputDoubleForRotations("Pitch " + UnitConversions.DEGREE_SYMBOL, "%.5f");
+      rollImGuiInput = new ImGuiInputDoubleForRotations("Roll " + UnitConversions.DEGREE_SYMBOL, "%.5f");
       camera3D = panel3D.getCamera3D();
       panel3D.addImGuiOverlayAddition(this::renderTooltipAndContextMenu);
 
