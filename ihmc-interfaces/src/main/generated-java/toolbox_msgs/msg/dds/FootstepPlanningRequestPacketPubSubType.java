@@ -89,6 +89,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -172,6 +174,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getCdrSerializedSize(data.getReferencePlan(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -225,6 +229,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_9(data.getRequestedSwingPlanner());
 
+      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.write(data.getReferencePlan(), cdr);
       cdr.write_type_7(data.getGenerateLog());
 
    }
@@ -272,6 +277,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       	
       data.setRequestedSwingPlanner(cdr.read_type_9());
       	
+      controller_msgs.msg.dds.FootstepDataListMessagePubSubType.read(data.getReferencePlan(), cdr);	
       data.setGenerateLog(cdr.read_type_7());
       	
 
@@ -310,6 +316,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
       ser.write_type_6("status_publish_period", data.getStatusPublishPeriod());
       ser.write_type_9("requested_swing_planner", data.getRequestedSwingPlanner());
+      ser.write_type_a("reference_plan", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getReferencePlan());
+
       ser.write_type_7("generate_log", data.getGenerateLog());
    }
 
@@ -346,6 +354,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
       data.setStatusPublishPeriod(ser.read_type_6("status_publish_period"));
       data.setRequestedSwingPlanner(ser.read_type_9("requested_swing_planner"));
+      ser.read_type_a("reference_plan", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getReferencePlan());
+
       data.setGenerateLog(ser.read_type_7("generate_log"));
    }
 

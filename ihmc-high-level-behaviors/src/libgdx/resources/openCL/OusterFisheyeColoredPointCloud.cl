@@ -18,8 +18,6 @@
 #define GRADIENT_MODE_WORLD_Z 0
 #define GRADIENT_MODE_SENSOR_X 1
 
-#define TWO_PI_F 2.0f * M_PI_F
-
 kernel void computeVertexBuffer(global float* parameters,
                                 global int* pixelShifts,
                                 global float* altitudeAngles,

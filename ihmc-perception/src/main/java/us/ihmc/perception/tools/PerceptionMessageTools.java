@@ -175,7 +175,7 @@ public class PerceptionMessageTools
       Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
       byte[] compressedByteArray = videoPacket.getData().toArray();
       BytedecoOpenCVTools.decompressJPG(compressedByteArray, colorImage);
-      BytedecoOpenCVTools.display("Color Image", colorImage, 1);
+      PerceptionDebugTools.display("Color Image", colorImage, 1);
    }
 
    public static void copyToBytePointer(IDLSequence.Byte sourceIDLSequence, BytePointer pointerToPack)

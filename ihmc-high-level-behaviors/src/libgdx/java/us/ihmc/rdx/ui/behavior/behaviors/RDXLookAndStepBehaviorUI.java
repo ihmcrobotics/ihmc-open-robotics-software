@@ -8,14 +8,18 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -47,13 +51,12 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 {
    public static final RDXBehaviorUIDefinition DEFINITION = new RDXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION,
                                                                                         RDXLookAndStepBehaviorUI::new);
-
    private final BehaviorHelper helper;
    private final AtomicReference<ArrayList<MinimalFootstep>> latestPlannedFootsteps;
    private final AtomicReference<ArrayList<MinimalFootstep>> latestCommandedFootsteps;
    private String currentState = "";
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean operatorReview = new ImBoolean(true);
+   private final ImBoolean operatorReview = new ImBoolean(false);
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private long numberOfSteppingRegionsReceived = 0;
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 250, 15);
@@ -87,6 +90,11 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final RDXBoxVisualizer obstacleBoxVisualizer = new RDXBoxVisualizer();
    private final Notification planningFailedNotification = new Notification();
    private volatile int numberOfPlannedSteps = 0;
+
+   private ImDouble ballAndArrowX = new ImDouble(7.0);
+   private ImDouble ballAndArrowY = new ImDouble(0.5);
+   private ImDouble ballAndArrowYaw = new ImDouble(0.1);
+   private ImDoubleWrapper referenceAlpha;
 
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -164,12 +172,12 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
                                                           lookAndStepRemotePropertySet.setPropertyChanged();
                                                        }
                                                     });
+      referenceAlpha = new ImDoubleWrapper(footstepPlannerRemotePropertySet.getStoredPropertySet(), FootstepPlannerParameterKeys.referencePlanAlpha);
    }
 
    @Override
    public void create(RDXBaseUI baseUI)
    {
-
       goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
       goalAffordance.setOnStartPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(true));
       goalAffordance.setOnEndPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(false));
@@ -260,11 +268,22 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          helper.publish(ReviewApproval, true);
       }
       footstepPlanningDurationPlot.renderImGuiWidgets();
-//      ImGui.text("Footstep planning regions recieved:");
-//      steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
+      ImGui.text("Footstep planning regions recieved:");
+      steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
       stopForImpassibilities.renderImGuiWidget();
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
+
+      ImGui.text(ReferenceBasedIdealStepCalculator.statusMessage);
+
+      referenceAlpha.accessImDouble(alpha ->
+      {
+         if (ImGuiTools.volatileInputDouble("Reference alpha", alpha))
+         {
+            footstepPlannerRemotePropertySet.getStoredPropertySet().set(FootstepPlannerParameterKeys.referencePlanAlpha, alpha.get());
+            footstepPlannerRemotePropertySet.setPropertyChanged();
+         }
+      });
 
 //      footholdVolumePlot.render();
 
