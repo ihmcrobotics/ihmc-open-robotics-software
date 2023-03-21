@@ -318,7 +318,7 @@ public class OpenCVArUcoMarkerDetection
    /**
     * Providing this because the classes that use this need different data at different times, which is not thread safe anymore, so you can use this to make sure all the stuff you get from the getters is from the same detection result. To use, do
     * <pre>
-    *    synchronized (arUcoMarkerDetection.getSyncObject)
+    *    synchronized (arUcoMarkerDetection.getSyncObject())
     *    {
     *       arUcoMarkerDetection.getIds()
     *       arUcoMarkerDetection.updateMarkerPose(...)
