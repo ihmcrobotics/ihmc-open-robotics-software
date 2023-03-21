@@ -51,7 +51,7 @@ module mission_control_msgs
         /**
          * [n] : total memory for nth GPU
          */
-        sequence<float> nvidia_gpu_total_memory;
+        sequence<float> nvidia_gpu_memory_total;
         /**
          * [n] : utilization for nth GPU
          */
