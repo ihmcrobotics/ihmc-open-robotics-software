@@ -24,7 +24,7 @@ mainDependencies {
 
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.4")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.0")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
