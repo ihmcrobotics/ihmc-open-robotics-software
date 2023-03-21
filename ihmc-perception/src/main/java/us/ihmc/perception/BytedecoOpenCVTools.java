@@ -218,4 +218,31 @@ public class BytedecoOpenCVTools
    {
       return a.getImageWidth() == b.getImageWidth() && a.getImageHeight() == b.getImageHeight();
    }
+
+   public static boolean dimensionsMatch(Mat a, int imageWidth, int imageHeight)
+   {
+      return a.cols() == imageWidth && a.rows() == imageHeight;
+   }
+
+   /**
+    * Puts 3 floats in a Mat that is an array of Float3s i.e. type == CV_32FC3
+    * Assumes Mat is continuous. i.e. Mat::isContinuous == true
+    */
+   public static void putFloat3(BytePointer dataPointer, int float3Index, float float1, float float2, float float3)
+   {
+      dataPointer.putFloat(getFloat3ByteIndexContinuous(float3Index, 0), float1);
+      dataPointer.putFloat(getFloat3ByteIndexContinuous(float3Index, 1), float2);
+      dataPointer.putFloat(getFloat3ByteIndexContinuous(float3Index, 2), float3);
+   }
+
+   /**
+    * Calculate the index of the first byte of float in a CV_32FC3 in a Mat that is an array of Float3s.
+    * Assumes Mat is continuous. i.e. Mat::isContinuous == true
+    * @param float3Index index of the float3 i.e. the triplet
+    * @param floatIndex index of the float in the triplet, 0, 1, or 2
+    */
+   public static long getFloat3ByteIndexContinuous(int float3Index, int floatIndex)
+   {
+      return (long) float3Index * 3 * Float.BYTES + floatIndex * Float.BYTES;
+   }
 }
