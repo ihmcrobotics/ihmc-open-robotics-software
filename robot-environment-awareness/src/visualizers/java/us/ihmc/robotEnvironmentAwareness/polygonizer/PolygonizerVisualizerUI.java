@@ -15,10 +15,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.javafx.JavaFXMessager;
 
 public class PolygonizerVisualizerUI
 {
@@ -57,9 +57,9 @@ public class PolygonizerVisualizerUI
       multipleConcaveHullViewer = new MultipleConcaveHullViewer(messager);
       multiplePointCloudViewer = new MultiplePointCloudViewer(messager, executorService);
 
-      messager.registerTopicListener(PolygonizerOutput,
+      messager.addTopicListener(PolygonizerOutput,
                                      message -> executorService.execute(() -> multipleConcaveHullViewer.submit(MultipleConcaveHullViewer.toConcaveHullViewerInputList(message))));
-      messager.registerTopicListener(PlanarRegionSemgentationData, data -> messager.submitMessage(PointCloudInput, MultiplePointCloudViewer.toInputList(data)));
+      messager.addTopicListener(PlanarRegionSemgentationData, data -> messager.submitMessage(PointCloudInput, MultiplePointCloudViewer.toInputList(data)));
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);

@@ -2,8 +2,8 @@ package us.ihmc.atlas.sensors;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.PerceptionSuiteUI;
 

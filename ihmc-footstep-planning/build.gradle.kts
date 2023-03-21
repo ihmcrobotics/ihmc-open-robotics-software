@@ -40,6 +40,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
+   api("us.ihmc:ihmc-messager-javafx:0.2.0")
    api("us.ihmc:ihmc-javafx-toolkit:17-0.21.4")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-communication:source")

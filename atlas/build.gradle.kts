@@ -72,5 +72,5 @@ testDependencies {
    api("us.ihmc:ihmc-sensor-processing-test:source")
    api("us.ihmc:ihmc-simulation-toolkit-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-messager-test:0.1.7")
+   api("us.ihmc:ihmc-messager-test:0.2.0")
 }
