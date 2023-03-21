@@ -115,9 +115,9 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
       }
    }
 
-   public void getVisualReferenceFrameRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getVisualReferenceFrameRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive() && robotLoadedActivator.poll())
+      if (isActive() && robotLoadedActivator.poll() && sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
          multiBody.getVisualReferenceFrameRenderables(renderables, pool);
       }
