@@ -272,11 +272,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       return splineGraphics;
    }
 
-   public FullHumanoidRobotModel getPreviewModel()
-   {
-      return ghostRobotModel;
-   }
-
    public boolean isActive()
    {
       return this.enabled.get();
@@ -310,10 +305,5 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public boolean isFirstPreview()
    {
       return firstPreview;
-   }
-
-   public boolean isCurrentTaskDone()
-   {
-      return proMPAssistant.isCurrentTaskDone();
    }
 }

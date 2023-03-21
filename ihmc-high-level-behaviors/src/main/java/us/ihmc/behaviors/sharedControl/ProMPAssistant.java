@@ -111,16 +111,20 @@ public class ProMPAssistant
                                                            rotationArrayNode.get(2).asDouble(),
                                                            rotationArrayNode.get(3).asDouble());
                   }
-                  case "bodyParts" -> {
+                  case "bodyParts" ->
+                  {
                      JsonNode bodyPartsArrayNode = taskPropertyMap.getValue();
                      HashMap<String, String> bodyPartsGeometry = new HashMap<>();
-                     for (JsonNode bodyPartObject : bodyPartsArrayNode) {
+                     for (JsonNode bodyPartObject : bodyPartsArrayNode)
+                     {
                         Iterator<Map.Entry<String, JsonNode>> bodyPartFields = bodyPartObject.fields();
                         List<String> name = new ArrayList<>();
                         List<String> geometry = new ArrayList<>();
-                        while (bodyPartFields.hasNext()) {
+                        while (bodyPartFields.hasNext())
+                        {
                            Map.Entry<String, JsonNode> bodyPartProperty = bodyPartFields.next();
-                           switch (bodyPartProperty.getKey()) {
+                           switch (bodyPartProperty.getKey())
+                           {
                               case "name" -> name.add(bodyPartProperty.getValue().asText());
                               case "geometry" -> geometry.add(bodyPartProperty.getValue().asText());
                            }
@@ -145,7 +149,8 @@ public class ProMPAssistant
          {
             proMPManagers.put(taskNames[i],
                               new ProMPManager(taskNames[i],
-                                               bodyPartsGeometries[i], logEnabled,
+                                               bodyPartsGeometries[i],
+                                               logEnabled,
                                                isLastViaPoint,
                                                numberBasisFunctions,
                                                speedFactor,
@@ -186,16 +191,17 @@ public class ProMPAssistant
          else if (sampleCounter < generatedFramePoseTrajectory.size() - 1)
          {
             // pack the frame using the trajectory generated from prediction
-            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter + 1); // +1 to avoid discontinuity due to imprecision in conditioning
+            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(
+                  sampleCounter + 1); // +1 to avoid discontinuity due to imprecision in conditioning
             List<FramePose3D> observations = bodyPartObservedTrajectoryMap.get(bodyPart);
-            FramePose3D lastObservedFramePose = observations.get(observations.size()-1);
+            FramePose3D lastObservedFramePose = observations.get(observations.size() - 1);
             if (objectFrame != null) // change back to world frame if before it was changed to object frame
             {
                generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                lastObservedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             }
 
-            double alpha = (double)(sampleCounter - numberObservations) / (INTERPOLATION_SAMPLES);
+            double alpha = (double) (sampleCounter - numberObservations) / (INTERPOLATION_SAMPLES);
             if (alpha > 1.0)
             {
                framePose.getPosition().set(generatedFramePose.getPosition());
@@ -372,7 +378,7 @@ public class ProMPAssistant
                // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
                (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet().forEach(part -> bodyPartObservedTrajectoryMap.put(part, new ArrayList<>()));
             }
-            if(!currentTask.isEmpty())
+            if (!currentTask.isEmpty())
                LogTools.info("Found task! {}", currentTask);
          }
          else // no tasks in this context
@@ -441,7 +447,9 @@ public class ProMPAssistant
             {
                isLastViaPoint.set(true);
                proMPManagers.get(currentTask)
-                            .updateTaskTrajectory(entryPartObservation.getKey(), observedTrajectory.get(observedTrajectory.size() - 1), observedTrajectory.size() - 1);
+                            .updateTaskTrajectory(entryPartObservation.getKey(),
+                                                  observedTrajectory.get(observedTrajectory.size() - 1),
+                                                  observedTrajectory.size() - 1);
             }
          }
          else
@@ -469,7 +477,7 @@ public class ProMPAssistant
       {
          bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart, frame));
          // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
-         setStartTrajectories(numberObservations+1);
+         setStartTrajectories(numberObservations + 1);
       }
    }
 

@@ -49,7 +49,6 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:robot-environment-awareness:source")
-   api("com.googlecode.json-simple:json-simple:1.1.1")
 }
 
 openpnpDependencies {

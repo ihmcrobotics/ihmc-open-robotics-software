@@ -1,16 +1,11 @@
 package us.ihmc.rdx.ui.tools;
 
-import us.ihmc.log.LogTools;
-
 import java.io.*;
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -182,13 +177,13 @@ public class TrajectoryRecordReplay<T extends Number>
 
    private String escapeSpecialCharacters(T data)
    {
-      String str = String.valueOf(data);
-      if (str.contains(",") || str.contains("\"") || str.contains("\n"))
+      String string = String.valueOf(data);
+      if (string.contains(",") || string.contains("\"") || string.contains("\n"))
       {
-         str = str.replace("\"", "\"\"");
-         str = "\"" + str + "\"";
+         string = string.replace("\"", "\"\"");
+         string = "\"" + string + "\"";
       }
-      return str;
+      return string;
    }
 
    private void reset()
