@@ -77,11 +77,11 @@ public class RDXHDF5ImageLoggingUI
       }
    }
 
-   public void copyRGBImage(Mat rgbImageToCopy)
+   public void copyBayerBGImage(Mat bayerBGImageToCopy)
    {
       synchronized (syncObject)
       {
-         opencv_imgproc.cvtColor(rgbImageToCopy, bgrSourceCopy, opencv_imgproc.COLOR_RGB2BGR);
+         opencv_imgproc.cvtColor(bayerBGImageToCopy, bgrSourceCopy, opencv_imgproc.COLOR_BayerBG2BGR);
       }
    }
 

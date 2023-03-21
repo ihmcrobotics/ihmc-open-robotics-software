@@ -1,7 +1,6 @@
-package us.ihmc.rdx.ui.graphics;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -10,14 +9,16 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.log.LogTools;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXGridMapGraphic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableProvider
+import java.util.Set;
+
+public class RDXROS2HeightMapVisualizer extends RDXVisualizer
 {
    private final RDXGridMapGraphic gridMapGraphic = new RDXGridMapGraphic();
    private final ResettableExceptionHandlingExecutorService executorService;
@@ -25,8 +26,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
    private final ImBoolean inPaintHeight = new ImBoolean(false);
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
+   private final ROS2Heartbeat activeHeartbeat;
 
-   public RDXHeightMapVisualizer(ROS2PublishSubscribeAPI ros2)
+   public RDXROS2HeightMapVisualizer(ROS2PublishSubscribeAPI ros2)
    {
       super("Height Map");
 
@@ -35,6 +37,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
       executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), daemon, queueSize);
 
       ros2.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
+      activeHeartbeat = new ROS2Heartbeat(ros2, ROS2Tools.PUBLISH_HEIGHT_MAP);
    }
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
@@ -56,10 +59,11 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
    public void setActive(boolean active)
    {
       super.setActive(active);
-      if (!isActive())
+      if (!active)
       {
          executorService.interruptAndReset();
       }
+      activeHeartbeat.setAlive(active);
    }
 
    @Override
@@ -92,7 +96,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (isActive())
       {
@@ -102,6 +106,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
 
    public void destroy()
    {
+      activeHeartbeat.destroy();
       gridMapGraphic.destroy();
    }
 }
