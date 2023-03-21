@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -11,6 +10,7 @@ import imgui.type.ImInt;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -59,6 +59,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private RDXPinholePinholeColoredPointCloudKernel pinholePinholeKernel;
    private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
+   private boolean usingColor;
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
                                              PubSubImplementation pubSubImplementation,
@@ -104,24 +105,17 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
             colorChannel.update(openCLManager);
          }
 
-         // We decompress outside of the incoming message synchronization block.
-         // Using an internal swap reference to the unpacked data, we can allow ROS 2
-         // to not have to wait for compression to finish and also not have to copy
-         // the unpacked result to a decompression input buffer.
-         depthChannel.decompress();
-         colorChannel.decompress();
-
          if (depthChannel.getDecompressedImageReady().poll())
          {
             // Stop coloring points if there's been no data in a few seconds
             if (colorChannel.getDecompressedImageReady().poll())
                colorReceptionTimer.reset();
-            boolean usingColor = colorReceptionTimer.isRunning(2.0);
+            usingColor = colorReceptionTimer.isRunning(2.0);
 
             int totalNumberOfPoints = depthChannel.getTotalNumberOfPixels();
-            if (depthChannel.getIsOusterCameraModel())
+            if (depthChannel.getCameraModel() == CameraModel.OUSTER)
             {
-               int sanitizedLevelOfColorDetail = usingColor && colorChannel.getIsEquidistantFisheyeCameraModel() ? levelOfColorDetail.get() : 0;
+               int sanitizedLevelOfColorDetail = usingColor && colorChannel.getCameraModel() == CameraModel.EQUIDISTANT_FISHEYE ? levelOfColorDetail.get() : 0;
                totalNumberOfPoints = ousterFisheyeKernel.calculateNumberOfPointsForLevelOfColorDetail(depthChannel.getImageWidth(),
                                                                                                       depthChannel.getImageHeight(),
                                                                                                       sanitizedLevelOfColorDetail);
@@ -144,40 +138,58 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
             pointCloudRenderer.updateMeshFastestBeforeKernel();
             pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
 
-            if (depthChannel.getIsPinholeCameraModel()) // Assuming color camera is also pinhole if using it
+            synchronized (depthChannel.getDecompressionAccessSyncObject())
             {
-               pinholePinholeKernel.computeVertexBuffer(colorChannel,
-                                                        depthChannel,
-                                                        usingColor && useSensorColor.get(),
-                                                        gradientMode.ordinal(),
-                                                        useSinusoidalGradientPattern.get(),
-                                                        pointSize.get(),
-                                                        pointCloudVertexBuffer);
-            }
-            else if (depthChannel.getIsOusterCameraModel()) // Assuming color is equidistant fisheye if using it
-            {
-
-               ousterFisheyeKernel.getOusterToWorldTransformToPack().set(depthChannel.getRotationMatrixToWorld(),
-                                                                         depthChannel.getTranslationToWorld());
-               ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(colorChannel.getRotationMatrixToWorld(),
-                                                                           colorChannel.getTranslationToWorld());
-               ousterFisheyeKernel.runKernel(depthChannel.getOusterHorizontalFieldOfView(),
-                                             depthChannel.getOusterVerticalFieldOfView(),
-                                             pointSize.get(),
-                                             usingColor && useSensorColor.get(),
-                                             gradientMode.ordinal(),
-                                             useSinusoidalGradientPattern.get(),
-                                             depthChannel.getDepth16UC1Image(),
-                                             colorChannel.getFx(),
-                                             colorChannel.getFy(),
-                                             colorChannel.getCx(),
-                                             colorChannel.getCy(),
-                                             usingColor ? colorChannel.getColor8UC4Image() : null,
-                                             pointCloudVertexBuffer);
+               if (usingColor)
+               {
+                  synchronized (colorChannel.getDecompressionAccessSyncObject())
+                  {
+                     runKernels();
+                  }
+               }
+               else
+               {
+                  runKernels();
+               }
             }
 
             pointCloudRenderer.updateMeshFastestAfterKernel();
          }
+      }
+   }
+
+   private void runKernels()
+   {
+      if (depthChannel.getCameraModel() == CameraModel.PINHOLE) // Assuming color camera is also pinhole if using it
+      {
+         pinholePinholeKernel.computeVertexBuffer(colorChannel,
+                                                  depthChannel,
+                                                  usingColor && useSensorColor.get(),
+                                                  gradientMode.ordinal(),
+                                                  useSinusoidalGradientPattern.get(),
+                                                  pointSize.get(),
+                                                  pointCloudVertexBuffer);
+      }
+      else if (depthChannel.getCameraModel() == CameraModel.OUSTER) // Assuming color is equidistant fisheye if using it
+      {
+
+         ousterFisheyeKernel.getOusterToWorldTransformToPack().set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld());
+         ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld());
+         ousterFisheyeKernel.setInstrinsicParameters(depthChannel.getOusterPixelShiftsBuffer(),
+                                                     depthChannel.getOusterBeamAltitudeAnglesBuffer(),
+                                                     depthChannel.getOusterBeamAzimuthAnglesBuffer());
+         ousterFisheyeKernel.runKernel(0.0f,
+                                       pointSize.get(),
+                                       usingColor && useSensorColor.get(),
+                                       gradientMode.ordinal(),
+                                       useSinusoidalGradientPattern.get(),
+                                       depthChannel.getDepth16UC1Image(),
+                                       colorChannel.getFx(),
+                                       colorChannel.getFy(),
+                                       colorChannel.getCx(),
+                                       colorChannel.getCy(),
+                                       usingColor ? colorChannel.getColor8UC4Image() : null,
+                                       pointCloudVertexBuffer);
       }
    }
 
@@ -225,7 +237,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
          gradientMode = RDXColorGradientMode.SENSOR_X;
       ImGui.checkbox(labels.get("Sinusoidal gradient"), useSinusoidalGradientPattern);
       ImGui.sliderFloat(labels.get("Point size"), pointSize.getData(), 0.0005f, 0.05f);
-      if (depthChannel.getIsOusterCameraModel() && colorChannel.getIsEquidistantFisheyeCameraModel())
+      if (depthChannel.getCameraModel() == CameraModel.OUSTER && colorChannel.getCameraModel() == CameraModel.EQUIDISTANT_FISHEYE)
       {
          ImGui.sliderInt(labels.get("Level of color detail"), levelOfColorDetail.getData(), 0, 3);
       }
@@ -240,6 +252,8 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    @Override
    public void destroy()
    {
+      depthChannel.destroy();
+      colorChannel.destroy();
       unsubscribe();
       super.destroy();
    }
@@ -269,5 +283,15 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    public boolean isSubscribed()
    {
       return subscribed.get();
+   }
+
+   public void setPointSize(float pointSize)
+   {
+      this.pointSize.set(pointSize);
+   }
+
+   public void setLevelOfColorDetail(int levelOfColorDetail)
+   {
+      this.levelOfColorDetail.set(levelOfColorDetail);
    }
 }

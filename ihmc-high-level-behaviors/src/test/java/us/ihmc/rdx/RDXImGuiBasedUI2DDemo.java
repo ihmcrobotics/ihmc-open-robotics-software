@@ -12,9 +12,7 @@ import java.time.LocalDateTime;
 
 public class RDXImGuiBasedUI2DDemo
 {
-   private final RDXBaseUI2D baseUI = new RDXBaseUI2D(getClass(),
-                                                      "ihmc-open-robotics-software",
-                                                      "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI2D baseUI = new RDXBaseUI2D(getClass());
 
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
