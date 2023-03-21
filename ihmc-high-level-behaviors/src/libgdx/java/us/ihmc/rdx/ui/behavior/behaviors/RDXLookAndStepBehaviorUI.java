@@ -172,7 +172,15 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
                                                           lookAndStepRemotePropertySet.setPropertyChanged();
                                                        }
                                                     });
-      referenceAlpha = new ImDoubleWrapper(footstepPlannerRemotePropertySet.getStoredPropertySet(), FootstepPlannerParameterKeys.referencePlanAlpha);
+      referenceAlpha = new ImDoubleWrapper(footstepPlannerRemotePropertySet.getStoredPropertySet(),
+                                           FootstepPlannerParameterKeys.referencePlanAlpha,
+                                           alpha ->
+                                           {
+                                              if (ImGuiTools.volatileInputDouble("Reference alpha", alpha))
+                                              {
+                                                 footstepPlannerRemotePropertySet.setPropertyChanged();
+                                              }
+                                           });
    }
 
    @Override
@@ -276,14 +284,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 
       ImGui.text(ReferenceBasedIdealStepCalculator.statusMessage);
 
-      referenceAlpha.accessImDouble(alpha ->
-      {
-         if (ImGuiTools.volatileInputDouble("Reference alpha", alpha))
-         {
-            footstepPlannerRemotePropertySet.getStoredPropertySet().set(FootstepPlannerParameterKeys.referencePlanAlpha, alpha.get());
-            footstepPlannerRemotePropertySet.setPropertyChanged();
-         }
-      });
+      referenceAlpha.renderImGuiWidget();
 
 //      footholdVolumePlot.render();
 
