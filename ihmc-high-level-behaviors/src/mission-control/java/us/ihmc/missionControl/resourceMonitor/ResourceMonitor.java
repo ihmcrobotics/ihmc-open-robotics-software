@@ -1,6 +1,5 @@
 package us.ihmc.missionControl.resourceMonitor;
 
-import org.apache.logging.log4j.util.Strings;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -17,7 +16,7 @@ import java.util.List;
  */
 public abstract class ResourceMonitor
 {
-   private static final double DEFAULT_READ_PERIOD_SECONDS = 1.0;
+   private static final double DEFAULT_READ_PERIOD_SECONDS = 0.25;
 
    private final double parsePeriodSeconds;
    private final String[] command;
@@ -84,6 +83,9 @@ public abstract class ResourceMonitor
          {
             lines.add(line);
          }
+      }
+      catch (Exception ignored)
+      {
       }
 
       String[] lineArray = new String[lines.size()];

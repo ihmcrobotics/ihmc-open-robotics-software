@@ -1,91 +1,241 @@
 package us.ihmc.rdx.ui.missionControl;
 
-import imgui.ImGui;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
+import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiGlfwWindow;
+import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
 import us.ihmc.ros2.ROS2Node;
 
 import java.text.DecimalFormat;
+import java.util.*;
 
 public class ImGuiMachine
 {
-   private final String instanceId;
+   private final UUID instanceId;
    private final String hostname;
+
    private SystemResourceUsageMessage lastResourceUsageMessage = new SystemResourceUsageMessage();
 
-   /* ImGui elements */
+   private final ImGuiGlfwWindow window;
+   private final ImGuiPanel panel;
+   private final Map<String, ImGuiMachineService> services = new HashMap<>();
    private final ImPlotPlot cpuPlot = new ImPlotPlot();
+   private final ImPlotPlot ramPlot = new ImPlotPlot();
+   private final List<ImPlotPlot> gpuPlots = new ArrayList<>(); // Empty if no NVIDIA GPUs
+   private final List<ImPlotPlot> vramPlots = new ArrayList<>(); // Empty if no NVIDIA GPUs
+   private final ImPlotPlot netPlot = new ImPlotPlot();
 
-   public ImGuiMachine(String instanceId, String hostname, ROS2Node ros2Node)
+   private static int plotFlags = ImPlotFlags.None;
+   private static int plotAxisXFlags = ImPlotAxisFlags.None;
+   private static int plotAxisYFlags = ImPlotAxisFlags.None;
+
+   static
+   {
+      plotFlags += ImPlotFlags.NoMenus;
+      plotFlags += ImPlotFlags.NoBoxSelect;
+      plotFlags += ImPlotFlags.NoTitle;
+      plotFlags += ImPlotFlags.NoMousePos;
+      plotFlags += ImPlotFlags.NoLegend;
+      plotAxisXFlags += ImPlotAxisFlags.NoDecorations;
+      plotAxisXFlags += ImPlotAxisFlags.AutoFit;
+      plotAxisYFlags += ImPlotAxisFlags.NoDecorations;
+      plotAxisYFlags += ImPlotAxisFlags.AutoFit;
+   }
+
+   public ImGuiMachine(UUID instanceId, String hostname, ImGuiGlfwWindow window, ROS2Node ros2Node)
    {
       this.instanceId = instanceId;
       this.hostname = hostname;
+      this.window = window;
+
+      panel = new ImGuiPanel(hostname + "##" + instanceId, this::renderImGuiWidgets);
+      window.getPanelManager().addPanel(panel);
+
+      cpuPlot.setFlags(plotFlags);
+      cpuPlot.setXFlags(plotAxisXFlags);
+      cpuPlot.setYFlags(plotAxisYFlags);
+      cpuPlot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always));
+
+      ramPlot.setFlags(plotFlags);
+      ramPlot.setXFlags(plotAxisXFlags);
+      ramPlot.setYFlags(plotAxisYFlags);
+      ramPlot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, lastResourceUsageMessage.getMemoryTotal(), ImGuiCond.Always));
+
+      netPlot.setFlags(plotFlags);
+      netPlot.setXFlags(plotAxisXFlags);
+      netPlot.setYFlags(plotAxisYFlags);
+      netPlot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(-3000.0, 103000.0, ImGuiCond.Always));
+
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            ROS2Tools.getSystemResourceUsageTopic(instanceId),
-                                           subscriber -> lastResourceUsageMessage = subscriber.takeNextData());
+                                           subscriber -> acceptSystemResourceUsageMessage(subscriber.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           ROS2Tools.getSystemServiceStatusTopic(instanceId),
+                                           subscriber -> acceptSystemServiceStatusMessage(subscriber.takeNextData()),
+                                           ROS2Tools.getSystemServiceStatusQosProfile());
+   }
 
-      /* ImGui elements setup */
+   private void acceptSystemResourceUsageMessage(SystemResourceUsageMessage message)
+   {
+      // Create the plot lines if they don't exist
       {
-         int flags = ImPlotFlags.None;
-         flags += ImPlotFlags.NoMenus;
-         flags += ImPlotFlags.NoBoxSelect;
-         flags += ImPlotFlags.NoTitle;
-         flags += ImPlotFlags.NoMousePos;
-         flags += ImPlotFlags.NoLegend;
-         int xFlags = ImPlotAxisFlags.None;
-         xFlags += ImPlotAxisFlags.NoDecorations;
-         xFlags += ImPlotAxisFlags.AutoFit;
-         int yFlags = ImPlotAxisFlags.None;
-         yFlags += ImPlotAxisFlags.NoDecorations;
-         yFlags += ImPlotAxisFlags.AutoFit;
+         // CPU
+         if (cpuPlot.getPlotLines().size() < message.getCpuCount())
+         {
+            for (int i = 0; i < message.getCpuCount(); i++)
+            {
+               cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("CPU (" + i + ") utilization %", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            }
+         }
 
-         cpuPlot.setFlags(flags);
-         cpuPlot.setXFlags(xFlags);
-         cpuPlot.setYFlags(yFlags);
-         cpuPlot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always));
+         // RAM
+         if (ramPlot.getPlotLines().isEmpty())
+         {
+            ramPlot.getPlotLines().add(new ImPlotDoublePlotLine("RAM usage (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            ramPlot.getPlotLines().add(new ImPlotDoublePlotLine("RAM total (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+         }
+
+         // GPU
+         int gpuIndex = 0;
+         while (gpuPlots.size() < message.getNvidiaGpuCount())
+         {
+            ImPlotPlot plot = new ImPlotPlot();
+            plot.setFlags(plotFlags);
+            plot.setXFlags(plotAxisXFlags);
+            plot.setYFlags(plotAxisYFlags);
+            plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always));
+            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ") utilization %", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            gpuPlots.add(plot);
+            gpuIndex++;
+         }
+
+         // VRAM
+         gpuIndex = 0;
+         while (vramPlots.size() < message.getNvidiaGpuCount())
+         {
+            ImPlotPlot plot = new ImPlotPlot();
+            plot.setFlags(plotFlags);
+            plot.setXFlags(plotAxisXFlags);
+            plot.setYFlags(plotAxisYFlags);
+            float totalGpuMemory = message.getNvidiaGpuTotalMemory().get(gpuIndex);
+            plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, totalGpuMemory, ImGuiCond.Always));
+            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ") memory usage (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ") memory total (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            vramPlots.add(plot);
+            gpuIndex++;
+         }
+
+         // Network
+         if (netPlot.getPlotLines().size() < message.getIfaceCount())
+         {
+            for (int i = 0; i < message.getIfaceCount(); i++)
+            {
+               String iface = message.getIfaceNames().getString(i);
+               netPlot.getPlotLines().add(new ImPlotDoublePlotLine(iface + " rx (Kbps)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+               netPlot.getPlotLines().add(new ImPlotDoublePlotLine(iface + " tx (Kbps)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            }
+         }
       }
+
+      // Update the plot line values
+      {
+         // CPU
+         for (int i = 0; i < cpuPlot.getPlotLines().size(); i++)
+            ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(message.getCpuUsages().get(i));
+
+         // RAM
+         ((ImPlotDoublePlotLine) ramPlot.getPlotLines().get(0)).addValue(message.getMemoryUsed());
+         ((ImPlotDoublePlotLine) ramPlot.getPlotLines().get(1)).addValue(message.getMemoryTotal());
+
+         // GPU / VRAM
+         for (int i = 0; i < message.getNvidiaGpuCount(); i++)
+         {
+            ImPlotPlot gpuPlot = gpuPlots.get(i);
+            ImPlotPlot vramPlot = vramPlots.get(i);
+            ((ImPlotDoublePlotLine) gpuPlot.getPlotLines().get(i)).addValue(message.getNvidiaGpuUtilization().get(i));
+            ((ImPlotDoublePlotLine) vramPlot.getPlotLines().get(0)).addValue(message.getNvidiaGpuMemoryUsed().get(i));
+            ((ImPlotDoublePlotLine) vramPlot.getPlotLines().get(1)).addValue(message.getNvidiaGpuTotalMemory().get(i));
+         }
+
+         // Network
+         for (int i = 0; i < netPlot.getPlotLines().size(); i++)
+         {
+            ImPlotDoublePlotLine plotLine = (ImPlotDoublePlotLine) netPlot.getPlotLines().get(i);
+            String plotLineName = plotLine.getVariableName();
+
+            // The message has rx and tx data for all interfaces
+            // Find the network iface in the message for the plot line we are updating
+            for (int j = 0; j < message.getIfaceCount(); j++)
+            {
+               String iface = message.getIfaceNames().getString(j);
+
+               // j is our iface index
+               if (plotLineName.contains(iface))
+               {
+                  float rx = message.getIfaceRxKbps().get(j);
+                  float tx = message.getIfaceTxKbps().get(j);
+
+                  // If the plot line represents rx
+                  if (plotLineName.contains("rx"))
+                     plotLine.addValue(rx);
+                     // If the plot line represents tx
+                  else if (plotLineName.contains("tx"))
+                     plotLine.addValue(tx);
+               }
+            }
+         }
+      }
+
+      lastResourceUsageMessage = message;
    }
 
-   public String getInstanceId()
+   private void acceptSystemServiceStatusMessage(SystemServiceStatusMessage message)
    {
-      return instanceId;
-   }
+      String serviceName = message.getServiceNameAsString();
+      final ImGuiMachineService service;
 
-   public String getHostname()
-   {
-      return hostname;
+      if (!services.containsKey(serviceName))
+         service = new ImGuiMachineService(serviceName, instanceId);
+      else
+         service = services.get(serviceName);
+
+      service.setStatus(message.getStatusAsString());
+
+      if (message.getLogLineCount() > 0)
+      {
+         List<String> logLines = new ArrayList<>();
+
+         for (int i = 0; i < message.getLogLineCount(); i++)
+         {
+            String logLine = message.getLogLines().getString(i);
+            logLines.add(logLine);
+         }
+
+         service.acceptLogLines(logLines);
+      }
    }
 
    public void renderImGuiWidgets()
    {
-      ImGui.pushFont(ImGuiTools.getMediumFont());
-      ImGui.text(hostname);
-      ImGui.popFont();
+      // Render service statuses & buttons
 
-      //      double gpuUsage = 1.0f;
-      float plotWidth = false ? 4.0f : 3.0f;
+      // Render usage graphs
+      cpuPlot.render();
+      ramPlot.render();
+      gpuPlots.forEach(ImPlotPlot::render);
+      vramPlots.forEach(ImPlotPlot::render);
+      netPlot.render();
+   }
 
-      plotWidth -= 1.0f;
-
-      ImGui.sameLine();
-
-      for (int i = 0; i < lastResourceUsageMessage.getCpuCount(); i++)
-      {
-         if (cpuPlot.getPlotLines().size() == i)
-            cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("Core " + i, 30 * 5, 30.0, new DecimalFormat("0.0")));
-
-         ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(lastResourceUsageMessage.getCpuUsages().get(i));
-      }
-      cpuPlot.render(ImGui.getColumnWidth() / plotWidth, 35.0f);
-      plotWidth -= 1.0f;
-
-      ImGui.sameLine();
+   public void destroy()
+   {
+      window.getImGuiDockSystem().getPanelManager().queueRemovePanel(panel);
    }
 }
