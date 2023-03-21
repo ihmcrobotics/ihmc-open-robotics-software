@@ -1,5 +1,18 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
@@ -7,14 +20,22 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -36,19 +57,14 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
-import us.ihmc.footstepPlanning.log.*;
+import us.ihmc.footstepPlanning.log.VariableDescriptor;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.text.DecimalFormat;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlannerLogVisualizerController
 {
@@ -125,10 +141,10 @@ public class FootstepPlannerLogVisualizerController
 
    public void bindControls()
    {
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, type -> loadLog(type));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, type -> loadLog(type));
 
       AtomicReference<PlanarRegionsList> planarRegionData = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.GraphData,
+      messager.addTopicListener(FootstepPlannerMessagerAPI.GraphData,
                                      graphData -> Platform.runLater(() -> updateGraphData(planarRegionData.get(),
                                                                                           graphData.getLeft(),
                                                                                           graphData.getMiddle(),
@@ -143,7 +159,7 @@ public class FootstepPlannerLogVisualizerController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedNominalIdealStep, showNominalIdealStep.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowBodyBox, showBodyBox.selectedProperty(), true);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, show ->
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, show ->
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedStartOfSwingStep, show);
          messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, show);

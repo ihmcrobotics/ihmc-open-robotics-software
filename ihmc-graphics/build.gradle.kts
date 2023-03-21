@@ -16,7 +16,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-graphics-description:0.20.0")
+   api("us.ihmc:ihmc-graphics-description:0.20.1")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
 }
 
@@ -27,7 +27,7 @@ testDependencies {
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.4")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.1")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
