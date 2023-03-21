@@ -51,10 +51,10 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:scs2-definition:17-0.13.2")
-   api("us.ihmc:scs2-bullet-simulation:17-0.13.2")
-   api("us.ihmc:scs2-session-visualizer-jfx:17-0.13.2")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.13.2")
+   api("us.ihmc:scs2-definition:17-0.14.0")
+   api("us.ihmc:scs2-bullet-simulation:17-0.14.0")
+   api("us.ihmc:scs2-session-visualizer-jfx:17-0.14.0")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.14.0")
 }
 
 testDependencies {
@@ -70,7 +70,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.0")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.1")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
