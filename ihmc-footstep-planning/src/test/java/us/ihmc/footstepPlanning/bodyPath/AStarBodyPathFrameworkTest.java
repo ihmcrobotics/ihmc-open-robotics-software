@@ -131,7 +131,7 @@ public class AStarBodyPathFrameworkTest
 
    @Test
    @Tag("path-planning-slow")
-   public void dtestDatasetsNoOcclusionSimulateDynamicReplanning()
+   public void testDatasetsNoOcclusionSimulateDynamicReplanning()
    {
 
       Predicate<DataSet> dataSetFilter = dataSet ->
