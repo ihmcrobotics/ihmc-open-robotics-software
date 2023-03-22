@@ -1,9 +1,13 @@
 package us.ihmc.ihmcPerception.steppableRegions.data;
 
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsCalculator;
+import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,17 +16,20 @@ import java.util.List;
 public class SteppableRegionDataHolder
 {
    public int regionNumber;
-   private boolean isCentroidUpToDate = false;
-   private boolean isNormalUpToDate = false;
+   private boolean isPlaneUpToDate = false;
 
    private int lastRingNumber = -1;
 
    private final List<SteppableCell> memberCells = new ArrayList<>();
+   private final List<Point3DReadOnly> memberPoints = new ArrayList<>();
    private final List<SteppableBorderRing> borderCellRings = new ArrayList<>();
 
-   private final Point3D regionCentroidTotal = new Point3D();
+   private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
+
    private final Point3D regionCentroid = new Point3D();
    private final Vector3D regionNormal = new Vector3D();
+
+   private final Plane3D plane = new Plane3D();
 
    private int minX = Integer.MAX_VALUE;
    private int maxX = Integer.MIN_VALUE;
@@ -53,10 +60,17 @@ public class SteppableRegionDataHolder
       borderCellRings.remove(ring);
    }
 
-   public void addCell(SteppableCell cell)
+   public void addCell(SteppableCell cell, HeightMapData heightMapData)
+   {
+      addCell(cell, SteppableRegionsCalculator.convertCellToPoint(cell, heightMapData));
+   }
+
+   public void addCell(SteppableCell cell, Point3DReadOnly point)
    {
       markChanged();
       memberCells.add(cell);
+      memberPoints.add(point);
+
       cell.setRegion(this);
 
       minX = Math.min(minX, cell.getX());
@@ -70,10 +84,11 @@ public class SteppableRegionDataHolder
       if (this == other)
          return false;
 
-      for (SteppableCell otherCell : other.memberCells)
+      for (int i = 0; i < other.memberCells.size(); i++)
       {
-         addCell(otherCell);
+         addCell(other.memberCells.get(i), other.memberPoints.get(i));
       }
+
       this.borderCellRings.addAll(other.borderCellRings);
 
       return true;
@@ -81,15 +96,15 @@ public class SteppableRegionDataHolder
 
    public Point3DReadOnly getCentroidInWorld()
    {
-      if (!isCentroidUpToDate)
-         updateCentroid();
+      if (!isPlaneUpToDate)
+         updatePlane();
       return regionCentroid;
    }
 
    public Vector3DReadOnly getNormalInWorld()
    {
-      if (!isNormalUpToDate)
-         updateNormal();
+      if (!isPlaneUpToDate)
+         updatePlane();
       return regionNormal;
    }
 
@@ -100,21 +115,17 @@ public class SteppableRegionDataHolder
 
    private void markChanged()
    {
-      isCentroidUpToDate = false;
-      isNormalUpToDate = false;
+      isPlaneUpToDate = false;
    }
 
-   private void updateCentroid()
+   private void updatePlane()
    {
-      regionCentroid.setAndScale(1.0 / memberCells.size(), regionCentroidTotal);
-      isCentroidUpToDate = true;
-   }
+      planeFitter.fitPlaneToPoints(memberPoints, plane);
 
-   private void updateNormal()
-   {
-      // TODO run a least squares fit here
-      regionNormal.set(0.0, 0.0, 1.0);
-      isNormalUpToDate = false;
+      regionCentroid.set(plane.getPoint());
+      regionNormal.set(plane.getNormal());
+
+      isPlaneUpToDate = true;
    }
 
    public int getMinX()
@@ -142,11 +153,17 @@ public class SteppableRegionDataHolder
       return memberCells;
    }
 
+   public List<Point3DReadOnly> getMemberPoints()
+   {
+      return memberPoints;
+   }
+
    public void clear()
    {
       regionNumber = -1;
       memberCells.clear();
       borderCellRings.clear();
+      memberPoints.clear();
    }
 
    @Override
