@@ -8,7 +8,9 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
+import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
@@ -30,7 +32,6 @@ public class RemoteSteppableRegionsUpdater
 {
    private static final long updateDTMillis = 100;
 
-   private final ROS2Node ros2Node;
    private final SteppableRegionsUpdater steppableRegionsUpdater;
 
    private final SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
@@ -39,20 +40,17 @@ public class RemoteSteppableRegionsUpdater
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
                                                                                                                   ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-   public RemoteSteppableRegionsUpdater(ROS2Node ros2Node, SteppableRegionCalculatorParametersReadOnly defaultParameters)
+   public RemoteSteppableRegionsUpdater(ROS2PublishSubscribeAPI rosHelper, SteppableRegionCalculatorParametersReadOnly defaultParameters)
    {
-      this.ros2Node = ros2Node;
-      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(new ROS2Helper(ros2Node));
+      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(rosHelper);
       ros2PropertySetGroup.registerStoredPropertySet(SteppableRegionsAPI.PARAMETERS, steppableRegionCalculatorParameters);
 
-      IHMCROS2Publisher<SteppableRegionsListCollectionMessage> steppableRegionsPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                                                                     SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT);
-      IHMCROS2Publisher<SteppableRegionDebugImagesMessage> steppableRegionsDebugPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                                                                              SteppableRegionsAPI.STEPPABLE_REGIONS_DEBUG_OUTPUT);
+      rosHelper.createPublisher(SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT);
+      rosHelper.createPublisher(SteppableRegionsAPI.STEPPABLE_REGIONS_DEBUG_OUTPUT);
 
       steppableRegionsUpdater = new SteppableRegionsUpdater(defaultParameters);
-      steppableRegionsUpdater.addSteppableRegionListCollectionOutputConsumer(steppableRegionsPublisher::publish);
-      steppableRegionsUpdater.addSteppableRegionDebugConsumer(steppableRegionsDebugPublisher::publish);
+      steppableRegionsUpdater.addSteppableRegionListCollectionOutputConsumer(message -> rosHelper.publish(SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT, message));
+      steppableRegionsUpdater.addSteppableRegionDebugConsumer(message -> rosHelper.publish(SteppableRegionsAPI.STEPPABLE_REGIONS_DEBUG_OUTPUT, message));
    }
 
    public void submitLatestHeightMapMessage(HeightMapMessage heightMapMessage)
@@ -75,7 +73,6 @@ public class RemoteSteppableRegionsUpdater
 
    public void destroy()
    {
-      ros2Node.destroy();
       executorService.shutdown();
    }
 }
