@@ -30,11 +30,8 @@ public class OusterDriverAndDepthPublisher
 {
    private final Activator nativesLoadedActivator;
    private final ROS2HeartbeatMonitor publishLidarScanMonitor;
-<<<<<<< HEAD
    private final ROS2HeartbeatMonitor publishSteppableRegionsMonitor;
-=======
    private final ROS2HeartbeatMonitor publishHeightMapMonitor;
->>>>>>> develop
    private final Supplier<HumanoidReferenceFrames> humanoidReferenceFramesSupplier;
    private final Runnable asynchronousCompressAndPublish = this::asynchronousCompressAndPublish;
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;
@@ -57,25 +54,19 @@ public class OusterDriverAndDepthPublisher
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
       publishLidarScanMonitor = new ROS2HeartbeatMonitor(ros2, ROS2Tools.PUBLISH_LIDAR_SCAN);
-<<<<<<< HEAD
       publishSteppableRegionsMonitor = new ROS2HeartbeatMonitor(ros2, SteppableRegionsAPI.PUBLISH_STEPPABLE_REGIONS);
-=======
       publishHeightMapMonitor = new ROS2HeartbeatMonitor(ros2, ROS2Tools.PUBLISH_HEIGHT_MAP);
->>>>>>> develop
 
       ouster = new NettyOuster();
       ouster.bind();
 
       depthPublisher = new OusterDepthPublisher(imageMessageTopic, lidarScanTopic, publishLidarScanMonitor::isAlive);
       heightMapUpdater = new OusterHeightMapUpdater(ros2);
-<<<<<<< HEAD
-      heightMapUpdater.start();
 
       steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2, new SteppableRegionCalculatorParameters(), publishSteppableRegionsMonitor::isAlive);
       heightMapUpdater.attachHeightMapConsumer(steppableRegionsUpdater::submitLatestHeightMapMessage);
       steppableRegionsUpdater.start();
 
-=======
       publishHeightMapMonitor.setAlivenessChangedCallback(isAlive ->
       {
          if (isAlive)
@@ -83,7 +74,7 @@ public class OusterDriverAndDepthPublisher
          else
             heightMapUpdater.stop();
       });
->>>>>>> develop
+
       extractCompressAndPublishThread = MissingThreadTools.newSingleThreadExecutor("CopyAndPublish", true, 1);
       // Using incoming Ouster UDP Netty events as the thread scheduler. Only called on last datagram of frame.
       ouster.setOnFrameReceived(this::onFrameReceived);
