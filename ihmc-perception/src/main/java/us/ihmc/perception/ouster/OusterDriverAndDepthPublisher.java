@@ -62,7 +62,7 @@ public class OusterDriverAndDepthPublisher
       heightMapUpdater = new OusterHeightMapUpdater(ros2);
       heightMapUpdater.start();
 
-      steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2, new SteppableRegionCalculatorParameters());
+      steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2, new SteppableRegionCalculatorParameters(), publishSteppableRegionsMonitor::isAlive);
       heightMapUpdater.attachHeightMapConsumer(steppableRegionsUpdater::submitLatestHeightMapMessage);
       steppableRegionsUpdater.start();
 

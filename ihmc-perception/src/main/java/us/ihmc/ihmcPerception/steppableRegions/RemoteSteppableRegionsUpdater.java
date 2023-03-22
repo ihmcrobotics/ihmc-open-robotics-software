@@ -27,12 +27,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class RemoteSteppableRegionsUpdater
 {
-   private static final long updateDTMillis = 100;
+   private static final long updateDTMillis = 200;
 
    private final SteppableRegionsUpdater steppableRegionsUpdater;
+   private final Supplier<Boolean> computeSteppableRegions;
 
    private final SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
@@ -42,6 +44,14 @@ public class RemoteSteppableRegionsUpdater
 
    public RemoteSteppableRegionsUpdater(ROS2PublishSubscribeAPI rosHelper, SteppableRegionCalculatorParametersReadOnly defaultParameters)
    {
+      this(rosHelper, defaultParameters, () -> true);
+   }
+
+   public RemoteSteppableRegionsUpdater(ROS2PublishSubscribeAPI rosHelper,
+                                        SteppableRegionCalculatorParametersReadOnly defaultParameters,
+                                        Supplier<Boolean> computeSteppableRegions)
+   {
+      this.computeSteppableRegions = computeSteppableRegions;
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(rosHelper);
       ros2PropertySetGroup.registerStoredPropertySet(SteppableRegionsAPI.PARAMETERS, steppableRegionCalculatorParameters);
 
@@ -67,8 +77,11 @@ public class RemoteSteppableRegionsUpdater
    {
       ros2PropertySetGroup.update();
 
-      steppableRegionsUpdater.submitLatestSteppableRegionCalculatorParameters(steppableRegionCalculatorParameters);
-      steppableRegionsUpdater.compute();
+      if (computeSteppableRegions.get())
+      {
+         steppableRegionsUpdater.submitLatestSteppableRegionCalculatorParameters(steppableRegionCalculatorParameters);
+         steppableRegionsUpdater.compute();
+      }
    }
 
    public void destroy()
