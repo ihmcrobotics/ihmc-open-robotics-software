@@ -18,7 +18,7 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.Set;
 
-public class RDXROS2HeightMapVisualizer extends RDXVisualizer
+public class RDXHeightMapVisualizer extends RDXVisualizer
 {
    private final RDXGridMapGraphic gridMapGraphic = new RDXGridMapGraphic();
    private final ResettableExceptionHandlingExecutorService executorService;
@@ -26,16 +26,20 @@ public class RDXROS2HeightMapVisualizer extends RDXVisualizer
    private final ImBoolean inPaintHeight = new ImBoolean(false);
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
-   private final ROS2Heartbeat activeHeartbeat;
 
-   public RDXROS2HeightMapVisualizer(ROS2PublishSubscribeAPI ros2)
+   private ROS2Heartbeat activeHeartbeat;
+
+   public RDXHeightMapVisualizer()
    {
       super("Height Map");
 
       boolean daemon = true;
       int queueSize = 1;
       executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), daemon, queueSize);
+   }
 
+   public void setupForNetworking(ROS2PublishSubscribeAPI ros2)
+   {
       ros2.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
       activeHeartbeat = new ROS2Heartbeat(ros2, ROS2Tools.PUBLISH_HEIGHT_MAP);
    }
@@ -71,7 +75,8 @@ public class RDXROS2HeightMapVisualizer extends RDXVisualizer
       {
          executorService.interruptAndReset();
       }
-      activeHeartbeat.setAlive(active);
+      if (activeHeartbeat != null)
+         activeHeartbeat.setAlive(active);
    }
 
    @Override
@@ -113,7 +118,8 @@ public class RDXROS2HeightMapVisualizer extends RDXVisualizer
 
    public void destroy()
    {
-      activeHeartbeat.destroy();
+      if (activeHeartbeat != null)
+         activeHeartbeat.destroy();
       gridMapGraphic.destroy();
    }
 }
