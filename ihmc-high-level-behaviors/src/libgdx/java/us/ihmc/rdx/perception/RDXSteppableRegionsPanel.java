@@ -201,7 +201,7 @@ public class RDXSteppableRegionsPanel
 
       ImGui.sliderInt("Yaw index to render", yawIndexToRender.getData(), 0, parameters.getYawDiscretizations() - 1);
 
-      ImGui.checkbox(labels.getHidden("Steppable regions active"), regionsActive);
+      ImGui.checkbox("Steppable regions active", regionsActive);
    }
 
    public void renderImGuiWidgets()

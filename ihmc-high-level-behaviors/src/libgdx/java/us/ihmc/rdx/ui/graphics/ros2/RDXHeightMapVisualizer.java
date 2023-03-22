@@ -26,7 +26,8 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private final ImBoolean inPaintHeight = new ImBoolean(false);
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
-
+   private final ImBoolean heightMapActive = new ImBoolean(false);
+   
    private ROS2Heartbeat activeHeartbeat;
 
    public RDXHeightMapVisualizer()
@@ -75,14 +76,14 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       {
          executorService.interruptAndReset();
       }
-      if (activeHeartbeat != null)
-         activeHeartbeat.setAlive(active);
    }
 
    @Override
    public void renderImGuiWidgets()
    {
       super.renderImGuiWidgets();
+
+      ImGui.checkbox("Height map active", heightMapActive);
 
       ImGui.checkbox("In Paint Height", inPaintHeight);
       ImGui.checkbox("Render Ground Plane", renderGroundPlane);
@@ -99,6 +100,11 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    public void update()
    {
       super.update();
+
+      if (activeHeartbeat != null)
+      {
+         activeHeartbeat.setAlive(heightMapActive.get());
+      }
 
       boolean isActive = isActive();
       if (isActive)
