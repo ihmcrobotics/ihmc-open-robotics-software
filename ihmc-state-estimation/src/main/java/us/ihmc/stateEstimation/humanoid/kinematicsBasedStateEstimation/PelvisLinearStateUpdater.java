@@ -356,7 +356,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          if (trustImuWhenNoFeetAreInContact.getValue())
          {
             imuBasedLinearStateCalculator.estimateRootJointLinearVelocity(rootJoint.getJointTwist(), rootJointVelocity);
-//            rootJointPosition.scaleAdd(estimatorDT, rootJointVelocity, rootJointPosition);
             imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition, rootJoint.getJointTwist(), rootJointPosition);
 
             mainIMULinearVelocityEstimate.update(null, imuBasedLinearStateCalculator.getLinearAccelerationMeasurement());
@@ -645,7 +644,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       if (!useNewFusingFilter.getValue())
       {
          imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition, rootJoint.getJointTwist(), pelvisPositionIMUPart);
-//         pelvisPositionIMUPart.scaleAdd(estimatorDT, rootJointVelocity, rootJointPosition);
          pelvisPositionKinPart.setIncludingFrame(kinematicsBasedLinearStateCalculator.getPelvisPosition());
 
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForPositionBreakFrequency.getValue(), estimatorDT);
