@@ -203,8 +203,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       FactoryTools.disposeFactory(this);
 
-      ros2Node.destroy();
-
       return goalOrientedTestConductor;
    }
 
