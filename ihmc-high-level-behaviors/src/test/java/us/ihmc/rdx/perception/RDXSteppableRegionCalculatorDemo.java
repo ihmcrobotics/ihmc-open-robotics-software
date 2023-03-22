@@ -105,10 +105,8 @@ public class RDXSteppableRegionCalculatorDemo
                steppableRegionsUpdater.submitLatestHeightMapMessage(message);
             });
 
-            new IHMCROS2Callback<>(ros2Node, SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT, steppableRegionsVisualizer::acceptSteppableRegionsCollection);
-            new IHMCROS2Callback<>(ros2Node,
-                                   SteppableRegionsAPI.STEPPABLE_REGIONS_DEBUG_OUTPUT,
-                                   steppableRegionsUI::setLatestSteppableRegionDebugImagesToRender);
+            steppableRegionsVisualizer.setUpForNetworking(ros2Node);
+            steppableRegionsUI.setUpForNetworking(ros2Node);
 
             robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
             robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
