@@ -9,29 +9,27 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.MathTools;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
@@ -47,7 +45,6 @@ import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -61,12 +58,9 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class RaymanController implements Controller
 {
@@ -96,12 +90,14 @@ public class RaymanController implements Controller
    private final SideDependentList<ReferenceFrame> soleFrames, soleZUpFrames;
 
    private final YoGraphicDefinition graphicsGroup;
-   private final YoFramePoint3D measuredCenterOfMassPoint = new YoFramePoint3D("measuredCenterOfMassPoint", WORLD_FRAME, registry);
-   private final YoFramePoint3D desiredCenterOfMassPoint = new YoFramePoint3D("desiredCenterOfMassPoint", WORLD_FRAME, registry);
+   private final YoFramePoint3D measuredCoM = new YoFramePoint3D("measuredCoM", WORLD_FRAME, registry);
+   private final YoFramePoint3D measuredCoMVelocity = new YoFramePoint3D("measuredCoMVelocity", WORLD_FRAME, registry);
+   private final YoFramePoint3D desiredCoM = new YoFramePoint3D("desiredCenterOfMassPoint", WORLD_FRAME, registry);
+   private final YoFramePoint3D desireCMP = new YoFramePoint3D("desiredCMP", WORLD_FRAME, registry);
    private final SideDependentList<YoFramePoint3D> soleFramePoints = new SideDependentList<>();
 
    private final YoFramePoint3D measuredICP = new YoFramePoint3D("measuredCapturePoint", WORLD_FRAME, registry);
-   private double omega0 = Math.sqrt(9.81 / DESIRED_CENTER_OF_MASS_HEIGHT);
+   private static final double OMEGA = Math.sqrt(9.81 / DESIRED_CENTER_OF_MASS_HEIGHT);
 
    private final YoDouble desiredComVelocityX = new YoDouble("desiredComVelocityX", registry);
 
@@ -182,8 +178,8 @@ public class RaymanController implements Controller
       graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("measuredICP", measuredICP,
                                                                             0.1,
                                                                             ColorDefinitions.BurlyWood()));
-      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("measuredCenterOfMass", measuredCenterOfMassPoint, 0.1, ColorDefinitions.Black()));
-      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredCenterOfMass", desiredCenterOfMassPoint, 0.1, ColorDefinitions.GreenYellow()));
+      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("measuredCenterOfMass", measuredCoM, 0.1, ColorDefinitions.Black()));
+      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredCenterOfMass", desiredCoM, 0.1, ColorDefinitions.GreenYellow()));
       graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("leftSoleFramePoint",
                                                                             soleFramePoints.get(RobotSide.LEFT),
                                                                             0.05,
@@ -384,22 +380,22 @@ public class RaymanController implements Controller
          FramePoint3D rightSolePosition = new FramePoint3D(robotJae.getSoleFrame(RobotSide.RIGHT));
          rightSolePosition.changeFrame(WORLD_FRAME);
          // The desired center of mass position is set to be right in between the feet.
-         desiredCenterOfMassPoint.interpolate(leftSolePosition, rightSolePosition, 0.5);
+         desiredCoM.interpolate(leftSolePosition, rightSolePosition, 0.5);
          // We set the desired height.
-         desiredCenterOfMassPoint.setZ(DESIRED_CENTER_OF_MASS_HEIGHT);
+         desiredCoM.setZ(DESIRED_CENTER_OF_MASS_HEIGHT);
 
          // So now, we just have pack the command for the controller core.
-         sendCenterOfMassCommand(desiredCenterOfMassPoint);
+         sendCenterOfMassCommand(desiredCoM);
 
          FramePoint3D measuredCoMPosition = new FramePoint3D(WORLD_FRAME, toolbox.getCenterOfMassFrame().getTransformToWorldFrame().getTranslation());
-         measuredCenterOfMassPoint.set(measuredCoMPosition);
+         measuredCoM.set(measuredCoMPosition);
          // Now it is the turn of the feet.
 
          planeContactStateCommands = new SideDependentList<>(side -> createPlaneContactStateCommand(side, true));
 
          updateICP();
 
-         measuredCenterOfMassPoint.set(measuredCoMPosition);
+         measuredCoM.set(measuredCoMPosition);
 
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -490,14 +486,14 @@ public class RaymanController implements Controller
          double alpha = centerOfMassTrajectory.getValue();
 
          // The alpha parameter is now used to interpolate between the initial and final center of mass positions.
-         desiredCenterOfMassPoint.interpolate(initialCenterOfMassPosition, finalCenterOfMassPosition, alpha);
-         desiredCenterOfMassPoint.setZ(DESIRED_CENTER_OF_MASS_HEIGHT);
+         desiredCoM.interpolate(initialCenterOfMassPosition, finalCenterOfMassPosition, alpha);
+         desiredCoM.setZ(DESIRED_CENTER_OF_MASS_HEIGHT);
 
          FramePoint3D measuredCoMPosition = new FramePoint3D(WORLD_FRAME, toolbox.getCenterOfMassFrame().getTransformToWorldFrame().getTranslation());
-         measuredCenterOfMassPoint.set(measuredCoMPosition);
+         measuredCoM.set(measuredCoMPosition);
 
          // And now we pack the command for the controller core.
-         sendCenterOfMassCommand(desiredCenterOfMassPoint);
+         sendCenterOfMassCommand(desiredCoM);
 
          // As for the standing state, we request both feet to be in support.
          planeContactStateCommands = new SideDependentList<>(side -> createPlaneContactStateCommand(side, true));
@@ -577,12 +573,12 @@ public class RaymanController implements Controller
          FramePoint3D supportFootPosition = new FramePoint3D(robotJae.getSoleFrame(supportSide));
          supportFootPosition.changeFrame(WORLD_FRAME);
 
-         double currentEnergy = calculateOrbitalEnergy(measuredCoMPosition.getX(), supportFootPosition.getX(), measuredCoMVelocity.getX(), omega0);
+         double currentEnergy = calculateOrbitalEnergy(measuredCoMPosition.getX(), supportFootPosition.getX(), measuredCoMVelocity.getX(), OMEGA);
 
          double desiredEnergy = 0.5 * Math.pow(desiredComVelocityX.getValue(), 2);
          double a = 1;
          double b = -2 * (measuredCPPosition.getX() - supportFootPosition.getX());
-         double c = 2 * (currentEnergy - desiredEnergy) / Math.pow(omega0, 2);
+         double c = 2 * (currentEnergy - desiredEnergy) / Math.pow(OMEGA, 2);
          double[] sol = solveQuadratic(a, b, c);
          //         desiredStepLength.set(sol[0]);
          desiredStepLength.set(0.3);
@@ -623,7 +619,7 @@ public class RaymanController implements Controller
             FramePoint3D centerOfMassPosition = new FramePoint3D(robotJae.getSoleFrame(supportSide));
             centerOfMassPosition.changeFrame(WORLD_FRAME);
             centerOfMassPosition.setZ(DESIRED_CENTER_OF_MASS_HEIGHT);
-            desiredCenterOfMassPoint.set(centerOfMassPosition);
+            desiredCoM.set(centerOfMassPosition);
          }
 
          if (walkModeYoEnum.getValue() == WalkMode.LIP)
@@ -633,15 +629,15 @@ public class RaymanController implements Controller
                                                                            soleFrames.get(supportSide).getTransformToWorldFrame().getTranslation(),
                                                                            referenceCOM,
                                                                            timeInState);
-            desiredCenterOfMassPoint.set(comFromTrajectory);
+            desiredCoM.set(comFromTrajectory);
          }
 
 
          FramePoint3D measuredCoMPosition = new FramePoint3D(WORLD_FRAME, toolbox.getCenterOfMassFrame().getTransformToWorldFrame().getTranslation());
-         measuredCenterOfMassPoint.set(measuredCoMPosition);
+         measuredCoM.set(measuredCoMPosition);
 
          // We pack the center of mass command for the controller core.
-         sendCenterOfMassCommand(desiredCenterOfMassPoint);
+         sendCenterOfMassCommand(desiredCoM);
 
 
          // As in the standing state, the support is specified with the contact state
@@ -765,14 +761,61 @@ public class RaymanController implements Controller
       return planeContactStateCommand;
    }
 
+   public void sendICPCommand(FramePoint3D trajectoryICP, FramePoint3D trajectoryICPVelocity)
+   {
+      measuredCoM.set(WORLD_FRAME, toolbox.getCenterOfMassFrame().getTransformToWorldFrame().getTranslation());
+      measuredCoMVelocity.set(WORLD_FRAME, toolbox.getCentroidalMomentumRateCalculator().getCenterOfMassVelocity());
+      updateICP();
+      desireCMP.set(calculateDesiredCMP(measuredICP, trajectoryICP, trajectoryICPVelocity));
+
+      FramePoint3D desiredCoMAcceleration = calculateDesiredCoMAcceleration(measuredCoM, desireCMP);
+      double kp = 10.0;
+      double kd = GainCalculator.computeDerivativeGain(kp, 1.0);
+      desiredCoMAcceleration.setZ(kp * (DESIRED_CENTER_OF_MASS_HEIGHT - measuredCoM.getZ()) - kd * measuredCoMVelocity.getZ());
+
+      FrameVector3D desiredLinearMomentumRate = new FrameVector3D(WORLD_FRAME, desiredCoMAcceleration);
+      desiredLinearMomentumRate.scale(toolbox.getTotalRobotMass());
+      MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+      momentumRateCommand.setWeight(1.0);
+      momentumRateCommand.setLinearMomentumRate(desiredLinearMomentumRate);
+      momentumRateCommand.setSelectionMatrixForLinearControl();
+
+      // send command to controller
+      controllerCoreCommand.addInverseDynamicsCommand(momentumRateCommand);
+   }
+
+   // updates and writes to measuredICP
    public void updateICP()
    {
       FramePoint3D measuredCoMPosition = new FramePoint3D(WORLD_FRAME, toolbox.getCenterOfMassFrame().getTransformToWorldFrame().getTranslation());
       FrameVector3D measuredCoMVelocity = new FrameVector3D(WORLD_FRAME, toolbox.getCentroidalMomentumRateCalculator().getCenterOfMassVelocity());
-      FramePoint3D measuredCPPosition = new FramePoint3D(WORLD_FRAME);
-      measuredCPPosition.scaleAdd(1.0 / omega0, measuredCoMVelocity, measuredCoMPosition);
-      measuredICP.set(measuredCPPosition);
+      measuredICP.setToZero();
+      measuredICP.scaleAdd(1.0 / OMEGA, measuredCoMVelocity, measuredCoMPosition);
       measuredICP.setZ(0.0);
+   }
+
+   public static FramePoint3D calculateDesiredCMP(FramePoint3DReadOnly measuredICP, FramePoint3D trajectoryICP, FramePoint3D trajectoryICPVelocity)
+   {
+      FramePoint3D cmp = new FramePoint3D();
+      double kp = 2.0;
+      FramePoint3D desiredICPVelocity = new FramePoint3D();
+      FramePoint3D ICPError = new FramePoint3D();
+      ICPError.sub(measuredICP, trajectoryICP);
+      ICPError.scale(kp);
+      desiredICPVelocity.add(ICPError, trajectoryICPVelocity);
+
+      cmp.add(measuredICP);
+      cmp.scaleAdd(-1 / OMEGA, desiredICPVelocity);
+
+      return cmp;
+   }
+
+   public static FramePoint3D calculateDesiredCoMAcceleration(FramePoint3DReadOnly measuredCoM, FramePoint3DReadOnly desiredCMP)
+   {
+      FramePoint3D desiredComAcceleration = new FramePoint3D();
+      desiredComAcceleration.sub(measuredCoM, desiredCMP);
+      desiredComAcceleration.scale(OMEGA * OMEGA);
+      return desiredComAcceleration;
    }
 
    public void addHipTrajectoryPoint()
@@ -821,7 +864,7 @@ public class RaymanController implements Controller
    private FramePoint3D evaluateICP(Tuple3DReadOnly icp0, Tuple3DReadOnly support, double t)
    {
       // eqn: backwards eta(t) = exp(-w*t) * (eta0 - u) + u
-      double exp_wt = Math.exp(-omega0 * t);
+      double exp_wt = Math.exp(-OMEGA * t);
       FramePoint3D icp = new FramePoint3D();
       icp.sub(icp0, support);
       icp.scale(exp_wt);
@@ -837,7 +880,7 @@ public class RaymanController implements Controller
 
       // eqn: forward com(t) = exp(-w*t) * (com0 - icp(t)) + icp(t)
       FramePoint3D com = new FramePoint3D();
-      double exp_wt = Math.exp(-omega0 * t);
+      double exp_wt = Math.exp(-OMEGA * t);
       com.sub(com0, icp);
       com.scale(exp_wt);
       com.add(icp);
