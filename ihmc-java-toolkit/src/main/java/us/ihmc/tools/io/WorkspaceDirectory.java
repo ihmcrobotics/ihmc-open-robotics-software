@@ -66,12 +66,13 @@ public class WorkspaceDirectory
 
    protected void setFilesystemDirectoryToSourceSetDirectory(Class<?> classForFindingSourceSetDirectory)
    {
-      filesystemDirectory = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory).toAbsolutePath();
+      Path path = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory);
+      filesystemDirectory = path == null ? null : path.toAbsolutePath();
    }
 
    protected void setFilesystemDirectoryToSourceSetDirectory(Class<?> classForFindingSourceSetDirectory, String subsequentPath)
    {
-      filesystemDirectory = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory).toAbsolutePath();
+      setFilesystemDirectoryToSourceSetDirectory(classForFindingSourceSetDirectory);
       if (filesystemDirectory != null)
          filesystemDirectory = filesystemDirectory.resolve(subsequentPath).toAbsolutePath();
    }
