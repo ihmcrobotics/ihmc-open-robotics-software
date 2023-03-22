@@ -3,9 +3,9 @@ package us.ihmc.valkyrie.joystick;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;

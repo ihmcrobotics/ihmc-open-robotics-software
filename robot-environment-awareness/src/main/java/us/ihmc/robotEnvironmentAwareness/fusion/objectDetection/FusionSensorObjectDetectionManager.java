@@ -16,12 +16,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicReference;
 
-import perception_msgs.msg.dds.DoorParameterPacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import perception_msgs.msg.dds.DoorParameterPacket;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.commons.Conversions;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.ros2.ROS2Node;

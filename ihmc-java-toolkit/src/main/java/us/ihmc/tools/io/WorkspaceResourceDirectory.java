@@ -120,7 +120,7 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
 
    public WorkspaceResourceDirectory resolve(String subdirectory)
    {
-      return new WorkspaceResourceDirectory(classForLoading, pathNecessaryForClasspathLoading + "/" + subdirectory);
+      return new WorkspaceResourceDirectory(classForLoading, pathNecessaryForClasspathLoading.resolve(subdirectory).toString());
    }
 
    /**

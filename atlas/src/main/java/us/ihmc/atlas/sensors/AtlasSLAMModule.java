@@ -64,8 +64,8 @@ public class AtlasSLAMModule extends SLAMModule
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToD435DepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
-      reaMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
-      reaMessager.registerTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
+      reaMessager.addTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
+      reaMessager.addTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
    }
 
    public AtlasSLAMModule(Messager messager, DRCRobotModel drcRobotModel)
@@ -83,8 +83,8 @@ public class AtlasSLAMModule extends SLAMModule
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToD435DepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
-      reaMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
-      reaMessager.registerTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
+      reaMessager.addTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
+      reaMessager.addTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
    }
 
    @Override
