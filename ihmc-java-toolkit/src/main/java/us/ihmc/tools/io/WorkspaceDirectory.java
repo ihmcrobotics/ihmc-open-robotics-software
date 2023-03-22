@@ -28,6 +28,10 @@ import java.nio.file.Path;
  */
 public class WorkspaceDirectory
 {
+   /**
+    * Should be kept absolute, otherwise will break Windows because it won't
+    * have the drive letter i.e. "C:"
+    */
    protected Path filesystemDirectory;
 
    protected WorkspaceDirectory()
@@ -37,12 +41,12 @@ public class WorkspaceDirectory
 
    public WorkspaceDirectory(String directoryNameToAssumePresent)
    {
-      filesystemDirectory = PathTools.findDirectoryInline(directoryNameToAssumePresent);
+      filesystemDirectory = PathTools.findDirectoryInline(directoryNameToAssumePresent).toAbsolutePath();
    }
 
    public WorkspaceDirectory(String directoryNameToAssumePresent, String subsequentPath)
    {
-      filesystemDirectory = WorkspacePathTools.findPath(directoryNameToAssumePresent, subsequentPath);
+      filesystemDirectory = WorkspacePathTools.findPath(directoryNameToAssumePresent, subsequentPath).toAbsolutePath();
    }
 
    public WorkspaceDirectory(Class<?> classForFindingSourceSetDirectory)
@@ -57,19 +61,19 @@ public class WorkspaceDirectory
 
    public WorkspaceDirectory(Path filesystemDirectory)
    {
-      this.filesystemDirectory = filesystemDirectory;
+      this.filesystemDirectory = filesystemDirectory.toAbsolutePath();
    }
 
    protected void setFilesystemDirectoryToSourceSetDirectory(Class<?> classForFindingSourceSetDirectory)
    {
-      filesystemDirectory = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory);
+      filesystemDirectory = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory).toAbsolutePath();
    }
 
    protected void setFilesystemDirectoryToSourceSetDirectory(Class<?> classForFindingSourceSetDirectory, String subsequentPath)
    {
-      filesystemDirectory = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory);
+      filesystemDirectory = WorkspacePathTools.inferFilesystemSourceSetDirectory(classForFindingSourceSetDirectory).toAbsolutePath();
       if (filesystemDirectory != null)
-         filesystemDirectory = filesystemDirectory.resolve(subsequentPath);
+         filesystemDirectory = filesystemDirectory.resolve(subsequentPath).toAbsolutePath();
    }
 
    /** If the directory is available for reading/writing using files.
