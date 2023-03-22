@@ -38,6 +38,11 @@ import java.util.List;
 
 public class DualBlackflyCamera
 {
+   /**
+    * Temporary for demo. Let's leave it on in the future.
+    */
+   private static final boolean ARUCO_DETECTION_ENABLED = false;
+
    private final String serialNumber;
    private final ROS2SyncedRobotModel syncedRobot;
    private SpinnakerBlackfly blackfly;
@@ -201,20 +206,23 @@ public class DualBlackflyCamera
                syncedRobot.update();
                ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
 
-               opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), distortedRGBImage, opencv_imgproc.COLOR_BayerBG2RGB);
-               opencv_imgproc.remap(distortedRGBImage,
-                                    undistortedImage.getBytedecoOpenCVMat(),
-                                    undistortionMap1,
-                                    undistortionMap2,
-                                    opencv_imgproc.INTER_LINEAR,
-                                    opencv_core.BORDER_CONSTANT,
-                                    undistortionRemapBorderValue);
+               if (ARUCO_DETECTION_ENABLED)
+               {
+                  opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), distortedRGBImage, opencv_imgproc.COLOR_BayerBG2RGB);
+                  opencv_imgproc.remap(distortedRGBImage,
+                                       undistortedImage.getBytedecoOpenCVMat(),
+                                       undistortionMap1,
+                                       undistortionMap2,
+                                       opencv_imgproc.INTER_LINEAR,
+                                       opencv_core.BORDER_CONSTANT,
+                                       undistortionRemapBorderValue);
 
-               arUcoMarkerDetection.update();
-               // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
-               // arUcoMarkerDetection.drawDetectedMarkers(blackflySourceImage.getBytedecoOpenCVMat());
-               // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
-               arUcoMarkerPublisher.update();
+                  arUcoMarkerDetection.update();
+                  // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
+                  // arUcoMarkerDetection.drawDetectedMarkers(blackflySourceImage.getBytedecoOpenCVMat());
+                  // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
+                  arUcoMarkerPublisher.update();
+               }
             }
 
             convertColorDuration.start();
