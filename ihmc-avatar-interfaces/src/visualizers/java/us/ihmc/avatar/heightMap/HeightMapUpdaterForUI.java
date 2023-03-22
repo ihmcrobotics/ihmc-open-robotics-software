@@ -34,7 +34,7 @@ public class HeightMapUpdaterForUI
 
       heightMapUpdater = new HeightMapUpdater();
 
-      messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, pointCloudData ->
+      messager.addTopicListener(HeightMapMessagerAPI.PointCloudData, pointCloudData ->
       {
          if (heightMapUpdater.updatesAreEnabled())
          {
@@ -57,20 +57,20 @@ public class HeightMapUpdaterForUI
       heightMapUpdater.attachHeightMapConsumer(heightMap -> messager.submitMessage(HeightMapMessagerAPI.HeightMapData, heightMap));
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
 
-      messager.registerTopicListener(HeightMapMessagerAPI.Import, i -> importHeightMap());
+      messager.addTopicListener(HeightMapMessagerAPI.Import, i -> importHeightMap());
    }
 
    private void attachMessagerToUpdater()
    {
-      messager.registerTopicListener(HeightMapMessagerAPI.EnableUpdates, heightMapUpdater::setEnableUpdates);
-      messager.registerTopicListener(HeightMapMessagerAPI.Clear, c -> heightMapUpdater.requestClear());
-      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterX, heightMapUpdater::setGridCenterX);
-      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterY, heightMapUpdater::setGridCenterY);
-      messager.registerTopicListener(HeightMapMessagerAPI.MaxHeight, heightMapUpdater::setMaxHeight);
-      messager.registerTopicListener(HeightMapMessagerAPI.parameters, heightMapUpdater::setParameters);
+      messager.addTopicListener(HeightMapMessagerAPI.EnableUpdates, heightMapUpdater::setEnableUpdates);
+      messager.addTopicListener(HeightMapMessagerAPI.Clear, c -> heightMapUpdater.requestClear());
+      messager.addTopicListener(HeightMapMessagerAPI.GridCenterX, heightMapUpdater::setGridCenterX);
+      messager.addTopicListener(HeightMapMessagerAPI.GridCenterY, heightMapUpdater::setGridCenterY);
+      messager.addTopicListener(HeightMapMessagerAPI.MaxHeight, heightMapUpdater::setMaxHeight);
+      messager.addTopicListener(HeightMapMessagerAPI.parameters, heightMapUpdater::setParameters);
 
-      messager.registerTopicListener(HeightMapMessagerAPI.PublishFrequency, heightMapUpdater::setPublishFrequency);
-      messager.registerTopicListener(HeightMapMessagerAPI.Export, e -> heightMapUpdater.exportOnThread());
+      messager.addTopicListener(HeightMapMessagerAPI.PublishFrequency, heightMapUpdater::setPublishFrequency);
+      messager.addTopicListener(HeightMapMessagerAPI.Export, e -> heightMapUpdater.exportOnThread());
 
       heightMapUpdater.setGridCenterConsumer((point) ->
                                              {

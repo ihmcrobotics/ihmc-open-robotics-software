@@ -178,7 +178,7 @@ public class RDXBlackflyReader
       return imageWidth;
    }
 
-   public Mat getBayerRGImage()
+   public Mat getBayerBGImage()
    {
       return blackflySourceMat;
    }

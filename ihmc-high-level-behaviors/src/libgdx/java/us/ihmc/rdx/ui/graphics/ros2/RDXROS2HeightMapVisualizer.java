@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics;
+package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -9,7 +9,6 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
@@ -19,7 +18,7 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.Set;
 
-public class RDXHeightMapVisualizer extends RDXVisualizer
+public class RDXROS2HeightMapVisualizer extends RDXVisualizer
 {
    private final RDXGridMapGraphic gridMapGraphic = new RDXGridMapGraphic();
    private final ResettableExceptionHandlingExecutorService executorService;
@@ -27,14 +26,18 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private final ImBoolean inPaintHeight = new ImBoolean(false);
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
+   private final ROS2Heartbeat activeHeartbeat;
 
-   public RDXHeightMapVisualizer()
+   public RDXROS2HeightMapVisualizer(ROS2PublishSubscribeAPI ros2)
    {
       super("Height Map");
 
       boolean daemon = true;
       int queueSize = 1;
       executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), daemon, queueSize);
+
+      ros2.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
+      activeHeartbeat = new ROS2Heartbeat(ros2, ROS2Tools.PUBLISH_HEIGHT_MAP);
    }
 
    @Override
@@ -64,10 +67,11 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    public void setActive(boolean active)
    {
       super.setActive(active);
-      if (!isActive())
+      if (!active)
       {
          executorService.interruptAndReset();
       }
+      activeHeartbeat.setAlive(active);
    }
 
    @Override
@@ -109,6 +113,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
    public void destroy()
    {
+      activeHeartbeat.destroy();
       gridMapGraphic.destroy();
    }
 }
