@@ -53,7 +53,7 @@ public class OpenCVArUcoMarkerDetection
    private BytePointer objectPointsDataPointer;
    private boolean running = true;
    private final Timer timer = new Timer();
-   private final Throttler throttler = new Throttler();
+   private final Throttler throttler = new Throttler().setFrequency(20.0);
 
    public void create(ReferenceFrame sensorFrame)
    {
@@ -143,7 +143,8 @@ public class OpenCVArUcoMarkerDetection
    {
       while (running)
       {
-         if (throttler.run(0.05) && timer.isRunning(0.5))
+         throttler.waitAndRun();
+         if (timer.isRunning(0.5))
          {
             OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadOne();
 
