@@ -51,7 +51,7 @@ public class OpenCVArUcoMarkerDetection
    private Scalar defaultBorderColor;
    private BytedecoImage optionalSourceColorImage;
    private BytePointer objectPointsDataPointer;
-   private boolean running = true;
+   private volatile boolean running = true;
    private final Timer timer = new Timer();
    private final Throttler throttler = new Throttler().setFrequency(20.0);
 
