@@ -339,13 +339,8 @@ void kernel computeSurfaceNormalsWithLeastSquares(
       float y_solution = y / n;
       float z_solution = -coefficients[0] * x_solution - coefficients[1] * y_solution - coefficients[2];
 
-<<<<<<< HEAD
-        normal = (float3) (coefficients[0], coefficients[1], 1.0);
-        normal = normalize(normal);
-=======
       normal = (float3) (coefficients[0], coefficients[1], 1.0);
-      normalize(normal);
->>>>>>> develop
+      normal = normalize(normal);
 
       float x_coordinate = index_to_coordinate(idx_x, params[centerX], params[HEIGHT_MAP_RESOLUTION], center_index);
       float y_coordinate = index_to_coordinate(idx_y, params[centerY], params[HEIGHT_MAP_RESOLUTION], center_index);

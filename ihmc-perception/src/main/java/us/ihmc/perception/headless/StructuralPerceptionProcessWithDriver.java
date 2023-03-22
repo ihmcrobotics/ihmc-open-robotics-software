@@ -19,7 +19,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.OpenCVImageFormat;
+import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
@@ -181,7 +181,7 @@ public class StructuralPerceptionProcessWithDriver
       {
          outputImageMessage.getData().add(pngImageBytePointer.get(i));
       }
-      outputImageMessage.setFormat(OpenCVImageFormat.PNG.ordinal());
+      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(outputImageMessage);
       outputImageMessage.setSequenceNumber(sequenceNumber++);
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);

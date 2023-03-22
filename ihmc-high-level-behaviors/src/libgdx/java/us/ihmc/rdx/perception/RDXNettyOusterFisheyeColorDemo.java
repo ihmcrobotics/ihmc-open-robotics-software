@@ -64,9 +64,9 @@ public class RDXNettyOusterFisheyeColorDemo
                   baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapImagePanel().getImagePanel());
 
                   interactableBlackflyFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel());
+                  interactableBlackflyFujinon.getInteractableFrameModel().setPose(SensorHeadParameters.FISHEYE_TO_OUSTER_TRANSFORM);
 
                   nettyOusterUI.createAfterNativesLoaded();
-                  nettyOusterUI.getSensorFrame().update(transformToBlackfly -> transformToBlackfly.set(SensorHeadParameters.OUSTER_TO_FISHEYE_TRANSFORM));
 
                   blackflyReader.setMonitorPanelUIThreadPreprocessor(texture ->
                   {
