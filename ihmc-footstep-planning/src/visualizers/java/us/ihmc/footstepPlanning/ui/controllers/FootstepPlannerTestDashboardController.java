@@ -4,7 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.DataSet;
 
 public class FootstepPlannerTestDashboardController
@@ -21,7 +21,7 @@ public class FootstepPlannerTestDashboardController
 
    public void bindControls()
    {
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.TestDataSets,
+      messager.addTopicListener(FootstepPlannerMessagerAPI.TestDataSets,
                                      dataSets -> testDashboardDataSets.setItems(FXCollections.observableArrayList(dataSets)));
 
       testDashboardDataSets.getSelectionModel()

@@ -73,15 +73,15 @@ public class LiveMapModule implements PerceptionModule
 
       slamParameters = new PlanarRegionSLAMParameters("ForLiveMap");
 
-      messager.registerTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters ->
+      messager.addTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters ->
       {
          slamParameters.setAllFromStrings(parameters);
          hasNewParameters.set(true);
       });
 
-      messager.registerTopicListener(LiveMapModuleAPI.LocalizedMap, (message) -> hasNewLocalizedMap.set(true));
-      messager.registerTopicListener(LiveMapModuleAPI.RegionsAtFeet, (message) -> hasNewRegionsAtFeet.set(true));
-      messager.registerTopicListener(LiveMapModuleAPI.LidarMap, (message) -> hasNewLidarMap.set(true));
+      messager.addTopicListener(LiveMapModuleAPI.LocalizedMap, (message) -> hasNewLocalizedMap.set(true));
+      messager.addTopicListener(LiveMapModuleAPI.RegionsAtFeet, (message) -> hasNewRegionsAtFeet.set(true));
+      messager.addTopicListener(LiveMapModuleAPI.LidarMap, (message) -> hasNewLidarMap.set(true));
 
       viewingEnabled = messager.createInput(LiveMapModuleAPI.ViewingEnable, true);
       combinedLiveMap = messager.createInput(LiveMapModuleAPI.CombinedLiveMap);
@@ -94,7 +94,7 @@ public class LiveMapModule implements PerceptionModule
       clearLidar = messager.createInput(LiveMapModuleAPI.ClearLidar, false);
       clearLocalizedMap = messager.createInput(LiveMapModuleAPI.ClearLocalizedMap, false);
 
-      messager.registerTopicListener(LiveMapModuleAPI.RequestEntireModuleState, request -> sendCurrentState());
+      messager.addTopicListener(LiveMapModuleAPI.RequestEntireModuleState, request -> sendCurrentState());
 
       sendCurrentState();
 
