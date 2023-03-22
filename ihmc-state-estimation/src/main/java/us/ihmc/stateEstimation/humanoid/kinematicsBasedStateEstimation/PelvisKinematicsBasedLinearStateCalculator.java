@@ -91,7 +91,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
    private final BooleanProvider useControllerDesiredCoP;
    private final BooleanProvider trustCoPAsNonSlippingContactPoint;
 
-   private final BooleanParameter assumeTrustedFootAtZeroHeight = new BooleanParameter("assumeTrustedFootAtZeroHeight", registry, true);
+   private final BooleanParameter assumeTrustedFootAtZeroHeight = new BooleanParameter("assumeTrustedFootAtZeroHeight", registry, false);
 
    public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure,
                                                      Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
