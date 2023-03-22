@@ -205,7 +205,8 @@ public class SteppableRegionsCalculationModule
                snapNormalYImages.get(yawValue),
                snapNormalZImages.get(yawValue),
                steppabilityConnections.get(yawValue),
-               parameters);
+               parameters,
+               heightMapData);
 
          SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
                                                                                           polygonizerParameters,
