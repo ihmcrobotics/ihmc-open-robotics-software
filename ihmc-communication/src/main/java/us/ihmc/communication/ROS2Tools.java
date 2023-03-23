@@ -250,12 +250,6 @@ public class ROS2Tools
    public static final ROS2Topic<Empty> PUBLISH_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("publish_lidar_scan").withType(Empty.class);
    public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("publish_height_map").withType(Empty.class);
 
-   public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
-
-   /** Mission Control types **/
-   public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withType(SystemAvailableMessage.class);
-   public static final ROS2Topic<SystemServiceStatusMessage> SYSTEM_SERVICE_STATUS = IHMC_ROOT.withModule("asdf").withType(SystemServiceStatusMessage.class);
-//   public static final ROS2Topic<SystemServiceStatusMessage> SYSTEM_SERVICE_STATUS = IHMC_ROOT.withModule(ZED2_NAME).withType(SystemServiceStatusMessage.class).withSuffix("color_stereo");
    public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withModule("mission_control").withType(SystemAvailableMessage.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
