@@ -307,22 +307,26 @@ public class WholeBodyInverseDynamicsSolver
       {
          KinematicLoopFunction kinematicLoopFunction = kinematicLoopFunctions.get(i);
          List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopFunction.getLoopJoints();
-         kinematicLoopJointTau.reshape(loopJoints.size(), 1);
-
-         for (int j = 0; j < loopJoints.size(); j++)
+         
+         if(loopJoints != null && !loopJoints.isEmpty())
          {
-            OneDoFJointReadOnly loopJoint = loopJoints.get(j);
-            double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque((OneDoFJointBasics) loopJoint);
-            kinematicLoopJointTau.set(j, tau);
-         }
-
-         kinematicLoopFunction.adjustTau(kinematicLoopJointTau);
-
-         for (int j = 0; j < loopJoints.size(); j++)
-         {
-            OneDoFJointReadOnly loopJoint = loopJoints.get(j);
-            // TODO The following cast is ugly and does not seem like it should be needed.
-            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque((OneDoFJointBasics) loopJoint, kinematicLoopJointTau.get(j));
+            kinematicLoopJointTau.reshape(loopJoints.size(), 1);
+   
+            for (int j = 0; j < loopJoints.size(); j++)
+            {
+               OneDoFJointReadOnly loopJoint = loopJoints.get(j);
+               double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque((OneDoFJointBasics) loopJoint);
+               kinematicLoopJointTau.set(j, tau);
+            }
+   
+            kinematicLoopFunction.adjustTau(kinematicLoopJointTau);
+   
+            for (int j = 0; j < loopJoints.size(); j++)
+            {
+               OneDoFJointReadOnly loopJoint = loopJoints.get(j);
+               // TODO The following cast is ugly and does not seem like it should be needed.
+               lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque((OneDoFJointBasics) loopJoint, kinematicLoopJointTau.get(j));
+            }
          }
       }
    }
