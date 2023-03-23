@@ -34,6 +34,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
@@ -214,8 +215,15 @@ public class InverseDynamicsOptimizationControlModule
 
       for (int i = 0; i < kinematicLoopFunctions.size(); i++)
       {
-         motionQPInputCalculator.convertKinematicLoopFunction(kinematicLoopFunctions.get(i), motionQPVariableSubstitution);
-         qpSolver.addAccelerationSubstitution(motionQPVariableSubstitution);
+         List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopFunctions.get(i).getLoopJoints();
+         
+         // Check if the kinematic loop has joints. If no joints are returned, do not add a substitution
+         if(loopJoints != null && loopJoints.isEmpty())
+         {
+            motionQPInputCalculator.convertKinematicLoopFunction(kinematicLoopFunctions.get(i), motionQPVariableSubstitution);
+            qpSolver.addAccelerationSubstitution(motionQPVariableSubstitution);
+         }
+         
       }
 
       qpSolver.setMaxNumberOfIterations(maximumNumberOfIterations.getIntegerValue());

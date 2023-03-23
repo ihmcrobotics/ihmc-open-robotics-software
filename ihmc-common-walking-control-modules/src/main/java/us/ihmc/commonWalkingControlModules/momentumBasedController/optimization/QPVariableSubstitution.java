@@ -72,7 +72,7 @@ public class QPVariableSubstitution
    {
       this.numberOfVariablesToSubstitute = numberOfVariablesToSubstitute;
 
-      if (variableIndices.length < numberOfVariablesToSubstitute)
+      if (variableIndices.length != numberOfVariablesToSubstitute)
          variableIndices = new int[numberOfVariablesToSubstitute];
 
       activeIndices.reset();
@@ -97,8 +97,10 @@ public class QPVariableSubstitution
       int newSizeX = oldSizeX + other.numberOfVariablesToSubstitute;
       int newSizeY = oldSizeY + other.transformation.getNumCols();
 
-      if (variableIndices.length < newSizeX)
+      if (variableIndices.length != newSizeX)
+      {
          variableIndices = Arrays.copyOf(variableIndices, newSizeX);
+      }
 
       for (int i = 0; i < other.numberOfVariablesToSubstitute; i++)
       {
