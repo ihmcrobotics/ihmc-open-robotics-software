@@ -49,9 +49,9 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.BodyPathMeshViewer;
@@ -206,8 +206,8 @@ public class VisibilityGraphsTestVisualizer
       messager.bindBidirectional(ShowStartVisibilityMap, showStartMapToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowGoalVisibilityMap, showGoalMapToggleButton.selectedProperty(), true);
 
-      messager.registerJavaFXSyncedTopicListener(UIVisibilityGraphsTopics.AllDatasetPaths, this::showDatasets);
-      messager.registerJavaFXSyncedTopicListener(CurrentDatasetPath, path -> datasetsListView.getSelectionModel().select(path));
+      messager.addFXTopicListener(UIVisibilityGraphsTopics.AllDatasetPaths, this::showDatasets);
+      messager.addFXTopicListener(CurrentDatasetPath, path -> datasetsListView.getSelectionModel().select(path));
 
       datasetsListView.setOnMouseClicked(this::handleDatasetSelection);
    }

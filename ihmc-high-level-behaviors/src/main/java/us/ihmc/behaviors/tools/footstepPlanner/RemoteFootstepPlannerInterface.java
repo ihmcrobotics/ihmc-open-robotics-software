@@ -68,7 +68,7 @@ public class RemoteFootstepPlannerInterface
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       if (messager != null)
       {
-         messager.registerTopicListener(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
+         messager.addTopicListener(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
          {
             DefaultFootstepPlannerParameters settableFootstepPlannerParameters = new DefaultFootstepPlannerParameters(); // TODO: This might not be thread safe
             parameters.packFootstepPlannerParameters(settableFootstepPlannerParameters);              // TODO: Clean this up  - @dcalvert
