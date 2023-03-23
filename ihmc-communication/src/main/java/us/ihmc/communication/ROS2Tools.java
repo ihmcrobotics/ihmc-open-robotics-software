@@ -252,6 +252,8 @@ public class ROS2Tools
 
    public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withModule("mission_control").withType(SystemAvailableMessage.class);
 
+   public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
+
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
    public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getBipedalSupportRegionParametersTopic(String robotName)
