@@ -88,7 +88,7 @@ public class BytedecoRealsense
       rs2_sensor_list sensorList = realsense2.rs2_query_sensors(device, error);
       sensor = realsense2.rs2_create_sensor(sensorList, 0, error);
 
-      LogTools.info("Configured Depth Stream of L515 Device. Serial number: {}", serialNumber);
+      LogTools.info("Configured Depth Stream of Realsense Device. Serial number: {}", serialNumber);
    }
 
    public void enableColor(RealsenseConfiguration realsenseConfiguration)

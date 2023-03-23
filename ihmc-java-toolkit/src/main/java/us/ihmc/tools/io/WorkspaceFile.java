@@ -7,13 +7,17 @@ import java.nio.file.Path;
  */
 public class WorkspaceFile
 {
+   /**
+    * Should be kept absolute, otherwise will break Windows because it won't
+    * have the drive letter i.e. "C:"
+    */
    private final Path filesystemFile;
 
    public WorkspaceFile(WorkspaceDirectory directory, String subsequentPathToFile)
    {
       if (directory.isFileAccessAvailable())
       {
-         filesystemFile = directory.getFilesystemDirectory().resolve(subsequentPathToFile);
+         filesystemFile = directory.getFilesystemDirectory().resolve(subsequentPathToFile).toAbsolutePath();
       }
       else
       {
