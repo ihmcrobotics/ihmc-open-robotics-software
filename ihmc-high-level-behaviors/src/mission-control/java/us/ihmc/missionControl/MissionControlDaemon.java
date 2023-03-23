@@ -2,6 +2,7 @@ package us.ihmc.missionControl;
 
 import mission_control_msgs.msg.dds.SystemAvailableMessage;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
+import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -17,10 +18,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class MissionControlDaemon
 {
@@ -38,7 +36,7 @@ public class MissionControlDaemon
    private final FreeMemoryMonitor memoryMonitor;
    private SysstatNetworkMonitor networkMonitor; // Optional - requires sysstat
    private NVIDIAGPUMonitor nvidiaGPUMonitor; // Optional - requires an NVIDIA GPU
-   private final List<SystemdServiceMonitor> serviceMonitors = new ArrayList<>();
+   private final Map<String, SystemdServiceMonitor> serviceMonitors = new HashMap<>();
 
    private final ROS2Node ros2Node;
    private final IHMCROS2Publisher<SystemAvailableMessage> systemAvailablePublisher;
@@ -90,13 +88,44 @@ public class MissionControlDaemon
       systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.0);
       systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.25);
 
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId), subscriber ->
+      {
+         SystemServiceActionMessage message = subscriber.takeNextData();
+         LogTools.info("Received service action message " + message);
+         handleServiceActionMessage(message);
+      });
+
       MissionControlTools.findSystemdServiceNames().forEach(service ->
       {
          LogTools.info("Watching systemd service: " + service);
-         serviceMonitors.add(new SystemdServiceMonitor(instanceId, service, ros2Node));
+         serviceMonitors.put(service, new SystemdServiceMonitor(instanceId, service, ros2Node));
       });
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
+   }
+
+   private void handleServiceActionMessage(SystemServiceActionMessage message)
+   {
+      String serviceName = message.getServiceNameAsString();
+      SystemdServiceMonitor serviceMonitor = serviceMonitors.get(serviceName);
+
+      if (serviceMonitor == null)
+         return;
+
+      String action = message.getSystemdActionAsString();
+
+      if (action.equals("start"))
+      {
+         serviceMonitor.start();
+      }
+      else if (action.equals("stop"))
+      {
+         serviceMonitor.stop();
+      }
+      else if (action.equals("restart"))
+      {
+         serviceMonitor.restart();
+      }
    }
 
    private void publishAvailable()
@@ -158,7 +187,7 @@ public class MissionControlDaemon
       systemAvailablePublisher.destroy();
       systemResourceUsagePublisher.destroy();
       schedulers.forEach(ExceptionHandlingThreadScheduler::shutdown);
-      serviceMonitors.forEach(SystemdServiceMonitor::destroy);
+      serviceMonitors.values().forEach(SystemdServiceMonitor::destroy);
       ros2Node.destroy();
    }
 

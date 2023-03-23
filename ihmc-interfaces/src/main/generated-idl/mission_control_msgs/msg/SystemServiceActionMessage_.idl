@@ -1,0 +1,21 @@
+#ifndef __mission_control_msgs__msg__SystemServiceActionMessage__idl__
+#define __mission_control_msgs__msg__SystemServiceActionMessage__idl__
+
+module mission_control_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="mission_control_msgs::msg::dds_::SystemServiceActionMessage_")
+      struct SystemServiceActionMessage
+      {
+        string service_name;
+        string systemd_action;
+      };
+    };
+  };
+};
+
+#endif

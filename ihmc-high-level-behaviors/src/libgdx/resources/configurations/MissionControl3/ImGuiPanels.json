@@ -3,6 +3,6 @@
     "Machine View" : false
   },
   "windows" : {
-    "Machines" : false
+    "Control Panel" : true
   }
 }

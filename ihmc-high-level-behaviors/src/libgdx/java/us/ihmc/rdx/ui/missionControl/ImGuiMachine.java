@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.missionControl;
 
+import imgui.ImGui;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
@@ -7,8 +8,7 @@ import imgui.flag.ImGuiCond;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.rdx.imgui.ImGuiGlfwWindow;
-import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
 import us.ihmc.ros2.ROS2Node;
@@ -21,10 +21,9 @@ public class ImGuiMachine
    private final UUID instanceId;
    private final String hostname;
 
+   private final ROS2Node ros2Node;
    private SystemResourceUsageMessage lastResourceUsageMessage = new SystemResourceUsageMessage();
 
-   private final ImGuiGlfwWindow window;
-   private final ImGuiPanel panel;
    private final Map<String, ImGuiMachineService> services = new HashMap<>();
    private final ImPlotPlot cpuPlot = new ImPlotPlot();
    private final ImPlotPlot ramPlot = new ImPlotPlot();
@@ -49,14 +48,10 @@ public class ImGuiMachine
       plotAxisYFlags += ImPlotAxisFlags.AutoFit;
    }
 
-   public ImGuiMachine(UUID instanceId, String hostname, ImGuiGlfwWindow window, ROS2Node ros2Node)
+   public ImGuiMachine(UUID instanceId, String hostname, ROS2Node ros2Node)
    {
       this.instanceId = instanceId;
       this.hostname = hostname;
-      this.window = window;
-
-      panel = new ImGuiPanel(hostname + "##" + instanceId, this::renderImGuiWidgets);
-      window.getPanelManager().addPanel(panel);
 
       cpuPlot.setFlags(plotFlags);
       cpuPlot.setXFlags(plotAxisXFlags);
@@ -73,6 +68,7 @@ public class ImGuiMachine
       netPlot.setYFlags(plotAxisYFlags);
       netPlot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(-3000.0, 103000.0, ImGuiCond.Always));
 
+      this.ros2Node = ros2Node;
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            ROS2Tools.getSystemResourceUsageTopic(instanceId),
                                            subscriber -> acceptSystemResourceUsageMessage(subscriber.takeNextData()));
@@ -201,7 +197,7 @@ public class ImGuiMachine
 
       if (!services.containsKey(serviceName))
       {
-         service = new ImGuiMachineService(serviceName, hostname, instanceId, panel);
+         service = new ImGuiMachineService(serviceName, hostname, instanceId, ros2Node);
          services.put(serviceName, service);
       }
       else
@@ -227,11 +223,9 @@ public class ImGuiMachine
 
    public void renderImGuiWidgets()
    {
-      // Render service statuses & buttons
-//      for (ImGuiMachineService service : services.values())
-//      {
-//         service.renderImGuiWidgets();
-//      }
+      ImGui.pushFont(ImGuiTools.getMediumFont());
+      ImGui.text(hostname);
+      ImGui.popFont();
 
       // Render usage graphs
       cpuPlot.render();
@@ -239,10 +233,13 @@ public class ImGuiMachine
       gpuPlots.forEach(ImPlotPlot::render);
       vramPlots.forEach(ImPlotPlot::render);
       netPlot.render();
-   }
 
-   public void destroy()
-   {
-      window.getImGuiDockSystem().getPanelManager().queueRemovePanel(panel);
+      // Render service statuses & buttons
+      for (ImGuiMachineService service : services.values())
+      {
+         ImGui.separator();
+         service.renderImGuiWidgets();
+      }
+      ImGui.separator();
    }
 }
