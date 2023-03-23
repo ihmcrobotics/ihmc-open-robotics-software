@@ -1,11 +1,13 @@
 package us.ihmc.rdx.ui.missionControl;
 
+import imgui.ImGui;
 import mission_control_msgs.msg.dds.SystemAvailableMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.imgui.ImGuiGlfwWindow;
+import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
@@ -45,6 +47,10 @@ public class MissionControlUI
 
       window = new ImGuiGlfwWindow(getClass(), "Mission Control 3");
 
+      ImGuiPanel controlPanel = new ImGuiPanel("Control Panel", this::renderImGuiWidgets);
+
+      window.getImGuiDockSystem().getPanelManager().addPanel(controlPanel);
+
       ThreadTools.startAThread(() -> window.run(null, () ->
       {
       }, () -> System.exit(0)), getClass().getName());
@@ -67,16 +73,25 @@ public class MissionControlUI
          // Check for new machines
          if (!expired && !machines.containsKey(instanceId))
          {
-            ImGuiMachine machine = new ImGuiMachine(instanceId, message.getHostnameAsString(), window, ros2Node);
+            ImGuiMachine machine = new ImGuiMachine(instanceId, message.getHostnameAsString(), ros2Node);
             machines.put(instanceId, machine);
          }
          else if (expired)
          {
-            ImGuiMachine removed = machines.remove(instanceId);
-
-            if (removed != null)
-               removed.destroy();
+            machines.remove(instanceId);
          }
+      }
+   }
+
+   public void renderImGuiWidgets()
+   {
+      for (Map.Entry<UUID, ImGuiMachine> entry : machines.entrySet())
+      {
+         UUID instanceId = entry.getKey();
+         ImGuiMachine machine = entry.getValue();
+
+         machine.renderImGuiWidgets();
+         ImGui.newLine();
       }
    }
 

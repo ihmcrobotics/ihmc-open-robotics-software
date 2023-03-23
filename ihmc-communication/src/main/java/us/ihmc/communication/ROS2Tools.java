@@ -6,6 +6,7 @@ import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import mission_control_msgs.msg.dds.SystemAvailableMessage;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
+import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
@@ -116,8 +117,6 @@ public class ROS2Tools
    public static final ROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule(HEIGHT_MAP_MODULE_NAME);
 
    public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
-
-   public static final ROS2Topic<SystemResourceUsageMessage> SYSTEM_RESOURCE_USAGE = IHMC_ROOT.withTypeName(SystemResourceUsageMessage.class);
 
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
    public static final ROS2Topic<PlanarRegionsListMessage> REA_SUPPORT_REGIONS_INPUT = REA.withRobot(null)
@@ -371,6 +370,12 @@ public class ROS2Tools
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
       return typeNamedTopic(SystemServiceStatusMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   public static ROS2Topic<SystemServiceActionMessage> getSystemServiceActionTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemServiceActionMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
    }
 
    /**

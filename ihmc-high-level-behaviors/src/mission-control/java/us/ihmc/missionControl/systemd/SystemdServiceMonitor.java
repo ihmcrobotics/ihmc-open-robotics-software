@@ -37,6 +37,21 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 1.0);
    }
 
+   public void start()
+   {
+
+   }
+
+   public void stop()
+   {
+
+   }
+
+   public void restart()
+   {
+
+   }
+
    public void publishStatus()
    {
       publishStatus(Lists.newArrayList());
