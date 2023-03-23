@@ -11,6 +11,7 @@ import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -29,6 +30,7 @@ import us.ihmc.perception.odometry.RapidPatchesBasedICP;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
+import us.ihmc.robotics.geometry.PlanarLandmarkList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
@@ -436,8 +438,8 @@ public class PlanarRegionMappingHandler
    public void computeICP()
    {
       RigidBodyTransform currentToPreviousTransform = new RigidBodyTransform();
-      boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousRegions.getPlanarRegionsList(),
-                                                                                                  currentRegions.getPlanarRegionsList(),
+      boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(new PlanarLandmarkList(previousRegions.getPlanarRegionsList()),
+                                                                                                  new PlanarLandmarkList(currentRegions.getPlanarRegionsList()),
                                                                                                   currentToPreviousTransform,
                                                                                                   getParameters());
 
@@ -511,5 +513,10 @@ public class PlanarRegionMappingHandler
    public int getTotalDepthCount()
    {
       return totalDepthCount;
+   }
+
+   public PlanarRegionMap getPlanarRegionMap()
+   {
+      return planarRegionMap;
    }
 }

@@ -21,12 +21,9 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.*;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class PlaneRegistrationTools
 {
@@ -43,8 +40,8 @@ public class PlaneRegistrationTools
     * @param parameters      The parameters for the registration.
     * @return True if the registration was successful, false otherwise.
     */
-   public static boolean computeIterativeQuaternionAveragingBasedRegistration(PlanarRegionsList previousRegions,
-                                                                              PlanarRegionsList currentRegions,
+   public static boolean computeIterativeQuaternionAveragingBasedRegistration(PlanarLandmarkList previousRegions,
+                                                                              PlanarLandmarkList currentRegions,
                                                                               RigidBodyTransform transformToPack,
                                                                               PlanarRegionMappingParameters parameters)
    {
@@ -110,7 +107,7 @@ public class PlaneRegistrationTools
     * @param matches The matches from current to previous region lists.
     * @return The transform from the current to previous planar region lists.
     */
-   public static RigidBodyTransform computeQuaternionAveragingTransform(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, TIntIntMap matches)
+   public static RigidBodyTransform computeQuaternionAveragingTransform(PlanarLandmarkList previousRegions, PlanarLandmarkList currentRegions, TIntIntMap matches)
    {
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
@@ -170,15 +167,15 @@ public class PlaneRegistrationTools
     * @param matches
     * @return
     */
-   public static ArrayList<Point3DReadOnly> findTranslationEstimates(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, TIntIntMap matches)
+   public static ArrayList<Point3DReadOnly> findTranslationEstimates(PlanarLandmarkList previousRegions, PlanarLandmarkList currentRegions, TIntIntMap matches)
    {
       ArrayList<Point3DReadOnly> translations = new ArrayList<>();
 
       int[] keySet = matches.keySet().toArray();
       for (Integer i : keySet)
       {
-         PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(i));
-         PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(i);
+         PlanarLandmark currentRegion = currentRegions.getPlanarLandmarksAsList().get(matches.get(i));
+         PlanarLandmark previousRegion = previousRegions.getPlanarLandmarksAsList().get(i);
 
          Point3DReadOnly currentOrigin = currentRegion.getPoint();
          Point3DReadOnly previousOrigin = previousRegion.getPoint();
@@ -203,15 +200,15 @@ public class PlaneRegistrationTools
     * @param matches The matches between the previous and the current planar regions list.
     * @return The list of rotations (quaternions) from matching pairs from current to the previous planar regions list.
     */
-   public static ArrayList<QuaternionReadOnly> findRotationEstimates(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, TIntIntMap matches)
+   public static ArrayList<QuaternionReadOnly> findRotationEstimates(PlanarLandmarkList previousRegions, PlanarLandmarkList currentRegions, TIntIntMap matches)
    {
       ArrayList<QuaternionReadOnly> quaternions = new ArrayList<>();
 
       int[] keySet = matches.keySet().toArray();
       for (Integer i : keySet)
       {
-         PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(i));
-         PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(i);
+         PlanarLandmark currentRegion = currentRegions.getPlanarLandmarksAsList().get(matches.get(i));
+         PlanarLandmark previousRegion = previousRegions.getPlanarLandmarksAsList().get(i);
 
          UnitVector3DReadOnly currentNormal = currentRegion.getNormal();
          UnitVector3DReadOnly previousNormal = previousRegion.getNormal();
@@ -257,8 +254,8 @@ public class PlaneRegistrationTools
     * @param quaternions
     * @return
     */
-   public static TDoubleArrayList computeResidualWeights(PlanarRegionsList previousRegions,
-                                                         PlanarRegionsList currentRegions,
+   public static TDoubleArrayList computeResidualWeights(PlanarLandmarkList previousRegions,
+                                                         PlanarLandmarkList currentRegions,
                                                          TIntIntMap matches,
                                                          ArrayList<QuaternionReadOnly> quaternions)
    {
@@ -274,8 +271,8 @@ public class PlaneRegistrationTools
 
          for (Integer index : keySet)
          {
-            PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(index));
-            PlanarRegion previousRegion = previousRegions.getPlanarRegionsAsList().get(index);
+            PlanarLandmark currentRegion = currentRegions.getPlanarLandmarksAsList().get(matches.get(index));
+            PlanarLandmark previousRegion = previousRegions.getPlanarLandmarksAsList().get(index);
 
             UnitVector3D currentNormal = new UnitVector3D(currentRegion.getNormal());
             UnitVector3D previousNormal = new UnitVector3D(previousRegion.getNormal());
@@ -446,14 +443,14 @@ public class PlaneRegistrationTools
     * @param matches The matches between the two planar regions lists.
     * @return The registration error.
     */
-   public static double computeRegistrationError(PlanarRegionsList referenceRegions, PlanarRegionsList transformedRegions, TIntIntMap matches)
+   public static double computeRegistrationError(PlanarLandmarkList referenceRegions, PlanarLandmarkList transformedRegions, TIntIntMap matches)
    {
       double error = 0.0;
       int[] keySet = matches.keys();
       for (Integer key : keySet)
       {
-         PlanarRegion referenceRegion = referenceRegions.getPlanarRegion(key);
-         PlanarRegion transformedRegion = transformedRegions.getPlanarRegion(matches.get(key));
+         PlanarLandmark referenceRegion = referenceRegions.getPlanarLandmarkById(key);
+         PlanarLandmark transformedRegion = transformedRegions.getPlanarLandmarkById(matches.get(key));
 
          double cosineSimilarity = referenceRegion.getNormal().dot(transformedRegion.getNormal());
 
@@ -479,8 +476,8 @@ public class PlaneRegistrationTools
     * @param distanceThreshold The orthogonal distance threshold between two planar regions (origin-to-plane distance)
     * @param minBoxSize The minimum size of the bounding box of a planar region
     */
-   public static void findBestPlanarRegionMatches(PlanarRegionsList map,
-                                                  PlanarRegionsList incoming,
+   public static void findBestPlanarRegionMatches(PlanarLandmarkList map,
+                                                  PlanarLandmarkList incoming,
                                                   TIntIntMap matches,
                                                   float overlapThreshold,
                                                   float normalThreshold,
@@ -488,8 +485,8 @@ public class PlaneRegistrationTools
                                                   float minBoxSize)
    {
       matches.clear();
-      List<PlanarRegion> newRegions = incoming.getPlanarRegionsAsList();
-      List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
+      ArrayList<PlanarLandmark> newRegions = incoming.getPlanarLandmarksAsList();
+      ArrayList<PlanarLandmark> mapRegions = map.getPlanarLandmarksAsList();
       Vector3D originVector = new Vector3D();
 
       for (int i = 0; i < newRegions.size(); i++)
