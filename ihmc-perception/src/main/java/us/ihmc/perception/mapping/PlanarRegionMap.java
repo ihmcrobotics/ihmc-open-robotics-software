@@ -15,10 +15,7 @@ import us.ihmc.perception.slamWrapper.SlamWrapper;
 import us.ihmc.perception.tools.PerceptionEuclidTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.*;
 
 import java.util.*;
 
@@ -76,6 +73,8 @@ public class PlanarRegionMap
    private MergingMode merger;
    private MatchingMode matcher;
 
+   private PlanarLandmarkList mapLandmarks;
+   private PlanarLandmarkList previousLandmarks;
    private PlanarRegionMappingParameters parameters;
    private SlamWrapper.FactorGraphExternal factorGraph;
 
@@ -675,6 +674,8 @@ public class PlanarRegionMap
             regions.addPlanarRegion(region);
       }
 
+      PlanarLandmarkList landmarks = new PlanarLandmarkList(regions);
+
       currentTimeIndex++;
       boolean isKeyframe = false;
       RigidBodyTransform transformToPrevious = new RigidBodyTransform();
@@ -714,7 +715,8 @@ public class PlanarRegionMap
          transformToPrevious.setIdentity();
 
          LogTools.debug("Computing ICP transform [{} <- {}]", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
-         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousRegions, regions.copy(), transformToPrevious, parameters);
+
+         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousLandmarks, landmarks.copy(), transformToPrevious, parameters);
 
 //         PerceptionPrintTools.printTransform("Transform to previous", transformToPrevious);
 
@@ -734,13 +736,16 @@ public class PlanarRegionMap
          previousRegions.clear();
          previousRegions.addPlanarRegionsList(regions.copy());
 
+         previousLandmarks.clear();
+         previousLandmarks.addAll(landmarks.copy());
+
          RigidBodyTransform transformToWorld = new RigidBodyTransform(transformToPrevious);
          transformToWorld.multiply(keyframes.get(keyframes.size() - 1).getTransformToWorld());
 
          regions.applyTransform(transformToWorld);
 
          RigidBodyTransform residualTransform = new RigidBodyTransform();
-         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(finalMap, regions.copy(), residualTransform, parameters);
+         boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(mapLandmarks, landmarks.copy(), residualTransform, parameters);
 
          if (valid)
          {
@@ -809,6 +814,9 @@ public class PlanarRegionMap
 
          finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
          processUniqueRegions(finalMap);
+
+         mapLandmarks.clear();
+         mapLandmarks.addAll(finalMap);
 
          factorGraph.clearISAM2();
          sensorPoseIndex++;
@@ -922,10 +930,36 @@ public class PlanarRegionMap
 
    public void printStatistics()
    {
-      LogTools.info("Whole Algorithm Duration: " + wholeAlgorithmDurationStopwatch.totalElapsed());
-      LogTools.info("Quaternion Averaging Duration: " + quaternionAveragingStopwatch.totalElapsed());
-      LogTools.info("Factor Graph Duration: " + factorGraphStopwatch.totalElapsed());
-      LogTools.info("Region Merging Duration: " + regionMergingStopwatch.totalElapsed());
+      LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f\n",
+                                    wholeAlgorithmDurationStopwatch.totalElapsed(),
+                                    quaternionAveragingStopwatch.totalElapsed(),
+                                    factorGraphStopwatch.totalElapsed(),
+                                    regionMergingStopwatch.totalElapsed()));
+   }
+
+   public Stopwatch getWholeAlgorithmDurationStopwatch()
+   {
+      return wholeAlgorithmDurationStopwatch;
+   }
+
+   public Stopwatch getQuaternionAveragingStopwatch()
+   {
+      return quaternionAveragingStopwatch;
+   }
+
+   public Stopwatch getFactorGraphStopwatch()
+   {
+      return factorGraphStopwatch;
+   }
+
+   public Stopwatch getRegionMergingStopwatch()
+   {
+      return regionMergingStopwatch;
+   }
+
+   public int getNumberOfKeyframes()
+   {
+      return keyframes.size();
    }
 }
 
