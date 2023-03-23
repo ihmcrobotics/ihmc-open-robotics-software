@@ -1,5 +1,7 @@
 package us.ihmc.communication;
 
+import com.eprosima.xmlschemas.fastrtps_profiles.HistoryQosKindType;
+import com.eprosima.xmlschemas.fastrtps_profiles.ReliabilityQosKindType;
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
@@ -384,7 +386,7 @@ public class ROS2Tools
     */
    public static ROS2QosProfile getSystemServiceStatusQosProfile()
    {
-      return ROS2QosProfile.KEEP_HISTORY(100);
+      return new ROS2QosProfile(HistoryQosKindType.KEEP_LAST, 100, ReliabilityQosKindType.BEST_EFFORT, ROS2QosProfile.RosDurability.TRANSIENT_LOCAL, false);
    }
 
    public final static ExceptionHandler RUNTIME_EXCEPTION = e ->

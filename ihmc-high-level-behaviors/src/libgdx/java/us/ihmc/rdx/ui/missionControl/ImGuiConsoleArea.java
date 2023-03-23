@@ -12,7 +12,7 @@ import java.util.HashMap;
 public class ImGuiConsoleArea
 {
    private final TextEditor textEditor = new TextEditor();
-   private TextEditorLanguageDefinition textEditorLanguageDefinition = new TextEditorLanguageDefinition();
+   private TextEditorLanguageDefinition textEditorLanguageDefinition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean autoScroll = new ImBoolean(true);
 
