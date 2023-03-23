@@ -1,6 +1,7 @@
 package us.ihmc.perception.realsense;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -31,7 +32,6 @@ public class BytedecoRealsense
    protected final int COLOR_STREAM_INDEX = -1;
 
    protected final rs2_device device; // The device (a device contains sensors like cameras and IMUS)
-   private final String serialNumber;
    protected final rs2_pipeline pipeline; // Declare RealSense pipeline, encapsulating the actual device and sensors
    protected final rs2_config config; // Create a configuration for configuring the pipeline with a non default profile
    protected rs2_sensor sensor; // The depth sensor
@@ -75,18 +75,37 @@ public class BytedecoRealsense
    public BytedecoRealsense(rs2_context context, rs2_device device, String serialNumber, int depthWidth, int depthHeight, int fps)
    {
       this.device = device;
-      this.serialNumber = serialNumber;
       this.depthWidth = depthWidth;
       this.depthHeight = depthHeight;
       this.fps = fps;
       pipeline = realsense2.rs2_create_pipeline(context, error);
+      checkError(true, "Failed to create pipeline.");
       config = realsense2.rs2_create_config(error);
+      checkError(true, "Failed to create config.");
 
       realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_DEPTH, DEPTH_STREAM_INDEX, depthWidth, depthHeight, realsense2.RS2_FORMAT_Z16, fps, error);
       checkError(true, "Failed to enable stream.");
 
+      realsense2.rs2_config_enable_device(config, serialNumber, error);
+      checkError(true, "Failed to enable device.");
+
       rs2_sensor_list sensorList = realsense2.rs2_query_sensors(device, error);
+      checkError(true, "Failed to query sensors.");
+      int numberOfSensors = realsense2.rs2_get_sensors_count(sensorList, error);
+      checkError(true, "Failed to get sensors count.");
+      LogTools.info("{} Realsense sensors detected.", numberOfSensors);
+
+      for (int i = 0; i < numberOfSensors; i++)
+      {
+         rs2_sensor sensor = realsense2.rs2_create_sensor(sensorList, 0, error);
+         checkError(true, "Failed to create sensor.");
+         BytePointer friendlyNameBytePointer = realsense2.rs2_get_sensor_info(sensor, realsense2.RS2_CAMERA_INFO_NAME, error);
+         LogTools.info("Sensor {}: {}", i, new String(friendlyNameBytePointer.getStringBytes()));
+
+      }
+
       sensor = realsense2.rs2_create_sensor(sensorList, 0, error);
+      checkError(true, "Failed to create sensor.");
 
       LogTools.info("Configured Depth Stream of Realsense Device. Serial number: {}", serialNumber);
    }
