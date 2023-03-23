@@ -4,6 +4,7 @@ import us.ihmc.commons.nio.PathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 
 /**
@@ -31,7 +32,12 @@ public class WorkspaceDirectory
    /**
     * Should be kept absolute, otherwise will break Windows because it won't
     * have the drive letter i.e. "C:"
+    *
+    * This will be null in the case where filesystem access of this directory
+    * is not available, such as when this directory refers to one on the classpath
+    * and, in this process, that part of the classpath is loaded from a JAR file.
     */
+   @Nullable
    protected Path filesystemDirectory;
 
    protected WorkspaceDirectory()
