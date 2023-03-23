@@ -219,6 +219,8 @@ public class ImGuiMachine
 
          service.acceptLogLines(logLines);
       }
+
+      services.put(serviceName, service);
    }
 
    public void renderImGuiWidgets()
