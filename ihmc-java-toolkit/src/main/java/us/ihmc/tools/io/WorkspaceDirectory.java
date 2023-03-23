@@ -40,31 +40,66 @@ public class WorkspaceDirectory
    @Nullable
    protected Path filesystemDirectory;
 
+   /**
+    * This is used for the extending classes, which need to do some calculation before
+    * setting filesystemDirectory, which is also why the filesystemDirectory can't be
+    * final.
+    */
    protected WorkspaceDirectory()
    {
 
    }
 
+   /**
+    * This way of construction looks for a directory in your working directory
+    * or an immediate descendant of it.
+    *
+    * @param directoryNameToAssumePresent
+    */
    public WorkspaceDirectory(String directoryNameToAssumePresent)
    {
       filesystemDirectory = PathTools.findDirectoryInline(directoryNameToAssumePresent).toAbsolutePath();
    }
 
+   /**
+    * This way of construction looks for a directory in your working directory
+    * or an immediate descendant of it. Then, it resolves a subsequent path from that.
+    *
+    * @param directoryNameToAssumePresent
+    * @param subsequentPath
+    */
    public WorkspaceDirectory(String directoryNameToAssumePresent, String subsequentPath)
    {
       filesystemDirectory = WorkspacePathTools.findPath(directoryNameToAssumePresent, subsequentPath).toAbsolutePath();
    }
 
+   /**
+    * This constructor uses the Java's {@link java.security.CodeSource} to find the source set directory
+    * that contains classForFindingSourceSetDirectory. The resolved path will end in "src/main" or "src/test", etc.
+    *
+    * @param classForFindingSourceSetDirectory
+    */
    public WorkspaceDirectory(Class<?> classForFindingSourceSetDirectory)
    {
       setFilesystemDirectoryToSourceSetDirectory(classForFindingSourceSetDirectory);
    }
 
+   /**
+    * This constructor uses the Java's {@link java.security.CodeSource} to find the source set directory
+    * that contains classForFindingSourceSetDirectory. The resolved path will end in "src/main" or "src/test", etc.
+    * Then, it resolves a subsequent path from that.
+    *
+    * @param classForFindingSourceSetDirectory
+    */
    public WorkspaceDirectory(Class<?> classForFindingSourceSetDirectory, String subsequentPath)
    {
       setFilesystemDirectoryToSourceSetDirectory(classForFindingSourceSetDirectory, subsequentPath);
    }
 
+   /**
+    * This is used to create a WorkspaceDirectory when you already know the filesystem
+    * directory.
+    */
    public WorkspaceDirectory(Path filesystemDirectory)
    {
       this.filesystemDirectory = filesystemDirectory.toAbsolutePath();
