@@ -7,6 +7,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.missionControl.MissionControlTools;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.ArrayList;
@@ -39,17 +40,17 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
 
    public void start()
    {
-
+      ProcessTools.execSimpleCommandSafe("sudo systemctl start " + serviceName);
    }
 
    public void stop()
    {
-
+      ProcessTools.execSimpleCommandSafe("sudo systemctl stop " + serviceName);
    }
 
    public void restart()
    {
-
+      ProcessTools.execSimpleCommandSafe("sudo systemctl restart " + serviceName);
    }
 
    public void publishStatus()

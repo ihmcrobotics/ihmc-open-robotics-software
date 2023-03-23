@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.missionControl;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -29,7 +30,7 @@ public class ImGuiMachineService
       consoleArea = new ImGuiConsoleArea();
       ThreadTools.startAsDaemon(() ->
       {
-         serviceActionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId));
+        serviceActionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId));
       }, "Service-Action-Publisher");
    }
 
@@ -78,8 +79,20 @@ public class ImGuiMachineService
       if (ImGui.button("Start##" + instanceId + "-" + serviceName))
          sendStartMessage();
       ImGui.sameLine();
-      if (ImGui.button("Stop##" + instanceId + "-" + serviceName))
-         sendStopMessage();
+      // "Grey-out" button if it's mission control and do nothing when pressed
+      if (serviceName.equals("mission-control-3"))
+      {
+         ImGui.beginDisabled(true);
+         ImGui.pushStyleColor(ImGuiCol.Button, 0.5f, 0.5f, 0.5f, 1.0f);
+         ImGui.button("Stop");
+         ImGui.popStyleColor();
+         ImGui.endDisabled();
+      }
+      else
+      {
+         if (ImGui.button("Stop##" + instanceId + "-" + serviceName))
+            sendStopMessage();
+      }
       ImGui.sameLine();
       if (ImGui.button("Restart##" + instanceId + "-" + serviceName))
          sendRestartMessage();
