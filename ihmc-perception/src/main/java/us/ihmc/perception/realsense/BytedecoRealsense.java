@@ -1,6 +1,7 @@
 package us.ihmc.perception.realsense;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -31,10 +32,9 @@ public class BytedecoRealsense
    protected final int COLOR_STREAM_INDEX = -1;
 
    protected final rs2_device device; // The device (a device contains sensors like cameras and IMUS)
-   private final String serialNumber;
    protected final rs2_pipeline pipeline; // Declare RealSense pipeline, encapsulating the actual device and sensors
    protected final rs2_config config; // Create a configuration for configuring the pipeline with a non default profile
-   protected rs2_sensor sensor; // The depth sensor
+   protected rs2_sensor depthSensor; // The depth sensor
    protected final rs2_error error = new rs2_error(); // error pointer, have to check it after every call
    protected rs2_pipeline_profile pipelineProfile;
    protected rs2_intrinsics depthStreamIntrinsics = new rs2_intrinsics();
@@ -72,20 +72,96 @@ public class BytedecoRealsense
    public BytedecoRealsense(rs2_context context, rs2_device device, String serialNumber, int depthWidth, int depthHeight, int fps)
    {
       this.device = device;
-      this.serialNumber = serialNumber;
       this.depthWidth = depthWidth;
       this.depthHeight = depthHeight;
       this.fps = fps;
       pipeline = realsense2.rs2_create_pipeline(context, error);
+      checkError(true, "Failed to create pipeline.");
       config = realsense2.rs2_create_config(error);
+      checkError(true, "Failed to create config.");
 
       realsense2.rs2_config_enable_stream(config, realsense2.RS2_STREAM_DEPTH, DEPTH_STREAM_INDEX, depthWidth, depthHeight, realsense2.RS2_FORMAT_Z16, fps, error);
       checkError(true, "Failed to enable stream.");
 
+      realsense2.rs2_config_enable_device(config, serialNumber, error);
+      checkError(true, "Failed to enable device.");
+
       rs2_sensor_list sensorList = realsense2.rs2_query_sensors(device, error);
-      sensor = realsense2.rs2_create_sensor(sensorList, 0, error);
+      checkError(true, "Failed to query sensors.");
+      int numberOfSensors = realsense2.rs2_get_sensors_count(sensorList, error);
+      checkError(true, "Failed to get sensors count.");
+      LogTools.info("{} Realsense sensors detected.", numberOfSensors);
+
+      for (int i = 0; i < numberOfSensors; i++)
+      {
+         rs2_sensor sensor = realsense2.rs2_create_sensor(sensorList, i, error);
+         checkError(true, "Failed to create sensor.");
+
+         int sensorType = -1;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_DEPTH_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_DEPTH_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_DEPTH_STEREO_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_DEPTH_STEREO_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_SOFTWARE_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_SOFTWARE_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_POSE_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_POSE_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_L500_DEPTH_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_L500_DEPTH_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_TM2_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_TM2_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_COLOR_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_COLOR_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_MOTION_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_MOTION_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_FISHEYE_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_FISHEYE_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_CALIBRATED_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_CALIBRATED_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_MAX_USABLE_RANGE_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_MAX_USABLE_RANGE_SENSOR;
+         if (checkSensorType(sensor, realsense2.RS2_EXTENSION_DEBUG_STREAM_SENSOR))
+            sensorType = realsense2.RS2_EXTENSION_DEBUG_STREAM_SENSOR;
+
+         String sensorTypeName = switch (sensorType)
+               {
+                  case realsense2.RS2_EXTENSION_DEPTH_SENSOR -> "Depth";
+                  case realsense2.RS2_EXTENSION_DEPTH_STEREO_SENSOR -> "Depth Stereo";
+                  case realsense2.RS2_EXTENSION_SOFTWARE_SENSOR -> "Software";
+                  case realsense2.RS2_EXTENSION_POSE_SENSOR -> "Pose";
+                  case realsense2.RS2_EXTENSION_L500_DEPTH_SENSOR -> "L500 Depth";
+                  case realsense2.RS2_EXTENSION_TM2_SENSOR -> "TM2";
+                  case realsense2.RS2_EXTENSION_COLOR_SENSOR -> "Color";
+                  case realsense2.RS2_EXTENSION_MOTION_SENSOR -> "Motion";
+                  case realsense2.RS2_EXTENSION_FISHEYE_SENSOR -> "Fisheye";
+                  case realsense2.RS2_EXTENSION_CALIBRATED_SENSOR -> "Calibrated";
+                  case realsense2.RS2_EXTENSION_MAX_USABLE_RANGE_SENSOR -> "Max Usable Range";
+                  case realsense2.RS2_EXTENSION_DEBUG_STREAM_SENSOR -> "Debug Stream";
+                  default -> "Unknown";
+               };
+
+         BytePointer friendlyNameBytePointer = realsense2.rs2_get_sensor_info(sensor, realsense2.RS2_CAMERA_INFO_NAME, error);
+         LogTools.info("Sensor {}: {}: {}", i, friendlyNameBytePointer.getString(), sensorTypeName);
+
+         realsense2.rs2_delete_sensor(sensor);
+      }
+
+      // We assume the first sensor is the depth stream. There are multiple kinds above,
+      // so I didn't know a way to make this any better without testing all kinds of Realsenses.
+      // Just keep in mind, maybe the first sensor is not always the depth sensor.
+      depthSensor = realsense2.rs2_create_sensor(sensorList, 0, error);
+      checkError(true, "Failed to create sensor.");
+
+      realsense2.rs2_delete_sensor_list(sensorList);
 
       LogTools.info("Configured Depth Stream of Realsense Device. Serial number: {}", serialNumber);
+   }
+
+   private boolean checkSensorType(rs2_sensor sensor, int sensorType)
+   {
+      int isSensorOfType = realsense2.rs2_is_sensor_extendable_to(sensor, sensorType, error);
+      checkError(true, "Failed to check sensor extendable to " + sensorType);
+      return isSensorOfType == 1;
    }
 
    public void enableColor(RealsenseConfiguration realsenseConfiguration)
@@ -114,7 +190,7 @@ public class BytedecoRealsense
     */
    public void enableInterCamSyncMode()
    {
-      rs2_options options = new rs2_options(sensor);
+      rs2_options options = new rs2_options(depthSensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_INTER_CAM_SYNC_MODE, 1.0f, error);
       checkError(true, "Failed to set sync mode.");
    }
@@ -181,7 +257,7 @@ public class BytedecoRealsense
                                                                    depthStreamIntrinsics.ppy(),
                                                                    depthHeight,
                                                                    depthWidth));
-               depthDiscretization = realsense2.rs2_get_depth_scale(sensor, error);
+               depthDiscretization = realsense2.rs2_get_depth_scale(depthSensor, error);
                LogTools.info("Depth discretization: {} (meters/unit)", depthDiscretization);
             }
 
@@ -278,26 +354,54 @@ public class BytedecoRealsense
 
    public void setLaserPower(float laserPower)
    {
-      rs2_options options = new rs2_options(sensor);
+      rs2_options options = new rs2_options(depthSensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_LASER_POWER, laserPower, error);
       checkError(true, "Failed to set laser power.");
    }
 
    public void setDigitalGain(int digitalGain)
    {
-      rs2_options options = new rs2_options(sensor);
+      rs2_options options = new rs2_options(depthSensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_DIGITAL_GAIN, digitalGain, error);
-      checkError(true, "");
+      checkError(true, "Failed to set digital gain");
    }
 
    public void deleteDevice()
    {
+      // LogTools/log4j2 is no longer operational during JVM shutdown
+      System.out.println("Stopping pipeline...");
       realsense2.rs2_pipeline_stop(pipeline, error);
       checkError(false, "Error stopping pipeline.");
 
+      System.out.println("Deleting pipeline profile...");
       realsense2.rs2_delete_pipeline_profile(pipelineProfile);
+
+      // Calling delete on these may cause a native crash - it's not required anyway
+      // https://github.com/IntelRealSense/librealsense/issues/4651#issuecomment-522295675
+      // if (depthFrameStreamProfile != null)
+      // {
+      //    LogTools.info("Deleting depth stream profile...");
+      //    realsense2.rs2_delete_stream_profile(depthFrameStreamProfile);
+      // }
+      // if (colorFrameStreamProfile != null)
+      // {
+      //    LogTools.info("Deleting color stream profile...");
+      //    realsense2.rs2_delete_stream_profile(colorFrameStreamProfile);
+      // }
+
+      if (colorFrameQueue != null)
+      {
+         System.out.println("Deleting color frame queue...");
+         realsense2.rs2_delete_frame_queue(colorFrameQueue);
+      }
+
+      System.out.println("Deleting sensor...");
+      realsense2.rs2_delete_sensor(depthSensor);
+      System.out.println("Deleting config...");
       realsense2.rs2_delete_config(config);
+      System.out.println("Deleting pipeline...");
       realsense2.rs2_delete_pipeline(pipeline);
+      System.out.println("Deleting device...");
       realsense2.rs2_delete_device(device);
    }
 
