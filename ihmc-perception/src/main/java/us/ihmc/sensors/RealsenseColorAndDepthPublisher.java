@@ -137,7 +137,7 @@ public class RealsenseColorAndDepthPublisher
       while (running)
       {
          update();
-         throttler.waitAndRun(outputPeriod); // do the waiting after we send to remove unecessary latency
+         throttler.waitAndRun(outputPeriod); // do the waiting after we send to remove unnecessary latency
       }
 
       // Make sure the Realsense
