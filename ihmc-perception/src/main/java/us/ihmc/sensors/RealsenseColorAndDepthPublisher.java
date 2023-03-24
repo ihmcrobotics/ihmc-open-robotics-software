@@ -299,5 +299,6 @@ public class RealsenseColorAndDepthPublisher
                                                                                                ROS2Tools.L515_COLOR_IMAGE,
                                                                                                ReferenceFrame::getWorldFrame);
       realsensePublisher.run();
+      ThreadTools.sleepForever();
    }
 }
