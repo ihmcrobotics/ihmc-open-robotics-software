@@ -388,7 +388,7 @@ public class ROS2Tools
    {
       ROS2QosProfile profile = new ROS2QosProfile();
       profile.setReliability(ReliabilityQosKindType.BEST_EFFORT);
-//      profile.setHistory(HistoryQosKindType.KEEP_ALL);
+      profile.setHistory(HistoryQosKindType.KEEP_ALL);
       return profile;
    }
 

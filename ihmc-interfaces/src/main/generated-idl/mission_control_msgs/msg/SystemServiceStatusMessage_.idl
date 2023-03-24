@@ -14,7 +14,7 @@ module mission_control_msgs
         string service_name;
         string status;
         long log_line_count;
-        sequence<string> log_lines;
+        sequence<string, 8192> log_lines;
       };
     };
   };
