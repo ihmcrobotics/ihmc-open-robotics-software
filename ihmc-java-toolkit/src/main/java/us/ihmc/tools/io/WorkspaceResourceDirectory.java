@@ -59,18 +59,17 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
 
    private void initialize()
    {
-      pathNecessaryForClasspathLoadingString = pathNecessaryForClasspathLoading.toString();
-      // This path isn't absolute for the filesystem, only for the classpath
+      pathNecessaryForClasspathLoadingString = ResourceTools.toResourceAccessStringWithCorrectSeparators(pathNecessaryForClasspathLoading);
+      // This path isn't absolute for the filesystem, only for the classpath, so we remove the first
+      // character which is ensured to be a forward slash ('/') at this point.
       // i.e. /us/ihmc/tools/io would need to be us/ihmc/tools/io
       // to append to /path/to/ihmc-java-toolkit/src/test/resources/us/ihmc/tools/io
-      String subsequentPathToResourceDirectory = pathNecessaryForClasspathLoadingString.substring(1);
+      String classpathPathToResourceDirectoryString = pathNecessaryForClasspathLoadingString.substring(1);
       if (filesystemDirectory != null)
-         filesystemDirectory = filesystemDirectory.resolve(subsequentPathToResourceDirectory);
-      String tempPathNecessaryForResourceExploring = pathNecessaryForClasspathLoadingString;
-      if (tempPathNecessaryForResourceExploring.startsWith("/"))
-         tempPathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring.replaceFirst("/", "");
-      tempPathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring.replaceAll("/", ".");
-      pathNecessaryForResourceExploring = tempPathNecessaryForResourceExploring;
+      {
+         filesystemDirectory = filesystemDirectory.resolve(classpathPathToResourceDirectoryString);
+      }
+      pathNecessaryForResourceExploring = classpathPathToResourceDirectoryString.replaceAll("/", ".");
    }
 
    public void walkResourcesFlat(BiConsumer<String, BasicPathVisitor.PathType> pathVisitor)
@@ -120,7 +119,8 @@ public class WorkspaceResourceDirectory extends WorkspaceDirectory
 
    public WorkspaceResourceDirectory resolve(String subdirectory)
    {
-      return new WorkspaceResourceDirectory(classForLoading, pathNecessaryForClasspathLoading + "/" + subdirectory);
+      return new WorkspaceResourceDirectory(classForLoading,
+               ResourceTools.toResourceAccessStringWithCorrectSeparators(pathNecessaryForClasspathLoading.resolve(subdirectory)));
    }
 
    /**

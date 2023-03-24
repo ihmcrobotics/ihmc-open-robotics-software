@@ -1,5 +1,6 @@
 package us.ihmc.tools.io.resources;
 
+import com.google.common.reflect.ClassPath;
 import org.apache.commons.io.IOUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
@@ -8,6 +9,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.BasicPathVisitor;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -211,5 +213,32 @@ public class ResourceTools
       {
          pathVisitor.accept(directoryName, BasicPathVisitor.PathType.DIRECTORY);
       }
+   }
+
+   /**
+    * Used to measure the classpath size.
+    * @param clazz i.e. YourClass.class or getClass()
+    * @param packagePrefix i.e. "us", "org", "com". Unfortunately, can't pass "" or "*".
+    */
+   public static Set<ClassPath.ClassInfo> getClassInfoRecursive(Class<?> clazz, String packagePrefix)
+   {
+      try
+      {
+         return ClassPath.from(clazz.getClassLoader()).getTopLevelClassesRecursive(packagePrefix);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   /**
+    * Prints the number of classes on the classpath for the packagePrefix provided.
+    * @param clazz i.e. YourClass.class or getClass()
+    * @param packagePrefix i.e. "us", "org", "com". Unfortunately, can't pass "" or "*".
+    */
+   public static void printClasspathSize(Class<?> clazz, String packagePrefix)
+   {
+      System.out.println("Number of classes in " + packagePrefix  + ".* " + getClassInfoRecursive(clazz, packagePrefix).size());
    }
 }

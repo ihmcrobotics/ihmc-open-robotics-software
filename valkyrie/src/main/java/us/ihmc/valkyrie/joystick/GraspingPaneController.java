@@ -2,7 +2,7 @@ package us.ihmc.valkyrie.joystick;
 
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.messager.javafx.JavaFXMessager;
 
 public class GraspingPaneController
 {

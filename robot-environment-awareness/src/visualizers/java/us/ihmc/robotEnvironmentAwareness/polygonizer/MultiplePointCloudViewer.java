@@ -17,12 +17,12 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.geometry.REAGraphics3DTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
@@ -52,7 +52,7 @@ public class MultiplePointCloudViewer extends AnimationTimer
    public MultiplePointCloudViewer(JavaFXMessager messager, ExecutorService executorService)
    {
       this.executorService = executorService;
-      messager.registerTopicListener(PointCloudInput, this::processInPutOnThread);
+      messager.addTopicListener(PointCloudInput, this::processInPutOnThread);
    }
 
    private void processInPutOnThread(Collection<Input> inputs)
