@@ -292,7 +292,7 @@ public class AtlasLookAndStepBehaviorTest
       monitorThread.start();
 
       Notification bodyPathPlanningStateReached = new Notification();
-      behaviorMessager.registerTopicListener(LookAndStepBehaviorAPI.CurrentState, state ->
+      behaviorMessager.addTopicListener(LookAndStepBehaviorAPI.CurrentState, state ->
       {
          if (state.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING.name()))
          {

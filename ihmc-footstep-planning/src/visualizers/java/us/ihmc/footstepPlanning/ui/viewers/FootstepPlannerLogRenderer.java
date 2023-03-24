@@ -85,15 +85,14 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       nominalIdealStep = messager.createInput(FootstepPlannerMessagerAPI.LoggedNominalIdealStep);
       collisionBoxes = messager.createInput(FootstepPlannerMessagerAPI.LoggedCollisionBoxes);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, root::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStartOfSwingStep, startOfSwingStepGraphic.getMeshView()::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, stanceStepGraphic.getMeshView()::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedUnsnappedCandidateStep, loggedUnsnappedCandidateStepGraphic.getMeshView()::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, loggedSnappedCandidateStepGraphic.getMeshView()::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, loggedWiggledCandidateStepGraphic.getMeshView()::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowBodyBox, loggedBodyBoxGraphic.getMeshView()::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, loggedIealStepGraphic.getMeshView()::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedNominalIdealStep, loggedNominalIdealStepGraphic.getMeshView()::setVisible);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, root::setVisible);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStartOfSwingStep, startOfSwingStepGraphic.getMeshView()::setVisible);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, stanceStepGraphic.getMeshView()::setVisible);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowLoggedUnsnappedCandidateStep, loggedUnsnappedCandidateStepGraphic.getMeshView()::setVisible);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, loggedSnappedCandidateStepGraphic.getMeshView()::setVisible);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, loggedWiggledCandidateStepGraphic.getMeshView()::setVisible);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowBodyBox, loggedBodyBoxGraphic.getMeshView()::setVisible);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, loggedIealStepGraphic.getMeshView()::setVisible);
 
       root.setVisible(false);
    }
