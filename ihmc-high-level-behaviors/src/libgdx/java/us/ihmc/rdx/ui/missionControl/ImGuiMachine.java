@@ -8,6 +8,7 @@ import imgui.flag.ImGuiCond;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
@@ -24,6 +25,7 @@ public class ImGuiMachine
    private final ROS2Node ros2Node;
    private SystemResourceUsageMessage lastResourceUsageMessage = new SystemResourceUsageMessage();
 
+   private final ImGuiPanel panel;
    private final Map<String, ImGuiMachineService> services = new HashMap<>();
    private final ImPlotPlot cpuPlot = new ImPlotPlot();
    private final ImPlotPlot ramPlot = new ImPlotPlot();
@@ -42,6 +44,7 @@ public class ImGuiMachine
       plotFlags += ImPlotFlags.NoTitle;
       plotFlags += ImPlotFlags.NoMousePos;
       plotFlags += ImPlotFlags.NoLegend;
+      plotFlags += ImPlotFlags.NoChild;
       plotAxisXFlags += ImPlotAxisFlags.NoDecorations;
       plotAxisXFlags += ImPlotAxisFlags.AutoFit;
       plotAxisYFlags += ImPlotAxisFlags.NoDecorations;
@@ -52,6 +55,8 @@ public class ImGuiMachine
    {
       this.instanceId = instanceId;
       this.hostname = hostname;
+
+      panel = new ImGuiPanel(hostname + "##" + instanceId);
 
       cpuPlot.setFlags(plotFlags);
       cpuPlot.setXFlags(plotAxisXFlags);
@@ -106,8 +111,9 @@ public class ImGuiMachine
             plot.setFlags(plotFlags);
             plot.setXFlags(plotAxisXFlags);
             plot.setYFlags(plotAxisYFlags);
+            String gpuModel = message.getNvidiaGpuModels().getString(0);
             plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always));
-            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ") utilization %", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") utilization %", 30 * 5, 30.0, new DecimalFormat("0.0")));
             gpuPlots.add(plot);
             gpuIndex++;
          }
@@ -120,10 +126,11 @@ public class ImGuiMachine
             plot.setFlags(plotFlags);
             plot.setXFlags(plotAxisXFlags);
             plot.setYFlags(plotAxisYFlags);
+            String gpuModel = message.getNvidiaGpuModels().getString(0);
             float totalGpuMemory = message.getNvidiaGpuMemoryTotal().get(gpuIndex);
             plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, totalGpuMemory, ImGuiCond.Always));
-            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ") memory usage (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
-            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ") memory total (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex +  ", " + gpuModel + ") memory usage (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory total (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
             vramPlots.add(plot);
             gpuIndex++;
          }
@@ -228,10 +235,17 @@ public class ImGuiMachine
       ImGui.popFont();
 
       // Render usage graphs
+      ImGui.text("CPU");
       cpuPlot.render();
+      ImGui.text("RAM");
       ramPlot.render();
+      if (!gpuPlots.isEmpty())
+         ImGui.text("GPUs");
       gpuPlots.forEach(ImPlotPlot::render);
+      if (!vramPlots.isEmpty())
+         ImGui.text("VRAM");
       vramPlots.forEach(ImPlotPlot::render);
+      ImGui.text("Network");
       netPlot.render();
 
       // Render service statuses & buttons
