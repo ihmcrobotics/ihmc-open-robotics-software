@@ -99,35 +99,30 @@ public class RealSenseHardwareManager
    public rs2_device createDevice(String serialNumberToFind)
    {
       int rs2DeviceCount = updateDeviceCount();
-      LogTools.info("{} Realsense device(s) detected.");
+      LogTools.info("{} Realsense device(s) detected.", rs2DeviceCount);
 
       for (int i = 0; i < rs2DeviceCount; i++)
       {
          rs2_device rs2Device = realsense2.rs2_create_device(devices, i, error);
          checkError();
 
-         int supportsSerialNumber = realsense2.rs2_supports_device_info(rs2Device, realsense2.RS2_CAMERA_INFO_SERIAL_NUMBER, error);
-         checkError();
+         String deviceName = getDeviceInfo(rs2Device, realsense2.RS2_CAMERA_INFO_NAME);
+         if (deviceName != null)
+            LogTools.info("Realsense device found: {}", deviceName);
 
-         if (supportsSerialNumber == 1)
+         String deviceSerialNumber = getDeviceInfo(rs2Device, realsense2.RS2_CAMERA_INFO_SERIAL_NUMBER);
+         if (deviceSerialNumber != null)
          {
-            BytePointer deviceSerialNumberBytePointer = realsense2.rs2_get_device_info(rs2Device, realsense2.RS2_CAMERA_INFO_SERIAL_NUMBER, error);
-            checkError();
+            LogTools.info("Realsense device matched serial number: {}", deviceSerialNumber);
 
-            String serialNumberFromRS2 = deviceSerialNumberBytePointer.getString();
-            LogTools.info("Realsense device matched serial number: {}", serialNumberFromRS2);
+            String deviceFirmwareVersion = getDeviceInfo(rs2Device, realsense2.RS2_CAMERA_INFO_FIRMWARE_VERSION);
+            if (deviceFirmwareVersion != null)
+               LogTools.info("Realsense device firmware version: {}", deviceFirmwareVersion);
+            String deviceRecommendedFirmwareVersion = getDeviceInfo(rs2Device, realsense2.RS2_CAMERA_INFO_RECOMMENDED_FIRMWARE_VERSION);
+            if (deviceRecommendedFirmwareVersion != null)
+               LogTools.info("Realsense device recommended firmware version: {}", deviceRecommendedFirmwareVersion);
 
-            int supportsName = realsense2.rs2_supports_device_info(rs2Device, realsense2.RS2_CAMERA_INFO_NAME, error);
-            checkError();
-
-            if (supportsName == 1)
-            {
-               BytePointer nameBytePointer = realsense2.rs2_get_device_info(rs2Device, realsense2.RS2_CAMERA_INFO_NAME, error);
-               checkError();
-               LogTools.info("Realsense device name: {}", nameBytePointer.toString());
-            }
-
-            if (serialNumberFromRS2.contains(serialNumberToFind.toLowerCase()))
+            if (deviceSerialNumber.contains(serialNumberToFind.toLowerCase()))
             {
                return rs2Device;
             }
@@ -138,6 +133,20 @@ public class RealSenseHardwareManager
       }
 
       LogTools.error("Device not found. Serial Number: {}", serialNumberToFind);
+      return null;
+   }
+
+   private String getDeviceInfo(rs2_device rs2Device, int deviceInfoEnum)
+   {
+      int supportsInfo = realsense2.rs2_supports_device_info(rs2Device, deviceInfoEnum, error);
+      checkError();
+
+      if (supportsInfo == 1)
+      {
+         BytePointer infoBytePointer = realsense2.rs2_get_device_info(rs2Device, deviceInfoEnum, error);
+         checkError();
+         return infoBytePointer.getString();
+      }
       return null;
    }
 
