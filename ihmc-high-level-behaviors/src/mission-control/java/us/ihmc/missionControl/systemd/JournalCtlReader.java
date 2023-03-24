@@ -77,4 +77,22 @@ public class JournalCtlReader
          logConsumer.accept(Arrays.asList(lines));
       }
    }
+
+   public static void main(String[] args)
+   {
+      JournalCtlReader reader = new JournalCtlReader("httpd", strings -> {
+         for (String string : strings)
+         {
+            System.out.println(string);
+         }
+      });
+
+      reader.start();
+
+      while (true)
+      {
+         ThreadTools.sleep(5000);
+      }
+   }
+
 }
