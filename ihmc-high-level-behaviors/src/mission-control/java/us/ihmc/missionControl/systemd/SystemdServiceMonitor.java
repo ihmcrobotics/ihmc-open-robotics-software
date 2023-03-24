@@ -78,6 +78,8 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       for (String logLine : logLines)
          message.getLogLines().add(logLine);
 
+      System.out.println(message);
+
       serviceStatusPublisher.publish(message);
    }
 

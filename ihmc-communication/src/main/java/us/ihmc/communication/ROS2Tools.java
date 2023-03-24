@@ -386,7 +386,10 @@ public class ROS2Tools
     */
    public static ROS2QosProfile getSystemServiceStatusQosProfile()
    {
-      return new ROS2QosProfile(HistoryQosKindType.KEEP_LAST, 100, ReliabilityQosKindType.BEST_EFFORT, ROS2QosProfile.RosDurability.TRANSIENT_LOCAL, false);
+      ROS2QosProfile profile = new ROS2QosProfile();
+      profile.setReliability(ReliabilityQosKindType.BEST_EFFORT);
+//      profile.setHistory(HistoryQosKindType.KEEP_ALL);
+      return profile;
    }
 
    public final static ExceptionHandler RUNTIME_EXCEPTION = e ->

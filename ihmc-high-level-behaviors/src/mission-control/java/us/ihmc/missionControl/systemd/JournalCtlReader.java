@@ -40,7 +40,8 @@ public class JournalCtlReader
             String line;
             while ((line = reader.readLine()) != null)
             {
-               System.out.println(line);
+               logLineQueue.add(line);
+               System.out.println("adding line "+ line.substring(0, 10));
             }
             reader.close();
          }
@@ -60,6 +61,8 @@ public class JournalCtlReader
          {
             linesToSend.add(logLineQueue.poll());
          }
+
+         System.out.println("accepting "+ linesToSend.size() + " lines");
 
          logConsumer.accept(linesToSend);
       }
