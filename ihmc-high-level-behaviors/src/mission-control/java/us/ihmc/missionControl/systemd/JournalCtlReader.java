@@ -16,15 +16,14 @@ public class JournalCtlReader
    private final String serviceName;
    private final Consumer<List<String>> logConsumer;
    private final ConcurrentLinkedQueue<String> logLineQueue = new ConcurrentLinkedQueue<>();
+   PausablePeriodicThread readerThread = new PausablePeriodicThread("journalctl-processor", 0.2, true, this::processOutput);
+
+   private volatile boolean running = false;
 
    public JournalCtlReader(String serviceName, Consumer<List<String>> logConsumer)
    {
       this.serviceName = serviceName;
       this.logConsumer = logConsumer;
-
-      PausablePeriodicThread readerThread = new PausablePeriodicThread("journalctl-processor", 0.2, true, this::processOutput);
-      readerThread.start();
-      start();
    }
 
    public void start()
@@ -38,10 +37,10 @@ public class JournalCtlReader
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
-            while ((line = reader.readLine()) != null)
+            while ((line = reader.readLine()) != null && running)
             {
                logLineQueue.add(line);
-               System.out.println("adding line "+ line.substring(0, 10));
+               System.out.println("adding line " + line.substring(0, 10));
             }
             reader.close();
          }
@@ -50,6 +49,15 @@ public class JournalCtlReader
             e.printStackTrace();
          }
       }, "journalctl-reader-" + serviceName);
+
+      readerThread.start();
+      running = true;
+   }
+
+   public void stop()
+   {
+      readerThread.stop();
+      running = false;
    }
 
    private void processOutput()
@@ -61,8 +69,6 @@ public class JournalCtlReader
          {
             linesToSend.add(logLineQueue.poll());
          }
-
-         System.out.println("accepting "+ linesToSend.size() + " lines");
 
          logConsumer.accept(linesToSend);
       }
