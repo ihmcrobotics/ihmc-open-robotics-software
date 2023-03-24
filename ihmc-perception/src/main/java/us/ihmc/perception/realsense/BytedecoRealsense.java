@@ -55,8 +55,6 @@ public class BytedecoRealsense
    protected rs2_stream_profile colorFrameStreamProfile;
    protected double depthDiscretization;
    protected rs2_frame syncedFrames = new rs2_frame();
-   protected mutable_rs2_frame depthFrame = new mutable_rs2_frame();
-   protected mutable_rs2_frame colorFrame = new mutable_rs2_frame();
    protected MutableBytePointer depthFrameData = null;
    protected MutableBytePointer colorFrameData = null;
    private int depthFrameDataSize;
@@ -66,7 +64,6 @@ public class BytedecoRealsense
    private long depthFrameDataAddress;
    private long colorFrameDataAddress;
    private boolean colorEnabled = false;
-   private long colorFrameAddress;
    private int colorWidth;
    private int colorHeight;
    private CameraPinholeBrown depthCameraIntrinsics;
@@ -88,7 +85,7 @@ public class BytedecoRealsense
       rs2_sensor_list sensorList = realsense2.rs2_query_sensors(device, error);
       sensor = realsense2.rs2_create_sensor(sensorList, 0, error);
 
-      LogTools.info("Configured Depth Stream of L515 Device. Serial number: {}", serialNumber);
+      LogTools.info("Configured Depth Stream of Realsense Device. Serial number: {}", serialNumber);
    }
 
    public void enableColor(RealsenseConfiguration realsenseConfiguration)
@@ -145,51 +142,11 @@ public class BytedecoRealsense
 
       if (frameAvailable)
       {
-//         depthFrame.address(syncedFrames.address());
-//         rs2_frame pointer = syncedFrames.getPointer(1);
-//         long address = pointer.address();
-//         System.out.println(address);
-//         colorFrame.address(syncedFrames.address() + RS2_FRAME_POINTER_SIZE);
-//
          rs2_frame extractedColorFrame = null;
          if (colorEnabled)
          {
             extractedColorFrame = realsense2.rs2_extract_frame(syncedFrames, 1, error);
          }
-
-//
-//         BytePointer bytePointer = new BytePointer(pointer);
-//         long mightBeAddress = bytePointer.getLong();
-//         System.out.println(mightBeAddress);
-//         new Pointer
-//         BytePointer bytePointer = new BytePointer(pointer);
-//         long mightBeAddress = bytePointer.getLong();
-//         System.out.println(mightBeAddress);
-         //         syncedFrames.
-
-//         new rs2_frame
-//         checkError(false, "");
-//
-//
-//         int numberOfFrames = realsense2.rs2_embedded_frames_count(syncedFrames, error);
-//         checkError(false, "");
-
-//         System.out.println(numberOfFrames);
-//         colorFrameAddress = colorFrame.address();
-
-         //         depthFrame.set(syncedFrames.address(), 0, rs2_frame.totalBytes(), rs2_frame.totalBytes());
-
-//            depthFrame = realsense2.rs2_extract_frame(syncedFrames, 0, error);
-//            checkError(true, "");
-
-
-
-//            if (colorEnabled)
-//            {
-////               colorFrame = realsense2.rs2_extract_frame(syncedFrames, 1, error);
-//               checkError(true, "");
-//            }
-//         realsense2.rs2_extract_frame()
 
          depthFrameDataSize = realsense2.rs2_get_frame_data_size(syncedFrames, error);
          checkError(false, "");
@@ -296,7 +253,6 @@ public class BytedecoRealsense
             dataWasRead = true;
          }
 
-//         rs2_release_frame(depthFrame);
          rs2_release_frame(syncedFrames);
 
          if (colorEnabled)
