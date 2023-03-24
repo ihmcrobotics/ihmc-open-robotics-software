@@ -156,6 +156,11 @@ public class MeshBasedContactDetector
       }
    }
 
+   public Map<RigidBodyBasics, List<DetectedContactPoint>> getAllContactPoints()
+   {
+      return allContactPoints;
+   }
+
    private boolean detectEnvironmentContact(ContactableShape contactableShape, List<FramePoint3DReadOnly> contactFramePoints, List<FrameVector3DReadOnly> contactNormals)
    {
       if (environmentShapes == null || environmentShapes.isEmpty())
