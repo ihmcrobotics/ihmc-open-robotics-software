@@ -8,6 +8,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.imgui.ImGuiGlfwWindow;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
@@ -22,7 +23,12 @@ public class MissionControlUI
    private final Map<UUID, ImGuiMachine> machines = new HashMap<>();
    private final ROS2Node ros2Node;
 
-   private final ImGuiGlfwWindow window;
+   private static ImGuiGlfwWindow window;
+
+   public static ImGuiGlfwWindow getWindow()
+   {
+      return window;
+   }
 
    public MissionControlUI()
    {
@@ -85,6 +91,8 @@ public class MissionControlUI
 
    public void renderImGuiWidgets()
    {
+      boolean hadMachine = false;
+
       for (Map.Entry<UUID, ImGuiMachine> entry : machines.entrySet())
       {
          UUID instanceId = entry.getKey();
@@ -92,6 +100,15 @@ public class MissionControlUI
 
          machine.renderImGuiWidgets();
          ImGui.newLine();
+
+         hadMachine = true;
+      }
+
+      if (!hadMachine)
+      {
+         ImGui.pushFont(ImGuiTools.getMediumFont());
+         ImGui.text("No machines");
+         ImGui.popFont();
       }
    }
 

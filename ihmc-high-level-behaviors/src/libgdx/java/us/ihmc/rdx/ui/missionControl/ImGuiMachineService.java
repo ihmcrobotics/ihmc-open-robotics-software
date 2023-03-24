@@ -6,6 +6,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.ros2.ROS2Node;
 
 import javax.annotation.Nullable;
@@ -24,8 +25,10 @@ public class ImGuiMachineService
    private final ImGuiConsoleArea consoleArea;
    private IHMCROS2Publisher<SystemServiceActionMessage> serviceActionPublisher;
 
+   // Time of the last action button press
    private long lastActionRequest = -1;
-   private boolean waitingOnChange = false;
+   // If we've clicked an action button, i.e. "Start" and we're expecting a change sometime in the near future
+   private boolean waitingOnStatusChange = false;
 
    public ImGuiMachineService(String serviceName, String hostname, UUID instanceId, ROS2Node ros2Node)
    {
@@ -33,10 +36,11 @@ public class ImGuiMachineService
       this.hostname = hostname;
       this.instanceId = instanceId;
       logPanel = new ImGuiPanel(serviceName + " Log##" + instanceId, this::renderImGuiLogPanelWidgets);
+      MissionControlUI.getWindow().getPanelManager().addPanel(logPanel);
       consoleArea = new ImGuiConsoleArea();
       ThreadTools.startAsDaemon(() ->
       {
-        serviceActionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId));
+         serviceActionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId));
       }, "Service-Action-Publisher");
    }
 
@@ -51,7 +55,7 @@ public class ImGuiMachineService
       {
          status = status.substring(8); // Remove the "Active: "
          if (!status.equals(this.status))
-            waitingOnChange = false;
+            waitingOnStatusChange = false;
          this.status = status;
       }
       else
@@ -97,12 +101,15 @@ public class ImGuiMachineService
    {
       String statusString = status.toString();
 
+      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text(serviceName);
+      ImGui.popFont();
       ImGui.text(statusString);
 
+      boolean isMissionControl3 = serviceName.contains("mission-control-3");
       boolean allButtonsDisabled = false;
 
-      if (waitingOnChange && !hasItBeenAWhileSinceTheLastActionRequest())
+      if (waitingOnStatusChange && !hasItBeenAWhileSinceTheLastActionRequest() || isMissionControl3)
       {
          allButtonsDisabled = true;
       }
@@ -118,7 +125,7 @@ public class ImGuiMachineService
          if (ImGui.button("Start##" + instanceId + "-" + serviceName))
          {
             sendStartMessage();
-            waitingOnChange = true;
+            waitingOnStatusChange = true;
             lastActionRequest = System.currentTimeMillis();
          }
          if (disabled)
@@ -127,13 +134,13 @@ public class ImGuiMachineService
       ImGui.sameLine();
       // Stop button
       {
-         boolean disabled = statusString.startsWith("inactive") || statusString.startsWith("failed") || serviceName.contains("mission-control-3");
+         boolean disabled = statusString.startsWith("inactive") || statusString.startsWith("failed") || isMissionControl3;
          if (disabled)
             ImGui.beginDisabled(true);
          if (ImGui.button("Stop##" + instanceId + "-" + serviceName))
          {
             sendStopMessage();
-            waitingOnChange = true;
+            waitingOnStatusChange = true;
             lastActionRequest = System.currentTimeMillis();
          }
          if (disabled)
@@ -145,7 +152,7 @@ public class ImGuiMachineService
          if (ImGui.button("Restart##" + instanceId + "-" + serviceName))
          {
             sendRestartMessage();
-            waitingOnChange = true;
+            waitingOnStatusChange = true;
             lastActionRequest = System.currentTimeMillis();
          }
       }

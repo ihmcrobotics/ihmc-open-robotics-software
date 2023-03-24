@@ -25,6 +25,9 @@ float32[] iface_tx_kbps
 # ======== NVIDIA GPU statistics ========
 int32 nvidia_gpu_count
 
+# [n] : model for nth GPU
+string[] nvidia_gpu_models
+
 # [n] : memory used for nth GPU
 float32[] nvidia_gpu_memory_used
 

@@ -5,6 +5,7 @@ import us.ihmc.log.LogTools;
 // TODO: support multiple GPUs
 public class NVIDIAGPUMonitor extends ResourceMonitor
 {
+   private String gpuModel;
    private int gpuUsage;
    private int memoryUsage;
    private int encoderUsage;
@@ -16,7 +17,12 @@ public class NVIDIAGPUMonitor extends ResourceMonitor
 
    public NVIDIAGPUMonitor()
    {
-      super("nvidia-smi", "--query", "--display=MEMORY,UTILIZATION");
+      super("nvidia-smi", "--query");
+   }
+
+   public String getGpuModel()
+   {
+      return gpuModel;
    }
 
    public int getGpuUsage()
@@ -65,6 +71,11 @@ public class NVIDIAGPUMonitor extends ResourceMonitor
       for (int i = 0; i < lines.length; i++)
       {
          String line = lines[i].trim();
+
+         if (line.startsWith("Product Name"))
+         {
+            gpuModel = line.substring(line.indexOf(":") + 1).trim();
+         }
 
          if (line.equals("FB Memory Usage"))
          {
