@@ -34,7 +34,7 @@ public class BytedecoRealsense
    protected final rs2_device device; // The device (a device contains sensors like cameras and IMUS)
    protected final rs2_pipeline pipeline; // Declare RealSense pipeline, encapsulating the actual device and sensors
    protected final rs2_config config; // Create a configuration for configuring the pipeline with a non default profile
-   protected rs2_sensor sensor; // The depth sensor
+   protected rs2_sensor depthSensor; // The depth sensor
    protected final rs2_error error = new rs2_error(); // error pointer, have to check it after every call
    protected rs2_pipeline_profile pipelineProfile;
    protected rs2_intrinsics depthStreamIntrinsics = new rs2_intrinsics();
@@ -97,11 +97,12 @@ public class BytedecoRealsense
          rs2_sensor sensor = realsense2.rs2_create_sensor(sensorList, 0, error);
          checkError(true, "Failed to create sensor.");
          BytePointer friendlyNameBytePointer = realsense2.rs2_get_sensor_info(sensor, realsense2.RS2_CAMERA_INFO_NAME, error);
-         LogTools.info("Sensor {}: {}", i, new String(friendlyNameBytePointer.getStringBytes()));
+         LogTools.info("Sensor {}: {}", i, friendlyNameBytePointer.toString());
+
 
       }
 
-      sensor = realsense2.rs2_create_sensor(sensorList, 0, error);
+      depthSensor = realsense2.rs2_create_sensor(sensorList, 0, error);
       checkError(true, "Failed to create sensor.");
 
       LogTools.info("Configured Depth Stream of Realsense Device. Serial number: {}", serialNumber);
@@ -133,7 +134,7 @@ public class BytedecoRealsense
     */
    public void enableInterCamSyncMode()
    {
-      rs2_options options = new rs2_options(sensor);
+      rs2_options options = new rs2_options(depthSensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_INTER_CAM_SYNC_MODE, 1.0f, error);
       checkError(true, "Failed to set sync mode.");
    }
@@ -200,7 +201,7 @@ public class BytedecoRealsense
                                                                    depthStreamIntrinsics.ppy(),
                                                                    depthHeight,
                                                                    depthWidth));
-               depthDiscretization = realsense2.rs2_get_depth_scale(sensor, error);
+               depthDiscretization = realsense2.rs2_get_depth_scale(depthSensor, error);
                LogTools.info("Depth discretization: {} (meters/unit)", depthDiscretization);
             }
 
@@ -297,14 +298,14 @@ public class BytedecoRealsense
 
    public void setLaserPower(float laserPower)
    {
-      rs2_options options = new rs2_options(sensor);
+      rs2_options options = new rs2_options(depthSensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_LASER_POWER, laserPower, error);
       checkError(true, "Failed to set laser power.");
    }
 
    public void setDigitalGain(int digitalGain)
    {
-      rs2_options options = new rs2_options(sensor);
+      rs2_options options = new rs2_options(depthSensor);
       realsense2.rs2_set_option(options, realsense2.RS2_OPTION_DIGITAL_GAIN, digitalGain, error);
       checkError(true, "");
    }
