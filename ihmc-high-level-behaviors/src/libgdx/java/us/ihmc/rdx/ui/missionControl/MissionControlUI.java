@@ -23,7 +23,7 @@ public class MissionControlUI
    private final Map<UUID, ImGuiMachine> machines = new HashMap<>();
    private final ROS2Node ros2Node;
 
-   private ImGuiGlfwWindow window;
+   private final ImGuiGlfwWindow window;
 
    public MissionControlUI()
    {
