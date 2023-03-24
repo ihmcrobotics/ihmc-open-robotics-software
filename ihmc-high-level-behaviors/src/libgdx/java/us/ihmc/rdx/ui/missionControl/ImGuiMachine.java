@@ -83,6 +83,11 @@ public class ImGuiMachine
                                            ROS2Tools.getSystemServiceStatusQosProfile());
    }
 
+   public ImGuiPanel getPanel()
+   {
+      return panel;
+   }
+
    private void acceptSystemResourceUsageMessage(SystemResourceUsageMessage message)
    {
       // Create the plot lines if they don't exist
@@ -204,7 +209,7 @@ public class ImGuiMachine
 
       if (!services.containsKey(serviceName))
       {
-         service = new ImGuiMachineService(serviceName, hostname, instanceId, ros2Node);
+         service = new ImGuiMachineService(serviceName, hostname, instanceId, panel, ros2Node);
          services.put(serviceName, service);
       }
       else

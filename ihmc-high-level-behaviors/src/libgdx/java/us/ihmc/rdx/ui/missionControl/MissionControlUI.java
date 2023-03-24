@@ -23,12 +23,7 @@ public class MissionControlUI
    private final Map<UUID, ImGuiMachine> machines = new HashMap<>();
    private final ROS2Node ros2Node;
 
-   private static ImGuiGlfwWindow window;
-
-   public static ImGuiGlfwWindow getWindow()
-   {
-      return window;
-   }
+   private ImGuiGlfwWindow window;
 
    public MissionControlUI()
    {
@@ -80,11 +75,17 @@ public class MissionControlUI
          if (!expired && !machines.containsKey(instanceId))
          {
             ImGuiMachine machine = new ImGuiMachine(instanceId, message.getHostnameAsString(), ros2Node);
+            window.getPanelManager().addPanel(machine.getPanel());
             machines.put(instanceId, machine);
          }
          else if (expired)
          {
-            machines.remove(instanceId);
+            ImGuiMachine machine = machines.remove(instanceId);
+
+            if (machine != null)
+            {
+               window.getPanelManager().queueRemovePanel(machine.getPanel());
+            }
          }
       }
    }

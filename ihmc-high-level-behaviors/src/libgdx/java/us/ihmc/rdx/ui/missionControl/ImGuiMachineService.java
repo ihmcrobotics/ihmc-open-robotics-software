@@ -30,13 +30,13 @@ public class ImGuiMachineService
    // If we've clicked an action button, i.e. "Start" and we're expecting a change sometime in the near future
    private boolean waitingOnStatusChange = false;
 
-   public ImGuiMachineService(String serviceName, String hostname, UUID instanceId, ROS2Node ros2Node)
+   public ImGuiMachineService(String serviceName, String hostname, UUID instanceId, ImGuiPanel machinePanel, ROS2Node ros2Node)
    {
       this.serviceName = serviceName;
       this.hostname = hostname;
       this.instanceId = instanceId;
       logPanel = new ImGuiPanel(serviceName + " Log##" + instanceId, this::renderImGuiLogPanelWidgets);
-      MissionControlUI.getWindow().getPanelManager().addPanel(logPanel);
+      machinePanel.addChild(logPanel);
       consoleArea = new ImGuiConsoleArea();
       ThreadTools.startAsDaemon(() ->
       {
