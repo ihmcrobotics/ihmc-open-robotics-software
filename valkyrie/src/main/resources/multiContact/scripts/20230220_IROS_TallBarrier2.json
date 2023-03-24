@@ -7227,31 +7227,31 @@
           "sequence_id" : 0,
           "current_toolbox_state" : 3,
           "joint_name_hash" : 1976133317,
-          "desired_joint_angles" : [ 0.89020604, -0.17177594, -0.7898519, 0.6476612, 0.033524543, 0.088580035, -0.2252602, -0.4545168, -2.1783493, 2.057, -0.5844854, -0.12304231, 1.181, 0.4797367, -0.028656809, 0.41972548, -1.519, -0.6663291, -2.174, 0.075642474, 0.019149814, -6.3460076E-4, -11.70551, 0.8859538, 1.3204956, -1.0751314, 1.4734128 ],
+          "desired_joint_angles" : [ 0.87895226, -0.26433468, -0.8024814, 0.6451012, 0.04267151, 0.118606664, -0.22776866, -0.4536627, -2.1737032, 2.057, -0.8644, -0.12408572, 1.181, 0.5340908, -0.036922395, 0.4227989, -1.519, -0.6113431, -2.174, 0.090814255, 0.0243184, -6.3146645E-4, 9.288469, 0.8314295, 1.3683473, -1.2349689, 1.4920053 ],
           "desired_root_position" : {
-            "x" : 0.4255973825040583,
-            "y" : 0.08932811471455221,
-            "z" : 1.0761142961137082
+            "x" : 0.42126808022419876,
+            "y" : 0.10178283949081703,
+            "z" : 1.0678040942811524
           },
           "desired_root_orientation" : {
-            "x" : 0.014308967748482516,
-            "y" : 0.06633746709591212,
-            "z" : -0.4485947857996151,
-            "w" : 0.8911550437800762
+            "x" : 0.0419295563620663,
+            "y" : 0.08136237471925108,
+            "z" : -0.4461837024789224,
+            "w" : 0.890248381029432
           },
-          "desired_joint_velocities" : [ -5.495604E-11, 7.1573023E-9, 9.952483E-9, -4.0349946E-9, 4.3444484E-9, -2.6952467E-9, 2.849776E-9, 7.387424E-10, 5.740297E-9, 0.0, 1.0569323E-10, -1.2788381E-10, 0.0, -2.270073E-9, 5.815664E-9, -9.283408E-9, 0.0, 3.066769E-9, 0.0, -3.6776138E-10, -3.6270154E-9, 1.3816236E-9, -7.452994E-4, -2.7717828E-9, -7.392753E-9, 2.4631408E-9, 4.057865E-9 ],
+          "desired_joint_velocities" : [ 1.0129135E-5, 3.4836834E-5, 1.8284234E-5, 9.743732E-7, -6.5572153E-6, -1.4059527E-5, 2.024128E-7, -2.3705476E-7, -9.857728E-7, 0.0, 0.0, -9.686794E-8, 0.0, -7.140769E-6, -3.1917716E-6, -7.763066E-6, 0.0, -2.8601982E-5, 0.0, -2.9360224E-6, -2.376988E-6, -1.135428E-7, 6.2078144E-4, -6.851612E-4, 1.5688485E-4, -4.97831E-4, -5.4456923E-6 ],
           "desired_root_linear_velocity" : {
-            "x" : -2.6049285228868513E-9,
-            "y" : -3.2011072529682105E-9,
-            "z" : -3.886343399872594E-10
+            "x" : 5.450349747047889E-6,
+            "y" : -3.2292273084749863E-6,
+            "z" : 4.848461658798001E-6
           },
           "desired_root_angular_velocity" : {
-            "x" : 4.139692054427879E-9,
-            "y" : -1.0664349316819033E-8,
-            "z" : 1.579765083505047E-9
+            "x" : -4.057055128528497E-6,
+            "y" : -2.3589741323409852E-5,
+            "z" : -5.301429175115675E-6
           },
           "support_region" : [ ],
-          "solution_quality" : 0.31122159961991286
+          "solution_quality" : 0.33711689139182643
         }
       },
       "ikPrivilegedConfiguration" : {
@@ -7260,18 +7260,18 @@
           "use_privileged_root_joint_position" : true,
           "use_privileged_root_joint_orientation" : true,
           "privileged_root_joint_position" : {
-            "x" : 0.47008263561400554,
-            "y" : 4.029741236300239E-4,
-            "z" : 1.0845592200475314
+            "x" : 0.4283733140819856,
+            "y" : 0.061141666740264465,
+            "z" : 1.0810279591161458
           },
           "privileged_root_joint_orientation" : {
-            "x" : -0.03892015426572403,
-            "y" : 0.017848229511006165,
-            "z" : -0.29821316483091476,
-            "w" : 0.9535384473720944
+            "x" : -0.011425679436477714,
+            "y" : 0.06275822738054926,
+            "z" : -0.43609116957045074,
+            "w" : 0.8976387639625099
           },
           "privileged_joint_hash_codes" : [ -1125911624, -50597405, 2113478223, 50005387, 198041311, 1756621650, -1027817653, -295382337, -2079477326, -1617110071, 140620596, 109168446, -924769235, 1685301882, 1874039824, -1988668465, -1051199441, 2139390173, -510372639, -992849718, 695341792, 1384116089, 223738931, 1647609966, 1895052909, -1394815392, -1630808225 ],
-          "privileged_joint_angles" : [ 0.5815511, 0.052767683, -0.74459845, 0.70370185, -0.0148021635, 0.012330016, -0.0076937205, -0.094486415, 0.004088189, 1.2052956, -0.54487824, -0.123868845, 0.8205376, 0.43134028, -0.034755543, 0.29807878, -1.5190219, -0.9753974, -2.1358702, 0.050669868, 0.0021608002, -3.641426E-6, -11.69364, 0.98484904, 1.2760687, -0.58730704, 1.5330951 ],
+          "privileged_joint_angles" : [ 0.91689605, -0.10744034, -0.82026696, 0.67280453, 0.024704823, 0.07092559, -0.2284731, -0.49907577, -1.9916732, 2.0565755, -0.5840442, -0.12483453, 1.1681532, 0.46757615, -0.029788412, 0.40131512, -1.5189726, -0.68619275, -2.1743228, 0.06764669, 0.01187737, -7.801008E-8, 9.287769, 0.8939116, 1.3181359, -0.89187485, 1.4961784 ],
           "privileged_weight" : 0.5,
           "privileged_gain" : 100.0
         }
@@ -7285,7 +7285,7 @@
               "desired_position_in_world" : {
                 "x" : 0.5443664337004809,
                 "y" : 0.1512797110834444,
-                "z" : 1.0873714980083755
+                "z" : 1.0745638055751776
               },
               "selection_matrix" : {
                 "sequence_id" : 0,
@@ -7307,6 +7307,68 @@
       },
       "sixDoFAnchors" : [ {
         "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "pelvis",
+          "isContactState" : false,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : -878626891,
+              "desired_position_in_world" : {
+                "x" : 0.4781157665966735,
+                "y" : 0.06251001557727787,
+                "z" : 0.9635752690295346
+              },
+              "desired_orientation_in_world" : {
+                "x" : 0.04192961606523602,
+                "y" : 0.08136245246947764,
+                "z" : -0.44618368046045753,
+                "w" : 0.890248382147103
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : 0.08871118112153899,
+                "y" : 0.025349691666915846,
+                "z" : -0.0869907668515466
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : 0.0,
+                "y" : 0.0,
+                "z" : 0.0,
+                "w" : 1.0
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
           "rigidBodyName" : "rightElbowPitchLink",
           "isContactState" : true,
           "isTrackingController" : false,
@@ -7320,10 +7382,10 @@
                 "z" : 1.1014769645887994
               },
               "desired_orientation_in_world" : {
-                "x" : -0.6547680957604798,
-                "y" : 0.411016106697611,
-                "z" : 0.347006464031467,
-                "w" : 0.5309717645315156
+                "x" : -0.6768036631294077,
+                "y" : 0.4197233282544218,
+                "z" : 0.29319419046708023,
+                "w" : 0.5289671974423364
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.04068498800426268,
@@ -7377,15 +7439,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : -1300704193,
               "desired_position_in_world" : {
-                "x" : 0.6649966836610868,
-                "y" : 0.14430998969871686,
-                "z" : 1.2289847467741448
+                "x" : 0.6680780539183755,
+                "y" : 0.15269946804967788,
+                "z" : 1.2125366492551952
               },
               "desired_orientation_in_world" : {
-                "x" : 0.004452365976663942,
-                "y" : 0.2790758969588034,
-                "z" : 0.13561730755429574,
-                "w" : 0.950633875929936
+                "x" : 0.02691080877747811,
+                "y" : 0.30069790035016947,
+                "z" : 0.14733015262803661,
+                "w" : 0.941886621214327
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.18505699890866834,
@@ -7439,15 +7501,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 2027763393,
               "desired_position_in_world" : {
-                "x" : 0.6442235058466761,
-                "y" : 0.2089326954630616,
-                "z" : 0.4947178719431211
+                "x" : 0.6408768235054902,
+                "y" : 0.22121315668209404,
+                "z" : 0.4912914301113753
               },
               "desired_orientation_in_world" : {
-                "x" : -0.05111132225999675,
-                "y" : 0.47706940550094146,
-                "z" : -0.018560877062764124,
-                "w" : 0.8771817992380337
+                "x" : -0.06457605110652213,
+                "y" : 0.4742910902699196,
+                "z" : -0.025593303045387237,
+                "w" : 0.8776234261648249
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.09693130820594198,
@@ -7493,68 +7555,6 @@
         }
       }, {
         "SixDoFMotionControlAnchorDescription" : {
-          "rigidBodyName" : "pelvis",
-          "isContactState" : false,
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
-              "sequence_id" : 0,
-              "end_effector_hash_code" : -878626891,
-              "desired_position_in_world" : {
-                "x" : 0.4826453262144208,
-                "y" : 0.043553948049432266,
-                "z" : 0.9746849166180742
-              },
-              "desired_orientation_in_world" : {
-                "x" : 0.014308967774069037,
-                "y" : 0.06633746709527774,
-                "z" : -0.448594785809835,
-                "w" : 0.8911550437745679
-              },
-              "control_frame_position_in_end_effector" : {
-                "x" : 0.08871118112153899,
-                "y" : 0.025349691666915846,
-                "z" : -0.0869907668515466
-              },
-              "control_frame_orientation_in_end_effector" : {
-                "x" : 0.0,
-                "y" : 0.0,
-                "z" : 0.0,
-                "w" : 1.0
-              },
-              "angular_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 0,
-                "x_selected" : false,
-                "y_selected" : false,
-                "z_selected" : false
-              },
-              "linear_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 83766130,
-                "x_selected" : false,
-                "y_selected" : false,
-                "z_selected" : false
-              },
-              "angular_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 0.1,
-                "y_weight" : 0.1,
-                "z_weight" : 0.1
-              },
-              "linear_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 0.1,
-                "y_weight" : 0.1,
-                "z_weight" : 0.1
-              }
-            }
-          }
-        }
-      }, {
-        "SixDoFMotionControlAnchorDescription" : {
           "rigidBodyName" : "leftElbowPitchLink",
           "isContactState" : true,
           "isTrackingController" : false,
@@ -7568,10 +7568,10 @@
                 "z" : 1.1008091126260022
               },
               "desired_orientation_in_world" : {
-                "x" : 0.6343277078863496,
-                "y" : 0.32150617063132875,
-                "z" : -0.09728893325104178,
-                "w" : 0.6962736564889578
+                "x" : 0.6331436058881325,
+                "y" : 0.33299300397479814,
+                "z" : -0.1190499896661365,
+                "w" : 0.6885288182692908
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.04536166451679495,
@@ -7630,10 +7630,10 @@
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : -0.2253057255357737,
-                "y" : -0.2924832841455783,
-                "z" : 0.02675246908601807,
-                "w" : 0.9289645654889196
+                "x" : -0.2253797697137628,
+                "y" : -0.2924038517471453,
+                "z" : 0.02684245604355881,
+                "w" : 0.928969014252227
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.1445913339807622,
@@ -7687,15 +7687,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 532235394,
               "desired_position_in_world" : {
-                "x" : 0.9476098642049792,
+                "x" : 0.9475937928506557,
                 "y" : 0.1961255268138561,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.2688428069751058,
-                "y" : -0.29499175548084994,
-                "z" : 0.03329425863693933,
-                "w" : 0.9162941130869984
+                "x" : 0.26877069819656474,
+                "y" : -0.2948911725896928,
+                "z" : 0.033337784440275665,
+                "w" : 0.9163460592201076
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.14459133398076232,
@@ -7749,15 +7749,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 532235394,
               "desired_position_in_world" : {
-                "x" : 0.6727196487523183,
+                "x" : 0.6727029475114839,
                 "y" : 0.20436472316886173,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.45169976796057043,
-                "y" : 0.16676727279310707,
-                "z" : 0.025948316595230708,
-                "w" : 0.8760608889885394
+                "x" : 0.45161056130166183,
+                "y" : 0.16687141856068405,
+                "z" : 0.025928565689008035,
+                "w" : 0.8760876326427932
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.13040866601923765,
@@ -7804,6 +7804,58 @@
       } ],
       "oneDoFAnchors" : [ {
         "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "leftHipYaw",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : -1125911624,
+              "desired_position" : 1.05823382754641,
+              "weight" : 0.1
+            }
+          }
+        }
+      }, {
+        "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "rightAnklePitch",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : 140620596,
+              "desired_position" : -1.153908904415109,
+              "weight" : 0.1
+            }
+          }
+        }
+      }, {
+        "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "rightHipYaw",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : -1027817653,
+              "desired_position" : -0.24949639301816617,
+              "weight" : 0.1
+            }
+          }
+        }
+      }, {
+        "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "rightKneePitch",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : -1617110071,
+              "desired_position" : 2.057,
+              "weight" : 0.1
+            }
+          }
+        }
+      }, {
+        "OneDoFMotionControlAnchorDescription" : {
           "jointName" : "rightElbowPitch",
           "isTrackingController" : false,
           "ikSolverMessage" : {
@@ -7830,19 +7882,6 @@
         }
       }, {
         "OneDoFMotionControlAnchorDescription" : {
-          "jointName" : "leftHipYaw",
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
-              "sequence_id" : 0,
-              "joint_hash_code" : -1125911624,
-              "desired_position" : 1.05823382754641,
-              "weight" : 0.1
-            }
-          }
-        }
-      }, {
-        "OneDoFMotionControlAnchorDescription" : {
           "jointName" : "leftElbowPitch",
           "isTrackingController" : false,
           "ikSolverMessage" : {
@@ -7856,32 +7895,6 @@
         }
       }, {
         "OneDoFMotionControlAnchorDescription" : {
-          "jointName" : "rightAnklePitch",
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
-              "sequence_id" : 0,
-              "joint_hash_code" : 140620596,
-              "desired_position" : -0.5842334365641595,
-              "weight" : 0.1
-            }
-          }
-        }
-      }, {
-        "OneDoFMotionControlAnchorDescription" : {
-          "jointName" : "rightHipYaw",
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
-              "sequence_id" : 0,
-              "joint_hash_code" : -1027817653,
-              "desired_position" : -0.24949639301816617,
-              "weight" : 0.1
-            }
-          }
-        }
-      }, {
-        "OneDoFMotionControlAnchorDescription" : {
           "jointName" : "rightHipPitch",
           "isTrackingController" : false,
           "ikSolverMessage" : {
@@ -7889,19 +7902,6 @@
               "sequence_id" : 0,
               "joint_hash_code" : -2079477326,
               "desired_position" : -2.1565629858352553,
-              "weight" : 0.1
-            }
-          }
-        }
-      }, {
-        "OneDoFMotionControlAnchorDescription" : {
-          "jointName" : "rightKneePitch",
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
-              "sequence_id" : 0,
-              "joint_hash_code" : -1617110071,
-              "desired_position" : 2.057,
               "weight" : 0.1
             }
           }
@@ -7986,31 +7986,31 @@
           "sequence_id" : 0,
           "current_toolbox_state" : 3,
           "joint_name_hash" : 1976133317,
-          "desired_joint_angles" : [ 0.89125115, -0.17427279, -0.8756327, 0.2760748, 0.20959958, 0.08740917, 0.338395, -0.500575, -2.21805, 1.0045362, 0.072157785, -0.027754223, 1.181, 0.50800085, -0.019943317, 0.521597, -1.519, -0.64658463, -1.9958442, 0.074588746, 0.021290572, -7.508758E-4, -11.721894, 0.8433972, 1.32023, -1.0289396, 1.3395505 ],
+          "desired_joint_angles" : [ 0.90698284, -0.22179742, -0.8324797, 0.2736606, 0.20237887, 0.099517085, 0.338395, -0.40980375, -2.21805, 1.0079873, -0.5864172, -0.027684243, 1.181, 0.5807965, -0.03152377, 0.52501804, -1.519, -0.6254669, -1.994012, 0.08866634, 0.027274204, -0.0050605107, 9.289957, 0.8663889, 1.2992265, -1.0190462, 1.3418565 ],
           "desired_root_position" : {
-            "x" : 0.494048400673946,
-            "y" : 0.0912118507517725,
-            "z" : 1.1209114265846642
+            "x" : 0.4902076322714495,
+            "y" : 0.09712213532972747,
+            "z" : 1.1210785469732045
           },
           "desired_root_orientation" : {
-            "x" : -0.04319106946746664,
-            "y" : 0.19240767786196122,
-            "z" : -0.45784650297900015,
-            "w" : 0.8668854576747292
+            "x" : -0.021637609407302437,
+            "y" : 0.18406477756238646,
+            "z" : -0.4684385040103686,
+            "w" : 0.8638387230731058
           },
-          "desired_joint_velocities" : [ 1.6120438E-8, -1.1411899E-8, 1.6289082E-8, -7.0047856E-9, 1.1530471E-8, 9.891296E-9, 0.0, 0.0, 0.0, -8.5353946E-10, 5.2291504E-11, 5.7738536E-11, 0.0, -3.983591E-8, -1.0016605E-9, 5.0614403E-8, 0.0, 2.8186896E-8, -2.978462E-8, -6.003531E-11, -2.7776912E-9, 2.9396316E-9, -8.1716105E-4, -2.8166358E-9, -3.5941916E-8, -2.2924107E-8, 1.6903812E-8 ],
+          "desired_joint_velocities" : [ 9.944379E-9, 1.2216811E-8, 2.884748E-8, -1.3800905E-8, 6.613793E-9, -1.5812629E-9, 0.0, 1.1747825E-9, 0.0, 1.6646684E-9, -2.8133051E-10, -8.613596E-11, 0.0, -7.357337E-9, 7.115926E-9, 1.5240254E-8, 0.0, 3.4613423E-9, -9.556356E-9, -1.4165336E-9, -5.5049227E-9, -5.1784625E-9, 7.526415E-4, 3.0720227E-7, -1.6976709E-7, 3.2579072E-7, 3.7401193E-9 ],
           "desired_root_linear_velocity" : {
-            "x" : -1.5510292256278035E-8,
-            "y" : -1.2120682513216963E-9,
-            "z" : -5.88998084680159E-9
+            "x" : -5.1592400716199416E-9,
+            "y" : -2.844235846843901E-9,
+            "z" : 4.2381091344689814E-10
           },
           "desired_root_angular_velocity" : {
-            "x" : 1.5702775163495275E-8,
-            "y" : -1.2412909811132522E-8,
-            "z" : -1.7622185030652382E-8
+            "x" : 9.229373931773921E-9,
+            "y" : -2.170677132484755E-8,
+            "z" : -5.219785499666063E-9
           },
           "support_region" : [ ],
-          "solution_quality" : 0.4611768525131756
+          "solution_quality" : 0.458489606744227
         }
       },
       "ikPrivilegedConfiguration" : {
@@ -8019,18 +8019,18 @@
           "use_privileged_root_joint_position" : true,
           "use_privileged_root_joint_orientation" : true,
           "privileged_root_joint_position" : {
-            "x" : 0.47008263561400554,
-            "y" : 4.029741236300239E-4,
-            "z" : 1.0845592200475314
+            "x" : 0.4283733140819856,
+            "y" : 0.061141666740264465,
+            "z" : 1.0810279591161458
           },
           "privileged_root_joint_orientation" : {
-            "x" : -0.03892015426572403,
-            "y" : 0.017848229511006165,
-            "z" : -0.29821316483091476,
-            "w" : 0.9535384473720944
+            "x" : -0.011425679436477714,
+            "y" : 0.06275822738054926,
+            "z" : -0.43609116957045074,
+            "w" : 0.8976387639625099
           },
           "privileged_joint_hash_codes" : [ -1125911624, -50597405, 2113478223, 50005387, 198041311, 1756621650, -1027817653, -295382337, -2079477326, -1617110071, 140620596, 109168446, -924769235, 1685301882, 1874039824, -1988668465, -1051199441, 2139390173, -510372639, -992849718, 695341792, 1384116089, 223738931, 1647609966, 1895052909, -1394815392, -1630808225 ],
-          "privileged_joint_angles" : [ 0.5815511, 0.052767683, -0.74459845, 0.70370185, -0.0148021635, 0.012330016, -0.0076937205, -0.094486415, 0.004088189, 1.2052956, -0.54487824, -0.123868845, 0.8205376, 0.43134028, -0.034755543, 0.29807878, -1.5190219, -0.9753974, -2.1358702, 0.050669868, 0.0021608002, -3.641426E-6, -11.69364, 0.98484904, 1.2760687, -0.58730704, 1.5330951 ],
+          "privileged_joint_angles" : [ 0.91689605, -0.10744034, -0.82026696, 0.67280453, 0.024704823, 0.07092559, -0.2284731, -0.49907577, -1.9916732, 2.0565755, -0.5840442, -0.12483453, 1.1681532, 0.46757615, -0.029788412, 0.40131512, -1.5189726, -0.68619275, -2.1743228, 0.06764669, 0.01187737, -7.801008E-8, 9.287769, 0.8939116, 1.3181359, -0.89187485, 1.4961784 ],
           "privileged_weight" : 0.5,
           "privileged_gain" : 100.0
         }
@@ -8066,130 +8066,6 @@
       },
       "sixDoFAnchors" : [ {
         "SixDoFMotionControlAnchorDescription" : {
-          "rigidBodyName" : "torso",
-          "isContactState" : false,
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
-              "sequence_id" : 0,
-              "end_effector_hash_code" : -1300704193,
-              "desired_position_in_world" : {
-                "x" : 0.7705984765225815,
-                "y" : 0.1377725592103381,
-                "z" : 1.1948410780289906
-              },
-              "desired_orientation_in_world" : {
-                "x" : 0.03429582326471243,
-                "y" : 0.4217845606960362,
-                "z" : 0.1211773713444419,
-                "w" : 0.8979073591073294
-              },
-              "control_frame_position_in_end_effector" : {
-                "x" : 0.18505699890866834,
-                "y" : 0.009162799814779396,
-                "z" : -0.022662512237281125
-              },
-              "control_frame_orientation_in_end_effector" : {
-                "x" : 0.0,
-                "y" : 0.0,
-                "z" : 0.0,
-                "w" : 1.0
-              },
-              "angular_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 0,
-                "x_selected" : false,
-                "y_selected" : false,
-                "z_selected" : false
-              },
-              "linear_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 83766130,
-                "x_selected" : false,
-                "y_selected" : false,
-                "z_selected" : false
-              },
-              "angular_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 0.1,
-                "y_weight" : 0.1,
-                "z_weight" : 0.1
-              },
-              "linear_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 0.1,
-                "y_weight" : 0.1,
-                "z_weight" : 0.1
-              }
-            }
-          }
-        }
-      }, {
-        "SixDoFMotionControlAnchorDescription" : {
-          "rigidBodyName" : "rightElbowPitchLink",
-          "isContactState" : true,
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
-              "sequence_id" : 0,
-              "end_effector_hash_code" : 601127246,
-              "desired_position_in_world" : {
-                "x" : 0.5091384884497308,
-                "y" : -0.6372374245855753,
-                "z" : 1.1014769645887994
-              },
-              "desired_orientation_in_world" : {
-                "x" : -0.5441778857509161,
-                "y" : 0.5398805625804767,
-                "z" : 0.426886117943446,
-                "w" : 0.4797579067765585
-              },
-              "control_frame_position_in_end_effector" : {
-                "x" : -0.04068498800426268,
-                "y" : -0.258104785475939,
-                "z" : 0.018864026131600306
-              },
-              "control_frame_orientation_in_end_effector" : {
-                "x" : -0.6792318372203636,
-                "y" : 0.6120230659591641,
-                "z" : 0.08969959973843072,
-                "w" : 0.39500108841237286
-              },
-              "angular_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 0,
-                "x_selected" : false,
-                "y_selected" : false,
-                "z_selected" : false
-              },
-              "linear_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 83766130,
-                "x_selected" : true,
-                "y_selected" : true,
-                "z_selected" : true
-              },
-              "angular_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 200.0,
-                "y_weight" : 200.0,
-                "z_weight" : 200.0
-              },
-              "linear_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 200.0,
-                "y_weight" : 200.0,
-                "z_weight" : 200.0
-              }
-            }
-          }
-        }
-      }, {
-        "SixDoFMotionControlAnchorDescription" : {
           "rigidBodyName" : "pelvis",
           "isContactState" : false,
           "isTrackingController" : false,
@@ -8198,15 +8074,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : -878626891,
               "desired_position_in_world" : {
-                "x" : 0.5194724214802718,
-                "y" : 0.04540778738512986,
-                "z" : 1.007362898693924
+                "x" : 0.5182052417052623,
+                "y" : 0.05343735359735941,
+                "z" : 1.0073005396292958
               },
               "desired_orientation_in_world" : {
-                "x" : -0.04319106943196815,
-                "y" : 0.19240767785375615,
-                "z" : -0.4578465029714258,
-                "w" : 0.8668854576823193
+                "x" : -0.02163760943429943,
+                "y" : 0.18406477753925532,
+                "z" : -0.4684385039983283,
+                "w" : 0.8638387230838875
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.08871118112153899,
@@ -8252,6 +8128,130 @@
         }
       }, {
         "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "rightElbowPitchLink",
+          "isContactState" : true,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : 601127246,
+              "desired_position_in_world" : {
+                "x" : 0.5091384884497308,
+                "y" : -0.6372374245855753,
+                "z" : 1.1014769645887994
+              },
+              "desired_orientation_in_world" : {
+                "x" : -0.5330630088441777,
+                "y" : 0.5446787176565113,
+                "z" : 0.45076763136905906,
+                "w" : 0.4647337578054542
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : -0.04068498800426268,
+                "y" : -0.258104785475939,
+                "z" : 0.018864026131600306
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : -0.6792318372203636,
+                "y" : 0.6120230659591641,
+                "z" : 0.08969959973843072,
+                "w" : 0.39500108841237286
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : true,
+                "y_selected" : true,
+                "z_selected" : true
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "torso",
+          "isContactState" : false,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : -1300704193,
+              "desired_position_in_world" : {
+                "x" : 0.7705972697691224,
+                "y" : 0.1406041267184805,
+                "z" : 1.1886472222243207
+              },
+              "desired_orientation_in_world" : {
+                "x" : 0.04063384687428288,
+                "y" : 0.4363554569406263,
+                "z" : 0.11909516969327252,
+                "w" : 0.890931617040312
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : 0.18505699890866834,
+                "y" : 0.009162799814779396,
+                "z" : -0.022662512237281125
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : 0.0,
+                "y" : 0.0,
+                "z" : 0.0,
+                "w" : 1.0
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
           "rigidBodyName" : "leftHipPitchLink",
           "isContactState" : true,
           "isTrackingController" : false,
@@ -8260,15 +8260,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 2027763393,
               "desired_position_in_world" : {
-                "x" : 0.5769609260775639,
-                "y" : 0.21225776523698706,
-                "z" : 0.509186048519874
+                "x" : 0.5803352175699102,
+                "y" : 0.21750286877741667,
+                "z" : 0.5096873346918782
               },
               "desired_orientation_in_world" : {
-                "x" : -0.04601693104426171,
-                "y" : 0.5608124030079608,
-                "z" : -0.019944090536640934,
-                "w" : 0.8264224851384252
+                "x" : -0.05078387848062627,
+                "y" : 0.5648482069435885,
+                "z" : -0.023467255011813813,
+                "w" : 0.8232962946238058
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.09693130820594198,
@@ -8327,10 +8327,10 @@
                 "z" : 1.1008091126260022
               },
               "desired_orientation_in_world" : {
-                "x" : 0.5383287811964607,
-                "y" : 0.5156094816360776,
-                "z" : -0.23803097228497458,
-                "w" : 0.622647767213196
+                "x" : 0.5312298274259276,
+                "y" : 0.5228324653363636,
+                "z" : -0.25401999471041353,
+                "w" : 0.6163723922521522
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.04536166451679495,
@@ -8389,10 +8389,10 @@
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : -0.22583626406700563,
-                "y" : -0.2921151558624818,
-                "z" : 0.026926522156837444,
-                "w" : 0.9289465431079622
+                "x" : -0.22590284767466065,
+                "y" : -0.2920538095601542,
+                "z" : 0.02692670661166603,
+                "w" : 0.9289496370659335
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.1445913339807622,
@@ -8446,15 +8446,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 532235394,
               "desired_position_in_world" : {
-                "x" : 0.9476224792816588,
+                "x" : 0.9476282147649044,
                 "y" : 0.1961255268138561,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.2683213996080789,
-                "y" : -0.29466208926663284,
-                "z" : 0.03329192361283747,
-                "w" : 0.9165530685582486
+                "x" : 0.2682558657759239,
+                "y" : -0.29461745266729183,
+                "z" : 0.0332649377850012,
+                "w" : 0.9165875795442603
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.14459133398076232,
@@ -8508,15 +8508,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 532235394,
               "desired_position_in_world" : {
-                "x" : 0.6727336957910546,
+                "x" : 0.6727400016179824,
                 "y" : 0.20436472316886173,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.4512331669394605,
-                "y" : 0.16706429870059283,
-                "z" : 0.02562538581319041,
-                "w" : 0.8762542375106607
+                "x" : 0.4511850719504153,
+                "y" : 0.16710011346757972,
+                "z" : 0.025560445983058677,
+                "w" : 0.8762740704422148
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.13040866601923765,
@@ -8563,32 +8563,6 @@
       } ],
       "oneDoFAnchors" : [ {
         "OneDoFMotionControlAnchorDescription" : {
-          "jointName" : "rightElbowPitch",
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
-              "sequence_id" : 0,
-              "joint_hash_code" : -1630808225,
-              "desired_position" : 1.5051129981599138,
-              "weight" : 0.1
-            }
-          }
-        }
-      }, {
-        "OneDoFMotionControlAnchorDescription" : {
-          "jointName" : "rightHipRoll",
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
-              "sequence_id" : 0,
-              "joint_hash_code" : -295382337,
-              "desired_position" : -0.5515,
-              "weight" : 0.1
-            }
-          }
-        }
-      }, {
-        "OneDoFMotionControlAnchorDescription" : {
           "jointName" : "leftHipYaw",
           "isTrackingController" : false,
           "ikSolverMessage" : {
@@ -8602,26 +8576,13 @@
         }
       }, {
         "OneDoFMotionControlAnchorDescription" : {
-          "jointName" : "leftElbowPitch",
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
-              "sequence_id" : 0,
-              "joint_hash_code" : -510372639,
-              "desired_position" : -2.1027813178577848,
-              "weight" : 0.1
-            }
-          }
-        }
-      }, {
-        "OneDoFMotionControlAnchorDescription" : {
           "jointName" : "rightAnklePitch",
           "isTrackingController" : false,
           "ikSolverMessage" : {
             "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
               "sequence_id" : 0,
               "joint_hash_code" : 140620596,
-              "desired_position" : 0.07431900296699756,
+              "desired_position" : -0.5847173225860611,
               "weight" : 0.1
             }
           }
@@ -8654,19 +8615,6 @@
         }
       }, {
         "OneDoFMotionControlAnchorDescription" : {
-          "jointName" : "rightHipPitch",
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
-              "sequence_id" : 0,
-              "joint_hash_code" : -2079477326,
-              "desired_position" : -2.315690940649408,
-              "weight" : 0.1
-            }
-          }
-        }
-      }, {
-        "OneDoFMotionControlAnchorDescription" : {
           "jointName" : "rightKneePitch",
           "isTrackingController" : false,
           "ikSolverMessage" : {
@@ -8674,6 +8622,58 @@
               "sequence_id" : 0,
               "joint_hash_code" : -1617110071,
               "desired_position" : 1.0259088682786122,
+              "weight" : 0.1
+            }
+          }
+        }
+      }, {
+        "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "rightElbowPitch",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : -1630808225,
+              "desired_position" : 1.5051129981599138,
+              "weight" : 0.1
+            }
+          }
+        }
+      }, {
+        "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "rightHipRoll",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : -295382337,
+              "desired_position" : -0.37836333820216284,
+              "weight" : 0.1
+            }
+          }
+        }
+      }, {
+        "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "leftElbowPitch",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : -510372639,
+              "desired_position" : -2.1027813178577848,
+              "weight" : 0.1
+            }
+          }
+        }
+      }, {
+        "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "rightHipPitch",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : -2079477326,
+              "desired_position" : -2.315690940649408,
               "weight" : 0.1
             }
           }
@@ -8711,42 +8711,142 @@
     "KinematicsToolboxSnapshotDescription" : {
       "controllerConfiguration" : {
         "controller_msgs::msg::dds_::RobotConfigurationData_" : {
-          "sequence_id" : 14232,
-          "wall_time" : 1676949388135,
-          "monotonic_time" : 1676949388135,
+          "sequence_id" : 54150,
+          "wall_time" : 1677706691005,
+          "monotonic_time" : 1677706691005,
           "sync_timestamp" : 0,
           "joint_name_hash" : -1361652808,
-          "joint_angles" : [ 0.8931455, -0.22715867, -0.87401986, 0.28218913, 0.21413887, 0.103300706, 0.3401463, -0.50056964, -2.212183, 1.0085744, 0.07265054, -0.02736563, 1.1801131, 0.5783734, -0.035703197, 0.52045375, -1.5189704, -0.5785273, -2.021752, 0.0979246, 0.026628574, -0.0014443733, 8.987755, 0.8272527, 1.3493397, -1.0062566, 1.377768 ],
-          "joint_velocities" : [ ],
-          "joint_torques" : [ 60.23859, 62.42101, 46.593655, -54.62472, -13.240619, -9.022602, -13.92424, -0.17159568, -56.057514, -10.064847, -1.1450506, -0.67101765, 9.689018, 71.55094, 53.06891, 4.8850923, -0.23743777, -399.8876, 153.40034, -11.989463, 0.47977436, -4.619125, 0.0, 282.91974, -281.5368, -223.5377, -240.04475 ],
+          "joint_angles" : [ 0.12574248, -0.35240912, -1.1493832, 1.3312098, -0.57537425, 0.101737246, -0.07402557, -0.32763994, -1.4290532, 1.3002437, -0.32750225, 0.052770223, 0.37902275, 0.47134963, 0.002891156, 0.6608494, -1.493452, -0.8639304, -1.4000174, 0.07498063, 0.0026266503, -0.0058983583, 109.05137, 1.5096343, 1.5039675, -0.701068, 1.3267945 ],
+          "joint_velocities" : [ -0.013500677, 0.0087826485, 0.078642145, 0.014648675, -0.020803941, 0.009950957, -0.02022832, -0.0016071629, 0.083972745, 0.029591076, -0.08197204, 0.005648184, -0.0073676314, -0.01913326, -0.0130707985, -0.07937033, -0.07079985, -0.1225235, 0.03265471, -0.03303566, -0.009098613, -0.022561613, 4.2232246, -0.13524553, -0.011692035, -0.027736468, -0.17126028 ],
+          "joint_torques" : [ -128.17136, -169.78055, 72.90126, -142.76952, 161.77364, 32.990417, 89.567986, 303.45737, 177.12921, -98.9222, 4.2653675, -19.39832, 67.75297, 92.87151, -112.7503, 78.2753, 335.77966, -262.36456, -6.3474064, -8.756357, 1.0432065, -3.8232858, 0.0, 328.30566, -113.2336, -273.23764, -183.96635 ],
           "root_position" : {
-            "x" : 0.4795992458928088,
-            "y" : 0.08742403122344108,
-            "z" : 1.1192968820613558
+            "x" : 0.7087888724715227,
+            "y" : 0.0418573820007263,
+            "z" : 0.9470176400522868
           },
           "root_orientation" : {
-            "x" : -0.023368039390324627,
-            "y" : 0.19349063343138415,
-            "z" : -0.4592074496504666,
-            "w" : 0.8666855414133133
+            "x" : 0.11864128607267484,
+            "y" : 0.20655618175245513,
+            "z" : -0.10467693184211792,
+            "w" : 0.9655576259131243
           },
           "pelvis_linear_velocity" : {
-            "x" : -0.0029147715367626582,
-            "y" : -0.0019472850061583718,
-            "z" : -7.866224707048383E-4
+            "x" : 0.027118654979502048,
+            "y" : 0.014773601124877737,
+            "z" : 0.020925288989864024
           },
           "pelvis_angular_velocity" : {
-            "x" : 0.0061956436048291805,
-            "y" : -0.010096258523034973,
-            "z" : -0.006288292985316017
+            "x" : -0.01016007479594886,
+            "y" : -0.030739453620188817,
+            "z" : 0.0259955540744748
           },
           "pelvis_linear_acceleration" : {
             "x" : 0.0,
             "y" : 0.0,
             "z" : 0.0
           },
-          "force_sensor_data" : [ ],
-          "imu_sensor_data" : [ ],
+          "force_sensor_data" : [ {
+            "sequence_id" : 54150,
+            "angular_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            }
+          }, {
+            "sequence_id" : 54150,
+            "angular_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            }
+          } ],
+          "imu_sensor_data" : [ {
+            "sequence_id" : 54150,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          }, {
+            "sequence_id" : 54150,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          }, {
+            "sequence_id" : 54150,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          }, {
+            "sequence_id" : 54150,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          } ],
           "robot_motion_status" : 0,
           "last_received_packet_type_id" : -1,
           "last_received_packet_unique_id" : -1,
@@ -8758,51 +8858,51 @@
           "sequence_id" : 0,
           "current_toolbox_state" : 3,
           "joint_name_hash" : 1976133317,
-          "desired_joint_angles" : [ 0.21301782, -0.38989198, -0.6672988, 0.42538235, -0.029622853, 0.15049347, 0.23113284, -0.500575, -1.1597221, 0.8978457, 0.18382622, -0.032853678, 0.5115183, 0.49127218, 0.003999668, 0.4777439, -1.4960196, -0.6526937, -1.434793, 0.10409347, 0.02596666, -0.0022484995, 8.989542, 1.1386989, 1.4444119, -1.0086464, 1.2995714 ],
+          "desired_joint_angles" : [ 0.19337164, -0.416075, -1.4178437, 1.3728139, -0.37664288, 0.18643099, -0.12489759, -0.18983223, -1.7912549, 1.3680615, -0.018614002, 0.15731841, 0.076585084, 0.5394621, 0.051646177, 1.001738, -1.4288877, -0.44261962, -1.1530223, 0.0722262, 0.0024439383, -0.0051158606, 108.69248, 1.5351058, 1.519, -1.3946042, 2.010798 ],
           "desired_root_position" : {
-            "x" : 0.6400986632205135,
-            "y" : 0.07845081671741733,
-            "z" : 1.1020349308871933
+            "x" : 0.6094442232261194,
+            "y" : 0.07380969525760235,
+            "z" : 0.9003232430902945
           },
           "desired_root_orientation" : {
-            "x" : 0.10593406175079792,
-            "y" : 0.1407101171031939,
-            "z" : -0.1549503361081827,
-            "w" : 0.9720951758165169
+            "x" : 0.09546947097880974,
+            "y" : 0.20824330469909544,
+            "z" : -0.1700010444414295,
+            "w" : 0.9584466344287766
           },
-          "desired_joint_velocities" : [ 5.8700267E-10, 5.3901328E-11, -1.1678436E-9, 2.6756375E-11, 1.0438872E-9, -5.928591E-11, 2.6487146E-10, 0.0, -3.146372E-10, -1.2052581E-9, 2.0083935E-10, -1.5537571E-10, 4.2399417E-10, 2.9031222E-9, 6.701254E-10, -8.682499E-10, -1.6164847E-10, 8.308909E-10, -1.5218937E-9, -2.1922741E-10, 1.8818627E-10, 7.034173E-11, -7.0055656E-5, -3.643752E-10, -1.1946E-10, -2.1138646E-10, 1.6164847E-9 ],
+          "desired_joint_velocities" : [ -3.584938E-9, 0.0, 5.226486E-9, 6.7639228E-9, -1.3422818E-8, -1.3028745E-9, -5.3979043E-9, -1.684014E-9, 2.0188295E-9, -2.747802E-9, 1.3893608E-9, 8.5842444E-10, 1.3623269E-9, -1.8078428E-8, -1.3211168E-9, 3.8147263E-10, 1.7335022E-9, -1.5850099E-9, 1.248357E-8, 7.3996365E-10, 6.560464E-11, -1.9962418E-10, 5.262568E-5, -3.8946624E-10, 0.0, 1.0241807E-8, -9.8090425E-9 ],
           "desired_root_linear_velocity" : {
-            "x" : -7.59327781207908E-10,
-            "y" : -2.8270591423407154E-10,
-            "z" : -3.280649363279764E-10
+            "x" : 6.689813189519889E-9,
+            "y" : 1.405095817474944E-9,
+            "z" : 3.0652625836874448E-9
           },
           "desired_root_angular_velocity" : {
-            "x" : -6.052403023204533E-11,
-            "y" : 9.206135853645492E-11,
-            "z" : -6.472642422039598E-10
+            "x" : 7.675484692271084E-10,
+            "y" : 1.9743763533808245E-9,
+            "z" : 3.5556655397783743E-9
           },
           "support_region" : [ ],
-          "solution_quality" : 0.043860507203888156
+          "solution_quality" : 0.07717109278578847
         }
       },
       "ikPrivilegedConfiguration" : {
         "toolbox_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
           "sequence_id" : 0,
-          "use_privileged_root_joint_position" : true,
-          "use_privileged_root_joint_orientation" : true,
+          "use_privileged_root_joint_position" : false,
+          "use_privileged_root_joint_orientation" : false,
           "privileged_root_joint_position" : {
-            "x" : 0.4795992458928088,
-            "y" : 0.08742403122344108,
-            "z" : 1.1192968820613558
+            "x" : 0.0,
+            "y" : 0.0,
+            "z" : 0.0
           },
           "privileged_root_joint_orientation" : {
-            "x" : -0.023368039390324627,
-            "y" : 0.19349063343138415,
-            "z" : -0.4592074496504666,
-            "w" : 0.8666855414133133
+            "x" : 0.0,
+            "y" : 0.0,
+            "z" : 0.0,
+            "w" : 1.0
           },
-          "privileged_joint_hash_codes" : [ -1125911624, -50597405, 2113478223, 50005387, 198041311, 1756621650, -1027817653, -295382337, -2079477326, -1617110071, 140620596, 109168446, -924769235, 1685301882, 1874039824, -1988668465, -1051199441, 2139390173, -510372639, -992849718, 695341792, 1384116089, 223738931, 1647609966, 1895052909, -1394815392, -1630808225 ],
-          "privileged_joint_angles" : [ 0.8931455, -0.22715867, -0.87401986, 0.28218913, 0.21413887, 0.103300706, 0.3401463, -0.50056964, -2.212183, 1.0085744, 0.07265054, -0.02736563, 1.1801131, 0.5783734, -0.035703197, 0.52045375, -1.5189704, -0.5785273, -2.021752, 0.0979246, 0.026628574, -0.0014443733, 8.987755, 0.8272527, 1.3493397, -1.0062566, 1.377768 ],
+          "privileged_joint_hash_codes" : [ ],
+          "privileged_joint_angles" : [ ],
           "privileged_weight" : 0.5,
           "privileged_gain" : 100.0
         }
@@ -8815,8 +8915,8 @@
               "sequence_id" : 0,
               "desired_position_in_world" : {
                 "x" : 0.7492547457337715,
-                "y" : 0.04116252603593482,
-                "z" : 1.0486966678386276
+                "y" : 0.002616665607913064,
+                "z" : 0.8826848234143964
               },
               "selection_matrix" : {
                 "sequence_id" : 0,
@@ -8838,130 +8938,6 @@
       },
       "sixDoFAnchors" : [ {
         "SixDoFMotionControlAnchorDescription" : {
-          "rigidBodyName" : "rightFoot",
-          "isContactState" : false,
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
-              "sequence_id" : 0,
-              "end_effector_hash_code" : -284345206,
-              "desired_position_in_world" : {
-                "x" : 0.992443875866742,
-                "y" : -0.20735539666000913,
-                "z" : 0.11463901608849832
-              },
-              "desired_orientation_in_world" : {
-                "x" : -0.1423764886689444,
-                "y" : 0.09554352884262735,
-                "z" : -0.0024396603947399865,
-                "w" : 0.985187503791922
-              },
-              "control_frame_position_in_end_effector" : {
-                "x" : 0.0881399810199536,
-                "y" : 0.017018520057585494,
-                "z" : -0.018361671647509875
-              },
-              "control_frame_orientation_in_end_effector" : {
-                "x" : 0.0,
-                "y" : 0.0,
-                "z" : 0.0,
-                "w" : 1.0
-              },
-              "angular_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 0,
-                "x_selected" : false,
-                "y_selected" : false,
-                "z_selected" : false
-              },
-              "linear_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 83766130,
-                "x_selected" : true,
-                "y_selected" : true,
-                "z_selected" : true
-              },
-              "angular_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 0.1,
-                "y_weight" : 0.1,
-                "z_weight" : 0.1
-              },
-              "linear_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 0.1,
-                "y_weight" : 0.1,
-                "z_weight" : 0.1
-              }
-            }
-          }
-        }
-      }, {
-        "SixDoFMotionControlAnchorDescription" : {
-          "rigidBodyName" : "torso",
-          "isContactState" : false,
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
-              "sequence_id" : 0,
-              "end_effector_hash_code" : -1300704193,
-              "desired_position_in_world" : {
-                "x" : 0.7899050945637501,
-                "y" : 0.04535687529218805,
-                "z" : 1.2560233243442955
-              },
-              "desired_orientation_in_world" : {
-                "x" : 0.115558682171073,
-                "y" : 0.3449202970925505,
-                "z" : 0.12485116918884132,
-                "w" : 0.9230863259634231
-              },
-              "control_frame_position_in_end_effector" : {
-                "x" : 0.06418795910297408,
-                "y" : -0.005939236724980181,
-                "z" : -0.0660621794899702
-              },
-              "control_frame_orientation_in_end_effector" : {
-                "x" : 0.0,
-                "y" : 0.0,
-                "z" : 0.0,
-                "w" : 1.0
-              },
-              "angular_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 0,
-                "x_selected" : true,
-                "y_selected" : true,
-                "z_selected" : false
-              },
-              "linear_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 83766130,
-                "x_selected" : false,
-                "y_selected" : false,
-                "z_selected" : false
-              },
-              "angular_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 0.1,
-                "y_weight" : 0.1,
-                "z_weight" : 0.1
-              },
-              "linear_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 0.1,
-                "y_weight" : 0.1,
-                "z_weight" : 0.1
-              }
-            }
-          }
-        }
-      }, {
-        "SixDoFMotionControlAnchorDescription" : {
           "rigidBodyName" : "rightElbowPitchLink",
           "isContactState" : true,
           "isTrackingController" : false,
@@ -8975,10 +8951,10 @@
                 "z" : 1.1014769645887994
               },
               "desired_orientation_in_world" : {
-                "x" : -0.4368130256240457,
-                "y" : 0.6049840497421897,
-                "z" : 0.4639082487850657,
-                "w" : 0.4774702262046087
+                "x" : 0.4669373153168951,
+                "y" : -0.6033492455302835,
+                "z" : -0.5477093343329447,
+                "w" : -0.34344390599812724
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.04068498800426268,
@@ -9024,6 +9000,68 @@
         }
       }, {
         "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "torso",
+          "isContactState" : false,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : -1300704193,
+              "desired_position_in_world" : {
+                "x" : 0.7739029910801352,
+                "y" : -0.015344453999991396,
+                "z" : 1.0141373479005547
+              },
+              "desired_orientation_in_world" : {
+                "x" : 0.1791197257955117,
+                "y" : 0.44993989206239243,
+                "z" : -0.12321901813924667,
+                "w" : 0.8661912553995356
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : 0.06418795910297408,
+                "y" : -0.005939236724980181,
+                "z" : -0.0660621794899702
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : 0.0,
+                "y" : 0.0,
+                "z" : 0.0,
+                "w" : 1.0
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : true,
+                "y_selected" : true,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
           "rigidBodyName" : "leftHipPitchLink",
           "isContactState" : true,
           "isTrackingController" : false,
@@ -9032,15 +9070,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 2027763393,
               "desired_position_in_world" : {
-                "x" : 0.6769081079935227,
-                "y" : 0.2369331668794143,
-                "z" : 0.518122328752155
+                "x" : 0.8103246063430604,
+                "y" : 0.23054303837718737,
+                "z" : 0.41914505789564926
               },
               "desired_orientation_in_world" : {
-                "x" : -0.0672583459825656,
-                "y" : 0.5966168499833372,
-                "z" : -0.03899240631150802,
-                "w" : 0.7987516769695623
+                "x" : -0.10297875804308923,
+                "y" : 0.333096365940079,
+                "z" : -0.032812421605787304,
+                "w" : 0.9366779229691388
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.09693130820594198,
@@ -9095,14 +9133,14 @@
               "end_effector_hash_code" : 612165328,
               "desired_position_in_world" : {
                 "x" : 0.4981137256482838,
-                "y" : 0.6436919405281375,
+                "y" : 0.6318210941588047,
                 "z" : 1.1008091126260022
               },
               "desired_orientation_in_world" : {
-                "x" : 0.4402641616913789,
-                "y" : 0.6502207493480453,
-                "z" : -0.16498305029710136,
-                "w" : 0.5967922906356262
+                "x" : 0.2766992977293315,
+                "y" : 0.8143593343508999,
+                "z" : -0.4607320271253265,
+                "w" : 0.2190487899364916
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.04536166451679495,
@@ -9161,10 +9199,10 @@
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : -0.22474674580810874,
-                "y" : -0.29280252143582053,
-                "z" : 0.025706513478668393,
-                "w" : 0.9290289332707902
+                "x" : -0.22476835082094973,
+                "y" : -0.2928316996369467,
+                "z" : 0.025495529459232783,
+                "w" : 0.9290203238544144
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.1445913339807622,
@@ -9218,15 +9256,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 532235394,
               "desired_position_in_world" : {
-                "x" : 0.9478906322239976,
+                "x" : 0.9479527922073523,
                 "y" : 0.1961255268138561,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.26938555357755006,
-                "y" : -0.2956748860207631,
-                "z" : 0.03250182364089973,
-                "w" : 0.9159429112997935
+                "x" : 0.26936231793709914,
+                "y" : -0.295799955153347,
+                "z" : 0.03233162760686262,
+                "w" : 0.9159153858643942
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.14459133398076232,
@@ -9280,15 +9318,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 532235394,
               "desired_position_in_world" : {
-                "x" : 0.6730120588896834,
+                "x" : 0.673077440783623,
                 "y" : 0.20436472316886173,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.4525526698135438,
-                "y" : 0.16597513695291993,
-                "z" : 0.025668403087362346,
-                "w" : 0.8757793489464328
+                "x" : 0.4526186118245281,
+                "y" : 0.1658176312169487,
+                "z" : 0.02553898165534315,
+                "w" : 0.8757788909443097
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.13040866601923765,
@@ -9332,6 +9370,68 @@
             }
           }
         }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "rightFoot",
+          "isContactState" : false,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : -284345206,
+              "desired_position_in_world" : {
+                "x" : 0.9088540852677576,
+                "y" : -0.20735539666000913,
+                "z" : 0.07223220204608889
+              },
+              "desired_orientation_in_world" : {
+                "x" : 0.02458933670938225,
+                "y" : -0.00347782958652255,
+                "z" : -0.20264735445929058,
+                "w" : 0.9789368309304796
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : 0.0881399810199536,
+                "y" : 0.017018520057585494,
+                "z" : -0.018361671647509875
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : 0.0,
+                "y" : 0.0,
+                "z" : 0.0,
+                "w" : 1.0
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : true,
+                "y_selected" : true,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : true,
+                "y_selected" : true,
+                "z_selected" : true
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              }
+            }
+          }
+        }
       } ],
       "oneDoFAnchors" : [ {
         "OneDoFMotionControlAnchorDescription" : {
@@ -9346,49 +9446,162 @@
             }
           }
         }
+      }, {
+        "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "leftShoulderPitch",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : -1988668465,
+              "desired_position" : 0.9997245955423519,
+              "weight" : 0.1
+            }
+          }
+        }
       } ],
-      "executionDuration" : "NaN"
+      "executionDuration" : 5.0
     }
   }, {
     "KinematicsToolboxSnapshotDescription" : {
       "controllerConfiguration" : {
         "controller_msgs::msg::dds_::RobotConfigurationData_" : {
-          "sequence_id" : 16232,
-          "wall_time" : 1676949667052,
-          "monotonic_time" : 1676949667052,
+          "sequence_id" : 2416,
+          "wall_time" : 1677705486094,
+          "monotonic_time" : 1677705486094,
           "sync_timestamp" : 0,
           "joint_name_hash" : -1361652808,
-          "joint_angles" : [ 0.20445621, -0.3976734, -0.6568438, 0.43733212, -0.040183604, 0.14505874, 0.23066626, -0.49792954, -1.1551878, 0.8977674, 0.18405418, -0.03273394, 0.5135399, 0.4845996, 9.372682E-4, 0.47221816, -1.519842, -0.62185967, -1.4490329, 0.10980892, 0.025525974, -1.6239394E-6, 8.761532, 1.1074369, 1.4993192, -0.98120666, 1.3167868 ],
-          "joint_velocities" : [ ],
-          "joint_torques" : [ 68.66425, 77.89544, -105.041725, -95.89151, 42.395256, 10.8709, 3.4671092, -26.411982, -44.78647, 0.78773993, -0.90009, -0.23965515, -19.689304, 200.52182, 91.66724, 44.22601, 190.58568, -246.58553, 113.68622, -8.556451, 0.67016035, -3.3699749, 0.0, 250.10173, -400.0882, -219.48375, -137.56755 ],
+          "joint_angles" : [ 0.12046746, -0.22629695, -0.8512236, 0.789125, -0.20916675, 0.07869159, 0.09814783, -0.22376756, -1.0458316, 0.78522104, -0.2089685, -0.058178123, 0.28665364, 0.2942839, 0.0019235966, 0.60034144, -0.7079236, -0.32904738, -0.97425956, 0.034125052, 0.006610911, 1.8313361E-6, 28.955608, 1.240121, 0.7171757, -0.29655772, 0.97490275 ],
+          "joint_velocities" : [ 0.12942629, -0.031803172, -0.42902127, 0.49935457, -0.11841929, 0.057068247, 0.080005, -0.2488378, -0.7335778, 0.32104492, -0.20923565, -0.020596784, 0.06855607, 0.17975211, 0.009556389, 0.33205968, -0.35336283, -0.19209374, -0.5747853, 0.023845203, 5.091342E-4, -7.847899E-12, 10.02078, 0.7680541, 0.37622863, -0.23150618, 0.47747663 ],
+          "joint_torques" : [ 27.59623, 30.914778, -84.16299, -23.380396, -1.9391294, 0.26684368, -205.06438, -347.65662, 103.879555, 63.988987, 10.067435, -37.087467, 188.04713, -17.597893, 288.5932, 70.602844, -107.57122, 1.3307792, 38.77823, 9.86911, 1.3578513, -0.0027470037, 0.0, -55.14375, 251.90338, 218.24973, 123.15631 ],
           "root_position" : {
-            "x" : 0.6401178647958311,
-            "y" : 0.06498819252855877,
-            "z" : 1.1052852120177477
+            "x" : 0.8251016693651103,
+            "y" : 0.21872871464475233,
+            "z" : 0.6470108713509186
           },
           "root_orientation" : {
-            "x" : 0.11275982595500343,
-            "y" : 0.13581484616625053,
-            "z" : -0.14381853158694696,
-            "w" : 0.9737329095720291
+            "x" : 0.24046398970404811,
+            "y" : -0.40686042805443196,
+            "z" : -0.5504822102569443,
+            "w" : 0.6881940118379448
           },
           "pelvis_linear_velocity" : {
-            "x" : 0.0019147265136802024,
-            "y" : 4.697609374137882E-4,
-            "z" : 4.2066810290572075E-4
+            "x" : 0.0327617919312954,
+            "y" : -0.02777404475691904,
+            "z" : -0.10504392348585652
           },
           "pelvis_angular_velocity" : {
-            "x" : 0.0013787283189271513,
-            "y" : -0.00225891788944654,
-            "z" : 0.004534338071375489
+            "x" : 0.0360662426434637,
+            "y" : 0.5233300493510572,
+            "z" : 0.08659518882252759
           },
           "pelvis_linear_acceleration" : {
             "x" : 0.0,
             "y" : 0.0,
             "z" : 0.0
           },
-          "force_sensor_data" : [ ],
-          "imu_sensor_data" : [ ],
+          "force_sensor_data" : [ {
+            "sequence_id" : 2416,
+            "angular_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            }
+          }, {
+            "sequence_id" : 2416,
+            "angular_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            }
+          } ],
+          "imu_sensor_data" : [ {
+            "sequence_id" : 2416,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          }, {
+            "sequence_id" : 2416,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          }, {
+            "sequence_id" : 2416,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          }, {
+            "sequence_id" : 2416,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          } ],
           "robot_motion_status" : 0,
           "last_received_packet_type_id" : -1,
           "last_received_packet_unique_id" : -1,
@@ -9400,31 +9613,31 @@
           "sequence_id" : 0,
           "current_toolbox_state" : 3,
           "joint_name_hash" : 1976133317,
-          "desired_joint_angles" : [ 0.06928908, -0.416075, -0.75817955, 0.72237253, -0.27293205, 0.12586506, -0.070641845, -0.38836032, -1.0252068, 0.78261864, -0.10336673, 0.14119126, 0.44842386, 0.47573575, -0.018184006, 0.3096251, -1.3922229, -0.8033377, -1.0866213, 0.119076125, 0.023519017, -0.004422129, 8.98242, 1.1990871, 1.5071646, -0.83644027, 1.0032073 ],
+          "desired_joint_angles" : [ 0.09741501, -0.35190406, -1.0834683, 1.3278158, -0.56846225, 0.12037894, -0.08983633, -0.25813094, -1.3478578, 1.310388, -0.32187548, 0.09196958, 0.39379615, 0.47862726, 6.965895E-4, 0.6032116, -1.4852753, -0.9714765, -1.3598719, 0.07819608, 0.010857096, -0.0014315174, 9.2880745, 1.4538966, 1.519, -0.72355133, 1.2047598 ],
           "desired_root_position" : {
-            "x" : 0.7344293059545647,
-            "y" : 0.040794090816809014,
-            "z" : 1.0641685605863178
+            "x" : 0.7361644250960253,
+            "y" : 0.030399606329048878,
+            "z" : 0.9464359250637255
           },
           "desired_root_orientation" : {
-            "x" : 0.13991515656146808,
-            "y" : 0.15094127024444823,
-            "z" : -0.089464563046723,
-            "w" : 0.9744929829712636
+            "x" : 0.10845786790482913,
+            "y" : 0.1606449986002071,
+            "z" : -0.10003324755418375,
+            "w" : 0.9759218332930366
           },
-          "desired_joint_velocities" : [ -1.9133306E-10, 0.0, 1.6264767E-10, -1.7463808E-10, -4.887202E-10, 3.7747583E-11, 9.382772E-11, -2.847167E-10, 1.1901591E-10, 1.3378187E-10, -6.582096E-10, 3.1447067E-10, 9.686696E-10, -3.26289E-9, -2.4301047E-10, 3.4178216E-10, 2.3470115E-10, -6.2305716E-10, 8.104628E-10, 3.002737E-10, 2.5017384E-9, 7.4614794E-11, -2.8913503E-4, 1.2605472E-9, 9.481305E-10, -7.784884E-10, -6.4548367E-10 ],
+          "desired_joint_velocities" : [ -6.83148E-10, -3.0030978E-9, 7.149392E-9, 2.4171776E-9, -9.6697095E-9, 1.9541453E-9, -1.4240692E-9, -4.6429527E-9, 3.7303494E-9, 6.447509E-9, -1.06353815E-8, 3.7683745E-9, 5.415113E-10, -1.5043689E-8, -5.547056E-10, 4.1636694E-9, 1.3811174E-10, -3.9802606E-9, 1.1288304E-8, 1.3807844E-9, 1.9587804E-10, -4.7391735E-10, -5.1128234E-5, 6.05338E-9, 0.0, -2.1045388E-9, -7.920109E-9 ],
           "desired_root_linear_velocity" : {
-            "x" : 5.209130349292934E-10,
-            "y" : 1.6419043902260455E-10,
-            "z" : 1.786317205265675E-10
+            "x" : 5.1053394845013145E-9,
+            "y" : 2.3112760594301562E-9,
+            "z" : 1.1066267902037907E-9
           },
           "desired_root_angular_velocity" : {
-            "x" : -6.981681899276282E-11,
-            "y" : 4.557947907990467E-10,
-            "z" : -4.1800785055556844E-11
+            "x" : 1.0636371783334653E-9,
+            "y" : 6.701539323472616E-11,
+            "z" : -1.4551027049947152E-11
           },
           "support_region" : [ ],
-          "solution_quality" : 0.044785659560590385
+          "solution_quality" : 0.10922606949977794
         }
       },
       "ikPrivilegedConfiguration" : {
@@ -9433,18 +9646,18 @@
           "use_privileged_root_joint_position" : true,
           "use_privileged_root_joint_orientation" : true,
           "privileged_root_joint_position" : {
-            "x" : 0.4795992458928088,
-            "y" : 0.08742403122344108,
-            "z" : 1.1192968820613558
+            "x" : 0.4283733140819856,
+            "y" : 0.061141666740264465,
+            "z" : 1.0810279591161458
           },
           "privileged_root_joint_orientation" : {
-            "x" : -0.023368039390324627,
-            "y" : 0.19349063343138415,
-            "z" : -0.4592074496504666,
-            "w" : 0.8666855414133133
+            "x" : -0.011425679436477714,
+            "y" : 0.06275822738054926,
+            "z" : -0.43609116957045074,
+            "w" : 0.8976387639625099
           },
           "privileged_joint_hash_codes" : [ -1125911624, -50597405, 2113478223, 50005387, 198041311, 1756621650, -1027817653, -295382337, -2079477326, -1617110071, 140620596, 109168446, -924769235, 1685301882, 1874039824, -1988668465, -1051199441, 2139390173, -510372639, -992849718, 695341792, 1384116089, 223738931, 1647609966, 1895052909, -1394815392, -1630808225 ],
-          "privileged_joint_angles" : [ 0.8931455, -0.22715867, -0.87401986, 0.28218913, 0.21413887, 0.103300706, 0.3401463, -0.50056964, -2.212183, 1.0085744, 0.07265054, -0.02736563, 1.1801131, 0.5783734, -0.035703197, 0.52045375, -1.5189704, -0.5785273, -2.021752, 0.0979246, 0.026628574, -0.0014443733, 8.987755, 0.8272527, 1.3493397, -1.0062566, 1.377768 ],
+          "privileged_joint_angles" : [ 0.91689605, -0.10744034, -0.82026696, 0.67280453, 0.024704823, 0.07092559, -0.2284731, -0.49907577, -1.9916732, 2.0565755, -0.5840442, -0.12483453, 1.1681532, 0.46757615, -0.029788412, 0.40131512, -1.5189726, -0.68619275, -2.1743228, 0.06764669, 0.01187737, -7.801008E-8, 9.287769, 0.8939116, 1.3181359, -0.89187485, 1.4961784 ],
           "privileged_weight" : 0.5,
           "privileged_gain" : 100.0
         }
@@ -9457,8 +9670,8 @@
               "sequence_id" : 0,
               "desired_position_in_world" : {
                 "x" : 0.8254717685373401,
-                "y" : 0.011880976808909701,
-                "z" : 1.005358623754804
+                "y" : -6.477211607048141E-4,
+                "z" : 0.9171799849302922
               },
               "selection_matrix" : {
                 "sequence_id" : 0,
@@ -9493,10 +9706,10 @@
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.1335224032680257,
-                "y" : -0.17661905016703838,
-                "z" : -0.10689504342705414,
-                "w" : 0.9693043529430538
+                "x" : 0.12708964583246518,
+                "y" : -0.18119069983064198,
+                "z" : -0.1401781162722791,
+                "w" : 0.9650742188740803
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.1445913339807624,
@@ -9550,15 +9763,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : -284345206,
               "desired_position_in_world" : {
-                "x" : 1.0104892401698136,
-                "y" : -0.2870319773330854,
+                "x" : 0.9996587252031288,
+                "y" : -0.2848622437453467,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : -0.29216037770139647,
-                "y" : -0.3563150039925475,
-                "z" : -0.15778325482340066,
-                "w" : 0.8733764229291412
+                "x" : -0.30450333497790216,
+                "y" : -0.34612061705311203,
+                "z" : -0.18769987194967583,
+                "w" : 0.8673217370204577
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.14459133398076246,
@@ -9612,15 +9825,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : -284345206,
               "desired_position_in_world" : {
-                "x" : 0.7390751530033675,
-                "y" : -0.24276694403813381,
+                "x" : 0.7319381993039213,
+                "y" : -0.22200750627073393,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : -0.5734002032001488,
-                "y" : 0.18576284335495016,
-                "z" : -0.0708704382579722,
-                "w" : 0.7947840926816762
+                "x" : -0.5668780176211161,
+                "y" : 0.20535490258552097,
+                "z" : -0.09829571412982673,
+                "w" : 0.7917175188826834
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.13040866601923776,
@@ -9674,15 +9887,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : -1300704193,
               "desired_position_in_world" : {
-                "x" : 0.8849839784864284,
-                "y" : 0.008732179163474744,
-                "z" : 1.216885668614438
+                "x" : 0.8920973542757716,
+                "y" : -0.0017400219075853346,
+                "z" : 1.0937573623351984
               },
               "desired_orientation_in_world" : {
-                "x" : 0.13110732305701647,
-                "y" : 0.3390509749917696,
-                "z" : 0.1670703624996376,
-                "w" : 0.9164839333955579
+                "x" : 0.10608246331240606,
+                "y" : 0.35023878858139296,
+                "z" : 0.12423046622557858,
+                "w" : 0.9223047724109347
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.06418795910297408,
@@ -9737,14 +9950,14 @@
               "end_effector_hash_code" : 601127246,
               "desired_position_in_world" : {
                 "x" : 0.5091384884497308,
-                "y" : -0.6372374245855753,
+                "y" : -0.6342503655259218,
                 "z" : 1.1014769645887994
               },
               "desired_orientation_in_world" : {
-                "x" : -0.2890079963545217,
-                "y" : 0.698209849919561,
-                "z" : 0.5073757531536314,
-                "w" : 0.4141826030028714
+                "x" : -0.23779653589185212,
+                "y" : 0.7063213905742889,
+                "z" : 0.5635680095122501,
+                "w" : 0.3563060473657979
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.04068498800426268,
@@ -9798,15 +10011,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 2027763393,
               "desired_position_in_world" : {
-                "x" : 0.7717191362614243,
-                "y" : 0.22064226048393937,
-                "z" : 0.4980634723740277
+                "x" : 0.8746025394778462,
+                "y" : 0.20525302028393444,
+                "z" : 0.41419342189873865
               },
               "desired_orientation_in_world" : {
-                "x" : -0.059241423567012896,
-                "y" : 0.5750517581619145,
-                "z" : -0.030978602555330657,
-                "w" : 0.815381049174166
+                "x" : -0.0662989636245329,
+                "y" : 0.44211207369792394,
+                "z" : -0.02542847682307844,
+                "w" : 0.8941447054472181
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.09693130820594198,
@@ -9861,14 +10074,14 @@
               "end_effector_hash_code" : 612165328,
               "desired_position_in_world" : {
                 "x" : 0.4981137256482838,
-                "y" : 0.6436919405281375,
+                "y" : 0.6138058252476877,
                 "z" : 1.1008091126260022
               },
               "desired_orientation_in_world" : {
-                "x" : 0.387445714197462,
-                "y" : 0.7200628793531094,
-                "z" : -0.03280114521601761,
-                "w" : 0.5747341587205739
+                "x" : 0.43789816651724,
+                "y" : 0.7559558869204236,
+                "z" : -0.06318325151179831,
+                "w" : 0.48247670360297396
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.04536166451679495,
@@ -9927,10 +10140,10 @@
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : -0.22478876737383777,
-                "y" : -0.29279174343682973,
-                "z" : 0.025745167305185484,
-                "w" : 0.9290210930857277
+                "x" : -0.2249692232717536,
+                "y" : -0.29273495005815536,
+                "z" : 0.025726926058543837,
+                "w" : 0.9289958142373578
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.1445913339807622,
@@ -9984,15 +10197,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 532235394,
               "desired_position_in_world" : {
-                "x" : 0.947882122014322,
+                "x" : 0.9478980112403672,
                 "y" : 0.1961255268138561,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.26934438238437813,
-                "y" : -0.29565338512676065,
-                "z" : 0.03253277575240718,
-                "w" : 0.9159608605409452
+                "x" : 0.26916614463510463,
+                "y" : -0.2956363883406068,
+                "z" : 0.03249799645353193,
+                "w" : 0.9160199739621959
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.14459133398076232,
@@ -10046,15 +10259,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 532235394,
               "desired_position_in_world" : {
-                "x" : 0.6730031992099966,
+                "x" : 0.6730204290013349,
                 "y" : 0.20436472316886173,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.45250362528784166,
-                "y" : 0.16599958068112444,
-                "z" : 0.025671500574422145,
-                "w" : 0.8757999671005411
+                "x" : 0.45236974680282377,
+                "y" : 0.16599893544688743,
+                "z" : 0.02555507666092039,
+                "w" : 0.8758726526527151
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.13040866601923765,
@@ -10126,7 +10339,886 @@
           }
         }
       } ],
-      "executionDuration" : "NaN"
+      "executionDuration" : 5.0
+    }
+  }, {
+    "KinematicsToolboxSnapshotDescription" : {
+      "controllerConfiguration" : {
+        "controller_msgs::msg::dds_::RobotConfigurationData_" : {
+          "sequence_id" : 2416,
+          "wall_time" : 1677705486094,
+          "monotonic_time" : 1677705486094,
+          "sync_timestamp" : 0,
+          "joint_name_hash" : -1361652808,
+          "joint_angles" : [ 0.12046746, -0.22629695, -0.8512236, 0.789125, -0.20916675, 0.07869159, 0.09814783, -0.22376756, -1.0458316, 0.78522104, -0.2089685, -0.058178123, 0.28665364, 0.2942839, 0.0019235966, 0.60034144, -0.7079236, -0.32904738, -0.97425956, 0.034125052, 0.006610911, 1.8313361E-6, 28.955608, 1.240121, 0.7171757, -0.29655772, 0.97490275 ],
+          "joint_velocities" : [ 0.12942629, -0.031803172, -0.42902127, 0.49935457, -0.11841929, 0.057068247, 0.080005, -0.2488378, -0.7335778, 0.32104492, -0.20923565, -0.020596784, 0.06855607, 0.17975211, 0.009556389, 0.33205968, -0.35336283, -0.19209374, -0.5747853, 0.023845203, 5.091342E-4, -7.847899E-12, 10.02078, 0.7680541, 0.37622863, -0.23150618, 0.47747663 ],
+          "joint_torques" : [ 27.59623, 30.914778, -84.16299, -23.380396, -1.9391294, 0.26684368, -205.06438, -347.65662, 103.879555, 63.988987, 10.067435, -37.087467, 188.04713, -17.597893, 288.5932, 70.602844, -107.57122, 1.3307792, 38.77823, 9.86911, 1.3578513, -0.0027470037, 0.0, -55.14375, 251.90338, 218.24973, 123.15631 ],
+          "root_position" : {
+            "x" : 0.8251016693651103,
+            "y" : 0.21872871464475233,
+            "z" : 0.6470108713509186
+          },
+          "root_orientation" : {
+            "x" : 0.24046398970404811,
+            "y" : -0.40686042805443196,
+            "z" : -0.5504822102569443,
+            "w" : 0.6881940118379448
+          },
+          "pelvis_linear_velocity" : {
+            "x" : 0.0327617919312954,
+            "y" : -0.02777404475691904,
+            "z" : -0.10504392348585652
+          },
+          "pelvis_angular_velocity" : {
+            "x" : 0.0360662426434637,
+            "y" : 0.5233300493510572,
+            "z" : 0.08659518882252759
+          },
+          "pelvis_linear_acceleration" : {
+            "x" : 0.0,
+            "y" : 0.0,
+            "z" : 0.0
+          },
+          "force_sensor_data" : [ {
+            "sequence_id" : 2416,
+            "angular_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            }
+          }, {
+            "sequence_id" : 2416,
+            "angular_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_part" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            }
+          } ],
+          "imu_sensor_data" : [ {
+            "sequence_id" : 2416,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          }, {
+            "sequence_id" : 2416,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          }, {
+            "sequence_id" : 2416,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          }, {
+            "sequence_id" : 2416,
+            "orientation" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0,
+              "w" : 1.0
+            },
+            "angular_velocity" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "linear_acceleration" : {
+              "x" : 0.0,
+              "y" : 0.0,
+              "z" : 0.0
+            },
+            "time" : 0.0
+          } ],
+          "robot_motion_status" : 0,
+          "last_received_packet_type_id" : -1,
+          "last_received_packet_unique_id" : -1,
+          "last_received_packet_robot_timestamp" : -1
+        }
+      },
+      "ikSolution" : {
+        "toolbox_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
+          "sequence_id" : 0,
+          "current_toolbox_state" : 3,
+          "joint_name_hash" : 1976133317,
+          "desired_joint_angles" : [ 0.078191586, -0.09672999, -1.3709471, 1.241345, -0.44183296, 0.047660805, -0.07737203, 0.07334005, -1.4651909, 1.0945026, -0.19852944, -0.011369265, 0.0021618812, 0.17492706, 0.014175101, 1.2668431, -1.3757647, -0.38908377, -1.2274996, 5.5995E-20, -8.002924E-4, -6.8733433E-22, 0.001746509, 1.2846456, 1.519, -0.85318446, 1.7453331 ],
+          "desired_root_position" : {
+            "x" : 0.7452193490844393,
+            "y" : 0.008767911337684094,
+            "z" : 0.9590175810188465
+          },
+          "desired_root_orientation" : {
+            "x" : 0.016697338800260593,
+            "y" : 0.28160107564388676,
+            "z" : -0.07200801667189777,
+            "w" : 0.9566801339048361
+          },
+          "desired_joint_velocities" : [ -5.9008354E-11, 2.5188185E-11, -3.3373304E-10, 7.238654E-11, 5.301315E-11, -3.5610404E-11, 8.409939E-12, 2.4397151E-11, -3.250733E-10, 8.6597396E-11, 2.9004577E-11, -2.3250499E-11, -5.4612564E-11, 2.6312286E-11, -7.352105E-11, 7.549517E-12, 1.478817E-10, 7.271961E-11, 1.1479706E-10, 1.0511356E-17, -4.4632992E-10, 0.0, 7.347509E-5, 6.017409E-11, 0.0, 1.677547E-10, -9.547918E-11 ],
+          "desired_root_linear_velocity" : {
+            "x" : 3.030579536237796E-11,
+            "y" : -3.356912165776438E-11,
+            "z" : -5.163779977614483E-11
+          },
+          "desired_root_angular_velocity" : {
+            "x" : -8.476946304191574E-12,
+            "y" : 2.109512467593673E-10,
+            "z" : 6.012480183864577E-11
+          },
+          "support_region" : [ ],
+          "solution_quality" : 0.0403172616195762
+        }
+      },
+      "ikPrivilegedConfiguration" : {
+        "toolbox_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
+          "sequence_id" : 0,
+          "use_privileged_root_joint_position" : false,
+          "use_privileged_root_joint_orientation" : false,
+          "privileged_root_joint_position" : {
+            "x" : 0.0,
+            "y" : 0.0,
+            "z" : 0.0
+          },
+          "privileged_root_joint_orientation" : {
+            "x" : 0.0,
+            "y" : 0.0,
+            "z" : 0.0,
+            "w" : 1.0
+          },
+          "privileged_joint_hash_codes" : [ ],
+          "privileged_joint_angles" : [ ],
+          "privileged_weight" : 0.5,
+          "privileged_gain" : 100.0
+        }
+      },
+      "centerOfMassAnchor" : {
+        "CenterOfMassMotionControlAnchorDescription" : {
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxCenterOfMassMessage_" : {
+              "sequence_id" : 0,
+              "desired_position_in_world" : {
+                "x" : 0.8254717685373401,
+                "y" : -0.006404189573046549,
+                "z" : 0.9390681058825653
+              },
+              "selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : true,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "weights" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 7.921261966660795E-4,
+                "y_weight" : 7.921261966660795E-4,
+                "z_weight" : 7.921261966660795E-4
+              }
+            }
+          }
+        }
+      },
+      "sixDoFAnchors" : [ {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "leftFoot",
+          "isContactState" : true,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : 532235394,
+              "desired_position_in_world" : {
+                "x" : 0.9431336032524952,
+                "y" : 0.036372465233427125,
+                "z" : 0.0
+              },
+              "desired_orientation_in_world" : {
+                "x" : -0.2248007636358176,
+                "y" : -0.29278414217203963,
+                "z" : 0.025754282458425364,
+                "w" : 0.9290203333062134
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : 0.1445913339807622,
+                "y" : -0.08494323607834448,
+                "z" : -0.03807207585965923
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : -0.2204196539809931,
+                "y" : -0.29608878156880736,
+                "z" : 0.039527771624523894,
+                "w" : 0.9285387255458966
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : true,
+                "y_selected" : true,
+                "z_selected" : true
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "leftFoot",
+          "isContactState" : true,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : 532235394,
+              "desired_position_in_world" : {
+                "x" : 0.947879271552877,
+                "y" : 0.1961255268138561,
+                "z" : 0.0
+              },
+              "desired_orientation_in_world" : {
+                "x" : 0.2693326388290887,
+                "y" : -0.2956441855041959,
+                "z" : 0.032537649445853356,
+                "w" : 0.9159671100031153
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : 0.14459133398076232,
+                "y" : 0.07505676392165556,
+                "z" : -0.03807207585965923
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : 0.273701605255221,
+                "y" : -0.29161867614052756,
+                "z" : 0.04611769064200638,
+                "w" : 0.9153792315847074
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : false,
+                "y_selected" : true,
+                "z_selected" : true
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "leftFoot",
+          "isContactState" : true,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : 532235394,
+              "desired_position_in_world" : {
+                "x" : 0.673000295423922,
+                "y" : 0.20436472316886173,
+                "z" : 0.0
+              },
+              "desired_orientation_in_world" : {
+                "x" : 0.45249088427018463,
+                "y" : 0.1660089367033734,
+                "z" : 0.0256681253892468,
+                "w" : 0.8758048754865456
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : -0.13040866601923765,
+                "y" : 0.07505676392165554,
+                "z" : -0.038072075859659216
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : 0.4499910386782943,
+                "y" : 0.17270077226465572,
+                "z" : 0.038660133175107164,
+                "w" : 0.8753215994543403
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : false,
+                "y_selected" : true,
+                "z_selected" : true
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "torso",
+          "isContactState" : false,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : -1300704193,
+              "desired_position_in_world" : {
+                "x" : 0.888288655124192,
+                "y" : -0.023089694779257108,
+                "z" : 1.1024246917449512
+              },
+              "desired_orientation_in_world" : {
+                "x" : 0.029078522464689976,
+                "y" : 0.3631700769412774,
+                "z" : -0.0715747044286605,
+                "w" : 0.9285144029209709
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : 0.06418795910297408,
+                "y" : -0.005939236724980181,
+                "z" : -0.0660621794899702
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : 0.0,
+                "y" : 0.0,
+                "z" : 0.0,
+                "w" : 1.0
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : true,
+                "y_selected" : true,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "rightElbowPitchLink",
+          "isContactState" : true,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : 601127246,
+              "desired_position_in_world" : {
+                "x" : 0.5091384884497308,
+                "y" : -0.5662392042552089,
+                "z" : 1.1014769645887994
+              },
+              "desired_orientation_in_world" : {
+                "x" : -0.4235787050612728,
+                "y" : 0.618742882553311,
+                "z" : 0.4058861031623215,
+                "w" : 0.5224890402371519
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : -0.04068498800426268,
+                "y" : -0.258104785475939,
+                "z" : 0.018864026131600306
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : -0.6792318372203636,
+                "y" : 0.6120230659591641,
+                "z" : 0.08969959973843072,
+                "w" : 0.39500108841237286
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : true,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : true,
+                "y_selected" : true,
+                "z_selected" : true
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "rightFoot",
+          "isContactState" : true,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : -284345206,
+              "desired_position_in_world" : {
+                "x" : 1.0362449676993795,
+                "y" : -0.12911389988688662,
+                "z" : 0.0
+              },
+              "desired_orientation_in_world" : {
+                "x" : 0.12530626298483152,
+                "y" : -0.1825133025365546,
+                "z" : -0.1507293808390329,
+                "w" : 0.9634665996316936
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : 0.1445913339807624,
+                "y" : 0.07505676392165553,
+                "z" : -0.03807207585965924
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : 0.14729875905344156,
+                "y" : -0.16528144601518846,
+                "z" : -0.028267756367113213,
+                "w" : 0.9747748730524469
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : true,
+                "y_selected" : true,
+                "z_selected" : true
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "rightFoot",
+          "isContactState" : true,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : -284345206,
+              "desired_position_in_world" : {
+                "x" : 0.996287092159043,
+                "y" : -0.28404323874365855,
+                "z" : 0.0
+              },
+              "desired_orientation_in_world" : {
+                "x" : -0.3080802915990849,
+                "y" : -0.342721658035218,
+                "z" : -0.1972074111105346,
+                "w" : 0.8652962706754805
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : 0.14459133398076246,
+                "y" : -0.0849432360783445,
+                "z" : -0.03807207585965921
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : -0.2624786357558671,
+                "y" : -0.3787638101246652,
+                "z" : -0.08673272549665753,
+                "w" : 0.8832442336293552
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : true
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "rightFoot",
+          "isContactState" : true,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : -284345206,
+              "desired_position_in_world" : {
+                "x" : 0.7300002405751493,
+                "y" : -0.21536782354822628,
+                "z" : 0.0
+              },
+              "desired_orientation_in_world" : {
+                "x" : -0.5644424392037959,
+                "y" : 0.21156030209251414,
+                "z" : -0.10686283727320367,
+                "w" : 0.7907131625400668
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : -0.13040866601923776,
+                "y" : -0.08494323607834445,
+                "z" : -0.03807207585965924
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : -0.586567746197445,
+                "y" : 0.13884088968549593,
+                "z" : -0.006482236960895671,
+                "w" : 0.797884369489823
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : true
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "leftHipPitchLink",
+          "isContactState" : true,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : 2027763393,
+              "desired_position_in_world" : {
+                "x" : 0.8296864103040749,
+                "y" : 0.18347747543885512,
+                "z" : 0.441252380473994
+              },
+              "desired_orientation_in_world" : {
+                "x" : -0.03439967555310431,
+                "y" : 0.42365020277697557,
+                "z" : -0.0093543026269314,
+                "w" : 0.905124115815744
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : -0.09693130820594198,
+                "y" : -0.008489652390912632,
+                "z" : -0.14902249928518543
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : -0.01207160647565705,
+                "y" : 0.7420946388382049,
+                "z" : 0.020471816926974924,
+                "w" : 0.6698736657283965
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "leftElbowPitchLink",
+          "isContactState" : true,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : 612165328,
+              "desired_position_in_world" : {
+                "x" : 0.4981137256482838,
+                "y" : 0.5757417892777279,
+                "z" : 1.1008091126260022
+              },
+              "desired_orientation_in_world" : {
+                "x" : 0.1783472003012306,
+                "y" : 0.7685539045837411,
+                "z" : -0.5519621015016415,
+                "w" : 0.2699166730672451
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : -0.04536166451679495,
+                "y" : 0.25191941191947254,
+                "z" : 0.02082043694864275
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : 0.5623744534389872,
+                "y" : 0.7522182361517236,
+                "z" : -0.03074796320367562,
+                "w" : 0.34199014909616327
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : true,
+                "y_selected" : true,
+                "z_selected" : true
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 200.0,
+                "y_weight" : 200.0,
+                "z_weight" : 200.0
+              }
+            }
+          }
+        }
+      } ],
+      "oneDoFAnchors" : [ {
+        "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "rightHipYaw",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : -1027817653,
+              "desired_position" : -0.07609251791650606,
+              "weight" : 0.1
+            }
+          }
+        }
+      }, {
+        "OneDoFMotionControlAnchorDescription" : {
+          "jointName" : "leftHipYaw",
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+              "sequence_id" : 0,
+              "joint_hash_code" : -1125911624,
+              "desired_position" : 0.07609251791650606,
+              "weight" : 0.1
+            }
+          }
+        }
+      } ],
+      "executionDuration" : 5.0
     }
   }, {
     "KinematicsToolboxSnapshotDescription" : {
@@ -10179,31 +11271,31 @@
           "sequence_id" : 0,
           "current_toolbox_state" : 3,
           "joint_name_hash" : 1976133317,
-          "desired_joint_angles" : [ 0.06604183, -0.014832514, -0.54168284, 0.9479281, -0.4966527, 0.042755853, -0.08230988, -0.008006389, -0.64474154, 0.85884875, -0.29913545, 0.049231216, -0.12180609, 0.19588679, 0.0869159, -0.031572513, -0.9562272, 0.17212836, -1.4093305, 0.10325205, 0.030983673, -0.0013267432, 8.97253, -0.15683432, 0.95928496, 0.53253067, 1.4264315 ],
+          "desired_joint_angles" : [ 0.06623759, -0.029457817, -0.5354555, 0.9511852, -0.5003867, 0.05390809, -0.08206259, -0.02339676, -0.64125454, 0.86175716, -0.3003759, 0.06040988, -0.28724506, 0.23120712, 0.12443763, 0.19595113, -0.95583725, 5.799549E-4, -1.4439512, 0.05448828, 0.024368264, 0.0, 9.293594, -0.433143, 0.9645509, 0.8342359, 1.3526468 ],
           "desired_root_position" : {
-            "x" : 0.780941664533577,
-            "y" : 0.02291620784584088,
-            "z" : 1.076411075232497
+            "x" : 0.781168700607127,
+            "y" : 0.03126188440880543,
+            "z" : 1.0754824091463397
           },
           "desired_root_orientation" : {
-            "x" : -0.014698471738118713,
-            "y" : 0.04487153863130889,
-            "z" : -0.04903816996201554,
-            "w" : 0.9976801881546007
+            "x" : -0.012957049307843348,
+            "y" : 0.04202616060512507,
+            "z" : -0.04962665981717184,
+            "w" : 0.9977991337606068
           },
-          "desired_joint_velocities" : [ 3.219645E-7, -6.729351E-6, 2.3345394E-6, -7.2508337E-6, 4.273452E-6, -3.3720316E-6, 3.1218522E-7, -6.5653426E-6, -4.62337E-6, 4.283295E-6, -1.8523072E-6, -3.2014295E-6, 2.8774783E-4, -2.9261015E-5, 2.3253913E-5, -4.6497455E-4, 1.8055463E-6, 5.071909E-4, 2.1398018E-4, 1.6026908E-6, -1.457292E-5, -2.2192573E-7, 1.9018872E-4, 4.981788E-4, -2.1779567E-7, -6.013446E-4, 2.2839938E-4 ],
+          "desired_joint_velocities" : [ -1.4002688E-11, 4.4499474E-10, 1.9584334E-10, -6.6091577E-10, 9.732215E-10, -1.2218976E-9, -2.245426E-11, 4.3238677E-10, -2.4924507E-10, 4.4264592E-10, 1.881828E-10, -1.2660775E-9, 1.272038E-9, 6.9666495E-11, -1.2616297E-10, -4.6799506E-9, -4.773959E-11, 1.4380083E-9, 5.420109E-9, 1.0683815E-10, 3.4398353E-9, 0.0, 6.0940423E-4, 6.6840977E-10, -8.570922E-11, 1.8185453E-10, 1.5201174E-9 ],
           "desired_root_linear_velocity" : {
-            "x" : 6.505524810016916E-8,
-            "y" : -4.425348308141067E-6,
-            "z" : 3.2718761692569604E-7
+            "x" : -4.985945906631987E-10,
+            "y" : -1.1467374714868106E-9,
+            "z" : 5.873772591055736E-12
           },
           "desired_root_angular_velocity" : {
-            "x" : 9.901828107427543E-6,
-            "y" : 1.3832908985737943E-6,
-            "z" : -5.895780256060051E-8
+            "x" : 7.9580198398925E-10,
+            "y" : -4.4629553039841376E-10,
+            "z" : 1.3251225262884232E-10
           },
           "support_region" : [ ],
-          "solution_quality" : 0.08817886015778748
+          "solution_quality" : 0.10135201740564309
         }
       },
       "ikPrivilegedConfiguration" : {
@@ -10212,18 +11304,18 @@
           "use_privileged_root_joint_position" : true,
           "use_privileged_root_joint_orientation" : true,
           "privileged_root_joint_position" : {
-            "x" : 0.4795992458928088,
-            "y" : 0.08742403122344108,
-            "z" : 1.1192968820613558
+            "x" : 0.4283733140819856,
+            "y" : 0.061141666740264465,
+            "z" : 1.0810279591161458
           },
           "privileged_root_joint_orientation" : {
-            "x" : -0.023368039390324627,
-            "y" : 0.19349063343138415,
-            "z" : -0.4592074496504666,
-            "w" : 0.8666855414133133
+            "x" : -0.011425679436477714,
+            "y" : 0.06275822738054926,
+            "z" : -0.43609116957045074,
+            "w" : 0.8976387639625099
           },
           "privileged_joint_hash_codes" : [ -1125911624, -50597405, 2113478223, 50005387, 198041311, 1756621650, -1027817653, -295382337, -2079477326, -1617110071, 140620596, 109168446, -924769235, 1685301882, 1874039824, -1988668465, -1051199441, 2139390173, -510372639, -992849718, 695341792, 1384116089, 223738931, 1647609966, 1895052909, -1394815392, -1630808225 ],
-          "privileged_joint_angles" : [ 0.8931455, -0.22715867, -0.87401986, 0.28218913, 0.21413887, 0.103300706, 0.3401463, -0.50056964, -2.212183, 1.0085744, 0.07265054, -0.02736563, 1.1801131, 0.5783734, -0.035703197, 0.52045375, -1.5189704, -0.5785273, -2.021752, 0.0979246, 0.026628574, -0.0014443733, 8.987755, 0.8272527, 1.3493397, -1.0062566, 1.377768 ],
+          "privileged_joint_angles" : [ 0.91689605, -0.10744034, -0.82026696, 0.67280453, 0.024704823, 0.07092559, -0.2284731, -0.49907577, -1.9916732, 2.0565755, -0.5840442, -0.12483453, 1.1681532, 0.46757615, -0.029788412, 0.40131512, -1.5189726, -0.68619275, -2.1743228, 0.06764669, 0.01187737, -7.801008E-8, 9.287769, 0.8939116, 1.3181359, -0.89187485, 1.4961784 ],
           "privileged_weight" : 0.5,
           "privileged_gain" : 100.0
         }
@@ -10237,7 +11329,7 @@
               "desired_position_in_world" : {
                 "x" : 0.8505981681842567,
                 "y" : 0.0026758405251643483,
-                "z" : 1.0123464517866572
+                "z" : 1.0126385598132543
               },
               "selection_matrix" : {
                 "sequence_id" : 0,
@@ -10329,15 +11421,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : -284345206,
               "desired_position_in_world" : {
-                "x" : 1.0078597002699186,
-                "y" : -0.28655308998612106,
+                "x" : 1.0078637968134114,
+                "y" : -0.28654242316276557,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : -0.2949568342400156,
-                "y" : -0.35382771100998955,
-                "z" : -0.16500144648491963,
-                "w" : 0.8721129167226132
+                "x" : -0.2949578362199941,
+                "y" : -0.3538273762274594,
+                "z" : -0.16500255792371663,
+                "w" : 0.8721125033864849
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.14459133398076246,
@@ -10391,15 +11483,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : -284345206,
               "desired_position_in_world" : {
-                "x" : 0.7372106368129068,
-                "y" : -0.2378285429786936,
+                "x" : 0.7372148786305329,
+                "y" : -0.23781706914176784,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : -0.5717349250868361,
-                "y" : 0.1905278795962093,
-                "z" : -0.07734680900020494,
-                "w" : 0.7942517067466762
+                "x" : -0.5717350744149134,
+                "y" : 0.19052867626840694,
+                "z" : -0.07734810691306805,
+                "w" : 0.7942512817491367
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.13040866601923776,
@@ -10445,68 +11537,6 @@
         }
       }, {
         "SixDoFMotionControlAnchorDescription" : {
-          "rigidBodyName" : "torso",
-          "isContactState" : false,
-          "isTrackingController" : false,
-          "ikSolverMessage" : {
-            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
-              "sequence_id" : 0,
-              "end_effector_hash_code" : -1300704193,
-              "desired_position_in_world" : {
-                "x" : 0.8415499622172073,
-                "y" : -0.006950103490984889,
-                "z" : 1.2707284472971812
-              },
-              "desired_orientation_in_world" : {
-                "x" : 0.04862291324248485,
-                "y" : 0.1357431564001053,
-                "z" : -0.1184983671396328,
-                "w" : 0.9824295113562047
-              },
-              "control_frame_position_in_end_effector" : {
-                "x" : 0.06418795910297408,
-                "y" : -0.005939236724980181,
-                "z" : -0.0660621794899702
-              },
-              "control_frame_orientation_in_end_effector" : {
-                "x" : 0.0,
-                "y" : 0.0,
-                "z" : 0.0,
-                "w" : 1.0
-              },
-              "angular_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 0,
-                "x_selected" : true,
-                "y_selected" : true,
-                "z_selected" : false
-              },
-              "linear_selection_matrix" : {
-                "sequence_id" : 0,
-                "selection_frame_id" : 83766130,
-                "x_selected" : false,
-                "y_selected" : false,
-                "z_selected" : false
-              },
-              "angular_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 0.1,
-                "y_weight" : 0.1,
-                "z_weight" : 0.1
-              },
-              "linear_weight_matrix" : {
-                "sequence_id" : 0,
-                "weight_frame_id" : 0,
-                "x_weight" : 0.1,
-                "y_weight" : 0.1,
-                "z_weight" : 0.1
-              }
-            }
-          }
-        }
-      }, {
-        "SixDoFMotionControlAnchorDescription" : {
           "rigidBodyName" : "rightElbowPitchLink",
           "isContactState" : true,
           "isTrackingController" : false,
@@ -10520,10 +11550,10 @@
                 "z" : 0.877424660425666
               },
               "desired_orientation_in_world" : {
-                "x" : -0.5718164544737414,
-                "y" : -0.09199435520381723,
-                "z" : 0.4874414713600666,
-                "w" : 0.653424665131373
+                "x" : -0.5883891860872468,
+                "y" : -0.10614423761263263,
+                "z" : 0.48864120849051923,
+                "w" : 0.6354221713806854
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.04068498800426268,
@@ -10569,6 +11599,68 @@
         }
       }, {
         "SixDoFMotionControlAnchorDescription" : {
+          "rigidBodyName" : "torso",
+          "isContactState" : false,
+          "isTrackingController" : false,
+          "ikSolverMessage" : {
+            "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+              "sequence_id" : 0,
+              "end_effector_hash_code" : -1300704193,
+              "desired_position_in_world" : {
+                "x" : 0.837963796327756,
+                "y" : -0.014497807579717211,
+                "z" : 1.269205673181661
+              },
+              "desired_orientation_in_world" : {
+                "x" : 0.09472548662057582,
+                "y" : 0.13560273828348915,
+                "z" : -0.20616547199065044,
+                "w" : 0.9644349525568776
+              },
+              "control_frame_position_in_end_effector" : {
+                "x" : 0.06418795910297408,
+                "y" : -0.005939236724980181,
+                "z" : -0.0660621794899702
+              },
+              "control_frame_orientation_in_end_effector" : {
+                "x" : 0.0,
+                "y" : 0.0,
+                "z" : 0.0,
+                "w" : 1.0
+              },
+              "angular_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 0,
+                "x_selected" : true,
+                "y_selected" : true,
+                "z_selected" : false
+              },
+              "linear_selection_matrix" : {
+                "sequence_id" : 0,
+                "selection_frame_id" : 83766130,
+                "x_selected" : false,
+                "y_selected" : false,
+                "z_selected" : false
+              },
+              "angular_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              },
+              "linear_weight_matrix" : {
+                "sequence_id" : 0,
+                "weight_frame_id" : 0,
+                "x_weight" : 0.1,
+                "y_weight" : 0.1,
+                "z_weight" : 0.1
+              }
+            }
+          }
+        }
+      }, {
+        "SixDoFMotionControlAnchorDescription" : {
           "rigidBodyName" : "leftHipPitchLink",
           "isContactState" : true,
           "isTrackingController" : false,
@@ -10577,15 +11669,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 2027763393,
               "desired_position_in_world" : {
-                "x" : 0.8537555156214959,
-                "y" : 0.18210323327927408,
-                "z" : 0.46854822761091686
+                "x" : 0.8552345261762255,
+                "y" : 0.18631609408770422,
+                "z" : 0.4671090772272949
               },
               "desired_orientation_in_world" : {
-                "x" : -0.025302979491788356,
-                "y" : 0.5740579093032985,
-                "z" : -0.007076979413535163,
-                "w" : 0.8183930549299306
+                "x" : -0.029875566163552983,
+                "y" : 0.5743529987806916,
+                "z" : -0.010311167066641423,
+                "w" : 0.8179974102475862
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.09693130820594198,
@@ -10644,10 +11736,10 @@
                 "z" : 0.9416629294050572
               },
               "desired_orientation_in_world" : {
-                "x" : 0.659151486231978,
-                "y" : 0.05924108692504534,
-                "z" : -0.5382860948700683,
-                "w" : 0.5217833764002506
+                "x" : 0.6622347656484517,
+                "y" : 0.08992051587892509,
+                "z" : -0.5784590280259542,
+                "w" : 0.4677013672054814
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.04536166451679495,
@@ -10706,10 +11798,10 @@
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : -0.2247132053710082,
-                "y" : -0.2928347567446913,
-                "z" : 0.025760324621183384,
-                "w" : 0.9290253959120686
+                "x" : -0.22475601218434782,
+                "y" : -0.2928142464959554,
+                "z" : 0.02575677978341057,
+                "w" : 0.929021603802185
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.1445913339807622,
@@ -10763,15 +11855,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 532235394,
               "desired_position_in_world" : {
-                "x" : 0.9479004775334693,
+                "x" : 0.9479115598694088,
                 "y" : 0.1961255268138561,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.26941896111882657,
-                "y" : -0.2956738100558312,
-                "z" : 0.032563619535739975,
-                "w" : 0.9159312376589479
+                "x" : 0.26937673037429555,
+                "y" : -0.29566328756140314,
+                "z" : 0.03255252665285966,
+                "w" : 0.9159474496551383
               },
               "control_frame_position_in_end_effector" : {
                 "x" : 0.14459133398076232,
@@ -10825,15 +11917,15 @@
               "sequence_id" : 0,
               "end_effector_hash_code" : 532235394,
               "desired_position_in_world" : {
-                "x" : 0.673020809872997,
+                "x" : 0.6730322228042385,
                 "y" : 0.20436472316886173,
                 "z" : 0.0
               },
               "desired_orientation_in_world" : {
-                "x" : 0.45255458091866585,
-                "y" : 0.1659893406810422,
-                "z" : 0.025737930853615976,
-                "w" : 0.8757736288477623
+                "x" : 0.4525232413509648,
+                "y" : 0.1659952196003946,
+                "z" : 0.02570619860864688,
+                "w" : 0.8757896405302623
               },
               "control_frame_position_in_end_effector" : {
                 "x" : -0.13040866601923765,
@@ -11022,7 +12114,7 @@
           }
         }
       } ],
-      "executionDuration" : "NaN"
+      "executionDuration" : 5.0
     }
   } ]
 }
