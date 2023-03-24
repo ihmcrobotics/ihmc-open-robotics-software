@@ -157,7 +157,8 @@ public class RealsenseColorAndDepthPublisher
          colorPoseInDepthFrame.set(realsense.getDepthToColorTranslation(), realsense.getDepthToColorRotation());
 
          BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-         BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
+         if (parameters.getPublishColor())
+            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
 
          if (parameters.getPublishDepth())
          {
