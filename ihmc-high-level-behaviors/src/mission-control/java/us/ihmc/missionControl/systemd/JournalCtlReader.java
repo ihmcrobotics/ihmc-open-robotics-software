@@ -6,7 +6,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
@@ -15,9 +15,7 @@ public class JournalCtlReader
 {
    private final String serviceName;
    private final Consumer<List<String>> logConsumer;
-   private final ConcurrentLinkedQueue<Integer> characterQueue = new ConcurrentLinkedQueue<>();
-
-   private static volatile boolean running = true;
+   private final ConcurrentLinkedQueue<String> logLineQueue = new ConcurrentLinkedQueue<>();
 
    public JournalCtlReader(String serviceName, Consumer<List<String>> logConsumer)
    {
@@ -29,11 +27,6 @@ public class JournalCtlReader
       start();
    }
 
-   public void stop()
-   {
-      running = false;
-   }
-
    public void start()
    {
       ThreadTools.startAsDaemon(() ->
@@ -43,56 +36,32 @@ public class JournalCtlReader
          try
          {
             Process process = processBuilder.start();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            int read;
-            while ((read = bufferedReader.read()) > -1 && running)
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null)
             {
-               characterQueue.add(read);
+               System.out.println(line);
             }
-
-            process.destroy();
-            process.waitFor();
+            reader.close();
          }
-         catch (IOException | InterruptedException e)
+         catch (IOException e)
          {
-            throw new RuntimeException(e);
+            e.printStackTrace();
          }
       }, "journalctl-reader-" + serviceName);
    }
 
    private void processOutput()
    {
-      if (!characterQueue.isEmpty())
+      if (!logLineQueue.isEmpty())
       {
-         StringBuilder output = new StringBuilder();
-         while (!characterQueue.isEmpty())
+         List<String> linesToSend = new ArrayList<>();
+         while (!logLineQueue.isEmpty())
          {
-            output.append((char) ((int) characterQueue.poll()));
+            linesToSend.add(logLineQueue.poll());
          }
 
-         String outputString = output.toString();
-         String[] lines = outputString.split("\n");
-
-         logConsumer.accept(Arrays.asList(lines));
+         logConsumer.accept(linesToSend);
       }
    }
-
-   public static void main(String[] args)
-   {
-      JournalCtlReader reader = new JournalCtlReader("httpd", strings -> {
-         for (String string : strings)
-         {
-            System.out.println(string);
-         }
-      });
-
-      reader.start();
-
-      while (true)
-      {
-         ThreadTools.sleep(5000);
-      }
-   }
-
 }
