@@ -40,7 +40,6 @@ public class JournalCtlReader
             while ((line = reader.readLine()) != null && running)
             {
                logLineQueue.add(line);
-               System.out.println("adding line " + line.substring(0, 10));
             }
             reader.close();
          }
