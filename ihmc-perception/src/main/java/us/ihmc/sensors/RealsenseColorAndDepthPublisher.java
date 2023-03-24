@@ -120,6 +120,8 @@ public class RealsenseColorAndDepthPublisher
       LogTools.info("Setting Up ROS2 Property Set Group");
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
+
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
 
    /**
@@ -296,7 +298,6 @@ public class RealsenseColorAndDepthPublisher
                                                                                                ROS2Tools.L515_DEPTH_IMAGE,
                                                                                                ROS2Tools.L515_COLOR_IMAGE,
                                                                                                ReferenceFrame::getWorldFrame);
-      Runtime.getRuntime().addShutdownHook(new Thread(realsensePublisher::destroy, "Shutdown"));
       realsensePublisher.run();
    }
 }
