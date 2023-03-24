@@ -57,6 +57,8 @@ public class PlanarRegionMappingHandler
 
    private final static long PUBLISH_MILLISECONDS = 100;
 
+   private int delayMilliseconds = 100;
+
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
    private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
@@ -273,6 +275,11 @@ public class PlanarRegionMappingHandler
       updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 100, TimeUnit.MILLISECONDS);
    }
 
+   public void pauseButtonCallback()
+   {
+      updateMapFuture.cancel(true);
+   }
+
    public void nextButtonCallback()
    {
       if (source == DataSource.PLANAR_REGIONS_LOG && (planarRegionListIndex < planarRegionsListBuffer.getBufferLength()))
@@ -372,7 +379,7 @@ public class PlanarRegionMappingHandler
 
       RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
 
-      planarRegionMap.printStatistics();
+      planarRegionMap.printStatistics(true);
 
       //planarRegionMap.submitRegionsUsingIterativeReduction(regions);
 
