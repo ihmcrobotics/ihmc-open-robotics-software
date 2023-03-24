@@ -8,6 +8,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
+import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -38,10 +39,14 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
    private final List<OpenCVArUcoMarker> arUcoMarkersToTrack;
+   private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
-   public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel, List<OpenCVArUcoMarker> arUcoMarkersToTrack)
+   public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel,
+                                                   List<OpenCVArUcoMarker> arUcoMarkersToTrack,
+                                                   IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics)
    {
       this.arUcoMarkersToTrack = arUcoMarkersToTrack;
+      this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
@@ -90,7 +95,12 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                for (RobotSide side : blackflies.sides())
                {
                   DualBlackflyCamera blackfly = blackflies.get(side);
-                  blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()), side, ros2Helper, realtimeROS2Node, arUcoMarkersToTrack);
+                  blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()),
+                                  side,
+                                  ros2Helper,
+                                  realtimeROS2Node,
+                                  arUcoMarkersToTrack,
+                                  ousterFisheyeColoringIntrinsics);
                }
             }
 
