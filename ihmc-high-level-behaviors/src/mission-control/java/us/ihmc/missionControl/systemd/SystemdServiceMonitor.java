@@ -84,7 +84,6 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
    public void destroy()
    {
       systemServiceStatusPublisherScheduler.shutdown();
-      reader.stop();
       serviceStatusPublisher.destroy();
       ros2Node.destroy();
    }
