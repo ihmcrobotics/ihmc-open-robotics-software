@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import imgui.type.ImDouble;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -23,10 +24,11 @@ public class RDXNettyOusterFisheyeColorDemo
    private RDXInteractableBlackflyFujinon interactableBlackflyFujinon;
    private volatile boolean running = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDouble coloringFx = new ImDouble(SensorHeadParameters.FOCAL_LENGTH_X_FOR_COLORING);
-   private final ImDouble coloringFy = new ImDouble(SensorHeadParameters.FOCAL_LENGTH_Y_FOR_COLORING);
-   private final ImDouble coloringCx = new ImDouble(SensorHeadParameters.PRINCIPAL_POINT_X_FOR_COLORING);
-   private final ImDouble coloringCy = new ImDouble(SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_COLORING);
+   private final IntrinsicCameraMatrixProperties ousterFisheyeColoringInstrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsBenchtop();
+   private final ImDouble coloringFx = new ImDouble(ousterFisheyeColoringInstrinsics.getFocalLengthX());
+   private final ImDouble coloringFy = new ImDouble(ousterFisheyeColoringInstrinsics.getFocalLengthY());
+   private final ImDouble coloringCx = new ImDouble(ousterFisheyeColoringInstrinsics.getPrinciplePointX());
+   private final ImDouble coloringCy = new ImDouble(ousterFisheyeColoringInstrinsics.getPrinciplePointY());
 
    public RDXNettyOusterFisheyeColorDemo()
    {
