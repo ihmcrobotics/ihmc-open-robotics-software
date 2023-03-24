@@ -17,7 +17,7 @@ public class SystemServiceStatusMessage extends Packet<SystemServiceStatusMessag
    {
       service_name_ = new java.lang.StringBuilder(255);
       status_ = new java.lang.StringBuilder(255);
-      log_lines_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (100, "type_d");
+      log_lines_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (8192, "type_d");
    }
 
    public SystemServiceStatusMessage(SystemServiceStatusMessage other)

@@ -44,7 +44,7 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 8192; ++i0)
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
@@ -89,7 +89,7 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
 
       cdr.write_type_2(data.getLogLineCount());
 
-      if(data.getLogLines().size() <= 100)
+      if(data.getLogLines().size() <= 8192)
       cdr.write_type_e(data.getLogLines());else
           throw new RuntimeException("log_lines field exceeds the maximum length");
 
