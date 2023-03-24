@@ -376,7 +376,8 @@ public class BytedecoRealsense
       System.out.println("Deleting pipeline profile...");
       realsense2.rs2_delete_pipeline_profile(pipelineProfile);
 
-      // Not sure why, but these produce native crashes is you try to delete them
+      // Calling delete on these may cause a native crash - it's not required anyway
+      // https://github.com/IntelRealSense/librealsense/issues/4651#issuecomment-522295675
       // if (depthFrameStreamProfile != null)
       // {
       //    LogTools.info("Deleting depth stream profile...");
