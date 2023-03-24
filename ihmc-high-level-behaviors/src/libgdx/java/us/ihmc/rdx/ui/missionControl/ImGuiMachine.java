@@ -204,8 +204,6 @@ public class ImGuiMachine
 
    private void acceptSystemServiceStatusMessage(SystemServiceStatusMessage message)
    {
-      System.out.println(message);
-
       String serviceName = message.getServiceNameAsString();
       final ImGuiMachineService service;
 

@@ -31,6 +31,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       this.serviceName = serviceName;
       this.ros2Node = ros2Node;
       reader = new JournalCtlReader(serviceName, this);
+      reader.start();
       serviceStatusPublisher = ROS2Tools.createPublisher(ros2Node,
                                                          ROS2Tools.getSystemServiceStatusTopic(instanceId),
                                                          ROS2Tools.getSystemServiceStatusQosProfile());
@@ -78,13 +79,12 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       for (String logLine : logLines)
          message.getLogLines().add(logLine);
 
-      System.out.println(message);
-
       serviceStatusPublisher.publish(message);
    }
 
    public void destroy()
    {
+      reader.stop();
       systemServiceStatusPublisherScheduler.shutdown();
       serviceStatusPublisher.destroy();
       ros2Node.destroy();
