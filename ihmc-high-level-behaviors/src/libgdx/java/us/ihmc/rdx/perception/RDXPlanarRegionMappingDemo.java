@@ -42,10 +42,6 @@ public class RDXPlanarRegionMappingDemo
    private final RDXLineMeshModel mocapGraphic = new RDXLineMeshModel(0.02f, Color.YELLOW);
    private final RDXLineMeshModel rootJointGraphic = new RDXLineMeshModel(0.02f, Color.RED);
 
-   // 20230207_214209_PerceptionLogFixed.hdf5 -> Ouster_Indoor_Urban
-   // L515_CinderBlocks_PerceptionLog.hdf5 -> L515_CinderBlocks
-   // L515_RoughTerrain_PerceptionLog.hdf5 -> L515_RoughTerrain
-
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
 
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();

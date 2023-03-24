@@ -443,6 +443,9 @@ public class PlanarRegionMappingHandler
                                                                                                   currentToPreviousTransform,
                                                                                                   getParameters());
 
+      if (valid)
+         currentRegions.getPlanarRegionsList().applyTransform(currentToPreviousTransform);
+
       PerceptionDebugTools.printTransform("ComputeICP", currentToPreviousTransform, true);
    }
 

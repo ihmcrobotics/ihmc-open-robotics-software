@@ -64,6 +64,8 @@ public class PlanarRegionMap
    private final RigidBodyTransform previousTransformToWorld = new RigidBodyTransform();
    private final RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
    private final PlanarRegionsList previousRegions = new PlanarRegionsList();
+   private final PlanarLandmarkList mapLandmarks = new PlanarLandmarkList();
+   private final PlanarLandmarkList previousLandmarks = new PlanarLandmarkList();
 
    private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
    private final Stopwatch quaternionAveragingStopwatch = new Stopwatch();
@@ -73,8 +75,6 @@ public class PlanarRegionMap
    private MergingMode merger;
    private MatchingMode matcher;
 
-   private PlanarLandmarkList mapLandmarks;
-   private PlanarLandmarkList previousLandmarks;
    private PlanarRegionMappingParameters parameters;
    private SlamWrapper.FactorGraphExternal factorGraph;
 
@@ -698,10 +698,12 @@ public class PlanarRegionMap
          previousTransformToWorld.set(initialTransformToWorld);
 
          previousRegions.addPlanarRegionsList(regions.copy());
+         previousLandmarks.addAll(landmarks.copy());
 
          regions.applyTransform(initialTransformToWorld);
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, initialTransformToWorld, regions.copy()));
          finalMap.addPlanarRegionsList(regions);
+         mapLandmarks.addAll(finalMap);
 
          initializeFactorGraphForSmoothing(regions, initialTransformToWorld);
 
