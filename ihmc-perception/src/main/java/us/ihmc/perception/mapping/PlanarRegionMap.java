@@ -663,7 +663,7 @@ public class PlanarRegionMap
 
    public RigidBodyTransform registerRegions(PlanarRegionsList incomingRegions, RigidBodyTransform estimatedTransformToWorld)
    {
-      wholeAlgorithmDurationStopwatch.start();
+      wholeAlgorithmDurationStopwatch.resetLap();
 
       PlanarRegionsList regions = new PlanarRegionsList();
 
@@ -712,7 +712,7 @@ public class PlanarRegionMap
       }
       else
       {
-         quaternionAveragingStopwatch.start();
+         quaternionAveragingStopwatch.resetLap();
 
          transformToPrevious.setIdentity();
 
@@ -785,9 +785,10 @@ public class PlanarRegionMap
          LogTools.debug("Estimated Transform to previous: {}", estimatedTransformToPrevious);
          LogTools.debug("Transform to previous: {}", transformToPrevious);
 
-         quaternionAveragingStopwatch.suspend();
+         quaternionAveragingStopwatch.lap();
+         //quaternionAveragingStopwatch.suspend();
 
-         factorGraphStopwatch.start();
+         factorGraphStopwatch.resetLap();
          applyFactorGraphBasedSmoothing(finalMap,
                                         graphRegions,
                                         transformToWorld,
@@ -810,9 +811,10 @@ public class PlanarRegionMap
              posteriorRegionsInWorld.addPlanarRegion(region);
           });
 
-         factorGraphStopwatch.suspend();
+         factorGraphStopwatch.lap();
+         //factorGraphStopwatch.suspend();
 
-         regionMergingStopwatch.start();
+         regionMergingStopwatch.resetLap();
 
          finalMap = crossReduceRegionsIteratively(finalMap, graphRegions);
          processUniqueRegions(finalMap);
@@ -826,8 +828,11 @@ public class PlanarRegionMap
          keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
          previousTransformToWorld.set(estimatedTransformToWorld);
 
-         regionMergingStopwatch.suspend();
-         wholeAlgorithmDurationStopwatch.suspend();
+         regionMergingStopwatch.lap();
+         //regionMergingStopwatch.suspend();
+
+         wholeAlgorithmDurationStopwatch.lap();
+         //wholeAlgorithmDurationStopwatch.suspend();
 
          PerceptionDebugTools.printTransform(String.valueOf(sensorPoseIndex), transformToWorld, false);
          LogTools.debug("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
@@ -835,7 +840,8 @@ public class PlanarRegionMap
          return transformToWorld;
       }
 
-      wholeAlgorithmDurationStopwatch.suspend();
+      wholeAlgorithmDurationStopwatch.lap();
+      //wholeAlgorithmDurationStopwatch.suspend();
       return null;
    }
 
@@ -930,13 +936,24 @@ public class PlanarRegionMap
       initialTransformToWorld.set(transformToWorld);
    }
 
-   public void printStatistics()
+   public void printStatistics(boolean average)
    {
-      LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f\n",
-                                    wholeAlgorithmDurationStopwatch.totalElapsed(),
-                                    quaternionAveragingStopwatch.totalElapsed(),
-                                    factorGraphStopwatch.totalElapsed(),
-                                    regionMergingStopwatch.totalElapsed()));
+      if(average)
+      {
+         LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f",
+                                     wholeAlgorithmDurationStopwatch.averageLap(),
+                                     quaternionAveragingStopwatch.averageLap(),
+                                     factorGraphStopwatch.averageLap(),
+                                     regionMergingStopwatch.averageLap()));
+      }
+      else
+      {
+         LogTools.info(String.format("Whole Algorithm: %.3f, Quaternion Averaging: %.3f, Factor Graph: %.3f, Region Merging: %.3f",
+                                     wholeAlgorithmDurationStopwatch.totalElapsed(),
+                                     quaternionAveragingStopwatch.totalElapsed(),
+                                     factorGraphStopwatch.totalElapsed(),
+                                     regionMergingStopwatch.totalElapsed()));
+      }
    }
 
    public Stopwatch getWholeAlgorithmDurationStopwatch()

@@ -68,10 +68,10 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
       {
          if (ImGui.beginTabItem("Map"))
          {
-            wholeAlgorithmDurationPlot.render(mappingManager.getPlanarRegionMap().getWholeAlgorithmDurationStopwatch().totalElapsed());
-            quaternionAveragingDurationPlot.render(mappingManager.getPlanarRegionMap().getQuaternionAveragingStopwatch().totalElapsed());
-            factorGraphDurationPlot.render(mappingManager.getPlanarRegionMap().getFactorGraphStopwatch().totalElapsed());
-            regionMergingDurationPlot.render(mappingManager.getPlanarRegionMap().getRegionMergingStopwatch().totalElapsed());
+            wholeAlgorithmDurationPlot.render(mappingManager.getPlanarRegionMap().getWholeAlgorithmDurationStopwatch().averageLap());
+            quaternionAveragingDurationPlot.render(mappingManager.getPlanarRegionMap().getQuaternionAveragingStopwatch().averageLap());
+            factorGraphDurationPlot.render(mappingManager.getPlanarRegionMap().getFactorGraphStopwatch().averageLap());
+            regionMergingDurationPlot.render(mappingManager.getPlanarRegionMap().getRegionMergingStopwatch().averageLap());
 
             if (ImGui.button("Load Next Set"))
                mappingManager.nextButtonCallback();
@@ -80,6 +80,9 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
                mappingManager.performMapCleanUp();
             if (ImGui.button("Auto Increment"))
                mappingManager.autoIncrementButtonCallback();
+            ImGui.sameLine();
+            if (ImGui.button("Pause"))
+               mappingManager.pauseButtonCallback();
             if (ImGui.checkbox("Enable Live Mode", liveModeEnabled))
                mappingManager.setEnableLiveMode(liveModeEnabled.get());
             ImGui.checkbox("Render live mode", renderEnabled);
