@@ -7,6 +7,8 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -69,6 +71,7 @@ public class RealsenseColorAndDepthPublisher
    private final FramePose3D cameraPose = new FramePose3D();
    private final Point3D cameraPosition = new Point3D();
    private final Throttler throttler = new Throttler();
+   private final Notification destroyedNotification = new Notification();
 
    private boolean previousLoggerEnabledState = false;
    private boolean loggerInitialized = false;
@@ -121,14 +124,33 @@ public class RealsenseColorAndDepthPublisher
 
    /**
     * Must be called from the sensor-specific calling class, after the sensor and logger initialization have succeeded.
+    * We run in a daemon thread, because otherwise it will get killed on Ctrl+C before the shutdown hooks are finished running.
+    * See {@link Runtime#addShutdownHook(Thread)} for details.
     */
    public void run()
+   {
+      ThreadTools.startAsDaemon(this::updateThread, getClass().getSimpleName() + "UpdateThread");
+   }
+
+   private void updateThread()
    {
       while (running)
       {
          update();
+         if (!running)
          throttler.waitAndRun(outputPeriod); // do the waiting after we send to remove unecessary latency
       }
+
+      // Make sure the Realsense
+      ThreadTools.sleep(100);
+
+      if (realsense != null)
+         realsense.deleteDevice();
+      realSenseHardwareManager.deleteContext();
+      if (perceptionDataLogger != null)
+         perceptionDataLogger.closeLogFile();
+
+      destroyedNotification.set();
    }
 
    /**
@@ -258,11 +280,7 @@ public class RealsenseColorAndDepthPublisher
    public void destroy()
    {
       running = false;
-      if (realsense != null)
-         realsense.deleteDevice();
-      realSenseHardwareManager.deleteContext();
-      if (perceptionDataLogger != null)
-         perceptionDataLogger.closeLogFile();
+      destroyedNotification.blockingPoll();
    }
 
    public static void main(String[] args)
