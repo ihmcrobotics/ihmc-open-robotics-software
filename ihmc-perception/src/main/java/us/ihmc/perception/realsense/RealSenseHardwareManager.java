@@ -99,6 +99,7 @@ public class RealSenseHardwareManager
    public rs2_device createDevice(String serialNumberToFind)
    {
       int rs2DeviceCount = updateDeviceCount();
+      LogTools.info("{} Realsense device(s) detected.");
 
       for (int i = 0; i < rs2DeviceCount; i++)
       {
@@ -114,16 +115,29 @@ public class RealSenseHardwareManager
             checkError();
 
             String serialNumberFromRS2 = deviceSerialNumberBytePointer.getString();
-            LogTools.info("Realsense Sensor detected. Serial Number: = {}", serialNumberFromRS2);
+            LogTools.info("Realsense device matched serial number: {}", serialNumberFromRS2);
+
+            int supportsName = realsense2.rs2_supports_device_info(rs2Device, realsense2.RS2_CAMERA_INFO_NAME, error);
+            checkError();
+
+            if (supportsName == 1)
+            {
+               BytePointer nameBytePointer = realsense2.rs2_get_device_info(rs2Device, realsense2.RS2_CAMERA_INFO_NAME, error);
+               checkError();
+               LogTools.info("Realsense device name: {}", nameBytePointer.toString());
+            }
 
             if (serialNumberFromRS2.contains(serialNumberToFind.toLowerCase()))
             {
                return rs2Device;
             }
          }
+
+         // We didn't select this device.
+         realsense2.rs2_delete_device(rs2Device);
       }
 
-      LogTools.error("Device not found. Serial Number: = {}", serialNumberToFind);
+      LogTools.error("Device not found. Serial Number: {}", serialNumberToFind);
       return null;
    }
 
