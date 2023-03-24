@@ -16,10 +16,14 @@ public class GroundDefinition extends TerrainObjectDefinition
    {
       super();
       // flat ground
-      GeometryDefinition groundGeometryDefinition = new Box3DDefinition(10.0, 10.0, 0.1);
+      RigidBodyTransform groundPose = new RigidBodyTransform();
+      groundPose.getRotation();
+      groundPose.appendTranslation(0.0, 0.0, -0.05);
+
+      GeometryDefinition groundGeometryDefinition = new Box3DDefinition(100.0, 100.0, 0.1);
       ColorDefinition color = ColorDefinitions.DarkSlateGray();
       color.setAlpha(0.5);
-      addVisualDefinition(new VisualDefinition(new RigidBodyTransform(), groundGeometryDefinition, new MaterialDefinition(color)));
-      addCollisionShapeDefinition(new CollisionShapeDefinition(new RigidBodyTransform(), groundGeometryDefinition));
+      addVisualDefinition(new VisualDefinition(groundPose, groundGeometryDefinition, new MaterialDefinition(color)));
+      addCollisionShapeDefinition(new CollisionShapeDefinition(groundPose, groundGeometryDefinition));
    }
 }

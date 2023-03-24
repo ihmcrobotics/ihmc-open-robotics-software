@@ -43,6 +43,7 @@ public class RaymanWalker
     * control frames during the swing phase.
     */
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   private final MidFrameZUpFrame midFeetZUpFrame;
    /**
     * A {@code ContactablePlaneBody} allows to attach to a rigid-body a list of points that can be used
     * to distribute the ground reaction forces on the foot when it is in support.
@@ -101,6 +102,7 @@ public class RaymanWalker
          ContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, soleFrame, contactPoints);
          footContactableBodies.put(robotSide, footContactableBody);
       }
+      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", ReferenceFrame.getWorldFrame(), getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
    }
 
    public void updateInverseDynamicsRobotState()
@@ -239,8 +241,9 @@ public class RaymanWalker
 
    public ReferenceFrame getMidFeetFrame()
    {
-      MidFrameZUpFrame midFeetZUpFrame;
-      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", ReferenceFrame.getWorldFrame(), getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
+//      MidFrameZUpFrame midFeetZUpFrame;
+//      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", ReferenceFrame.getWorldFrame(), getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
+      midFeetZUpFrame.update();
       return midFeetZUpFrame;
    }
 

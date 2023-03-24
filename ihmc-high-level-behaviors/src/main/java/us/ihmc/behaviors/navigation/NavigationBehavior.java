@@ -25,7 +25,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.Footstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.behaviors.BehaviorDefinition;
@@ -308,7 +308,7 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
 
       for (int i = 0; i < latestFootstepPlan.getNumberOfSteps(); i++)
       {
-         PlannedFootstep footstep = latestFootstepPlan.getFootstep(i);
+         Footstep footstep = latestFootstepPlan.getFootstep(i);
 
          if (footstep.getFootstepPose().getPosition().distance(robotPose.getPosition()) > 2.0)
          {
