@@ -6,7 +6,6 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.tools.thread.SwapReference;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,23 +39,26 @@ public class OpenCVArUcoMarkerROS2Publisher
 
    public void update()
    {
-      SwapReference<Mat> ids = arUcoMarkerDetection.getIds();
-      arUcoMarkerPoses.getMarkerId().clear();
-      arUcoMarkerPoses.getOrientation().clear();
-      arUcoMarkerPoses.getPosition().clear();
-      for (int i = 0; i < ids.getForThreadTwo().rows(); i++)
+      synchronized (arUcoMarkerDetection.getSyncObject())
       {
-         int markerID = ids.getForThreadTwo().ptr(i, 0).getInt();
-         OpenCVArUcoMarker markerToTrack = arUcoMarkersToTrack.get(markerID);
-
-         if (markerToTrack != null)
+         Mat ids = arUcoMarkerDetection.getIds();
+         arUcoMarkerPoses.getMarkerId().clear();
+         arUcoMarkerPoses.getOrientation().clear();
+         arUcoMarkerPoses.getPosition().clear();
+         for (int i = 0; i < ids.rows(); i++)
          {
-            framePoseOfMarker.setIncludingFrame(cameraFrame, arUcoMarkerDetection.getPose(markerToTrack));
-            framePoseOfMarker.changeFrame(ReferenceFrame.getWorldFrame());
+            int markerID = ids.ptr(i, 0).getInt();
+            OpenCVArUcoMarker markerToTrack = arUcoMarkersToTrack.get(markerID);
 
-            arUcoMarkerPoses.getMarkerId().add(markerID);
-            arUcoMarkerPoses.getOrientation().add().set(framePoseOfMarker.getOrientation());
-            arUcoMarkerPoses.getPosition().add().set(framePoseOfMarker.getX(), framePoseOfMarker.getY(), framePoseOfMarker.getZ());
+            if (markerToTrack != null)
+            {
+               framePoseOfMarker.setIncludingFrame(cameraFrame, arUcoMarkerDetection.getPose(markerToTrack));
+               framePoseOfMarker.changeFrame(ReferenceFrame.getWorldFrame());
+
+               arUcoMarkerPoses.getMarkerId().add(markerID);
+               arUcoMarkerPoses.getOrientation().add().set(framePoseOfMarker.getOrientation());
+               arUcoMarkerPoses.getPosition().add().set(framePoseOfMarker.getX(), framePoseOfMarker.getY(), framePoseOfMarker.getZ());
+            }
          }
       }
 
