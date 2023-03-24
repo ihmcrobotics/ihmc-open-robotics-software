@@ -165,9 +165,12 @@ public class RealSenseHardwareManager
 
    public void deleteContext()
    {
+      // LogTools/log4j2 is no longer operational during JVM shutdown
+      System.out.println("Deleting device list...");
       realsense2.rs2_delete_device_list(devices);
+      System.out.println("Deleting context...");
       realsense2.rs2_delete_context(context);
-      LogTools.info("Deleted realsense2 context");
+      System.out.println("Deleted everything.");
    }
 
    private void checkError()

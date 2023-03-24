@@ -146,6 +146,9 @@ public class BytedecoRealsense
          realsense2.rs2_delete_sensor(sensor);
       }
 
+      // We assume the first sensor is the depth stream. There are multiple kinds above,
+      // so I didn't know a way to make this any better without testing all kinds of Realsenses.
+      // Just keep in mind, maybe the first sensor is not always the depth sensor.
       depthSensor = realsense2.rs2_create_sensor(sensorList, 0, error);
       checkError(true, "Failed to create sensor.");
 
@@ -365,18 +368,39 @@ public class BytedecoRealsense
 
    public void deleteDevice()
    {
+      // LogTools/log4j2 is no longer operational during JVM shutdown
+      System.out.println("Stopping pipeline...");
       realsense2.rs2_pipeline_stop(pipeline, error);
       checkError(false, "Error stopping pipeline.");
 
+      System.out.println("Deleting pipeline profile...");
       realsense2.rs2_delete_pipeline_profile(pipelineProfile);
 
-      if (depthFrameStreamProfile != null)
-         realsense2.rs2_delete_stream_profile(depthFrameStreamProfile);
-      if (colorFrameStreamProfile != null)
-         realsense2.rs2_delete_stream_profile(colorFrameStreamProfile);
+      // Not sure why, but these produce native crashes is you try to delete them
+      // if (depthFrameStreamProfile != null)
+      // {
+      //    LogTools.info("Deleting depth stream profile...");
+      //    realsense2.rs2_delete_stream_profile(depthFrameStreamProfile);
+      // }
+      // if (colorFrameStreamProfile != null)
+      // {
+      //    LogTools.info("Deleting color stream profile...");
+      //    realsense2.rs2_delete_stream_profile(colorFrameStreamProfile);
+      // }
 
+      if (colorFrameQueue != null)
+      {
+         System.out.println("Deleting color frame queue...");
+         realsense2.rs2_delete_frame_queue(colorFrameQueue);
+      }
+
+      System.out.println("Deleting sensor...");
+      realsense2.rs2_delete_sensor(depthSensor);
+      System.out.println("Deleting config...");
       realsense2.rs2_delete_config(config);
+      System.out.println("Deleting pipeline...");
       realsense2.rs2_delete_pipeline(pipeline);
+      System.out.println("Deleting device...");
       realsense2.rs2_delete_device(device);
    }
 
