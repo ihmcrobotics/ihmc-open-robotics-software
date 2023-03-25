@@ -18,6 +18,11 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
       set(PerceptionConfigurationParameters.ousterThrottlerFrequency, ousterThrottlerFrequency);
    }
 
+   default void setRapidRegionsEnabled(boolean rapidRegionsEnabled)
+   {
+      set(PerceptionConfigurationParameters.rapidRegionsEnabled, rapidRegionsEnabled);
+   }
+
    default void setLoggingEnabled(boolean loggingEnabled)
    {
       set(PerceptionConfigurationParameters.loggingEnabled, loggingEnabled);

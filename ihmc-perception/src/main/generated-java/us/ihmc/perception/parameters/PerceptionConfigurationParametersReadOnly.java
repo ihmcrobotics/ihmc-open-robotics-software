@@ -20,6 +20,11 @@ public interface PerceptionConfigurationParametersReadOnly extends StoredPropert
       return get(ousterThrottlerFrequency);
    }
 
+   default boolean getRapidRegionsEnabled()
+   {
+      return get(rapidRegionsEnabled);
+   }
+
    default boolean getLoggingEnabled()
    {
       return get(loggingEnabled);
