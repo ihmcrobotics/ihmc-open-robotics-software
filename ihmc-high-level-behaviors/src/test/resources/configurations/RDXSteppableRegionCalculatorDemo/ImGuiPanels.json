@@ -1,0 +1,26 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "CPU Height Map" : false,
+    "Height Map Image" : true,
+    "Environment###java.lang.Class:Environment" : false,
+    "Global Visualizers" : false,
+    "Ouster Lidar Simulator###java.lang.Integer:Ouster Lidar Simulator" : false,
+    "Ouster Lidar Color###GlobalWidgetIndex:2:Ouster Lidar Color" : false,
+    "Ouster Lidar Depth###GlobalWidgetIndex:1:Ouster Lidar Depth" : false,
+    "Steppable Region Extraction" : false,
+    "Raw Steppability 0" : false,
+    "Raw Steppability 1" : false,
+    "Raw Steppability 2" : false,
+    "Raw Steppability 3" : false,
+    "Raw Steppability 4" : false,
+    "Steppable Regions 0" : false,
+    "Steppable Regions 1" : false,
+    "Steppable Regions 2" : false,
+    "Steppable Regions 3" : false,
+    "Steppable Regions 4" : false,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}
