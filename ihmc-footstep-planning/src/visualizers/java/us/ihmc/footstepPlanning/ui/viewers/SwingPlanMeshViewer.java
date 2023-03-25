@@ -59,13 +59,13 @@ public class SwingPlanMeshViewer extends AnimationTimer
       leftFootPose = messager.createInput(LeftFootPose, null);
       rightFootPose = messager.createInput(RightFootPose, null);
 
-      messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
+      messager.addTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
       }));
 
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
 
       showSolution = messager.createInput(ShowFootstepPlan, true);
       showPostProcessingInfo = messager.createInput(ShowPostProcessingInfo, true);

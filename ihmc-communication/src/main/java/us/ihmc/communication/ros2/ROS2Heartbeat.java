@@ -48,6 +48,7 @@ public class ROS2Heartbeat
          if (!this.alive)
             ThreadTools.startAsDaemon(() -> ExceptionTools.handle(this::publishThread, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE),
                                       "Heartbeat-" + heartbeatTopic.getName());
+         this.alive = true;
       }
       else
       {

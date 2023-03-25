@@ -221,8 +221,10 @@ public class RDXImGuiLayoutManager
 
    public void applyLayoutDirectory()
    {
-      layoutDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading, "/")
-            .resolve(configurationExtraPath + (currentLayoutName.equals("Main") ? "" : "/" + currentLayoutName + "Layout"));
+      layoutDirectory = new HybridResourceDirectory(dotIHMCDirectory, classForLoading, "/");
+      layoutDirectory = layoutDirectory.resolve(configurationExtraPath);
+      if (!currentLayoutName.equals("Main"))
+         layoutDirectory = layoutDirectory.resolve(currentLayoutName + "Layout");
       for (Consumer<HybridResourceDirectory> layoutDirectoryUpdatedListener : layoutDirectoryUpdatedListeners)
       {
          layoutDirectoryUpdatedListener.accept(layoutDirectory);
