@@ -226,8 +226,6 @@ public class SteppableRegionMessageConverter
       for (int yawIndex = 0; yawIndex < steppableRegionListCollection.getDiscretizations(); yawIndex++)
       {
          SteppableRegionsList steppableRegionsList = steppableRegionListCollection.getSteppableRegions(yawIndex);
-         if (steppableRegionsList == null)
-            LogTools.info("Crap");
          double footYaw = steppableRegionsList.getFootYaw();
 
          numberOfRegionsBuffer.add(steppableRegionsList.getNumberOfSteppableRegions());
