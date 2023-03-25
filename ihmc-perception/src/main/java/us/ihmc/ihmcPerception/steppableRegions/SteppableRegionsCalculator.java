@@ -3,8 +3,12 @@ package us.ihmc.ihmcPerception.steppableRegions;
 import com.jme3.terrain.heightmap.HeightMap;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -134,12 +138,19 @@ public class SteppableRegionsCalculator
       Point3DReadOnly centroid = regionDataHolder.getCentroidInWorld();
       Vector3DReadOnly normal = regionDataHolder.getNormalInWorld();
       AxisAngle orientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normal);
+      orientation.invert();
+      Pose3D pose = new Pose3D(centroid, orientation);
 
-      List<Point2D> pointCloudInRegion = pointsInWorld.parallelStream()
-                                                      .map(Point2D::new)//pointInWorld -> PolygonizerTools.toPointInPlane(pointInWorld, centroid, orientation))
-                                                      .toList();
+      List<Point2D> pointCloudInRegion = pointsInWorld.parallelStream().map(point -> PolygonizerTools.toPointInPlane(point, centroid, orientation)).toList();
 
       ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInRegion, concaveHullFactoryParameters);
+      for (ConcaveHull concaveHull : concaveHullCollection.getConcaveHulls())
+      {
+         Point2D localCentroid = new Point2D();
+         concaveHull.getConcaveHullVertices().forEach(localCentroid::add);
+         localCentroid.scale(1.0 / concaveHull.getNumberOfVertices());
+         LogTools.info("centroid : " + localCentroid);
+      }
 
       // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
       double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
@@ -151,8 +162,7 @@ public class SteppableRegionsCalculator
 //      if (polygonizerParameters.getCutNarrowPassage())
 //         concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
 
-      return createSteppableRegions(centroid,
-                                    orientation,
+      return createSteppableRegions(pose,
                                     concaveHullCollection,
                                     heightMapData,
                                     regionDataHolder,
@@ -206,8 +216,7 @@ public class SteppableRegionsCalculator
       return points;
    }
 
-   public static List<SteppableRegion> createSteppableRegions(Point3DReadOnly origin,
-                                                              Orientation3DReadOnly orientation,
+   public static List<SteppableRegion> createSteppableRegions(RigidBodyTransformReadOnly transformToWorld,
                                                               ConcaveHullCollection concaveHullCollection,
                                                               HeightMapData heightMapData,
                                                               SteppableRegionDataHolder regionDataHolder,
@@ -215,19 +224,18 @@ public class SteppableRegionsCalculator
    {
       List<SteppableRegion> regions = concaveHullCollection.getConcaveHulls()
                                                            .parallelStream()
-                                                           .map(hull -> createSteppableRegion(origin, orientation, hull, footYaw))
+                                                           .map(hull -> createSteppableRegion(transformToWorld, hull, footYaw))
                                                            .toList();
       HeightMapData regionHeightMap = createHeightMapForRegion(regionDataHolder, heightMapData);
       regions.forEach(region -> region.setLocalHeightMap(regionHeightMap));
       return regions;
    }
 
-   public static SteppableRegion createSteppableRegion(Point3DReadOnly origin,
-                                                       Orientation3DReadOnly orientation,
+   public static SteppableRegion createSteppableRegion(RigidBodyTransformReadOnly transformToWorld,
                                                        ConcaveHull concaveHull,
                                                        double footYaw)
    {
-      return new SteppableRegion(origin, orientation, concaveHull.getConcaveHullVertices(), footYaw);
+      return new SteppableRegion(transformToWorld, concaveHull.getConcaveHullVertices(), footYaw);
    }
 
    public static HeightMapData createHeightMapForRegion(SteppableRegionDataHolder regionDataHolder, HeightMapData heightMapData)
