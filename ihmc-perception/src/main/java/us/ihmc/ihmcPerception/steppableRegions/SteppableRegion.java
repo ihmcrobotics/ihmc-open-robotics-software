@@ -51,7 +51,7 @@ public class SteppableRegion
       concaveHullInRegionFrame.update();
       convexHullInRegionFrame.update();
 
-      transformFromWorldToRegion.inverseTransform(concaveHullInRegionFrame.getCentroid(), centroidInWorld);
+      transformFromWorldToRegion.inverseTransform(concaveHullInRegionFrame.getCentroid(), centroidInWorld, false);
    }
 
    public ConvexPolygon2DReadOnly getConvexHullInRegionFrame()

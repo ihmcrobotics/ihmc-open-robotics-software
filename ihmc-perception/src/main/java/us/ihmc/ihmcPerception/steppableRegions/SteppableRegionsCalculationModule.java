@@ -9,6 +9,11 @@ import perception_msgs.msg.dds.SteppableRegionDebugImageMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.QuaternionTools;
+import us.ihmc.euclid.tools.RotationMatrixTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableCell;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionDataHolder;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionsEnvironmentModel;
@@ -20,6 +25,7 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersRe
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.nio.ByteBuffer;
@@ -281,6 +287,18 @@ public class SteppableRegionsCalculationModule
       }
    }
 
+   private static double computeMaximumWIdthInWindow(SteppableRegionCalculatorParametersReadOnly parameters)
+   {
+      // we know when snapping, the foot can be off axis, so what's the maximum off axis it can be?
+      double rotationForPseudoWidth = (Math.PI / parameters.getYawDiscretizations()) / 2.0;
+      Vector2D footVector = new Vector2D(parameters.getFootLength() / 2.0, parameters.getFootWidth() / 2.0);
+      Vector2D rotatedFootVector = new Vector2D();
+      // apply yaw rotation to the vector
+      RotationMatrixTools.applyYawRotation(rotationForPseudoWidth, footVector, rotatedFootVector);
+
+      return rotatedFootVector.getY() * 2.0;
+   }
+
    private void populateSteppabilityParameters(HeightMapData heightMapData)
    {
       steppableParameters.setParameter(heightMapData.getCenterIndex());
@@ -290,7 +308,7 @@ public class SteppableRegionsCalculationModule
       steppableParameters.setParameter((float) parameters.getDistanceFromCliffTops());
       steppableParameters.setParameter((float) parameters.getDistanceFromCliffBottoms());
       steppableParameters.setParameter(parameters.getYawDiscretizations());
-      steppableParameters.setParameter((float) parameters.getFootWidth());
+      steppableParameters.setParameter((float) computeMaximumWIdthInWindow(parameters));
       steppableParameters.setParameter((float) parameters.getFootLength());
       steppableParameters.setParameter((float) parameters.getCliffStartHeightToAvoid());
       steppableParameters.setParameter((float) parameters.getCliffEndHeightToAvoid());
