@@ -10,6 +10,7 @@
     "lowerBound" : 1,
     "upperBound" : 10
   },
+  "Rapid regions enabled" : false,
   "Logging enabled" : false,
   "Publish color" : true,
   "Publish depth" : true,
