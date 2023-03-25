@@ -146,7 +146,7 @@ public class RDXSteppableRegionCalculatorDemo
                   baseUI.getImGuiPanelManager().addPanel(ousterLidarSimulator);
                   baseUI.getPrimaryScene().addRenderableProvider(ousterLidarSimulator::getRenderables);
 
-//                  baseUI.getImGuiPanelManager().addPanel(steppableRegionsUI.getBasePanel());
+                  baseUI.getImGuiPanelManager().addPanel(steppableRegionsUI.getBasePanel());
 
                   baseUI.getLayoutManager().reloadLayout();
                   realtimeRos2Node.spin();
