@@ -253,7 +253,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             visibilityGraphPlanner.computeBestEffortPlan(horizonLength);
          }
 
-
+         bodyPathPlanHolder.setPoseWaypoints(waypoints);
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);
          if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
          {
