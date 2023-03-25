@@ -71,8 +71,7 @@ public class SteppableRegionMessageConverter
       }
 
       double footYaw = message.getFootYaw();
-      SteppableRegion steppableRegion = new SteppableRegion(transformToWorld.getTranslation(),
-                                                            transformToWorld.getRotation(),
+      SteppableRegion steppableRegion = new SteppableRegion(transformToWorld,
                                                             concaveHullVertices,
                                                             footYaw);
       steppableRegion.setRegionId(message.getRegionId());
@@ -175,10 +174,9 @@ public class SteppableRegionMessageConverter
             concaveHullVertices.add(new Point2D(vertexBuffer.get(vertexIndex)));
          }
 
-         SteppableRegion steppableRegion = new SteppableRegion(transformToWorld.getTranslation(),
-                                                                    transformToWorld.getRotation(),
-                                                                    concaveHullVertices,
-                                                                    footYaw);
+         SteppableRegion steppableRegion = new SteppableRegion(transformToWorld,
+                                                               concaveHullVertices,
+                                                               footYaw);
          steppableRegion.setRegionId(message.getRegionId().get(regionIndex));
          steppableRegions.add(steppableRegion);
 
@@ -303,8 +301,7 @@ public class SteppableRegionMessageConverter
                concaveHullVertices.add(new Point2D(vertexBuffer.get(vertexIndex)));
             }
 
-            SteppableRegion steppableRegion = new SteppableRegion(transformToWorld.getTranslation(),
-                                                                  transformToWorld.getRotation(),
+            SteppableRegion steppableRegion = new SteppableRegion(transformToWorld,
                                                                   concaveHullVertices,
                                                                   footYaw);
             steppableRegion.setRegionId(message.getRegionId().get(regionIndex));

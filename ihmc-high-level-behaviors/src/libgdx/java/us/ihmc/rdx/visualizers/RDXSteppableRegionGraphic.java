@@ -9,6 +9,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegion;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionMessageConverter;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsListCollection;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -19,22 +21,47 @@ public class RDXSteppableRegionGraphic implements RenderableProvider
 {
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
+   private boolean renderHeightMap = true;
+   private boolean renderPlanes = false;
    private boolean inPaintHeight = true;
    private boolean renderGroundCells = false;
    private boolean renderGroundPlane = false;
 
    private final RecyclingArrayList<RDXGridMapGraphic> gridMapGraphics = new RecyclingArrayList<>(RDXGridMapGraphic::new);
-
+   private final RDXPlanarRegionsGraphic regionGraphics = new RDXPlanarRegionsGraphic();
+   {
+      regionGraphics.setDrawNormal(true);
+   }
 
    public void clear()
    {
+      for (int i = 0; i < gridMapGraphics.size(); i++)
+         gridMapGraphics.get(i).clear();
+
+      regionGraphics.clear();
       gridMapGraphics.clear();
    }
 
    public void update()
    {
-      for (RDXGridMapGraphic gridMapGraphic : gridMapGraphics)
-         gridMapGraphic.update();
+      if (renderPlanes)
+         regionGraphics.update();
+
+      if (renderHeightMap)
+      {
+         for (RDXGridMapGraphic gridMapGraphic : gridMapGraphics)
+            gridMapGraphic.update();
+      }
+   }
+
+   public void setRenderPlanes(boolean renderPlanes)
+   {
+      this.renderPlanes = renderPlanes;
+   }
+
+   public void setRenderHeightMap(boolean renderHeightMap)
+   {
+      this.renderHeightMap = renderHeightMap;
    }
 
    public void setInPaintHeight(boolean inPaintHeight)
@@ -62,10 +89,17 @@ public class RDXSteppableRegionGraphic implements RenderableProvider
       SteppableRegionsListCollection steppableRegionsCollection = SteppableRegionMessageConverter.convertToSteppableRegionsListCollection(message);
       List<SteppableRegion> steppableRegionsToView = steppableRegionsCollection.getSteppableRegions(yawToShow).getSteppableRegionsAsList();
 
-      for (int i = 0; i < gridMapGraphics.size(); i++)
-         gridMapGraphics.get(i).clear();
-      gridMapGraphics.clear();
-      steppableRegionsToView.forEach(this::generateMeshes);
+      clear();
+      if (renderHeightMap)
+         steppableRegionsToView.forEach(this::generateMeshes);
+      if (renderPlanes)
+         generatePlanarRegionMeshes(steppableRegionsToView);
+   }
+
+   private void generatePlanarRegionMeshes(List<SteppableRegion> steppableRegionsToView)
+   {
+      List<PlanarRegion> planarRegions = steppableRegionsToView.stream().map(region -> region.toPlanarRegion()).toList();
+      regionGraphics.generateMeshes(new PlanarRegionsList(planarRegions));
    }
 
    private void generateMeshes(SteppableRegion steppableRegion)
@@ -84,12 +118,18 @@ public class RDXSteppableRegionGraphic implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXGridMapGraphic gridMapGraphic : gridMapGraphics)
-      {
-         if (gridMapGraphic == null)
-            continue;
+      if (renderPlanes)
+         regionGraphics.getRenderables(renderables, pool);
 
-         gridMapGraphic.getRenderables(renderables, pool);
+      if (renderHeightMap)
+      {
+         for (RDXGridMapGraphic gridMapGraphic : gridMapGraphics)
+         {
+            if (gridMapGraphic == null)
+               continue;
+
+            gridMapGraphic.getRenderables(renderables, pool);
+         }
       }
    }
 

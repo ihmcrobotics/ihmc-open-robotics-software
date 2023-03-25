@@ -1,15 +1,20 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionNormal;
 import us.ihmc.robotics.geometry.PlanarRegionOrigin;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
@@ -32,26 +37,19 @@ public class SteppableRegion
    private final PlanarRegionOrigin origin = new PlanarRegionOrigin(transformFromRegionToWorld);
    private final PlanarRegionNormal normal = new PlanarRegionNormal(transformFromRegionToWorld);
 
-   private final Point2D centroidInWorld = new Point2D();
-
    private HeightMapData localHeightMap;
 
-   public SteppableRegion(Tuple3DReadOnly origin,
-                          Orientation3DReadOnly orientation,
-                          List<? extends Point2DReadOnly> concaveHullVertices,
-                          double footYaw)
+   public SteppableRegion(RigidBodyTransformReadOnly transformFromRegionToWorld, List<? extends Point2DReadOnly> concaveHullVertices, double footYaw)
    {
       this.footYaw = footYaw;
 
-      transformFromWorldToRegion.set(orientation, origin);
-      transformFromRegionToWorld.setAndInvert(transformFromWorldToRegion);
+      this.transformFromRegionToWorld.set(transformFromRegionToWorld);
+      transformFromWorldToRegion.setAndInvert(transformFromRegionToWorld);
 
       concaveHullInRegionFrame.addVertices(Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices));
       convexHullInRegionFrame.addVertices(Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices));
       concaveHullInRegionFrame.update();
       convexHullInRegionFrame.update();
-
-      transformFromWorldToRegion.inverseTransform(concaveHullInRegionFrame.getCentroid(), centroidInWorld, false);
    }
 
    public ConvexPolygon2DReadOnly getConvexHullInRegionFrame()
@@ -62,11 +60,6 @@ public class SteppableRegion
    public ConcavePolygon2DReadOnly getConcaveHullInRegionFrame()
    {
       return concaveHullInRegionFrame;
-   }
-
-   public Point2DReadOnly getConcaveHullCentroidInWorld()
-   {
-      return centroidInWorld;
    }
 
    public void setLocalHeightMap(HeightMapData heightMapData)
@@ -107,6 +100,19 @@ public class SteppableRegion
    public double getFootYaw()
    {
       return footYaw;
+   }
+
+   public PlanarRegion toPlanarRegion()
+   {
+      return toPlanarRegion(this);
+   }
+
+   public static PlanarRegion toPlanarRegion(SteppableRegion steppableRegion)
+   {
+      PlanarRegion planarRegion = new PlanarRegion(steppableRegion.transformFromRegionToWorld, steppableRegion.getConcaveHullInRegionFrame());
+      planarRegion.setRegionId(steppableRegion.getRegionId());
+
+      return planarRegion;
    }
 }
 
