@@ -1,13 +1,9 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
-import com.jme3.terrain.heightmap.HeightMap;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -18,7 +14,6 @@ import us.ihmc.ihmcPerception.steppableRegions.data.SteppableBorderRing;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableCell;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionDataHolder;
 import us.ihmc.ihmcPerception.steppableRegions.data.SteppableRegionsEnvironmentModel;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
@@ -27,7 +22,10 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
 
 public class SteppableRegionsCalculator
 {
@@ -144,13 +142,6 @@ public class SteppableRegionsCalculator
       List<Point2D> pointCloudInRegion = pointsInWorld.parallelStream().map(point -> PolygonizerTools.toPointInPlane(point, centroid, orientation)).toList();
 
       ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInRegion, concaveHullFactoryParameters);
-      for (ConcaveHull concaveHull : concaveHullCollection.getConcaveHulls())
-      {
-         Point2D localCentroid = new Point2D();
-         concaveHull.getConcaveHullVertices().forEach(localCentroid::add);
-         localCentroid.scale(1.0 / concaveHull.getNumberOfVertices());
-         LogTools.info("centroid : " + localCentroid);
-      }
 
       // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
       double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();

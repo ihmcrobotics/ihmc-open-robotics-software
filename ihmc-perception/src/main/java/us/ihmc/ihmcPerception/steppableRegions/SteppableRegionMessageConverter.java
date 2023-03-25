@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
@@ -225,6 +226,8 @@ public class SteppableRegionMessageConverter
       for (int yawIndex = 0; yawIndex < steppableRegionListCollection.getDiscretizations(); yawIndex++)
       {
          SteppableRegionsList steppableRegionsList = steppableRegionListCollection.getSteppableRegions(yawIndex);
+         if (steppableRegionsList == null)
+            LogTools.info("Crap");
          double footYaw = steppableRegionsList.getFootYaw();
 
          numberOfRegionsBuffer.add(steppableRegionsList.getNumberOfSteppableRegions());
@@ -244,7 +247,7 @@ public class SteppableRegionMessageConverter
                vertexBuffer.add().set(steppableRegion.getConcaveHullInRegionFrame().getVertex(vertexIndex), 0.0);
             }
 
-            if (!MathTools.epsilonEquals(steppableRegion.getFootYaw(), footYaw, 1e-5))
+            if (Double.isFinite(footYaw) && !MathTools.epsilonEquals(steppableRegion.getFootYaw(), footYaw, 1e-5))
                throw new RuntimeException("Yaws are not equal.");
 
             HeightMapMessage heightMapMessage = heightMapBuffer.add();
