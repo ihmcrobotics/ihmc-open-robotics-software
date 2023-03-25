@@ -21,6 +21,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.util.Set;
@@ -114,8 +115,10 @@ public class RDXInteractableFrameModel
       {
          if (extendedContextMenu != null)
             extendedContextMenu.run();
-         ImGui.text("Transform to parent:");
-         transformText.set(transformToParent.toString());
+         ImGui.text("Transform to parent: (" + representativeReferenceFrame.getParent().getName() + ")");
+         transformText.set(String.format("Translation:\n%s\nYaw, pitch, roll:\n%s",
+                                         transformToParent.getTranslation(),
+                                         EuclidCoreMissingTools.getYawPitchRollValuesStringDegrees(transformToParent.getRotation())));
          ImGui.inputTextMultiline(labels.getHidden("transformToParent"), transformText, 0, 60, ImGuiInputTextFlags.ReadOnly);
          if (ImGui.menuItem("Close"))
             ImGui.closeCurrentPopup();
@@ -142,6 +145,17 @@ public class RDXInteractableFrameModel
    public ReferenceFrame getReferenceFrame()
    {
       return representativeReferenceFrame;
+   }
+
+   public RigidBodyTransform getTransformToParentToModify()
+   {
+      return transformToParent;
+   }
+
+   public void setPose(RigidBodyTransform transformToParent)
+   {
+      this.transformToParent.set(transformToParent);
+      representativeReferenceFrame.update();
    }
 
    public void setExtendedContextMenu(Runnable runnable)

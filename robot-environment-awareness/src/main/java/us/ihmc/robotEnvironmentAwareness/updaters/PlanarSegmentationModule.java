@@ -178,7 +178,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       planarRegionFeatureUpdater.setSurfaceNormalFilterParametersTopic(SegmentationModuleAPI.SurfaceNormalFilterParameters);
       planarRegionFeatureUpdater.bindControls();
 
-      reaMessager.registerTopicListener(SegmentationModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
+      reaMessager.addTopicListener(SegmentationModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
 
       isOcTreeBoundingBoxRequested = reaMessager.createInput(SegmentationModuleAPI.RequestBoundingBox, false);
 
@@ -225,7 +225,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
          loadConfigurationFile(filePropertyHelper);
 
-         reaMessager.registerTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration, (content) -> saveConfigurationFIle(filePropertyHelper));
+         reaMessager.addTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration, (content) -> saveConfigurationFIle(filePropertyHelper));
       }
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.

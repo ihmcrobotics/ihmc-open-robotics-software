@@ -1,5 +1,7 @@
 package us.ihmc.atlas.sensors;
 
+import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.FAST_RTPS;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -17,11 +19,11 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
@@ -34,8 +36,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.tools.processManagement.JavaProcessManager;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import static us.ihmc.pubsub.DomainFactory.PubSubImplementation.*;
 
 public class AtlasSLAMBasedREAStandaloneLauncher
 {

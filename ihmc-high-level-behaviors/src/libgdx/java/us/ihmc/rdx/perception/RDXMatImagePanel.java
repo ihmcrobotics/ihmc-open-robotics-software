@@ -71,6 +71,14 @@ public class RDXMatImagePanel
       BytedecoOpenCVTools.setRGBA8888ImageAlpha(image, 255);
    }
 
+   public void ensureDimensionsMatch(int imageWidth, int imageHeight)
+   {
+      if (!BytedecoOpenCVTools.dimensionsMatch(image, imageWidth, imageHeight))
+      {
+         resize(imageWidth, imageHeight);
+      }
+   }
+
    public void resize(int imageWidth, int imageHeight)
    {
       panelTexture.dispose();

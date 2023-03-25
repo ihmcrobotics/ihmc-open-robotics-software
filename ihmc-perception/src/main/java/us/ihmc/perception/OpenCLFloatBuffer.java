@@ -20,6 +20,13 @@ public class OpenCLFloatBuffer
       this(numberOfFloats, null);
    }
 
+   public OpenCLFloatBuffer(ByteBuffer backingDirectByteBuffer)
+   {
+      this.backingDirectByteBuffer = backingDirectByteBuffer;
+      FloatBuffer backingDirectFloatBuffer = backingDirectByteBuffer.asFloatBuffer();
+      resize(backingDirectFloatBuffer.capacity(), null, backingDirectFloatBuffer);
+   }
+
    public OpenCLFloatBuffer(int numberOfFloats, FloatBuffer backingDirectFloatBuffer)
    {
       resize(numberOfFloats, null, backingDirectFloatBuffer);

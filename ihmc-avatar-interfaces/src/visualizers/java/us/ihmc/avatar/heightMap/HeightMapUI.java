@@ -1,25 +1,26 @@
 package us.ihmc.avatar.heightMap;
 
+import org.apache.commons.lang3.tuple.Triple;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.messager.javafx.JavaFXMessager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -123,11 +124,11 @@ public abstract class HeightMapUI extends ApplicationNoModule
       if (SHOW_HEIGHT_MAP)
       {
          heightMapVisualizer = new HeightMapVisualizer();
-         messager.registerTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
-         messager.registerTopicListener(HeightMapMessagerAPI.MaxHeight, heightMapVisualizer::setMaxHeight);
-         messager.registerTopicListener(HeightMapMessagerAPI.xPosition, v -> heightMapVisualizer.setDebugPosition(0, v));
-         messager.registerTopicListener(HeightMapMessagerAPI.yPosition, v -> heightMapVisualizer.setDebugPosition(1, v));
-         messager.registerTopicListener(HeightMapMessagerAPI.zPosition, v -> heightMapVisualizer.setDebugPosition(2, v));
+         messager.addTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
+         messager.addTopicListener(HeightMapMessagerAPI.MaxHeight, heightMapVisualizer::setMaxHeight);
+         messager.addTopicListener(HeightMapMessagerAPI.xPosition, v -> heightMapVisualizer.setDebugPosition(0, v));
+         messager.addTopicListener(HeightMapMessagerAPI.yPosition, v -> heightMapVisualizer.setDebugPosition(1, v));
+         messager.addTopicListener(HeightMapMessagerAPI.zPosition, v -> heightMapVisualizer.setDebugPosition(2, v));
          view3dFactory.addNodeToView(heightMapVisualizer.getRoot());
          heightMapVisualizer.start();
       }
