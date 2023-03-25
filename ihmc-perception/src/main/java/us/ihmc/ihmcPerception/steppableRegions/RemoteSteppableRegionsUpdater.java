@@ -1,32 +1,15 @@
 package us.ihmc.ihmcPerception.steppableRegions;
 
 import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
-import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
-import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.ExecutorServiceTools;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class RemoteSteppableRegionsUpdater
@@ -39,8 +22,8 @@ public class RemoteSteppableRegionsUpdater
    private final SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
-   private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
-                                                                                                                  ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+   private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1, getClass(), ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledFuture<?> scheduled;
 
    public RemoteSteppableRegionsUpdater(ROS2PublishSubscribeAPI rosHelper, SteppableRegionCalculatorParametersReadOnly defaultParameters)
    {
@@ -70,7 +53,19 @@ public class RemoteSteppableRegionsUpdater
 
    public void start()
    {
-      executorService.scheduleAtFixedRate(this::compute, 0, updateDTMillis, TimeUnit.MILLISECONDS);
+      if (scheduled == null)
+      {
+         scheduled = executorService.scheduleAtFixedRate(this::compute, 0, updateDTMillis, TimeUnit.MILLISECONDS);
+      }
+   }
+
+   public void stop()
+   {
+      if (scheduled != null)
+      {
+         scheduled.cancel(true);
+         scheduled = null;
+      }
    }
 
    public void compute()
@@ -86,6 +81,7 @@ public class RemoteSteppableRegionsUpdater
 
    public void destroy()
    {
+      stop();
       executorService.shutdown();
    }
 }
