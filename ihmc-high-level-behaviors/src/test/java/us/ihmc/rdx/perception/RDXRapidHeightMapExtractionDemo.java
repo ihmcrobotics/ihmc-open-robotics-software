@@ -29,7 +29,9 @@ import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -51,6 +53,7 @@ public class RDXRapidHeightMapExtractionDemo
 
    private final RapidHeightMapExtractor rapidHeightMapUpdater = new RapidHeightMapExtractor();
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
+   private final RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
 
    private final Notification userChangedIndex = new Notification();
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
@@ -91,8 +94,10 @@ public class RDXRapidHeightMapExtractionDemo
 
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
+            heightMapVisualizer.setActive(true);
 
             baseUI.getPrimaryScene().addRenderableProvider(heightMapRenderer, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer);
 
             createForOuster(128, 2048);
 
@@ -224,6 +229,9 @@ public class RDXRapidHeightMapExtractionDemo
                                   gridCenter,
                                   rapidHeightMapUpdater.getCenterIndex(),
                                   rapidHeightMapUpdater.getCellSizeXYInMeters());
+
+         heightMapVisualizer.acceptHeightMapMessage(HeightMapMessageTools.toMessage(rapidHeightMapUpdater.getLatestHeightMapData()));
+         heightMapVisualizer.update();
 
          rapidHeightMapUpdater.setModified(false);
          rapidHeightMapUpdater.setProcessing(false);
