@@ -45,7 +45,7 @@ public class SteppableRegionsCalculationModuleTest
          assertTrue(regions.getSteppableRegions(i).getSteppableRegion(0).getConvexHullInRegionFrame().isPointInside(-extremumValue, -extremumValue));
          assertTrue(regions.getSteppableRegions(i).getSteppableRegion(0).getConvexHullInRegionFrame().isPointInside(-extremumValue, extremumValue));
 
-         assertEquals(1, regions.getSteppableRegions(i).getSteppableRegionsAsList());
+         assertEquals(1, regions.getSteppableRegions(i).getSteppableRegionsAsList().size());
       }
 
       LogTools.info("Tests passed!");
