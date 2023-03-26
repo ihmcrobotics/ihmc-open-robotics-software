@@ -39,7 +39,7 @@ import java.util.ArrayList;
 
 public class RDXRapidHeightMapExtractionDemo
 {
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_GoodPerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ImGuiPanel navigationPanel;
@@ -57,8 +57,8 @@ public class RDXRapidHeightMapExtractionDemo
                                                                                                                                          true,
                                                                                                                                          1);
 
-   private ImInt frameIndex = new ImInt(0);
-   private ImFloat planeHeight = new ImFloat(1.5f); // 2.133f
+   private final ImInt frameIndex = new ImInt(0);
+   private final ImFloat planeHeight = new ImFloat(1.5f); // 2.133f
 
    private final Pose3D cameraPose = new Pose3D();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
@@ -204,8 +204,6 @@ public class RDXRapidHeightMapExtractionDemo
 
                                       long begin = System.nanoTime();
 
-                                      RigidBodyTransform transform = new RigidBodyTransform(sensorOrientationBuffer.get(frameIndex.get()),
-                                                                                            sensorPositionBuffer.get(frameIndex.get()));
 
                                       // Point3D euler = new Point3D();
                                       // sensorOrientationBuffer.get(frameIndex.get()).getEuler(euler);
@@ -213,7 +211,7 @@ public class RDXRapidHeightMapExtractionDemo
 
                                       // LogTools.info("Rotation: " + euler);
 
-                                      rapidHeightMapUpdater.update(transform, planeHeight.get());
+                                      rapidHeightMapUpdater.update(new RigidBodyTransform(cameraPose), planeHeight.get());
                                       heightMapUpdateNotification.set();
 
                                       long end = System.nanoTime();
