@@ -96,13 +96,13 @@ public class RapidHeightMapExtractor
          // Upload input depth image
          inputDepthImage.writeOpenCLImage(openCLManager);
 
-         Point3D gridCenter = new Point3D();
-
-         populateParameterBuffer(gridCenter);
-
          // Fill ground plane buffer
          RigidBodyTransform worldToSensorTransform = new RigidBodyTransform(sensorToWorldTransform);
          worldToSensorTransform.invert();
+
+         Point3D gridCenter = new Point3D(sensorToWorldTransform.getTranslation());
+
+         populateParameterBuffer(gridCenter);
 
          // Fill world-to-sensor transform buffer
          worldToSensorTransform.get(worldToSensorTransformArray);
