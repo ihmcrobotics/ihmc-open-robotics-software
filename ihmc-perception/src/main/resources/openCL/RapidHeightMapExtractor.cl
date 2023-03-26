@@ -1,8 +1,7 @@
-#define GRID_WIDTH_METERS 0
-#define HEIGHT_MAP_RESOLUTION 1
-#define INPUT_HEIGHT 2
-#define INPUT_WIDTH 3
-#define CELLS_PER_AXIS 4
+#define HEIGHT_MAP_RESOLUTION 0
+#define HEIGHT_MAP_CENTER_INDEX 1
+#define DEPTH_INPUT_HEIGHT 2
+#define DEPTH_INPUT_WIDTH 3
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -12,11 +11,11 @@
  **/
 float3 back_project_spherical(int yaw_index, int pitch_index, float depth, global float *params)
 {
-  int yawCountsFromCenter = -yaw_index - (params[INPUT_WIDTH] / 2);
-  int pitchCountsFromCenter = -(pitch_index - (params[INPUT_HEIGHT] / 2));
+  int yawCountsFromCenter = -yaw_index - (params[DEPTH_INPUT_WIDTH] / 2);
+  int pitchCountsFromCenter = -(pitch_index - (params[DEPTH_INPUT_HEIGHT] / 2));
 
-  float yaw = yawCountsFromCenter / (float)params[INPUT_WIDTH] * HORIZONTAL_FOV;
-  float pitch = pitchCountsFromCenter / (float)params[INPUT_HEIGHT] * VERTICAL_FOV;
+  float yaw = yawCountsFromCenter / (float)params[DEPTH_INPUT_WIDTH] * HORIZONTAL_FOV;
+  float pitch = pitchCountsFromCenter / (float)params[DEPTH_INPUT_HEIGHT] * VERTICAL_FOV;
 
   float r = depth * cos(pitch);
 
@@ -27,28 +26,17 @@ float3 back_project_spherical(int yaw_index, int pitch_index, float depth, globa
   return (float3)(px, py, pz);
 }
 
-float3 compute_grid_cell_center(int rIndex, int cIndex, global float *params)
-{
-  float3 cellCenter = (float3)(0, 0, 0);
-  cellCenter.x =
-      ((params[CELLS_PER_AXIS] / 2) - rIndex) * params[HEIGHT_MAP_RESOLUTION];
-  cellCenter.y =
-      ((params[CELLS_PER_AXIS] / 2) - cIndex) * params[HEIGHT_MAP_RESOLUTION];
-  cellCenter.z = -2.0f;
-  return cellCenter;
-}
-
 /**
  * Converts a point in the sensor frame into a coordinate in the lidar sensor.
  * coordinates returned are (int2) (pitch, yaw)
  **/
 int2 spherical_projection(float3 cellCenter, global float *params)
 {
-  float pitchUnit = VERTICAL_FOV / (params[INPUT_HEIGHT]);
-  float yawUnit = HORIZONTAL_FOV / (params[INPUT_WIDTH]);
+  float pitchUnit = VERTICAL_FOV / (params[DEPTH_INPUT_HEIGHT]);
+  float yawUnit = HORIZONTAL_FOV / (params[DEPTH_INPUT_WIDTH]);
 
-  int pitchOffset = params[INPUT_HEIGHT] / 2;
-  int yawOffset = params[INPUT_WIDTH] / 2;
+  int pitchOffset = params[DEPTH_INPUT_HEIGHT] / 2;
+  int yawOffset = params[DEPTH_INPUT_WIDTH] / 2;
 
   float x = cellCenter.x;
   float y = cellCenter.y;
@@ -78,14 +66,15 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
                                   global float *worldToSensorTf,
                                   global float *plane)
 {
-  int cIndex = get_global_id(0);
-  int rIndex = get_global_id(1);
+  int xIndex = get_global_id(0);
+  int yIndex = get_global_id(1);
 
   float3 normal;
   float3 centroid;
 
   float averageHeightZ = 0;
-  float3 cellCenterInWorld = compute_grid_cell_center(rIndex, cIndex, params);
+  float3 cellCenterInWorld = (float3) (0.0f, 0.0f, -2.0f);;
+  cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex), (float2) (0.0f, 0.0f), params[HEIGHT_MAP_RESOLUTION], params[HEIGHT_MAP_CENTER_INDEX]);
 
   float3 cellCenterInSensor = transformPoint3D32_2(
       cellCenterInWorld,
@@ -106,13 +95,13 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
   int count = 0;
 
-  for (int pitch_count = 0; pitch_count < (int)params[INPUT_HEIGHT]; pitch_count++)
+  for (int pitch_count = 0; pitch_count < (int)params[DEPTH_INPUT_HEIGHT]; pitch_count++)
   {
     for (int yaw_count_offset = -WINDOW_WIDTH / 2; yaw_count_offset < WINDOW_WIDTH / 2 + 1; yaw_count_offset++)
     {
       int yaw_count = projectedPoint.y + yaw_count_offset;
 
-      if ((yaw_count >= 0) && (yaw_count < (int)params[INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[INPUT_HEIGHT]))
+      if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
       {
         float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float)1000;
 
@@ -132,10 +121,10 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
     averageHeightZ = averageHeightZ / (float)(count) - get_height_on_plane(cellCenterInSensor.x, cellCenterInSensor.y, plane);
     averageHeightZ = clamp(averageHeightZ, -20.f, 1.5f);
 
-    write_imageui(out, (int2)(cIndex, rIndex), (uint4)((int)((2.0f + averageHeightZ) * 10000.0f), 0, 0, 0));
+    write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)((2.0f + averageHeightZ) * 10000.0f), 0, 0, 0));
   }
   else
   {
-    write_imageui(out, (int2)(cIndex, rIndex), (uint4)(0, 0, 0, 0));
+    write_imageui(out, (int2)(xIndex, yIndex), (uint4)(0, 0, 0, 0));
   }
 }
