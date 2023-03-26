@@ -1,16 +1,22 @@
 package us.ihmc.perception.gpuHeightMap;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class RapidHeightMapExtractor
@@ -40,6 +46,8 @@ public class RapidHeightMapExtractor
    private boolean patchSizeChanged = true;
    private boolean modified = true;
    private boolean processing = false;
+
+   private HeightMapData latestHeightMapData;
 
    public void create(OpenCLManager openCLManager,  BytedecoImage depthImage)
    {
@@ -126,7 +134,36 @@ public class RapidHeightMapExtractor
 
          // Read height map image into CPU memory
          outputHeightMapImage.readOpenCLImage(openCLManager);
+
+         latestHeightMapData = convertToHeightMapData(new Point3D());
       }
+   }
+
+   private HeightMapData convertToHeightMapData(Tuple3DReadOnly center)
+   {
+      HeightMapData heightMapData = new HeightMapData(cellSizeXYInMeters, gridWidthInMeters, center.getX(), center.getY());
+      BytePointer heightMapPointer = outputHeightMapImage.getBytedecoByteBufferPointer();
+
+      float maxHeight = 0.7f;
+      float minHeight = 0.0f;
+
+
+      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      {
+         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
+         {
+            int heightIndex = xIndex * cellsPerAxis + yIndex;
+            float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / 10000.0f;
+            cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
+            if (cellHeight > maxHeight - 0.01f)
+               cellHeight = 0.0f;
+
+            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+            heightMapData.setHeightAt(key, cellHeight);
+         }
+      }
+
+      return heightMapData;
    }
 
    public boolean isProcessing()
@@ -167,5 +204,10 @@ public class RapidHeightMapExtractor
    public int getCenterIndex()
    {
       return centerIndex;
+   }
+
+   public HeightMapData getLatestHeightMapData()
+   {
+      return latestHeightMapData;
    }
 }
