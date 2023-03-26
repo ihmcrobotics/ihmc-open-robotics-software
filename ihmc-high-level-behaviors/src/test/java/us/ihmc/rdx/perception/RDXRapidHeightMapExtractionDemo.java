@@ -219,8 +219,9 @@ public class RDXRapidHeightMapExtractionDemo
 
       if (heightMapUpdateNotification.poll())
       {
+         Point2D gridCenter = rapidHeightMapUpdater.getLatestHeightMapData() != null ? rapidHeightMapUpdater.getLatestHeightMapData().getGridCenter() : new Point2D();
          heightMapRenderer.update(rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
-                                  new Point2D(),
+                                  gridCenter,
                                   rapidHeightMapUpdater.getCenterIndex(),
                                   rapidHeightMapUpdater.getCellSizeXYInMeters());
 

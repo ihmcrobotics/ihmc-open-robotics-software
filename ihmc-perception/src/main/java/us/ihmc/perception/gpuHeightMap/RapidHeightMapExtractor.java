@@ -75,13 +75,15 @@ public class RapidHeightMapExtractor
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
    }
 
-   private void populateParameterBuffer()
+   private void populateParameterBuffer(Tuple3DReadOnly gridCenter)
    {
       //// Fill parameters buffer
       parametersBuffer.setParameter(cellSizeXYInMeters);
       parametersBuffer.setParameter(centerIndex);
       parametersBuffer.setParameter((float) inputDepthImage.getImageHeight());
       parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
+      parametersBuffer.setParameter((float) gridCenter.getX());
+      parametersBuffer.setParameter((float) gridCenter.getY());
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -94,7 +96,9 @@ public class RapidHeightMapExtractor
          // Upload input depth image
          inputDepthImage.writeOpenCLImage(openCLManager);
 
-         populateParameterBuffer();
+         Point3D gridCenter = new Point3D();
+
+         populateParameterBuffer(gridCenter);
 
          // Fill ground plane buffer
          RigidBodyTransform worldToSensorTransform = new RigidBodyTransform(sensorToWorldTransform);
@@ -135,7 +139,7 @@ public class RapidHeightMapExtractor
          // Read height map image into CPU memory
          outputHeightMapImage.readOpenCLImage(openCLManager);
 
-         latestHeightMapData = convertToHeightMapData(new Point3D());
+         latestHeightMapData = convertToHeightMapData(gridCenter);
       }
    }
 
