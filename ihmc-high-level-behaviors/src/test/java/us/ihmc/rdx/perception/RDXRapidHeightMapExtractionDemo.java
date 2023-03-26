@@ -220,7 +220,8 @@ public class RDXRapidHeightMapExtractionDemo
       if (heightMapUpdateNotification.poll())
       {
          heightMapRenderer.update(rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
-                                  rapidHeightMapUpdater.getCellsPerAxis(),
+                                  new Point2D(),
+                                  rapidHeightMapUpdater.getCenterIndex(),
                                   rapidHeightMapUpdater.getCellSizeXYInMeters());
 
          rapidHeightMapUpdater.setModified(false);
