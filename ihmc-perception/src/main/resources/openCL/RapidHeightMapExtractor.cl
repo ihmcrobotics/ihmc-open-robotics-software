@@ -1,10 +1,8 @@
-#define GRID_LENGTH_METERS 0
-#define GRID_WIDTH_METERS 1
-#define CELL_SIZE_XY_METERS 2
-#define INPUT_HEIGHT 3
-#define INPUT_WIDTH 4
-#define GRID_LENGTH 5
-#define GRID_WIDTH 6
+#define GRID_WIDTH_METERS 0
+#define HEIGHT_MAP_RESOLUTION 1
+#define INPUT_HEIGHT 2
+#define INPUT_WIDTH 3
+#define CELLS_PER_AXIS 4
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -33,9 +31,9 @@ float3 compute_grid_cell_center(int rIndex, int cIndex, global float *params)
 {
   float3 cellCenter = (float3)(0, 0, 0);
   cellCenter.x =
-      ((params[GRID_LENGTH] / 2) - rIndex) * params[CELL_SIZE_XY_METERS];
+      ((params[CELLS_PER_AXIS] / 2) - rIndex) * params[HEIGHT_MAP_RESOLUTION];
   cellCenter.y =
-      ((params[GRID_WIDTH] / 2) - cIndex) * params[CELL_SIZE_XY_METERS];
+      ((params[CELLS_PER_AXIS] / 2) - cIndex) * params[HEIGHT_MAP_RESOLUTION];
   cellCenter.z = -2.0f;
   return cellCenter;
 }
@@ -100,7 +98,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
   int WINDOW_WIDTH = 20;
 
-  float halfCellWidth = params[CELL_SIZE_XY_METERS] / 2.0f;
+  float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 2.0f;
   float minX = cellCenterInSensor.x - halfCellWidth;
   float maxX = cellCenterInSensor.x + halfCellWidth;
   float minY = cellCenterInSensor.y - halfCellWidth;

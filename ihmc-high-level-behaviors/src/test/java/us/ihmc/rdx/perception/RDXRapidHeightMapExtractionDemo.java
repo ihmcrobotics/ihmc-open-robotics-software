@@ -120,7 +120,7 @@ public class RDXRapidHeightMapExtractionDemo
             loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
             rapidHeightMapUpdater.create(openCLManager, openCLProgram, loadedDepthImage);
-            heightMapRenderer.create(rapidHeightMapUpdater.getGridLength() * rapidHeightMapUpdater.getGridWidth());
+            heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
          }
 
          @Override
@@ -222,8 +222,7 @@ public class RDXRapidHeightMapExtractionDemo
       if (heightMapUpdateNotification.poll())
       {
          heightMapRenderer.update(rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
-                                  rapidHeightMapUpdater.getGridLength(),
-                                  rapidHeightMapUpdater.getGridWidth(),
+                                  rapidHeightMapUpdater.getCellsPerAxis(),
                                   rapidHeightMapUpdater.getCellSizeXYInMeters());
 
          rapidHeightMapUpdater.setModified(false);

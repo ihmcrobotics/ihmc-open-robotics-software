@@ -75,18 +75,18 @@ public class RDXHeightMapRenderer implements RenderableProvider
       intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update(BytePointer heightMapPointer, int gridLength, int gridWidth, float cellSizeXYInMeters)
+   public void update(BytePointer heightMapPointer, int cellsPerAxis, float cellSizeXYInMeters)
    {
-      LogTools.info("Rendering Height Map: {} {} {}", gridLength, gridWidth, cellSizeXYInMeters);
+      LogTools.info("Rendering Height Map: {} {} {}", cellsPerAxis, cellsPerAxis, cellSizeXYInMeters);
 
       float maxHeight = 0.7f;
       float minHeight = 0.0f;
 
-      for (int i = 0; i < gridLength; i++)
+      for (int i = 0; i < cellsPerAxis; i++)
       {
-         for (int j = 0; j < gridWidth; j++)
+         for (int j = 0; j < cellsPerAxis; j++)
          {
-            int heightIndex = i * gridWidth + j;
+            int heightIndex = i * cellsPerAxis + j;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
             float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / 10000.0f;
             cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
@@ -94,8 +94,8 @@ public class RDXHeightMapRenderer implements RenderableProvider
                cellHeight = 0.0f;
 
             // Position
-            intermediateVertexBuffer[vertexIndex] = ((float) gridLength / 2 - i) * cellSizeXYInMeters;
-            intermediateVertexBuffer[vertexIndex + 1] = ((float) gridWidth / 2 - j) * cellSizeXYInMeters;
+            intermediateVertexBuffer[vertexIndex] = ((float) cellsPerAxis / 2 - i) * cellSizeXYInMeters;
+            intermediateVertexBuffer[vertexIndex + 1] = ((float) cellsPerAxis / 2 - j) * cellSizeXYInMeters;
             intermediateVertexBuffer[vertexIndex + 2] = cellHeight;
 
             // Color (0.0 to 1.0)

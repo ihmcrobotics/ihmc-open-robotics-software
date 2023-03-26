@@ -10,21 +10,17 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.tools.PerceptionEuclidTools;
+import us.ihmc.perception.opencl.OpenCLFloatParameters;
 
 public class RapidHeightMapExtractor
 {
-   private final int TOTAL_NUM_PARAMS = 7;
+   private static final float gridWidthInMeters = 8.0f;
+   private static final float cellSizeXYInMeters = 0.02f;
 
-   private float gridLengthInMeters = 8.0f;
-   private float gridWidthInMeters = 6.0f;
-   private float cellSizeXYInMeters = 0.02f;
-
-   private int gridLength = (int) (gridLengthInMeters / cellSizeXYInMeters);
-   private int gridWidth = (int) (gridWidthInMeters / cellSizeXYInMeters);
+   private static final int cellsPerAxis = (int) (gridWidthInMeters / cellSizeXYInMeters);
 
    private OpenCLManager openCLManager;
-   private OpenCLFloatBuffer parametersBuffer;
+   private OpenCLFloatParameters parametersBuffer;
 
    private OpenCLFloatBuffer worldToSensorTransformBuffer;
    private float[] worldToSensorTransformArray = new float[16];
@@ -49,8 +45,7 @@ public class RapidHeightMapExtractor
       this.openCLManager = openCLManager;
       this.rapidHeightMapUpdaterProgram = program;
 
-      parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
-      parametersBuffer.createOpenCLBufferObject(openCLManager);
+      parametersBuffer = new OpenCLFloatParameters();
 
       worldToSensorTransformBuffer = new OpenCLFloatBuffer(16);
       worldToSensorTransformBuffer.createOpenCLBufferObject(openCLManager);
@@ -61,7 +56,7 @@ public class RapidHeightMapExtractor
       groundPlaneBuffer = new OpenCLFloatBuffer(4);
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
 
-      outputHeightMapImage = new BytedecoImage(gridWidth, gridLength, opencv_core.CV_16UC1);
+      outputHeightMapImage = new BytedecoImage(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
       outputHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
@@ -75,13 +70,11 @@ public class RapidHeightMapExtractor
          inputDepthImage.writeOpenCLImage(openCLManager);
 
          //// Fill parameters buffer
-         parametersBuffer.getBytedecoFloatBufferPointer().put(0, gridLengthInMeters);
-         parametersBuffer.getBytedecoFloatBufferPointer().put(1, gridWidthInMeters);
-         parametersBuffer.getBytedecoFloatBufferPointer().put(2, cellSizeXYInMeters);
-         parametersBuffer.getBytedecoFloatBufferPointer().put(3, (float) inputDepthImage.getImageHeight());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(4, (float) inputDepthImage.getImageWidth());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(5, (float) gridLength);
-         parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) gridWidth);
+         parametersBuffer.setParameter(gridWidthInMeters);
+         parametersBuffer.setParameter(cellSizeXYInMeters);
+         parametersBuffer.setParameter((float) inputDepthImage.getImageHeight());
+         parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
+         parametersBuffer.setParameter((float) cellsPerAxis);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
 
@@ -119,7 +112,7 @@ public class RapidHeightMapExtractor
          openCLManager.setKernelArgument(heightMapUpdateKernel, 5, groundPlaneBuffer.getOpenCLBufferObject());
 
          // Execute kernel with length and width parameters
-         openCLManager.execute2D(heightMapUpdateKernel, gridWidth, gridLength);
+         openCLManager.execute2D(heightMapUpdateKernel, cellsPerAxis, cellsPerAxis);
 
          // Read height map image into CPU memory
          outputHeightMapImage.readOpenCLImage(openCLManager);
@@ -156,23 +149,8 @@ public class RapidHeightMapExtractor
       return outputHeightMapImage;
    }
 
-   public float getGridLengthInMeters()
+   public int getCellsPerAxis()
    {
-      return gridLengthInMeters;
-   }
-
-   public float getGridWidthInMeters()
-   {
-      return gridWidthInMeters;
-   }
-
-   public int getGridLength()
-   {
-      return gridLength;
-   }
-
-   public int getGridWidth()
-   {
-      return gridWidth;
+      return cellsPerAxis;
    }
 }
