@@ -163,4 +163,9 @@ public class RapidHeightMapExtractor
    {
       return cellsPerAxis;
    }
+
+   public int getCenterIndex()
+   {
+      return centerIndex;
+   }
 }

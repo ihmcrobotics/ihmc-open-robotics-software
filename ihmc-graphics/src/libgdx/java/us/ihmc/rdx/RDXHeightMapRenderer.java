@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
@@ -75,27 +76,32 @@ public class RDXHeightMapRenderer implements RenderableProvider
       intermediateVertexBuffer = new float[totalCells * FLOATS_PER_CELL];
    }
 
-   public void update(BytePointer heightMapPointer, int cellsPerAxis, float cellSizeXYInMeters)
+   public void update(BytePointer heightMapPointer, Point2DReadOnly center, int centerIndex, float cellSizeXYInMeters)
    {
+      int cellsPerAxis = 2 * centerIndex + 1;
       LogTools.info("Rendering Height Map: {} {} {}", cellsPerAxis, cellsPerAxis, cellSizeXYInMeters);
 
       float maxHeight = 0.7f;
       float minHeight = 0.0f;
 
-      for (int i = 0; i < cellsPerAxis; i++)
+      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
-         for (int j = 0; j < cellsPerAxis; j++)
+         double xPosition = indexToCoordinate(xIndex, center.getX(), cellSizeXYInMeters, centerIndex);
+
+         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
-            int heightIndex = i * cellsPerAxis + j;
+            int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
             float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / 10000.0f;
             cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
             if (cellHeight > maxHeight - 0.01f)
                cellHeight = 0.0f;
 
+            double yPosition = indexToCoordinate(yIndex, center.getY(), cellSizeXYInMeters, centerIndex);
+
             // Position
-            intermediateVertexBuffer[vertexIndex] = ((float) cellsPerAxis / 2 - i) * cellSizeXYInMeters;
-            intermediateVertexBuffer[vertexIndex + 1] = ((float) cellsPerAxis / 2 - j) * cellSizeXYInMeters;
+            intermediateVertexBuffer[vertexIndex] = (float) xPosition;
+            intermediateVertexBuffer[vertexIndex + 1] = (float) yPosition;
             intermediateVertexBuffer[vertexIndex + 2] = cellHeight;
 
             // Color (0.0 to 1.0)
@@ -112,6 +118,11 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       renderable.meshPart.size = totalCells;
       renderable.meshPart.mesh.setVertices(intermediateVertexBuffer, 0, totalCells * FLOATS_PER_CELL);
+   }
+
+   public static double indexToCoordinate(int index, double gridCenter, double resolution, int centerIndex)
+   {
+      return (index - centerIndex) * resolution + gridCenter;
    }
 
    public FloatBuffer getVertexBuffer()
