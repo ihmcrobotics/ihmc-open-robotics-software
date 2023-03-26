@@ -11,13 +11,15 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class RapidHeightMapExtractor
 {
    private static final float gridWidthInMeters = 8.0f;
    private static final float cellSizeXYInMeters = 0.02f;
 
-   private static final int cellsPerAxis = (int) (gridWidthInMeters / cellSizeXYInMeters);
+   private int centerIndex;
+   private int cellsPerAxis;
 
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
@@ -39,11 +41,14 @@ public class RapidHeightMapExtractor
    private boolean modified = true;
    private boolean processing = false;
 
-   public void create(OpenCLManager openCLManager, _cl_program program, BytedecoImage depthImage)
+   public void create(OpenCLManager openCLManager,  BytedecoImage depthImage)
    {
       this.inputDepthImage = depthImage;
       this.openCLManager = openCLManager;
-      this.rapidHeightMapUpdaterProgram = program;
+      rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
+
+      centerIndex = HeightMapTools.computeCenterIndex(gridWidthInMeters, cellSizeXYInMeters);
+      cellsPerAxis = 2 * centerIndex + 1;
 
       parametersBuffer = new OpenCLFloatParameters();
 
@@ -62,6 +67,18 @@ public class RapidHeightMapExtractor
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
    }
 
+   private void populateParameterBuffer()
+   {
+      //// Fill parameters buffer
+      parametersBuffer.setParameter(cellSizeXYInMeters);
+      parametersBuffer.setParameter(centerIndex);
+      parametersBuffer.setParameter((float) inputDepthImage.getImageHeight());
+      parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
+
+      parametersBuffer.writeOpenCLBufferObject(openCLManager);
+   }
+
+
    public void update(RigidBodyTransform sensorToWorldTransform, float planeHeight)
    {
       if (!processing)
@@ -69,14 +86,7 @@ public class RapidHeightMapExtractor
          // Upload input depth image
          inputDepthImage.writeOpenCLImage(openCLManager);
 
-         //// Fill parameters buffer
-         parametersBuffer.setParameter(gridWidthInMeters);
-         parametersBuffer.setParameter(cellSizeXYInMeters);
-         parametersBuffer.setParameter((float) inputDepthImage.getImageHeight());
-         parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
-         parametersBuffer.setParameter((float) cellsPerAxis);
-         parametersBuffer.writeOpenCLBufferObject(openCLManager);
-
+         populateParameterBuffer();
 
          // Fill ground plane buffer
          RigidBodyTransform worldToSensorTransform = new RigidBodyTransform(sensorToWorldTransform);

@@ -71,7 +71,6 @@ public class RDXRapidHeightMapExtractionDemo
    private final BytePointer depthBytePointer = new BytePointer(1000000);
 
    private OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
    private PerceptionDataLoader perceptionDataLoader;
 
    private boolean initialized = false;
@@ -89,7 +88,6 @@ public class RDXRapidHeightMapExtractionDemo
             baseUI.create();
 
             openCLManager = new OpenCLManager();
-            openCLProgram = openCLManager.loadProgram("RapidHeightMapExtractor");
 
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
@@ -119,7 +117,7 @@ public class RDXRapidHeightMapExtractionDemo
                                                      loadedDepthImage.getBytedecoOpenCVMat());
             loadedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
-            rapidHeightMapUpdater.create(openCLManager, openCLProgram, loadedDepthImage);
+            rapidHeightMapUpdater.create(openCLManager, loadedDepthImage);
             heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
          }
 
