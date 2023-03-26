@@ -2,6 +2,8 @@
 #define HEIGHT_MAP_CENTER_INDEX 1
 #define DEPTH_INPUT_HEIGHT 2
 #define DEPTH_INPUT_WIDTH 3
+#define HEIGHT_MAP_CENTER_X 4
+#define HEIGHT_MAP_CENTER_Y 5
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -74,7 +76,10 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
   float averageHeightZ = 0;
   float3 cellCenterInWorld = (float3) (0.0f, 0.0f, -2.0f);;
-  cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex), (float2) (0.0f, 0.0f), params[HEIGHT_MAP_RESOLUTION], params[HEIGHT_MAP_CENTER_INDEX]);
+  cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
+                                               (float2) (params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
+                                               params[HEIGHT_MAP_RESOLUTION],
+                                               params[HEIGHT_MAP_CENTER_INDEX]);
 
   float3 cellCenterInSensor = transformPoint3D32_2(
       cellCenterInWorld,
