@@ -21,7 +21,8 @@ public class ROS2Heartbeat
     * if it's really meaningful. Things will respond to other things being on or off within
     * half a second and there could 1000s of these without overloading the network.
     */
-   public static final double HEARTBEAT_PERIOD = UnitConversions.hertzToSeconds(2.5);
+   public static final double STATUS_FREQUENCY = 2.5;
+   public static final double HEARTBEAT_PERIOD = UnitConversions.hertzToSeconds(STATUS_FREQUENCY);
    private ROS2PublishSubscribeAPI ros2;
    private IHMCROS2Publisher<Empty> heartbeatPublisher;
    private final Empty emptyMessage = new Empty();
