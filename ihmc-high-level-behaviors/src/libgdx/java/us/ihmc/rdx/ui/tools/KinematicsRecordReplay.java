@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXObjectDetector;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -30,14 +29,13 @@ public class KinematicsRecordReplay
    private boolean isUserMoving = false;
    private final List<List<Pose3DReadOnly>> framesToRecordHistory = new ArrayList<>();
    private int partId = 0; // identifier of current frame, used to now what body part among numberParts we are currently handling
-   private RDXObjectDetector objectDetector;
    private ReferenceFrame objectFrame;
 
-   public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming, int numberParts)
+   public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming, int numberOfParts)
    {
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
-      trajectoryRecorder.setNumberParts(numberParts);
-      for (int n = 0; n < numberParts; n++)
+      trajectoryRecorder.setNumberParts(numberOfParts);
+      for (int n = 0; n < numberOfParts; n++)
          framesToRecordHistory.add(new ArrayList<>());
    }
 
@@ -211,7 +209,7 @@ public class KinematicsRecordReplay
       return isReplaying;
    }
 
-   public void setObjectDetector(RDXObjectDetector objectDetector)
+   public void setObjectDetector(RDXArUcoObjectDetector objectDetector)
    {
       this.objectDetector = objectDetector;
    }

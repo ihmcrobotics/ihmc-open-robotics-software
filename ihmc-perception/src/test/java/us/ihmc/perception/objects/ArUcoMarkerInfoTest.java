@@ -7,12 +7,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ObjectInfoTest
+public class ArUcoMarkerInfoTest
 {
    @Test
-   public void infoArUcoObjectTest()
+   public void markerInfoTest()
    {
-      ObjectInfo objectInfo = new ObjectInfo();
+      ArUcoMarkerObjectInfo objectInfo = new ArUcoMarkerObjectInfo();
+      objectInfo.load();
       String name = objectInfo.getObjectName(0);
       System.out.println("Name: " + name);
       assertTrue(!name.isEmpty());

@@ -8,10 +8,10 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class ArUcoMarkerObject
 {
-   private RigidBodyTransform markerToWorld = new RigidBodyTransform();
+   private RigidBodyTransform markerTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                                     markerToWorld);
-   private final RigidBodyTransform objectToMarker = new RigidBodyTransform();
+                                                                                                                     markerTransformToWorld);
+   private final RigidBodyTransform objectTransformToMarker = new RigidBodyTransform();
    // object frame might be different from marker location, for example the door handle is not exactly where the marker is on the door
    private ReferenceFrame objectFrame;
    private FramePose3D objectPose = new FramePose3D();
@@ -19,10 +19,10 @@ public class ArUcoMarkerObject
    private FramePose3D appendixPose = new FramePose3D();
    private boolean hasAppendix =  false;
 
-   public ArUcoMarkerObject(int id, ObjectInfo arucoInfo)
+   public ArUcoMarkerObject(int id, ArUcoMarkerObjectInfo arucoInfo)
    {
-      objectToMarker.set(arucoInfo.getMarkerYawPitchRoll(id), arucoInfo.getMarkerTranslation(id));
-      objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, objectToMarker);
+      objectTransformToMarker.set(arucoInfo.getMarkerYawPitchRoll(id), arucoInfo.getMarkerTranslation(id));
+      objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, objectTransformToMarker);
       if (arucoInfo.hasAppendix(id))
       {
          hasAppendix = true;
@@ -39,7 +39,7 @@ public class ArUcoMarkerObject
    public void computeObjectPose(FramePose3DBasics markerPose)
    {
       objectPose.set(markerPose);
-      objectPose.appendTransform(objectToMarker);
+      objectPose.appendTransform(objectTransformToMarker);
       if (hasAppendix)
       {
          appendixPose.set(objectPose);
@@ -47,9 +47,9 @@ public class ArUcoMarkerObject
       }
    }
 
-   public RigidBodyTransform getMarkerToWorld()
+   public RigidBodyTransform getMarkerTransformToWorld()
    {
-      return markerToWorld;
+      return markerTransformToWorld;
    }
 
    public ReferenceFrame getMarkerFrame()

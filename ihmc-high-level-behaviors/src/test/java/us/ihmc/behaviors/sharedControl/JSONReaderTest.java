@@ -12,8 +12,6 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 public class JSONReaderTest
 {
@@ -40,44 +38,20 @@ public class JSONReaderTest
          //iterating tasks
          for (JsonNode taskNode : tasksArrayNode)
          {
-            Iterator<Map.Entry<String, JsonNode>> taskFields = taskNode.fields();
-            while (taskFields.hasNext())
+            String taskName = taskNode.get("name").asText();
+            System.out.println(taskName);
+            assertEquals(taskName, "PushDoor");
+
+            JsonNode bodyPartsArrayNode = taskNode.get("bodyParts");
+            HashMap<String, String> bodyPartsGeometry = new HashMap<>();
+            for (JsonNode bodyPartObject : bodyPartsArrayNode)
             {
-               Map.Entry<String, JsonNode> taskPropertyMap = taskFields.next();
-               switch (taskPropertyMap.getKey())
-               {
-                  case "name" ->
-                  {
-                     String taskName = taskPropertyMap.getValue().asText();
-                     System.out.println(taskName);
-                     assertEquals(taskName, "PushDoor");
-                  }
-                  case "bodyParts" ->
-                  {
-                     JsonNode bodyPartsArrayNode = taskPropertyMap.getValue();
-                     HashMap<String, String> bodyPartsGeometry = new HashMap<>();
-                     for (JsonNode bodyPartObject : bodyPartsArrayNode) {
-                        Iterator<Map.Entry<String, JsonNode>> bodyPartFields = bodyPartObject.fields();
-                        while (bodyPartFields.hasNext()) {
-                           Map.Entry<String, JsonNode> bodyPartProperty = bodyPartFields.next();
-                           switch (bodyPartProperty.getKey()) {
-                              case "name" ->
-                              {
-                                 String name = bodyPartProperty.getValue().asText();
-                                 System.out.println(name);
-                                 assertTrue(name.equals("leftHand") || name.equals("rightHand"));
-                              }
-                              case "geometry" ->
-                              {
-                                 String geometry = bodyPartProperty.getValue().asText();
-                                 System.out.println(geometry);
-                                 assertEquals(geometry, "Pose");
-                              }
-                           }
-                        }
-                     }
-                  }
-               }
+               String name = bodyPartObject.get("name").asText();
+               System.out.println(name);
+               assertTrue(name.equals("leftHand") || name.equals("rightHand"));
+               String geometry = bodyPartObject.get("geometry").asText();
+               System.out.println(geometry);
+               assertEquals(geometry, "Pose");
             }
          }
       });

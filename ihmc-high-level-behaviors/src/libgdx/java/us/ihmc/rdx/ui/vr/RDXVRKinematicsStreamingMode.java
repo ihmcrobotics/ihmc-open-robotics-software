@@ -21,7 +21,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXObjectDetector;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
@@ -148,14 +147,6 @@ public class RDXVRKinematicsStreamingMode
       wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
 
       sharedControlAssistant = new RDXVRSharedControl(robotModel, streamToController, kinematicsRecorder.isReplayingEnabled());
-   }
-
-   public void addObjectDetection(RDXObjectDetector objectDetector)
-   {
-      // the object information can be used to improve the precision of the assistance
-      sharedControlAssistant.setObjectDetector(objectDetector);
-      // the object information can be used to record the motion in the object frame
-      kinematicsRecorder.setObjectDetector(objectDetector);
    }
 
    public void processVRInput(RDXVRContext vrContext)
