@@ -23,7 +23,7 @@ import java.util.List;
 public class MultiContactSupportRegionSolverInput
 {
    public static final int maxContactPoints = 50;
-   private static final double defaultCoefficientOfFriction = 0.9;
+   private static final double defaultCoefficientOfFriction = 0.7;
    private static final double defaultMaxNormalForce = 2.0;
 
    /**

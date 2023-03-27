@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -25,7 +24,7 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContact
  * This class solves for forces given a set of contact points, surface normals, and CoM xy position
  * {@see http://lall.stanford.edu/papers/bretl_eqmcut_ieee_tro_projection_2008_08_01_01/pubdata/entry.pdf}
  */
-public class MultiContactForceOptimizer
+public class LPMultiContactForceOptimizer
 {
    private static final int maximumNumberOfIterations = 10000;
    private static final double convergenceThreshold = 1e-8;
@@ -42,7 +41,7 @@ public class MultiContactForceOptimizer
    private final DMatrixRMaj beq = new DMatrixRMaj(0);
    private double[] solution;
 
-   public MultiContactForceOptimizer()
+   public LPMultiContactForceOptimizer()
    {
       for (int i = 0; i < MultiContactSupportRegionSolverInput.maxContactPoints; i++)
       {
