@@ -38,6 +38,10 @@ public class RapidHeightMapWithHistoryExtractor
    private OpenCLFloatBuffer groundPlaneBuffer;
    private _cl_program rapidHeightMapUpdaterProgram;
    private _cl_kernel heightMapUpdateKernel;
+   private _cl_kernel initializeDataStructureKernel;
+   private _cl_kernel translateHeightMapKernel;
+   private _cl_kernel heightMapUpdateDataKernel;
+   private _cl_kernel computeHeightMapOutputValuesKernel;
    private BytedecoImage inputDepthImage;
    private BytedecoImage outputHeightMapImage;
    private BytedecoImage outputVarianceImage;
@@ -75,6 +79,10 @@ public class RapidHeightMapWithHistoryExtractor
       outputVarianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
+      initializeDataStructureKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "initializeDataStructureKernel");
+      translateHeightMapKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "translateHeightMapKernel");
+      heightMapUpdateDataKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateDataKernel");
+      computeHeightMapOutputValuesKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeHeightMapOutputValuesKernel");
    }
 
    private void populateParameterBuffer(Tuple3DReadOnly gridCenter)

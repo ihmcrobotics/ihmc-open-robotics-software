@@ -252,6 +252,104 @@ void kernel heightMapUpdateKernel(read_only image2d_t depth_map_in,
   }
 }
 
+void kernel heightMapUpdateDataKernel(read_only image2d_t depth_map_in,
+                                  global float *params,
+                                  global float *sensorToWorldTf,
+                                  global float *worldToSensorTf,
+                                  global float *ground_plane,
+                                  read_only image2d_t data_keys,
+                                  global float *height_samples,
+                                  global float *variance_samples,
+                                  global int *samples_per_buffered_value,
+                                  global int *buffer_write_keys,
+                                  global int *entries_in_buffer)
+{
+  int xIndex = get_global_id(0);
+  int yIndex = get_global_id(1);
+
+  float3 normal;
+  float3 centroid;
+
+  float totalHeightZ = 0.0f;
+  float sumOfSquare = 0.0f;
+  float3 cellCenterInWorld = (float3) (0.0f, 0.0f, -2.0f);;
+  cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
+                                               (float2) (params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
+                                               params[HEIGHT_MAP_RESOLUTION],
+                                               params[HEIGHT_MAP_CENTER_INDEX]);
+
+  float3 cellCenterInSensor = transformPoint3D32_2(
+      cellCenterInWorld,
+      (float3)(worldToSensorTf[0], worldToSensorTf[1], worldToSensorTf[2]),
+      (float3)(worldToSensorTf[4], worldToSensorTf[5], worldToSensorTf[6]),
+      (float3)(worldToSensorTf[8], worldToSensorTf[9], worldToSensorTf[10]),
+      (float3)(worldToSensorTf[3], worldToSensorTf[7], worldToSensorTf[11]));
+
+  int2 projectedPoint = spherical_projection(cellCenterInSensor, params);
+
+  int WINDOW_WIDTH = 20;
+
+  float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 2.0f;
+  float minX = cellCenterInSensor.x - halfCellWidth;
+  float maxX = cellCenterInSensor.x + halfCellWidth;
+  float minY = cellCenterInSensor.y - halfCellWidth;
+  float maxY = cellCenterInSensor.y + halfCellWidth;
+
+  int count = 0;
+  float previousMean = 0.0f;
+
+  for (int pitch_count = 0; pitch_count < (int)params[DEPTH_INPUT_HEIGHT]; pitch_count++)
+  {
+    for (int yaw_count_offset = -WINDOW_WIDTH / 2; yaw_count_offset < WINDOW_WIDTH / 2 + 1; yaw_count_offset++)
+    {
+      int yaw_count = projectedPoint.y + yaw_count_offset;
+
+      if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
+      {
+        float radius = ((float)read_imageui(depth_map_in, (int2) (yaw_count, pitch_count)).x) / (float)1000;
+
+        float3 pointInWorld = back_project_spherical(yaw_count, pitch_count, radius, params);
+
+        if (pointInWorld.x > minX && pointInWorld.x < maxX && pointInWorld.y > minY && pointInWorld.y < maxY)
+        {
+          count++;
+          totalHeightZ += pointInWorld.z;
+
+          float meanHeight = totalHeightZ / ((float) count);
+          float diff = pointInWorld.z - meanHeight;
+          if (count == 1)
+          {
+            sumOfSquare += diff * diff;
+          }
+          else
+          {
+            sumOfSquare += (pointInWorld.z - previousMean) * diff;
+          }
+          previousMean = meanHeight;
+        }
+      }
+    }
+  }
+
+  int2 indices = (int2) (xIndex, yIndex);
+  int data_key = read_imageui(data_keys, indices).x;
+  int buffer_length = params[BUFFER_LENGTH];
+  if (count > 0)
+  {
+    float countf = (float) count;
+    float averageHeightZ = totalHeightZ / countf - get_height_on_plane(cellCenterInSensor.x, cellCenterInSensor.y, ground_plane);
+    averageHeightZ = clamp(averageHeightZ, -20.f, 1.5f);
+
+    float variance = sumOfSquare / countf;
+
+    height_samples[data_key * buffer_length] = averageHeightZ;
+    variance_samples[data_key * buffer_length] = variance;
+    samples_per_buffered_value[data_key * buffer_length] = count;
+    buffer_write_keys[data_key] = 0;
+    entries_in_buffer[data_key] = 1;
+  }
+}
+
 void kernel computeHeightMapOutputValuesKernel(global float *params,
                                                read_only image2d_t data_keys,
                                                global float *height_samples,
