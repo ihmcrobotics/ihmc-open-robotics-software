@@ -67,86 +67,47 @@ public class ProMPAssistant
          boolean logEnabled = jsonNode.get("logging").asBoolean();
          numberObservations = jsonNode.get("numberObservations").asInt();
          conditionOnlyLastObservation = jsonNode.get("conditionOnlyLastObservation").asBoolean();
-         // getting tasks
-         JsonNode tasksArrayNode = jsonNode.get("tasks");
-         int size = tasksArrayNode.size();
-         String[] taskNames = new String[size];
-         String[] bodyPartsInference = new String[size];
-         String[] bodyPartsGoal = new String[size];
-         HashMap<String, String>[] bodyPartsGeometries = new HashMap[size];
-         Point3D[] goalToEETranslations = new Point3D[size];
-         Quaternion[] goalToEERotations = new Quaternion[size];
-         String lastContext = "";
-         for (int i = 0; i < size; i++)
-         {
-            JsonNode taskNode = tasksArrayNode.get(i);
-            Iterator<Map.Entry<String, JsonNode>> taskFields = taskNode.fields();
-            while (taskFields.hasNext())
-            {
-               Map.Entry<String, JsonNode> taskPropertyMap = taskFields.next();
-               switch (taskPropertyMap.getKey())
-               {
-                  case "context" ->
-                  {
-                     String context = taskPropertyMap.getValue().asText();
-                     if (!contextTasksMap.containsKey(context))
-                        contextTasksMap.put(context, new ArrayList<>());
-                     lastContext = context;
-                  }
-                  case "name" -> taskNames[i] = taskPropertyMap.getValue().asText();
-                  case "bodyPartForInference" -> bodyPartsInference[i] = taskPropertyMap.getValue().asText();
-                  case "bodyPartWithObservableGoal" -> bodyPartsGoal[i] = taskPropertyMap.getValue().asText();
-                  case "translationGoalToEE" ->
-                  {
-                     JsonNode translationArrayNode = taskPropertyMap.getValue();
-                     goalToEETranslations[i] = new Point3D(translationArrayNode.get(0).asDouble(),
-                                                           translationArrayNode.get(1).asDouble(),
-                                                           translationArrayNode.get(2).asDouble());
-                  }
-                  case "rotationGoalToEE" ->
-                  {
-                     JsonNode rotationArrayNode = taskPropertyMap.getValue();
-                     goalToEERotations[i] = new Quaternion(rotationArrayNode.get(0).asDouble(),
-                                                           rotationArrayNode.get(1).asDouble(),
-                                                           rotationArrayNode.get(2).asDouble(),
-                                                           rotationArrayNode.get(3).asDouble());
-                  }
-                  case "bodyParts" ->
-                  {
-                     JsonNode bodyPartsArrayNode = taskPropertyMap.getValue();
-                     HashMap<String, String> bodyPartsGeometry = new HashMap<>();
-                     for (JsonNode bodyPartObject : bodyPartsArrayNode)
-                     {
-                        Iterator<Map.Entry<String, JsonNode>> bodyPartFields = bodyPartObject.fields();
-                        List<String> name = new ArrayList<>();
-                        List<String> geometry = new ArrayList<>();
-                        while (bodyPartFields.hasNext())
-                        {
-                           Map.Entry<String, JsonNode> bodyPartProperty = bodyPartFields.next();
-                           switch (bodyPartProperty.getKey())
-                           {
-                              case "name" -> name.add(bodyPartProperty.getValue().asText());
-                              case "geometry" -> geometry.add(bodyPartProperty.getValue().asText());
-                           }
-                        }
-                        for (int j = 0; j < name.size(); j++)
-                           bodyPartsGeometry.put(name.get(j), geometry.get(j));
-                     }
-                     bodyPartsGeometries[i] = bodyPartsGeometry;
-                  }
-                  default ->
-                  {
-                  }
-               }
-            }
-            // in contextTaskMap add task to last parsed context
-            contextTasksMap.get(lastContext).add(taskNames[i]);
-         }
          int numberBasisFunctions = jsonNode.get("numberBasisFunctions").asInt();
          long speedFactor = jsonNode.get("allowedIncreaseDecreaseSpeedFactor").asLong();
          numberOfInferredSpeeds = jsonNode.get("numberOfInferredSpeeds").asInt();
-         for (int i = 0; i < size; i++)
+         // getting tasks
+         JsonNode tasksArrayNode = jsonNode.get("tasks");
+         int numberOfTasks = tasksArrayNode.size();
+         String[] taskNames = new String[numberOfTasks];
+         String[] bodyPartsInference = new String[numberOfTasks];
+         String[] bodyPartsGoal = new String[numberOfTasks];
+         HashMap<String, String>[] bodyPartsGeometries = new HashMap[numberOfTasks];
+         Point3D[] goalToEETranslations = new Point3D[numberOfTasks];
+         Quaternion[] goalToEERotations = new Quaternion[numberOfTasks];
+         for (int i = 0; i < numberOfTasks; i++)
          {
+            JsonNode taskNode = tasksArrayNode.get(i);
+            String context = taskNode.get("context").asText();
+            if (!contextTasksMap.containsKey(context))
+               contextTasksMap.put(context, new ArrayList<>());
+            taskNames[i] = taskNode.get("name").asText();
+            // in contextTaskMap add task to last parsed context
+            contextTasksMap.get(context).add(taskNames[i]);
+
+            bodyPartsInference[i] = taskNode.get("bodyPartForInference").asText();
+            bodyPartsGoal[i] = taskNode.get("bodyPartWithObservableGoal").asText();
+            JsonNode translationArrayNode = taskNode.get("translationGoalToEE");
+            goalToEETranslations[i] = new Point3D(translationArrayNode.get(0).asDouble(),
+                                                  translationArrayNode.get(1).asDouble(),
+                                                  translationArrayNode.get(2).asDouble());
+            JsonNode rotationArrayNode = taskNode.get("rotationGoalToEE");
+            goalToEERotations[i] = new Quaternion(rotationArrayNode.get(0).asDouble(),
+                                                  rotationArrayNode.get(1).asDouble(),
+                                                  rotationArrayNode.get(2).asDouble(),
+                                                  rotationArrayNode.get(3).asDouble());
+            JsonNode bodyPartsArrayNode = taskNode.get("bodyParts");
+            HashMap<String, String> bodyPartsGeometry = new HashMap<>();
+            for (JsonNode bodyPartObject : bodyPartsArrayNode)
+            {
+               bodyPartsGeometry.put(bodyPartObject.get("name").asText(), bodyPartObject.get("geometry").asText());
+            }
+            bodyPartsGeometries[i] = bodyPartsGeometry;
+            // initialize the proMP managers
             proMPManagers.put(taskNames[i],
                               new ProMPManager(taskNames[i],
                                                bodyPartsGeometries[i],
@@ -155,15 +116,17 @@ public class ProMPAssistant
                                                numberBasisFunctions,
                                                speedFactor,
                                                numberOfInferredSpeeds));
+            // initialize maps
             taskBodyPartInferenceMap.put(taskNames[i], bodyPartsInference[i]);
             taskBodyPartGoalMap.put(taskNames[i], bodyPartsGoal[i]);
             taskTransformGoalMap.put(taskNames[i], new RigidBodyTransform(goalToEERotations[i], goalToEETranslations[i]));
             LogTools.info("Loading ProMPs for tasks:");
             LogTools.info("{}", taskNames[i]);
-            for (HashMap<String, String> bodyPartsGeometry : bodyPartsGeometries)
-               for (String key : bodyPartsGeometry.keySet())
-                  LogTools.info("     {} {}", key, bodyPartsGeometry.get(key));
+            for (HashMap<String, String> partsGeometry : bodyPartsGeometries)
+               for (String key : partsGeometry.keySet())
+                  LogTools.info("     {} {}", key, partsGeometry.get(key));
          }
+
          for (ProMPManager prompManager : proMPManagers.values())
             prompManager.loadTaskFromDemos();
 

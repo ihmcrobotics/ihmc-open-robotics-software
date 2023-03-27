@@ -13,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXObjectDetector;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
@@ -63,11 +62,6 @@ public class RDXVRModeManager
       leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
       baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
-   }
-
-   public void addObjectDetection(RDXObjectDetector objectDetector)
-   {
-      kinematicsStreamingMode.addObjectDetection(objectDetector);
    }
 
    public void processVRInput(RDXVRContext vrContext)

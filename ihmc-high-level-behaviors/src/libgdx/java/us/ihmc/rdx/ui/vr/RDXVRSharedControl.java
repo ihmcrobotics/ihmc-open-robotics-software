@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXObjectDetector;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -35,7 +34,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
-   private RDXObjectDetector objectDetector;
    private String objectName = "";
    private FramePose3D objectPose;
    private ReferenceFrame objectFrame;
@@ -285,11 +283,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public boolean isPreviewGraphicActive()
    {
       return ghostRobotGraphic.isActive();
-   }
-
-   public void setObjectDetector(RDXObjectDetector objectDetector)
-   {
-      this.objectDetector = objectDetector;
    }
 
    public void saveStatusForPreview(KinematicsToolboxOutputStatus status)
