@@ -84,23 +84,11 @@ int yaw_to_index(float yaw, int yaw_total_indices)
    return ((int) (yaw / yaw_total_indices)) + (yaw_total_indices / 2);
 }
 
-float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector)
-{
-   float* inverse_covariance_matrix = invert3x3Matrix(covariance_matrix);
-   float coefficients[3] = {0.0f, 0.0f, 0.0f};
-   for (int row = 0; row < 3; row++)
-   {
-      for (int col = 0; col < 3; col++)
-      {
-         coefficients[row] += inverse_covariance_matrix[col + row * 3] * z_variance_vector[col];
-      }
-   }
-
-   return coefficients;
-}
-
-void kernel computeSurfaceNormalsWithRANSAC(
-    global float* params, global float* ransac_params, global int* ransac_offsets, global float* height_map, global float* normal_xyz_buffer)
+void kernel computeSurfaceNormalsWithRANSAC(global float* params,
+                                            global float* ransac_params,
+                                            global int* ransac_offsets,
+                                            global float* height_map,
+                                            global float* normal_xyz_buffer)
 {
    int key = get_global_id(0);
 
@@ -352,7 +340,7 @@ void kernel computeSurfaceNormalsWithLeastSquares(
       float z_solution = -coefficients[0] * x_solution - coefficients[1] * y_solution - coefficients[2];
 
       normal = (float3) (coefficients[0], coefficients[1], 1.0);
-      normalize(normal);
+      normal = normalize(normal);
 
       float x_coordinate = index_to_coordinate(idx_x, params[centerX], params[HEIGHT_MAP_RESOLUTION], center_index);
       float y_coordinate = index_to_coordinate(idx_y, params[centerY], params[HEIGHT_MAP_RESOLUTION], center_index);

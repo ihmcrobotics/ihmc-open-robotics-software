@@ -59,6 +59,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -83,7 +84,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarPostProcessingTests implements MultiRobotTestInterface
 {
-   private static final boolean keepSCSUp = true;
+   private static final boolean keepSCSUp = false;
 
    protected SimulationTestingParameters simulationTestingParameters;
    protected SCS2AvatarTestingSimulation simulationTestHelper;
@@ -195,6 +196,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
                                                                environment.getPlanarRegionsList(),
                                                                goalPose,
                                                                footstepPlannerParameters);
+      requestPacket.setTimeout(10.0);
       requestPacket.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
 
       runTest(requestPacket);
@@ -433,7 +435,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffTops(-1.0);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
 
-      System.out.println("output. " + plannerOutput.getFootstepPlanningResult());
+      LogTools.info("output. " + plannerOutput.getFootstepPlanningResult());
 
       if (!plannerOutput.getFootstepPlanningResult().validForExecution())
       {

@@ -34,6 +34,9 @@ import java.util.function.Consumer;
  * To connect to the Ouster, type in os-122221003063.local into the browser, finding the serial number
  * from the Confluence page: https://confluence.ihmc.us/display/PER/In-House+Perception+Sensors+Tracker
  *
+ * Apparently it is better to use this magical command from the user manual:
+ * avahi-browse -lrt _roger._tcp
+ *
  * To test, use the GNU netcat command:
  * netcat -ul 7502
  *
