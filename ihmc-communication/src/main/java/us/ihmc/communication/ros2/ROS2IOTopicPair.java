@@ -4,22 +4,22 @@ import us.ihmc.ros2.ROS2Topic;
 
 public class ROS2IOTopicPair<T>
 {
-   private final ROS2Topic<T> inputTopic;
-   private final ROS2Topic<T> outputTopic;
+   private final ROS2Topic<T> commandTopic;
+   private final ROS2Topic<T> statusTopic;
 
    public ROS2IOTopicPair(ROS2Topic<T> baseTopic)
    {
-      inputTopic = baseTopic.withInput();
-      outputTopic = baseTopic.withOutput();
+      commandTopic = baseTopic.withIOQualifier("command");
+      statusTopic = baseTopic.withIOQualifier("status");
    }
 
-   public ROS2Topic<T> getInputTopic()
+   public ROS2Topic<T> getCommandTopic()
    {
-      return inputTopic;
+      return commandTopic;
    }
 
-   public ROS2Topic<T> getOutputTopic()
+   public ROS2Topic<T> getStatusTopic()
    {
-      return outputTopic;
+      return statusTopic;
    }
 }

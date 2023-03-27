@@ -22,7 +22,7 @@ public class ROS2SyncedRigidBodyTransform
       this.ros2 = ros2;
       this.topicPair = topicPair;
       this.rigidBodyTransformToSync = rigidBodyTransformToSync;
-      frameUpdateSubscription = ros2.subscribe(topicPair.getInputTopic());
+      frameUpdateSubscription = ros2.subscribe(topicPair.getCommandTopic());
    }
 
    public void update()
@@ -35,7 +35,7 @@ public class ROS2SyncedRigidBodyTransform
       if (statusThrottler.run())
       {
          MessageTools.toMessage(rigidBodyTransformToSync, statusMessage);
-         ros2.publish(topicPair.getOutputTopic(), statusMessage);
+         ros2.publish(topicPair.getStatusTopic(), statusMessage);
       }
    }
 }
