@@ -160,6 +160,7 @@ void kernel translateHeightMapKernel(global float *params,
 
 void kernel heightMapUpdateKernel(read_only image2d_t depth_map_in,
                                   read_write image2d_t average_height_out,
+                                  read_write image2d_t variance_out,
                                   global float *params,
                                   global float *sensorToWorldTf,
                                   global float *worldToSensorTf,
@@ -171,7 +172,8 @@ void kernel heightMapUpdateKernel(read_only image2d_t depth_map_in,
   float3 normal;
   float3 centroid;
 
-  float averageHeightZ = 0;
+  float totalHeightZ = 0.0f;
+  float sumOfSquare = 0.0f;
   float3 cellCenterInWorld = (float3) (0.0f, 0.0f, -2.0f);;
   cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
@@ -196,6 +198,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t depth_map_in,
   float maxY = cellCenterInSensor.y + halfCellWidth;
 
   int count = 0;
+  float previousMean = 0.0f;
 
   for (int pitch_count = 0; pitch_count < (int)params[DEPTH_INPUT_HEIGHT]; pitch_count++)
   {
@@ -207,27 +210,45 @@ void kernel heightMapUpdateKernel(read_only image2d_t depth_map_in,
       {
         float radius = ((float)read_imageui(depth_map_in, (int2) (yaw_count, pitch_count)).x) / (float)1000;
 
-        float3 piontInWorld = back_project_spherical(yaw_count, pitch_count, radius, params);
+        float3 pointInWorld = back_project_spherical(yaw_count, pitch_count, radius, params);
 
-        if (piontInWorld.x > minX && piontInWorld.x < maxX && piontInWorld.y > minY && piontInWorld.y < maxY)
+        if (pointInWorld.x > minX && pointInWorld.x < maxX && pointInWorld.y > minY && pointInWorld.y < maxY)
         {
           count++;
-          averageHeightZ += piontInWorld.z;
+          totalHeightZ += pointInWorld.z;
+
+          float meanHeight = totalHeightZ / ((float) count);
+          float diff = pointInWorld.z - meanHeight;
+          if (count == 1)
+          {
+            sumOfSquare += diff * diff;
+          }
+          else
+          {
+            sumOfSquare += (pointInWorld.z - previousMean) * diff;
+          }
+          previousMean = meanHeight;
         }
       }
     }
   }
 
+  int2 indices = (int2) (xIndex, yIndex);
   if (count > 0)
   {
-    averageHeightZ = averageHeightZ / (float)(count) - get_height_on_plane(cellCenterInSensor.x, cellCenterInSensor.y, plane);
+    float countf = (float) count;
+    float averageHeightZ = totalHeightZ / countf - get_height_on_plane(cellCenterInSensor.x, cellCenterInSensor.y, plane);
     averageHeightZ = clamp(averageHeightZ, -20.f, 1.5f);
 
-    write_imageui(average_height_out, (int2)(xIndex, yIndex), (uint4)((int)((2.0f + averageHeightZ) * 10000.0f), 0, 0, 0));
+    float variance = sumOfSquare / countf;
+
+    write_imageui(average_height_out, indices, (uint4)((int)((2.0f + averageHeightZ) * 10000.0f), 0, 0, 0));
+    write_imageui(variance_out, indices, (uint4)((int)(variance * 10000.0f), 0, 0, 0));
   }
   else
   {
-    write_imageui(average_height_out, (int2)(xIndex, yIndex), (uint4)(0, 0, 0, 0));
+    write_imageui(average_height_out, indices, (uint4)(0, 0, 0, 0));
+    write_imageui(variance_out, indices, (uint4)(0, 0, 0, 0));
   }
 }
 

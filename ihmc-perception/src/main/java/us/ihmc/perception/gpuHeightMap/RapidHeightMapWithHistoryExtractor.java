@@ -40,6 +40,7 @@ public class RapidHeightMapWithHistoryExtractor
    private _cl_kernel heightMapUpdateKernel;
    private BytedecoImage inputDepthImage;
    private BytedecoImage outputHeightMapImage;
+   private BytedecoImage outputVarianceImage;
 
    private boolean firstRun = true;
    private boolean patchSizeChanged = true;
@@ -70,6 +71,8 @@ public class RapidHeightMapWithHistoryExtractor
 
       outputHeightMapImage = new BytedecoImage(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
       outputHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      outputVarianceImage = new BytedecoImage(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      outputVarianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
    }
@@ -127,10 +130,11 @@ public class RapidHeightMapWithHistoryExtractor
          // Set kernel arguments for the height map kernel
          openCLManager.setKernelArgument(heightMapUpdateKernel, 0, inputDepthImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 1, outputHeightMapImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 2, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 3, sensorToWorldTransformBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 4, worldToSensorTransformBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 5, groundPlaneBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 2, outputVarianceImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 3, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 4, sensorToWorldTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 5, worldToSensorTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateKernel, 6, groundPlaneBuffer.getOpenCLBufferObject());
 
          // Execute kernel with length and width parameters
          openCLManager.execute2D(heightMapUpdateKernel, cellsPerAxis, cellsPerAxis);
