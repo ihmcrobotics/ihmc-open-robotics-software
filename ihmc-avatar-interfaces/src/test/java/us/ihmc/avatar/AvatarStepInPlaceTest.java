@@ -191,7 +191,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       forceDirection.changeFrame(ReferenceFrame.getWorldFrame());
 
       double icpErrorDeadband = robotModel.getWalkingControllerParameters().getStepAdjustmentParameters().getMinICPErrorForStepAdjustment();
-      double desiredICPError = icpErrorDeadband * 0.7;
+      double desiredICPError = icpErrorDeadband * 0.5;
       double omega = robotModel.getWalkingControllerParameters().getOmega0();
       double desiredVelocityError = desiredICPError * omega;
       double mass = fullRobotModel.getTotalMass();
