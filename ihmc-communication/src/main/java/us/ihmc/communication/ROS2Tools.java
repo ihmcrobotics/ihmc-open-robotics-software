@@ -9,6 +9,7 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
@@ -187,9 +188,8 @@ public class ROS2Tools
    public static final ROS2Topic<RigidBodyTransformMessage> STEPPING_FRAME_UPDATE = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
                                                                                              .withModule("frame_update")
                                                                                              .withSuffix("stepping");
-   public static final ROS2Topic<RigidBodyTransformMessage> OUSTER_LIDAR_FRAME_UPDATE = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
-                                                                                                 .withModule("frame_update")
-                                                                                                 .withSuffix("ouster_lidar");
+   public static final ROS2IOTopicPair<RigidBodyTransformMessage> OUSTER_LIDAR_FRAME_UPDATE
+         = new ROS2IOTopicPair<>(IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class).withModule("frame_update").withSuffix("ouster_lidar"));
 
    /** MoCap Topics */
    public static final ROS2Topic<Pose3D> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(Pose3D.class)
