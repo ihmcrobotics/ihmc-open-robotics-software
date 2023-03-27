@@ -111,6 +111,11 @@ public class RapidHeightMapWithHistoryExtractor
       samplesPerBufferedValueBuffer = new OpenCLIntBuffer(totalCells * bufferLengthPerCell);
       bufferWriteKeysBuffer = new OpenCLIntBuffer(totalCells);
       entriesInBufferBuffer = new OpenCLIntBuffer(totalCells);
+      heightSamplesBuffer.createOpenCLBufferObject(openCLManager);
+      varianceSamplesBuffer.createOpenCLBufferObject(openCLManager);
+      samplesPerBufferedValueBuffer.createOpenCLBufferObject(openCLManager);
+      bufferWriteKeysBuffer.createOpenCLBufferObject(openCLManager);
+      entriesInBufferBuffer.createOpenCLBufferObject(openCLManager);
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
       initializeDataStructureKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "initializeDataStructureKernel");

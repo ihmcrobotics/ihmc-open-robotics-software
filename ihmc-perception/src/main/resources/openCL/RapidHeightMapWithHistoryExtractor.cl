@@ -63,16 +63,19 @@ float get_height_on_plane(float x, float y, global float *plane)
   return height;
 }
 
-void initializeCellData(int data_key,
+void initializeCellData(global float *params,
+                        int data_key,
                         global float *height_samples,
                         global float *variance_samples,
                         global int *samples_per_buffered_value,
                         global int *buffer_write_keys,
                         global int *entries_in_buffer)
 {
-  height_samples[data_key] = -2.0f;
-  variance_samples[data_key] = 0.0f;
-  samples_per_buffered_value[data_key] = 1;
+  int buffer_length = params[BUFFER_LENGTH];
+
+  height_samples[buffer_length * data_key] = -2.0f;
+  variance_samples[buffer_length * data_key] = 0.0f;
+  samples_per_buffered_value[buffer_length * data_key] = 1;
   buffer_write_keys[data_key] = 0;
   entries_in_buffer[data_key] = 0;
 }
@@ -89,7 +92,7 @@ void kernel initializeDataStructureKernel(global float *params,
   int xIndex = get_global_id(0);
   int yIndex = get_global_id(1);
 
-   if (xIndex == 0 && yIndex == 0)
+  if (xIndex == 0 && yIndex == 0)
         printf("started initialize\n");
 
   int2 indices = (int2)(xIndex, yIndex);
@@ -98,7 +101,7 @@ void kernel initializeDataStructureKernel(global float *params,
 
   write_imageui(data_keys, indices, (uint4)(0, 0, 0, 0));
 
-  initializeCellData(data_key, height_samples, variance_samples, samples_per_buffered_value, buffer_write_keys, entries_in_buffer);
+  initializeCellData(params, data_key, height_samples, variance_samples, samples_per_buffered_value, buffer_write_keys, entries_in_buffer);
 
    if (xIndex == 0 && yIndex == 0)
         printf("finished initialize\n");
@@ -161,7 +164,7 @@ void kernel translateHeightMapKernel(global float *params,
     int2 old_indices = (int2) (old_x_index, old_y_index);
     data_buffer_key = read_imageui(old_data_keys, old_indices).x;
 
-    initializeCellData(data_buffer_key, height_samples, variance_samples, samples_per_buffered_value, buffer_write_keys, entries_in_buffer);
+    initializeCellData(params, data_buffer_key, height_samples, variance_samples, samples_per_buffered_value, buffer_write_keys, entries_in_buffer);
   }
 
   write_imageui(new_data_keys, indices, (uint4)(data_buffer_key, 0, 0, 0));
@@ -381,6 +384,7 @@ void kernel computeHeightMapOutputValuesKernel(global float *params,
   int xIndex = get_global_id(0);
   int yIndex = get_global_id(1);
 
+  if (xIndex == 0 && yIndex == 0)
       printf("started compute output\n");
 
   int2 indices = (int2) (xIndex, yIndex);
