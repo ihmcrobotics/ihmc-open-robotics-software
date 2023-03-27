@@ -60,7 +60,7 @@ float4 transform(float x,
    return ret;
 }
 
-float3 transformPoint3D32(float3 point, float* transform)
+float3 transformPoint3D32(float3 point, global float* transform)
 {
    return (float3) (dot((float3) (transform[ROTATION_MATRIX_M00], transform[ROTATION_MATRIX_M01], transform[ROTATION_MATRIX_M02]), point) +
                         transform[TRANSLATION_X],
