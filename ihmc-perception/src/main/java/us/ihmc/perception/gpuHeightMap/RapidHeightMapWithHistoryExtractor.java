@@ -7,12 +7,14 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
+import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -22,6 +24,8 @@ public class RapidHeightMapWithHistoryExtractor
 {
    private static final float gridWidthInMeters = 8.0f;
    private static final float cellSizeXYInMeters = 0.02f;
+
+   private static final int bufferLengthPerCell = 10;
 
    private int centerIndex;
    private int cellsPerAxis;
@@ -34,6 +38,7 @@ public class RapidHeightMapWithHistoryExtractor
 
    private OpenCLFloatBuffer sensorToWorldTransformBuffer;
    private float[] sensorToWorldTransformArray = new float[16];
+   private OpenCLFloatBuffer oldOriginBuffer;
 
    private OpenCLFloatBuffer groundPlaneBuffer;
    private _cl_program rapidHeightMapUpdaterProgram;
@@ -43,6 +48,15 @@ public class RapidHeightMapWithHistoryExtractor
    private _cl_kernel heightMapUpdateDataKernel;
    private _cl_kernel computeHeightMapOutputValuesKernel;
    private BytedecoImage inputDepthImage;
+   private BytedecoImage dataKeyImage1;
+   private BytedecoImage dataKeyImage2;
+   private BytedecoImage activeDataKeyImage;
+   private OpenCLFloatBuffer heightSamplesBuffer;
+   private OpenCLFloatBuffer varianceSamplesBuffer;
+   private OpenCLIntBuffer samplesPerBufferedValueBuffer;
+   private OpenCLIntBuffer bufferWriteKeysBuffer;
+   private OpenCLIntBuffer entriesInBufferBuffer;
+
    private BytedecoImage outputHeightMapImage;
    private BytedecoImage outputVarianceImage;
 
@@ -51,6 +65,7 @@ public class RapidHeightMapWithHistoryExtractor
    private boolean modified = true;
    private boolean processing = false;
 
+   private final Point2D previousOrigin = new Point2D();
    private HeightMapData latestHeightMapData;
 
    public void create(OpenCLManager openCLManager,  BytedecoImage depthImage)
@@ -58,6 +73,8 @@ public class RapidHeightMapWithHistoryExtractor
       this.inputDepthImage = depthImage;
       this.openCLManager = openCLManager;
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapWithHistoryExtractor", "HeightMapUtils.cl");
+
+      previousOrigin.setToNaN();
 
       centerIndex = HeightMapTools.computeCenterIndex(gridWidthInMeters, cellSizeXYInMeters);
       cellsPerAxis = 2 * centerIndex + 1;
@@ -70,13 +87,30 @@ public class RapidHeightMapWithHistoryExtractor
       sensorToWorldTransformBuffer = new OpenCLFloatBuffer(16);
       sensorToWorldTransformBuffer.createOpenCLBufferObject(openCLManager);
 
+      oldOriginBuffer = new OpenCLFloatBuffer(2);
+      oldOriginBuffer.createOpenCLBufferObject(openCLManager);
+
       groundPlaneBuffer = new OpenCLFloatBuffer(4);
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
+
+      dataKeyImage1 = new BytedecoImage(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      dataKeyImage2 = new BytedecoImage(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      dataKeyImage1.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      dataKeyImage2.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
       outputHeightMapImage = new BytedecoImage(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
       outputHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       outputVarianceImage = new BytedecoImage(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
       outputVarianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+
+      activeDataKeyImage = dataKeyImage1;
+
+      int totalCells = cellsPerAxis * cellsPerAxis;
+      heightSamplesBuffer = new OpenCLFloatBuffer(totalCells * bufferLengthPerCell);
+      varianceSamplesBuffer = new OpenCLFloatBuffer(totalCells * bufferLengthPerCell);
+      samplesPerBufferedValueBuffer = new OpenCLIntBuffer(totalCells * bufferLengthPerCell);
+      bufferWriteKeysBuffer = new OpenCLIntBuffer(totalCells);
+      entriesInBufferBuffer = new OpenCLIntBuffer(totalCells);
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
       initializeDataStructureKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "initializeDataStructureKernel");
@@ -94,6 +128,7 @@ public class RapidHeightMapWithHistoryExtractor
       parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
       parametersBuffer.setParameter((float) gridCenter.getX());
       parametersBuffer.setParameter((float) gridCenter.getY());
+      parametersBuffer.setParameter((float) bufferLengthPerCell);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -135,22 +170,79 @@ public class RapidHeightMapWithHistoryExtractor
                                                                                        (float) (planeHeight - sensorToWorldTransform.getTranslationZ())});
          groundPlaneBuffer.writeOpenCLBufferObject(openCLManager);
 
+         if (firstRun || previousOrigin.containsNaN())
+         {
+            activeDataKeyImage = dataKeyImage1;
+            openCLManager.setKernelArgument(initializeDataStructureKernel, 0, parametersBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(initializeDataStructureKernel, 1, activeDataKeyImage.getOpenCLImageObject());
+            openCLManager.setKernelArgument(initializeDataStructureKernel, 2, heightSamplesBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(initializeDataStructureKernel, 3, varianceSamplesBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(initializeDataStructureKernel, 4, samplesPerBufferedValueBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(initializeDataStructureKernel, 5, bufferWriteKeysBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(initializeDataStructureKernel, 6, entriesInBufferBuffer.getOpenCLBufferObject());
+
+            openCLManager.execute2D(initializeDataStructureKernel, cellsPerAxis, cellsPerAxis);
+
+         }
+         else
+         {
+            oldOriginBuffer.getBackingDirectFloatBuffer().put(0, (float) previousOrigin.getX());
+            oldOriginBuffer.getBackingDirectFloatBuffer().put(1, (float) previousOrigin.getY());
+            oldOriginBuffer.writeOpenCLBufferObject(openCLManager);
+
+            BytedecoImage newDataKeyImage;
+            if (activeDataKeyImage == dataKeyImage1)
+               newDataKeyImage = dataKeyImage2;
+            else
+               newDataKeyImage = dataKeyImage1;
+            openCLManager.setKernelArgument(translateHeightMapKernel, 0, parametersBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 1, activeDataKeyImage.getOpenCLImageObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 2, newDataKeyImage.getOpenCLImageObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 3, oldOriginBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 4, heightSamplesBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 5, varianceSamplesBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 6, samplesPerBufferedValueBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 7, bufferWriteKeysBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 8, entriesInBufferBuffer.getOpenCLBufferObject());
+
+            openCLManager.execute2D(translateHeightMapKernel, cellsPerAxis, cellsPerAxis);
+            activeDataKeyImage = newDataKeyImage;
+         }
+
          // Set kernel arguments for the height map kernel
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 0, inputDepthImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 1, outputHeightMapImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 2, outputVarianceImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 3, parametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 4, sensorToWorldTransformBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 5, worldToSensorTransformBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(heightMapUpdateKernel, 6, groundPlaneBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 0, inputDepthImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 1, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 2, sensorToWorldTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 3, worldToSensorTransformBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 4, groundPlaneBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 5, activeDataKeyImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 6, heightSamplesBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 7, varianceSamplesBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 8, samplesPerBufferedValueBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 9, bufferWriteKeysBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(heightMapUpdateDataKernel, 10, entriesInBufferBuffer.getOpenCLBufferObject());
 
          // Execute kernel with length and width parameters
-         openCLManager.execute2D(heightMapUpdateKernel, cellsPerAxis, cellsPerAxis);
+         openCLManager.execute2D(heightMapUpdateDataKernel, cellsPerAxis, cellsPerAxis);
 
+         // Set kernel arguments for the height map kernel
+         openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 0, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 1, activeDataKeyImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 2, heightSamplesBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 3, varianceSamplesBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 4, samplesPerBufferedValueBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 5, entriesInBufferBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 6, outputHeightMapImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 7, outputVarianceImage.getOpenCLImageObject());
+         
          // Read height map image into CPU memory
          outputHeightMapImage.readOpenCLImage(openCLManager);
+         outputVarianceImage.readOpenCLImage(openCLManager);
 
          latestHeightMapData = convertToHeightMapData(gridCenter);
+
+         firstRun = false;
+         previousOrigin.set(gridCenter);
       }
    }
 
