@@ -202,7 +202,7 @@ public class RDXRigidBody implements RigidBodyBasics
    @Override
    public Iterable<? extends RDXRigidBody> subtreeIterable()
    {
-      return new RigidBodyIterable<>(RDXRigidBody.class, null, this);
+      return new RigidBodyIterable<>(RDXRigidBody.class, null, null, this);
    }
 
    @Override
