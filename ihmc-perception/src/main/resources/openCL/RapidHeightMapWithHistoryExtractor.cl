@@ -5,6 +5,8 @@
 #define HEIGHT_MAP_CENTER_X 4
 #define HEIGHT_MAP_CENTER_Y 5
 
+#define BUFFER_LENGTH 6
+
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
 
@@ -227,4 +229,60 @@ void kernel heightMapUpdateKernel(read_only image2d_t depth_map_in,
   {
     write_imageui(average_height_out, (int2)(xIndex, yIndex), (uint4)(0, 0, 0, 0));
   }
+}
+
+void kernel computeHeightMapOutputValuesKernel(global float *params,
+                                               read_only image2d_t data_keys,
+                                               global float *height_samples,
+                                               global float *variance_samples,
+                                               global int *samples_per_buffered_value,
+                                               global int *entries_in_buffer,
+                                               write_only image2d_t height_value_out,
+                                               write_only image2d_t variance_out)
+{
+  int xIndex = get_global_id(0);
+  int yIndex = get_global_id(1);
+
+  int2 indices = (int2) (xIndex, yIndex);
+
+  int data_key = read_imageui(data_keys, indices).x;
+  int entries_to_read = entries_in_buffer[data_key];
+
+  float total_height;
+  float total_variance;
+
+  int buffer_length = (int) params[BUFFER_LENGTH];
+
+  if (entries_to_read > 0)
+  {
+    int entry_to_read = 0;
+    int start = data_key * buffer_length;
+    int total_samples = samples_per_buffered_value[start];
+    total_height = height_samples[start];
+    total_variance = variance_samples[start];
+    entry_to_read++;
+    for (; entry_to_read < entries_to_read; entry_to_read++)
+    {
+      float height_sample = height_samples[start + entry_to_read];
+      float variance_sample = variance_samples[start + entry_to_read];
+      int samples = samples_per_buffered_value[start + entry_to_read];
+
+      // TODO double check this math, since it's probably wrong
+      total_height += (total_height * total_samples * variance_sample + height_sample * samples * total_variance) / (total_samples * total_variance + samples * variance_sample);
+      total_variance += total_variance * total_samples * variance_sample * samples / (total_samples * total_variance + samples * variance_sample);
+      total_samples += samples;
+    }
+    total_height /= total_samples;
+    total_variance /= total_samples;
+  }
+  else
+  {
+    total_height = -2.0f;
+    total_variance = 1.0f;
+  }
+
+  total_height = clamp(total_height, -20.f, 1.5f);
+
+  write_imageui(height_value_out, indices, (uint4)((int)((2.0f + total_height) * 10000.0f), 0, 0, 0));
+  write_imageui(variance_out, indices, (uint4)((int)((total_variance) * 10000.0f), 0, 0, 0));
 }
