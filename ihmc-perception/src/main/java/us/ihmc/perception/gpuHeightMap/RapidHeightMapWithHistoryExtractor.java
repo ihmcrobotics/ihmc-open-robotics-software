@@ -23,7 +23,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 public class RapidHeightMapWithHistoryExtractor
 {
    private static final float gridWidthInMeters = 8.0f;
-   private static final float cellSizeXYInMeters = 0.02f;
+   private static final float cellSizeXYInMeters = 0.05f;
 
    private static final int bufferLengthPerCell = 10;
 
@@ -182,7 +182,6 @@ public class RapidHeightMapWithHistoryExtractor
             openCLManager.setKernelArgument(initializeDataStructureKernel, 6, entriesInBufferBuffer.getOpenCLBufferObject());
 
             openCLManager.execute2D(initializeDataStructureKernel, cellsPerAxis, cellsPerAxis);
-
          }
          else
          {
@@ -234,7 +233,9 @@ public class RapidHeightMapWithHistoryExtractor
          openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 5, entriesInBufferBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 6, outputHeightMapImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(computeHeightMapOutputValuesKernel, 7, outputVarianceImage.getOpenCLImageObject());
-         
+
+         openCLManager.execute2D(computeHeightMapOutputValuesKernel, cellsPerAxis, cellsPerAxis);
+
          // Read height map image into CPU memory
          outputHeightMapImage.readOpenCLImage(openCLManager);
          outputVarianceImage.readOpenCLImage(openCLManager);

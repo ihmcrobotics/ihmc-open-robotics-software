@@ -85,8 +85,12 @@ void kernel initializeDataStructureKernel(global float *params,
                                           global int *buffer_write_keys,
                                           global int *entries_in_buffer)
 {
+
   int xIndex = get_global_id(0);
   int yIndex = get_global_id(1);
+
+   if (xIndex == 0 && yIndex == 0)
+        printf("started initialize\n");
 
   int2 indices = (int2)(xIndex, yIndex);
 
@@ -95,6 +99,9 @@ void kernel initializeDataStructureKernel(global float *params,
   write_imageui(data_keys, indices, (uint4)(0, 0, 0, 0));
 
   initializeCellData(data_key, height_samples, variance_samples, samples_per_buffered_value, buffer_write_keys, entries_in_buffer);
+
+   if (xIndex == 0 && yIndex == 0)
+        printf("finished initialize\n");
 }
 
 void kernel translateHeightMapKernel(global float *params,
@@ -109,6 +116,9 @@ void kernel translateHeightMapKernel(global float *params,
 {
   int xIndex = get_global_id(0);
   int yIndex = get_global_id(1);
+
+  if (xIndex == 0 && yIndex == 0)
+      printf("started translate\n");
 
   int2 indices = (int2) (xIndex, yIndex);
 
@@ -156,6 +166,9 @@ void kernel translateHeightMapKernel(global float *params,
 
   write_imageui(new_data_keys, indices, (uint4)(data_buffer_key, 0, 0, 0));
   // TODO add variance to everything, since we just translated.
+
+  if (xIndex == 0 && yIndex == 0)
+      printf("finished translate\n");
 }
 
 void kernel heightMapUpdateKernel(read_only image2d_t depth_map_in,
@@ -267,6 +280,9 @@ void kernel heightMapUpdateDataKernel(read_only image2d_t depth_map_in,
   int xIndex = get_global_id(0);
   int yIndex = get_global_id(1);
 
+   if (xIndex == 0 && yIndex == 0)
+        printf("started update\n");
+
   float3 normal;
   float3 centroid;
 
@@ -348,6 +364,9 @@ void kernel heightMapUpdateDataKernel(read_only image2d_t depth_map_in,
     buffer_write_keys[data_key] = 0;
     entries_in_buffer[data_key] = 1;
   }
+
+   if (xIndex == 0 && yIndex == 0)
+        printf("finished update\n");
 }
 
 void kernel computeHeightMapOutputValuesKernel(global float *params,
@@ -361,6 +380,8 @@ void kernel computeHeightMapOutputValuesKernel(global float *params,
 {
   int xIndex = get_global_id(0);
   int yIndex = get_global_id(1);
+
+      printf("started compute output\n");
 
   int2 indices = (int2) (xIndex, yIndex);
 
@@ -404,4 +425,7 @@ void kernel computeHeightMapOutputValuesKernel(global float *params,
 
   write_imageui(height_value_out, indices, (uint4)((int)((2.0f + total_height) * 10000.0f), 0, 0, 0));
   write_imageui(variance_out, indices, (uint4)((int)((total_variance) * 10000.0f), 0, 0, 0));
+
+  if (xIndex == 0 && yIndex == 0)
+    printf("finished compute output\n");
 }
