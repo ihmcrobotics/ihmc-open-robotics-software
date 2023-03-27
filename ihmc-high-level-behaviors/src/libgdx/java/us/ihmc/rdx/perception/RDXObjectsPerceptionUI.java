@@ -12,47 +12,30 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
+import java.util.ArrayList;
 import java.util.Set;
 
-public class RDXObjectsPerceptionManagerUI
+public class RDXObjectsPerceptionUI
 {
-   private final ImGuiPanel panel = new ImGuiPanel("Objects Perception Manager UI", this::renderImGuiWidgets);
+   private final ImGuiPanel panel = new ImGuiPanel("Objects Perception UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ROS2PublishSubscribeAPI ros2;
-   private final RDXObjectPerceptionUpdater pullDoorFrame;
-   private final RDXObjectPerceptionUpdater pullDoorPanel;
-   private final RDXObjectPerceptionUpdater pushDoorFrame;
-   private final RDXObjectPerceptionUpdater pushDoorPanel;
+   private final ArrayList<RDXObjectPerceptionUpdater> objectUpdaters = new ArrayList<>();
 
-   public RDXObjectsPerceptionManagerUI(ROS2PublishSubscribeAPI ros2, ObjectInfo objectInfo)
+   public RDXObjectsPerceptionUI(ROS2PublishSubscribeAPI ros2, ObjectInfo objectInfo)
    {
       this.ros2 = ros2;
 
-      pullDoorFrame = new RDXObjectPerceptionUpdater(ros2,
-                                                     BehaviorSequencePerceptionManager.DETECTED_PULL_DOOR_FRAME,
-                                                     "environmentObjects/door/doorFrame/DoorFrame.g3dj",
-                                                     String.format("PullDoor%dFrame", BehaviorSequencePerceptionManager.PULL_DOOR_MARKER_ID));
-      pullDoorPanel = new RDXObjectPerceptionUpdater(ros2,
-                                                     BehaviorSequencePerceptionManager.DETECTED_PULL_DOOR_PANEL,
-                                                     "environmentObjects/door/doorPanel/DoorPanel.g3dj",
-                                                     String.format("PullDoor%dPanel", BehaviorSequencePerceptionManager.PULL_DOOR_MARKER_ID));
-      pushDoorFrame = new RDXObjectPerceptionUpdater(ros2,
-                                                     BehaviorSequencePerceptionManager.DETECTED_PUSH_DOOR_FRAME,
-                                                     "environmentObjects/door/doorFrame/DoorFrame.g3dj",
-                                                     String.format("PushDoor%dFrame", BehaviorSequencePerceptionManager.PUSH_DOOR_MARKER_ID));
-      pushDoorPanel = new RDXObjectPerceptionUpdater(ros2,
-                                                     BehaviorSequencePerceptionManager.DETECTED_PUSH_DOOR_PANEL,
-                                                     "environmentObjects/door/doorPanel/DoorPanel.g3dj",
-                                                     String.format("PushDoor%dPanel", BehaviorSequencePerceptionManager.PUSH_DOOR_MARKER_ID));
+      ArrayList<Integer> IDs = objectInfo.getIDs();
+      for (int i = 0; i < IDs.size(); i++)
+         objectUpdaters.add(new RDXObjectPerceptionUpdater(ros2, ObjectsPerceptionManager.DETECTED_OBJECT, IDs.get(i), objectInfo));
    }
 
    public void update()
    {
-      pullDoorFrame.update();
-      pullDoorPanel.update();
-      pushDoorFrame.update();
-      pushDoorPanel.update();
+      for (RDXObjectPerceptionUpdater objectUpdater : objectUpdaters)
+         objectUpdater.update();
    }
 
    public void renderImGuiWidgets()
@@ -64,35 +47,13 @@ public class RDXObjectsPerceptionManagerUI
    {
       if (showGraphics.get())
       {
-         pullDoorFrame.getObject().getRenderables(renderables, pool, sceneLevels);
-         pullDoorPanel.getObject().getRenderables(renderables, pool, sceneLevels);
-         pushDoorFrame.getObject().getRenderables(renderables, pool, sceneLevels);
-         pushDoorPanel.getObject().getRenderables(renderables, pool, sceneLevels);
+         for (RDXObjectPerceptionUpdater objectUpdater : objectUpdaters)
+            objectUpdater.getObject().getRenderables(renderables, pool, sceneLevels);
       }
    }
 
    public ImGuiPanel getPanel()
    {
       return panel;
-   }
-
-   public RDXPerceptionObjectUpdater getPullDoorFrame()
-   {
-      return pullDoorFrame;
-   }
-
-   public RDXPerceptionObjectUpdater getPullDoorPanel()
-   {
-      return pullDoorPanel;
-   }
-
-   public RDXPerceptionObjectUpdater getPushDoorFrame()
-   {
-      return pushDoorFrame;
-   }
-
-   public RDXPerceptionObjectUpdater getPushDoorPanel()
-   {
-      return pushDoorPanel;
    }
 }

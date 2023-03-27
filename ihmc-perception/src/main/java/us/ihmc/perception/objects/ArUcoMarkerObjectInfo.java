@@ -12,7 +12,6 @@ import java.util.List;
 
 public class ArUcoMarkerObjectInfo extends ObjectInfo
 {
-   private final List<Integer> markerIds = new ArrayList<>();
    private double[] markerSizes;
    private double[][] markerToBodyTranslations;
    private double[][] markerToBodyRotations;
@@ -43,7 +42,7 @@ public class ArUcoMarkerObjectInfo extends ObjectInfo
             JsonNode propertiesArrayNode = objectNode.get("properties");
             for (JsonNode propertyObject : propertiesArrayNode)
             {
-               markerIds.add(propertyObject.get("markerId").asInt());
+               IDs.add(propertyObject.get("ID").asInt());
                markerSizes[i] = propertyObject.get("markerSize").asDouble();
                JsonNode tempArrayNode = propertyObject.get("translationMarkerToMainBody");
                for (int j = 0; j < 3; j++)
@@ -68,40 +67,35 @@ public class ArUcoMarkerObjectInfo extends ObjectInfo
 
    public List<Integer> getMarkersId()
    {
-      return markerIds;
-   }
-
-   public String getObjectName(int id)
-   {
-      return objectNames.get(markerIds.indexOf(id));
+      return IDs;
    }
 
    public double getMarkerSize(int id)
    {
-      return markerSizes[markerIds.indexOf(id)];
+      return markerSizes[IDs.indexOf(id)];
    }
 
    public Point3D getMarkerTranslation(int id)
    {
-      int realIndex = markerIds.indexOf(id);
+      int realIndex = IDs.indexOf(id);
       return new Point3D(markerToBodyTranslations[realIndex][0], markerToBodyTranslations[realIndex][1], markerToBodyTranslations[realIndex][2]);
    }
 
    public YawPitchRoll getMarkerYawPitchRoll(int id)
    {
-      int realIndex = markerIds.indexOf(id);
+      int realIndex = IDs.indexOf(id);
       return new YawPitchRoll(markerToBodyRotations[realIndex][0], markerToBodyRotations[realIndex][1], markerToBodyRotations[realIndex][2]);
    }
 
    public Point3D getAppendixTranslation(int id)
    {
-      int realIndex = markerIds.indexOf(id);
+      int realIndex = IDs.indexOf(id);
       return new Point3D(bodyToAppendixTranslations[realIndex][0], bodyToAppendixTranslations[realIndex][1], bodyToAppendixTranslations[realIndex][2]);
    }
 
    public YawPitchRoll getAppendixYawPitchRoll(int id)
    {
-      int realIndex = markerIds.indexOf(id);
+      int realIndex = IDs.indexOf(id);
       return new YawPitchRoll(bodyToAppendixRotations[realIndex][0], bodyToAppendixRotations[realIndex][1], bodyToAppendixRotations[realIndex][2]);
    }
 

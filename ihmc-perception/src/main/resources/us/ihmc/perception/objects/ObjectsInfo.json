@@ -4,7 +4,7 @@
       "name": "Door",
       "properties": [
         {
-          "markerId": 0,
+          "ID": 0,
           "markerSize": 0.2032,
           "translationMarkerToMainBody": [0.03, -0.188, 0.205],
           "yawPitchRollMarkerToMainBody": [3.1415, 0.0, 0.0],

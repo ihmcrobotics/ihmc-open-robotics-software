@@ -12,7 +12,8 @@ import java.util.*;
 
 public class ObjectInfo
 {
-   protected final List<String> objectNames = new ArrayList<>();
+   protected final ArrayList<Integer> IDs = new ArrayList<>();
+   protected final ArrayList<String> objectNames = new ArrayList<>();
    protected double[][] bodyToAppendixTranslations;
    protected double[][] bodyToAppendixRotations;
    protected final HashMap<String, String> virtualBodyFileName = new HashMap<>();
@@ -45,6 +46,7 @@ public class ObjectInfo
             JsonNode propertiesArrayNode = objectNode.get("properties");
             for (JsonNode propertyObject : propertiesArrayNode)
             {
+               IDs.add(propertyObject.get("ID").asInt());
                JsonNode tempArrayNode = propertyObject.get("translationMainBodyToAppendix");
                for (int j = 0; j < 3; j++)
                   bodyToAppendixTranslations[i][j] = tempArrayNode.get(j).asDouble();
@@ -56,6 +58,26 @@ public class ObjectInfo
             }
          }
       });
+   }
+
+   public String getObjectName(int id)
+   {
+      return objectNames.get(IDs.indexOf(id));
+   }
+
+   public int getNumberOfObjects()
+   {
+      return objectNames.size();
+   }
+
+   public ArrayList<String> getObjectNames()
+   {
+      return objectNames;
+   }
+
+   public ArrayList<Integer> getIDs()
+   {
+      return IDs;
    }
 
    public Point3D getAppendixTranslation(String objectName)
