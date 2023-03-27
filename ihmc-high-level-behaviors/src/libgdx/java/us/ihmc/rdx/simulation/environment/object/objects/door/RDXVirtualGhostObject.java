@@ -23,6 +23,8 @@ public class RDXVirtualGhostObject extends RDXModelInstance
    private RigidBodyTransform transformToParent = new RigidBodyTransform();
    private final ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                                         transformToParent);
+   private boolean showing = false;
+
    public RDXVirtualGhostObject(String modelName)
    {
       super(RDXModelLoader.load(modelName));
@@ -45,6 +47,11 @@ public class RDXVirtualGhostObject extends RDXModelInstance
 
       if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
          referenceFrameGraphic.getRenderables(renderables, pool);
+   }
+
+   public void setShowing(boolean showing)
+   {
+      this.showing = showing;
    }
 
    public RigidBodyTransform getTransformToParent()
