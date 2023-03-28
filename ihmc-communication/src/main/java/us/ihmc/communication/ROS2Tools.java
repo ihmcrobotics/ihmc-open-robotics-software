@@ -210,11 +210,13 @@ public class ROS2Tools
    /** Rapid regions are generated in Java, come with epoch second and nano timestamp, are pre-filtered for body collisions, and in world frame.
     *  They are prre filtered using the polygonizer, segmentation, and concave hull filtering parameters. There is no need for delay compensation. */
 
-   public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS_WITH_POSE = MAPSENSE_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class);
-   public static final ROS2Topic<PlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS_WITH_POSE = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("perspective");
+   public static final ROS2Topic<PlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix("perspective");
 
-   public static final ROS2Topic<FramePlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS_WITH_POSE = MAPSENSE_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class);
-   public static final ROS2Topic<PlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<FramePlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS_WITH_POSE = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("spherical");
+   public static final ROS2Topic<PlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix("spherical");
+
+   public static final ROS2Topic<PlanarRegionsListMessage> SLAM_OUTPUT_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix("slam_output");
 
    /**
     * Rapid regions are generated in Java, come with epoch second and nano timestamp, are pre-filtered

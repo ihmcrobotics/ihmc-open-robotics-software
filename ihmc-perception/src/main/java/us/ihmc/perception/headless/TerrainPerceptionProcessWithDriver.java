@@ -136,19 +136,10 @@ public class TerrainPerceptionProcessWithDriver
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_and_depth_publisher");
       ros2Helper = new ROS2Helper(ros2Node);
 
-      LogTools.info("Setting Up ROS2 Property Set Group");
-      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
+      LogTools.info(String.format("Sensor Fx: %.2f, Sensor Fy: %.2f, Sensor Cx: %.2f, Sensor Cy: %.2f", sensor.getDepthFocalLengthPixelsX(),
+                    sensor.getDepthFocalLengthPixelsY(), sensor.getDepthPrincipalOffsetXPixels(), sensor.getDepthPrincipalOffsetYPixels()));
 
       openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
-      rapidRegionsExtractor.create(openCLManager,
-                                   openCLProgram,
-                                   depthHeight,
-                                   depthWidth,
-                                   sensor.getDepthFocalLengthPixelsX(),
-                                   sensor.getDepthFocalLengthPixelsY(),
-                                   sensor.getDepthPrincipalOffsetXPixels(),
-                                   sensor.getDepthPrincipalOffsetYPixels());
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
@@ -181,100 +172,6 @@ public class TerrainPerceptionProcessWithDriver
       destroyedNotification.set();
    }
 
-   private void old_update()
-   {
-      if (sensor.readFrameData())
-      {
-         Instant now = Instant.now();
-
-         sensor.updateDataBytePointers();
-
-         if (depth16UC1Image == null)
-         {
-            LogTools.info("Is now reading frames.");
-
-            MutableBytePointer depthFrameData = sensor.getDepthFrameData();
-            MutableBytePointer colorFrameData = sensor.getColorFrameData();
-
-            depth16UC1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
-            depthBytedecoImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-            color8UC3Image = new Mat(colorHeight, colorWidth, opencv_core.CV_8UC3, colorFrameData);
-
-            PerceptionMessageTools.setDepthIntrinsicsFromRealsense(sensor, depthImageMessage);
-            PerceptionMessageTools.setColorIntrinsicsFromRealsense(sensor, colorImageMessage);
-
-            // Important not to store as a field, as update() needs to be called each frame
-            ReferenceFrame cameraFrame = sensorFrameUpdater.get();
-            cameraPose.setToZero(cameraFrame);
-            cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-            MessageTools.toMessage(now, depthImageMessage.getAcquisitionTime());
-            MessageTools.toMessage(now, colorImageMessage.getAcquisitionTime());
-
-            openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
-            rapidRegionsExtractor.create(openCLManager,
-                                         openCLProgram,
-                                         depthHeight,
-                                         depthWidth,
-                                         sensor.getDepthFocalLengthPixelsX(),
-                                         sensor.getDepthFocalLengthPixelsY(),
-                                         sensor.getDepthPrincipalOffsetXPixels(),
-                                         sensor.getDepthPrincipalOffsetYPixels());
-
-            ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
-            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
-                                                           rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
-            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
-                                                           rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getConcaveHullFactoryParameters());
-
-            onPatchSizeResized();
-
-            LogTools.info("Initialized.");
-         }
-
-         //            LogTools.info("New Iteration: {}", dataAquisitionTime);
-         ros2PropertySetGroup.update();
-
-         depth16UC1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
-
-         FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
-         extractFramePlanarRegionsList(depthBytedecoImage, ReferenceFrame.getWorldFrame(), framePlanarRegionsList);
-         PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
-
-         //            LogTools.info("Planar regions: {}", planarRegionsList.getNumberOfPlanarRegions());
-
-         BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-         BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
-
-         // TODO:  Filter out regions that are colliding with the body before publishing
-         PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
-         PerceptionMessageTools.publishCompressedDepthImage(compressedDepthPointer,
-                                                            depthTopic,
-                                                            depthImageMessage,
-                                                            ros2Helper,
-                                                            cameraPose,
-                                                            now,
-                                                            depthSequenceNumber,
-                                                            depthHeight,
-                                                            depthWidth,
-                                                            (float) sensor.getDepthDiscretization());
-
-         PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
-                                                               colorTopic,
-                                                               colorImageMessage,
-                                                               ros2Helper,
-                                                               cameraPose,
-                                                               now,
-                                                               colorSequenceNumber,
-                                                               colorHeight,
-                                                               colorWidth,
-                                                               (float) sensor.getDepthDiscretization());
-
-         //            display(depthU16C1Image, color8UC3Image, 1);
-      }
-   }
-
    /**
     * Update the sensor and logger, and publish the data to ROS2
     */
@@ -291,12 +188,36 @@ public class TerrainPerceptionProcessWithDriver
 
          if (depth16UC1Image == null)
          {
+            LogTools.info(String.format("Creating images with dimensions: depth: %d x %d, color: %d x %d",
+                                        sensor.getDepthHeight(),
+                                        sensor.getDepthWidth(),
+                                        sensor.getColorHeight(),
+                                        sensor.getColorWidth()));
+
             depth16UC1Image = new Mat(sensor.getDepthHeight(), sensor.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
             color8UC3Image = new Mat(sensor.getColorHeight(), sensor.getColorWidth(), opencv_core.CV_8UC3, colorFrameData);
-            depthBytedecoImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+            depthBytedecoImage = new BytedecoImage(sensor.getDepthWidth(), sensor.getDepthHeight(), opencv_core.CV_16UC1);
             // YUV I420 has 1.5 times the height of the image
             // YUV image must be preallocated or there will be a memory leak
             yuvColorImage = new Mat(sensor.getColorHeight() * 1.5, sensor.getColorWidth(), opencv_core.CV_8UC1);
+
+            rapidRegionsExtractor.create(openCLManager,
+                                         openCLProgram,
+                                         depthHeight,
+                                         depthWidth,
+                                         sensor.getDepthFocalLengthPixelsX(),
+                                         sensor.getDepthFocalLengthPixelsY(),
+                                         sensor.getDepthPrincipalOffsetXPixels(),
+                                         sensor.getDepthPrincipalOffsetYPixels());
+
+            LogTools.info("Setting Up ROS2 Property Set Group");
+            ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
+                                                           rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
+                                                           rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getConcaveHullFactoryParameters());
          }
          else
          {
@@ -351,7 +272,7 @@ public class TerrainPerceptionProcessWithDriver
          {
             depth16UC1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
             FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
-            extractFramePlanarRegionsList(depthBytedecoImage, ReferenceFrame.getWorldFrame(), framePlanarRegionsList);
+            extractFramePlanarRegionsList(depthBytedecoImage, cameraFrame, framePlanarRegionsList);
             PerceptionMessageTools.publishPlanarRegionsList(framePlanarRegionsList.getPlanarRegionsList(), regionsTopic, ros2Helper);
 
             LogTools.info("Planar regions found: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());

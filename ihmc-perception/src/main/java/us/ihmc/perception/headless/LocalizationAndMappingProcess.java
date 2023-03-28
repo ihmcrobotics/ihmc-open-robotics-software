@@ -11,9 +11,11 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMap;
+import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
@@ -40,15 +42,15 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class LocalizationAndMappingProcess
 {
-   private final static long PUBLISH_PERIOD_MILLISECONDS = 100;
+   private final static long SLAM_UPDATE_FREQUENCY = 30;
 
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
    private PlanarRegionMap planarRegionMap;
    private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
+   private IHMCROS2Publisher<PlanarRegionsListMessage> slamOutputRegionsPublisher;
 
    private final AtomicReference<FramePlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
-   private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForRendering = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
@@ -58,10 +60,12 @@ public class LocalizationAndMappingProcess
                                                                                                         ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private ScheduledFuture<?> updateMapFuture;
-   private boolean enableLiveMode = false;
+   private boolean enableLiveMode = true;
 
    private ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic;
    private ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic;
+
+   private final PerceptionConfigurationParameters configurationParameters = new PerceptionConfigurationParameters();
 
    public LocalizationAndMappingProcess(String simpleRobotName, ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic, ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic, ROS2Node ros2Node, boolean smoothing)
    {
@@ -73,9 +77,9 @@ public class LocalizationAndMappingProcess
       this.ros2Node = ros2Node;
       this.ros2Helper = new ROS2Helper(ros2Node);
 
-      launchMapper();
       controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
-      ros2Helper.subscribeViaCallback(terrainRegionsTopic, latestIncomingRegions::set);
+      slamOutputRegionsPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SLAM_OUTPUT_RAPID_REGIONS);
+      ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
       {
@@ -85,23 +89,35 @@ public class LocalizationAndMappingProcess
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS, planarRegionMap.getParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, configurationParameters);
+
+      launchMapper();
    }
 
    private void launchMapper()
    {
-      updateMapFuture = executorService.scheduleAtFixedRate(this::updateMap, 0, PUBLISH_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+      updateMapFuture = executorService.scheduleAtFixedRate(this::updateMap, 0, SLAM_UPDATE_FREQUENCY, TimeUnit.MILLISECONDS);
+   }
+
+   public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message)
+   {
+      latestIncomingRegions.set(message);
+      LogTools.info("Received Regions: {}", message.getSensorPosition());
    }
 
    public synchronized void updateMap()
    {
       if (latestIncomingRegions.get() == null)
+      {
+         LogTools.warn("No regions received");
          return;
+      }
 
       FramePlanarRegionsList framePlanarRegionsList = PlanarRegionMessageConverter.convertToFramePlanarRegionsList(latestIncomingRegions.getAndSet(null));
 
       if (enableLiveMode)
       {
-         LogTools.debug("Registering Regions");
+         LogTools.info("Registering Regions: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
          updateMapWithNewRegions(framePlanarRegionsList);
       }
 
@@ -110,20 +126,29 @@ public class LocalizationAndMappingProcess
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionsToPublish);
          controllerRegionsPublisher.publish(planarRegionsListMessage);
+         slamOutputRegionsPublisher.publish(planarRegionsListMessage);
+      }
+
+      if (configurationParameters.getSLAMReset())
+      {
+         resetMap();
+         configurationParameters.setSLAMReset(false);
       }
    }
 
    public void updateMapWithNewRegions(FramePlanarRegionsList regions)
    {
-      planarRegionMap.submitRegionsUsingIterativeReduction(regions);
-      latestPlanarRegionsForRendering.set(planarRegionMap.getMapRegions().copy());
+      latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
+      RigidBodyTransform keyframePose = planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
+
+      planarRegionMap.printStatistics(true);
+
       latestPlanarRegionsForPublishing.set(planarRegionMap.getMapRegions().copy());
    }
 
    public void resetMap()
    {
       planarRegionMap.reset();
-      latestPlanarRegionsForRendering.set(new PlanarRegionsList());
       planarRegionMap.setModified(true);
       if (updateMapFuture.isCancelled() || updateMapFuture.isDone())
          launchMapper();

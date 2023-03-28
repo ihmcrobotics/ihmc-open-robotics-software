@@ -49,4 +49,14 @@ public interface PerceptionConfigurationParametersReadOnly extends StoredPropert
    {
       return get(logDepth);
    }
+
+   default boolean getSLAMEnabled()
+   {
+      return get(slamEnabled);
+   }
+
+   default boolean getSLAMReset()
+   {
+      return get(slamReset);
+   }
 }

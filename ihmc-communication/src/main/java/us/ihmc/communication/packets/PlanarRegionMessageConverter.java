@@ -242,6 +242,7 @@ public class PlanarRegionMessageConverter
 
       PlanarRegionsListMessage planarRegionsListMessage = convertToPlanarRegionsListMessage(frameRegions.getPlanarRegionsList());
       messageToReturn.getPlanarRegions().set(planarRegionsListMessage);
+      messageToReturn.getSensorPosition().set(frameRegions.getSensorToWorldFrameTransform().getTranslation());
       messageToReturn.getSensorOrientation().set(frameRegions.getSensorToWorldFrameTransform().getRotation());
 
       return messageToReturn;

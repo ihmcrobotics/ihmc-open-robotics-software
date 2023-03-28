@@ -47,4 +47,14 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
    {
       set(PerceptionConfigurationParameters.logDepth, logDepth);
    }
+
+   default void setSLAMEnabled(boolean slamEnabled)
+   {
+      set(PerceptionConfigurationParameters.slamEnabled, slamEnabled);
+   }
+
+   default void setSLAMReset(boolean slamReset)
+   {
+      set(PerceptionConfigurationParameters.slamReset, slamReset);
+   }
 }

@@ -116,6 +116,7 @@ public class PlanarRegionMap
    {
       initialized = false;
       finalMap.clear();
+      factorGraph = new SlamWrapper.FactorGraphExternal();
    }
 
    /**
