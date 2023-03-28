@@ -1,7 +1,7 @@
 package us.ihmc.avatar.scs2;
 
-import gnu.trove.map.TObjectDoubleMap;
-import gnu.trove.map.hash.TObjectDoubleHashMap;
+import java.util.Objects;
+
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
@@ -15,14 +15,10 @@ import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tools.RotationMatrixTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -30,9 +26,10 @@ import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.simulation.robot.Robot;
-import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SCS2AvatarSimulation
 {
@@ -151,6 +148,7 @@ public class SCS2AvatarSimulation
          simulationConstructionSet.stopSimulationThread();
 
       simulationConstructionSet.reinitializeSimulation();
+      simulationConstructionSet.setBufferInPoint();
 
       if (wasSimulationThreadRunning)
       {
@@ -158,6 +156,33 @@ public class SCS2AvatarSimulation
 
          if (simulateAfterReset)
             simulationConstructionSet.simulate();
+      }
+   }
+
+   /**
+    * Forces the variables in the controller's registry to update after rewinding the simulation.
+    * <p>
+    * This has no effect when the simulation is running.
+    * </p>
+    * <p>
+    * This can be used to ensure that the controller's variables are up-to-date at a given time while
+    * the simulation is paused. Useful notably to generate dataset from inside the controller.
+    * </p>
+    */
+   public void forceMirrorRegistryUpdate()
+   {
+      if (simulationConstructionSet.isSimulating())
+         return; // This would risk introducing threading issue
+
+      YoRegistry registry = robotController.getYoRegistry();
+
+      for (int i = 0; i < registry.getChildren().size(); i++)
+      {
+         YoRegistry controllerRegistry = registry.getChildren().get(i);
+         if (controllerRegistry instanceof MirroredYoVariableRegistry)
+         {
+            ((MirroredYoVariableRegistry) controllerRegistry).updateChangedValues();
+         }
       }
    }
 
@@ -181,6 +206,12 @@ public class SCS2AvatarSimulation
    }
 
    // GUI controls:
+   /**
+    * Align the camera to look at the robot root joint from the front using a default latitude.
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
+    */
    public void setCameraDefaultRobotView()
    {
       checkSimulationSessionAlive();
@@ -200,6 +231,9 @@ public class SCS2AvatarSimulation
     * <p>
     * The camera is rotated during this operation, its position remains unchanged.
     * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
     * 
     * @param focus the new focus position.
     */
@@ -213,6 +247,9 @@ public class SCS2AvatarSimulation
     * Sets the new focus point the camera is looking at.
     * <p>
     * The camera is rotated during this operation, its position remains unchanged.
+    * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
     * </p>
     *
     * @param x the x-coordinate of the new focus location.
@@ -256,6 +293,12 @@ public class SCS2AvatarSimulation
 
    /**
     * Sets the camera configuration.
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
     * 
     * @param cameraFocus    the new focus position (where the camera is looking at).
     * @param cameraPosition the new camerate position.
@@ -264,6 +307,12 @@ public class SCS2AvatarSimulation
    {
       setCameraFocusPosition(cameraFocus);
       setCameraPosition(cameraPosition);
+   }
+
+   public void requestCameraRigidBodyTracking(String rigidBodyName)
+   {
+      Objects.requireNonNull(robot, "The robot has not been set yet.");
+      requestCameraRigidBodyTracking(robot.getName(), rigidBodyName);
    }
 
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
@@ -373,6 +422,11 @@ public class SCS2AvatarSimulation
    public void setStepGeneratorThread(AvatarStepGeneratorThread stepGeneratorThread)
    {
       this.stepGeneratorThread = stepGeneratorThread;
+   }
+
+   public AvatarStepGeneratorThread getStepGeneratorThread()
+   {
+      return stepGeneratorThread;
    }
 
    public void setSimulatedRobotTimeProvider(SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider)

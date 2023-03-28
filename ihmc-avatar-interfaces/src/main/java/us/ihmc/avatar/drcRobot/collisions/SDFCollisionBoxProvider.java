@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;

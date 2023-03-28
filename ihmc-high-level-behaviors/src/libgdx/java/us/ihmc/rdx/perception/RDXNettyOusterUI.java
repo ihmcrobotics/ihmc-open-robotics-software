@@ -1,178 +1,261 @@
 package us.ihmc.rdx.perception;
 
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImFloat;
-import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_program;
+import imgui.type.ImInt;
 import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelLoader;
-import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
-import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
-import us.ihmc.perception.BytedecoTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.netty.NettyOuster;
-import us.ihmc.tools.thread.Activator;
-import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
+import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
+import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
+import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
+import us.ihmc.rdx.ui.interactable.RDXInteractableOuster;
+import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
+import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 import java.nio.ByteOrder;
+import java.util.Set;
 
 public class RDXNettyOusterUI
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
-   private final Activator nativesLoadedActivator;
    private NettyOuster ouster;
-   private RDXCVImagePanel imagePanel;
-   private final FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
+   private RDXBytedecoImagePanel imagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private int numberOfDepthPoints;
-   private OpenCLFloatBuffer parametersBuffer;
    private OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
-   private _cl_kernel createPointCloudKernel;
-   private OpenCLFloatBuffer pointCloudRenderingBuffer;
+   private OpenCLFloatBuffer pointCloudVertexBuffer;
+   private OusterDepthExtractionKernel depthExtractionKernel;
+   private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
    private RDXPointCloudRenderer pointCloudRenderer;
-   private final ImFloat verticalFieldOfView = new ImFloat((float) Math.toRadians(90.0));
-   private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
-   private RDXInteractableFrameModel ousterInteractable;
+   private final ImFloat pointSize = new ImFloat(0.01f);
+   private ModifiableReferenceFrame sensorFrame;
+   private RDXInteractableOuster ousterInteractable;
+   private int depthWidth;
+   private int depthHeight;
+   private BytedecoImage fisheyeImage;
+   private double fisheyeFocalLengthPixelsX;
+   private double fisheyeFocalLengthPixelsY;
+   private double fisheyePrincipalPointPixelsX;
+   private double fisheyePrincipalPointPixelsY;
+   private volatile boolean isReady = false;
+   private final ImPlotFrequencyPlot frameReadFrequency = new ImPlotFrequencyPlot("Frame read frequency");
+   private final ImPlotStopwatchPlot depthExtractionSynchronizedBlockStopwatchPlot = new ImPlotStopwatchPlot("Depth extraction kernel block");
+   private final ImPlotStopwatchPlot depthExtractionKernelStopwatchPlot = new ImPlotStopwatchPlot("Depth extraction kernel");
+   private final ImPlotStopwatchPlot drawDepthImageStopwatchPlot = new ImPlotStopwatchPlot("Draw depth image");
+   private final ImPlotStopwatchPlot depthImageToPointCloudStopwatchPlot = new ImPlotStopwatchPlot("Image to point cloud kernel");
+   private final Notification newFrameAvailable = new Notification();
+   private final ImInt levelOfColorDetail = new ImInt(0);
+   private final Notification levelOfColorDetailChanged = new Notification();
 
-   public RDXNettyOusterUI()
+   public void create(RDXBaseUI baseUI)
    {
-      nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
-      {
-         @Override
-         public void create()
-         {
-            baseUI.create();
-
-            ImGuiPanel panel = new ImGuiPanel("Ouster", this::renderImGuiWidgets);
-            baseUI.getImGuiPanelManager().addPanel(panel);
-
-            ModelData ousterSensorModel = RDXModelLoader.loadModelData("environmentObjects/ousterSensor/Ouster.g3dj");
-            CylinderRayIntersection cylinderIntersection = new CylinderRayIntersection();
-            ousterInteractable = new RDXInteractableFrameModel();
-            ousterInteractable.create(ReferenceFrame.getWorldFrame(),
-                                      baseUI.getPrimary3DPanel(),
-                                      ousterSensorModel,
-                                      pickRay ->
-            {
-               cylinderIntersection.update(0.0734, 0.04, -0.0372, ousterInteractable.getReferenceFrame().getTransformToWorldFrame());
-               return cylinderIntersection.intersect(pickRay);
-            });
-         }
-
-         @Override
-         public void render()
-         {
-            if (nativesLoadedActivator.poll())
-            {
-               if (nativesLoadedActivator.isNewlyActivated())
-               {
-                  ouster = new NettyOuster();
-                  ouster.bind();
-
-                  openCLManager = new OpenCLManager();
-                  openCLManager.create();
-               }
-
-               if (ouster.isInitialized())
-               {
-                  if (imagePanel == null)
-                  {
-                     imagePanel = new RDXCVImagePanel("Ouster Depth Image", ouster.getImageWidth(), ouster.getImageHeight());
-
-                     baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
-                     baseUI.getPerspectiveManager().reloadPerspective();
-
-                     numberOfDepthPoints = ouster.getImageWidth() * ouster.getImageHeight();
-
-                     pointCloudRenderer = new RDXPointCloudRenderer();
-                     parametersBuffer = new OpenCLFloatBuffer(16);
-                     openCLProgram = openCLManager.loadProgram("OusterPointCloud");
-                     createPointCloudKernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
-
-                     pointCloudRenderer.create(numberOfDepthPoints);
-                     baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.MODEL);
-
-                     pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfDepthPoints * 8, pointCloudRenderer.getVertexBuffer());
-                     ouster.getDepthImageMeters().createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-                     pointCloudRenderingBuffer.createOpenCLBufferObject(openCLManager);
-                     parametersBuffer.createOpenCLBufferObject(openCLManager);
-                  }
-
-                  frameReadFrequency.ping();
-                  imagePanel.drawFloatImage(ouster.getDepthImageMeters().getBytedecoOpenCVMat());
-
-                  RigidBodyTransform transformToWorldFrame = ousterInteractable.getReferenceFrame().getTransformToWorldFrame();
-
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(0, horizontalFieldOfView.get());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(1, verticalFieldOfView.get());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(2, transformToWorldFrame.getTranslation().getX32());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(3, transformToWorldFrame.getTranslation().getY32());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(4, transformToWorldFrame.getTranslation().getZ32());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(5, (float) transformToWorldFrame.getRotation().getM00());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) transformToWorldFrame.getRotation().getM01());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) transformToWorldFrame.getRotation().getM02());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(8, (float) transformToWorldFrame.getRotation().getM10());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(9, (float) transformToWorldFrame.getRotation().getM11());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(10, (float) transformToWorldFrame.getRotation().getM12());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(11, (float) transformToWorldFrame.getRotation().getM20());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(12, (float) transformToWorldFrame.getRotation().getM21());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(13, (float) transformToWorldFrame.getRotation().getM22());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(14, (float) ouster.getImageWidth());
-                  parametersBuffer.getBytedecoFloatBufferPointer().put(15, (float) ouster.getImageHeight());
-
-                  ouster.getDepthImageMeters().writeOpenCLImage(openCLManager);
-                  parametersBuffer.writeOpenCLBufferObject(openCLManager);
-
-                  openCLManager.setKernelArgument(createPointCloudKernel, 0, ouster.getDepthImageMeters().getOpenCLImageObject());
-                  openCLManager.setKernelArgument(createPointCloudKernel, 1, pointCloudRenderingBuffer.getOpenCLBufferObject());
-                  openCLManager.setKernelArgument(createPointCloudKernel, 2, parametersBuffer.getOpenCLBufferObject());
-                  openCLManager.execute2D(createPointCloudKernel, ouster.getImageWidth(), ouster.getImageHeight());
-                  pointCloudRenderingBuffer.readOpenCLBufferObject(openCLManager);
-                  openCLManager.finish();
-
-                  pointCloudRenderer.updateMeshFastest(numberOfDepthPoints);
-               }
-            }
-
-            baseUI.renderBeforeOnScreenUI();
-            baseUI.renderEnd();
-         }
-
-         private void renderImGuiWidgets()
-         {
-            ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
-
-            if (imagePanel != null)
-            {
-               ImGui.text("Frame read frequency: " + frameReadFrequency.getFrequency());
-            }
-         }
-
-         @Override
-         public void dispose()
-         {
-            openCLManager.destroy();
-            ouster.destroy();
-            baseUI.dispose();
-         }
-      });
+      sensorFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+      ousterInteractable = new RDXInteractableOuster(baseUI.getPrimary3DPanel(),
+                                                     sensorFrame.getReferenceFrame(),
+                                                     sensorFrame.getTransformToParent());
+      ouster = new NettyOuster();
+      ouster.setOnFrameReceived(this::onFrameReceived);
+      ouster.bind();
    }
 
-   public static void main(String[] args)
+   public void createAfterNativesLoaded()
    {
-      new RDXNettyOusterUI();
+      openCLManager = new OpenCLManager();
+      ousterFisheyeKernel = new RDXOusterFisheyeColoredPointCloudKernel(openCLManager);
+   }
+
+   public boolean isOusterInitialized()
+   {
+      return openCLManager != null && ouster.isInitialized();
+   }
+
+   public void createAfterOusterInitialized()
+   {
+      depthWidth = ouster.getImageWidth();
+      depthHeight = ouster.getImageHeight();
+      imagePanel = new RDXBytedecoImagePanel("Ouster Depth Image", depthWidth, depthHeight);
+      createPointCloudAndKernel();
+      isReady = true;
+   }
+
+   /**
+    * This method can be called multiple times from the UI thread when the parameters require buffer sizes to change.
+    * It will automatically calculate the new sizes of everything.
+    */
+   private void createPointCloudAndKernel()
+   {
+      depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, () -> false, () -> false);
+
+      int totalNumberOfPoints = ousterFisheyeKernel.calculateNumberOfPointsForLevelOfColorDetail(ouster.getImageWidth(),
+                                                                                                 ouster.getImageHeight(),
+                                                                                                 levelOfColorDetail.get());
+
+      if (pointCloudVertexBuffer == null
+          || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX != totalNumberOfPoints)
+      {
+         LogTools.info("Allocating new buffers. {} total points", totalNumberOfPoints);
+
+         if (pointCloudRenderer != null)
+            pointCloudRenderer.dispose();
+         pointCloudRenderer = new RDXPointCloudRenderer();
+         pointCloudRenderer.create(totalNumberOfPoints);
+
+         pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
+                                                        pointCloudRenderer.getVertexBuffer());
+         pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
+      }
+
+      ousterFisheyeKernel.setInstrinsicParameters(ouster.getPixelShiftBuffer(), ouster.getBeamAltitudeAnglesBuffer(), ouster.getBeamAzimuthAnglesBuffer());
+   }
+
+   public void setFisheyeImageToColorPoints(BytedecoImage fThetaFisheyeRGBA8Image,
+                                            double fisheyeFocalLengthPixelsX,
+                                            double fisheyeFocalLengthPixelsY,
+                                            double fisheyePrincipalPointPixelsX,
+                                            double fisheyePrincipalPointPixelsY)
+   {
+      this.fisheyeFocalLengthPixelsX = fisheyeFocalLengthPixelsX;
+      this.fisheyeFocalLengthPixelsY = fisheyeFocalLengthPixelsY;
+      this.fisheyePrincipalPointPixelsX = fisheyePrincipalPointPixelsX;
+      this.fisheyePrincipalPointPixelsY = fisheyePrincipalPointPixelsY;
+
+      if (fisheyeImage == null)
+      {
+         fisheyeImage = new BytedecoImage(fThetaFisheyeRGBA8Image.getImageWidth(), fThetaFisheyeRGBA8Image.getImageHeight(), opencv_core.CV_8UC4);
+         fisheyeImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+      }
+      else
+      {
+         fisheyeImage.ensureDimensionsMatch(fThetaFisheyeRGBA8Image, openCLManager);
+      }
+
+      fThetaFisheyeRGBA8Image.getBytedecoOpenCVMat().copyTo(fisheyeImage.getBytedecoOpenCVMat());
+   }
+
+   public void update()
+   {
+      if (newFrameAvailable.poll())
+      {
+         if (levelOfColorDetailChanged.poll())
+            createPointCloudAndKernel();
+
+         // Synchronize with copying the Ouster's buffer to the buffer used for this kernel
+         // All this is included in the block because it's not clear where the actual memory
+         // operations occur. Probably in the finish method.
+         depthExtractionSynchronizedBlockStopwatchPlot.start();
+         synchronized (this)
+         {
+            depthExtractionSynchronizedBlockStopwatchPlot.stop();
+            depthExtractionKernelStopwatchPlot.start();
+            depthExtractionKernel.runKernel(ousterInteractable.getInteractableFrameModel().getReferenceFrame().getTransformToRoot());
+            depthExtractionKernelStopwatchPlot.stop();
+         }
+
+         drawDepthImageStopwatchPlot.start();
+         imagePanel.drawDepthImage(depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat());
+         drawDepthImageStopwatchPlot.stop();
+
+         pointCloudRenderer.updateMeshFastestBeforeKernel();
+         pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
+
+         ousterFisheyeKernel.updateSensorTransform(ousterInteractable.getInteractableFrameModel().getReferenceFrame());
+         depthImageToPointCloudStopwatchPlot.start();
+         ousterFisheyeKernel.runKernel(ouster.getLidarOriginToBeamOrigin(),
+                                       pointSize.get(),
+                                       true,
+                                       RDXColorGradientMode.WORLD_Z.ordinal(),
+                                       true,
+                                       depthExtractionKernel.getExtractedDepthImage(),
+                                       fisheyeFocalLengthPixelsX,
+                                       fisheyeFocalLengthPixelsY,
+                                       fisheyePrincipalPointPixelsX,
+                                       fisheyePrincipalPointPixelsY,
+                                       fisheyeImage,
+                                       pointCloudVertexBuffer);
+         depthImageToPointCloudStopwatchPlot.stop();
+
+         pointCloudRenderer.updateMeshFastestAfterKernel();
+      }
+   }
+
+   private synchronized void onFrameReceived()
+   {
+      if (isReady)
+      {
+         depthExtractionKernel.copyLidarFrameBuffer();
+         frameReadFrequency.ping();
+         newFrameAvailable.set();
+      }
+   }
+
+   public void renderImGuiWidgets()
+   {
+      ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
+
+      ImGui.sliderFloat(labels.get("Point size"), pointSize.getData(), 0.0005f, 0.05f);
+      if (ImGui.sliderInt(labels.get("Level of color detail"), levelOfColorDetail.getData(), 0, 3))
+         levelOfColorDetailChanged.set();
+
+      if (isOusterInitialized())
+      {
+         ImGui.text("Columns per frame: " + ouster.getColumnsPerFrame());
+         ImGui.text("Pixels per column: " + ouster.getPixelsPerColumn());
+         frameReadFrequency.renderImGuiWidgets();
+         depthExtractionSynchronizedBlockStopwatchPlot.renderImGuiWidgets();
+         depthExtractionKernelStopwatchPlot.renderImGuiWidgets();
+         drawDepthImageStopwatchPlot.renderImGuiWidgets();
+         depthImageToPointCloudStopwatchPlot.renderImGuiWidgets();
+      }
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   {
+      if (sceneLevels.contains(RDXSceneLevel.MODEL))
+         pointCloudRenderer.getRenderables(renderables, pool);
+   }
+
+   public void destroy()
+   {
+      openCLManager.destroy();
+      ouster.destroy();
+   }
+
+   public RDXBytedecoImagePanel getImagePanel()
+   {
+      return imagePanel;
+   }
+
+   public ModifiableReferenceFrame getSensorFrame()
+   {
+      return sensorFrame;
+   }
+
+   public RDXInteractableFrameModel getOusterInteractable()
+   {
+      return ousterInteractable.getInteractableFrameModel();
+   }
+
+   public RDXOusterFisheyeColoredPointCloudKernel getOusterFisheyeKernel()
+   {
+      return ousterFisheyeKernel;
+   }
+
+   public boolean getIsReady()
+   {
+      return isReady;
    }
 }

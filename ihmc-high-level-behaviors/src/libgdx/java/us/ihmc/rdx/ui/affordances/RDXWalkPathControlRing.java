@@ -42,6 +42,10 @@ import us.ihmc.rdx.ui.gizmo.RDXPathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -187,7 +191,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
       if (footstepPlanToGenerateMeshes != null)
       {
-         plannedFootstepPlacement.updateFromPlan(footstepPlan);
+         plannedFootstepPlacement.updateFromPlan(footstepPlan, null);
          footstepPlanToGenerateMeshes = null;
       }
       foostepPlanGraphic.update();
@@ -290,24 +294,30 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    private void updateStuff()
    {
-      goalFrame.update();
-      goalPose.setToZero(goalFrame);
-//      goalPose.appendRotation(walkFacingDirection);
-
-      leftGoalFootPose.setIncludingFrame(goalPose);
-      leftGoalFootPose.getPosition().addY(halfIdealFootstepWidth);
-      leftGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      rightGoalFootPose.setIncludingFrame(goalPose);
-      rightGoalFootPose.getPosition().subY(halfIdealFootstepWidth);
-      rightGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       leftStanceFootPose.setToZero(footFrames.get(RobotSide.LEFT));
       leftStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightStanceFootPose.setToZero(footFrames.get(RobotSide.RIGHT));
       rightStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+
       double lowestStanceZ = Math.min(leftStanceFootPose.getZ(), rightStanceFootPose.getZ());
       leftStanceFootPose.setZ(lowestStanceZ);
       rightStanceFootPose.setZ(lowestStanceZ);
+
+      goalFrame.update();
+      goalPose.setToZero(goalFrame);
+      //      goalPose.appendRotation(walkFacingDirection);
+
+      leftGoalFootPose.setIncludingFrame(goalPose);
+      leftGoalFootPose.getPosition().addY(halfIdealFootstepWidth);
+      leftGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      leftGoalFootPose.setZ(lowestStanceZ);
+      rightGoalFootPose.setIncludingFrame(goalPose);
+      rightGoalFootPose.getPosition().subY(halfIdealFootstepWidth);
+      rightGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      rightGoalFootPose.setZ(lowestStanceZ);
+
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
+      goalPose.setZ(lowestStanceZ);
 
       midFeetZUpPose.setToZero(midFeetZUpFrame);
       midFeetZUpPose.changeFrame(ReferenceFrame.getWorldFrame());

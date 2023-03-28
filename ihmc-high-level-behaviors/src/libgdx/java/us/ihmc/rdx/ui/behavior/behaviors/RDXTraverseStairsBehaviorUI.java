@@ -19,6 +19,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
@@ -28,6 +29,7 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.tools.Timer;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
@@ -209,13 +211,19 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (areGraphicsEnabled())
       {
-         footstepPlanGraphic.getRenderables(renderables, pool);
-         goalAffordance.getRenderables(renderables, pool);
-         planarRegionsGraphic.getRenderables(renderables, pool);
+         if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+         {
+            footstepPlanGraphic.getRenderables(renderables, pool);
+            goalAffordance.getRenderables(renderables, pool);
+         }
+         if (sceneLevels.contains(RDXSceneLevel.MODEL))
+         {
+            planarRegionsGraphic.getRenderables(renderables, pool);
+         }
       }
    }
 

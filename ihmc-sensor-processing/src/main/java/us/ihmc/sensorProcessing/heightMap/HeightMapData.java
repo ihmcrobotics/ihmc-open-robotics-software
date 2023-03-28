@@ -3,6 +3,8 @@ package us.ihmc.sensorProcessing.heightMap;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 import java.util.Arrays;
 
@@ -12,6 +14,7 @@ public class HeightMapData
    private final TIntArrayList occupiedCells = new TIntArrayList();
    /* List of heights indexed by key */
    private final double[] heights;
+   private final Vector3D[] normals;
 
    private final int centerIndex;
    private final int cellsPerAxis;
@@ -29,6 +32,7 @@ public class HeightMapData
       this.centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
       this.cellsPerAxis = 2 * centerIndex + 1;
       this.heights = new double[cellsPerAxis * cellsPerAxis];
+      this.normals = new Vector3D[cellsPerAxis * cellsPerAxis];
       this.gridCenter.set(gridCenterX, gridCenterY);
 
       double epsilon = 1e-8;
@@ -45,6 +49,7 @@ public class HeightMapData
    {
       occupiedCells.clear();
       Arrays.fill(heights, Double.NaN);
+      Arrays.fill(normals, null);
       estimatedGroundHeight = Double.NaN;
    }
 
@@ -98,6 +103,11 @@ public class HeightMapData
 
    public void setHeightAt(int key, double height)
    {
+      setHeightAt(key, height, null);
+   }
+
+   public void setHeightAt(int key, double height, Vector3DReadOnly normal)
+   {
       if (key >= 0 && key < heights.length)
       {
          if (Double.isNaN(heights[key]))
@@ -106,10 +116,17 @@ public class HeightMapData
          }
 
          heights[key] = height;
+         if (normal != null)
+            normals[key] = new Vector3D(normal);
       }
    }
 
    public void setHeightAt(double x, double y, double z)
+   {
+      setHeightAt(x, y, z, null);
+   }
+
+   public void setHeightAt(double x, double y, double z, Vector3DReadOnly normal)
    {
       if (!MathTools.intervalContains(x, minX, maxX) || !MathTools.intervalContains(y, minY, maxY))
       {
@@ -123,6 +140,8 @@ public class HeightMapData
       }
 
       heights[key] = z;
+      if (normal != null)
+         normals[key] = new Vector3D(normal);
    }
 
    public double getHeightAt(int key)
@@ -192,6 +211,7 @@ public class HeightMapData
    public void markGroundCell(int i)
    {
       heights[occupiedCells.get(i)] = Double.NaN;
+      normals[occupiedCells.get(i)] = null;
       occupiedCells.remove(i);
    }
 }

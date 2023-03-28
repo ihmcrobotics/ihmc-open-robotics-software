@@ -1,6 +1,9 @@
 package us.ihmc.rdx.ui.tools;
 
+import us.ihmc.log.LogTools;
+
 import java.io.*;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,35 +14,63 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * Class to record and replay multi-dimensional trajectories of primitive Number types.
+ * Class to record and replay multidimensional trajectories of primitive Number types.
  * The multi-dimension represents the number of elements that are considered.
- * For each dimension, at each time step the class stores or reads a setpoint.
- * The collection of setpoints defines the trajectory.
+ * For each dimension, at each time step the class stores or reads a set point.
+ * The collection of set points defines the trajectory.
  * The trajectories are saved and loaded from .csv files.
- * Each column represents the trajectory of a distinct element (e.g., X position of the right hand, or Y position of the center of mass, etc...).
+ * Each column represents the trajectory of a distinct element (e.g., X position of the right hand, or Y position of the right hand, etc...).
  */
 public class TrajectoryRecordReplay<T extends Number>
 {
    private String filePath;
    private final Class<T> clazz;
+   private int numberParts; // specify the number of parts you want to record (e.g., left hand, right hand, chest)
    private ArrayList<T[]> dataMatrix = new ArrayList<>();
+   private ArrayList<T[]> concatenatedDataMatrix = new ArrayList<>();
+   private ArrayList<T[]> splitDataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
    private boolean savedRecording = true;
    private boolean doneReplaying = true;
+   private boolean concatenated = false;
+   private String recordFileName = "";
 
-   public TrajectoryRecordReplay(Class<T> clazz, String filePath)
+   public TrajectoryRecordReplay(Class<T> clazz, String filePath, int numberParts)
    {
       super();
       this.clazz = clazz;
       this.filePath = filePath;
+      this.numberParts = numberParts;
    }
 
    public T[] play()
    {
+      return this.play(false);
+   }
+
+   public T[] play(boolean split)
+   {
       if (timeStepReplay < 1)
+      {
          this.readCSV();
-      T[] values = dataMatrix.get(timeStepReplay);
-      if (timeStepReplay >= dataMatrix.size() - 2)
+         if (split)
+            this.splitData();
+      }
+      T[] values;
+      int size;
+      if (split)
+      {
+         // read split data (a row for each body part)
+         values = splitDataMatrix.get(timeStepReplay);
+         size = splitDataMatrix.size();
+      }
+      else
+      {
+         // read default data as they are stored in the csv file
+         values = dataMatrix.get(timeStepReplay);
+         size = dataMatrix.size();
+      }
+      if (timeStepReplay >= size - 1)
       {
          doneReplaying = true;
          this.reset();
@@ -60,14 +91,54 @@ public class TrajectoryRecordReplay<T extends Number>
       dataMatrix.add(localValues);
    }
 
+   /** Useful if we are recording trajectories of different parts but not in the same scope
+    * and we want to concatenate them into one single row to have a single csv file
+    * rather than having multiple TrajectoryRecordReplay objects and multiple csv files */
+   public void concatenateData()
+   {
+      for (int i = 0; i < dataMatrix.size(); i = i + numberParts)
+      {
+         T[] concatenatedRow = dataMatrix.get(i);
+         for (int j = 1; j <= numberParts - 1; j++)
+         {
+            concatenatedRow = concatenateWithCopy(concatenatedRow, dataMatrix.get(i + j));
+         }
+         concatenatedDataMatrix.add(concatenatedRow);
+      }
+      concatenated = true;
+   }
+
+   /** Useful if we are replaying a csv file where multiple parts have been concatenated in one single row
+    * and we want the info of each part in a separate row.
+    * Not useful if you have different parts with different number of elements */
+   private void splitData()
+   {
+      for (int i = 0; i < dataMatrix.size(); i++)
+      {
+         T[] row = dataMatrix.get(i);
+         for (int n = 0; n <= numberParts - 1; n++)
+         {
+            T[] splitRow = newNumberArray(row.length / numberParts);
+            for (int j = 0; j < splitRow.length; j++)
+            {
+               splitRow[j] = row[j + n * splitRow.length];
+            }
+            splitDataMatrix.add(splitRow);
+         }
+      }
+   }
+
    public void saveRecording()
    {
-      writeCSV(dataMatrix);
+      if (concatenated) // save concatenated data (a single row for every body part)
+         writeCSV(concatenatedDataMatrix);
+      else
+         writeCSV(dataMatrix);
       this.reset();
       savedRecording = true;
    }
 
-   private void readCSV()
+   public void readCSV()
    {
       doneReplaying = false;
       try
@@ -89,7 +160,7 @@ public class TrajectoryRecordReplay<T extends Number>
       }
    }
 
-   private void writeCSV(ArrayList<T[]> dataMatrix)
+   public void writeCSV(ArrayList<T[]> dataMatrix)
    {
       List<String[]> dataLines = new ArrayList<>();
       for (T[] dataLine : dataMatrix)
@@ -98,9 +169,16 @@ public class TrajectoryRecordReplay<T extends Number>
          Arrays.setAll(stringValues, j -> "" + dataLine[j]);
          dataLines.add(stringValues);
       }
-
-      String fileName = new SimpleDateFormat("yyyyMMddHHmm'.csv'").format(new Date());
-      File csvFile = new File(filePath + fileName);
+      // if recordFile name has not been set, generate file with current date and time as name
+      String fileName = "";
+      if (recordFileName.isEmpty())
+      {
+         fileName = new SimpleDateFormat("yyMMddHHmmssZ'.csv'").format(new Date());
+         recordFileName = fileName;
+      }
+      else
+         fileName = recordFileName;
+      File csvFile = new File(filePath + "/" + fileName);
       try (PrintWriter writer = new PrintWriter(csvFile))
       {
          dataLines.stream().map(this::convertToCSV).forEach(writer::println);
@@ -131,6 +209,10 @@ public class TrajectoryRecordReplay<T extends Number>
    {
       timeStepReplay = 0;
       dataMatrix.clear();
+      concatenated = false;
+      concatenatedDataMatrix.clear();
+      splitDataMatrix.clear();
+      recordFileName = "";
    }
 
    @SuppressWarnings("unchecked")
@@ -195,6 +277,34 @@ public class TrajectoryRecordReplay<T extends Number>
       return value;
    }
 
+   private <T> T concatenateWithCopy(T array1, T array2)
+   {
+      if (!array1.getClass().isArray() || !array2.getClass().isArray())
+      {
+         throw new IllegalArgumentException("Only arrays are accepted.");
+      }
+
+      Class<?> componentType1 = array1.getClass().getComponentType();
+      Class<?> componentType2 = array2.getClass().getComponentType();
+
+      if (!componentType1.equals(componentType2))
+      {
+         throw new IllegalArgumentException("Two arrays have different types.");
+      }
+
+      int len1 = Array.getLength(array1);
+      int len2 = Array.getLength(array2);
+
+      @SuppressWarnings("unchecked")
+      // the cast is safe due to the previous checks
+      T result = (T) Array.newInstance(componentType1, len1 + len2);
+
+      System.arraycopy(array1, 0, result, 0, len1);
+      System.arraycopy(array2, 0, result, len1, len2);
+
+      return result;
+   }
+
    public boolean hasSavedRecording()
    {
       return savedRecording;
@@ -203,6 +313,11 @@ public class TrajectoryRecordReplay<T extends Number>
    public boolean hasDoneReplay()
    {
       return doneReplaying;
+   }
+
+   public void setDoneReplay(boolean doneReplaying)
+   {
+      this.doneReplaying = doneReplaying;
    }
 
    public String getPath()
@@ -214,5 +329,37 @@ public class TrajectoryRecordReplay<T extends Number>
    {
       this.filePath = filePath;
       this.reset();
+   }
+
+   public void setPath(String filePath, boolean reset)
+   {
+      this.filePath = filePath;
+      if (reset)
+         this.reset();
+   }
+
+   public void setNumberParts(int numberParts)
+   {
+      this.numberParts = numberParts;
+   }
+
+   public ArrayList<T[]> getData()
+   {
+      return dataMatrix;
+   }
+
+   public ArrayList<T[]> getConcatenatedData()
+   {
+      return concatenatedDataMatrix;
+   }
+
+   public String getRecordFileName()
+   {
+      return recordFileName;
+   }
+
+   public void setRecordFileName(String recordFileName)
+   {
+      this.recordFileName = recordFileName;
    }
 }

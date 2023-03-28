@@ -2,17 +2,13 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersMessage;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
 import ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType;
-import perception_msgs.msg.dds.LidarScanMessage;
-import perception_msgs.msg.dds.LidarScanMessagePubSubType;
-import perception_msgs.msg.dds.PlanarRegionMessage;
-import perception_msgs.msg.dds.PlanarRegionMessagePubSubType;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
+import ihmc_common_msgs.msg.dds.InstantMessage;
+import perception_msgs.msg.dds.*;
 import controller_msgs.msg.dds.Polygon2DMessage;
 import controller_msgs.msg.dds.Polygon2DMessagePubSubType;
-import perception_msgs.msg.dds.RequestLidarScanMessagePubSubType;
-import perception_msgs.msg.dds.RequestPlanarRegionsListMessagePubSubType;
 import geometry_msgs.msg.dds.PointPubSubType;
 import geometry_msgs.msg.dds.QuaternionPubSubType;
 import geometry_msgs.msg.dds.Vector3PubSubType;
@@ -102,7 +98,11 @@ public class REACommunicationProperties
       privateNetClassList.registerPacketField(PlanarRegionsListMessage.class);
       privateNetClassList.registerPacketField(Polygon2DMessage.class);
       privateNetClassList.registerPacketField(PlanarRegionMessage.class);
-      privateNetClassList.registerPacketField(ConcaveHullFactoryParameters.class);
+      privateNetClassList.registerPacketField(InstantMessage.class);
+
+      privateNetClassList.registerPacketClass(ConcaveHullFactoryParametersMessage.class);
+      privateNetClassList.registerPacketField(ConcaveHullFactoryParametersMessage.class);
+      privateNetClassList.registerPacketClass(PolygonizerParametersMessage.class);
 
       privateNetClassList.registerPacketField(Vector3PubSubType.class);
       privateNetClassList.registerPacketField(PointPubSubType.class);

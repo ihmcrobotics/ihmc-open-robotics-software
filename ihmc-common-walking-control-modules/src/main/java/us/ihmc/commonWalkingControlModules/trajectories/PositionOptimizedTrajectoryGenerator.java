@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPolynomial3D;
+
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -20,10 +22,16 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
-import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoListDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -41,7 +49,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  *
  * @author gwiedebach
  */
-public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
+public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator, SCS2YoGraphicHolder
 {
    public static final int dimensions = 3;
    public final ReferenceFrame trajectoryFrame;
@@ -366,7 +374,10 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
          for (int i = 0; i < segments.getIntegerValue(); i++)
          {
             coefficients.get(i).toArray(tempCoeffs);
-            trajectories.get(axis).get(i).setDirectlyReverse(tempCoeffs);
+            YoPolynomial trajectory = trajectories.get(axis).get(i);
+            trajectory.setDirectlyReverse(tempCoeffs);
+            double startTime = i > 0 ? waypointTimes.get(i - 1).getDoubleValue() : 0.0;
+            trajectory.getTimeInterval().setInterval(startTime, waypointTimes.get(i).getDoubleValue());
          }
       }
 
@@ -587,6 +598,10 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
       return desiredAcceleration;
    }
 
+   public EnumMap<Axis3D, ArrayList<YoPolynomial>> getTrajectories()
+   {
+      return trajectories;
+   }
 
    public void informDone()
    {
@@ -643,7 +658,7 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
       {
          compute(time);
          tempVelocity.setIncludingFrame(getVelocity());
-         double speed = tempVelocity.length();
+         double speed = tempVelocity.norm();
          if (speed > maxSpeed.getDoubleValue())
          {
             maxSpeed.set(speed);
@@ -660,5 +675,28 @@ public class PositionOptimizedTrajectoryGenerator implements FixedFramePositionT
    public double getMaxSpeedTime()
    {
       return maxSpeedTime.getDoubleValue();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(namePrefix + getClass().getSimpleName());
+      for (int i = 0; i < trajectories.get(Axis3D.X).size(); i++)
+      {
+         YoPolynomial xPolynomial = trajectories.get(Axis3D.X).get(i);
+         YoPolynomial yPolynomial = trajectories.get(Axis3D.Y).get(i);
+         YoPolynomial zPolynomial = trajectories.get(Axis3D.Z).get(i);
+         YoListDefinition coefficientsX = YoGraphicDefinitionFactory.toYoListDefinition(xPolynomial.getYoCoefficients(),
+                                                                                        xPolynomial.getYoNumberOfCoefficients());
+         YoListDefinition coefficientsY = YoGraphicDefinitionFactory.toYoListDefinition(yPolynomial.getYoCoefficients(),
+                                                                                        yPolynomial.getYoNumberOfCoefficients());
+         YoListDefinition coefficientsZ = YoGraphicDefinitionFactory.toYoListDefinition(zPolynomial.getYoCoefficients(),
+                                                                                        zPolynomial.getYoNumberOfCoefficients());
+         YoDouble startTime = i == 0 ? null : waypointTimes.get(i - 1); // null will be considered as 0
+         YoDouble endTime = waypointTimes.get(i);
+         group.addChild(newYoGraphicPolynomial3D(namePrefix + "Trajectory"
+               + i, coefficientsX, coefficientsY, coefficientsZ, startTime, 0, endTime, 0, 0.01, ColorDefinitions.DodgerBlue()));
+      }
+      return group;
    }
 }

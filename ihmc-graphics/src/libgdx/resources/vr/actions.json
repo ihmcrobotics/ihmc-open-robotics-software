@@ -48,12 +48,12 @@
       },
       {
          "name" : "/actions/main/in/left_atouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
          "name" : "/actions/main/in/right_atouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
@@ -67,13 +67,18 @@
          "type" : "boolean"
       },
       {
+         "name" : "/actions/main/in/right_bbuttondoubleclick",
+         "requirement" : "optional",
+         "type" : "boolean"
+      },
+      {
          "name" : "/actions/main/in/left_btouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
          "name" : "/actions/main/in/right_btouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
@@ -88,22 +93,22 @@
       },
       {
          "name" : "/actions/main/in/left_touchpadtouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
          "name" : "/actions/main/in/right_touchpadtouched",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "boolean"
       },
       {
          "name" : "/actions/main/in/left_touchpad",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "vector2"
       },
       {
          "name" : "/actions/main/in/right_touchpad",
-         "requirement" : "mandatory",
+         "requirement" : "optional",
          "type" : "vector2"
       },
       {
@@ -148,6 +153,7 @@
          "/actions/main/in/right_atouched" : "A Touched Right",
          "/actions/main/in/left_bbutton" : "B Button Left",
          "/actions/main/in/right_bbutton" : "B Button Right",
+         "/actions/main/in/right_bbuttondoubleclick" : "B Button Double Click Right",
          "/actions/main/in/left_btouched" : "B Touched Left",
          "/actions/main/in/right_btouched" : "B Touched Right",
          "/actions/main/in/left_joystickpress" : "Joystick Press Left",

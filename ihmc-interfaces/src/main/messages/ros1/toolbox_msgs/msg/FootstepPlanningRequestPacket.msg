@@ -46,6 +46,10 @@ bool abort_if_body_path_planner_fails
 # If true, will plan a body path. If false, will follow a straight-line path to the goal
 bool plan_body_path
 
+# If true, will plan footsteps. If false, will not plan footsteps
+# Field default value True
+bool plan_footsteps
+
 # If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
 # Field default value True
 bool perform_a_star_search
@@ -93,6 +97,9 @@ float64 status_publish_period
 
 # Specifies swing planner to use. See the above enumeration
 int8 requested_swing_planner
+
+# Reference plan to be used in ReferenceBasedIdealStepCalculator.
+controller_msgs/FootstepDataListMessage reference_plan
 
 # Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
 # For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/

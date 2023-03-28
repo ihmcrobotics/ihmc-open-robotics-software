@@ -78,7 +78,6 @@ public class ControllerAPIDefinition
       commands.add(ClearDelayQueueCommand.class);
       commands.add(MomentumTrajectoryCommand.class);
       commands.add(CenterOfMassTrajectoryCommand.class);
-      commands.add(PlanarRegionsListCommand.class);
       commands.add(StepConstraintRegionCommand.class);
       commands.add(StepConstraintsListCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
@@ -89,6 +88,7 @@ public class ControllerAPIDefinition
       /** Commands supported by multi-contact controller, not in this repo */
       commands.add(MultiContactTrajectoryCommand.class);
       commands.add(MultiContactTrajectorySequenceCommand.class);
+      commands.add(MultiContactBalanceStatusCommand.class);
 
       /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);

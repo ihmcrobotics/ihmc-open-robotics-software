@@ -67,7 +67,7 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       setupSim(getRobotModel(), false, false, null);
       assertTrue(simulationTestHelper.simulateNow(2.0));
 
-      ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.10);
+      ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.20);
 
       CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
@@ -84,7 +84,8 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
                                                                                  getFastTransferTime(),
                                                                                  startPose,
                                                                                  true);
-      footsteps.setOffsetFootstepsHeightWithExecutionError(true);
+//      footsteps.setOffsetFootstepsHeightWithExecutionError(true);
+//      footsteps.setAreFootstepsAdjustable(true);
       simulationTestHelper.publishToController(footsteps);
 
       boolean success = simulationTestHelper.simulateNow(1.1

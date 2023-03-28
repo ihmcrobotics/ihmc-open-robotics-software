@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -15,6 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepPlannerRequest
 {
@@ -57,6 +60,11 @@ public class FootstepPlannerRequest
     * If true, the planner will plan a body path. If false, it will try to follow a straight line to the goal.
     */
    private boolean planBodyPath;
+
+   /**
+    * If true, the planner will plan steps. If false, it will only return the body path.
+    */
+   private boolean planFootsteps;
 
    /**
     * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
@@ -119,6 +127,11 @@ public class FootstepPlannerRequest
     */
    private SwingPlannerType swingPlannerType = SwingPlannerType.NONE;
 
+   /**
+    * Reference footstep plan. When provided, the planner will try to match this plan by having the cost function's minima be at these steps.
+    */
+   private FootstepPlan referencePlan = null;
+
    public FootstepPlannerRequest()
    {
       clear();
@@ -134,6 +147,7 @@ public class FootstepPlannerRequest
       abortIfGoalStepSnappingFails = false;
       abortIfBodyPathPlannerFails = false;
       planBodyPath = false;
+      planFootsteps = true;
       performAStarSearch = true;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
@@ -146,6 +160,7 @@ public class FootstepPlannerRequest
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
       swingPlannerType = SwingPlannerType.NONE;
+      referencePlan = null;
    }
 
    public void setRequestId(int requestId)
@@ -228,6 +243,11 @@ public class FootstepPlannerRequest
       this.planBodyPath = planBodyPath;
    }
 
+   public void setPlanFootsteps(boolean planFootsteps)
+   {
+      this.planFootsteps = planFootsteps;
+   }
+
    public void setPerformAStarSearch(boolean performAStarSearch)
    {
       this.performAStarSearch = performAStarSearch;
@@ -283,6 +303,14 @@ public class FootstepPlannerRequest
       this.swingPlannerType = swingPlannerType;
    }
 
+   public void setReferencePlan(FootstepPlanReadOnly referencePlan)
+   {
+      if (referencePlan == null)
+         this.referencePlan = null;
+      else
+         this.referencePlan = new FootstepPlan(referencePlan);
+   }
+
    public int getRequestId()
    {
       return requestId;
@@ -321,6 +349,11 @@ public class FootstepPlannerRequest
    public boolean getPlanBodyPath()
    {
       return planBodyPath;
+   }
+
+   public boolean getPlanFootsteps()
+   {
+      return planFootsteps;
    }
 
    public boolean getPerformAStarSearch()
@@ -383,6 +416,18 @@ public class FootstepPlannerRequest
       return swingPlannerType;
    }
 
+   public FootstepPlan getReferencePlan()
+   {
+      return referencePlan;
+   }
+
+   public boolean hasReferenceFootstepPlan()
+   {
+      return referencePlan != null;
+   }
+
+   // TODO add ROS field if needed. probably should be added to be loggable
+
    public void setFromPacket(FootstepPlanningRequestPacket requestPacket)
    {
       clear();
@@ -399,6 +444,7 @@ public class FootstepPlannerRequest
       setAbortIfGoalStepSnappingFails(requestPacket.getAbortIfGoalStepSnappingFails());
       setAbortIfBodyPathPlannerFails(requestPacket.getAbortIfBodyPathPlannerFails());
       setPlanBodyPath(requestPacket.getPlanBodyPath());
+      setPlanFootsteps(requestPacket.getPlanFootsteps());
       setPerformAStarSearch(requestPacket.getPerformAStarSearch());
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
       setGoalYawProximity(requestPacket.getGoalYawProximity());
@@ -408,6 +454,7 @@ public class FootstepPlannerRequest
          setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
       setStatusPublishPeriod(requestPacket.getStatusPublishPeriod());
+      setReferencePlan(FootstepDataMessageConverter.convertToFootstepPlan(requestPacket.getReferencePlan()));
 
       SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(requestPacket.getRequestedSwingPlanner());
       if (swingPlannerType != null)
@@ -436,6 +483,7 @@ public class FootstepPlannerRequest
       requestPacket.setAbortIfGoalStepSnappingFails(getAbortIfGoalStepSnappingFails());
       requestPacket.setAbortIfBodyPathPlannerFails(getAbortIfBodyPathPlannerFails());
       requestPacket.setPlanBodyPath(getPlanBodyPath());
+      requestPacket.setPlanFootsteps(getPlanFootsteps());
       requestPacket.setPerformAStarSearch(getPerformAStarSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
@@ -452,7 +500,7 @@ public class FootstepPlannerRequest
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
       }
 
-      if(getPlanarRegionsList() != null)
+      if (getPlanarRegionsList() != null)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
          requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
@@ -461,6 +509,11 @@ public class FootstepPlannerRequest
       if (getHeightMapMessage() != null)
       {
          requestPacket.getHeightMapMessage().set(getHeightMapMessage());
+      }
+
+      if (referencePlan != null && !referencePlan.isEmpty())
+      {
+         requestPacket.getReferencePlan().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(referencePlan, -1.0, -1.0));
       }
    }
 
@@ -480,6 +533,7 @@ public class FootstepPlannerRequest
       this.abortIfBodyPathPlannerFails = other.abortIfBodyPathPlannerFails;
 
       this.planBodyPath = other.planBodyPath;
+      this.planFootsteps = other.planFootsteps;
       this.performAStarSearch = other.performAStarSearch;
       this.goalDistanceProximity = other.goalDistanceProximity;
       this.goalYawProximity = other.goalYawProximity;
@@ -501,5 +555,8 @@ public class FootstepPlannerRequest
       }
 
       this.heightMapMessage = other.heightMapMessage;
+
+      if (other.referencePlan != null)
+         this.referencePlan = new FootstepPlan(other.referencePlan);
    }
 }

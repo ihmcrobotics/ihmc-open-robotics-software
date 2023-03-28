@@ -9,13 +9,13 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDX3DSituatedImagePanel;
-import us.ihmc.rdx.ui.graphics.live.RDXROS2BigVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
 import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.pubsub.DomainFactory;
 
 public class RDXARDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
@@ -46,8 +46,13 @@ public class RDXARDemo
 
             DomainFactory.PubSubImplementation pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
             globalVisualizersPanel = new RDXGlobalVisualizersPanel(false);
-            RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video", pubSubImplementation, ROS2Tools.BIG_VIDEO);
+
+            RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
+                                                                                      pubSubImplementation,
+                                                                                      ROS2Tools.BIG_VIDEO);
+            videoVisualizer.setSubscribed(true);
             globalVisualizersPanel.addVisualizer(videoVisualizer);
+
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
 
@@ -98,7 +103,7 @@ public class RDXARDemo
             baseUI.getPrimaryScene().addCoordinateFrame(0.3);
 
             // TODO: Make a new scene for this panel
-            arPanel = new RDX3DPanel("AR View", 2, false);
+            arPanel = new RDX3DPanel("AR View", false);
 
             baseUI.add3DPanel(arPanel);
             arPanel.getCamera3D().setInputEnabled(false);

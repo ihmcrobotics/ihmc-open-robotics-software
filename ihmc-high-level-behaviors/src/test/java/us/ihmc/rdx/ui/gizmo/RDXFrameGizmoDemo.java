@@ -11,9 +11,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class RDXFrameGizmoDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI();
 
    public RDXFrameGizmoDemo()
    {

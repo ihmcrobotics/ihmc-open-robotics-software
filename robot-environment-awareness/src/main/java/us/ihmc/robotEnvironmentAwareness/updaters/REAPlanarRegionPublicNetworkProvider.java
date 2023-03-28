@@ -30,6 +30,7 @@ import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
@@ -52,10 +53,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
 
    public REAPlanarRegionPublicNetworkProvider(ROS2Topic outputTopic, ROS2Topic lidarOutputTopic, ROS2Topic stereoOutputTopic, ROS2Topic depthOutputTopic)
    {
-      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
-           outputTopic,
-           lidarOutputTopic,
-           stereoOutputTopic,
+      this(ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), outputTopic, lidarOutputTopic, stereoOutputTopic,
            depthOutputTopic);
    }
 
@@ -87,15 +85,17 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     NormalEstimationParametersMessage.class,
                                                     inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters,
+                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PlanarRegionSegmentationParametersMessage.class,
                                                     inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters,
+                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PolygonizerParametersMessage.class,
                                                     inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, s.takeNextData()));
    }
 
    @Override
@@ -132,7 +132,11 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    @Override
    public void registerLidarScanHandler(NewMessageListener<LidarScanMessage> lidarScanHandler)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, REASourceType.LIDAR_SCAN.getTopicName(), lidarScanHandler);
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           LidarScanMessage.class,
+                                           REASourceType.LIDAR_SCAN.getTopicName(),
+                                           lidarScanHandler,
+                                           ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override
@@ -141,25 +145,36 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            StereoVisionPointCloudMessage.class,
                                            REASourceType.STEREO_POINT_CLOUD.getTopicName(),
-                                           stereoVisionPointCloudHandler);
+                                           stereoVisionPointCloudHandler,
+                                           ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override
    public void registerLidarScanHandler(Messager messager, NewMessageListener<LidarScanMessage> lidarScanHandler)
    {
-      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.LIDAR_SCAN, LidarScanMessage.class, lidarScanHandler);
+      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.LIDAR_SCAN, LidarScanMessage.class, lidarScanHandler, ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override
    public void registerStereoVisionPointCloudHandler(Messager messager, NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
    {
-      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.STEREO_POINT_CLOUD, StereoVisionPointCloudMessage.class, stereoVisionPointCloudHandler);
+      new REAModuleROS2Subscription<>(ros2Node,
+                                      messager,
+                                      REASourceType.STEREO_POINT_CLOUD,
+                                      StereoVisionPointCloudMessage.class,
+                                      stereoVisionPointCloudHandler,
+                                      ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override
    public void registerDepthPointCloudHandler(Messager messager, NewMessageListener<StereoVisionPointCloudMessage> depthPointCloudHandler)
    {
-      new REAModuleROS2Subscription<>(ros2Node, messager, REASourceType.DEPTH_POINT_CLOUD, StereoVisionPointCloudMessage.class, depthPointCloudHandler);
+      new REAModuleROS2Subscription<>(ros2Node,
+                                      messager,
+                                      REASourceType.DEPTH_POINT_CLOUD,
+                                      StereoVisionPointCloudMessage.class,
+                                      depthPointCloudHandler,
+                                      ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override
@@ -170,6 +185,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
                                       "/ihmc/stamped_pose_T265",
                                       StampedPosePacket.class,
                                       stampedPosePacketHandler,
+                                      ROS2QosProfile.BEST_EFFORT(),
                                       REAModuleAPI.DepthCloudBufferEnable);
    }
 

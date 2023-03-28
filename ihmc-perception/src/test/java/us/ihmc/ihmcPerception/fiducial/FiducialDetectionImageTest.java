@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import boofcv.abst.fiducial.FiducialDetector;
@@ -32,6 +33,7 @@ import us.ihmc.tools.io.resources.ResourceTools;
 public class FiducialDetectionImageTest
 {
    @Test
+   @Tag("gui")
    public void testFiducialDetected() throws IOException
    {
       FiducialDetector<GrayF32> detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(0.1), ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10),

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
 import java.util.Arrays;
@@ -42,7 +41,7 @@ public class MultiContactSupportRegionSolverTest
       solver.solve();
 
       ConvexPolygon2DReadOnly supportPolygon = solver.getSupportRegion();
-      MultiContactForceOptimizer forceOptimizer = new MultiContactForceOptimizer();
+      LPMultiContactForceOptimizer forceOptimizer = new LPMultiContactForceOptimizer();
 
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
       ConvexPolygon2D innerPolygon = new ConvexPolygon2D();

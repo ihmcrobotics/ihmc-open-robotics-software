@@ -32,6 +32,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -310,6 +311,7 @@ public class AvatarSimulationFactory
    {
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       HumanoidSteppingPluginFactory steppingFactory;
+      HumanoidSteppingPluginEnvironmentalConstraints stepSnapperUpdatable = null;
       boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
 
       if (useHeadingAndVelocityScript || headingAndVelocityEvaluationScriptParameters.hasValue())
@@ -329,18 +331,27 @@ public class AvatarSimulationFactory
       }
       else
       {
-         JoystickBasedSteppingPluginFactory velocityBasedSteppingGeneratorFactory = new JoystickBasedSteppingPluginFactory();
+         JoystickBasedSteppingPluginFactory joystickPluginFactory = new JoystickBasedSteppingPluginFactory();
          if (footstepAdjustment.hasValue())
-            velocityBasedSteppingGeneratorFactory.setFootStepAdjustment(footstepAdjustment.get());
+            joystickPluginFactory.setFootStepAdjustment(footstepAdjustment.get());
+         else
+         {
+            stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getContactPointParameters(),
+                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
+                                                                                      robotModel.get().getSteppingEnvironmentalConstraintParameters());
+            stepSnapperUpdatable.setShouldSnapToRegions(true);
+         }
 
-         steppingFactory = velocityBasedSteppingGeneratorFactory;
+         steppingFactory = joystickPluginFactory;
       }
 
       stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
                                                           contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-                                                          robotModel.get());
+                                                          robotModel.get(),
+                                                          stepSnapperUpdatable,
+                                                          realtimeROS2Node.get());
    }
 
    private void createMasterContext()
@@ -432,8 +443,8 @@ public class AvatarSimulationFactory
       {
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
-         builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry()));
-         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getYoGraphicsListRegistry()));
+         builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(), controllerThread.getSCS1YoGraphicsListRegistry()));
+         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getSCS1YoGraphicsListRegistry()));
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          builders,
@@ -447,25 +458,25 @@ public class AvatarSimulationFactory
       {
          yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
                                           createYoVariableServerJointList(estimatorThread.getFullRobotModel().getElevator()),
-                                          estimatorThread.getYoGraphicsListRegistry());
+                                          estimatorThread.getSCS1YoGraphicsListRegistry());
          estimatorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              estimatorThread.getYoRegistry()));
 
-         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
+         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getSCS1YoGraphicsListRegistry());
          controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                               controllerThread.getYoVariableRegistry()));
-         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getYoGraphicsListRegistry());
+         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getSCS1YoGraphicsListRegistry());
          stepGeneratorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                                  stepGeneratorThread.getYoVariableRegistry()));
       }
 
       // Add registry and graphics to SCS.
       SimulationRobotVisualizer estimatorRobotVisualizer = new SimulationRobotVisualizer(estimatorThread.getYoRegistry(),
-                                                                                         estimatorThread.getYoGraphicsListRegistry());
+                                                                                         estimatorThread.getSCS1YoGraphicsListRegistry());
       SimulationRobotVisualizer controllerRobotVisualizer = new SimulationRobotVisualizer(controllerThread.getYoVariableRegistry(),
-                                                                                          controllerThread.getYoGraphicsListRegistry());
+                                                                                          controllerThread.getSCS1YoGraphicsListRegistry());
       SimulationRobotVisualizer stepGeneratorRobotVisualizer = new SimulationRobotVisualizer(stepGeneratorThread.getYoVariableRegistry(),
-                                                                                             stepGeneratorThread.getYoGraphicsListRegistry());
+                                                                                             stepGeneratorThread.getSCS1YoGraphicsListRegistry());
       estimatorTask.addRunnableOnSchedulerThread(() -> estimatorRobotVisualizer.update());
       controllerTask.addRunnableOnSchedulerThread(() -> controllerRobotVisualizer.update());
       stepGeneratorTask.addRunnableOnSchedulerThread(() -> stepGeneratorRobotVisualizer.update());
@@ -638,8 +649,8 @@ public class AvatarSimulationFactory
          SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = simulationConstructionSet.createSimulationOverheadPlotterFactory();
          simulationOverheadPlotterFactory.setShowOnStart(guiInitialSetup.get().isShowOverheadView());
          simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
-         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(controllerThread.getYoGraphicsListRegistry());
-         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(estimatorThread.getYoGraphicsListRegistry());
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(controllerThread.getSCS1YoGraphicsListRegistry());
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(estimatorThread.getSCS1YoGraphicsListRegistry());
          simulationOverheadPlotterFactory.addYoGraphicsListRegistries(actualCMPComputer.getYoGraphicsListRegistry());
          simulationOverheadPlotterFactory.createOverheadPlotter();
          guiInitialSetup.get().initializeGUI(simulationConstructionSet, humanoidFloatingRootJointRobot, robotModel.get());

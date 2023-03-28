@@ -13,8 +13,8 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -48,6 +48,7 @@ public class ValkyrieFootstepPlannerUI extends ApplicationNoModule
       ui = FootstepPlannerUI.createUI(primaryStage,
                                       messager,
                                       model.getVisibilityGraphsParameters(),
+                                      model.getAStarBodyPathPlannerParameters(),
                                       model.getFootstepPlannerParameters(),
                                       model.getSwingPlannerParameters(),
                                       model,
@@ -66,7 +67,7 @@ public class ValkyrieFootstepPlannerUI extends ApplicationNoModule
          // Create logger and connect to messager
          FootstepPlannerLogger logger = new FootstepPlannerLogger(plannerModule);
          Runnable loggerRunnable = () -> logger.logSessionAndReportToMessager(messager);
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
+         messager.addTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
 
          // Automatically send graph data over messager
          plannerModule.addStatusCallback(status -> handleMessagerCallbacks(plannerModule, status));

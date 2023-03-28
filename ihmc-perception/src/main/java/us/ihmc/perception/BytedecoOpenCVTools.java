@@ -1,13 +1,21 @@
 package us.ihmc.perception;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.*;
+import us.ihmc.log.LogTools;
+
+import java.awt.image.BufferedImage;
 
 public class BytedecoOpenCVTools
 {
+   public static final IntPointer compressionParametersPNG = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION);
+   public static final IntPointer compressionParametersJPG = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+
    public static final int FLIP_Y = 0;
    public static final int FLIP_X = 1;
    public static final int FLIP_BOTH = -1;
@@ -38,7 +46,50 @@ public class BytedecoOpenCVTools
       opencv_core.normalize(source, destination, min, max, normType, depthType, mask);
    }
 
+   public static void transferDepth16UC1ToLower8UC3(Mat source, Mat destination)
+   {
+      BytePointer data = source.data();
+
+      Mat lower = new Mat(source.rows(), source.cols(), opencv_core.CV_8UC2, data);
+      Mat upper = new Mat(source.rows(), source.cols(), opencv_core.CV_8UC1);
+      upper.put(new Scalar(0));
+
+      MatVector mats = new MatVector();
+      mats.push_back(lower);
+      mats.push_back(upper);
+
+      opencv_core.merge(mats, destination);
+   }
+
+   public static void extractDepth16FromLower8UC3(Mat source, Mat destination)
+   {
+      MatVector mats = new MatVector();
+      opencv_core.split(source, mats);
+
+      LogTools.info("Previous Depth: {}", mats.size());
+
+      MatVector finalMats = new MatVector();
+      finalMats.push_back(mats.get(0));
+      finalMats.push_back(mats.get(2));
+
+      LogTools.info("New Depth: {}", mats.size());
+
+      Mat depth8UC2 = new Mat(source.rows(), source.cols(), opencv_core.CV_8UC2);
+      opencv_core.merge(finalMats, depth8UC2);
+      Mat depth = new Mat(source.rows(), source.cols(), opencv_core.CV_16UC1, depth8UC2.data());
+
+      destination.put(depth);
+   }
+
+   /**
+    * Not an incorrect name, but overspecified for a general operation.
+    */
    public static void convert8BitGrayTo8BitRGBA(Mat source, Mat destination)
+   {
+      convertGrayToRGBA(source, destination);
+   }
+
+   public static void convertGrayToRGBA(Mat source, Mat destination)
    {
       int destinationChannels = 0; // automatic mode
       opencv_imgproc.cvtColor(source, destination, opencv_imgproc.COLOR_GRAY2RGBA, destinationChannels);
@@ -84,39 +135,114 @@ public class BytedecoOpenCVTools
       double sigmaX = 4.74;
       double sigmaY = sigmaX;
       int borderType = opencv_core.BORDER_DEFAULT;
-      opencv_imgproc.GaussianBlur(sourceImage,
-                                  destinationImage,
-                                  gaussianKernelSize,
-                                  sigmaX,
-                                  sigmaY,
-                                  borderType);
+      opencv_imgproc.GaussianBlur(sourceImage, destinationImage, gaussianKernelSize, sigmaX, sigmaY, borderType);
    }
 
-   public static String getTypeString(int type)
+   public static Mat convertBufferedImageToMat(BufferedImage image)
    {
-      int numImgTypes = 35; // 7 base types, with five channel options each (none or C1, ..., C4)
+      return Java2DFrameUtils.toMat(image);
+   }
 
-      int enum_ints[] =       {opencv_core.CV_8U,  opencv_core.CV_8UC1,  opencv_core.CV_8UC2,  opencv_core.CV_8UC3,  opencv_core.CV_8UC4,
-                               opencv_core.CV_8S,  opencv_core.CV_8SC1,  opencv_core.CV_8SC2,  opencv_core.CV_8SC3,  opencv_core.CV_8SC4,
-                               opencv_core.CV_16U, opencv_core.CV_16UC1, opencv_core.CV_16UC2, opencv_core.CV_16UC3, opencv_core.CV_16UC4,
-                               opencv_core.CV_16S, opencv_core.CV_16SC1, opencv_core.CV_16SC2, opencv_core.CV_16SC3, opencv_core.CV_16SC4,
-                               opencv_core.CV_32S, opencv_core.CV_32SC1, opencv_core.CV_32SC2, opencv_core.CV_32SC3, opencv_core.CV_32SC4,
-                               opencv_core.CV_32F, opencv_core.CV_32FC1, opencv_core.CV_32FC2, opencv_core.CV_32FC3, opencv_core.CV_32FC4,
-                               opencv_core.CV_64F, opencv_core.CV_64FC1, opencv_core.CV_64FC2, opencv_core.CV_64FC3, opencv_core.CV_64FC4};
+   public static void compressRGBImageJPG(Mat image, Mat yuvImageToPack, BytePointer compressedBytes)
+   {
+      opencv_imgproc.cvtColor(image, yuvImageToPack, opencv_imgproc.COLOR_RGB2YUV_I420);
+      opencv_imgcodecs.imencode(".jpg", yuvImageToPack, compressedBytes, compressionParametersJPG);
+   }
 
-      String enum_strings[] = {"CV_8U",  "CV_8UC1",  "CV_8UC2",  "CV_8UC3",  "CV_8UC4",
-                               "CV_8S",  "CV_8SC1",  "CV_8SC2",  "CV_8SC3",  "CV_8SC4",
-                               "CV_16U", "CV_16UC1", "CV_16UC2", "CV_16UC3", "CV_16UC4",
-                               "CV_16S", "CV_16SC1", "CV_16SC2", "CV_16SC3", "CV_16SC4",
-                               "CV_32S", "CV_32SC1", "CV_32SC2", "CV_32SC3", "CV_32SC4",
-                               "CV_32F", "CV_32FC1", "CV_32FC2", "CV_32FC3", "CV_32FC4",
-                               "CV_64F", "CV_64FC1", "CV_64FC2", "CV_64FC3", "CV_64FC4"};
+   /* Not recommended for lossless use cases. */
+   public static void compressDepthJPG(Mat image, BytePointer compressedBytes)
+   {
+      Mat depthRGBAMat = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC4, image.data());
+      opencv_imgcodecs.imencode(".jpg", depthRGBAMat, compressedBytes, compressionParametersJPG);
+   }
 
-      for (int i = 0; i < numImgTypes; i++)
-      {
-         if (type == enum_ints[i])
-            return enum_strings[i];
-      }
-      return "unknown image type";
+   /* Not recommended for lossless use cases. */
+   public static void decompressImageJPG(byte[] data, Mat image)
+   {
+      BytePointer dataPointer = new BytePointer(data);
+      Mat inputJPEGMat = new Mat(1, data.length, opencv_core.CV_8UC1, dataPointer);
+
+      Mat depthRGBA8Mat = new Mat();
+      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, depthRGBA8Mat);
+
+      Mat depthImage32FC1 = new Mat(depthRGBA8Mat.rows(), depthRGBA8Mat.cols(), opencv_core.CV_32FC1, depthRGBA8Mat);
+
+      image.rows(depthRGBA8Mat.rows());
+      image.cols(depthRGBA8Mat.cols());
+      image.data(depthImage32FC1.data());
+   }
+
+   /* Not recommended for lossless use cases. */
+   public static void decompressJPG(byte[] data, Mat dst)
+   {
+      BytePointer dataPointer = new BytePointer(data);
+      Mat inputJPEGMat = new Mat(1, data.length, opencv_core.CV_8UC1, dataPointer);
+      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, dst);
+   }
+
+   public static void compressImagePNG(Mat image, BytePointer data)
+   {
+      opencv_imgcodecs.imencode(".png", image, data, compressionParametersPNG);
+   }
+
+   public static void decompressDepthPNG(BytePointer bytePointer, Mat image)
+   {
+      Mat compressedMat = new Mat(1, (int) bytePointer.limit(), opencv_core.CV_8UC1, bytePointer);
+      opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, image);
+   }
+
+   public static Mat decompressImageJPGUsingYUV(BytePointer messageEncodedBytePointer)
+   {
+      Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
+      Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
+
+      inputJPEGMat.cols((int) messageEncodedBytePointer.limit());
+      inputJPEGMat.data(messageEncodedBytePointer);
+
+      // imdecode takes the longest by far out of all this stuff
+      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
+
+      Mat outputMat = new Mat((int) (inputYUVI420Mat.rows() / 1.5f), inputYUVI420Mat.cols(), opencv_core.CV_8UC4);
+      opencv_imgproc.cvtColor(inputYUVI420Mat, outputMat, opencv_imgproc.COLOR_YUV2RGBA_I420);
+      opencv_imgproc.cvtColor(outputMat, outputMat, opencv_imgproc.COLOR_RGBA2RGB);
+
+      return outputMat;
+   }
+
+   public static void convertFloatToShort(Mat metricDepth, Mat shortDepthToPack, double scale, double delta)
+   {
+      metricDepth.convertTo(shortDepthToPack, opencv_core.CV_16UC1, scale, delta);
+   }
+
+   public static boolean dimensionsMatch(BytedecoImage a, BytedecoImage b)
+   {
+      return a.getImageWidth() == b.getImageWidth() && a.getImageHeight() == b.getImageHeight();
+   }
+
+   public static boolean dimensionsMatch(Mat a, int imageWidth, int imageHeight)
+   {
+      return a.cols() == imageWidth && a.rows() == imageHeight;
+   }
+
+   /**
+    * Puts 3 floats in a Mat that is an array of Float3s i.e. type == CV_32FC3
+    * Assumes Mat is continuous. i.e. Mat::isContinuous == true
+    */
+   public static void putFloat3(BytePointer dataPointer, int float3Index, float float1, float float2, float float3)
+   {
+      dataPointer.putFloat(getFloat3ByteIndexContinuous(float3Index, 0), float1);
+      dataPointer.putFloat(getFloat3ByteIndexContinuous(float3Index, 1), float2);
+      dataPointer.putFloat(getFloat3ByteIndexContinuous(float3Index, 2), float3);
+   }
+
+   /**
+    * Calculate the index of the first byte of float in a CV_32FC3 in a Mat that is an array of Float3s.
+    * Assumes Mat is continuous. i.e. Mat::isContinuous == true
+    * @param float3Index index of the float3 i.e. the triplet
+    * @param floatIndex index of the float in the triplet, 0, 1, or 2
+    */
+   public static long getFloat3ByteIndexContinuous(int float3Index, int floatIndex)
+   {
+      return (long) float3Index * 3 * Float.BYTES + floatIndex * Float.BYTES;
    }
 }

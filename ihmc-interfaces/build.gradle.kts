@@ -13,7 +13,7 @@ buildscript {
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -30,8 +30,8 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.19.0")
-   api("us.ihmc:euclid-geometry:0.19.0")
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:euclid-geometry:0.19.1")
    api("us.ihmc:ihmc-pub-sub:0.18.1")
    api("us.ihmc:ros2-common-interfaces:0.22.2") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
@@ -47,7 +47,7 @@ testDependencies {
 }
 
 generatorDependencies {
-   api("us.ihmc:euclid:0.19.0")
+   api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:ros2-msg-to-pubsub-generator:0.22.2")
 }

@@ -85,7 +85,10 @@ public class RDXJoystickBasedStepping
    private final ConcurrentLinkedQueue<Runnable> queuedTasksToProcess = new ConcurrentLinkedQueue<>();
    private final AtomicReference<FootstepDataListMessage> footstepsToSendReference = new AtomicReference<>(null);
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
-   private final AtomicBoolean hasSuccessfullyStoppedWalking = new AtomicBoolean(false);
+   // Set to true initially because this class shouldn't be sending pause walking messages unless it's being used
+   // This prevents the controller from getting pause walking messages while the operator is still starting up
+   // but they have run the UI.
+   private final AtomicBoolean hasSuccessfullyStoppedWalking = new AtomicBoolean(true);
    private boolean supportFootPosesInitialized = false;
    private boolean userNotClickingAnImGuiPanel;
 
@@ -161,7 +164,9 @@ public class RDXJoystickBasedStepping
       rightVRController = baseUI.getVRManager().getContext().getController(RobotSide.RIGHT);
       baseUI.getVRManager().getContext().addVRInputProcessor(context ->
       {
-         userNotClickingAnImGuiPanel = context.getSelectedPick() == null;
+         userNotClickingAnImGuiPanel = true;
+         for (RobotSide side : RobotSide.values)
+            userNotClickingAnImGuiPanel =  userNotClickingAnImGuiPanel && context.getSelectedPick().get(side) == null;
       });
    }
 
@@ -288,9 +293,12 @@ public class RDXJoystickBasedStepping
 
    private void sendPauseWalkingToController()
    {
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-      pauseWalkingMessage.setPause(true);
-      controllerHelper.publishToController(pauseWalkingMessage);
+      if (currentControllerConnected)
+      {
+         PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+         pauseWalkingMessage.setPause(true);
+         controllerHelper.publishToController(pauseWalkingMessage);
+      }
    }
 
    public void renderImGuiWidgets()

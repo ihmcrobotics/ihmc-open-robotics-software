@@ -10,12 +10,11 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.interfaces.RobotWalkRequester;
@@ -23,6 +22,7 @@ import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.interfaces.UIPublisher;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.LastCommandedFootsteps;
 
@@ -31,8 +31,6 @@ public class LookAndStepSteppingTask
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
-   protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
-   protected SwingPlannerParametersReadOnly swingPlannerParameters;
 
    protected RobotWalkRequester robotWalkRequester;
    protected Runnable doneWaitingForSwingOutput;
@@ -43,6 +41,7 @@ public class LookAndStepSteppingTask
    protected long previousStepMessageId = 0L;
    protected LookAndStepImminentStanceTracker imminentStanceTracker;
    protected ControllerStatusTracker controllerStatusTracker;
+   protected YoDouble stepDuration;
    private final Timer timerSincePlanWasSent = new Timer();
 
    protected final TypedInput<RobotConfigurationData> robotConfigurationData = new TypedInput<>();
@@ -59,11 +58,9 @@ public class LookAndStepSteppingTask
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
          statusLogger = lookAndStep.statusLogger;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
-         lookAndStepParameters = lookAndStep.lookAndStepParameters;
-         footstepPlannerParameters = lookAndStep.footstepPlannerParameters;
-         swingPlannerParameters = lookAndStep.swingPlannerParameters;
          uiPublisher = lookAndStep.helper::publish;
          robotWalkRequester = lookAndStep.robotInterface::requestWalk;
+         stepDuration = new YoDouble("stepDuration", lookAndStep.yoRegistry);
          doneWaitingForSwingOutput = () ->
          {
             if (!lookAndStep.isBeingReset.get())
@@ -82,6 +79,8 @@ public class LookAndStepSteppingTask
                                        + ". Planning again...", () -> !(footstepPlan != null && footstepPlan.getNumberOfSteps() > 0), doneWaitingForSwingOutput);
          suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
          suppressor.addCondition("Robot not in walking state", () -> !lookAndStep.controllerStatusTracker.isInWalkingState());
+
+         lookAndStepParameters = syncedRobot.getRobotModel().getLookAndStepParameters();
       }
 
       public void reset()
@@ -109,6 +108,8 @@ public class LookAndStepSteppingTask
       }
    }
 
+   private final Stopwatch stepDurationStopwatch = new Stopwatch();
+
    protected void performTask()
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
@@ -123,15 +124,7 @@ public class LookAndStepSteppingTask
       // TODO: Add combo to look and step UI to chose which steps to visualize
       uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage, "Look and Step Last Commanded"));
 
-      ExecutionMode executionMode;
-      if (lookAndStepParameters.getMaxStepsToSendToController() > 1)
-      {
-         executionMode = ExecutionMode.OVERRIDE; // ALPHA. Seems to not work on real robot.
-      }
-      else
-      {
-         executionMode = previousStepMessageId == 0L ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
-      }
+      ExecutionMode executionMode = ExecutionMode.OVERRIDE; // Always override, which we can do now
       imminentStanceTracker.addCommandedFootsteps(footstepPlan);
 
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
@@ -147,6 +140,8 @@ public class LookAndStepSteppingTask
       timerSincePlanWasSent.reset();
 
       ThreadTools.startAsDaemon(() -> robotWalkingThread(walkingStatusNotification), "RobotWalking");
+      // TODO: Where do we wait for transfer? We should consider possible exploitations of transfer time to do useful stuff,
+      // TODO: but also make it explict where it is happening, wait for it, know when it stops and starts relative to this code
       waitForPartOfSwing(lookAndStepParameters.getSwingDuration());
    }
 
@@ -158,6 +153,7 @@ public class LookAndStepSteppingTask
       double maxDurationToWait = 10.0;
       double robotTimeToStopWaitingRegardless = estimatedRobotTimeWhenPlanWasSent + maxDurationToWait;
       statusLogger.info("Waiting up to {} s for commanded step to start...", maxDurationToWait);
+      stepDurationStopwatch.reset();
 
       boolean stepStartTimeRecorded = false;
       double robotTimeInWhichStepStarted = Double.NaN;
@@ -214,6 +210,8 @@ public class LookAndStepSteppingTask
 
          ThreadTools.sleepSeconds(0.01); // Prevent free spinning
       }
+
+      stepDuration.set(stepDurationStopwatch.lap());
 
       doneWaitingForSwingOutput.run();
    }

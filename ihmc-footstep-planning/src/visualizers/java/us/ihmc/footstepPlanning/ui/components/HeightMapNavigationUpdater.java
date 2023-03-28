@@ -126,7 +126,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       goalPosition = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
       goalOrientation = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootOrientation);
       heightMapMessage = messager.createInput(FootstepPlannerMessagerAPI.HeightMapData);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegions::set);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegions::set);
 
       footPolygons = new SideDependentList<>(side ->
                                              {
@@ -137,15 +137,15 @@ public class HeightMapNavigationUpdater extends AnimationTimer
                                              });
 
       footstepPlannerParameters.setIdealFootstepLength(0.28);
-      planningModule = new FootstepPlanningModule("HeightMap", new DefaultVisibilityGraphParameters(), footstepPlannerParameters, new DefaultSwingPlannerParameters(), walkingControllerParameters, footPolygons, null);
+      planningModule = new FootstepPlanningModule("HeightMap", new DefaultVisibilityGraphParameters(), new AStarBodyPathPlannerParameters(), footstepPlannerParameters, new DefaultSwingPlannerParameters(), walkingControllerParameters, footPolygons, null);
       logger = new FootstepPlannerLogger(planningModule);
       planningModule.addCustomTerminationCondition((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> iterations > 1);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ApproveStep, executeRequested::set);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ReplanStep, replanRequested::set);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.WriteHeightMapLog, writeLog::set);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ResendLastStep, r -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessageCache));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ReconnectRos1Node, reconnectRos1Node::set);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ApproveStep, executeRequested::set);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ReplanStep, replanRequested::set);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.WriteHeightMapLog, writeLog::set);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ResendLastStep, r -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessageCache));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ReconnectRos1Node, reconnectRos1Node::set);
 
       currentState.set(State.WAITING_TO_START);
 

@@ -9,6 +9,7 @@ public class UnitConversions
    public static final double INCH_TO_METER = 0.0254;
    public static final double SQUAREINCH_TO_SQUAREMETER = INCH_TO_METER * INCH_TO_METER;
    public static final double CUBICINCH_TO_CUBICMETER = INCH_TO_METER * INCH_TO_METER * INCH_TO_METER;
+   public static final String DEGREE_SYMBOL = "\u00B0";
 
    // Angles
    public static final double DEG_TO_RAD = Math.PI / 180.0;
@@ -30,5 +31,15 @@ public class UnitConversions
    public static double hertzToSeconds(double hertz)
    {
       return 1.0 / hertz;
+   }
+
+   public static double inchesToMeters(double inches)
+   {
+      return inches * INCH_TO_METER;
+   }
+
+   public static double metersToInches(double meters)
+   {
+      return meters / INCH_TO_METER;
    }
 }

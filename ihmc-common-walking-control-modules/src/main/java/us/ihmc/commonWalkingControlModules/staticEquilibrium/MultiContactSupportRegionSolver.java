@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
@@ -11,7 +12,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.Face3D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -19,6 +22,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -42,7 +46,7 @@ public class MultiContactSupportRegionSolver
 {
    private static final double optimizedCoMGraphicScale = 0.03;
 
-   private static final int defaultNumberOfDirectionsToOptimize = 16;
+   private static final int defaultNumberOfDirectionsToOptimize = 32;
    private static final int centerOfMassDimensions = 2;
    private static final int staticEquilibriumConstraints = 6;
    static final double mg = 1.0;
@@ -82,6 +86,10 @@ public class MultiContactSupportRegionSolver
    private final YoFrameVector3D directionToOptimize = new YoFrameVector3D("directionToOptimize", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D optimizedCoM = new YoFramePoint3D("optimizedCoM", ReferenceFrame.getWorldFrame(), registry);
    private final List<Vector2D> directionsToOptimize = new ArrayList<>();
+
+   private final List<Point2D> vertexList = new ArrayList<>();
+   private final List<TIntArrayList> activeSetIndices = new ArrayList<>();
+   private final List<TIntArrayList> orderedActiveSetIndices = new ArrayList<>();
 
    public MultiContactSupportRegionSolver()
    {
@@ -274,16 +282,55 @@ public class MultiContactSupportRegionSolver
          supportRegion.addVertex(comExtremumX, comExtremumY);
          supportRegionVertices.add().setIncludingFrame(ReferenceFrame.getWorldFrame(), comExtremumX, comExtremumY, 0.0);
 
+         TIntArrayList activeSet = new TIntArrayList();
+         TIntArrayList activeSetIndicesSolverObj = linearProgramSolver.getSimplexStatistics().getActiveSetIndices();
+         for (int j = 0; j < activeSetIndicesSolverObj.size(); j++)
+         {
+            if (activeSetIndicesSolverObj.get(j) >= 2 * staticEquilibriumConstraints)
+            {
+               activeSet.add(activeSetIndicesSolverObj.get(j) - 2 * staticEquilibriumConstraints);
+            }
+         }
+         vertexList.add(new Point2D(comExtremumX, comExtremumY));
+         activeSetIndices.add(activeSet);
+
          updateGraphics();
       }
 
       supportRegion.update();
+
+      for (int i = 0; i < supportRegion.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = supportRegion.getVertex(i);
+         boolean foundMatch = false;
+
+         for (int j = 0; j < vertexList.size(); j++)
+         {
+            if (vertexList.get(j).epsilonEquals(vertex, 1e-4))
+            {
+               foundMatch = true;
+               orderedActiveSetIndices.add(activeSetIndices.get(j));
+               break;
+            }
+         }
+
+         if (!foundMatch)
+         {
+            LogTools.error("Couldn't find match for vertex " + i);
+         }
+      }
+
       return true;
    }
 
    public boolean foundSolution()
    {
       return foundSolution.getValue();
+   }
+
+   public List<TIntArrayList> getActiveSetIndices()
+   {
+      return orderedActiveSetIndices;
    }
 
    private void updateGraphics()
@@ -315,6 +362,10 @@ public class MultiContactSupportRegionSolver
       bin.zero();
       costVectorC.zero();
       solution.zero();
+
+      vertexList.clear();
+      activeSetIndices.clear();
+      orderedActiveSetIndices.clear();
    }
 
    //////////////////////////////////////////////////////////////////////////////////////////

@@ -36,7 +36,6 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
@@ -69,7 +68,6 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -127,20 +125,24 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
                                              SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> footContactSensorNames,
                                              SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
                                              PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              CoPTrajectoryParameters copTrajectoryParameters)
    {
-      this(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames, highLevelControllerParameters, walkingControllerParameters,
-           pushRecoveryControllerParameters, copTrajectoryParameters, new DefaultSplitFractionCalculatorParameters());
+      this(contactableBodiesFactory,
+           footForceSensorNames,
+           wristSensorNames,
+           highLevelControllerParameters,
+           walkingControllerParameters,
+           pushRecoveryControllerParameters,
+           copTrajectoryParameters,
+           new DefaultSplitFractionCalculatorParameters());
    }
 
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
                                              SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> footContactSensorNames,
                                              SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
@@ -428,17 +430,17 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       return requestedHighLevelControllerState;
    }
 
-   public RobotController getController(FullHumanoidRobotModel fullRobotModel,
-                                        double controlDT,
-                                        double gravity,
-                                        YoDouble yoTime,
-                                        YoGraphicsListRegistry yoGraphicsListRegistry,
-                                        HumanoidRobotSensorInformation sensorInformation,
-                                        ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                        CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
-                                        CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                        JointDesiredOutputListBasics lowLevelControllerOutput,
-                                        JointBasics... jointsToIgnore)
+   public HumanoidHighLevelControllerManager getController(FullHumanoidRobotModel fullRobotModel,
+                                                           double controlDT,
+                                                           double gravity,
+                                                           YoDouble yoTime,
+                                                           YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                           HumanoidRobotSensorInformation sensorInformation,
+                                                           ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                           CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
+                                                           CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                                           JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                           JointBasics... jointsToIgnore)
    {
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
       YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
@@ -559,6 +561,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
+      for (RobotSide robotSide : RobotSide.values)
+         humanoidHighLevelControllerManager.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
       return humanoidHighLevelControllerManager;
    }
 
@@ -629,6 +633,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public StatusMessageOutputManager getStatusOutputManager()
    {
       return statusMessageOutputManager;
+   }
+
+   public WholeBodyControllerCoreFactory getWholeBodyControllerCoreFactory()
+   {
+      return controllerCoreFactory;
    }
 
    public void attachControllerFailureListeners(List<ControllerFailureListener> listeners)

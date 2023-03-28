@@ -20,7 +20,7 @@ public class SCSYoVariablesVisualizer
       scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
       YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener);
-      client.start();
+      client.startWithHostSelector();
    }
 
    public static void main(String[] args) throws JSAPException

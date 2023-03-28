@@ -40,6 +40,8 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -148,18 +150,18 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       double hipWidth = leftHipPitch.getY() - rightHipPitch.getY();
 
-      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle() + ankleToGround;
-      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleToGround;
-      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle() + ankleToGround;
-      double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle();
+      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();// + ankleToGround;
+      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();// + ankleToGround;
+      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();// + ankleToGround;
 
       double doubleSupportPercentageIn = 0.3;
 
       return new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
                                                        nominalHeightAboveGround,
                                                        maximumHeightAboveGround,
-                                                       defaultOffsetHeightAboveGround,
                                                        doubleSupportPercentageIn,
+                                                       walkingControllerParameters.getHeightChangeForNonFlatStep(),
+                                                       walkingControllerParameters.getMaxLegLengthReductionSteppingDown(),
                                                        hipWidth,
                                                        centerOfMassFrame,
                                                        pelvisFrame,
@@ -453,5 +455,13 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       statusActualPosition.setY(Double.NaN);
 
       return statusHelper.pollStatusMessage(statusDesiredPosition, statusActualPosition);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(centerOfMassTrajectoryGenerator.getSCS2YoGraphics());
+      return group;
    }
 }

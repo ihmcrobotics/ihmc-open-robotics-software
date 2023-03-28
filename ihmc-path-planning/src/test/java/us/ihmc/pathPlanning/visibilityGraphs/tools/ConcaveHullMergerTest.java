@@ -19,6 +19,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -55,7 +56,7 @@ public class ConcaveHullMergerTest
       ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
       PlanarRegion mergedPlanarRegion = mergedPlanarRegions.get(0);
 
-      List<Point2D> concaveHull = mergedPlanarRegion.getConcaveHull();
+      List<? extends Point2DReadOnly> concaveHull = mergedPlanarRegion.getConcaveHull();
       assertEquals(8, concaveHull.size());
 
       int i = 0;
@@ -432,7 +433,7 @@ public class ConcaveHullMergerTest
       ArrayList<PlanarRegion> mergedPlanarRegions = ConcaveHullMerger.mergePlanarRegions(regionA, regionB, 1.0);
       PlanarRegion mergedPlanarRegion = mergedPlanarRegions.get(0);
 
-      List<Point2D> concaveHull = mergedPlanarRegion.getConcaveHull();
+      List<? extends Point2DReadOnly> concaveHull = mergedPlanarRegion.getConcaveHull();
       assertEquals(4, concaveHull.size());
 
       assertConcaveHullContains(concaveHull, pointA0);
@@ -572,7 +573,7 @@ public class ConcaveHullMergerTest
       BoundingBox3D mergedBoundingBox = mergedPlanarRegion.getBoundingBox3dInWorld();
       assertEquals(new BoundingBox3D(1.0, 2.0, 3.0, 2.5, 3.5, 3.0), mergedBoundingBox);
 
-      List<Point2D> concaveHull = mergedPlanarRegion.getConcaveHull();
+      List<? extends Point2DReadOnly> concaveHull = mergedPlanarRegion.getConcaveHull();
       assertEquals(8, concaveHull.size());
 
       assertConcaveHullContains(concaveHull, 0.0, 0.0);
@@ -672,7 +673,7 @@ public class ConcaveHullMergerTest
 
       assertTrue(expectedBox.epsilonEquals(mergedBoundingBox, 1e-7));
 
-      List<Point2D> concaveHull = mergedPlanarRegion.getConcaveHull();
+      List<? extends Point2DReadOnly> concaveHull = mergedPlanarRegion.getConcaveHull();
       assertEquals(8, concaveHull.size());
 
       assertConcaveHullContains(concaveHull, 1.0, 2.0);
@@ -1311,22 +1312,22 @@ public class ConcaveHullMergerTest
       return points;
    }
 
-   private void assertConcaveHullContains(List<Point2D> concaveHull, Point2D point)
+   private void assertConcaveHullContains(List<? extends Point2DReadOnly> concaveHull, Point2D point)
    {
       assertConcaveHullContains(concaveHull, point.getX(), point.getY());
    }
 
-   private void assertConcaveHullContains(List<Point2D> concaveHull, double x, double y)
+   private void assertConcaveHullContains(List<? extends Point2DReadOnly> concaveHull, double x, double y)
    {
       double epsilon = 1e-7;
 
-      for (Point2D point : concaveHull)
+      for (Point2DReadOnly point : concaveHull)
       {
          if (point.epsilonEquals(new Point2D(x, y), epsilon))
             return;
       }
       String errorMessage = "Concave Hull does not contain (" + x + ", " + y + "). \nConcave Hull = ";
-      for (Point2D point : concaveHull)
+      for (Point2DReadOnly point : concaveHull)
       {
          errorMessage += point + "\n";
       }

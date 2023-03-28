@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.ui.components;
 
+import perception_msgs.msg.dds.HeightMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -33,6 +34,7 @@ public class FootstepPathCalculatorModule
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    private final AtomicReference<PlanarRegionsList> planarRegionsReference;
+   private final AtomicReference<HeightMapMessage> heightMapReference;
    private final AtomicReference<RobotSide> initialStanceSideReference;
    private final AtomicReference<Pose3DReadOnly> leftFootStartPose;
    private final AtomicReference<Pose3DReadOnly> rightFootStartPose;
@@ -50,6 +52,7 @@ public class FootstepPathCalculatorModule
    private final AtomicReference<Boolean> abortIfGoalStepSnapFails;
 
    private final AtomicReference<FootstepPlannerParametersReadOnly> parameters;
+   private final AtomicReference<AStarBodyPathPlannerParametersReadOnly> pathPlannerParameters;
    private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphsParameters;
 
    private final Messager messager;
@@ -60,6 +63,7 @@ public class FootstepPathCalculatorModule
       this.messager = messager;
 
       planarRegionsReference = messager.createInput(PlanarRegionData);
+      heightMapReference = messager.createInput(HeightMapData);
       initialStanceSideReference = messager.createInput(InitialSupportSide, RobotSide.LEFT);
       leftFootStartPose = messager.createInput(LeftFootPose);
       rightFootStartPose = messager.createInput(RightFootPose);
@@ -68,6 +72,7 @@ public class FootstepPathCalculatorModule
 
       parameters = messager.createInput(PlannerParameters, new DefaultFootstepPlannerParameters());
       visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
+      pathPlannerParameters = messager.createInput(AStarBodyPathPlannerParameters, new AStarBodyPathPlannerParameters());
       performAStarSearch = messager.createInput(PerformAStarSearch, false);
       planBodyPath = messager.createInput(PlanBodyPath, true);
       planNarrowPassage = messager.createInput(PlanNarrowPassage, true);
@@ -78,16 +83,17 @@ public class FootstepPathCalculatorModule
       snapGoalSteps = messager.createInput(SnapGoalSteps, false);
       abortIfGoalStepSnapFails = messager.createInput(AbortIfGoalStepSnapFails, false);
 
-      messager.registerTopicListener(ComputePath, request -> computePathOnThread());
+      messager.addTopicListener(ComputePath, request -> computePathOnThread());
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
 
-      messager.registerTopicListener(HaltPlanning, halt -> planningModule.halt());
+      messager.addTopicListener(HaltPlanning, halt -> planningModule.halt());
    }
 
    public void clear()
    {
       planarRegionsReference.set(null);
+      heightMapReference.set(null);
       initialStanceSideReference.set(null);
       leftFootStartPose.set(null);
       rightFootStartPose.set(null);
@@ -122,8 +128,9 @@ public class FootstepPathCalculatorModule
       }
 
       PlanarRegionsList planarRegionsList = planarRegionsReference.get();
+      HeightMapMessage heightMapMessage = heightMapReference.get();
 
-      if (planarRegionsList == null)
+      if (planarRegionsList == null && heightMapMessage == null)
          return;
 
       if (leftFootStartPose.get() == null || rightFootStartPose.get() == null)
@@ -139,6 +146,7 @@ public class FootstepPathCalculatorModule
       {
          FootstepPlannerRequest request = new FootstepPlannerRequest();
          request.setPlanarRegionsList(planarRegionsList);
+         request.setHeightMapMessage(heightMapMessage);
          request.setTimeout(plannerTimeoutReference.get());
          request.setMaximumIterations(plannerMaxIterationsReference.get());
          request.setHorizonLength(plannerHorizonLengthReference.get());
@@ -152,6 +160,7 @@ public class FootstepPathCalculatorModule
 
          planningModule.getFootstepPlannerParameters().set(parameters.get());
          planningModule.getVisibilityGraphParameters().set(visibilityGraphsParameters.get());
+         planningModule.getAStarBodyPathPlannerParameters().set(pathPlannerParameters.get());
 
          planningModule.addStatusCallback(status -> messager.submitMessage(FootstepPlanningResultTopic, status.getFootstepPlanningResult()));
 
