@@ -125,13 +125,13 @@ public class DualBlackflyCamera
             imageWidth = blackfly.getWidth(spinImage);
             imageHeight = blackfly.getHeight(spinImage);
             LogTools.info("Blackfly {} resolution detected: {} x {}", serialNumber, imageWidth, imageHeight);
-            numberOfBytesInFrame = imageWidth * imageHeight * 4;
+            numberOfBytesInFrame = (long) imageWidth * imageHeight; // BayerRG8
             spinImageDataPointer = new BytePointer(numberOfBytesInFrame);
 
-            blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8U);
+            blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
 
-            yuv420Image = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
-            rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Mat for color conversion
+            yuv420Image = new Mat(imageHeight * 1.5, imageWidth, opencv_core.CV_8UC1);
+            rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4); // Mat for color conversion
 
             compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
 
