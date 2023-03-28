@@ -13,7 +13,7 @@ import imgui.type.ImString;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.communication.ros2.ROS2SyncedRigidBodyTransform;
+import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -46,7 +46,7 @@ public class RDXInteractableFrameModel
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final Notification contextMenuNotification = new Notification();
    private Runnable extendedContextMenu;
-   private ROS2SyncedRigidBodyTransform syncedTransformForTuning;
+   private ROS2TunedRigidBodyTransform syncedTransformForTuning;
 
    public void create(ReferenceFrame parentFrame, RDX3DPanel panel3D, ModelData modelData, RDXMousePickRayCollisionCalculator collisionCalculator)
    {
@@ -77,7 +77,7 @@ public class RDXInteractableFrameModel
 
    public void addRemoteTuning(ROS2PublishSubscribeAPI ros2, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)
    {
-      syncedTransformForTuning = new ROS2SyncedRigidBodyTransform(ros2, topicPair, rigidBodyTransformToSync);
+      syncedTransformForTuning = ROS2TunedRigidBodyTransform.remoteTuner(ros2, topicPair, rigidBodyTransformToSync);
    }
 
    public void update()
