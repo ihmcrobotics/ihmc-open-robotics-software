@@ -51,9 +51,9 @@ public class PointCloudVisualizer extends AnimationTimer
    public PointCloudVisualizer(Messager messager, HeightMapParameters parameters)
    {
       rootNode.getChildren().add(meshView);
-      messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, this::processPointCloud);
-      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterX, x -> gridCenter.set(new Point2D(x, gridCenter.get().getY())));
-      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterY, y -> gridCenter.set(new Point2D(gridCenter.get().getX(), y)));
+      messager.addTopicListener(HeightMapMessagerAPI.PointCloudData, this::processPointCloud);
+      messager.addTopicListener(HeightMapMessagerAPI.GridCenterX, x -> gridCenter.set(new Point2D(x, gridCenter.get().getY())));
+      messager.addTopicListener(HeightMapMessagerAPI.GridCenterY, y -> gridCenter.set(new Point2D(gridCenter.get().getX(), y)));
       gridSizeXY = parameters.getGridSizeXY();
    }
 

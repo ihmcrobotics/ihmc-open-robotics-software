@@ -388,6 +388,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
       setCheckForPathCollisions(parametersPacket.getCheckForPathCollisions());
       setIntermediateBodyBoxChecks((int) parametersPacket.getIntermediateBodyBoxChecks());
+      if (parametersPacket.getReferencePlanAlpha() != noValue)
+         setReferencePlanAlpha(parametersPacket.getReferencePlanAlpha());
       if (parametersPacket.getIdealFootstepWidth() != noValue)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
       if (parametersPacket.getIdealFootstepLength() != noValue)

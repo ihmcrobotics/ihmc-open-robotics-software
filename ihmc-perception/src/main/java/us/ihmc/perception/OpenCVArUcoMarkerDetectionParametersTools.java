@@ -2,6 +2,10 @@ package us.ihmc.perception;
 
 import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 
+/**
+ * Needed to tune the parameters while copying them to the swap buffer used to
+ * detect markers on another thread.
+ */
 public class OpenCVArUcoMarkerDetectionParametersTools
 {
    public static void copy(DetectorParameters from, DetectorParameters to)

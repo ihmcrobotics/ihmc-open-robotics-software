@@ -197,7 +197,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearLoggedData();
       bodyPathPlannerInterface.clearLoggedData();
 
-      boolean heightMapAvailable = request.getHeightMapMessage() != null;
+      boolean heightMapAvailable = request.getHeightMapMessage() != null && !request.getHeightMapMessage().getHeights().isEmpty();
       boolean planarRegionsAvailable = request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty();
 
       if (heightMapAvailable)
@@ -253,7 +253,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             visibilityGraphPlanner.computeBestEffortPlan(horizonLength);
          }
 
-
+         bodyPathPlanHolder.setPoseWaypoints(waypoints);
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);
          if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
          {
