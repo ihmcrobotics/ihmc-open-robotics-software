@@ -295,6 +295,64 @@ public abstract class PolynomialBasicsTest
    }
 
    @Test
+   public void testSetCubicDirectly() throws Exception
+   {
+      Random random = new Random(3453);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         int maxNumberOfCoefficients = RandomNumbers.nextInt(random, 1, 10);
+         PolynomialBasics trajectory = getPolynomial(maxNumberOfCoefficients);
+         double duration = random.nextDouble();
+         double z0 = RandomNumbers.nextDouble(random, 1.0);
+         double zd0 = RandomNumbers.nextDouble(random, 1.0);
+         double zf = RandomNumbers.nextDouble(random, 1.0);
+         double zdf = RandomNumbers.nextDouble(random, 1.0);
+
+         if (maxNumberOfCoefficients < 4)
+         {
+            Assertions.assertExceptionThrown(RuntimeException.class, () -> trajectory.setCubic(0.0, duration, z0, zd0, zf, zdf));
+            continue;
+         }
+
+         assertEquals(maxNumberOfCoefficients, trajectory.getMaximumNumberOfCoefficients());
+
+
+         trajectory.setCubicDirectly(duration, z0, zd0, zf, zdf);
+
+         trajectory.compute(0.0);
+         assertEquals(z0, trajectory.getValue(), SMALL_EPSILON);
+         assertEquals(zd0, trajectory.getVelocity(), SMALL_EPSILON);
+
+         PolynomialBasics derivative = getPolynomial(3);
+         PolynomialBasics alternative = getPolynomial(4);
+         alternative.setCubic(0.0, duration, z0, zd0, zf, zdf);
+         derivative.setQuadratic(0.0, duration, zd0, trajectory.getAcceleration(), zdf);
+
+         trajectory.compute(duration);
+
+         for (int j = 0; j < 4; j++)
+            assertEquals("INDEX " + j, alternative.getCoefficient(j), trajectory.getCoefficient(j), 1.0e-5);
+         assertEquals(zf, trajectory.getValue(), SMALL_EPSILON);
+
+         double dt = 1.0e-8;
+
+         for (double t = 0.0; t <= duration; t += duration / 1000)
+         {
+            trajectory.compute(t);
+            alternative.compute(t);
+            derivative.compute(t);
+
+            assertEquals(alternative.getValue(), trajectory.getValue(), SMALL_EPSILON);
+            assertEquals(alternative.getVelocity(), trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(alternative.getAcceleration(), trajectory.getAcceleration(), 1.0e-8);
+            assertEquals(derivative.getValue(), trajectory.getVelocity(), SMALL_EPSILON);
+            assertEquals(derivative.getVelocity(), trajectory.getAcceleration(), 1.0e-6);
+         }
+      }
+   }
+
+   @Test
    public void testMinimumJerkRandomInitialFinalConditions()
    {
       PolynomialBasics trajectory = getPolynomial(6);

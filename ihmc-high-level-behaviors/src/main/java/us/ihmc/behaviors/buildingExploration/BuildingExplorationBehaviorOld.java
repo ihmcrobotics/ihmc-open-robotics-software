@@ -2,7 +2,7 @@ package us.ihmc.behaviors.buildingExploration;
 
 import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
@@ -321,7 +321,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       }
 
       Point3D doorPosition = doorLocationPacket.getDoorTransformToWorld().getPosition();
-      Point3D robotRootJointPosition = new Point3D(robotConfigurationData.getRootTranslation());
+      Point3D robotRootJointPosition = new Point3D(robotConfigurationData.getRootPosition());
 
       double xyDistanceToDoor = doorPosition.distanceXY(robotRootJointPosition);
       boolean doorDetected = xyDistanceToDoor <= xyProximityToDoorToStopWalking;

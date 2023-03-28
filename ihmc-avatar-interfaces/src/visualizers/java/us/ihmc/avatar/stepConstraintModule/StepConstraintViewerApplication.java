@@ -1,21 +1,21 @@
 package us.ihmc.avatar.stepConstraintModule;
 
-import javafx.application.Application;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-public class StepConstraintViewerApplication extends Application
+public class StepConstraintViewerApplication extends ApplicationNoModule
 {
    private static StepConstraintCalculatorViewer ui;
    private static SharedMemoryJavaFXMessager messager;

@@ -10,7 +10,7 @@ public class AtlasL515AndGPUPlanarRegionsOnRobotProcess
    public AtlasL515AndGPUPlanarRegionsOnRobotProcess()
    {
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT);
-      new L515AndGPUPlanarRegionsOnRobotProcess(atlasRobotModel);
+      new L515AndGPUPlanarRegionsOnRobotProcess(atlasRobotModel, true);
    }
 
    public static void main(String[] args)

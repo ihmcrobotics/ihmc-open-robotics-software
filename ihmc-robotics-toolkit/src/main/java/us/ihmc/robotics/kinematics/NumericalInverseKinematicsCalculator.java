@@ -12,6 +12,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -134,7 +135,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
     * <li> &delta;X is the spatial (orientation and position) error in taskspace </li>
     */
    @Override
-   public boolean solve(RigidBodyTransform desiredTransform)
+   public boolean solve(RigidBodyTransformReadOnly desiredTransform)
    {
       iterationNumber = 0;
       minimumErrorScalar = Double.POSITIVE_INFINITY;
@@ -201,7 +202,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       }
    }
 
-   private void computeError(RigidBodyTransform desiredTransform)
+   private void computeError(RigidBodyTransformReadOnly desiredTransform)
    {
       jacobian.compute();
       jacobian.getEndEffectorFrame().getTransformToDesiredFrame(actualTransform, jacobian.getBaseFrame());

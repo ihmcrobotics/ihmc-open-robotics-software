@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.SelectionCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -26,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
@@ -213,7 +215,7 @@ public class WrenchMatrixCalculator
    }
 
    // FIXME The formulation of the objective should be unified with PlaneContactStateToWrenchMatrixHelper.computeCopObjectiveJacobian(...)
-   public boolean getCenterOfPressureInput(QPInputTypeA inputToPack)
+   public boolean getCenterOfPressureInput(NativeQPInputTypeA inputToPack)
    {
       int commands = centerOfPressureCommands.size();
       if (commands <= 0)
@@ -255,21 +257,20 @@ public class WrenchMatrixCalculator
       int tauYIndex = 1;
       CommonOps_DDRM.extractRow(fullWrenchJacobian, tauYIndex, singleCopRow);
       CommonOps_DDRM.add(desiredCoP.getX(), fzRow, 1.0, singleCopRow, singleCopRow);
-      CommonOps_DDRM.insert(singleCopRow, inputToPack.getTaskJacobian(), 0, 0);
-      inputToPack.getTaskObjective().set(0, 0.0);
+      inputToPack.getTaskJacobian().insert(singleCopRow, 0, 0);
 
       // [y_cop * J_fz - J_tx] * rho == 0
       int tauXIndex = 0;
       CommonOps_DDRM.extractRow(fullWrenchJacobian, tauXIndex, singleCopRow);
       CommonOps_DDRM.add(desiredCoP.getY(), fzRow, -1.0, singleCopRow, singleCopRow);
-      CommonOps_DDRM.insert(singleCopRow, inputToPack.getTaskJacobian(), 1, 0);
-      inputToPack.getTaskObjective().set(1, 0.0);
+      inputToPack.getTaskJacobian().insert(singleCopRow, 1, 0);
 
+      inputToPack.getTaskObjective().zero();
       inputToPack.getTaskWeightMatrix().zero();
       if (command.getConstraintType() == ConstraintType.OBJECTIVE)
       {
          weight.setIncludingFrame(command.getWeight());
-         weight.changeFrame(planeFrame);
+         weight.changeFrameAndProjectToXYPlane(planeFrame);
          inputToPack.getTaskWeightMatrix().set(0, 0, command.getWeight().getX());
          inputToPack.getTaskWeightMatrix().set(1, 1, command.getWeight().getY());
       }
@@ -292,12 +293,12 @@ public class WrenchMatrixCalculator
       contactWrenchCommands.add().set(command);
    }
 
-   private final DMatrixRMaj rigidBodyRhoTaskJacobian = new DMatrixRMaj(0, 0);
+   private final NativeMatrix rigidBodyRhoTaskJacobian = new NativeMatrix(0, 0);
    private final DMatrixRMaj tempTaskJacobian = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempTaskObjective = new DMatrixRMaj(Wrench.SIZE, 1);
    private final SelectionCalculator selectionCalculator = new SelectionCalculator();
 
-   public boolean getContactWrenchInput(QPInputTypeA inputToPack)
+   public boolean getContactWrenchInput(NativeQPInputTypeA inputToPack)
    {
       int commands = contactWrenchCommands.size();
       if (commands <= 0)
@@ -314,15 +315,15 @@ public class WrenchMatrixCalculator
 
       // Add the Jacobian for the body at the right place in the big Jacobian for all bodies:
       int rhoOffset = bodyRhoOffsets.get(command.getRigidBody());
-      DMatrixRMaj fullJacobian = inputToPack.getTaskJacobian();
+      NativeMatrix fullJacobian = inputToPack.getTaskJacobian();
       fullJacobian.zero();
-      CommonOps_DDRM.insert(rigidBodyRhoTaskJacobian, fullJacobian, 0, rhoOffset);
+      fullJacobian.insert(rigidBodyRhoTaskJacobian, 0, rhoOffset);
 
       contactWrenchCommands.remove(commands - 1);
       return true;
    }
 
-   private void computeCommandMatrices(ContactWrenchCommand command, DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
+   private void computeCommandMatrices(ContactWrenchCommand command, NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight)
    {
       PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(command.getRigidBody());
       ReferenceFrame planeFrame = helper.getPlaneFrame();

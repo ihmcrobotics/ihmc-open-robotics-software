@@ -1,6 +1,7 @@
 package us.ihmc.tools.property;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.log.LogTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +15,7 @@ public class StoredPropertySetTest
       DoubleStoredPropertyKey keyTwo = keyList.addDoubleKey("KeyTwo");
       IntegerStoredPropertyKey keyThree = keyList.addIntegerKey("KeyThree");
 
-      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class);
       storedPropertySet.load();
 
       assertEquals(false, storedPropertySet.get(keyOne));
@@ -30,7 +31,7 @@ public class StoredPropertySetTest
       DoubleStoredPropertyKey keyTwo = keyList.addDoubleKey("KeyTwo");
       IntegerStoredPropertyKey keyThree = keyList.addIntegerKey("KeyThree");
 
-      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class);
       storedPropertySet.load();
 
       assertEquals(false, storedPropertySet.get(keyOne));
@@ -64,7 +65,7 @@ public class StoredPropertySetTest
       DoubleStoredPropertyKey keyTwo = keyList.addDoubleKey("KeyTwo", 0.4);
       IntegerStoredPropertyKey keyThree = keyList.addIntegerKey("KeyThree", 8);
 
-      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class);
       assertEquals(true, storedPropertySet.get(keyOne));
       assertEquals(0.4, storedPropertySet.get(keyTwo));
       assertEquals(8, storedPropertySet.get(keyThree));
@@ -85,12 +86,12 @@ public class StoredPropertySetTest
       DoubleStoredPropertyKey keyTwo = keyList.addDoubleKey("KeyTwo", 0.4);
       IntegerStoredPropertyKey keyThree = keyList.addIntegerKey("KeyThree", 8);
 
-      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class);
       assertEquals(true, storedPropertySet.get(keyOne));
       assertEquals(0.4, storedPropertySet.get(keyTwo));
       assertEquals(8, storedPropertySet.get(keyThree));
 
-      StoredPropertySet storedPropertySet2 = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      StoredPropertySet storedPropertySet2 = new StoredPropertySet(keyList, StoredPropertySetTest.class);
       assertEquals(true, storedPropertySet2.get(keyOne));
       assertEquals(0.4, storedPropertySet2.get(keyTwo));
       assertEquals(8, storedPropertySet2.get(keyThree));
@@ -100,5 +101,53 @@ public class StoredPropertySetTest
       storedPropertySet2.load();
 
       assertFalse(storedPropertySet.equals(storedPropertySet2));
+   }
+
+   @Test
+   public void testLoadingStoredPropertySetGeneratorTest()
+   {
+      StoredPropertySetTestParameters storedPropertySetTestParameters = new StoredPropertySetTestParameters();
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
+   }
+
+   @Test
+   public void testToFromString()
+   {
+      StoredPropertySetTestParameters storedPropertySetTestParameters = new StoredPropertySetTestParameters();
+      LogTools.info(storedPropertySetTestParameters.toString());
+      boolean originalBoolean = storedPropertySetTestParameters.getTheFirstBooleanProperty();
+      LogTools.info(originalBoolean);
+      double originalDouble = storedPropertySetTestParameters.getTheFirstDoubleProperty();
+      LogTools.info(originalDouble);
+      int originalInteger = storedPropertySetTestParameters.getTheFirstIntegerProperty();
+      LogTools.info(originalInteger);
+      storedPropertySetTestParameters.setFromColonCommaString(storedPropertySetTestParameters.toString());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
+      assertEquals(originalBoolean, storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      assertEquals(originalDouble, storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      assertEquals(originalInteger, storedPropertySetTestParameters.getTheFirstIntegerProperty());
+   }
+
+   public static void main(String[] args)
+   {
+      StoredPropertySetTestParameters storedPropertySetTestParameters = new StoredPropertySetTestParameters();
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
+      storedPropertySetTestParameters.load();
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
+      storedPropertySetTestParameters.save();
+      storedPropertySetTestParameters.load();
+      storedPropertySetTestParameters.save();
+      storedPropertySetTestParameters.load();
+      storedPropertySetTestParameters.load();
+      storedPropertySetTestParameters.save();
+      storedPropertySetTestParameters.save();
    }
 }

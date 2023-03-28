@@ -129,7 +129,7 @@ public class AvatarCommonAsserts
    {
       FrameQuaternion currentBodyOrientation = new FrameQuaternion(body.getBodyFixedFrame());
       currentBodyOrientation.changeFrame(expected.getReferenceFrame());
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expected, currentBodyOrientation, epsilon);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expected, currentBodyOrientation, epsilon);
    }
 
    public static void assertBodyPosition(FramePoint3DReadOnly expected, RigidBodyBasics body, double epsilon)
@@ -153,7 +153,7 @@ public class AvatarCommonAsserts
    {
       FrameQuaternion controllerDesiredOrientation = findDesiredOrientation(scs, body);
       controllerDesiredOrientation.changeFrame(expected.getReferenceFrame());
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expected, controllerDesiredOrientation, epsilon);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expected, controllerDesiredOrientation, epsilon);
    }
 
    public static void assertDesiredChestAngularVelocityZero(FullHumanoidRobotModel robot, YoVariableHolder scs, double epsilon)
@@ -176,7 +176,7 @@ public class AvatarCommonAsserts
    {
       String namespace = PelvisICPBasedTranslationManager.class.getSimpleName();
       Tuple2DReadOnly desiredICPOffset = findTuple2d(namespace, "desiredICPOffset", scs);
-      EuclidCoreTestTools.assertTuple2DEquals(new Vector2D(), desiredICPOffset, epsilon);
+      EuclidCoreTestTools.assertEquals(new Vector2D(), desiredICPOffset, epsilon);
    }
 
    public static void assertDesiredPelvisHeightOffsetZero(YoVariableHolder scs, double epsilon)

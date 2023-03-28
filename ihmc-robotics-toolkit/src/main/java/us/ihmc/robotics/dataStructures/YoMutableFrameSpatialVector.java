@@ -85,7 +85,6 @@ public class YoMutableFrameSpatialVector implements SpatialVectorBasics, YoMutab
    @Override
    public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      checkFrameConsistency();
       YoMutableFrameObject.super.setReferenceFrame(referenceFrame);
       // When constructing this with two YoMutableFrameVector3D objects the angular part is updated only by the super implementation.
       linearPart.setReferenceFrame(referenceFrame);

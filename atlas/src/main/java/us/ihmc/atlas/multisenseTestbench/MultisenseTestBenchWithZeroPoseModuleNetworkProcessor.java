@@ -172,7 +172,7 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
 
             rosJointStatePublisher.publish(jointNamesList, jointAngles, jointVelocities, jointTorques, t);
 
-            RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+            RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
 
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
                                             robotConfigurationData.getPelvisAngularVelocity(), jointMap.getUnsanitizedRootJointInSdf(),

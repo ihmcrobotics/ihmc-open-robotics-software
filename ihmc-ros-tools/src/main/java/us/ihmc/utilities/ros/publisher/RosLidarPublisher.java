@@ -2,7 +2,7 @@ package us.ihmc.utilities.ros.publisher;
 
 import org.ros.message.Time;
 
-import controller_msgs.msg.dds.SimulatedLidarScanPacket;
+import perception_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import std_msgs.Header;
 import us.ihmc.communication.packets.MessageTools;

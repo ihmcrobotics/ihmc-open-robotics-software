@@ -14,6 +14,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -106,7 +107,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
    }
 
    @Override
-   public boolean solve(RigidBodyTransform desiredTransform)
+   public boolean solve(RigidBodyTransformReadOnly desiredTransform)
    {
       double initParam[] = new double[oneDoFJoints.length];
       for (int i = 0; i < oneDoFJoints.length; i++)
@@ -242,10 +243,10 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
     */
    public class FunctionErrors implements FunctionNtoM
    {
-      RigidBodyTransform desiredTransform;
+      RigidBodyTransformReadOnly desiredTransform;
       double parameterChangePenalty;
 
-      public FunctionErrors(RigidBodyTransform desiredTransform, double parameterChangePenalty)
+      public FunctionErrors(RigidBodyTransformReadOnly desiredTransform, double parameterChangePenalty)
       {
          this.parameterChangePenalty = parameterChangePenalty;
          this.desiredTransform = desiredTransform;
@@ -290,7 +291,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
       }
    }
 
-   private void extractTandR(RigidBodyTransform tran, Vector3D T, Vector3D R)
+   private void extractTandR(RigidBodyTransformReadOnly tran, Vector3D T, Vector3D R)
    {
       T.set(tran.getTranslation());
       rotationMatrix.set(tran.getRotation());

@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.function.LongUnaryOperator;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.FisheyePacket;
+import perception_msgs.msg.dds.FisheyePacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

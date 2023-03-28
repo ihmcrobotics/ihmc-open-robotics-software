@@ -1,0 +1,42 @@
+#ifndef __toolbox_msgs__msg__ToolboxStateMessage__idl__
+#define __toolbox_msgs__msg__ToolboxStateMessage__idl__
+
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet WAKE_UP =
+      0;
+
+      const octet REINITIALIZE =
+      1;
+
+      const octet SLEEP =
+      2;
+
+
+      /**
+       * This message is part of the IHMC toolbox framework.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::ToolboxStateMessage_")
+      struct ToolboxStateMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet requested_toolbox_state;
+        /**
+         * If true and the toolbox supports logging, all messages to and from the toolbox are logged.
+         * Can only be requested for WAKE_UP and REINITIALIZE. SLEEP will automatically end the toolbox log.
+         */
+        boolean request_logging;
+      };
+    };
+  };
+};
+
+#endif

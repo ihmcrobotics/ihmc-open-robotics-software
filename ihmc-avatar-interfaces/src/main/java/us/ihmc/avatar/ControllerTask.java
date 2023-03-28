@@ -21,8 +21,8 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final ThreadTimer timer;
    private final YoLong ticksBehindScheduled;
 
-   private final List<Runnable> taskThreadRunnables = new ArrayList<>();
-   private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
+   protected final List<Runnable> taskThreadRunnables = new ArrayList<>();
+   protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
    public ControllerTask(String prefix, AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
@@ -36,6 +36,15 @@ public class ControllerTask extends HumanoidRobotControlTask
 //      String prefix = "Controller";
       timer = new ThreadTimer(prefix, schedulerDt * divisor, controllerThread.getYoVariableRegistry());
       ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", controllerThread.getYoVariableRegistry());
+   }
+
+   @Override
+   protected boolean initialize()
+   {
+      // For when the task gets reset, so we can observe when it gets triggered.
+      timer.reset();
+      ticksBehindScheduled.set(0);
+      return super.initialize();
    }
 
    @Override

@@ -1,6 +1,6 @@
 package us.ihmc.ihmcPerception.bagTools;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 
 import javax.swing.*;

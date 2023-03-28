@@ -47,6 +47,17 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       this.jointAccelerationWeight = jointAccelerationWeight;
    }
 
+   /**
+    * Sets the weight specifying how much high joint torque values should be penalized in the
+    * optimization problem.
+    * <p>
+    * A positive value should be used but does not necessarily need to be non-zero. This weight helps
+    * to improve smoothness of the resulting motions. A high value will cause the system to become too
+    * 'springy'.
+    * </p>
+    *
+    * @param jointTorqueWeight the weight to use for joint torque regularization.
+    */
    public void setJointTorqueWeight(double jointTorqueWeight)
    {
       this.jointTorqueWeight = jointTorqueWeight;
@@ -62,6 +73,11 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       this.jointVelocityLimitMode = jointVelocityLimitMode;
    }
 
+   /**
+    * Sets whether the joint torques should be computed or not.
+    *
+    * @param computeJointTorques the new value for whether to compute the joint torques
+    */
    public void setComputeJointTorques(ActivationState computeJointTorques)
    {
       this.computeJointTorques = computeJointTorques;
@@ -102,6 +118,11 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       return jointVelocityLimitMode != null;
    }
 
+   /**
+    * Whether the solver should compute the resulting joint torques from the solution.
+    *
+    * @return {@code true} if this command should result in the solver computing the joint torques.
+    */
    public boolean hasComputeJointTorques()
    {
       return computeJointTorques != null;
@@ -137,6 +158,16 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       return jointAccelerationWeight;
    }
 
+   /**
+    * Gets the value for {@code jointTorqueWeight}.
+    * <p>
+    * It is equal to {@code Double#NaN} if this command does not hold onto a new value for this field.
+    * </p>
+    *
+    * @return the new value for {@code jointTorqueWeight}.
+    * @see #hasJointTorqueWeight()
+    * @see #setJointTorqueWeight(double)
+    */
    public double getJointTorqueWeight()
    {
       return jointTorqueWeight;

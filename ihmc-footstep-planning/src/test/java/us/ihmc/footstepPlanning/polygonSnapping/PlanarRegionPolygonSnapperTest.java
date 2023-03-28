@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
@@ -10,14 +11,69 @@ import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionPolygonSnapperTest
 {
+   private static final int iters = 100;
+
+   @Test
+   public void testCreateTransformToMatchSurfaceNormalPreserveX()
+   {
+      Random random = new Random(1738L);
+      for (int i = 0; i < iters; i++)
+      {
+         Vector3D surfaceNormal = EuclidCoreRandomTools.nextVector3D(random);
+         surfaceNormal.normalize();
+
+         Vector3D xAxis = new Vector3D();
+         Vector3D yAxis = new Vector3D(0.0, 1.0, 0.0);
+
+         xAxis.cross(yAxis, surfaceNormal);
+         xAxis.normalize();
+         yAxis.cross(surfaceNormal, xAxis);
+
+         RotationMatrix rotationMatrix = new RotationMatrix();
+         rotationMatrix.setColumns(xAxis, yAxis, surfaceNormal);
+         RigidBodyTransform transformExpected = new RigidBodyTransform();
+         transformExpected.getRotation().set(rotationMatrix);
+
+         EuclidCoreTestTools.assertEquals(transformExpected, PlanarRegionPolygonSnapper.createTransformToMatchSurfaceNormalPreserveX(surfaceNormal), 1e-5);
+      }
+   }
+
+   @Test
+   public void testSetTranslationSettingZAndPreservingXAndY()
+   {
+      Random random = new Random(1738L);
+      for (int i = 0; i < iters; i++)
+      {
+         Point3D highestVertex = EuclidCoreRandomTools.nextPoint3D(random);
+         RigidBodyTransform trasnformToModify = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+
+         RigidBodyTransform transformExpected = new RigidBodyTransform(trasnformToModify);
+
+         Vector3D newTranslation = new Vector3D(highestVertex.getX(), highestVertex.getY(), 0.0);
+         transformExpected.transform(newTranslation);
+         newTranslation.scale(-1.0);
+         newTranslation.add(highestVertex);
+
+         transformExpected.getTranslation().set(newTranslation);
+
+         PlanarRegionPolygonSnapper.setTranslationSettingZAndPreservingXAndY(highestVertex, trasnformToModify);
+
+         EuclidCoreTestTools.assertEquals(transformExpected, trasnformToModify, 1e-5);
+      }
+   }
 
    @Test
    public void testSnapPolygonToFlatPlanarRegion()
@@ -154,7 +210,7 @@ public class PlanarRegionPolygonSnapperTest
 
       Vector3D actualSurfaceNormal = new Vector3D(0.0, 0.0, 1.0);
       snapTransform.transform(actualSurfaceNormal);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedSurfaceNormal, actualSurfaceNormal, 1e-7);
+      EuclidCoreTestTools.assertEquals(expectedSurfaceNormal, actualSurfaceNormal, 1e-7);
 
       Vector3D xAxis = new Vector3D(1.0, 0.0, 0.0);
       snapTransform.transform(xAxis);

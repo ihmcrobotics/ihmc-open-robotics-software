@@ -225,8 +225,9 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       LookAheadCoMHeightTrajectoryGenerator lookAhead = new LookAheadCoMHeightTrajectoryGenerator(minimumHeight,
                                                                                                   nominalHeight,
                                                                                                   maximumHeight,
-                                                                                                  0.0,
                                                                                                   doubleSupportIn,
+                                                                                                  Double.POSITIVE_INFINITY,
+                                                                                                  0.0,
                                                                                                   comFrame,
                                                                                                   comFrame,
                                                                                                   soleFrames,
@@ -290,7 +291,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          endPosition.setY(0.0);
          endPosition.addZ(nominalHeight);
          queryPoint.interpolate(startPosition, endPosition, alpha);
-         lookAhead.solve(data, queryPoint, inTransfer);
+         lookAhead.solve(data, queryPoint);
 
          FramePoint3D currentCoM = new FramePoint3D(queryPoint);
          FramePoint3D upcomingPosition = new FramePoint3D(transferToAndNextFootstepsData.getTransferToPosition());

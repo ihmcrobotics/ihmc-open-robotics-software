@@ -63,6 +63,6 @@ public class CaptureRegionMathToolsTest
       actualRadius.sub(actualPoint, center);
       assertEquals(radius, actualRadius.length(), 1e-8);
 
-      EuclidCoreTestTools.assertTuple2DEquals(expectedPoint, actualPoint, 1.0e-12);
+      EuclidCoreTestTools.assertEquals(expectedPoint, actualPoint, 1.0e-12);
    }
 }

@@ -50,8 +50,8 @@ public class ICPControllerQPSolverTest
       FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
       FrameVector2D copFeedbackExpected = new FrameVector2D();
 
-      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
-      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
    }
 
    @Test
@@ -459,7 +459,7 @@ public class ICPControllerQPSolverTest
       FramePoint2D unconstrainedCMPAlt = new FramePoint2D(perfectCMP);
       unconstrainedCMPAlt.add(unconstrainedFeedbackDelta);
 
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(unconstrainedCMPAlt, unconstrainedFeedbackCMP, 1e-5);
+      EuclidFrameTestTools.assertGeometricallyEquals(unconstrainedCMPAlt, unconstrainedFeedbackCMP, 1e-5);
 
       DMatrixRMaj expectedSolution = new DMatrixRMaj(4, 1);
       feedbackCoPDelta.get(expectedSolution);

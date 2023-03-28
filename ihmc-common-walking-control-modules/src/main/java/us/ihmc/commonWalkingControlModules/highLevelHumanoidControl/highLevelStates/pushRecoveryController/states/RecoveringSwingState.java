@@ -123,7 +123,7 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       hasMinimumTimePassed.set(hasMinimumTimePassed(timeInState));
 
-      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround();
+      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGroundFiltered();
    }
 
    @Override
@@ -169,11 +169,11 @@ public class RecoveringSwingState extends PushRecoveryState
 
       feetManager.requestSwing(swingSide, nextFootstep, swingTime, null, null);
 
-      pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, Double.NaN);
+      pelvisOrientationManager.initializeSwing();
 
       actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 
-      walkingMessageHandler.reportFootstepStarted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepStarted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime, nextFootstep.getSequenceID());
    }
 
    @Override
@@ -181,7 +181,7 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 
-      walkingMessageHandler.reportFootstepCompleted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepCompleted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime, nextFootstep.getSequenceID());
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
       feetManager.touchDown(swingSide, Double.NaN, Double.NaN, Double.NaN, Double.NaN);

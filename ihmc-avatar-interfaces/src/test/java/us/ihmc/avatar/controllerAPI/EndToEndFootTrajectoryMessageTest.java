@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -36,7 +36,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -61,6 +60,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
@@ -366,7 +366,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
             SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(footName, trajectoryPointIndex, simulationTestHelper);
             SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-            framePoint.get(expectedTrajectoryPoint);
+            expectedTrajectoryPoint.set(framePoint);
 
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
             assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
@@ -378,7 +378,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(footName,
                                                                                                                                  simulationTestHelper);
          SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-         lastFramePoint.get(expectedTrajectoryPoint);
+         expectedTrajectoryPoint.set(lastFramePoint);
 
          controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime());
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
@@ -538,7 +538,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
             SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(footName, trajectoryPointIndex, simulationTestHelper);
             SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-            framePoint.get(expectedTrajectoryPoint);
+            expectedTrajectoryPoint.set(framePoint);
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
             assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
 
@@ -571,8 +571,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String varnameOrientationDesired = footName + Type.DESIRED.getName() + SpaceData3D.ORIENTATION.getName();
       Quaternion currentDesiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired, varnameOrientationDesired, simulationTestHelper);
 
-      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy(), currentDesiredPosition, 0.001);
-      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy(), currentDesiredOrientation, 0.001);
+      EuclidCoreTestTools.assertEquals(lastPoint.getPosition(), currentDesiredPosition, 0.001);
+      EuclidCoreTestTools.assertEquals(lastPoint.getOrientation(), currentDesiredOrientation, 0.001);
 
       assertEquals(2 * footTrajectoryMessages.size(), statusMessages.size());
       double startTime = 0.0;
@@ -648,12 +648,12 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          for (int i = 0; i < numberOfTrajectoryPointsPerMessage; i++)
          {
-            Point3D desiredPosition = new Point3D();
-            Vector3D desiredLinearVelocity = new Vector3D();
+            FrameEuclideanTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(calculatorIndex);
+            Point3D desiredPosition = new Point3D(trajectoryPoint.getPosition());
+            Vector3D desiredLinearVelocity = new Vector3D(trajectoryPoint.getLinearVelocity());
             Quaternion desiredOrientation = new Quaternion();
             Vector3D desiredAngularVelocity = new Vector3D();
 
-            trajectoryPoints.getTrajectoryPoint(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
             double time = trajectoryPoints.getTrajectoryPoint(calculatorIndex).getTime();
 
             spheres.appendTranslation(desiredPosition);
@@ -870,12 +870,12 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                                   currentDesiredTrajectoryPoint.getAngularVelocity(),
                                                                   currentDesiredTrajectoryPoint.getLinearVelocity());
 
-      EuclidGeometryTestTools.assertPose3DEquals(desiredPose, controllerDesiredPose, desiredEpsilon);
+      EuclidCoreTestTools.assertEquals(desiredPose, controllerDesiredPose, desiredEpsilon);
       MecanoTestTools.assertSpatialVectorEquals(desiredVelocity, controllerDesiredVelocity, desiredEpsilon);
 
       FramePose3D currentPose = new FramePose3D(foot.getBodyFixedFrame());
       currentPose.changeFrame(worldFrame);
-      EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
+      EuclidCoreTestTools.assertGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
             + currentPose.getPosition().distance(controllerDesiredPose.getPosition()) + ", orientation: "
             + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
                                                               controllerDesiredPose,
@@ -892,13 +892,13 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                                     currentDesiredTrajectoryPoint.getLinearVelocity());
 
       desiredEpsilon = 1.0e-7;
-      EuclidGeometryTestTools.assertPose3DEquals(desiredPose, controllerDesiredPose, desiredEpsilon);
+      EuclidCoreTestTools.assertEquals(desiredPose, controllerDesiredPose, desiredEpsilon);
       MecanoTestTools.assertSpatialVectorEquals(desiredVelocity, controllerDesiredVelocity, desiredEpsilon);
 
       currentPose = new FramePose3D(foot.getBodyFixedFrame());
       currentPose.changeFrame(worldFrame);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(controllerDesiredPose.getPosition(), currentPose.getPosition(), 1.0e-2);
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(controllerDesiredPose.getOrientation(), currentPose.getOrientation(), 2.0e-2);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(controllerDesiredPose.getOrientation(), currentPose.getOrientation(), 2.0e-2);
    }
 
    //Creates a trajectory for the foot, depending on the number of iterations, it looks like a ribbon or a sphere

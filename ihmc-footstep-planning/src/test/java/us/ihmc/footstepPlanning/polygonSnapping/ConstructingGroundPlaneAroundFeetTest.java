@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -20,7 +21,13 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class ConstructingGroundPlaneAroundFeetTest
 {
-   private final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private boolean visualize = false;
+
+   @BeforeEach
+   public void setup()
+   {
+      visualize &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
 
    @AfterEach
    public void tearDown()

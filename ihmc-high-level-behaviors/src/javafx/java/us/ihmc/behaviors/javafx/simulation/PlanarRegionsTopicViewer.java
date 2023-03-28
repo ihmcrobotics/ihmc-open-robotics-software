@@ -1,15 +1,15 @@
 package us.ihmc.behaviors.javafx.simulation;
 
-import javafx.application.Application;
 import javafx.stage.Stage;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.javafx.graphics.live.JavaFXLivePlanarRegionsGraphic;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 
-public class PlanarRegionsTopicViewer extends Application
+public class PlanarRegionsTopicViewer extends ApplicationNoModule
 {
    @Override
    public void start(Stage primaryStage) throws Exception

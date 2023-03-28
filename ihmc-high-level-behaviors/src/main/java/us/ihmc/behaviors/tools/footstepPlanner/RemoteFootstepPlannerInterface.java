@@ -1,6 +1,10 @@
 package us.ihmc.behaviors.tools.footstepPlanner;
 
-import controller_msgs.msg.dds.*;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -64,7 +68,7 @@ public class RemoteFootstepPlannerInterface
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       if (messager != null)
       {
-         messager.registerTopicListener(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
+         messager.addTopicListener(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
          {
             DefaultFootstepPlannerParameters settableFootstepPlannerParameters = new DefaultFootstepPlannerParameters(); // TODO: This might not be thread safe
             parameters.packFootstepPlannerParameters(settableFootstepPlannerParameters);              // TODO: Clean this up  - @dcalvert

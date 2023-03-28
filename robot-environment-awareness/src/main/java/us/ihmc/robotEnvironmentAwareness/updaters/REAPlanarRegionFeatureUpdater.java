@@ -5,13 +5,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersMessage;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import perception_msgs.msg.dds.PolygonizerParametersMessage;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
@@ -59,8 +63,8 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    private AtomicReference<Boolean> enableIntersectionCalulator;
    private AtomicReference<PlanarRegionSegmentationParameters> planarRegionSegmentationParameters;
    private AtomicReference<CustomRegionMergeParameters> customRegionMergingParameters;
-   private AtomicReference<ConcaveHullFactoryParameters> concaveHullFactoryParameters;
-   private AtomicReference<PolygonizerParameters> polygonizerParameters;
+   private AtomicReference<ConcaveHullFactoryParameters> concaveHullFactoryParameters = new AtomicReference<>(new ConcaveHullFactoryParameters());
+   private AtomicReference<PolygonizerParameters> polygonizerParameters = new AtomicReference<>(new PolygonizerParameters());
    private AtomicReference<IntersectionEstimationParameters> intersectionEstimationParameters;
    private AtomicReference<SurfaceNormalFilterParameters> surfaceNormalFilterParameters;
    private final Messager reaMessager;
@@ -76,8 +80,8 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
    private Topic<PlanarRegionSegmentationParameters> planarRegionsSegmentationParametersTopic = REAModuleAPI.PlanarRegionsSegmentationParameters;
    private Topic<CustomRegionMergeParameters> customRegionMergeParametersTopic = REAModuleAPI.CustomRegionsMergingParameters;
-   private Topic<ConcaveHullFactoryParameters> planarRegionsConcaveHullParametersTopic = REAModuleAPI.PlanarRegionsConcaveHullParameters;
-   private Topic<PolygonizerParameters> planarRegionsPolygonizerParametersTopic = REAModuleAPI.PlanarRegionsPolygonizerParameters;
+   private Topic<ConcaveHullFactoryParametersMessage> planarRegionsConcaveHullParametersTopic = REAModuleAPI.PlanarRegionsConcaveHullParameters;
+   private Topic<PolygonizerParametersMessage> planarRegionsPolygonizerParametersTopic = REAModuleAPI.PlanarRegionsPolygonizerParameters;
    private Topic<IntersectionEstimationParameters> planarRegionsIntersectionParametersTopic = REAModuleAPI.PlanarRegionsIntersectionParameters;
    private Topic<SurfaceNormalFilterParameters> surfaceNormalFilterParametersTopic = REAModuleAPI.SurfaceNormalFilterParameters;
 
@@ -90,7 +94,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
    {
       this.reaMessager = reaMessager;
 
-      reaMessager.registerTopicListener(requestEntireModuleStateTopic, (messageContent) -> sendCurrentState());
+      reaMessager.addTopicListener(requestEntireModuleStateTopic, (messageContent) -> sendCurrentState());
    }
 
    public void bindControls()
@@ -106,10 +110,13 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       planarRegionSegmentationParameters = reaMessager.createInput(planarRegionsSegmentationParametersTopic, new PlanarRegionSegmentationParameters());
       customRegionMergingParameters = reaMessager.createInput(customRegionMergeParametersTopic, new CustomRegionMergeParameters());
-      concaveHullFactoryParameters = reaMessager.createInput(planarRegionsConcaveHullParametersTopic, new ConcaveHullFactoryParameters());
-      polygonizerParameters = reaMessager.createInput(planarRegionsPolygonizerParametersTopic, new PolygonizerParameters());
+      reaMessager.addTopicListener(planarRegionsConcaveHullParametersTopic, message -> concaveHullFactoryParameters.set(REAParametersMessageHelper.convertFromMessage(message)));
+      reaMessager.addTopicListener(planarRegionsPolygonizerParametersTopic, message -> polygonizerParameters.set(REAParametersMessageHelper.convertFromMessage(message)));
       intersectionEstimationParameters = reaMessager.createInput(planarRegionsIntersectionParametersTopic, new IntersectionEstimationParameters());
       surfaceNormalFilterParameters = reaMessager.createInput(surfaceNormalFilterParametersTopic, new SurfaceNormalFilterParameters());
+
+      this.concaveHullFactoryParameters.set(new ConcaveHullFactoryParameters());
+      this.polygonizerParameters.set(REAParametersMessageHelper.convertFromMessage(new PolygonizerParametersMessage()));
    }
 
    public void setPlanarRegionSegmentationParameters(PlanarRegionSegmentationParameters planarRegionSegmentationParameters)
@@ -187,12 +194,12 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       this.customRegionMergeParametersTopic = customRegionMergeParametersTopic;
    }
 
-   public void setPlanarRegionsConcaveHullFactoryParametersTopic(Topic<ConcaveHullFactoryParameters> planarRegionsConcaveHullParametersTopic)
+   public void setPlanarRegionsConcaveHullFactoryParametersTopic(Topic<ConcaveHullFactoryParametersMessage> planarRegionsConcaveHullParametersTopic)
    {
       this.planarRegionsConcaveHullParametersTopic = planarRegionsConcaveHullParametersTopic;
    }
 
-   public void setPlanarRegionsPolygonizerParametersTopic(Topic<PolygonizerParameters> planarRegionsPolygonizerParametersTopic)
+   public void setPlanarRegionsPolygonizerParametersTopic(Topic<PolygonizerParametersMessage> planarRegionsPolygonizerParametersTopic)
    {
       this.planarRegionsPolygonizerParametersTopic = planarRegionsPolygonizerParametersTopic;
    }
@@ -217,8 +224,8 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       reaMessager.submitMessage(planarRegionsSegmentationParametersTopic, planarRegionSegmentationParameters.get());
       reaMessager.submitMessage(customRegionMergeParametersTopic, customRegionMergingParameters.get());
-      reaMessager.submitMessage(planarRegionsConcaveHullParametersTopic, concaveHullFactoryParameters.get());
-      reaMessager.submitMessage(planarRegionsPolygonizerParametersTopic, polygonizerParameters.get());
+      reaMessager.submitMessage(planarRegionsConcaveHullParametersTopic, REAParametersMessageHelper.convertToMessage(concaveHullFactoryParameters.get()));
+      reaMessager.submitMessage(planarRegionsPolygonizerParametersTopic, REAParametersMessageHelper.convertToMessage(polygonizerParameters.get()));
       reaMessager.submitMessage(planarRegionsIntersectionParametersTopic, intersectionEstimationParameters.get());
       reaMessager.submitMessage(surfaceNormalFilterParametersTopic, surfaceNormalFilterParameters.get());
    }
@@ -251,11 +258,19 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       String planarRegionConcaveHullFactoryParametersFile = filePropertyHelper.loadProperty(planarRegionsConcaveHullParametersTopic.getName());
       if (planarRegionConcaveHullFactoryParametersFile != null)
-         concaveHullFactoryParameters.set(ConcaveHullFactoryParameters.parse(planarRegionConcaveHullFactoryParametersFile));
+      {
+         ConcaveHullFactoryParameters concaveHullFactoryParametersStoredPropertySet = new ConcaveHullFactoryParameters();
+         concaveHullFactoryParametersStoredPropertySet.setFromColonCommaString(planarRegionConcaveHullFactoryParametersFile);
+         concaveHullFactoryParameters.set(concaveHullFactoryParametersStoredPropertySet);
+      }
 
       String polygonizerParametersFile = filePropertyHelper.loadProperty(planarRegionsPolygonizerParametersTopic.getName());
       if (polygonizerParametersFile != null)
-         polygonizerParameters.set(PolygonizerParameters.parse(polygonizerParametersFile));
+      {
+         PolygonizerParameters polygonizerParametersStoredPropertySet = new PolygonizerParameters();
+         polygonizerParametersStoredPropertySet.setFromColonCommaString(polygonizerParametersFile);
+         polygonizerParameters.set(polygonizerParametersStoredPropertySet);
+      }
 
       String intersectionEstimationParametersFile = filePropertyHelper.loadProperty(planarRegionsIntersectionParametersTopic.getName());
       if (intersectionEstimationParametersFile != null)

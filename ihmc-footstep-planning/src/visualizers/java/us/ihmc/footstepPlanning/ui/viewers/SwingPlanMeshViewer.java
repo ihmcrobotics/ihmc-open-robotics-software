@@ -2,8 +2,7 @@ package us.ihmc.footstepPlanning.ui.viewers;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -22,7 +21,6 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -61,13 +59,13 @@ public class SwingPlanMeshViewer extends AnimationTimer
       leftFootPose = messager.createInput(LeftFootPose, null);
       rightFootPose = messager.createInput(RightFootPose, null);
 
-      messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
+      messager.addTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
       }));
 
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
 
       showSolution = messager.createInput(ShowFootstepPlan, true);
       showPostProcessingInfo = messager.createInput(ShowPostProcessingInfo, true);

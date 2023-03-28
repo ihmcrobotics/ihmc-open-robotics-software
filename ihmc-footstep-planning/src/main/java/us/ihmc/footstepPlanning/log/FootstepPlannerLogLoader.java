@@ -2,13 +2,15 @@ package us.ihmc.footstepPlanning.log;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessagePubSubType;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessagePubSubType;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,17 +22,12 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.DataSet;
-import us.ihmc.pathPlanning.DataSetIOTools;
-import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
-import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoVariableType;
 
@@ -45,8 +42,8 @@ import java.util.*;
 public class FootstepPlannerLogLoader
 {
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
-   private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
+   private final JSONSerializer<StoredPropertySetMessage> bodyPathParametersSerializer = new JSONSerializer<>(new StoredPropertySetMessagePubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
@@ -167,19 +164,22 @@ public class FootstepPlannerLogLoader
          log.getRequestPacket().set(requestPacketSerializer.deserialize(jsonNode.toString()));
          requestPacketInputStream.close();
 
-         // load body path parameters packet
-         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
-         InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
-         jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
-         log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
-         bodyPathParametersPacketInputStream.close();
-
          // load footstep parameters packet
          File footstepParametersFile = new File(logDirectory, FootstepPlannerLogger.footstepParametersFileName);
          InputStream footstepParametersPacketInputStream = new FileInputStream(footstepParametersFile);
          jsonNode = objectMapper.readTree(footstepParametersPacketInputStream);
          log.getFootstepParametersPacket().set(footstepParametersSerializer.deserialize(jsonNode.toString()));
          footstepParametersPacketInputStream.close();
+
+         // load body path parameters packet
+         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
+         if (bodyPathParametersFile.exists())
+         {
+            InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
+            jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
+            log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
+            bodyPathParametersPacketInputStream.close();
+         }
 
          // load swing parameters packet
          File swingParametersFile = new File(logDirectory, FootstepPlannerLogger.swingParametersFileName);
@@ -198,33 +198,9 @@ public class FootstepPlannerLogLoader
          log.getStatusPacket().set(statusPacketSerializer.deserialize(jsonNode.toString()));
          statusPacketInputStream.close();
 
-         // load body path data file
-         File bodyPathPlannerFile = new File(logDirectory, FootstepPlannerLogger.bodyPathPlanFileName);
-         BufferedReader dataFileReader = new BufferedReader(new FileReader(bodyPathPlannerFile));
-         log.getVisibilityGraphHolder().setStartMapId(getIntCSV(true, dataFileReader.readLine())[0]);
-         log.getVisibilityGraphHolder().setGoalMapId(getIntCSV(true, dataFileReader.readLine())[0]);
-         log.getVisibilityGraphHolder().setInterRegionsMapId(getIntCSV(true, dataFileReader.readLine())[0]);
-         loadVisibilityMap(dataFileReader, log.getVisibilityGraphHolder().getStartVisibilityMap());
-         loadVisibilityMap(dataFileReader, log.getVisibilityGraphHolder().getGoalVisibilityMap());
-         loadVisibilityMap(dataFileReader, log.getVisibilityGraphHolder().getInterRegionsVisibilityMap());
-
-         int numberOfNavigableRegions = getIntCSV(true, dataFileReader.readLine())[0];
-         List<PlanarRegion> planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage()).getPlanarRegionsAsList();
-         for (int i = 0; i < numberOfNavigableRegions; i++)
-         {
-            VisibilityMapWithNavigableRegion navigableRegion = loadNavigableRegion(dataFileReader, planarRegionsList);
-            if (navigableRegion == null)
-            {
-               LogTools.error("Couldn't find corresponding planar region in visibility graph log");
-               break;
-            }
-            log.getVisibilityGraphHolder().addNavigableRegion(navigableRegion);
-         }
-
          // load footstep header file
-         dataFileReader.close();
          File headerFile = new File(logDirectory, FootstepPlannerLogger.headerFileName);
-         dataFileReader = new BufferedReader(new FileReader(headerFile));
+         BufferedReader dataFileReader = new BufferedReader(new FileReader(headerFile));
          int numberOfVariables = loadVariableDescriptors(dataFileReader, log.getVariableDescriptors());
          log.getFootPolygons().put(RobotSide.LEFT, readPolygon(dataFileReader.readLine()));
          log.getFootPolygons().put(RobotSide.RIGHT, readPolygon(dataFileReader.readLine()));
@@ -239,6 +215,7 @@ public class FootstepPlannerLogLoader
             FootstepPlannerIterationData iterationData = new FootstepPlannerIterationData();
             iterationData.setParentNode(readNode(dataFileReader.readLine()));
             iterationData.setIdealChildNode(readNode(dataFileReader.readLine()));
+            iterationData.setNominalIdealChildNode(readNode(dataFileReader.readLine()));
             int edges = getIntCSV(true, dataFileReader.readLine())[0];
             readSnapData(iterationData.getParentStartSnapData(), dataFileReader);
             readSnapData(iterationData.getParentEndSnapData(), dataFileReader);

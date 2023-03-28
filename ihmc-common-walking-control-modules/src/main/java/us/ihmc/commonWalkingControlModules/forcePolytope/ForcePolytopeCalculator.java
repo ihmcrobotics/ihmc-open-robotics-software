@@ -97,6 +97,7 @@ public class ForcePolytopeCalculator
    public void update()
    {
       rootBody.updateFramesRecursively();
+      contactPointFrame.update();
       contactPoint.setIncludingFrame(endEffector.getParentJoint().getFrameAfterJoint(), contactPointInParentFrameAfterJoint);
 
       /* Compute point jacobian */

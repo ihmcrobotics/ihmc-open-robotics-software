@@ -61,6 +61,11 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
+   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel)
+   {
+      this(robot, fullRobotModel, null, null);
+   }
+
    public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel, null, referenceFrames);

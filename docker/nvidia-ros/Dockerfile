@@ -1,9 +1,9 @@
 # An image for developing GPU accelerated applications on NVIDIA hardware with ROS.
 # This image is published to https://hub.docker.com/r/ihmcrobotics/nvidia-ros
-# Current version: 0.3
+# Current version: 0.4
 # This file is mostly taken from https://github.com/osrf/docker_images/blob/master/ros/noetic/ubuntu/focal/ros-core/Dockerfile
 # We aren't yet sure how to get around copying this code.
-FROM ihmcrobotics/nvidia:0.4
+FROM ihmcrobotics/nvidia:0.5
 
 # Setup ROS Noetic
 USER root

@@ -2,12 +2,9 @@ package us.ihmc.avatar;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.util.Precision;
-
-import controller_msgs.msg.dds.AdjustFootstepMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -38,18 +35,6 @@ public class AvatarLiftOffAndTouchDownTest
                                 double startPitch,
                                 double finalPitch,
                                 double footLength)
-         throws SimulationExceededMaximumTimeException
-   {
-      return doStep(robotModel, testHelper, stepLength, startPitch, finalPitch, footLength, 0.0);
-   }
-
-   public static boolean doStep(DRCRobotModel robotModel,
-                                SCS2AvatarTestingSimulation testHelper,
-                                double stepLength,
-                                double startPitch,
-                                double finalPitch,
-                                double footLength,
-                                double adjustmentX)
          throws SimulationExceededMaximumTimeException
    {
       double swingDuration = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
@@ -139,16 +124,6 @@ public class AvatarLiftOffAndTouchDownTest
       success &= checkFootPitch(testHelper, startPitch, side);
 
       testHelper.simulateNow(robotModel.getWalkingControllerParameters().getDefaultSwingTime() / 3.0);
-
-      if (!Precision.equals(adjustmentX, 0.0))
-      {
-         AdjustFootstepMessage adjustFootstepMessage = new AdjustFootstepMessage();
-         adjustFootstepMessage.getLocation().set(step.getLocation());
-         adjustFootstepMessage.getOrientation().set(step.getOrientation());
-         adjustFootstepMessage.setRobotSide(side.toByte());
-         adjustFootstepMessage.getLocation().addX(adjustmentX);
-         testHelper.publishToController(adjustFootstepMessage);
-      }
 
       testHelper.simulateNow(robotModel.getWalkingControllerParameters().getDefaultSwingTime() * 2.0 / 3.0);
       success &= checkFootPitch(testHelper, finalPitch, side);

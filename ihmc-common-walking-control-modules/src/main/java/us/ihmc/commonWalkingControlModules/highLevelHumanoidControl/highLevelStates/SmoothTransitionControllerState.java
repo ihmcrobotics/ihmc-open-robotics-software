@@ -13,10 +13,13 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SmoothTransitionControllerState extends HighLevelControllerState
 {
+   public static boolean REDUCE_YOVARIABLES = false;
+
    private final BooleanProvider enableTimeBasedTransition;
    private final DoubleProvider standTransitionDuration;
    private final YoDouble standTransitionRatioCurrentValue;
@@ -47,9 +50,11 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
+      YoRegistry registryForBlenders = REDUCE_YOVARIABLES ? null : registry;
+
       for (OneDoFJointBasics controlledJoint : controlledJoints)
       {
-         JointControlBlender jointControlBlender = new JointControlBlender("_StandTransition", controlledJoint, registry);
+         JointControlBlender jointControlBlender = new JointControlBlender("_StandTransition", controlledJoint, registryForBlenders);
          jointCommandBlenders.add(controlledJoint, jointControlBlender);
       }
    }

@@ -4,16 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
-import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -33,7 +31,7 @@ public class MultiContactScriptPostProcessor
    private final FloatingJointBasics rootJoint;
    private final int jointNameHash;
    private final OneDoFJointBasics[] oneDoFJoints;
-   private double durationPerKeyframe = 1.0;
+   private final TDoubleArrayList waypointTimes = new TDoubleArrayList();
 
    public MultiContactScriptPostProcessor(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
@@ -44,23 +42,31 @@ public class MultiContactScriptPostProcessor
       jointNameHash = Arrays.hashCode(oneDoFJoints);
    }
 
-   public WholeBodyJointspaceTrajectoryMessage process1(List<KinematicsToolboxSnapshotDescription> rawScript, boolean solveForTimes)
+   public WholeBodyJointspaceTrajectoryMessage process1(List<KinematicsToolboxSnapshotDescription> rawScript)
    {
       checkJointNameHash(rawScript);
-      List<KinematicsToolboxOutputStatus> desiredRobotConfigurations = rawScript.stream().map(item -> item.getIkSolution()).collect(Collectors.toList());
-      KinematicsToolboxOutputStatus startDesiredConfiguration = desiredRobotConfigurations.get(0);
+
+      computeRegularizedWaypointTimes(rawScript);
+      List<KinematicsToolboxOutputStatus> desiredRobotConfigurations = rawScript.stream().map(KinematicsToolboxSnapshotDescription::getIkSolution).collect(Collectors.toList());
+      RobotConfigurationData startDesiredConfiguration = rawScript.get(0).getControllerConfiguration();
       KinematicsToolboxOutputStatus targetDesiredConfiguration = desiredRobotConfigurations.get(desiredRobotConfigurations.size() - 1);
 
-      int numberOfJoints = startDesiredConfiguration.getDesiredJointAngles().size();
-      int numberOfConfigurations = desiredRobotConfigurations.size();
+      double totalTrajectoryTime = 0.0;
+      for (int i = 0; i < rawScript.size(); i++)
+      {
+         totalTrajectoryTime += rawScript.get(i).getExecutionDuration();
+      }
 
-      TDoubleArrayList startPosition = toTDoubleArrayList(startDesiredConfiguration.getDesiredJointAngles());
+      int numberOfJoints = startDesiredConfiguration.getJointAngles().size();
+      int numberOfConfigurations = 1 + desiredRobotConfigurations.size();
+
+      TDoubleArrayList startPosition = toTDoubleArrayList(startDesiredConfiguration.getJointAngles());
       TDoubleArrayList startVelocity = zeros(numberOfJoints);
       TDoubleArrayList targetPosition = toTDoubleArrayList(targetDesiredConfiguration.getDesiredJointAngles());
       TDoubleArrayList targetVelocity = zeros(numberOfJoints);
       List<TDoubleArrayList> waypoints = new ArrayList<>();
 
-      for (int i = 1; i < desiredRobotConfigurations.size() - 1; i++)
+      for (int i = 0; i < desiredRobotConfigurations.size() - 1; i++)
       {
          waypoints.add(toTDoubleArrayList(desiredRobotConfigurations.get(i).getDesiredJointAngles()));
       }
@@ -69,48 +75,30 @@ public class MultiContactScriptPostProcessor
       trajectoryPointOptimizer.setEndPoints(startPosition, startVelocity, targetPosition, targetVelocity);
       trajectoryPointOptimizer.setWaypoints(waypoints);
 
-      if (solveForTimes)
-      {
-         trajectoryPointOptimizer.compute(0);
-
-         for (int i = 0; i < 40; i++)
-         {
-            if (trajectoryPointOptimizer.doFullTimeUpdate())
-               break;
-            LogTools.info("Iteration: " + i);
-         }
-      }
-      else
-      {
-         trajectoryPointOptimizer.computeForFixedTime(new TDoubleArrayList(IntStream.range(1, numberOfConfigurations - 1)
-                                                                                    .mapToDouble(i -> (double) i / (numberOfConfigurations - 1))
-                                                                                    .toArray()));
-      }
+      trajectoryPointOptimizer.computeForFixedTime(waypointTimes);
 
       WholeBodyJointspaceTrajectoryMessage message = new WholeBodyJointspaceTrajectoryMessage();
-      double trajectoryTimeOffset = 0.5;
-      double totalTrajectoryTime = durationPerKeyframe * numberOfConfigurations;
-
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          message.getJointHashCodes().add(oneDoFJoints[jointIndex].hashCode());
          OneDoFJointTrajectoryMessage jointTrajectory = message.getJointTrajectoryMessages().add();
 
          TrajectoryPoint1DMessage startTrajectoryPoint = jointTrajectory.getTrajectoryPoints().add();
-         startTrajectoryPoint.setTime(trajectoryTimeOffset);
+         startTrajectoryPoint.setTime(0.0);
          startTrajectoryPoint.setPosition(startPosition.get(jointIndex));
          startTrajectoryPoint.setVelocity(startVelocity.get(jointIndex));
 
          for (int waypointIndex = 0; waypointIndex < numberOfConfigurations - 2; waypointIndex++)
          {
             TrajectoryPoint1DMessage trajectoryPoint = jointTrajectory.getTrajectoryPoints().add();
-            trajectoryPoint.setTime(trajectoryTimeOffset + trajectoryPointOptimizer.getWaypointTime(waypointIndex) * totalTrajectoryTime);
+            double time = trajectoryPointOptimizer.getWaypointTime(waypointIndex) * totalTrajectoryTime;
+            trajectoryPoint.setTime(time);
             trajectoryPoint.setPosition(waypoints.get(waypointIndex).get(jointIndex));
             trajectoryPoint.setVelocity(trajectoryPointOptimizer.getWaypointTime(waypointIndex) / totalTrajectoryTime);
          }
 
          TrajectoryPoint1DMessage targetTrajectoryPoint = jointTrajectory.getTrajectoryPoints().add();
-         targetTrajectoryPoint.setTime(trajectoryTimeOffset + totalTrajectoryTime);
+         targetTrajectoryPoint.setTime(totalTrajectoryTime);
          targetTrajectoryPoint.setPosition(targetPosition.get(jointIndex));
          targetTrajectoryPoint.setVelocity(targetVelocity.get(jointIndex));
       }
@@ -129,7 +117,7 @@ public class MultiContactScriptPostProcessor
       for (KinematicsToolboxSnapshotDescription item : rawScript)
       {
          KinematicsToolboxOutputStatus ikSolution = item.getIkSolution();
-         rootJoint.getJointPose().set(ikSolution.getDesiredRootTranslation(), ikSolution.getDesiredRootOrientation());
+         rootJoint.getJointPose().set(ikSolution.getDesiredRootPosition(), ikSolution.getDesiredRootOrientation());
          for (int i = 0; i < ikSolution.getDesiredJointAngles().size(); i++)
          {
             oneDoFJoints[i].setQ(ikSolution.getDesiredJointAngles().get(i));
@@ -216,6 +204,24 @@ public class MultiContactScriptPostProcessor
       }
    }
 
+   private void computeRegularizedWaypointTimes(List<KinematicsToolboxSnapshotDescription> script)
+   {
+      waypointTimes.clear();
+
+      double trajectoryDuration = 0.0;
+      for (int i = 0; i < script.size(); i++)
+      {
+         trajectoryDuration += script.get(i).getExecutionDuration();
+      }
+
+      double runningTotal = 0.0;
+      for (int i = 0; i < script.size() - 1; i++)
+      {
+         runningTotal += script.get(i).getExecutionDuration();
+         waypointTimes.add(runningTotal / trajectoryDuration);
+      }
+   }
+
    private static TDoubleArrayList toTDoubleArrayList(double... values)
    {
       return new TDoubleArrayList(values);
@@ -239,10 +245,5 @@ public class MultiContactScriptPostProcessor
          output.add(0.0);
       }
       return output;
-   }
-
-   public void setDurationPerKeyframe(double durationPerKeyframe)
-   {
-      this.durationPerKeyframe = durationPerKeyframe;
    }
 }

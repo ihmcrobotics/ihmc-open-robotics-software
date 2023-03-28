@@ -3,9 +3,9 @@ package us.ihmc.avatar.multiContact;
 import java.util.HashSet;
 import java.util.Set;
 
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.SelectionMatrix3DMessage;
+import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairAngularErrorCalculator;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairLinearErrorCalculator;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairSpatialErrorCalculator;
@@ -56,7 +56,7 @@ public class MultiContactScriptMatcher
       updateScriptRobotConfiguration(description.getControllerConfiguration());
 
       optimizer.clearErrorCalculators();
-      optimizer.addDefaultRigidBodyLinearErrorCalculators((scriptBody, controllerBody) -> defaultScriptBodiesToMatch.contains(scriptBody));
+      optimizer.addDefaultRigidBodyLinearErrorCalculators((controllerBody, scriptBody) -> defaultScriptBodiesToMatch.contains(scriptBody));
 
       for (SixDoFMotionControlAnchorDescription anchorDescription : description.getSixDoFAnchors())
       {
@@ -113,9 +113,9 @@ public class MultiContactScriptMatcher
 
    private void updateScriptRobotConfiguration(RobotConfigurationData configuration)
    {
-      if (configuration.getJointNameHash() != jointNameHash)
-         throw new RuntimeException("Hashes are different.");
-      scriptFullRobotModel.getRootJoint().getJointPose().set(configuration.getRootTranslation(), configuration.getRootOrientation());
+//      if (configuration.getJointNameHash() != jointNameHash)
+//         throw new RuntimeException("Hashes are different.");
+      scriptFullRobotModel.getRootJoint().getJointPose().set(configuration.getRootPosition(), configuration.getRootOrientation());
       for (int i = 0; i < configuration.getJointAngles().size(); i++)
          allScriptJoints[i].setQ(configuration.getJointAngles().get(i));
       scriptFullRobotModel.updateFrames();

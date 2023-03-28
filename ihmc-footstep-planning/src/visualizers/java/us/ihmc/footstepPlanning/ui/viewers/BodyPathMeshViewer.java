@@ -18,22 +18,17 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 
 public class BodyPathMeshViewer extends AnimationTimer
 {
@@ -68,10 +63,10 @@ public class BodyPathMeshViewer extends AnimationTimer
       defaultSize.scale(1.5 * BODYPATH_LINE_THICKNESS);
 
       show = messager.createInput(FootstepPlannerMessagerAPI.ShowBodyPath, true);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathData, this::processBodyPathOnThread);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.BodyPathData, this::processBodyPathOnThread);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.GlobalReset, data -> reset.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.GlobalReset, data -> reset.set(true));
 
       root.getChildren().addAll(bodyPathMeshView);
    }
@@ -100,7 +95,7 @@ public class BodyPathMeshViewer extends AnimationTimer
       if (newMesh != null)
       {
          if (VERBOSE)
-            PrintTools.info(this, "Rendering body path line.");
+            LogTools.info(this, "Rendering body path line.");
          bodyPathMeshView.setMesh(newMesh.getKey());
          bodyPathMeshView.setMaterial(newMesh.getValue());
       }
@@ -126,7 +121,7 @@ public class BodyPathMeshViewer extends AnimationTimer
          bodyPathMeshToRender.set(new Pair<>(null, null));
          activeBodyPathReference.set(null);
          if (VERBOSE)
-            PrintTools.warn("Received body path that is null.");
+            LogTools.warn("Received body path that is null.");
          return;
       }
 
@@ -134,7 +129,7 @@ public class BodyPathMeshViewer extends AnimationTimer
       bodyPath = bodyPath.stream().map(Pose3D::new).collect(Collectors.toList());
 
       if (VERBOSE)
-         PrintTools.info(this, "Building mesh for body path.");
+         LogTools.info(this, "Building mesh for body path.");
 
       palette.clearPalette();
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
@@ -149,7 +144,7 @@ public class BodyPathMeshViewer extends AnimationTimer
          Quaternion waypointOrientation = new Quaternion(waypoint.getYaw(), Math.toRadians(90), 0);
          meshBuilder.addCylinder(0.2, 0.01, waypoint.getPosition(), waypointOrientation, Color.PURPLE);
 
-         if (bodyPathUnsmoothed != null)
+         if (bodyPathUnsmoothed != null && bodyPathUnsmoothed.size() > segmentIndex + 1)
          {
             lineStart = bodyPathUnsmoothed.get(segmentIndex);
             lineEnd = bodyPathUnsmoothed.get(segmentIndex + 1);

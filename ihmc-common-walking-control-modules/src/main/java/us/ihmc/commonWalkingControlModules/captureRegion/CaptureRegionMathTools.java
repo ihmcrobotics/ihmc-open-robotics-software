@@ -1,15 +1,11 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tools.RotationMatrixTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class CaptureRegionMathTools
 {
@@ -31,13 +27,13 @@ public class CaptureRegionMathTools
       directionA.checkReferenceFrameMatch(centerOfCircle.getReferenceFrame());
       alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
-      double angleBetweenDirections = Math.abs(directionA.angle(directionB));
-      double angleBetweenDirectionsToSetLine = -angleBetweenDirections * alpha;
+      double angleBetweenDirections = directionA.angle(directionB);
+      double angleBetweenDirectionsToSetLine = angleBetweenDirections * alpha;
 
       rotatedFromA.setReferenceFrame(directionA.getReferenceFrame());
       RotationMatrixTools.applyYawRotation(angleBetweenDirectionsToSetLine, directionA, rotatedFromA);
 
-      rotatedFromA.scale(radius / rotatedFromA.length());
+      rotatedFromA.scale(radius / rotatedFromA.norm());
 
       pointToPack.setIncludingFrame(rotatedFromA);
       pointToPack.add(centerOfCircle);

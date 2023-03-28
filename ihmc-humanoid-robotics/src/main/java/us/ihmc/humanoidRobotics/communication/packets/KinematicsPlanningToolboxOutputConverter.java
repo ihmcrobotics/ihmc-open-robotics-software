@@ -7,12 +7,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
@@ -27,6 +27,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.generators.SO3TrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -120,7 +121,7 @@ public class KinematicsPlanningToolboxOutputConverter
 
          double time = keyFrameTimes.get(i);
 
-         orientationCalculator.getTrajectoryPoint(i).getAngularVelocity(desiredAngularVelocity);
+         desiredAngularVelocity.set(orientationCalculator.getTrajectoryPoint(i).getAngularVelocity());
 
          SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
          trajectoryPoint.setTime(time);
@@ -175,11 +176,13 @@ public class KinematicsPlanningToolboxOutputConverter
       {
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
+         FrameEuclideanTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(i);
 
-         trajectoryPoints.getTrajectoryPoint(i).get(desiredPositions[i], desiredLinearVelocity);
+         desiredPositions[i].set(trajectoryPoint.getPosition());
+         desiredLinearVelocity.set(trajectoryPoint.getLinearVelocity());
          double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
-         orientationCalculator.getTrajectoryPoint(i).getAngularVelocity(desiredAngularVelocity);
+         desiredAngularVelocity.set(orientationCalculator.getTrajectoryPoint(i).getAngularVelocity());
 
          trajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
                           .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity,

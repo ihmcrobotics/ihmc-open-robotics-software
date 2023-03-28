@@ -4,29 +4,45 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_MILLIONTH;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TRILLIONTH;
 import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
+import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.*;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class EuclidCoreMissingTools
 {
+   public static void transform(Matrix3DReadOnly matrix, double xOriginal, double yOriginal, double zOriginal, Tuple3DBasics tupleTransformed)
+   {
+      double x = matrix.getM00() * xOriginal + matrix.getM01() * yOriginal + matrix.getM02() * zOriginal;
+      double y = matrix.getM10() * xOriginal + matrix.getM11() * yOriginal + matrix.getM12() * zOriginal;
+      double z = matrix.getM20() * xOriginal + matrix.getM21() * yOriginal + matrix.getM22() * zOriginal;
+      tupleTransformed.set(x, y, z);
+   }
 
    public static void floorToGivenPrecision(Tuple3DBasics tuple3d, double precision)
    {
@@ -84,7 +100,7 @@ public class EuclidCoreMissingTools
    {
       double dotProduct = rotation.getX() * axis.getX() + rotation.getY() * axis.getY() + rotation.getZ() * axis.getZ();
 
-      double scale = dotProduct / axis.lengthSquared();
+      double scale = dotProduct / axis.normSquared();
       double projectedX = scale * axis.getX();
       double projectedY = scale * axis.getY();
       double projectedZ = scale * axis.getZ();
@@ -1075,14 +1091,14 @@ public class EuclidCoreMissingTools
     * Just a more thorough version
     */
    public static boolean intersectionBetweenRay2DAndLine2D(double rayOriginX,
-                                                                  double rayOriginY,
-                                                                  double rayDirectionX,
-                                                                  double rayDirectionY,
-                                                                  double lineOriginX,
-                                                                  double lineOriginY,
-                                                                  double lineDirectionX,
-                                                                  double lineDirectionY,
-                                                                  Point2DBasics intersectionToPack)
+                                                           double rayOriginY,
+                                                           double rayDirectionX,
+                                                           double rayDirectionY,
+                                                           double lineOriginX,
+                                                           double lineOriginY,
+                                                           double lineDirectionX,
+                                                           double lineDirectionY,
+                                                           Point2DBasics intersectionToPack)
    {
       double start1x = rayOriginX;
       double start1y = rayOriginY;
@@ -1125,7 +1141,7 @@ public class EuclidCoreMissingTools
 
       if (Math.abs(determinant) < epsilon)
       { // The lines are parallel
-         // Check if they are collinear
+        // Check if they are collinear
          double dx = start2x - start1x;
          double dy = start2y - start1y;
          double cross = dx * direction1y - dy * direction1x;
@@ -1252,5 +1268,108 @@ public class EuclidCoreMissingTools
       }
 
       return areIntersecting;
+   }
+
+   /**
+    * Calculate the angular velocity by differentiating orientation.
+    * 
+    * @param qStart                the initial orientation at time t.
+    * @param qEnd                  the final orientation at time t + duration.
+    * @param duration              the time interval between the 2 orientations.
+    * @param angularVelocityToPack the angular velocity.
+    */
+   public static void differentiateOrientation(QuaternionReadOnly qStart, QuaternionReadOnly qEnd, double duration, Vector3DBasics angularVelocityToPack)
+   {
+      double q1x = qStart.getX();
+      double q1y = qStart.getY();
+      double q1z = qStart.getZ();
+      double q1s = qStart.getS();
+
+      double q2x = qEnd.getX();
+      double q2y = qEnd.getY();
+      double q2z = qEnd.getZ();
+      double q2s = qEnd.getS();
+
+      double diffx = q1s * q2x - q1x * q2s - q1y * q2z + q1z * q2y;
+      double diffy = q1s * q2y + q1x * q2z - q1y * q2s - q1z * q2x;
+      double diffz = q1s * q2z - q1x * q2y + q1y * q2x - q1z * q2s;
+      double diffs = q1s * q2s + q1x * q2x + q1y * q2y + q1z * q2z;
+
+      if (diffs < 0.0)
+      {
+         diffx = -diffx;
+         diffy = -diffy;
+         diffz = -diffz;
+         diffs = -diffs;
+      }
+
+      double sinHalfTheta = EuclidCoreTools.norm(diffx, diffy, diffz);
+
+      double angle;
+      if (EuclidCoreTools.epsilonEquals(1.0, diffs, 1.0e-12))
+         angle = 2.0 * sinHalfTheta / diffs;
+      else
+         angle = 2.0 * EuclidCoreTools.atan2(sinHalfTheta, diffs);
+      angularVelocityToPack.set(diffx, diffy, diffz);
+      angularVelocityToPack.scale(angle / (sinHalfTheta * duration));
+   }
+
+   // *** NOTE ***: The 4x4 output matrix produced by this method assumes a Quaternion component ordering of:
+   //   Quat = [ Qs
+   //            Qx
+   //            Qy
+   //            Qz ]
+   public static DMatrixRMaj quaternionDotToOmegaTransform(QuaternionReadOnly rotatingFrameQuaternion)
+   {
+      double qs = rotatingFrameQuaternion.getS();
+      double qx = rotatingFrameQuaternion.getX();
+      double qy = rotatingFrameQuaternion.getY();
+      double qz = rotatingFrameQuaternion.getZ();
+
+      DMatrixRMaj E = new DMatrixRMaj(4,4);
+
+      E.set(0,0, qs); E.set(0,1, qx); E.set(0,2, qy); E.set(0,3, qz);
+      E.set(1,0,-qx); E.set(1,1, qs); E.set(1,2, qz); E.set(1,3,-qy);
+      E.set(2,0,-qy); E.set(2,1,-qz); E.set(2,2, qs); E.set(2,3, qx);
+      E.set(3,0,-qz); E.set(3,1, qy); E.set(3,2,-qx); E.set(3,3, qs);
+      
+      return E;
+   }
+
+   /**
+    * Sets the yaw pitch roll but the doubles are given in degrees.
+    */
+   public static void setYawPitchRollDegrees(Orientation3DBasics orientation3DBasics, double yaw, double pitch, double roll)
+   {
+      orientation3DBasics.setYawPitchRoll(Math.toRadians(yaw), Math.toRadians(pitch), Math.toRadians(roll));
+   }
+
+   /**
+    * Get the orientation as yaw pitch roll String but they are in degrees.
+    * Says yaw-pitch-roll.
+    */
+   public static String getYawPitchRollStringDegrees(Orientation3DBasics orientation3DBasics)
+   {
+      String degreeSymbol = "\u00B0";
+      // Degree symbol placed at the end so you don't have to remove it when copy and pasting
+      return EuclidCoreIOTools.getYawPitchRollString(EuclidCoreIOTools.DEFAULT_FORMAT,
+                                                     Math.toDegrees(orientation3DBasics.getYaw()),
+                                                     Math.toDegrees(orientation3DBasics.getPitch()),
+                                                     Math.toDegrees(orientation3DBasics.getRoll())) + degreeSymbol;
+   }
+
+   /**
+    * Get the orientation as yaw pitch roll String but they are in degrees.
+    * Doesn't say yaw-pitch-roll.
+    */
+   public static String getYawPitchRollValuesStringDegrees(Orientation3DBasics orientation3DBasics)
+   {
+      String degreeSymbol = "\u00B0";
+      // Degree symbol placed at the end so you don't have to remove it when copy and pasting
+      return EuclidCoreIOTools.getStringOf("(", ")", ", ",
+                                           EuclidCoreIOTools.DEFAULT_FORMAT,
+                                           Math.toDegrees(orientation3DBasics.getYaw()),
+                                           Math.toDegrees(orientation3DBasics.getPitch()),
+                                           Math.toDegrees(orientation3DBasics.getRoll())) + degreeSymbol;
    }
 }

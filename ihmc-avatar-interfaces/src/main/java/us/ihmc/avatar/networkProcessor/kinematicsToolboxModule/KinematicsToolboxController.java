@@ -1,20 +1,15 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
-import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -69,7 +64,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxContactStateCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
@@ -570,8 +565,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    public void registerStaticCollidables(Collidable... collidables)
    {
-      for (Collidable collidable : collidables)
-         staticCollidables.add(collidable);
+      staticCollidables.addAll(Arrays.asList(collidables));
    }
 
    /**
@@ -764,6 +758,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       // By default, always constrain the center of mass according to the current support polygon (if defined).
       enableSupportPolygonConstraint.set(true);
+      inverseKinematicsSolution.getSupportRegion().clear();
 
       return hasRobotConfigurationData;
    }
@@ -796,6 +791,7 @@ public class KinematicsToolboxController extends ToolboxController
       }
       getAdditionalInverseKinematicsCommands(inverseKinematicsCommandBuffer);
       computeCollisionCommands(collisionResults, inverseKinematicsCommandBuffer);
+      computeSupportPolygonFeedback(inverseKinematicsCommandBuffer);
 
       // Save all commands used for this control tick for computing the solution quality.
       allFeedbackControlCommands.clear();
@@ -811,9 +807,7 @@ public class KinematicsToolboxController extends ToolboxController
        * Submitting and requesting the controller core to run the feedback controllers, formulate and
        * solve the optimization problem for this control tick.
        */
-      controllerCore.reset();
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
+      controllerCore.compute(controllerCoreCommand);
 
       // Calculating the solution quality based on sum of all the active feedback controllers' output velocity.
       solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN));
@@ -875,7 +869,7 @@ public class KinematicsToolboxController extends ToolboxController
    {
       consumeUserConfigurationCommands();
       consumeUserMotionObjectiveCommands(fbCommandBufferToPack, ikCommandBufferToPack);
-      consumeUserContactStateCommands(ikCommandBufferToPack);
+      consumeUserContactStateCommands();
    }
 
    private void consumeUserConfigurationCommands()
@@ -1108,10 +1102,10 @@ public class KinematicsToolboxController extends ToolboxController
          }
 
          // Contact state
-         if (command.hasConstactStateInput())
+         if (command.hasSupportRegionInput())
          {
-            KinematicsToolboxContactStateCommand contactStateInput = command.getContactStateInput();
-            processUserContactStateCommand(contactStateInput, ikCommandBufferToPack);
+            KinematicsToolboxSupportRegionCommand supportRegionInput = command.getSupportRegionInput();
+            processUserSupportRegionInput(supportRegionInput);
          }
       }
 
@@ -1136,16 +1130,16 @@ public class KinematicsToolboxController extends ToolboxController
       }
    }
 
-   private void consumeUserContactStateCommands(InverseKinematicsCommandBuffer bufferToPack)
+   private void consumeUserContactStateCommands()
    {
-      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxContactStateCommand.class))
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxSupportRegionCommand.class))
       {
-         KinematicsToolboxContactStateCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxContactStateCommand.class);
-         processUserContactStateCommand(command, bufferToPack);
+         KinematicsToolboxSupportRegionCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxSupportRegionCommand.class);
+         processUserSupportRegionInput(command);
       }
    }
 
-   private void processUserContactStateCommand(KinematicsToolboxContactStateCommand command, InverseKinematicsCommandBuffer bufferToPack)
+   private void processUserSupportRegionInput(KinematicsToolboxSupportRegionCommand command)
    {
       isUserProvidingSupportPolygon.set(command.getNumberOfContacts() > 0);
       if (command.getCenterOfMassMargin() >= 0.0)
@@ -1155,14 +1149,14 @@ public class KinematicsToolboxController extends ToolboxController
 
       for (int i = 0; i < command.getNumberOfContacts(); i++)
       {
-         contactPointLocations.add(command.getContactPoint(i).getPosition());
+         contactPointLocations.add(command.getContactPoint(i).getVertexPosition());
       }
 
       if (!contactPointLocations.isEmpty())
-         updateSupportPolygonConstraint(contactPointLocations, bufferToPack);
+         updateSupportPolygonConstraint(contactPointLocations);
    }
 
-   protected void updateSupportPolygonConstraint(List<? extends FramePoint3DReadOnly> contactPoints, InverseKinematicsCommandBuffer bufferToPack)
+   protected void updateSupportPolygonConstraint(List<? extends FramePoint3DReadOnly> contactPoints)
    {
       if (!enableSupportPolygonConstraint.getValue())
          return;
@@ -1176,7 +1170,11 @@ public class KinematicsToolboxController extends ToolboxController
 
       // If the support polygon is empty or too small, we don't apply the constraint, it would likely cause the QP to fail.
       if (newSupportPolygon.getNumberOfVertices() <= 2 || newSupportPolygon.getArea() < MathTools.square(0.01))
+      {
+         shrunkSupportPolygon.clear();
+         shrunkSupportPolygonVertices.clear();
          return;
+      }
 
       if (!newSupportPolygon.epsilonEquals(supportPolygon, 5.0e-3))
       { // Update the polygon only if there is an actual update.
@@ -1196,6 +1194,14 @@ public class KinematicsToolboxController extends ToolboxController
                shrunkSupportPolygonVertices.remove(i);
          }
       }
+   }
+
+   private void computeSupportPolygonFeedback(InverseKinematicsCommandBuffer bufferToPack)
+   {
+      if (!enableSupportPolygonConstraint.getValue())
+         return;
+      if (shrunkSupportPolygonVertices.isEmpty())
+         return;
 
       centerOfMass.setToZero(centerOfMassFrame);
       centerOfMass.changeFrame(worldFrame);
@@ -1310,7 +1316,10 @@ public class KinematicsToolboxController extends ToolboxController
     */
    public void computeCollisionCommands(List<CollisionResult> collisions, InverseKinematicsCommandBuffer bufferToPack)
    {
-      if (collisions.isEmpty() || !enableSelfCollisionAvoidance.getValue())
+      boolean collisionsDetected = !collisions.isEmpty();
+      boolean collisionsEnabled = enableSelfCollisionAvoidance.getValue() || enableStaticCollisionAvoidance.getValue();
+
+      if (!collisionsDetected || !collisionsEnabled)
          return;
 
       int collisionIndex = 0;
@@ -1563,6 +1572,16 @@ public class KinematicsToolboxController extends ToolboxController
    public void minimizeAngularMomentum(boolean enable)
    {
       minimizeAngularMomentum.set(enable);
+   }
+
+   public void setEnableSelfCollisionAvoidance(boolean enableSelfCollisionAvoidance)
+   {
+      this.enableSelfCollisionAvoidance.set(enableSelfCollisionAvoidance);
+   }
+
+   public void setEnableStaticCollisionAvoidance(boolean enableStaticCollisionAvoidance)
+   {
+      this.enableStaticCollisionAvoidance.set(enableStaticCollisionAvoidance);
    }
 
    public InverseKinematicsOptimizationSettingsCommand getActiveOptimizationSettings()

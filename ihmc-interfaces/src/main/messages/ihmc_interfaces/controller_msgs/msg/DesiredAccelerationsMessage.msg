@@ -8,4 +8,4 @@ uint32 sequence_id
 # Specifies the desired joint accelerations.
 float64[] desired_joint_accelerations
 # Properties for queueing commands.
-QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties

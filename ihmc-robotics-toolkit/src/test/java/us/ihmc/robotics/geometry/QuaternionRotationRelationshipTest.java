@@ -53,7 +53,7 @@ public class QuaternionRotationRelationshipTest
       // Now going through the rotation vector (axis-angle as a single vector) method:
       Quaternion rotatedAxisAngle2Quaternion = computeRotatedRotationVector(transform1, quaternion1, quaternion2);
       
-      EuclidCoreTestTools.assertQuaternionEquals(quaternion1TimesQuaternion2TimesQuaternion1Inverse, rotatedAxisAngle2Quaternion, 1e-7);
+      EuclidCoreTestTools.assertEquals(quaternion1TimesQuaternion2TimesQuaternion1Inverse, rotatedAxisAngle2Quaternion, 1e-7);
 //      System.out.println("quaternion1TimesQuaternion2TimesQuaternion1Inverse = " + quaternion1TimesQuaternion2TimesQuaternion1Inverse);
 //      System.out.println("rotatedAxisAngle2Quaternion = " + rotatedAxisAngle2Quaternion);
    }

@@ -25,6 +25,7 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -109,7 +110,7 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
          feasibleSolutions.remove(indexToTest);
 
          IDLSequence.Float jointAngles = snapshotToTest.getIkSolution().getDesiredJointAngles();
-         Vector3D rootPosition = snapshotToTest.getIkSolution().getDesiredRootTranslation();
+         Point3D rootPosition = snapshotToTest.getIkSolution().getDesiredRootPosition();
          Quaternion rootOrientation = snapshotToTest.getIkSolution().getDesiredRootOrientation();
 
          FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();

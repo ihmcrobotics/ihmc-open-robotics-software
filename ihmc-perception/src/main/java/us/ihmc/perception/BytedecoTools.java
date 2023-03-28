@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 import us.ihmc.tools.thread.Activator;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -51,6 +52,18 @@ public class BytedecoTools
          nativesActivated.activate();
       }, "Bytedeco loader");
       return nativesActivated;
+   }
+
+   public static Activator loadGTSAMNativesOnAThread()
+   {
+      Activator nativesActivated = new Activator();
+      ThreadTools.startAThread(BytedecoTools::loadSlamWrapper, "SlamWrapper loader");
+      return nativesActivated;
+   }
+
+   public static void loadSlamWrapper()
+   {
+      SlamWrapperNativeLibrary.load();
    }
 
    public static Activator loadOpenCVNativesOnAThread()

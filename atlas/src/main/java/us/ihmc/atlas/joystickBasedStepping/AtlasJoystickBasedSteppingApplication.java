@@ -1,7 +1,6 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
-import javafx.application.Application;
+import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -15,11 +14,12 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 
-public class AtlasJoystickBasedSteppingApplication extends Application
+public class AtlasJoystickBasedSteppingApplication extends ApplicationNoModule
 {
    private JoystickBasedSteppingMainUI ui;
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_xbox_joystick_control");

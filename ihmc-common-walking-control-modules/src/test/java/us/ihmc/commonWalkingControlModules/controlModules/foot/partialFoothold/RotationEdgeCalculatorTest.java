@@ -1,27 +1,31 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.util.Random;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commons.InterpolationTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.Random;
-
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class RotationEdgeCalculatorTest
 {
@@ -79,7 +83,7 @@ public abstract class RotationEdgeCalculatorTest
 
          FrameLine2DReadOnly lineEstimate = footRotationDetector.getLineOfRotation();
          FrameLine2D expectedLine = new FrameLine2D(soleFrame, new FramePoint2D(point), new FrameVector2D(omega));
-         EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+         EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
       }
 
       // Test for non-planar measurement:
@@ -100,7 +104,7 @@ public abstract class RotationEdgeCalculatorTest
 
          FrameLine2DReadOnly lineEstimate = footRotationDetector.getLineOfRotation();
          FrameLine2D expectedLine = new FrameLine2D(soleFrame, new FramePoint2D(point), new FrameVector2D(omega));
-         EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+         EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
       }
    }
 
@@ -145,7 +149,7 @@ public abstract class RotationEdgeCalculatorTest
          FrameLine2D expectedLine = new FrameLine2D(soleFrame);
          expectedLine.getDirection().set(direction);
          expectedLine.getPoint().set(pointOfRotation);
-         EuclidGeometryTestTools.assertLine2DGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
+         EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
          assertTrue(footRotationDetector.isRotationEdgeTrusted());
       }
    }

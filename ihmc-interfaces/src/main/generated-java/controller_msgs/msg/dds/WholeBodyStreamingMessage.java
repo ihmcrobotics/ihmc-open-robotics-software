@@ -31,12 +31,12 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
             * Information for the left hand in task-space
             */
    public boolean has_left_hand_streaming_message_;
-   public controller_msgs.msg.dds.SE3StreamingMessage left_hand_streaming_message_;
+   public ihmc_common_msgs.msg.dds.SE3StreamingMessage left_hand_streaming_message_;
    /**
             * Information for the right hand in task-space
             */
    public boolean has_right_hand_streaming_message_;
-   public controller_msgs.msg.dds.SE3StreamingMessage right_hand_streaming_message_;
+   public ihmc_common_msgs.msg.dds.SE3StreamingMessage right_hand_streaming_message_;
    /**
             * Information for the left arm joints
             */
@@ -51,7 +51,7 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
             * Information for the chest
             */
    public boolean has_chest_streaming_message_;
-   public controller_msgs.msg.dds.SO3StreamingMessage chest_streaming_message_;
+   public ihmc_common_msgs.msg.dds.SO3StreamingMessage chest_streaming_message_;
    /**
             * Information for the pelvis
             */
@@ -60,7 +60,7 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
             * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
             */
    public boolean enable_user_pelvis_control_;
-   public controller_msgs.msg.dds.SE3StreamingMessage pelvis_streaming_message_;
+   public ihmc_common_msgs.msg.dds.SE3StreamingMessage pelvis_streaming_message_;
    /**
             * Information for the neck joints
             */
@@ -69,12 +69,12 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
 
    public WholeBodyStreamingMessage()
    {
-      left_hand_streaming_message_ = new controller_msgs.msg.dds.SE3StreamingMessage();
-      right_hand_streaming_message_ = new controller_msgs.msg.dds.SE3StreamingMessage();
+      left_hand_streaming_message_ = new ihmc_common_msgs.msg.dds.SE3StreamingMessage();
+      right_hand_streaming_message_ = new ihmc_common_msgs.msg.dds.SE3StreamingMessage();
       left_arm_streaming_message_ = new controller_msgs.msg.dds.JointspaceStreamingMessage();
       right_arm_streaming_message_ = new controller_msgs.msg.dds.JointspaceStreamingMessage();
-      chest_streaming_message_ = new controller_msgs.msg.dds.SO3StreamingMessage();
-      pelvis_streaming_message_ = new controller_msgs.msg.dds.SE3StreamingMessage();
+      chest_streaming_message_ = new ihmc_common_msgs.msg.dds.SO3StreamingMessage();
+      pelvis_streaming_message_ = new ihmc_common_msgs.msg.dds.SE3StreamingMessage();
       neck_streaming_message_ = new controller_msgs.msg.dds.JointspaceStreamingMessage();
    }
 
@@ -94,10 +94,10 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
 
       has_left_hand_streaming_message_ = other.has_left_hand_streaming_message_;
 
-      controller_msgs.msg.dds.SE3StreamingMessagePubSubType.staticCopy(other.left_hand_streaming_message_, left_hand_streaming_message_);
+      ihmc_common_msgs.msg.dds.SE3StreamingMessagePubSubType.staticCopy(other.left_hand_streaming_message_, left_hand_streaming_message_);
       has_right_hand_streaming_message_ = other.has_right_hand_streaming_message_;
 
-      controller_msgs.msg.dds.SE3StreamingMessagePubSubType.staticCopy(other.right_hand_streaming_message_, right_hand_streaming_message_);
+      ihmc_common_msgs.msg.dds.SE3StreamingMessagePubSubType.staticCopy(other.right_hand_streaming_message_, right_hand_streaming_message_);
       has_left_arm_streaming_message_ = other.has_left_arm_streaming_message_;
 
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.staticCopy(other.left_arm_streaming_message_, left_arm_streaming_message_);
@@ -106,12 +106,12 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.staticCopy(other.right_arm_streaming_message_, right_arm_streaming_message_);
       has_chest_streaming_message_ = other.has_chest_streaming_message_;
 
-      controller_msgs.msg.dds.SO3StreamingMessagePubSubType.staticCopy(other.chest_streaming_message_, chest_streaming_message_);
+      ihmc_common_msgs.msg.dds.SO3StreamingMessagePubSubType.staticCopy(other.chest_streaming_message_, chest_streaming_message_);
       has_pelvis_streaming_message_ = other.has_pelvis_streaming_message_;
 
       enable_user_pelvis_control_ = other.enable_user_pelvis_control_;
 
-      controller_msgs.msg.dds.SE3StreamingMessagePubSubType.staticCopy(other.pelvis_streaming_message_, pelvis_streaming_message_);
+      ihmc_common_msgs.msg.dds.SE3StreamingMessagePubSubType.staticCopy(other.pelvis_streaming_message_, pelvis_streaming_message_);
       has_neck_streaming_message_ = other.has_neck_streaming_message_;
 
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.staticCopy(other.neck_streaming_message_, neck_streaming_message_);
@@ -184,7 +184,7 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
    }
 
 
-   public controller_msgs.msg.dds.SE3StreamingMessage getLeftHandStreamingMessage()
+   public ihmc_common_msgs.msg.dds.SE3StreamingMessage getLeftHandStreamingMessage()
    {
       return left_hand_streaming_message_;
    }
@@ -205,7 +205,7 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
    }
 
 
-   public controller_msgs.msg.dds.SE3StreamingMessage getRightHandStreamingMessage()
+   public ihmc_common_msgs.msg.dds.SE3StreamingMessage getRightHandStreamingMessage()
    {
       return right_hand_streaming_message_;
    }
@@ -268,7 +268,7 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
    }
 
 
-   public controller_msgs.msg.dds.SO3StreamingMessage getChestStreamingMessage()
+   public ihmc_common_msgs.msg.dds.SO3StreamingMessage getChestStreamingMessage()
    {
       return chest_streaming_message_;
    }
@@ -304,7 +304,7 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
    }
 
 
-   public controller_msgs.msg.dds.SE3StreamingMessage getPelvisStreamingMessage()
+   public ihmc_common_msgs.msg.dds.SE3StreamingMessage getPelvisStreamingMessage()
    {
       return pelvis_streaming_message_;
    }

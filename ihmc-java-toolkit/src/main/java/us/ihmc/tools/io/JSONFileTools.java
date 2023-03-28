@@ -59,7 +59,7 @@ public class JSONFileTools
       }
    }
 
-   public static void loadUserWithClasspathDefaultFallback(HybridFile hybridFile, Consumer<JsonNode> jsonNodeConsumer)
+   public static void loadUserWithClasspathDefaultFallback(HybridResourceFile hybridFile, Consumer<JsonNode> jsonNodeConsumer)
    {
       InputStream settingsStream;
       if (!Files.exists(hybridFile.getExternalFile()))
@@ -93,7 +93,7 @@ public class JSONFileTools
       }
    }
 
-   public static void load(WorkspaceFile file, Consumer<JsonNode> jsonNodeConsumer)
+   public static void load(WorkspaceResourceFile file, Consumer<JsonNode> jsonNodeConsumer)
    {
       load(file.getClasspathResourceAsStream(), jsonNodeConsumer);
    }
@@ -167,12 +167,16 @@ public class JSONFileTools
 
    public static boolean save(WorkspaceFile workspaceFile, Consumer<ObjectNode> rootConsumer)
    {
-      return save(workspaceFile.getFilePath(), rootConsumer);
+      return save(workspaceFile.getFilesystemFile(), rootConsumer);
    }
 
    public static boolean save(Path settingsPath, Consumer<ObjectNode> rootConsumer)
    {
-      FileTools.ensureDirectoryExists(settingsPath.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      if (settingsPath.getParent() != null)
+      {
+         FileTools.ensureDirectoryExists(settingsPath.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      }
+
       try (PrintStream printStream = new PrintStream(settingsPath.toFile()))
       {
          JsonFactory jsonFactory = new JsonFactory();

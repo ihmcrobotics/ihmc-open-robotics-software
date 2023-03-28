@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import controller_msgs.msg.dds.DoorParameterPacket;
+import perception_msgs.msg.dds.DoorParameterPacket;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;

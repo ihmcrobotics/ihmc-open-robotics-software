@@ -84,7 +84,15 @@ public class SCS2SensorReader implements SensorReader
                                                          FloatingJointBasics rootJoint,
                                                          ForceSensorDataHolder forceSensorDataHolderToUpdate)
    {
-      return new SCS2SensorReader(controllerInput, rootJoint, null, forceSensorDataHolderToUpdate, null, true);
+      return newPerfectSensorReader(controllerInput, rootJoint, null, forceSensorDataHolderToUpdate);
+   }
+
+   public static SCS2SensorReader newPerfectSensorReader(SimControllerInput controllerInput,
+                                                         FloatingJointBasics rootJoint,
+                                                         IMUDefinition[] imuDefinitions,
+                                                         ForceSensorDataHolder forceSensorDataHolderToUpdate)
+   {
+      return new SCS2SensorReader(controllerInput, rootJoint, imuDefinitions, forceSensorDataHolderToUpdate, null, true);
    }
 
    private SCS2SensorReader(SimControllerInput controllerInput,
@@ -122,7 +130,10 @@ public class SCS2SensorReader implements SensorReader
          timestamp = new YoLong("timestamp", registry);
          controllerTimestamp = new YoLong("controllerTimestamp", registry);
          sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
+
+         addIMUSensors(imuDefinitions);
          addWrenchSensors(forceSensorDataHolder);
+
          perfectSensorOutputMap = new SensorOutputMapReadOnly()
          {
             @Override
@@ -170,8 +181,7 @@ public class SCS2SensorReader implements SensorReader
       }
       else
       {
-         for (IMUDefinition imuDefinition : imuDefinitions)
-            addIMUSensor(imuDefinition);
+         addIMUSensors(imuDefinitions);
          addWrenchSensors(forceSensorDataHolder);
          sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
          simJointList.remove(0);
@@ -220,10 +230,21 @@ public class SCS2SensorReader implements SensorReader
       }
    }
 
+   private void addIMUSensors(IMUDefinition[] definitions)
+   {
+      if (definitions == null)
+         return;
+
+      for (IMUDefinition definition : definitions)
+      {
+         addIMUSensor(definition);
+      }
+   }
+
    private void addIMUSensor(IMUDefinition definition)
    {
       SimRigidBodyReadOnly rigidBody = controllerInput.getInput().findRigidBody(definition.getRigidBody().getName());
-      List<SimIMUSensor> sensorList = rigidBody.getParentJoint().getAuxialiryData().getIMUSensors();
+      List<SimIMUSensor> sensorList = rigidBody.getParentJoint().getAuxiliaryData().getIMUSensors();
       try
       {
          simIMUSensors.add(sensorList.stream().filter(candidate -> candidate.getName().equals(definition.getName())).findFirst().get());
@@ -241,7 +262,7 @@ public class SCS2SensorReader implements SensorReader
    {
       if (forceSensorDataHolderToUpdate == null || forceSensorDataHolderToUpdate.getForceSensorDefinitions() == null)
          return;
-         
+
       for (ForceSensorDefinition definition : forceSensorDataHolderToUpdate.getForceSensorDefinitions())
       {
          addWrenchSensor(definition, forceSensorDataHolderToUpdate.get(definition));
@@ -251,8 +272,15 @@ public class SCS2SensorReader implements SensorReader
 
    private void addWrenchSensor(ForceSensorDefinition definition, ForceSensorData sensorDataToUpdate)
    {
-      simWrenchSensors.add(controllerInput.getInput().findRigidBody(definition.getRigidBody().getName()).getParentJoint().getAuxialiryData().getWrenchSensors()
-                                          .stream().filter(candidate -> candidate.getName().equals(definition.getSensorName())).findFirst().get());
+      simWrenchSensors.add(controllerInput.getInput()
+                                          .findRigidBody(definition.getRigidBody().getName())
+                                          .getParentJoint()
+                                          .getAuxiliaryData()
+                                          .getWrenchSensors()
+                                          .stream()
+                                          .filter(candidate -> candidate.getName().equals(definition.getSensorName()))
+                                          .findFirst()
+                                          .get());
       if (usePerfectSensor)
          controllerWrenchSensors.add(sensorDataToUpdate);
       stateEstimatorSensorDefinitions.addForceSensorDefinition(definition);

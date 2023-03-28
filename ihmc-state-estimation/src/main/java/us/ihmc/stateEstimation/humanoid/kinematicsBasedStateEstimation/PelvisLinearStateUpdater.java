@@ -20,12 +20,15 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
 import us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoFrameVector3D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -50,7 +53,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * 
  * @author Sylvain
  */
-public class PelvisLinearStateUpdater
+public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 {
    private static final double minForceZInPercentThresholdToFilterFoot = 0.0;
    private static final double maxForceZInPercentThresholdToFilterFoot = 0.45;
@@ -417,7 +420,7 @@ public class PelvisLinearStateUpdater
          wereFeetTrustedLastTick.get(foot).set(areFeetTrusted.get(foot).getValue());
          haveFeetHitGroundFiltered.get(foot).setWindowSize(windowSize);
 
-         if (footSwitches.get(foot).hasFootHitGround())
+         if (footSwitches.get(foot).hasFootHitGroundFiltered())
             haveFeetHitGroundFiltered.get(foot).update(true);
          else
             haveFeetHitGroundFiltered.get(foot).set(false);
@@ -451,7 +454,7 @@ public class PelvisLinearStateUpdater
          for (int i = 0; i < feet.size(); i++)
          {
             RigidBodyBasics foot = feet.get(i);
-            if (footSwitches.get(foot).getForceMagnitudePastThreshhold())
+            if (footSwitches.get(foot).hasFootHitGroundSensitive())
             {
                trustedFoot = foot;
                numberOfEndEffectorsTrusted = 1;
@@ -553,7 +556,7 @@ public class PelvisLinearStateUpdater
          if (!areFeetTrusted.get(foot).getBooleanValue())
             continue;
          Wrench footWrench = footWrenches.get(foot);
-         footSwitches.get(foot).computeAndPackFootWrench(footWrench);
+         footSwitches.get(foot).getMeasuredWrench(footWrench);
          FixedFrameVector3DBasics footForce = footForces.get(foot);
          footForce.setMatchingFrame(footWrench.getLinearPart());
          totalForceZ += footForce.getZ();
@@ -701,5 +704,14 @@ public class PelvisLinearStateUpdater
    public List<RigidBodyBasics> getCurrentListOfTrustedFeet()
    {
       return listOfTrustedFeet;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(kinematicsBasedLinearStateCalculator.getSCS2YoGraphics());
+      group.addChild(imuBasedLinearStateCalculator.getSCS2YoGraphics());
+      return group;
    }
 }

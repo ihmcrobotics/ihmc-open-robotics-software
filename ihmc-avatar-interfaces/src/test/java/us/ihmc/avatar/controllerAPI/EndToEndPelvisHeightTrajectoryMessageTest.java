@@ -163,7 +163,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       FramePoint3D actualPosition = new FramePoint3D(pelvisBodyFrame);
       actualPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedPosition, actualPosition, 2.0e-3);
+      EuclidCoreTestTools.assertEquals(expectedPosition, actualPosition, 2.0e-3);
    }
 
    protected FramePoint3D getRandomPelvisPosition(Random random, RigidBodyBasics pelvis)

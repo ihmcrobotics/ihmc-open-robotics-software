@@ -6,7 +6,7 @@ import java.util.function.LongUnaryOperator;
 import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.LocalizationPointMapPacket;
 import controller_msgs.msg.dds.LocalizationStatusPacket;
-import controller_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import sensor_msgs.PointCloud2;
 import std_msgs.Float64;
 import us.ihmc.commons.thread.ThreadTools;

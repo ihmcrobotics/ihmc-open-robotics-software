@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
-import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -12,18 +10,20 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class PelvisOrientationManager
+public class PelvisOrientationManager implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -35,8 +35,8 @@ public class PelvisOrientationManager
    private final ControllerPelvisOrientationManager walkingManager;
    private final UserPelvisOrientationManager userManager;
 
-   public PelvisOrientationManager(PID3DGainsReadOnly gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
-                                   LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public PelvisOrientationManager(PID3DGainsReadOnly gains,
+                                   HighLevelHumanoidControllerToolbox controllerToolbox,
                                    YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
@@ -44,7 +44,7 @@ public class PelvisOrientationManager
       String namePrefix = getClass().getSimpleName();
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisOrientationControlMode.class, true);
 
-      walkingManager = new ControllerPelvisOrientationManager(gains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox, registry);
+      walkingManager = new ControllerPelvisOrientationManager(gains, controllerToolbox, registry);
       userManager = new UserPelvisOrientationManager(gains, controllerToolbox, registry);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
@@ -177,9 +177,9 @@ public class PelvisOrientationManager
       walkingManager.initializeStanding();
    }
 
-   public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration, double nextSwingDuration)
+   public void initializeSwing()
    {
-      walkingManager.initializeSwing(supportSide, swingDuration, nextTransferDuration, nextSwingDuration);
+      walkingManager.initializeTiming();
    }
 
    public void setUpcomingFootstep(Footstep upcomingFootstep)
@@ -187,9 +187,9 @@ public class PelvisOrientationManager
       walkingManager.setUpcomingFootstep(upcomingFootstep);
    }
 
-   public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
+   public void initializeTransfer()
    {
-      walkingManager.initializeTransfer(transferToSide, transferDuration, swingDuration);
+      walkingManager.initializeTiming();
    }
 
    public void initializeTrajectory()
@@ -274,5 +274,11 @@ public class PelvisOrientationManager
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
    }
 }

@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -62,8 +64,8 @@ public class AtlasSLAMModule extends SLAMModule
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToD435DepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
-      reaMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
-      reaMessager.registerTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
+      reaMessager.addTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
+      reaMessager.addTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
    }
 
    public AtlasSLAMModule(Messager messager, DRCRobotModel drcRobotModel)
@@ -81,8 +83,8 @@ public class AtlasSLAMModule extends SLAMModule
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToD435DepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
-      reaMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
-      reaMessager.registerTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
+      reaMessager.addTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
+      reaMessager.addTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
    }
 
    @Override

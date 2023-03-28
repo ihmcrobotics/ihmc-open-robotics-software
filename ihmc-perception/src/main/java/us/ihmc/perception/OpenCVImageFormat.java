@@ -39,17 +39,18 @@ import java.util.Map;
 public enum OpenCVImageFormat
 {
    JPG("jpg"), JPEG("jpeg"), JPE("jpe"), PNG("png"), BMP("bmp"), DIB("dib"), PPM("ppm"), PGM("pgm"), PBM("pbm");
-   protected String strFormat;
 
-   static private Map<OpenCVImageFormat, String> map = new HashMap<>();
-
+   public static final OpenCVImageFormat[] values = values();
+   private static final Map<OpenCVImageFormat, String> map = new HashMap<>();
    static
    {
       for (OpenCVImageFormat format : OpenCVImageFormat.values())
       {
-         map.put(format, format.strFormat);
+         map.put(format, format.getStrFormat());
       }
    }
+
+   private final String strFormat;
 
    OpenCVImageFormat(final String strFormat)
    {
@@ -65,5 +66,10 @@ public enum OpenCVImageFormat
    {
       String ext = ".";
       return ext.concat(map.get(format));
+   }
+
+   public String getStrFormat()
+   {
+      return strFormat;
    }
 }

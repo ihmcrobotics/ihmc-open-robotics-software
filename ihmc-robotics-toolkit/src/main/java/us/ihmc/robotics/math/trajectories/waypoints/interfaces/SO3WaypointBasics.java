@@ -2,167 +2,63 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.interfaces.Transformable;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface SO3WaypointBasics extends Transformable, Clearable
+public interface SO3WaypointBasics extends SO3WaypointReadOnly, Transformable, Clearable
 {
-   abstract QuaternionReadOnly getOrientation();
+   @Override
+   QuaternionBasics getOrientation();
 
-   abstract void setOrientation(double x, double y, double z, double s);
-
-   abstract Vector3DReadOnly getAngularVelocity();
-
-   abstract void setAngularVelocity(double x, double y, double z);
-
-   default double getOrientationX()
-   {
-      return getOrientation().getX();
-   }
-
-   default double getOrientationY()
-   {
-      return getOrientation().getY();
-   }
-
-   default double getOrientationZ()
-   {
-      return getOrientation().getZ();
-   }
-
-   default double getOrientationS()
-   {
-      return getOrientation().getS();
-   }
-
-   default double getAngularVelocityX()
-   {
-      return getAngularVelocity().getX();
-   }
-
-   default double getAngularVelocityY()
-   {
-      return getAngularVelocity().getY();
-   }
-
-   default double getAngularVelocityZ()
-   {
-      return getAngularVelocity().getZ();
-   }
-
-   default void setOrientation(QuaternionReadOnly orientation)
-   {
-      setOrientation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-   }
-
-   default void setOrientationToZero()
-   {
-      setOrientation(0.0, 0.0, 0.0, 1.0);
-   }
-
-   default void setOrientationToNaN()
-   {
-      setOrientation(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   default void setAngularVelocity(Vector3DReadOnly angularVelocity)
-   {
-      setAngularVelocity(angularVelocity.getX(), angularVelocity.getY(), angularVelocity.getZ());
-   }
-
-   default void setAngularVelocityToZero()
-   {
-      setAngularVelocity(0.0, 0.0, 0.0);
-   }
-
-   default void setAngularVelocityToNaN()
-   {
-      setAngularVelocity(Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   default double orientationDistance(SO3WaypointBasics other)
-   {
-      return getOrientation().distance(other.getOrientation());
-   }
-
-   default void getOrientation(QuaternionBasics orientationToPack)
-   {
-      orientationToPack.set(getOrientation());
-   }
-
-   default void getAngularVelocity(Vector3DBasics angularVelocityToPack)
-   {
-      angularVelocityToPack.set(getAngularVelocity());
-   }
-
-   default void set(QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
-   {
-      setOrientation(orientation);
-      setAngularVelocity(angularVelocity);
-   }
-
-   default void get(SO3WaypointBasics otherToPack)
-   {
-      otherToPack.set(this);
-   }
-
-   default void get(QuaternionBasics orientationToPack, Vector3DBasics angularVelocityToPack)
-   {
-      getOrientation(orientationToPack);
-      getAngularVelocity(angularVelocityToPack);
-   }
-
-   default boolean epsilonEquals(SO3WaypointBasics other, double epsilon)
-   {
-      boolean orientationMatches = getOrientation().epsilonEquals(other.getOrientation(), epsilon);
-      boolean angularVelocityMatches = getAngularVelocity().epsilonEquals(other.getAngularVelocity(), epsilon);
-      return orientationMatches && angularVelocityMatches;
-   }
-
-   default boolean geometricallyEquals(SO3WaypointBasics other, double epsilon)
-   {
-      boolean orientationMatches = getOrientation().geometricallyEquals(other.getOrientation(), epsilon);
-      boolean angularVelocityMatches = getAngularVelocity().geometricallyEquals(other.getAngularVelocity(), epsilon);
-      return orientationMatches && angularVelocityMatches;
-   }
-
-   default void set(SO3WaypointBasics other)
-   {
-      setOrientation(other.getOrientation());
-      setAngularVelocity(other.getAngularVelocity());
-   }
+   @Override
+   Vector3DBasics getAngularVelocity();
 
    @Override
    default void setToNaN()
    {
-      setOrientationToNaN();
-      setAngularVelocityToNaN();
+      getOrientation().setToNaN();
+      getAngularVelocity().setToNaN();
    }
 
    @Override
    default void setToZero()
    {
-      setOrientationToZero();
-      setAngularVelocityToZero();
+      getOrientation().setToZero();
+      getAngularVelocity().setToZero();
    }
 
    @Override
    default boolean containsNaN()
    {
-      return getOrientation().containsNaN() || getAngularVelocity().containsNaN();
+      return SO3WaypointReadOnly.super.containsNaN();
    }
 
-   default QuaternionBasics getOrientationCopy()
+   default void set(Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
-      return new Quaternion(getOrientation());
+      getOrientation().set(orientation);
+      getAngularVelocity().set(angularVelocity);
    }
 
-   default Vector3DBasics getAngularVelocityCopy()
+   default void set(SO3WaypointReadOnly other)
    {
-      return new Vector3D(getAngularVelocity());
+      getOrientation().set(other.getOrientation());
+      getAngularVelocity().set(other.getAngularVelocity());
+   }
+
+   @Override
+   default void applyTransform(Transform transform)
+   {
+      getOrientation().applyTransform(transform);
+      getAngularVelocity().applyTransform(transform);
+   }
+
+   @Override
+   default void applyInverseTransform(Transform transform)
+   {
+      getOrientation().applyInverseTransform(transform);
+      getAngularVelocity().applyInverseTransform(transform);
    }
 }

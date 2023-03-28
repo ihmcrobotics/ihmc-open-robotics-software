@@ -9,11 +9,8 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
@@ -41,7 +38,6 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
  * </p>
  *
  * @author Sylvain Bertrand
- *
  */
 public class OrientationFeedbackControlCommand implements FeedbackControlCommand<OrientationFeedbackControlCommand>
 {
@@ -119,8 +115,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * can be to control the end-effector.
     * </p>
     *
-    * @param base the rigid-body located right before the first joint to be used for controlling the
-    *           end-effector.
+    * @param base        the rigid-body located right before the first joint to be used for controlling
+    *                    the end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
    public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
@@ -225,22 +221,33 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    /**
     * Configures this feedback command's inputs for inverse kinematics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse kinematics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse kinematics.
     * </p>
     *
-    * @param desiredOrientation the orientation the {@code endEffector.getBodyFixedFrame()} should
-    *           reach. Not modified.
+    * @param desiredOrientation         the orientation the {@code endEffector.getBodyFixedFrame()}
+    *                                   should reach. Not modified.
     * @param feedForwardAngularVelocity the feed-forward angular velocity of
-    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
+    *                                   {@code endEffector.getBodyFixedFrame()} with respect to the
+    *                                   {@code base}. Not modified. Can be {@code null}, in such case
+    *                                   the velocity is assumed to be zero.
     */
-   public void setInverseKinematics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly feedForwardAngularVelocity)
+   public void setInverseKinematics(FrameOrientation3DReadOnly desiredOrientation, FrameVector3DReadOnly feedForwardAngularVelocity)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
       referenceOrientation.setIncludingFrame(desiredOrientation);
-      referenceAngularVelocity.setIncludingFrame(feedForwardAngularVelocity);
-      referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (feedForwardAngularVelocity != null)
+      {
+         referenceAngularVelocity.setIncludingFrame(feedForwardAngularVelocity);
+         referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceAngularVelocity.setToZero(trajectoryFrame);
+      }
+
       referenceAngularAcceleration.setToZero(trajectoryFrame);
       referenceTorque.setToZero(trajectoryFrame);
    }
@@ -248,54 +255,97 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    /**
     * Configures this feedback command's inputs for inverse dynamics.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for inverse dynamics.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for inverse dynamics.
     * </p>
     *
-    * @param desiredOrientation the orientation the {@code endEffector.getBodyFixedFrame()} should
-    *           reach. Not modified.
-    * @param desiredAngularVelocity the desired angular velocity of
-    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
+    * @param desiredOrientation             the orientation the {@code endEffector.getBodyFixedFrame()}
+    *                                       should reach. Not modified.
+    * @param desiredAngularVelocity         the desired angular velocity of
+    *                                       {@code endEffector.getBodyFixedFrame()} with respect to the
+    *                                       {@code base}. Not modified. Can be {@code null}, in such
+    *                                       case the velocity is assumed to be zero.
     * @param feedForwardAngularAcceleration the feed-forward angular acceleration of
-    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
+    *                                       {@code endEffector.getBodyFixedFrame()} with respect to the
+    *                                       {@code base}. Not modified. Can be {@code null}, in such
+    *                                       case the acceleration is assumed to be zero.
     */
-   public void setInverseDynamics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
+   public void setInverseDynamics(FrameOrientation3DReadOnly desiredOrientation,
+                                  FrameVector3DReadOnly desiredAngularVelocity,
                                   FrameVector3DReadOnly feedForwardAngularAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
       referenceOrientation.setIncludingFrame(desiredOrientation);
-      referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
-      referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
-      referenceAngularAcceleration.setIncludingFrame(feedForwardAngularAcceleration);
-      referenceAngularAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (desiredAngularVelocity != null)
+      {
+         referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
+         referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceAngularVelocity.setToZero(trajectoryFrame);
+      }
+
+      if (feedForwardAngularAcceleration != null)
+      {
+         referenceAngularAcceleration.setIncludingFrame(feedForwardAngularAcceleration);
+         referenceAngularAcceleration.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceAngularAcceleration.setToZero(trajectoryFrame);
+      }
+
       referenceTorque.setToZero(trajectoryFrame);
    }
 
    /**
     * Configures this feedback command's inputs for virtual model control.
     * <p>
-    * Sets the desired data expressed in trajectory frame to be used during the next control tick and sets
-    * the control mode for virtual model control.
+    * Sets the desired data expressed in trajectory frame to be used during the next control tick and
+    * sets the control mode for virtual model control.
     * </p>
     *
-    * @param desiredOrientation the orientation the {@code endEffector.getBodyFixedFrame()} should
-    *           reach. Not modified.
+    * @param desiredOrientation     the orientation the {@code endEffector.getBodyFixedFrame()} should
+    *                               reach. Not modified.
     * @param desiredAngularVelocity the desired angular velocity of
-    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
-    * @param feedForwardTorque the feed-forward torque to exert at
-    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
+    *                               {@code endEffector.getBodyFixedFrame()} with respect to the
+    *                               {@code base}. Not modified. Can be {@code null}, in such case the
+    *                               velocity is assumed to be zero.
+    * @param feedForwardTorque      the feed-forward torque to exert at
+    *                               {@code endEffector.getBodyFixedFrame()}. Not modified. Can be
+    *                               {@code null}, in such case the torque is assumed to be zero.
     */
-   public void setVirtualModelControl(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
+   public void setVirtualModelControl(FrameOrientation3DReadOnly desiredOrientation,
+                                      FrameVector3DReadOnly desiredAngularVelocity,
                                       FrameVector3DReadOnly feedForwardTorque)
    {
       setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
       ReferenceFrame trajectoryFrame = desiredOrientation.getReferenceFrame();
       referenceOrientation.setIncludingFrame(desiredOrientation);
-      referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
-      referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
-      referenceTorque.setIncludingFrame(feedForwardTorque);
-      referenceTorque.checkReferenceFrameMatch(trajectoryFrame);
+
+      if (desiredAngularVelocity != null)
+      {
+         referenceAngularVelocity.setIncludingFrame(desiredAngularVelocity);
+         referenceAngularVelocity.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceAngularVelocity.setToZero(trajectoryFrame);
+      }
+
+      if (feedForwardTorque != null)
+      {
+         referenceTorque.setIncludingFrame(feedForwardTorque);
+         referenceTorque.checkReferenceFrameMatch(trajectoryFrame);
+      }
+      else
+      {
+         referenceTorque.setToZero(trajectoryFrame);
+      }
+
       referenceAngularAcceleration.setToZero(trajectoryFrame);
    }
 
@@ -318,11 +368,11 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * </p>
     *
     * @param bodyFixedOrientationInEndEffectorFrame the position of the {@code bodyFixedOrientation}.
-    *           Not modified.
+    *                                               Not modified.
     * @throws ReferenceFrameMismatchException if any the argument is not expressed in
-    *            {@code endEffector.getBodyFixedFrame()}.
+    *                                         {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setBodyFixedOrientationToControl(FrameQuaternionReadOnly bodyFixedOrientationInEndEffectorFrame)
+   public void setBodyFixedOrientationToControl(FrameOrientation3DReadOnly bodyFixedOrientationInEndEffectorFrame)
    {
       bodyFixedOrientationInEndEffectorFrame.checkReferenceFrameMatch(getEndEffector().getBodyFixedFrame());
       this.bodyFixedOrientationInEndEffectorFrame.set(bodyFixedOrientationInEndEffectorFrame);
@@ -380,7 +430,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * </p>
     *
     * @param angularWeightMatrix weight matrix holding the angular weights to use for each component of
-    *           the desired acceleration. Not modified.
+    *                            the desired acceleration. Not modified.
     */
    public void setWeightMatrix(WeightMatrix3D angularWeightMatrix)
    {
@@ -398,13 +448,13 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     *
     * @param angular the weights to use for the angular part of this command. Not modified.
     */
-   public void setWeightsForSolver(Vector3DReadOnly angular)
+   public void setWeightsForSolver(Tuple3DReadOnly angular)
    {
       spatialAccelerationCommand.setAngularWeights(angular);
       spatialAccelerationCommand.setLinearWeightsToZero();
    }
 
-   public void getBodyFixedOrientationIncludingFrame(FrameQuaternion bodyFixedOrientationToControlToPack)
+   public void getBodyFixedOrientationIncludingFrame(FrameOrientation3DBasics bodyFixedOrientationToControlToPack)
    {
       bodyFixedOrientationToControlToPack.setIncludingFrame(bodyFixedOrientationInEndEffectorFrame);
    }

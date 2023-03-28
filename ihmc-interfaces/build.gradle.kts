@@ -6,14 +6,14 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.20.5")
+      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.22.2")
       classpath("us.ihmc:log-tools:0.6.3") // removes vulnerable log4j versions from plugin classpath; can be removed later
    }
 }
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -30,36 +30,40 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:euclid-geometry:0.17.2")
-   api("us.ihmc:ihmc-pub-sub:0.16.2")
-   api("us.ihmc:ros2-common-interfaces:0.20.5") {
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:euclid-geometry:0.19.1")
+   api("us.ihmc:ihmc-pub-sub:0.18.1")
+   api("us.ihmc:ros2-common-interfaces:0.22.2") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
       exclude(group = "org.junit.platform", module = "junit-platform-launcher")
    }
-   api("us.ihmc:ihmc-commons:0.30.5")
+   api("us.ihmc:ihmc-commons:0.32.0")
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-ros2-library:0.20.5")
+   api("us.ihmc:ihmc-ros2-library:0.22.2")
 }
 
 generatorDependencies {
-   api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:ihmc-commons:0.30.5")
-   api("us.ihmc:ros2-msg-to-pubsub-generator:0.20.5")
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:ihmc-commons:0.32.0")
+   api("us.ihmc:ros2-msg-to-pubsub-generator:0.22.2")
 }
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()
+val msg_packages = listOf("ihmc_common_msgs", "controller_msgs", "toolbox_msgs", "quadruped_msgs", "perception_msgs", "exoskeleton_msgs", "atlas_msgs")
 
 tasks.create("generateMessages") {
    doFirst {
       delete("src/main/generated-idl")
       delete("src/main/generated-java")
-      delete("src/main/messages/ros1/controller_msgs/msg")
       delete("build/tmp/generateMessages")
+
+      for (packag in msg_packages) {
+         delete("src/main/messages/ros1/" + packag + "/msg")
+      }
 
       var foundDependency = false
 
@@ -91,19 +95,21 @@ tasks.create("generateMessages") {
                          file("build/tmp/generateMessages/generated-ros1").toPath(),
                          file("build/tmp/generateMessages/generated-java").toPath())
 
-      copy {
-         from("build/tmp/generateMessages/generated-idl/controller_msgs")
-         into("src/main/generated-idl/controller_msgs")
-      }
+      for (packag in msg_packages) {
+         copy {
+            from("build/tmp/generateMessages/generated-idl/$packag")
+            into("src/main/generated-idl/$packag")
+         }
 
-      copy {
-         from("build/tmp/generateMessages/generated-java/controller_msgs")
-         into("src/main/generated-java/controller_msgs")
-      }
+         copy {
+            from("build/tmp/generateMessages/generated-java/$packag")
+            into("src/main/generated-java/$packag")
+         }
 
-      copy {
-         from("build/tmp/generateMessages/generated-ros1/controller_msgs")
-         into("src/main/messages/ros1/controller_msgs")
+         copy {
+            from("build/tmp/generateMessages/generated-ros1/$packag")
+            into("src/main/messages/ros1/$packag")
+         }
       }
 
       us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())

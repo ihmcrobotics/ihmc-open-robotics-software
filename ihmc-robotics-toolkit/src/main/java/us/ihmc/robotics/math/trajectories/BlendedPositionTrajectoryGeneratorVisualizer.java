@@ -4,14 +4,11 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FixedFrameEuclideanTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoGraphicTrajectory3D;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoGraphicTrajectory3D.TrajectoryColorType;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.awt.*;
 
 public class BlendedPositionTrajectoryGeneratorVisualizer
 {
@@ -68,7 +65,7 @@ public class BlendedPositionTrajectoryGeneratorVisualizer
          MultipleWaypointsPositionTrajectoryGenerator blendTrajecotry = trajectory.getBlendTrajectory();
          for (int i = 0; i < blendTrajecotry.getCurrentNumberOfWaypoints(); i++)
          {
-            YoFrameEuclideanTrajectoryPoint blendWaypont = blendTrajecotry.getWaypoint(i);
+            FixedFrameEuclideanTrajectoryPointBasics blendWaypont = blendTrajecotry.getWaypoint(i);
             trajectory.compute(blendWaypont.getTime());
             waypointViz.setBall(trajectory.getPosition());
          }

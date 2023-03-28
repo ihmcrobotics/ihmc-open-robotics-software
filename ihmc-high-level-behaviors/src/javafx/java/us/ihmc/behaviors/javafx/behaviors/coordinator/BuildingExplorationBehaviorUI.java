@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.javafx.behaviors.coordinator;
 
-import controller_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -94,7 +94,7 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
 
       goalGraphic = new PositionGraphic(Color.GRAY, 0.05);
       goalGraphic.setMouseTransparent(true);
-      messager.registerTopicListener(Goal, newGoal -> Platform.runLater(() ->
+      messager.addTopicListener(Goal, newGoal -> Platform.runLater(() ->
       {
          goalGraphic.getPose().set(newGoal);
          goalGraphic.update();
@@ -163,7 +163,7 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
       stairsDetected.setText("No");
       doorDetected.setText("No");
 
-      messager.registerTopicListener(CurrentState, state ->
+      messager.addTopicListener(CurrentState, state ->
       {
          currentState.setText(state.toString());
          if (state == BuildingExplorationStateName.LOOK_AND_STEP)
@@ -178,9 +178,9 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
          }
       });
 
-      messager.registerTopicListener(DebrisDetected, d -> debrisDetected.setText("Yes"));
-      messager.registerTopicListener(StairsDetected, d -> stairsDetected.setText("Yes"));
-      messager.registerTopicListener(DoorDetected, d -> doorDetected.setText("Yes"));
+      messager.addTopicListener(DebrisDetected, d -> debrisDetected.setText("Yes"));
+      messager.addTopicListener(StairsDetected, d -> stairsDetected.setText("Yes"));
+      messager.addTopicListener(DoorDetected, d -> doorDetected.setText("Yes"));
 
       requestedState.getSelectionModel()
                     .selectedItemProperty()

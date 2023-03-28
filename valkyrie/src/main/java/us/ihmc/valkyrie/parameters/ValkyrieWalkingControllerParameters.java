@@ -82,9 +82,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       icpControllerParameters = new ValkyrieICPControllerParameters(target);
       stepAdjustmentParameters = new ValkyrieStepAdjustmentParameters(target);
 
-      minimumHeightAboveGround = jointMap.getModelScale() * (0.595 + 0.23 + 0.08);
-      nominalHeightAboveGround = jointMap.getModelScale() * (0.675 + 0.23 - 0.01 + 0.08);
-      maximumHeightAboveGround = jointMap.getModelScale() * (0.735 + 0.23 + 0.08);
+      minimumHeightAboveGround = jointMap.getModelScale() * (0.595 + 0.23 + 0.08) + 0.09;
+      nominalHeightAboveGround = jointMap.getModelScale() * (0.675 + 0.23 - 0.01 + 0.08) + 0.09;
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.735 + 0.23 + 0.08) + 0.09;
 
 
       kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
@@ -172,12 +172,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public double defaultOffsetHeightAboveAnkle()
-   {
-      return 0.0;
-   }
-
-   @Override
    public double getMaximumLegLengthForSingularityAvoidance()
    {
       return physicalProperties.getThighLength() + physicalProperties.getShinLength();
@@ -223,7 +217,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getHighLevelJointSpaceControlGains()
    {
       PIDGains spineGains = createSpineControlGains();
       PIDGains neckGains = createNeckControlGains();

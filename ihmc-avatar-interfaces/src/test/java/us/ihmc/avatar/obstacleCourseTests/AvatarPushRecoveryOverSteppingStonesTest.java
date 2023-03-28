@@ -10,11 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.PlanarRegionMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.stepAdjustment.StepConstraintCalculator;
 import us.ihmc.avatar.stepAdjustment.SteppableRegionsCalculator;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
@@ -131,9 +129,10 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
    public void testWalkingOverSteppingStonesForwardPush()
    {
       setupTest();
+      simulationTestHelper.setKeepSCSUp(true);
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
-      SteppableRegionsCalculator steppableRegionsCalculator = new SteppableRegionsCalculator(10.0, new YoRegistry("test"));
+      SteppableRegionsCalculator steppableRegionsCalculator = new SteppableRegionsCalculator(100.0, new YoRegistry("test"));
       steppableRegionsCalculator.setPlanarRegions(createPlanarRegionsList());
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
@@ -227,10 +226,8 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       platform.setRegionId(idStart + locations.size() - 2);
 
       planarRegions.add(platform);
-      planarRegions.add(platform);
 
       return planarRegions;
-
    }
 
    private PlanarRegionsListMessage createPlanarRegionsListMessage()

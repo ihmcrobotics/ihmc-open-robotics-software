@@ -16,7 +16,7 @@ import javax.swing.JLabel;
 
 import org.jtransforms.fft.DoubleFFT_1D;
 
-import controller_msgs.msg.dds.DrillDetectionPacket;
+import perception_msgs.msg.dds.DrillDetectionPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;

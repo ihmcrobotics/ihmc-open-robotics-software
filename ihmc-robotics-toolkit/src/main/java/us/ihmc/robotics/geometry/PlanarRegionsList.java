@@ -12,7 +12,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 
 public class PlanarRegionsList
 {
@@ -480,6 +479,29 @@ public class PlanarRegionsList
       for (PlanarRegion planarRegionToRemove : placeholderForRemovingRegions)
       {
          regions.remove(planarRegionToRemove);
+      }
+
+      placeholderForRemovingRegions.clear();
+   }
+
+   public void queuePlanarRegionForRemoval(PlanarRegion planarRegionToRemove)
+   {
+      if (placeholderForRemovingRegions == null)
+         placeholderForRemovingRegions = new ArrayList<>();
+
+      placeholderForRemovingRegions.add(planarRegionToRemove);
+   }
+
+   public void removeQueuedPlanarRegions()
+   {
+      if (placeholderForRemovingRegions != null)
+      {
+         for (PlanarRegion regionToRemove : placeholderForRemovingRegions)
+         {
+            regions.remove(regionToRemove);
+         }
+
+         placeholderForRemovingRegions.clear();
       }
    }
 

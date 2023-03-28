@@ -1,7 +1,7 @@
 package us.ihmc.perception.realsense;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -34,7 +34,7 @@ public class RealsenseL515ROSNode
    private final ROS1Helper ros1Helper;
    private final ROS2Helper ros2Helper;
    private RealSenseHardwareManager realSenseHardwareManager;
-   private BytedecoRealsenseL515 l515;
+   private BytedecoRealsense l515;
    private RosImagePublisher ros1DepthPublisher;
    private RosCameraInfoPublisher ros1DepthCameraInfoPublisher;
    private ChannelBuffer ros1DepthChannelBuffer;
@@ -102,11 +102,11 @@ public class RealsenseL515ROSNode
                depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
                depth32FC1Image = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_32FC1);
 
-               depthCameraIntrinsics.setFx(l515.getFocalLengthPixelsX());
-               depthCameraIntrinsics.setFy(l515.getFocalLengthPixelsY());
+               depthCameraIntrinsics.setFx(l515.getDepthFocalLengthPixelsX());
+               depthCameraIntrinsics.setFy(l515.getDepthFocalLengthPixelsY());
                depthCameraIntrinsics.setSkew(0.0);
-               depthCameraIntrinsics.setCx(l515.getPrincipalOffsetXPixels());
-               depthCameraIntrinsics.setCy(l515.getPrincipalOffsetYPixels());
+               depthCameraIntrinsics.setCx(l515.getDepthPrincipalOffsetXPixels());
+               depthCameraIntrinsics.setCy(l515.getDepthPrincipalOffsetYPixels());
             }
 
             VideoPacket videoPacket = new VideoPacket();
@@ -118,7 +118,7 @@ public class RealsenseL515ROSNode
             {
                videoPacket.getData().add(dataPointer.get(i));
             }
-            ros2Helper.publish(ROS2Tools.L515_DEPTH, videoPacket);
+            ros2Helper.publish(ROS2Tools.IHMC_ROOT.withModule("l515").withType(VideoPacket.class).withSuffix("depth"), videoPacket);
 
             if (publishROS1 && ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected())
             {

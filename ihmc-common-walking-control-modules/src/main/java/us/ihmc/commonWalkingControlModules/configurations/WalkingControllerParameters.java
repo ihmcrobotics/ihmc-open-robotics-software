@@ -6,15 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
@@ -29,15 +28,11 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 public abstract class WalkingControllerParameters
 {
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
-   private final LeapOfFaithParameters leapOfFaithParameters;
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
 
    public WalkingControllerParameters()
    {
       jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
-      pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
-      leapOfFaithParameters = new LeapOfFaithParameters();
 
       kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
       kneePrivilegedConfigurationParameters.setConfigurationGain(40.0);
@@ -56,15 +51,38 @@ public abstract class WalkingControllerParameters
     */
    public abstract double getOmega0();
 
+   public enum SmoothFootUnloadMethod
+   {
+      HARD_CONSTRAINT, RHO_WEIGHT
+   };
+
    /**
     * Specifies if the desired ground reaction force for the force that is about to swing should
-    * smoothly be brought to zero by adding a inequality constraint on the z-force.
+    * smoothly be brought to zero by either:
+    * <ul>
+    * <li>adding a inequality constraint on the z-force,
+    * <li>or increasing the rho weights.
+    * </ul>
     * 
-    * @return whether to perform smooth unloading before swing or not. Default value is {@code false}.
+    * @return whether to perform smooth unloading before swing or not. Default value is {@code null}
+    *         for disabling the feature.
     */
-   public boolean enforceSmoothFootUnloading()
+   public SmoothFootUnloadMethod enforceSmoothFootUnloading()
    {
-      return false;
+      return null;
+   }
+
+   /**
+    * Only used when {@link #enforceSmoothFootUnloading()} equals
+    * {@code SmoothFootUnloadMethod.RHO_WEIGHT}, it specifies the final rho weight value of the foot
+    * being unloaded.
+    * 
+    * @return the final unloaded rho weight value, should be greater that the default rho weight
+    *         specified in {@link MomentumOptimizationSettings}.
+    */
+   public double getFinalUnloadedRhoWeight()
+   {
+      return 0.001;
    }
 
    /**
@@ -163,7 +181,8 @@ public abstract class WalkingControllerParameters
    public abstract PDGains getCoMHeightControlGains();
 
    /**
-    * Returns a list of joint control gains for groups of joints.
+    * Gains used to compute desired accelerations: joint acceleration = kp * (q_des - q) + kd * (v_des
+    * - v) The feedback in acceleration-space is used as an objective in the whole-body QP
     * <p>
     * Each {@link GroupParameter} contains gains for one joint group:</br>
     * - The name of the joint group that the gain is used for (e.g. Arms).</br>
@@ -174,7 +193,24 @@ public abstract class WalkingControllerParameters
     *
     * @return list containing jointspace PID gains and the corresponding joints
     */
-   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getHighLevelJointSpaceControlGains()
+   {
+      return new ArrayList<>();
+   }
+
+   /**
+    * Gains used for low-level joint position control intended to be sent directly to the motor, torque
+    * = kp * (q_des - q) + kd * (v_des - v)
+    * <p>
+    * Each {@link GroupParameter} contains gains for one joint group:</br>
+    * - The name of the joint group that the gain is used for (e.g. Arms).</br>
+    * - The gains for the joint group.</br>
+    * - The names of all rigid bodies in the joint group.
+    * </p>
+    * If a joint is not contained in the list, low-level jointspace control is not supported for that
+    * joint.
+    */
+   public List<GroupParameter<PIDGainsReadOnly>> getLowLevelJointSpaceControlGains()
    {
       return new ArrayList<>();
    }
@@ -360,6 +396,15 @@ public abstract class WalkingControllerParameters
     * Returns a list of joints that will not be used by the controller.
     */
    public abstract String[] getJointsToIgnoreInController();
+
+   /**
+    * Returns a list of joints that cannot be controlled but should still be considered by the
+    * controller.
+    */
+   public String[] getInactiveJoints()
+   {
+      return null;
+   }
 
    /**
     * Returns the {@link MomentumOptimizationSettings} for this robot. These parameters define the
@@ -653,26 +698,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Parameters for the {@link PelvisOffsetTrajectoryWhileWalking}. These parameters can be used to
-    * shape the pelvis orientation trajectory while walking to create a more natural motion and improve
-    * foot reachability.
-    */
-   public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
-   {
-      return pelvisOffsetWhileWalkingParameters;
-   }
-
-   /**
-    * Parameters for the 'Leap of Faith' Behavior. This caused the robot to activly fall onto an
-    * upcoming foothold when necessary to reach an upcoming foothold. This method returns the robot
-    * specific implementation of the {@link LeapOfFaithParameters};
-    */
-   public LeapOfFaithParameters getLeapOfFaithParameters()
-   {
-      return leapOfFaithParameters;
-   }
-
-   /**
     * Returns {@link ToeOffParameters} that contain all parameters relevant to the toe off state when
     * walking.
     */
@@ -709,6 +734,24 @@ public abstract class WalkingControllerParameters
    public abstract double maximumHeightAboveAnkle();
 
    /**
+    * This is a reduction factor of {@link #maximumHeightAboveAnkle()} that is applied during the
+    * exchange phase to the height trajectory when the robot is stepping down
+    */
+   public double getMaxLegLengthReductionSteppingDown()
+   {
+      return 0.0;
+   }
+
+   /**
+    * If the step height change is above this value, it indicates that the foot should not be
+    * considered "flat", and that the robot is either stepping up or down
+    */
+   public double getHeightChangeForNonFlatStep()
+   {
+      return 0.10;
+   }
+
+   /**
     * Whether the height of the pelvis should be controlled instead of the center of mass height.
     */
    public boolean controlPelvisHeightInsteadOfCoMHeight()
@@ -719,20 +762,13 @@ public abstract class WalkingControllerParameters
    /**
     * Whether the height should be controlled with the rate of change of momentum or using a feedback
     * controller on the pelvis. Note that the height of the pelvis should be controlled to set this
-    * flag to {@code false}, i.e. {@code controlPelvisHeightInsteadOfCoMHeight() == true}.
-    *
-    * Fixme does this do what we think it does?
+    * flag to {@code false}, i.e. {@code controlPelvisHeightInsteadOfCoMHeight() == true}. Fixme does
+    * this do what we think it does?
     */
    public boolean controlHeightWithMomentum()
    {
       return true;
    }
-
-   /**
-    * Parameter for the CoM height trajectory generation.
-    */
-   @Deprecated // Remove this. It is not actually doing anything.
-   public abstract double defaultOffsetHeightAboveAnkle();
 
    /**
     * Returns parameters related to stepping such as maximum step length etc.

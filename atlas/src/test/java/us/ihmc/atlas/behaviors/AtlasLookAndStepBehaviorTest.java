@@ -1,6 +1,6 @@
 package us.ihmc.atlas.behaviors;
 
-import controller_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.application.Platform;
 import org.junit.jupiter.api.*;
@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.PARAMETERS;
 
 // TODO: Add reviewing; Add status logger to visualizer
 @Execution(ExecutionMode.SAME_THREAD)
@@ -270,10 +270,11 @@ public class AtlasLookAndStepBehaviorTest
                                 reachedGoalOrFallen.set();
                              });
 
-      LookAndStepBehaviorParameters lookAndStepBehaviorParameters = new LookAndStepBehaviorParameters();
+      LookAndStepBehaviorParameters lookAndStepBehaviorParameters = robotModel.getLookAndStepParameters();
       StoredPropertySetMessage storedPropertySetMessage = new StoredPropertySetMessage();
       lookAndStepBehaviorParameters.getAllAsStrings().forEach(value -> storedPropertySetMessage.getStrings().add(value));
-      IHMCROS2Publisher<StoredPropertySetMessage> parametersPublisher = new IHMCROS2Publisher<>(ros2Node, LOOK_AND_STEP_PARAMETERS);
+      IHMCROS2Publisher<StoredPropertySetMessage> parametersPublisher
+            = new IHMCROS2Publisher<>(ros2Node, PARAMETERS.getCommandTopic());
       parametersPublisher.publish(storedPropertySetMessage);
 
       IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, LookAndStepBehaviorAPI.GOAL_INPUT);
@@ -291,7 +292,7 @@ public class AtlasLookAndStepBehaviorTest
       monitorThread.start();
 
       Notification bodyPathPlanningStateReached = new Notification();
-      behaviorMessager.registerTopicListener(LookAndStepBehaviorAPI.CurrentState, state ->
+      behaviorMessager.addTopicListener(LookAndStepBehaviorAPI.CurrentState, state ->
       {
          if (state.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING.name()))
          {

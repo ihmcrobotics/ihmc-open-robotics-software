@@ -9,9 +9,9 @@ public class PDGains implements PDGainsReadOnly, Settable<PDGains>
    private double kp;
    private double kd;
    private double zeta;
-   private double maximumFeedback;
-   private double maximumFeedbackRate;
-   private double positionDeadband;
+   private double maximumFeedback = Double.POSITIVE_INFINITY;
+   private double maximumFeedbackRate = Double.POSITIVE_INFINITY;
+   private double positionDeadband = 0.0;
 
    @Override
    public double getKp()

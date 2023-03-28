@@ -1,0 +1,31 @@
+#ifndef __perception_msgs__msg__OcTreeKeyListMessage__idl__
+#define __perception_msgs__msg__OcTreeKeyListMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC robot environment awareness module.
+       * This message contains a list of occupied cells in the octree
+       * All keys are given at maximum depth
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::OcTreeKeyListMessage_")
+      struct OcTreeKeyListMessage
+      {
+        long tree_depth;
+        double tree_resolution;
+        long number_of_keys;
+        /**
+         * See us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConvterter for info on the compression protocol
+         */
+        sequence<octet, 200000> keys;
+      };
+    };
+  };
+};
+
+#endif

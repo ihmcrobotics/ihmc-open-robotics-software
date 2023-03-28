@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.YoPartialFootholdModuleParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -14,12 +13,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class FootControlHelper
+public class FootControlHelper implements SCS2YoGraphicHolder
 {
    private final RobotSide robotSide;
    private final ContactableFoot contactableFoot;
@@ -37,7 +39,7 @@ public class FootControlHelper
    private final ToeSlippingDetector toeSlippingDetector;
 
    private final ExplorationParameters explorationParameters;
-   private final FootholdRotationParameters footholdRotationParameters;
+   private final YoPartialFootholdModuleParameters footholdRotationParameters;
    private final SupportStateParameters supportStateParameters;
 
    private final SwingTrajectoryCalculator swingTrajectoryCalculator;
@@ -49,7 +51,7 @@ public class FootControlHelper
                             WorkspaceLimiterParameters workspaceLimiterParameters,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
-                            FootholdRotationParameters footholdRotationParameters,
+                            YoPartialFootholdModuleParameters footholdRotationParameters,
                             SupportStateParameters supportStateParameters,
                             YoRegistry registry)
    {
@@ -61,7 +63,9 @@ public class FootControlHelper
       this.supportStateParameters = supportStateParameters;
 
       this.swingTrajectoryParameters = swingTrajectoryParameters;
-      this.swingTrajectoryCalculator = new SwingTrajectoryCalculator(robotSide.getCamelCaseNameForStartOfExpression(), robotSide, controllerToolbox,
+      this.swingTrajectoryCalculator = new SwingTrajectoryCalculator(robotSide.getCamelCaseNameForStartOfExpression(),
+                                                                     robotSide,
+                                                                     controllerToolbox,
                                                                      walkingControllerParameters,
                                                                      swingTrajectoryParameters,
                                                                      registry);
@@ -73,14 +77,17 @@ public class FootControlHelper
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       if (walkingControllerParameters.createFootholdExplorationTools() && explorationParameters != null)
       {
-         partialFootholdControlModule = new PartialFootholdControlModule(robotSide, controllerToolbox,
-               walkingControllerParameters, explorationParameters, registry, yoGraphicsListRegistry);
+         partialFootholdControlModule = new PartialFootholdControlModule(robotSide,
+                                                                         controllerToolbox,
+                                                                         walkingControllerParameters,
+                                                                         explorationParameters,
+                                                                         registry,
+                                                                         yoGraphicsListRegistry);
       }
       else
       {
          partialFootholdControlModule = null;
       }
-
 
       isDesiredCoPOnEdge = new YoBoolean(namePrefix + "IsDesiredCoPOnEdge", registry);
 
@@ -126,9 +133,8 @@ public class FootControlHelper
          isDesiredCoPOnEdge.set(false);
       else
       {
-         double epsilon = isDesiredCoPOnEdge.getBooleanValue() ?
-               supportStateParameters.getCopOnEdgeEpsilonWithHysteresis() :
-               supportStateParameters.getCopOnEdgeEpsilon();
+         double epsilon = isDesiredCoPOnEdge.getBooleanValue() ? supportStateParameters.getCopOnEdgeEpsilonWithHysteresis()
+                                                               : supportStateParameters.getCopOnEdgeEpsilon();
          FrameConvexPolygon2DReadOnly footSupportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
          isDesiredCoPOnEdge.set(!footSupportPolygon.isPointInside(desiredCoP, -epsilon)); // Minus means that the check is done with a smaller polygon
       }
@@ -197,7 +203,7 @@ public class FootControlHelper
       return explorationParameters;
    }
 
-   public FootholdRotationParameters getFootholdRotationParameters()
+   public YoPartialFootholdModuleParameters getFootholdRotationParameters()
    {
       return footholdRotationParameters;
    }
@@ -215,5 +221,17 @@ public class FootControlHelper
    public SwingTrajectoryCalculator getSwingTrajectoryCalculator()
    {
       return swingTrajectoryCalculator;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(robotSide.getPascalCaseName() + getClass().getSimpleName());
+      group.addChild(swingTrajectoryCalculator.getSCS2YoGraphics());
+      if (partialFootholdControlModule != null)
+         group.addChild(partialFootholdControlModule.getSCS2YoGraphics());
+      if (workspaceLimiterControlModule != null)
+         group.addChild(workspaceLimiterControlModule.getSCS2YoGraphics());
+      return group;
    }
 }

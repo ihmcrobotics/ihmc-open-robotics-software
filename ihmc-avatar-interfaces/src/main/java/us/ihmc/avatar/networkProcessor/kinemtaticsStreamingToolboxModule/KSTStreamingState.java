@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
@@ -164,8 +164,8 @@ public class KSTStreamingState implements State
 
    public KSTStreamingState(KSTTools tools)
    {
-      useStreamingPublisher.set(true);
       KinematicsStreamingToolboxParameters parameters = tools.getParameters();
+      useStreamingPublisher.set(parameters.getUseStreamingPublisher());
       this.tools = tools;
       toolboxControllerPeriod = tools.getToolboxControllerPeriod();
       ikController = tools.getIKController();
@@ -173,6 +173,7 @@ public class KSTStreamingState implements State
       ikSolverJointGains = ikController.getDefaultJointGains();
       ikController.getCenterOfMassSafeMargin().set(parameters.getCenterOfMassSafeMargin());
       ikController.setPublishingSolutionPeriod(parameters.getPublishingSolutionPeriod());
+      ikController.getMomentumWeight().set(parameters.getCenterOfMassHoldWeight());
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
@@ -228,7 +229,7 @@ public class KSTStreamingState implements State
       //                                             .collect(Collectors.toList()));
       //      }
 
-      publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
+      publishingPeriod.set(parameters.getPublishingPeriod());
 
       defaultLinearRateLimit.set(parameters.getDefaultLinearRateLimit());
       defaultAngularRateLimit.set(parameters.getDefaultAngularRateLimit());

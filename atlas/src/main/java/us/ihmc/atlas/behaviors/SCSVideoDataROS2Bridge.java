@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;

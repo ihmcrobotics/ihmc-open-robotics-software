@@ -3,7 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
@@ -76,7 +76,7 @@ public class REAOcTreeBuffer
 
       isBufferStateRequested = reaMessager.createInput(requestStateTopic, false);
 
-      reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
+      reaMessager.addTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
       stereoVisionBufferSize = reaMessager.createInput(REAModuleAPI.StereoVisionBufferSize, NUMBER_OF_SAMPLES);
       depthCloudBufferSize = reaMessager.createInput(REAModuleAPI.DepthCloudBufferSize, NUMBER_OF_SAMPLES);
    }

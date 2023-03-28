@@ -62,7 +62,7 @@ public class LeastSquaresZPlaneFitterTest
 
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointList, plane3d);
 
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 1.0), new Vector3D(plane3d.getNormal()), 1e-7);
+      EuclidCoreTestTools.assertEquals(new Vector3D(0.0, 0.0, 1.0), new Vector3D(plane3d.getNormal()), 1e-7);
    }
 
 	@Test
@@ -126,7 +126,7 @@ public class LeastSquaresZPlaneFitterTest
          Point3D pointSolution = new Point3D(plane3dSolution.getPoint());
          Vector3D normalSolution = new Vector3D(plane3dSolution.getNormal());
 
-         EuclidCoreTestTools.assertTuple3DEquals(planeNormal, normalSolution, normalEpsilon);
+         EuclidCoreTestTools.assertEquals(planeNormal, normalSolution, normalEpsilon);
 
          double distanceToPlane = plane3d.distance(pointSolution);
          assertTrue(distanceToPlane < pointEpsilon);
@@ -194,7 +194,7 @@ public class LeastSquaresZPlaneFitterTest
 
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointList, plane3d);
 
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 1.0, 0.0), new Vector3D(plane3d.getNormal()), 1e-7);
+      EuclidCoreTestTools.assertEquals(new Vector3D(0.0, 1.0, 0.0), new Vector3D(plane3d.getNormal()), 1e-7);
    }
 
   

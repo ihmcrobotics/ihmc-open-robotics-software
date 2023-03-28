@@ -23,6 +23,11 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -175,7 +180,7 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
       {
          RigidBodyBasics foot = feet.get(i);
          Wrench footWrench = footWrenches.get(foot);
-         footSwitches.get(foot).computeAndPackFootWrench(footWrench);
+         footSwitches.get(foot).getMeasuredWrench(footWrench);
          tempFootForce.setIncludingFrame(footWrench.getLinearPart());
          tempFootForce.changeFrame(worldFrame);
 
@@ -201,5 +206,17 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
    public YoRegistry getRegistry()
    {
       return registry;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D("Meas CoM",
+                                                                    yoCenterOfMassPosition,
+                                                                    0.012,
+                                                                    ColorDefinitions.Black(),
+                                                                    DefaultPoint2DGraphic.CROSS));
+      return group;
    }
 }

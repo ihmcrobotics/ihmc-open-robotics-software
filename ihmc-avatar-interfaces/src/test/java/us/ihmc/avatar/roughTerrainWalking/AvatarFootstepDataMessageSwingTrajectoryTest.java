@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -277,16 +277,16 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          String linearVelocityPrefix = YoGeometryNameTools.assembleName(prefix, "linearVelocity", "");
          Vector3D desiredLinearVelocity = EndToEndTestTools.findVector3D(linearNamespace, linearVelocityPrefix, suffix, simulationTestHelper);
 
-         EuclidCoreTestTools.assertTuple3DEquals("Position", waypoint.getPosition(), desiredPosition, 1.0E-10, format);
-         EuclidCoreTestTools.assertTuple3DEquals("Linear Velocity", waypoint.getLinearVelocity(), desiredLinearVelocity, 1.0E-10, format);
+         EuclidCoreTestTools.assertEquals("Position", waypoint.getPosition(), desiredPosition, 1.0E-10, format);
+         EuclidCoreTestTools.assertEquals("Linear Velocity", waypoint.getLinearVelocity(), desiredLinearVelocity, 1.0E-10, format);
 
          String orientationPrefix = YoGeometryNameTools.assembleName(prefix, "orientation", "");
          Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(angularNamespace, orientationPrefix, suffix, simulationTestHelper);
          String angularVelocityPrefix = YoGeometryNameTools.assembleName(prefix, "angularVelocity", "");
          Vector3D desiredAngularVelocity = EndToEndTestTools.findVector3D(angularNamespace, angularVelocityPrefix, suffix, simulationTestHelper);
 
-         EuclidCoreTestTools.assertTuple4DEquals("Orientation", waypoint.getOrientation(), desiredOrientation, 1.0E-10, format);
-         EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.getAngularVelocity(), desiredAngularVelocity, 1.0E-10, format);
+         EuclidCoreTestTools.assertEquals("Orientation", waypoint.getOrientation(), desiredOrientation, 1.0E-10, format);
+         EuclidCoreTestTools.assertEquals("Angular Velocity", waypoint.getAngularVelocity(), desiredAngularVelocity, 1.0E-10, format);
       }
 
       String currentIndexName = prefix + "CurrentWaypointIndex";

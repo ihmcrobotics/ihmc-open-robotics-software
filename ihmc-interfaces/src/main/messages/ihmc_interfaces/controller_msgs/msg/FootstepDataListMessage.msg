@@ -41,7 +41,10 @@ bool offset_footsteps_with_execution_error false
 # If true the controller will adjust the z coordinate of the adjust upcoming footsteps with the location error of previous steps.
 bool offset_footsteps_height_with_execution_error false
 # Properties for queueing footstep lists.
-QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties
 
 # Default step constraints regions
 StepConstraintsListMessage default_step_constraints
+
+# If the controller should check and fail if the steps are not reachable
+bool should_check_for_reachability false

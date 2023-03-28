@@ -1,0 +1,30 @@
+#ifndef __exoskeleton_msgs__msg__QuixSideStepDirectionMessage__idl__
+#define __exoskeleton_msgs__msg__QuixSideStepDirectionMessage__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+
+      /**
+       * This message is part of the Quix controller API.
+       */
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::QuixSideStepDirectionMessage_")
+      struct QuixSideStepDirectionMessage
+      {
+        @defaultValue(value=255)
+        octet step_direction;
+      };
+    };
+  };
+};
+
+#endif

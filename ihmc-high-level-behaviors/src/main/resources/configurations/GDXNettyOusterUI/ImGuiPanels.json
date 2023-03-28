@@ -1,8 +1,0 @@
-{
-  "dockspacePanels" : { },
-  "windows" : {
-    "Ouster" : true,
-    "Ouster Depth Image" : true,
-    "VR Thread Debugger" : false
-  }
-}

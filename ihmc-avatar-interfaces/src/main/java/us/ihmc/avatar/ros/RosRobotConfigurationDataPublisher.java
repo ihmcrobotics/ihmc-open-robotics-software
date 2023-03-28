@@ -242,7 +242,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             }
 
             RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getRootOrientation(),
-                                                                        robotConfigurationData.getRootTranslation());
+                                                                        robotConfigurationData.getRootPosition());
 
             jointStatePublisher.publish(nameList, jointAngles, jointVelocities, jointTorques, t);
 

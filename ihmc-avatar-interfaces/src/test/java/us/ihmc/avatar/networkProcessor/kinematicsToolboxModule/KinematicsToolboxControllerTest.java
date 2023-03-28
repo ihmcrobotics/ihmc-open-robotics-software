@@ -16,9 +16,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.KinematicsToolboxTestRobot;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.SevenDoFArm;
@@ -36,6 +36,7 @@ import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -62,7 +63,6 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.tools.MemoryTools;
@@ -139,7 +139,7 @@ public final class KinematicsToolboxControllerTest
          if (ghost != null)
             scs.addRobot(ghost);
          scs.addRobot(robot);
-         scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
          scs.start(true, true, true);
          scs.setCameraFocusPosition(0.0, 0.0, 1.0);
@@ -698,7 +698,7 @@ public final class KinematicsToolboxControllerTest
       FloatingJointBasics rootJoint = initialFullRobotModel.getRootJoint();
       if (rootJoint != null)
       {
-         robotConfigurationData.getRootTranslation().set(rootJoint.getJointPose().getPosition());
+         robotConfigurationData.getRootPosition().set(rootJoint.getJointPose().getPosition());
          robotConfigurationData.getRootOrientation().set(rootJoint.getJointPose().getOrientation());
       }
       return robotConfigurationData;
