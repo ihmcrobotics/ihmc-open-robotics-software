@@ -14,6 +14,8 @@ public class ROS2SyncedRigidBodyTransform
    private final IHMCROS2Input<RigidBodyTransformMessage> frameUpdateSubscription;
    private final Throttler statusThrottler = new Throttler().setFrequency(ROS2Heartbeat.STATUS_FREQUENCY);
    private final RigidBodyTransformMessage statusMessage = new RigidBodyTransformMessage();
+   private boolean acceptingUpdates = true;
+   private boolean publishingStatus = true;
 
    public ROS2SyncedRigidBodyTransform(ROS2PublishSubscribeAPI ros2,
                                        ROS2IOTopicPair<RigidBodyTransformMessage> topicPair,
@@ -27,15 +29,25 @@ public class ROS2SyncedRigidBodyTransform
 
    public void update()
    {
-      if (frameUpdateSubscription.getMessageNotification().poll())
+      if (acceptingUpdates && frameUpdateSubscription.getMessageNotification().poll())
       {
          MessageTools.toEuclid(frameUpdateSubscription.getMessageNotification().read(), rigidBodyTransformToSync);
       }
 
-      if (statusThrottler.run())
+      if (publishingStatus && statusThrottler.run())
       {
          MessageTools.toMessage(rigidBodyTransformToSync, statusMessage);
          ros2.publish(topicPair.getStatusTopic(), statusMessage);
       }
+   }
+
+   public void setAcceptingUpdates(boolean acceptingUpdates)
+   {
+      this.acceptingUpdates = acceptingUpdates;
+   }
+
+   public void setPublishingStatus(boolean publishingStatus)
+   {
+      this.publishingStatus = publishingStatus;
    }
 }

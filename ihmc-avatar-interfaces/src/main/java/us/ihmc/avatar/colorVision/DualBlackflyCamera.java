@@ -20,6 +20,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2SyncedRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
@@ -42,6 +43,7 @@ public class DualBlackflyCamera
 {
    private final String serialNumber;
    private final ROS2SyncedRobotModel syncedRobot;
+   private RigidBodyTransform cameraTransformToParent;
    private SpinnakerBlackfly blackfly;
    private final spinImage spinImage = new spinImage();
    private BytePointer spinImageDataPointer;
@@ -82,11 +84,13 @@ public class DualBlackflyCamera
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
    private ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
+   private ROS2SyncedRigidBodyTransform remoteTunableCameraTransform;
 
-   public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot)
+   public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot, RigidBodyTransform cameraTransformToParent)
    {
       this.serialNumber = serialNumber;
       this.syncedRobot = syncedRobot;
+      this.cameraTransformToParent = cameraTransformToParent;
    }
 
    public void create(SpinnakerBlackfly blackfly,
@@ -206,8 +210,13 @@ public class DualBlackflyCamera
                                                                             arUcoMarkersToTrack,
                                                                             syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(),
                                                                             ros2Helper);
+
+                  remoteTunableCameraTransform = new ROS2SyncedRigidBodyTransform(ros2Helper,
+                                                                                  ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
+                                                                                  cameraTransformToParent);
                }
 
+               remoteTunableCameraTransform.update();
                syncedRobot.update();
                ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
 
