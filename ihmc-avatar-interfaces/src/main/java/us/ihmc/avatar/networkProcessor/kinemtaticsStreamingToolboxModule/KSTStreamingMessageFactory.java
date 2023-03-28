@@ -1,9 +1,9 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.JointspaceStreamingMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.SE3StreamingMessage;
-import controller_msgs.msg.dds.SO3StreamingMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import ihmc_common_msgs.msg.dds.SE3StreamingMessage;
+import ihmc_common_msgs.msg.dds.SO3StreamingMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;

@@ -1,9 +1,0 @@
-{
-  "dockspacePanels" : { },
-  "windows" : {
-    "Diagnostics" : true,
-    "VR Thread Debugger" : false,
-    "Video" : false,
-    "Video1" : true
-  }
-}

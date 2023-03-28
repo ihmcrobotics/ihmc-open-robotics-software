@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
@@ -9,6 +9,7 @@ ihmc {
    loadProductProperties("../product.properties")
    
    configureDependencyResolution()
+   javaDirectory("main", "generated-java")
    configurePublications()
 }
 
@@ -18,11 +19,12 @@ mainDependencies {
       exclude(group = "org.jmonkeyengine")
       exclude(group = "org.lwjgl.lwjgl") // exclude lwjgl 2
    }
+   api("us.ihmc:promp:source")
 }
 
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-javafx-toolkit:0.21.1")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.1")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
@@ -30,9 +32,9 @@ javafxDependencies {
 }
 
 missionControlDependencies {
-   api("us.ihmc:ihmc-commons:0.30.5")
+   api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:ihmc-ros2-library:0.20.5")
+   api("us.ihmc:ihmc-ros2-library:0.22.2")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
@@ -44,9 +46,10 @@ libgdxDependencies {
    api("org.abego.treelayout:org.abego.treelayout.core:1.0.3")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-perception-javacv:source")
+   api("us.ihmc:ihmc-perception-bytedeco:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-simulation:0.8.4-bullet-alpha-6")
-   api("us.ihmc:mecano-graphviz:0.11.1")
+   api("us.ihmc:scs2-definition:17-0.14.0")
+   api("us.ihmc:mecano-graphviz:17-0.11.5")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
    api("com.badlogicgames.gdx:gdx-bullet:1.11.0")
@@ -61,6 +64,9 @@ testDependencies {
    api("us.ihmc:ihmc-path-planning-test:source")
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
    api("com.github.stephengold:Libbulletjme:12.6.0")
+   api("us.ihmc:scs2-examples:17-0.14.0")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.14.0")
+   api("us.ihmc:example-simulations:source")
 }
 
 app.entrypoint(ihmc.sourceSetProject("mission-control"),

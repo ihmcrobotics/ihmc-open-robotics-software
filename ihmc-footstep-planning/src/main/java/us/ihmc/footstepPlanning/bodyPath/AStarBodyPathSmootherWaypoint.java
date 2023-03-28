@@ -15,6 +15,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -23,8 +26,8 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.heightMap.HeightMapData;
-import us.ihmc.robotics.heightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
@@ -42,15 +45,9 @@ import static us.ihmc.footstepPlanning.bodyPath.BodyPathRANSACTraversibilityCalc
 
 public class AStarBodyPathSmootherWaypoint
 {
-   private static final double boxGroundOffset = 0.35;
+   static final double boxGroundOffset = 0.35;
    private static final double nonGroundDiscount = 0.6;
-
-   private static final FrameBox3D collisionBox = new FrameBox3D();
-
-   static
-   {
-      collisionBox.getSize().set(boxSizeX, boxSizeY, 0.6);
-   }
+   static final double traversibilitySmoothingHeightDeadband = 0.05;
 
    private static final AppearanceDefinition collisionBoxColor = YoAppearance.RGBColorFromHex(0x824e38);
    private final boolean visualize;
@@ -116,14 +113,17 @@ public class AStarBodyPathSmootherWaypoint
    private final SideDependentList<YoInteger> yoGroundPlaneCells;
 
    private int pathSize;
+   private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
    private AStarBodyPathSmootherWaypoint[] waypoints;
    private final YoVector2D rollDelta;
 
    public AStarBodyPathSmootherWaypoint(int waypointIndex,
+                                        AStarBodyPathPlannerParametersReadOnly plannerParameters,
                                         YoGraphicsListRegistry graphicsListRegistry,
                                         YoRegistry parentRegistry)
    {
       this.waypointIndex = waypointIndex;
+      this.plannerParameters = plannerParameters;
 
       YoRegistry registry = new YoRegistry("Waypoint" + waypointIndex);
       maxCollision = new YoDouble("maxCollision" + waypointIndex, registry);
@@ -137,7 +137,10 @@ public class AStarBodyPathSmootherWaypoint
       waypoint = new YoFramePoseUsingYawPitchRoll("waypoint" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       initialWaypoint = new YoFramePoint3D("initWaypoint" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       waypointFrame = new PoseReferenceFrame("waypointFrame" + waypointIndex, ReferenceFrame.getWorldFrame());
-      nominalStepFrames = new SideDependentList<>(side -> ReferenceFrameTools.constructFrameWithUnchangingTranslationFromParent(side.getCamelCaseNameForStartOfExpression() + "nominalStepFrame" + waypointIndex, waypointFrame, new Vector3D(0.0, side.negateIfRightSide(halfStanceWidthTraversibility), 0.0)));
+      nominalStepFrames = new SideDependentList<>(side -> ReferenceFrameTools.constructFrameWithUnchangingTranslationFromParent(
+            side.getCamelCaseNameForStartOfExpression() + "nominalStepFrame" + waypointIndex,
+            waypointFrame,
+            new Vector3D(0.0, side.negateIfRightSide(plannerParameters.getHalfStanceWidth()), 0.0)));
 
       yoSmoothnessGradient = new YoFrameVector3D("smoothGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       yoEqualSpacingGradient = new YoFrameVector3D("spacingGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
@@ -146,21 +149,31 @@ public class AStarBodyPathSmootherWaypoint
       yoDisplacementGradient = new YoFrameVector3D("displacementGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       yoGroundPlaneGradient = new YoFrameVector3D("groundPlaneGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       yoSurfaceNormal = new YoFrameVector3D("surfaceNormal" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
-      yoNominalStepPoses = new SideDependentList<>(side -> new YoFramePoseUsingYawPitchRoll(side.getCamelCaseNameForStartOfExpression() + "nominalStepPose" + waypointIndex, ReferenceFrame.getWorldFrame(), registry));
-      yoNominalTraversibility = new SideDependentList<>(side -> new YoFrameVector3D(side.getCamelCaseNameForStartOfExpression() + "TravNominal" + waypointIndex, ReferenceFrame.getWorldFrame(), registry));
+      yoNominalStepPoses = new SideDependentList<>(side -> new YoFramePoseUsingYawPitchRoll(
+            side.getCamelCaseNameForStartOfExpression() + "nominalStepPose" + waypointIndex, ReferenceFrame.getWorldFrame(), registry));
+      yoNominalTraversibility = new SideDependentList<>(side -> new YoFrameVector3D(side.getCamelCaseNameForStartOfExpression() + "TravNominal" + waypointIndex,
+                                                                                    ReferenceFrame.getWorldFrame(),
+                                                                                    registry));
       yoTraversibilityGradient = new YoFrameVector3D("traversibilityGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
 
-      traversibilitySampleNeg = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "TravSampleNeg" + waypointIndex, registry));
-      traversibilitySamplePos = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "TravSamplePos" + waypointIndex, registry));
-      traversibilitySampleNominal = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "TravSampleNominal" + waypointIndex, registry));
+      traversibilitySampleNeg = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "TravSampleNeg" + waypointIndex,
+                                                                             registry));
+      traversibilitySamplePos = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "TravSamplePos" + waypointIndex,
+                                                                             registry));
+      traversibilitySampleNominal = new SideDependentList<>(side -> new YoDouble(
+            side.getCamelCaseNameForStartOfExpression() + "TravSampleNominal" + waypointIndex, registry));
 
-      yoElevatedStepPositions = new SideDependentList<>(side -> new YoFramePoint3D(side.getCamelCaseNameForStartOfExpression() + "DebugStepPose" + waypointIndex, ReferenceFrame.getWorldFrame(), registry));
-      yoSidedTraversibility = new SideDependentList<>(side -> new YoFrameVector3D(side.getCamelCaseNameForStartOfExpression() + "DebugTrav" + waypointIndex, ReferenceFrame.getWorldFrame(), registry));
+      yoElevatedStepPositions = new SideDependentList<>(side -> new YoFramePoint3D(
+            side.getCamelCaseNameForStartOfExpression() + "DebugStepPose" + waypointIndex, ReferenceFrame.getWorldFrame(), registry));
+      yoSidedTraversibility = new SideDependentList<>(side -> new YoFrameVector3D(side.getCamelCaseNameForStartOfExpression() + "DebugTrav" + waypointIndex,
+                                                                                  ReferenceFrame.getWorldFrame(),
+                                                                                  registry));
 
       int minMaxXOffsetGroundPlane = 1;
       int minYOffsetGroundPlane = 0;
       int maxYOffsetGroundPlane = 4;
-      yoGroundPlaneCells = new SideDependentList<>(side -> new YoInteger(side.getCamelCaseNameForStartOfExpression() + "GroundCells" + waypointIndex, registry));
+      yoGroundPlaneCells = new SideDependentList<>(side -> new YoInteger(side.getCamelCaseNameForStartOfExpression() + "GroundCells" + waypointIndex,
+                                                                         registry));
       for (int xi = -minMaxXOffsetGroundPlane; xi <= minMaxXOffsetGroundPlane; xi++)
       {
          for (int yi = minYOffsetGroundPlane; yi <= maxYOffsetGroundPlane; yi++)
@@ -172,6 +185,9 @@ public class AStarBodyPathSmootherWaypoint
 
       if (visualize)
       {
+         FrameBox3D collisionBox = new FrameBox3D();
+         collisionBox.getSize().set(plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY(), 0.6);
+
          waypointGraphic = new YoGraphicPosition("waypointViz" + waypointIndex, waypoint.getPosition(), 0.02, YoAppearance.Red());
          turnPointGraphic = new YoGraphicPosition("turnPointViz" + waypointIndex, waypoint.getPosition(), 0.02, YoAppearance.White());
          Graphics3DObject collisionBoxGraphic = new Graphics3DObject();
@@ -184,9 +200,18 @@ public class AStarBodyPathSmootherWaypoint
 
          for (RobotSide side : RobotSide.values)
          {
-            YoGraphicCoordinateSystem nominalStepPose = new YoGraphicCoordinateSystem(side.getCamelCaseNameForStartOfExpression() + "stepPoseViz" + waypointIndex, yoNominalStepPoses.get(side), 0.2);
-            YoGraphicVector nominalTraversibilityViz = new YoGraphicVector(side.getCamelCaseNameForStartOfExpression() + "nominalTraversibilityViz" + waypointIndex, yoNominalStepPoses.get(side).getPosition(), yoNominalTraversibility.get(side), 0.5, YoAppearance.Yellow());
-            YoGraphicVector debugTravViz = new YoGraphicVector(side.getCamelCaseNameForStartOfExpression() + "debugTravViz" + waypointIndex, yoElevatedStepPositions.get(side), yoSidedTraversibility.get(side), 0.5);
+            YoGraphicCoordinateSystem nominalStepPose = new YoGraphicCoordinateSystem(
+                  side.getCamelCaseNameForStartOfExpression() + "stepPoseViz" + waypointIndex, yoNominalStepPoses.get(side), 0.2);
+            YoGraphicVector nominalTraversibilityViz = new YoGraphicVector(
+                  side.getCamelCaseNameForStartOfExpression() + "nominalTraversibilityViz" + waypointIndex,
+                  yoNominalStepPoses.get(side).getPosition(),
+                  yoNominalTraversibility.get(side),
+                  0.5,
+                  YoAppearance.Yellow());
+            YoGraphicVector debugTravViz = new YoGraphicVector(side.getCamelCaseNameForStartOfExpression() + "debugTravViz" + waypointIndex,
+                                                               yoElevatedStepPositions.get(side),
+                                                               yoSidedTraversibility.get(side),
+                                                               0.5);
 
             graphicsListRegistry.registerYoGraphic("Step Poses", nominalStepPose);
             graphicsListRegistry.registerYoGraphic("Step Poses", nominalTraversibilityViz);
@@ -199,13 +224,41 @@ public class AStarBodyPathSmootherWaypoint
          graphicsListRegistry.registerYoGraphic("Normals", waypointOrientedGraphic);
          graphicsListRegistry.registerYoGraphic("Normals", surfaceNormal);
 
-         YoGraphicVector smoothnessGradientViz = new YoGraphicVector("smoothnessGradientViz" + waypointIndex, waypoint.getPosition(), yoSmoothnessGradient, gradientGraphicScale, smoothnessColor);
-         YoGraphicVector equalSpacingGradientViz = new YoGraphicVector("spacingGradientViz" + waypointIndex, waypoint.getPosition(), yoEqualSpacingGradient, gradientGraphicScale, spacingColor);
-         YoGraphicVector collisionGradientViz = new YoGraphicVector("collisionGradientViz" + waypointIndex, waypoint.getPosition(), yoCollisionGradient, gradientGraphicScale, collisionColor);
-         YoGraphicVector rollGradientViz = new YoGraphicVector("rollGradientViz" + waypointIndex, waypoint.getPosition(), yoRollGradient, gradientGraphicScale, rollColor);
-         YoGraphicVector displacementGradientViz = new YoGraphicVector("displacementGradientViz" + waypointIndex, waypoint.getPosition(), yoDisplacementGradient, gradientGraphicScale, displacementColor);
-         YoGraphicVector traversibilityGradientViz = new YoGraphicVector("traversibilityGradientViz" + waypointIndex, waypoint.getPosition(), yoTraversibilityGradient, gradientGraphicScale, traversibilityColor);
-         YoGraphicVector groundPlaneGradientViz = new YoGraphicVector("groundGradientViz" + waypointIndex, waypoint.getPosition(), yoGroundPlaneGradient, gradientGraphicScale, groundPlaneColor);
+         YoGraphicVector smoothnessGradientViz = new YoGraphicVector("smoothnessGradientViz" + waypointIndex,
+                                                                     waypoint.getPosition(),
+                                                                     yoSmoothnessGradient,
+                                                                     gradientGraphicScale,
+                                                                     smoothnessColor);
+         YoGraphicVector equalSpacingGradientViz = new YoGraphicVector("spacingGradientViz" + waypointIndex,
+                                                                       waypoint.getPosition(),
+                                                                       yoEqualSpacingGradient,
+                                                                       gradientGraphicScale,
+                                                                       spacingColor);
+         YoGraphicVector collisionGradientViz = new YoGraphicVector("collisionGradientViz" + waypointIndex,
+                                                                    waypoint.getPosition(),
+                                                                    yoCollisionGradient,
+                                                                    gradientGraphicScale,
+                                                                    collisionColor);
+         YoGraphicVector rollGradientViz = new YoGraphicVector("rollGradientViz" + waypointIndex,
+                                                               waypoint.getPosition(),
+                                                               yoRollGradient,
+                                                               gradientGraphicScale,
+                                                               rollColor);
+         YoGraphicVector displacementGradientViz = new YoGraphicVector("displacementGradientViz" + waypointIndex,
+                                                                       waypoint.getPosition(),
+                                                                       yoDisplacementGradient,
+                                                                       gradientGraphicScale,
+                                                                       displacementColor);
+         YoGraphicVector traversibilityGradientViz = new YoGraphicVector("traversibilityGradientViz" + waypointIndex,
+                                                                         waypoint.getPosition(),
+                                                                         yoTraversibilityGradient,
+                                                                         gradientGraphicScale,
+                                                                         traversibilityColor);
+         YoGraphicVector groundPlaneGradientViz = new YoGraphicVector("groundGradientViz" + waypointIndex,
+                                                                      waypoint.getPosition(),
+                                                                      yoGroundPlaneGradient,
+                                                                      gradientGraphicScale,
+                                                                      groundPlaneColor);
 
          graphicsListRegistry.registerYoGraphic("Smoothness Gradient", smoothnessGradientViz);
          graphicsListRegistry.registerYoGraphic("Spacing Gradient", equalSpacingGradientViz);
@@ -224,7 +277,10 @@ public class AStarBodyPathSmootherWaypoint
       }
    }
 
-   public void initialize(List<Point3D> bodyPath, HeightMapData heightMapData, HeightMapRANSACNormalCalculator ransacNormalCalculator, HeightMapLeastSquaresNormalCalculator leastSquaresSurfaceNormalCalculator)
+   public void initialize(List<Point3D> bodyPath,
+                          HeightMapData heightMapData,
+                          HeightMapRANSACNormalCalculator ransacNormalCalculator,
+                          HeightMapLeastSquaresNormalCalculator leastSquaresSurfaceNormalCalculator)
    {
       this.heightMapData = heightMapData;
       this.pathSize = bodyPath.size();
@@ -232,7 +288,7 @@ public class AStarBodyPathSmootherWaypoint
       this.leastSquaresSurfaceNormalCalculator = leastSquaresSurfaceNormalCalculator;
 
       isTurnPoint.set(false);
-      AStarBodyPathPlanner.packRadialOffsets(heightMapData, AStarBodyPathPlanner.snapRadius, xSnapOffsets, ySnapOffsets);
+      AStarBodyPathPlanner.packRadialOffsets(heightMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
 
       xTraversibilityGradientOffsets.clear();
       yTraversibilityGradientOffsets.clear();
@@ -251,8 +307,10 @@ public class AStarBodyPathSmootherWaypoint
          }
       }
 
-      int minYTraversibilityGradWindow = (int) Math.round((yOffsetTraversibilityGradientWindow - 0.5 * traversibilitySampleWindowY) / heightMapData.getGridResolutionXY());
-      int maxYTraversibilityGradWindow = (int) Math.round((yOffsetTraversibilityGradientWindow + 0.5 * traversibilitySampleWindowY) / heightMapData.getGridResolutionXY());
+      int minYTraversibilityGradWindow = (int) Math.round(
+            (yOffsetTraversibilityGradientWindow - 0.5 * traversibilitySampleWindowY) / heightMapData.getGridResolutionXY());
+      int maxYTraversibilityGradWindow = (int) Math.round(
+            (yOffsetTraversibilityGradientWindow + 0.5 * traversibilitySampleWindowY) / heightMapData.getGridResolutionXY());
       int minXTraversibilityGradWindow = (int) Math.round(-0.5 * traversibilitySampleWindowX / heightMapData.getGridResolutionXY());
       int maxXTraversibilityGradWindow = (int) Math.round(0.5 * traversibilitySampleWindowX / heightMapData.getGridResolutionXY());
       int minMaxYTraversibilityNomWindow = (int) Math.round(0.5 * yOffsetTraversibilityNominalWindow / heightMapData.getGridResolutionXY());
@@ -345,7 +403,8 @@ public class AStarBodyPathSmootherWaypoint
 
    public Vector2D computeCollisionGradient()
    {
-      int maxOffset = (int) Math.round(0.5 * EuclidCoreTools.norm(boxSizeX, boxSizeY) / heightMapData.getGridResolutionXY());
+      int maxOffset = (int) Math.round(0.5 * EuclidCoreTools.norm(plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY())
+                                       / heightMapData.getGridResolutionXY());
 
       double waypointX = waypoint.getX();
       double waypointY = waypoint.getY();
@@ -355,8 +414,14 @@ public class AStarBodyPathSmootherWaypoint
       double sH = Math.sin(heading);
       double cH = Math.cos(heading);
 
-      int indexX = HeightMapTools.coordinateToIndex(waypointX, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-      int indexY = HeightMapTools.coordinateToIndex(waypointY, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+      int indexX = HeightMapTools.coordinateToIndex(waypointX,
+                                                    heightMapData.getGridCenter().getX(),
+                                                    heightMapData.getGridResolutionXY(),
+                                                    heightMapData.getCenterIndex());
+      int indexY = HeightMapTools.coordinateToIndex(waypointY,
+                                                    heightMapData.getGridCenter().getY(),
+                                                    heightMapData.getGridResolutionXY(),
+                                                    heightMapData.getCenterIndex());
 
       Vector2D gradient = new Vector2D();
       int numCollisions = 0;
@@ -375,8 +440,14 @@ public class AStarBodyPathSmootherWaypoint
                continue;
             }
 
-            double px = HeightMapTools.indexToCoordinate(indexXI, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-            double py = HeightMapTools.indexToCoordinate(indexYI, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+            double px = HeightMapTools.indexToCoordinate(indexXI,
+                                                         heightMapData.getGridCenter().getX(),
+                                                         heightMapData.getGridResolutionXY(),
+                                                         heightMapData.getCenterIndex());
+            double py = HeightMapTools.indexToCoordinate(indexYI,
+                                                         heightMapData.getGridCenter().getY(),
+                                                         heightMapData.getGridResolutionXY(),
+                                                         heightMapData.getCenterIndex());
 
             double dx = px - waypointX;
             double dy = py - waypointY;
@@ -384,7 +455,7 @@ public class AStarBodyPathSmootherWaypoint
             double dxLocal = cH * dx + sH * dy;
             double dyLocal = -sH * dx + cH * dy;
 
-            if (Math.abs(dxLocal) > 0.5 * boxSizeX || Math.abs(dyLocal) > 0.5 * boxSizeY)
+            if (Math.abs(dxLocal) > 0.5 * plannerParameters.getCollisionBoxSizeX() || Math.abs(dyLocal) > 0.5 * plannerParameters.getCollisionBoxSizeY())
             {
                continue;
             }
@@ -395,7 +466,7 @@ public class AStarBodyPathSmootherWaypoint
                continue;
             }
 
-            double lateralPenetration = 0.5 * boxSizeY - Math.abs(dyLocal);
+            double lateralPenetration = 0.5 * plannerParameters.getCollisionBoxSizeY() - Math.abs(dyLocal);
             maxCollision.set(Math.max(maxCollision.getValue(), lateralPenetration));
 
             gradient.addX(Math.signum(dyLocal) * -lateralPenetration * sH);
@@ -406,7 +477,7 @@ public class AStarBodyPathSmootherWaypoint
 
       if (numCollisions > 0)
       {
-         gradient.scale(collisionWeight / numCollisions);
+         gradient.scale(plannerParameters.getSmootherCollisionWeight() / numCollisions);
       }
 
       if (visualize)
@@ -419,7 +490,12 @@ public class AStarBodyPathSmootherWaypoint
 
    public Vector2DBasics computeRollInclineGradient(HeightMapData heightMapData)
    {
-      int key = HeightMapTools.coordinateToKey(waypoint.getX(), waypoint.getY(), heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+      int key = HeightMapTools.coordinateToKey(waypoint.getX(),
+                                               waypoint.getY(),
+                                               heightMapData.getGridCenter().getX(),
+                                               heightMapData.getGridCenter().getY(),
+                                               heightMapData.getGridResolutionXY(),
+                                               heightMapData.getCenterIndex());
       UnitVector3DBasics surfaceNormal = leastSquaresSurfaceNormalCalculator.getSurfaceNormal(key);
 
       if (surfaceNormal != null)
@@ -437,8 +513,10 @@ public class AStarBodyPathSmootherWaypoint
          double incline = Math.atan2(next.getPosition().getZ() - previous.getPosition().getZ(), next.getPosition().distanceXY(previous.getPosition()));
          elevationIncline.set(incline);
 
+         // TODO remove hidden parameters
          double inclineClipped = EuclidCoreTools.clamp((Math.abs(incline) - Math.toRadians(2.0)) / Math.toRadians(7.0), 0.0, 1.0);
-         rollDelta.set(rollWeight * inclineClipped * tempVector.getX(), rollWeight * inclineClipped * tempVector.getY());
+         rollDelta.set(plannerParameters.getSmootherRollWeight() * inclineClipped * tempVector.getX(),
+                       plannerParameters.getSmootherRollWeight() * inclineClipped * tempVector.getY());
 
          sampledLSNormalHeight.set(leastSquaresSurfaceNormalCalculator.getSampledHeight(key));
       }
@@ -459,7 +537,7 @@ public class AStarBodyPathSmootherWaypoint
       tempVector.changeFrame(waypointFrame);
       tempVector.setX(0.0);
       tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-      tempVector.scale(displacementWeight);
+      tempVector.scale(plannerParameters.getSmootherDisplacementWeight());
       yoDisplacementGradient.set(tempVector);
 
       return tempVector;
@@ -484,8 +562,7 @@ public class AStarBodyPathSmootherWaypoint
          YoFrameVector3D sidedTraversibility = yoSidedTraversibility.get(side);
          sidedTraversibility.setToZero();
 
-         double localTraversibilityThreshold = 0.9;
-         double maxLocalTraversibilityThresholdDiscount = 0.75;
+         double localTraversibilityThreshold = plannerParameters.getSmootherMinimumTraversibilityToSearchFor();
 
          double currentTraversibility = traversibilitySampleNominal.get(side).getValue();
          double previousTraversibility0 = getNeighbor(waypointIndex - 1).traversibilitySampleNominal.get(side).getValue();
@@ -499,10 +576,13 @@ public class AStarBodyPathSmootherWaypoint
             continue;
          }
 
-         traversibilitySamplePos.get(side).set(computeTraversibility(side, 1.0, waypoint.getZ(), xTraversibilityGradientOffsets, yTraversibilityGradientOffsets));
-         traversibilitySampleNeg.get(side).set(computeTraversibility(side, -1.0, waypoint.getZ(), xTraversibilityGradientOffsets, yTraversibilityGradientOffsets));
+         traversibilitySamplePos.get(side)
+                                .set(computeTraversibility(side, 1.0, waypoint.getZ(), xTraversibilityGradientOffsets, yTraversibilityGradientOffsets));
+         traversibilitySampleNeg.get(side)
+                                .set(computeTraversibility(side, -1.0, waypoint.getZ(), xTraversibilityGradientOffsets, yTraversibilityGradientOffsets));
 
-         double alpha = EuclidCoreTools.clamp((localTraversibilityThreshold - maxLocalTraversibility) / (localTraversibilityThreshold - maxLocalTraversibilityThresholdDiscount), 0.0, 1.0);
+         double alpha = EuclidCoreTools.clamp(
+               (localTraversibilityThreshold - maxLocalTraversibility) / (localTraversibilityThreshold - plannerParameters.getSmootherTraversibilityThresholdForNoDiscount()), 0.0, 1.0);
          tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
          tempVector.scale(alpha * (traversibilitySamplePos.get(side).getValue() - traversibilitySampleNeg.get(side).getValue()));
          tempVector.changeFrame(ReferenceFrame.getWorldFrame());
@@ -511,7 +591,7 @@ public class AStarBodyPathSmootherWaypoint
          yoTraversibilityGradient.add(tempVector);
       }
 
-      yoTraversibilityGradient.scale(traversibilityWeight);
+      yoTraversibilityGradient.scale(plannerParameters.getSmootherTraversibilityWeight());
       return yoTraversibilityGradient;
    }
 
@@ -543,8 +623,14 @@ public class AStarBodyPathSmootherWaypoint
             tempPoint.addY(side.negateIfRightSide(heightMapData.getGridResolutionXY() * groundPlaneYOffsets.get(i)));
 
             tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-            int xQuery = HeightMapTools.coordinateToIndex(tempPoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-            int yQuery = HeightMapTools.coordinateToIndex(tempPoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+            int xQuery = HeightMapTools.coordinateToIndex(tempPoint.getX(),
+                                                          heightMapData.getGridCenter().getX(),
+                                                          heightMapData.getGridResolutionXY(),
+                                                          heightMapData.getCenterIndex());
+            int yQuery = HeightMapTools.coordinateToIndex(tempPoint.getY(),
+                                                          heightMapData.getGridCenter().getY(),
+                                                          heightMapData.getGridResolutionXY(),
+                                                          heightMapData.getCenterIndex());
 
             if (xQuery < 0 || xQuery >= heightMapData.getCellsPerAxis() || yQuery < 0 || yQuery >= heightMapData.getCellsPerAxis())
             {
@@ -561,11 +647,12 @@ public class AStarBodyPathSmootherWaypoint
          yoGroundPlaneCells.get(side).set(groundPlaneCells);
       }
 
-      double groundPlaneCellCountDelta = ((double) yoGroundPlaneCells.get(RobotSide.LEFT).getValue() - yoGroundPlaneCells.get(RobotSide.RIGHT).getValue()) / groundPlaneXOffsets.size();
+      double groundPlaneCellCountDelta =
+            ((double) yoGroundPlaneCells.get(RobotSide.LEFT).getValue() - yoGroundPlaneCells.get(RobotSide.RIGHT).getValue()) / groundPlaneXOffsets.size();
       tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
       tempVector.changeFrame(ReferenceFrame.getWorldFrame());
       yoGroundPlaneGradient.set(tempVector);
-      yoGroundPlaneGradient.scale(groundPlaneCellCountDelta * flatGroundWeight);
+      yoGroundPlaneGradient.scale(groundPlaneCellCountDelta * plannerParameters.getSmootherGroundPlaneWeight());
 
       return yoGroundPlaneGradient;
    }
@@ -591,8 +678,8 @@ public class AStarBodyPathSmootherWaypoint
       int numberOfSampledCells = 0;
 
       double traversibilityScoreNumerator = 0.0;
-      double minHeight = nominalHeight - heightWindow;
-      double maxHeight = nominalHeight + heightWindow;
+      double minHeight = nominalHeight - plannerParameters.getTraversibilityHeightWindowWidth();
+      double maxHeight = nominalHeight + plannerParameters.getTraversibilityHeightWindowWidth();
 
       for (int i = 0; i < xOffsets.size(); i++)
       {
@@ -601,8 +688,14 @@ public class AStarBodyPathSmootherWaypoint
          tempPoint.addY(signY * yOffsets.get(i));
 
          tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-         int xQuery = HeightMapTools.coordinateToIndex(tempPoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-         int yQuery = HeightMapTools.coordinateToIndex(tempPoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+         int xQuery = HeightMapTools.coordinateToIndex(tempPoint.getX(),
+                                                       heightMapData.getGridCenter().getX(),
+                                                       heightMapData.getGridResolutionXY(),
+                                                       heightMapData.getCenterIndex());
+         int yQuery = HeightMapTools.coordinateToIndex(tempPoint.getY(),
+                                                       heightMapData.getGridCenter().getY(),
+                                                       heightMapData.getGridResolutionXY(),
+                                                       heightMapData.getCenterIndex());
          double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
 
          if (xQuery < 0 || yQuery < 0 || xQuery >= heightMapData.getCellsPerAxis() || yQuery >= heightMapData.getCellsPerAxis())
@@ -619,21 +712,31 @@ public class AStarBodyPathSmootherWaypoint
             }
             else
             {
-               double nonGroundAlpha = heightQuery - heightMapData.getEstimatedGroundHeight() < heightWindow ? nonGroundDiscount : 1.0;
+               double nonGroundAlpha =
+                     Math.abs(heightQuery - heightMapData.getEstimatedGroundHeight()) < plannerParameters.getTraversibilityHeightWindowWidth() ?
+                           nonGroundDiscount :
+                           1.0;
 
-               double heightDeadband = 0.05;
-               double deltaHeight = Math.max(0.0, Math.abs(nominalHeight - heightQuery) - heightDeadband);
-               double cellPercentage = 1.0 - deltaHeight / heightWindow;
+               double deltaHeight = Math.max(0.0, Math.abs(nominalHeight - heightQuery) - traversibilitySmoothingHeightDeadband);
+               double cellPercentage = 1.0 - deltaHeight / plannerParameters.getTraversibilityHeightWindowWidth();
 
-               UnitVector3DBasics normal = ransacNormalCalculator.getSurfaceNormal(xQuery, yQuery);
+               double minNormalToPenalize = Math.toRadians(plannerParameters.getMinNormalAngleToPenalizeForTraversibility());
+               double maxNormalToPenalize = Math.toRadians(plannerParameters.getMaxNormalAngleToPenalizeForTraversibility());
+               double inclineWeight = plannerParameters.getTraversibilityInclineWeight();
+
+               UnitVector3DReadOnly normal = ransacNormalCalculator.getSurfaceNormal(xQuery, yQuery);
                double incline = Math.acos(normal.getZ());
-               double inclineAlpha = MathTools.clamp(EuclidCoreTools.interpolate(0.0, 1.0, (incline - minNormalToPenalize) / (maxNormalToPenalize - minNormalToPenalize)), 0.0, 1.0);
+               double inclineAlpha = MathTools.clamp(EuclidCoreTools.interpolate(0.0,
+                                                                                 1.0,
+                                                                                 (incline - minNormalToPenalize) / (maxNormalToPenalize - minNormalToPenalize)),
+                                                     0.0,
+                                                     1.0);
                traversibilityScoreNumerator += cellPercentage * ((1.0 - inclineWeight) * nonGroundAlpha + inclineWeight * inclineAlpha);
             }
          }
       }
 
-      if (numberOfSampledCells < 10)
+      if (numberOfSampledCells < plannerParameters.getMinOccupiedNeighborsForTraversibility())
       {
          return 0.0;
       }
@@ -646,7 +749,12 @@ public class AStarBodyPathSmootherWaypoint
    public void update(boolean firstTick)
    {
       // Cell key
-      int currentKey = HeightMapTools.coordinateToKey(waypoint.getX(), waypoint.getY(), heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+      int currentKey = HeightMapTools.coordinateToKey(waypoint.getX(),
+                                                      waypoint.getY(),
+                                                      heightMapData.getGridCenter().getX(),
+                                                      heightMapData.getGridCenter().getY(),
+                                                      heightMapData.getGridResolutionXY(),
+                                                      heightMapData.getCenterIndex());
       previousCellKey = cellKey;
       cellKey = currentKey;
 
@@ -668,7 +776,7 @@ public class AStarBodyPathSmootherWaypoint
 
       double heading0 = Math.atan2(y1 - y0, x1 - x0);
       double heading1 = Math.atan2(y2 - y1, x2 - x1);
-      this.waypoint.setOrientationYawPitchRoll(AngleTools.computeAngleAverage(heading0, heading1), 0.0,  0.0);
+      this.waypoint.setOrientationYawPitchRoll(AngleTools.computeAngleAverage(heading0, heading1), 0.0, 0.0);
 
       // Compute new height if shifted
       if (firstTick || cellKey != previousCellKey)
@@ -697,7 +805,7 @@ public class AStarBodyPathSmootherWaypoint
       int yIndex = HeightMapTools.coordinateToIndex(waypoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
 
       double previousHeight = waypoint.getZ();
-      double heightSampleDelta = 0.08;
+      double heightSampleDelta = plannerParameters.getMinSnapHeightThreshold();
       double minHeight = previousHeight - heightSampleDelta;
       double maxHeight = previousHeight + heightSampleDelta;
 

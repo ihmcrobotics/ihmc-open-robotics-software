@@ -1,51 +1,62 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import com.esotericsoftware.minlog.Log;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
+import us.ihmc.behaviors.tools.interfaces.UIPublisher;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.tools.Timer;
-import us.ihmc.tools.TimerSnapshotWithExpiration;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.stepChecking.CustomFootstepChecker;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.CustomFootstepChecker;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.behaviors.tools.interfaces.StatusLogger;
-import us.ihmc.behaviors.tools.interfaces.UIPublisher;
-import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.tools.Timer;
+import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -75,8 +86,13 @@ public class LookAndStepFootstepPlanningTask
    protected LookAndStepReview<FootstepPlan> review = new LookAndStepReview<>();
    protected Consumer<FootstepPlan> autonomousOutput;
    protected Timer planningFailedTimer = new Timer();
+   protected Timer successfulPlanExpirationTimer = new Timer();
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
    protected YoDouble footholdVolume;
+   protected YoDouble planarRegionDelay;
+   protected YoDouble footstepPlanningDuration;
+   protected YoDouble moreInclusivePlanningDuration;
+   protected FootstepPlan previousFootstepPlan = null;
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
@@ -84,13 +100,18 @@ public class LookAndStepFootstepPlanningTask
       private ResettableExceptionHandlingExecutorService executor;
       protected ControllerStatusTracker controllerStatusTracker;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
+      private ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
+      private ROS2StoredPropertySet<FootstepPlannerParametersBasics> ros2FootstepPlannerParameters;
+      private ROS2StoredPropertySet<SwingPlannerParametersBasics> ros2SwingPlannerParameters;
 
       private final TypedInput<LookAndStepBodyPathLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> lidarREAPlanarRegionsInput = new TypedInput<>();
+      private final TypedInput<HeightMapData> heightMapInput = new TypedInput<>();
       private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
       private final TypedInput<RobotConfigurationData> robotConfigurationDataInput = new TypedInput<>();
       private final Input footstepCompletedInput = new Input();
       private final Timer planarRegionsExpirationTimer = new Timer();
+      private final Timer heightMapExpirationTimer = new Timer();
       private final Timer lidarREAPlanarRegionsExpirationTimer = new Timer();
       private final Timer capturabilityBasedStatusExpirationTimer = new Timer();
       private final Timer robotConfigurationDataExpirationTimer = new Timer();
@@ -99,9 +120,12 @@ public class LookAndStepFootstepPlanningTask
       public void initialize(LookAndStepBehavior lookAndStep)
       {
          statusLogger = lookAndStep.statusLogger;
-         lookAndStepParameters = lookAndStep.lookAndStepParameters;
-         footstepPlannerParameters = lookAndStep.footstepPlannerParameters;
-         swingPlannerParameters = lookAndStep.swingPlannerParameters;
+         ros2LookAndStepParameters = lookAndStep.ros2LookAndStepParameters;
+         lookAndStepParameters = ros2LookAndStepParameters.getStoredPropertySet();
+         ros2FootstepPlannerParameters = lookAndStep.ros2FootstepPlannerParameters;
+         footstepPlannerParameters = ros2FootstepPlannerParameters.getStoredPropertySet();
+         ros2SwingPlannerParameters = lookAndStep.ros2SwingPlannerParameters;
+         swingPlannerParameters = ros2SwingPlannerParameters.getStoredPropertySet();
          uiPublisher = lookAndStep.helper::publish;
          footstepPlanningModule = lookAndStep.helper.getOrCreateFootstepPlanner();
          defaultFootPolygons = FootstepPlanningModuleLauncher.createFootPolygons(lookAndStep.helper.getRobotModel());
@@ -110,6 +134,9 @@ public class LookAndStepFootstepPlanningTask
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
          footholdVolume = new YoDouble("footholdVolume", lookAndStep.yoRegistry);
+         planarRegionDelay = new YoDouble("planarRegionDelay", lookAndStep.yoRegistry);
+         footstepPlanningDuration = new YoDouble("footstepPlanningDuration", lookAndStep.yoRegistry);
+         moreInclusivePlanningDuration = new YoDouble("moreInclusivePlanningDuration", lookAndStep.yoRegistry);
          helper = lookAndStep.helper;
          autonomousOutput = footstepPlan ->
          {
@@ -132,9 +159,11 @@ public class LookAndStepFootstepPlanningTask
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
-         suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + planarRegionReceptionTimerSnapshot.hasBeenSet() + " timeSinceLastUpdate: "
-                                       + planarRegionReceptionTimerSnapshot.getTimePassedSinceReset(),
-                                 () -> !lookAndStepParameters.getAssumeFlatGround() && planarRegionReceptionTimerSnapshot.isExpired());
+         suppressor.addCondition(() -> "Environment model expired. haveReceivedAnyRegions: " + planarRegionReceptionTimerSnapshot.hasBeenSet() +
+                                       " haveReceivedHeightMap: " + heightMapReceptionTimerSnapshot.hasBeenSet() +
+                                       " timeSinceLastRegionsUpdate: " + planarRegionReceptionTimerSnapshot.getTimePassedSinceReset() +
+                                       " timeSinceLastHeightMap: " + heightMapReceptionTimerSnapshot.getTimePassedSinceReset(),
+                                 () -> !lookAndStepParameters.getAssumeFlatGround() && planarRegionReceptionTimerSnapshot.isExpired() && heightMapReceptionTimerSnapshot.isExpired());
          suppressor.addCondition(() -> "No regions. " + (planarRegionsManager.getReceivedPlanarRegions() == null ?
                                        null :
                                        (" isEmpty: " + planarRegionsManager.getReceivedPlanarRegions().isEmpty())),
@@ -172,8 +201,16 @@ public class LookAndStepFootstepPlanningTask
          stepsStartedWhilePlanning.add(footstepStatusMessage);
       }
 
+      public void acceptHeightMap(HeightMapMessage heightMapMessage)
+      {
+         heightMapExpirationTimer.reset();
+         heightMapInput.set(HeightMapMessageTools.unpackMessage(heightMapMessage));
+      }
+
       public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
       {
+         planarRegionDelay.set(TimeTools.calculateDelay(planarRegionsListMessage.getLastUpdated().getSecondsSinceEpoch(),
+                                                        planarRegionsListMessage.getLastUpdated().getAdditionalNanos()));
          acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       }
 
@@ -224,13 +261,18 @@ public class LookAndStepFootstepPlanningTask
          review.reset();
          plannerFailedLastTime.set(false);
          planarRegionsManager.clear();
-         lastPlanStanceSide = null;
+         lastPlanInitialStanceSide = null;
       }
 
       private void evaluateAndRun()
       {
+         ros2LookAndStepParameters.update();
+         ros2FootstepPlannerParameters.update();
+         ros2SwingPlannerParameters.update();
          lidarREAPlanarRegions = lidarREAPlanarRegionsInput.getLatest();
+         heightMapData = heightMapInput.getLatest();
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
+         heightMapReceptionTimerSnapshot = heightMapExpirationTimer.createSnapshot(lookAndStepParameters.getHeightMapExpiration());
          lidarREAPlanarRegionReceptionTimerSnapshot = lidarREAPlanarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          capturabilityBasedStatusReceptionTimerSnapshot
@@ -243,8 +285,9 @@ public class LookAndStepFootstepPlanningTask
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
                                                      .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
-         PlannedFootstepReadOnly lastStartedFootstep = imminentStanceTracker.getLastStartedFootstep();
-         stanceSideWhenLastFootstepStarted = lastStartedFootstep == null ? null : lastStartedFootstep.getRobotSide().getOppositeSide();
+         RobotSide lastStartedRobotSide = imminentStanceTracker.getLastStartedRobotSide();
+         // FIXME: I could see this going out of date and being wrong for multiple footsteps
+         stanceSideWhenLastFootstepStarted = lastStartedRobotSide == null ? null : lastStartedRobotSide.getOppositeSide();
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
          numberOfCompletedFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
@@ -267,25 +310,30 @@ public class LookAndStepFootstepPlanningTask
    // snapshot data
    protected LookAndStepBodyPathLocalizationResult localizationResult;
    protected PlanarRegionsList lidarREAPlanarRegions;
+   protected HeightMapData heightMapData;
    protected LookAndStepPlanarRegionsManager planarRegionsManager;
    protected CapturabilityBasedStatus capturabilityBasedStatus;
    protected RobotConfigurationData robotConfigurationData;
    protected TimerSnapshotWithExpiration planarRegionReceptionTimerSnapshot;
+   protected TimerSnapshotWithExpiration heightMapReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration lidarREAPlanarRegionReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration capturabilityBasedStatusReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration robotConfigurationDataReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected RobotSide stanceSideWhenLastFootstepStarted;
-   protected RobotSide lastPlanStanceSide;
+   protected RobotSide lastPlanInitialStanceSide;
    protected LookAndStepBehavior.State behaviorState;
    protected int numberOfIncompleteFootsteps;
    protected int numberOfCompletedFootsteps;
    protected SwingPlannerType swingPlannerType;
    protected final List<FootstepStatusMessage> stepsStartedWhilePlanning = new ArrayList<>();
+   protected final Stopwatch moreInclusivePlanningDurationStopwatch = new Stopwatch();
+   private final Object logSessionSyncObject = new Object();
 
    protected void performTask()
    {
+      moreInclusivePlanningDurationStopwatch.reset();
       // clear the list so we can inspect on completion
       stepsStartedWhilePlanning.clear();
 
@@ -320,7 +368,7 @@ public class LookAndStepFootstepPlanningTask
       // calculate impassibility
       if (lookAndStepParameters.getStopForImpassibilities() && lidarREAPlanarRegions != null)
       {
-         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
+         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootPosition()), robotConfigurationData.getRootOrientation());
          BodyCollisionData collisionData = PlannerTools.detectCollisionsAlongBodyPath(rootPose,
                                                                                       bodyPathPlan,
                                                                                       lidarREAPlanarRegions,
@@ -348,7 +396,7 @@ public class LookAndStepFootstepPlanningTask
       }
       uiPublisher.publishToUI(ImminentFootPosesForUI, imminentFootPosesForUI);
 
-      RobotSide stanceSide;
+      RobotSide initialStanceSide;
       // if last plan failed
       // if foot is in the air
       // how many steps are left
@@ -356,26 +404,26 @@ public class LookAndStepFootstepPlanningTask
       if (isInMotion && stanceSideWhenLastFootstepStarted != null)
       {
          // If we are in motion (currently walking), make sure to plan w.r.t. the stance side when the last step started
-         stanceSide = stanceSideWhenLastFootstepStarted.getOppositeSide();
+         initialStanceSide = stanceSideWhenLastFootstepStarted.getOppositeSide();
       }
       // If we are stopped, prevent look and step from getting stuck if one side isn't feasible and alternate planning with left and right
-      else if (lastPlanStanceSide != null)
+      else if (lastPlanInitialStanceSide != null)
       {
-         stanceSide = lastPlanStanceSide.getOppositeSide();
+         initialStanceSide = lastPlanInitialStanceSide.getOppositeSide();
       }
       else // if first step, step with furthest foot from the goal
       {
          if (startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld().getPosition().distance(subGoalPoseBetweenFeet.getPosition()) <= startFootPoses.get(
                RobotSide.RIGHT).getSolePoseInWorld().getPosition().distance(subGoalPoseBetweenFeet.getPosition()))
          {
-            stanceSide = RobotSide.LEFT;
+            initialStanceSide = RobotSide.LEFT;
          }
          else
          {
-            stanceSide = RobotSide.RIGHT;
+            initialStanceSide = RobotSide.RIGHT;
          }
       }
-      lastPlanStanceSide = stanceSide;
+      lastPlanInitialStanceSide = initialStanceSide;
       plannerFailedLastTime.set(false);
 
       uiPublisher.publishToUI(SubGoalForUI, new Pose3D(subGoalPoseBetweenFeet));
@@ -383,11 +431,12 @@ public class LookAndStepFootstepPlanningTask
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
       //      footstepPlannerRequest.getBodyPathWaypoints().add(waypoint); // use these to add waypoints between start and goal
-      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
+      footstepPlannerRequest.setRequestedInitialStanceSide(initialStanceSide);
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
 
-      double plannerTimeoutWhenMoving =  lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration();
+      // Make the timeout a little less so that we don't pause walking.
+      double plannerTimeoutWhenMoving =  lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration() - 0.008;
       boolean robotIsInMotion = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION;
       double plannerTimeout = robotIsInMotion ? plannerTimeoutWhenMoving : lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped();
       // TODO: Set start footholds!!
@@ -397,6 +446,23 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setTimeout(plannerTimeout);
       footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
       footstepPlannerRequest.setSnapGoalSteps(true);
+      footstepPlannerRequest.setMaximumIterations(100);
+
+      double expirationTime = 1.5 * swingPlannerParameters.getMaximumSwingTime();
+      if (successfulPlanExpirationTimer.isRunning(expirationTime)
+          && previousFootstepPlan != null
+          && previousFootstepPlan.getNumberOfSteps() >= 2)
+      {
+         if (initialStanceSide == previousFootstepPlan.getFootstep(0).getRobotSide())
+         {
+            previousFootstepPlan.remove(0);
+         }
+      }
+      else
+      {
+         previousFootstepPlan = null;
+      }
+      footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getSwingPlanningModule().getSwingPlannerParameters().set(swingPlannerParameters);
@@ -407,8 +473,9 @@ public class LookAndStepFootstepPlanningTask
       stepInPlaceChecker.setStanceFeetPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(), startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       footstepPlanningModule.getChecker().clearCustomFootstepCheckers();
       footstepPlanningModule.getChecker().attachCustomFootstepChecker(stepInPlaceChecker);
+      int iterations = footstepPlanningModule.getAStarFootstepPlanner().getIterations();
 
-      statusLogger.info("Stance side: {}", stanceSide.name());
+      statusLogger.info("Stance side: {}", initialStanceSide.name());
       statusLogger.info("Planning footsteps with {}...", swingPlannerType.name());
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
       statusLogger.info("Footstep planner completed with {}, {} step(s)",
@@ -421,12 +488,26 @@ public class LookAndStepFootstepPlanningTask
                         footstepPlannerOutput.getPlannerTimings().getTimeBeforePlanningSeconds(),
                         footstepPlannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
                         plannerTimeout));
+      footstepPlanningDuration.set(footstepPlannerOutput.getPlannerTimings().getTotalElapsedSeconds());
 
-      // print log duration?
-      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
-      footstepPlannerLogger.logSession();
-      uiPublisher.publishToUI(FootstepPlannerLatestLogPath, footstepPlannerLogger.getLatestLogDirectory());
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
+      String latestLogDirectory = FootstepPlannerLogger.generateALogFolderName();
+      statusLogger.info("Footstep planner log folder: {}", latestLogDirectory);
+      uiPublisher.publishToUI(FootstepPlannerLatestLogPath, latestLogDirectory);
+      ThreadTools.startAThread(() ->
+      {
+         synchronized (logSessionSyncObject)
+         {
+            Stopwatch stopwatch = new Stopwatch().start();
+            FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
+            footstepPlannerLogger.logSessionWithExactFolderName(latestLogDirectory);
+            FootstepPlannerLogger.deleteOldLogs();
+            LogTools.info("Logged footstep planner data in {} s. {} iterations",
+                          FormattingTools.getFormattedDecimal3D(stopwatch.totalElapsed()),
+                          iterations);
+         }
+      }, "FootstepPlanLogging");
+
+      moreInclusivePlanningDuration.set(moreInclusivePlanningDurationStopwatch.lap());
 
       // TODO: Detect step down and reject unless we planned two steps.
       // Should get closer to the edge somehow?  Solve this in the footstep planner?
@@ -444,6 +525,7 @@ public class LookAndStepFootstepPlanningTask
          uiPublisher.publishToUI(FootstepPlannerRejectionReasons, rejectionReasonsMessage);
          uiPublisher.publishToUI(PlanningFailed, true);
 
+         previousFootstepPlan = null;
          doFailureAction("Footstep planning failure. Aborting task...");
       }
       else
@@ -456,6 +538,7 @@ public class LookAndStepFootstepPlanningTask
             fullPlan.addFootstep(new PlannedFootstep(footstepPlannerOutput.getFootstepPlan().getFootstep(i)));
          }
 
+         // This whole thing seems kinda dangerous
          if (stepsStartedWhilePlanning.size() > 0)
          {
             if (!removeStepsThatWereCompletedWhilePlanning(fullPlan))
@@ -464,12 +547,15 @@ public class LookAndStepFootstepPlanningTask
             startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
          }
 
-         if (!checkToMakeSurePlanIsStillReachable(fullPlan, startFootPoses))
-         {
-            uiPublisher.publishToUI(PlanningFailed, true);
-            doFailureAction("Footstep planning produced unreachable steps. Aborting task...");
-         }
+         successfulPlanExpirationTimer.reset();
+         previousFootstepPlan = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
 
+//         if (!checkToMakeSurePlanIsStillReachable(fullPlan, startFootPoses))
+//         {
+//            uiPublisher.publishToUI(PlanningFailed, true);
+//            doFailureAction("Footstep planning produced unreachable steps. Aborting task...");
+//            return;
+//         }
 
          FootstepPlan reducedPlan = new FootstepPlan();
          for (int i = 0; i < lookAndStepParameters.getMaxStepsToSendToController() && i < fullPlan.getNumberOfSteps(); i++)
@@ -571,9 +657,6 @@ public class LookAndStepFootstepPlanningTask
          footstep.setTransferDuration(lookAndStepParameters.getTransferDuration()); // But probably keep this.
       }
    }
-
-
-
 
    private void doFailureAction(String message)
    {

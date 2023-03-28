@@ -1,13 +1,16 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 public class FootstepPlannerOutput
@@ -62,6 +65,11 @@ public class FootstepPlannerOutput
     */
    private final FootstepPlannerTimings plannerTimings = new FootstepPlannerTimings();
 
+   /**
+    * Swing trajectories, helpful for visualization
+    */
+   private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
+
    public FootstepPlannerOutput()
    {
       clear();
@@ -79,6 +87,7 @@ public class FootstepPlannerOutput
       goalPose.setToNaN();
       exception = null;
       plannerTimings.clear();
+      swingTrajectories = null;
    }
 
    public int getRequestId()
@@ -99,6 +108,11 @@ public class FootstepPlannerOutput
    public FootstepPlanningResult getFootstepPlanningResult()
    {
       return footstepPlanningResult;
+   }
+
+   public List<EnumMap<Axis3D, List<PolynomialReadOnly>>> getSwingTrajectories()
+   {
+      return swingTrajectories;
    }
 
    /**
@@ -163,6 +177,11 @@ public class FootstepPlannerOutput
    public void setException(Exception exception)
    {
       this.exception = exception;
+   }
+
+   public void setSwingTrajectories(List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
+   {
+      this.swingTrajectories = swingTrajectories;
    }
 
    public void setPacket(FootstepPlanningToolboxOutputStatus outputStatus)

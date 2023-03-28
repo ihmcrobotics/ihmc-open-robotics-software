@@ -1,6 +1,6 @@
 package us.ihmc.atlas.behaviors;
 
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -74,8 +74,6 @@ public class AtlasSimulationWithCamera
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     robotModel.getSensorInformation().getFeetForceSensorNames(),
-                                                                                                    robotModel.getSensorInformation()
-                                                                                                              .getFeetContactSensorNames(),
                                                                                                     robotModel.getSensorInformation()
                                                                                                               .getWristForceSensorNames(),
                                                                                                     robotModel.getHighLevelControllerParameters(),

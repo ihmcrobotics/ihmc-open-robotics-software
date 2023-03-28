@@ -1,15 +1,15 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
+import java.io.File;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication.PawStepPlannerMessagerAPI;
-
-import java.io.File;
 
 public class PawStepPlannerDataExporterAnchorPaneController
 {

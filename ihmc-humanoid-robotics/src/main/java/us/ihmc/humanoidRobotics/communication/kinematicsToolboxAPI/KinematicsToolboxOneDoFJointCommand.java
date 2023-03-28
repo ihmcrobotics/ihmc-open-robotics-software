@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import java.util.Objects;
 
-import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.JointHashCodeResolver;

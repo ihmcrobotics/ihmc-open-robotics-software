@@ -7,7 +7,17 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.FORCE;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.POSE;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.D_FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_CUMULATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.I_FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.P_FEEDBACK;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
@@ -183,27 +193,27 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       String endEffectorName = endEffector.getName();
       registry = new YoRegistry(appendIndex(endEffectorName, controllerIndex) + "SpatialFBController");
       dt = ccToolbox.getControlDT();
-      gains = fbToolbox.getOrCreateSE3PIDGains(endEffector, controllerIndex, computeIntegralTerm);
+      gains = fbToolbox.getOrCreateSE3PIDGains(endEffector, controllerIndex, computeIntegralTerm, true);
       positionGains = gains.getPositionGains();
       orientationGains = gains.getOrientationGains();
       YoDouble maximumLinearRate = positionGains.getYoMaximumFeedbackRate();
       YoDouble maximumAngularRate = orientationGains.getYoMaximumFeedbackRate();
 
-      controlFrame = fbToolbox.getOrCreateControlFrame(endEffector, controllerIndex);
+      controlFrame = fbToolbox.getOrCreateControlFrame(endEffector, controllerIndex, true);
 
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerEnabled", registry);
       isEnabled.set(false);
 
-      yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled);
-      yoCurrentPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled);
-      yoErrorVector = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ERROR, POSE, isEnabled);
-      yoErrorOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR, isEnabled);
+      yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled, true);
+      yoCurrentPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, CURRENT, isEnabled, true);
+      yoErrorVector = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ERROR, POSE, isEnabled, false);
+      yoErrorOrientation = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR, isEnabled, false);
 
       if (computeIntegralTerm)
       {
-         yoErrorPositionIntegrated = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, POSITION, isEnabled);
-         yoErrorOrientationCumulated = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR_CUMULATED, isEnabled);
-         yoErrorRotationVectorIntegrated = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled);
+         yoErrorPositionIntegrated = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, POSITION, isEnabled, false);
+         yoErrorOrientationCumulated = fbToolbox.getOrCreateOrientationData(endEffector, controllerIndex, ERROR_CUMULATED, isEnabled, false);
+         yoErrorRotationVectorIntegrated = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, ROTATION_VECTOR, isEnabled, false);
       }
       else
       {
@@ -212,16 +222,16 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoErrorRotationVectorIntegrated = null;
       }
 
-      yoDesiredRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, ROTATION_VECTOR, isEnabled);
-      yoCurrentRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, CURRENT, ROTATION_VECTOR, isEnabled);
+      yoDesiredRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, ROTATION_VECTOR, isEnabled, true);
+      yoCurrentRotationVector = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, CURRENT, ROTATION_VECTOR, isEnabled, true);
 
-      yoDesiredVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, VELOCITY, isEnabled);
+      yoDesiredVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, VELOCITY, isEnabled, true);
 
       if (ccToolbox.isEnableInverseDynamicsModule() || ccToolbox.isEnableVirtualModelControlModule())
       {
 
-         yoCurrentVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, CURRENT, VELOCITY, isEnabled);
-         yoErrorVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ERROR, VELOCITY, isEnabled);
+         yoCurrentVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, CURRENT, VELOCITY, isEnabled, true);
+         yoErrorVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ERROR, VELOCITY, isEnabled, false);
 
          DoubleProvider breakFrequency = fbToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
          if (breakFrequency != null)
@@ -233,7 +243,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                                                      dt,
                                                                                      breakFrequency,
                                                                                      breakFrequency,
-                                                                                     isEnabled);
+                                                                                     isEnabled,
+                                                                                     false);
          }
          else
          {
@@ -242,14 +253,14 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
          if (ccToolbox.isEnableInverseDynamicsModule())
          {
-            yoDesiredAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, ACCELERATION, isEnabled);
-            yoFeedForwardAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, ACCELERATION, isEnabled);
-            yoProportionalFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, P_FEEDBACK, ACCELERATION, isEnabled);
-            yoDerivativeFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, D_FEEDBACK, ACCELERATION, isEnabled);
+            yoDesiredAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, ACCELERATION, isEnabled, true);
+            yoFeedForwardAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, ACCELERATION, isEnabled, false);
+            yoProportionalFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, P_FEEDBACK, ACCELERATION, isEnabled, false);
+            yoDerivativeFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, D_FEEDBACK, ACCELERATION, isEnabled, false);
             yoIntegralFeedbackAcceleration = computeIntegralTerm
-                  ? fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, I_FEEDBACK, ACCELERATION, isEnabled)
+                  ? fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, I_FEEDBACK, ACCELERATION, isEnabled, false)
                   : null;
-            yoFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, ACCELERATION, isEnabled);
+            yoFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, ACCELERATION, isEnabled, false);
             rateLimitedFeedbackAcceleration = fbToolbox.getOrCreateRateLimitedVectorData6D(endEffector,
                                                                                            controllerIndex,
                                                                                            FEEDBACK,
@@ -257,8 +268,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                                                            dt,
                                                                                            maximumAngularRate,
                                                                                            maximumLinearRate,
-                                                                                           isEnabled);
-            yoAchievedAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ACHIEVED, ACCELERATION, isEnabled);
+                                                                                           isEnabled,
+                                                                                           false);
+            yoAchievedAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ACHIEVED, ACCELERATION, isEnabled, true);
          }
          else
          {
@@ -274,9 +286,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
          if (ccToolbox.isEnableVirtualModelControlModule())
          {
-            yoDesiredWrench = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, FORCE, isEnabled);
-            yoFeedForwardWrench = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, FORCE, isEnabled);
-            yoFeedbackWrench = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, FORCE, isEnabled);
+            yoDesiredWrench = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, FORCE, isEnabled, true);
+            yoFeedForwardWrench = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, FORCE, isEnabled, false);
+            yoFeedbackWrench = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, FORCE, isEnabled, false);
             rateLimitedFeedbackWrench = fbToolbox.getOrCreateRateLimitedVectorData6D(endEffector,
                                                                                      controllerIndex,
                                                                                      FEEDBACK,
@@ -284,7 +296,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                                                      dt,
                                                                                      maximumAngularRate,
                                                                                      maximumLinearRate,
-                                                                                     isEnabled);
+                                                                                     isEnabled,
+                                                                                     false);
          }
          else
          {
@@ -317,8 +330,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       if (ccToolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedbackVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, VELOCITY, isEnabled);
-         yoFeedForwardVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, VELOCITY, isEnabled);
+         yoFeedbackVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, VELOCITY, isEnabled, false);
+         yoFeedForwardVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, VELOCITY, isEnabled, false);
          rateLimitedFeedbackVelocity = fbToolbox.getOrCreateRateLimitedVectorData6D(endEffector,
                                                                                     controllerIndex,
                                                                                     FEEDBACK,
@@ -326,7 +339,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                                                     dt,
                                                                                     maximumAngularRate,
                                                                                     maximumLinearRate,
-                                                                                    isEnabled);
+                                                                                    isEnabled,
+                                                                                    false);
       }
       else
       {
@@ -400,17 +414,32 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
        * other controller.
        */
       if (rateLimitedFeedbackAcceleration != null)
+      {
+         rateLimitedFeedbackAcceleration.setToZero(worldFrame);
          rateLimitedFeedbackAcceleration.reset();
+      }
       if (rateLimitedFeedbackVelocity != null)
+      {
+         rateLimitedFeedbackVelocity.setToZero(worldFrame);
          rateLimitedFeedbackVelocity.reset();
+      }
       if (yoFilteredErrorVelocity != null)
+      {
+         yoFilteredErrorVelocity.setToZero(worldFrame);
          yoFilteredErrorVelocity.reset();
+      }
       if (yoErrorPositionIntegrated != null)
+      {
          yoErrorPositionIntegrated.setToZero(worldFrame);
+      }
       if (yoErrorOrientationCumulated != null)
+      {
          yoErrorOrientationCumulated.setToZero(worldFrame);
+      }
       if (yoErrorRotationVectorIntegrated != null)
+      {
          yoErrorRotationVectorIntegrated.setToZero(worldFrame);
+      }
    }
 
    protected final FrameVector3D linearProportionalFeedback = new FrameVector3D();

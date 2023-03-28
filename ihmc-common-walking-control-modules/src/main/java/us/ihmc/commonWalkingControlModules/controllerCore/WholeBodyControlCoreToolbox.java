@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.createWrenchVisualizerWithContactableBodies;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -9,6 +7,7 @@ import java.util.stream.Stream;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
@@ -36,14 +35,18 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class WholeBodyControlCoreToolbox
+public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -60,6 +63,7 @@ public class WholeBodyControlCoreToolbox
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final JointIndexHandler jointIndexHandler;
+   private final List<OneDoFJointBasics> inactiveOneDoFJoints = new ArrayList<>();
    private final double totalRobotMass;
    private CentroidalMomentumCalculator centroidalMomentumCalculator;
    private CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
@@ -195,6 +199,21 @@ public class WholeBodyControlCoreToolbox
    public void addKinematicLoopFunction(KinematicLoopFunction function)
    {
       kinematicLoopFunctions.add(function);
+   }
+
+   /**
+    * Registers a joint as inactive, i.e. it cannot be controlled but should still be considered.
+    * <p>
+    * The list of inactive joints can be modified at runtime via
+    * {@link InverseDynamicsOptimizationSettingsCommand}.
+    * </p>
+    * 
+    * @param inactiveJoint the joint to be registered as inactive.
+    */
+   public void addInactiveJoint(OneDoFJointBasics inactiveJoint)
+   {
+      if (!inactiveOneDoFJoints.contains(inactiveJoint))
+         inactiveOneDoFJoints.add(inactiveJoint);
    }
 
    /**
@@ -547,7 +566,10 @@ public class WholeBodyControlCoreToolbox
       if (yoGraphicsListRegistry == null)
          return null;
       if (wrenchVisualizer == null)
-         wrenchVisualizer = createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
+      {
+         wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", 1.0, yoGraphicsListRegistry, registry);
+         wrenchVisualizer.registerContactablePlaneBodies(contactablePlaneBodies);
+      }
       return wrenchVisualizer;
    }
 
@@ -649,5 +671,21 @@ public class WholeBodyControlCoreToolbox
    public boolean getDeactiveRhoWhenNotInContact()
    {
       return optimizationSettings.getDeactivateRhoWhenNotInContact();
+   }
+
+   public List<OneDoFJointBasics> getInactiveOneDoFJoints()
+   {
+      return inactiveOneDoFJoints;
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      if (planeContactWrenchProcessor != null)
+         group.addChild(planeContactWrenchProcessor.getSCS2YoGraphics());
+      if (wrenchVisualizer != null)
+         group.addChild(wrenchVisualizer.getSCS2YoGraphics());
+      return group;
    }
 }

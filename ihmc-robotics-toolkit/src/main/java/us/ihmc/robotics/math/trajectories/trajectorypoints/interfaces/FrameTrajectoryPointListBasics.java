@@ -4,8 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameChangeable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 
-public interface FrameTrajectoryPointListBasics<T extends TrajectoryPointBasics & FrameChangeable>
-      extends TrajectoryPointListBasics<T>, FrameChangeable
+public interface FrameTrajectoryPointListBasics<T extends TrajectoryPointBasics & FrameChangeable> extends TrajectoryPointListBasics<T>, FrameChangeable
 {
    default void clear(ReferenceFrame referenceFrame)
    {

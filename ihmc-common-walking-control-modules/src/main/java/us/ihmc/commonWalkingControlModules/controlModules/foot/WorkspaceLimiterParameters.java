@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -24,6 +26,7 @@ public class WorkspaceLimiterParameters
    private final DoubleProvider timeToCorrectForUnachievedSwingTranslation;
    private final DoubleProvider correctionAlphaFilter;
    private final DoubleProvider alphaUnreachableFootstep;
+   private final BooleanProvider enableSingularityAvoidanceOnSwingFoot;
 
    public WorkspaceLimiterParameters(YoRegistry parentRegistry)
    {
@@ -54,6 +57,8 @@ public class WorkspaceLimiterParameters
 
       velocityDifferenceForLengthening = new DoubleParameter(namePrefix + "VelocityDifferenceForLengthening", registry, defaultMinVelocityDifference);
 
+      enableSingularityAvoidanceOnSwingFoot = new BooleanParameter(namePrefix + "enableSingularityAvoidanceOnSwingFoot", registry, true);
+
       parentRegistry.addChild(registry);
    }
 
@@ -65,6 +70,11 @@ public class WorkspaceLimiterParameters
    public DoubleProvider getCorrectionAlphaFilter()
    {
       return correctionAlphaFilter;
+   }
+
+   public BooleanProvider getEnableSingularityAvoidanceOnSwingFoot()
+   {
+      return enableSingularityAvoidanceOnSwingFoot;
    }
 
    public DoubleProvider getTimeToCorrectForUnachievedSwingTranslation()

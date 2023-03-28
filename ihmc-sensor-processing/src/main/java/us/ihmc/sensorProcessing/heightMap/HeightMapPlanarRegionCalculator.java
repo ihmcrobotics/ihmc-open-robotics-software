@@ -7,9 +7,8 @@ import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-import us.ihmc.robotics.heightMap.HeightMapData;
-import us.ihmc.robotics.heightMap.HeightMapTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +39,7 @@ public class HeightMapPlanarRegionCalculator
    private final Plane3D planeEstimate = new Plane3D();
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
-   public void computeRegions(HeightMapData heightMapData, IntFunction<UnitVector3DBasics> surfaceNormals)
+   public void computeRegions(HeightMapData heightMapData, IntFunction<UnitVector3DReadOnly> surfaceNormals)
    {
       regionIds = new int[heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis()];
       Arrays.fill(regionIds, noRegionId);
@@ -66,7 +65,7 @@ public class HeightMapPlanarRegionCalculator
       System.out.println("Num matches: " + numMatches);
    }
 
-   private void growRegions(HeightMapData heightMapData, IntFunction<UnitVector3DBasics> surfaceNormals, double distanceEpsilon, double angularEpsilon)
+   private void growRegions(HeightMapData heightMapData, IntFunction<UnitVector3DReadOnly> surfaceNormals, double distanceEpsilon, double angularEpsilon)
    {
       for (int xi = 0; xi < heightMapData.getCellsPerAxis(); xi++)
       {
@@ -174,7 +173,7 @@ public class HeightMapPlanarRegionCalculator
       }
    }
 
-   private void getPlaneEstimate(int key, IntFunction<UnitVector3DBasics> surfaceNormals, HeightMapData heightMapData)
+   private void getPlaneEstimate(int key, IntFunction<UnitVector3DReadOnly> surfaceNormals, HeightMapData heightMapData)
    {
       if (regionIds[key] < 0)
       {
@@ -195,7 +194,7 @@ public class HeightMapPlanarRegionCalculator
 
    private final RecyclingArrayList<Point3D> tempPoints = new RecyclingArrayList<>(Point3D::new);
 
-   public void updatePlaneEstimate(int regionId, IntFunction<UnitVector3DBasics> surfaceNormals, HeightMapData heightMapData)
+   public void updatePlaneEstimate(int regionId, IntFunction<UnitVector3DReadOnly> surfaceNormals, HeightMapData heightMapData)
    {
       TIntArrayList region = regions.get(regionId);
       int numberOfPoints = region.size();

@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
+import java.util.List;
+
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.List;
-
-public interface StepAdjustmentController
+public interface StepAdjustmentController extends SCS2YoGraphicHolder
 {
    void reset();
 
@@ -27,7 +27,6 @@ public interface StepAdjustmentController
    void compute(double currentTime,
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly residualICPError,
                        double omega0);
 
    FramePose3DReadOnly getFootstepSolution();
@@ -35,6 +34,4 @@ public interface StepAdjustmentController
    boolean wasFootstepAdjusted();
 
    boolean useStepAdjustment();
-
-
 }

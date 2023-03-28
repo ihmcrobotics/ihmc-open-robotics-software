@@ -1,7 +1,7 @@
 #ifndef __controller_msgs__msg__PelvisHeightTrajectoryMessage__idl__
 #define __controller_msgs__msg__PelvisHeightTrajectoryMessage__idl__
 
-#include "controller_msgs/msg/./EuclideanTrajectoryMessage_.idl"
+#include "ihmc_common_msgs/msg/./EuclideanTrajectoryMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -35,7 +35,7 @@ module controller_msgs
         /**
          * The position trajectory information.
          */
-        controller_msgs::msg::dds::EuclideanTrajectoryMessage euclidean_trajectory;
+        ihmc_common_msgs::msg::dds::EuclideanTrajectoryMessage euclidean_trajectory;
       };
     };
   };

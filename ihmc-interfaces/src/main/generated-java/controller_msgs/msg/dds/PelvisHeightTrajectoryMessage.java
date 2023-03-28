@@ -31,11 +31,11 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    /**
             * The position trajectory information.
             */
-   public controller_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
+   public ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
 
    public PelvisHeightTrajectoryMessage()
    {
-      euclidean_trajectory_ = new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
+      euclidean_trajectory_ = new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage();
    }
 
    public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage other)
@@ -52,7 +52,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
       enable_user_pelvis_control_during_walking_ = other.enable_user_pelvis_control_during_walking_;
 
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.euclidean_trajectory_, euclidean_trajectory_);
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.euclidean_trajectory_, euclidean_trajectory_);
    }
 
    /**
@@ -108,7 +108,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    /**
             * The position trajectory information.
             */
-   public controller_msgs.msg.dds.EuclideanTrajectoryMessage getEuclideanTrajectory()
+   public ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage getEuclideanTrajectory()
    {
       return euclidean_trajectory_;
    }

@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
@@ -52,7 +48,9 @@ public class WholeBodyControllerBoundCalculator
 
    private final double controlDT;
 
-   public WholeBodyControllerBoundCalculator(JointIndexHandler jointIndexHandler, double controlDT, boolean considerJointVelocityLimits,
+   public WholeBodyControllerBoundCalculator(JointIndexHandler jointIndexHandler,
+                                             double controlDT,
+                                             boolean considerJointVelocityLimits,
                                              YoRegistry parentRegistry)
    {
       this.controlDT = controlDT;
@@ -92,9 +90,9 @@ public class WholeBodyControllerBoundCalculator
          jointLimitParameters[jointIndex] = new JointLimitParameters();
          jointLimitData[jointIndex] = new JointLimitData();
 
-         YoDouble filterAlpha = new YoDouble("joint_limit_filter_alpha_" + joint.getName(), parentRegistry);
-         YoDouble velocityDeadband = new YoDouble("joint_limit_velocity_deadband" + joint.getName(), parentRegistry);
-         YoDouble romMarginFraction = new YoDouble("joint_limit_rom_margin_fraction" + joint.getName(), parentRegistry);
+         YoDouble filterAlpha = new YoDouble("joint_limit_filter_alpha_" + joint.getName(), registry);
+         YoDouble velocityDeadband = new YoDouble("joint_limit_velocity_deadband" + joint.getName(), registry);
+         YoDouble romMarginFraction = new YoDouble("joint_limit_rom_margin_fraction" + joint.getName(), registry);
          filterAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(Double.POSITIVE_INFINITY, controlDT));
          AlphaFilteredYoVariable filteredLowerLimit = new AlphaFilteredYoVariable("qdd_min_filter_" + joint.getName(), registry, filterAlpha);
          AlphaFilteredYoVariable filteredUpperLimit = new AlphaFilteredYoVariable("qdd_max_filter_" + joint.getName(), registry, filterAlpha);
@@ -146,7 +144,8 @@ public class WholeBodyControllerBoundCalculator
          if (params != null)
          {
             jointLimitParameters[jointIndex].set(params);
-            filterAlphas[jointIndex].set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(), controlDT));
+            filterAlphas[jointIndex].set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(),
+                                                                                                         controlDT));
             velocityGains[jointIndex].set(params.getVelocityControlGain());
             romMarginFractions[jointIndex].set(params.getRangeOfMotionMarginFraction());
             velocityDeadbandSizes[jointIndex].set(params.getVelocityDeadbandSize());
@@ -234,7 +233,7 @@ public class WholeBodyControllerBoundCalculator
       CommonOps_DDRM.fill(qDDotMinToPack, Double.NEGATIVE_INFINITY);
       CommonOps_DDRM.fill(qDDotMaxToPack, Double.POSITIVE_INFINITY);
 
-      for ( OneDoFJointBasics joint : oneDoFJoints)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
 
@@ -254,7 +253,9 @@ public class WholeBodyControllerBoundCalculator
       }
    }
 
-   private void computeAccelerationLimitDefault(OneDoFJointBasics joint, double absoluteMaximumJointAcceleration, DMatrixRMaj qDDotMinToPack,
+   private void computeAccelerationLimitDefault(OneDoFJointBasics joint,
+                                                double absoluteMaximumJointAcceleration,
+                                                DMatrixRMaj qDDotMinToPack,
                                                 DMatrixRMaj qDDotMaxToPack)
    {
       int index = jointIndexHandler.getOneDoFJointIndex(joint);
@@ -305,7 +306,9 @@ public class WholeBodyControllerBoundCalculator
       }
    }
 
-   private void computeAccelerationLimitRestrictive(OneDoFJointBasics joint, double absoluteMaximumJointAcceleration, DMatrixRMaj qDDotMinToPack,
+   private void computeAccelerationLimitRestrictive(OneDoFJointBasics joint,
+                                                    double absoluteMaximumJointAcceleration,
+                                                    DMatrixRMaj qDDotMinToPack,
                                                     DMatrixRMaj qDDotMaxToPack)
    {
       int index = jointIndexHandler.getOneDoFJointIndex(joint);

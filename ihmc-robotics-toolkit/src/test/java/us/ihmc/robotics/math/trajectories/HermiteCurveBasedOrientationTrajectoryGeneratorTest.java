@@ -443,9 +443,9 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
             traj.compute(time);
             traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-            EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(initialOrientation, currentOrientation, 1.0e-2);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity, currentAngularVelocity, 1.0e-2);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocity, currentAngularAcceleration, 1.0e-2);
+            EuclidFrameTestTools.assertGeometricallyEquals(initialOrientation, currentOrientation, 1.0e-2);
+            EuclidFrameTestTools.assertGeometricallyEquals(angularVelocity, currentAngularVelocity, 1.0e-2);
+            EuclidFrameTestTools.assertGeometricallyEquals(angularVelocity, currentAngularAcceleration, 1.0e-2);
          }
       }
    }

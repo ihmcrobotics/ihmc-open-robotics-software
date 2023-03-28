@@ -28,13 +28,10 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
@@ -46,12 +43,11 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
+import us.ihmc.scs2.simulation.SimulationTerminalCondition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.RobotInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -68,10 +64,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SCS2AvatarTestingSimulation implements YoVariableHolder
 {
-   private static final double CAMERA_PITCH_FROM_ROBOT = Math.toRadians(-15.0);
-   private static final double CAMERA_YAW_FROM_ROBOT = Math.toRadians(15.0);
-   private static final double CAMERA_DISTANCE_FROM_ROBOT = 6.0;
-
    private final SCS2AvatarSimulation avatarSimulation;
 
    private final ControllerFailureListener exceptionOnFailureListener = fallingDirection ->
@@ -115,7 +107,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
       if (fullRobotModel != null)
          avatarSimulation.setFullHumanoidRobotModel(fullRobotModel);
       if (yoGraphicsListRegistry != null)
-         simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
       if (parameters != null)
       {
@@ -167,11 +159,9 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          getSimulationConstructionSet().waitUntilVisualizerFullyUp();
          getSimulationConstructionSet().addVisualizerShutdownListener(() -> isVisualizerGoingDown.set(true));
 
-         SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) getRobotDefinition().getRootJointDefinitions().get(0).getInitialJointState();
-         if (initialRootJointState != null)
-            initializeCamera(initialRootJointState.getOrientation(), initialRootJointState.getPosition());
+         setCameraDefaultRobotView();
          if (cameraTracksPelvis)
-            requestCameraRigidBodyTracking(getRobotModel().getSimpleRobotName(), getRobot().getFloatingRootJoint().getSuccessor().getName());
+            requestCameraRigidBodyTracking(getRobot().getFloatingRootJoint().getSuccessor().getName());
       }
 
       // We park the simulation thread assuming that the calling test will need to run the simulation in their own thread to keep things synchronous.
@@ -190,26 +180,10 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
          getHighLevelHumanoidControllerFactory().detachControllerFailureListener(exceptionOnFailureListener);
    }
 
-   private void initializeCamera(Orientation3DReadOnly robotOrientation, Tuple3DReadOnly robotPosition)
-   {
-      Point3D focusPosition = new Point3D(robotPosition);
-      Point3D cameraPosition = new Point3D(10, 0, 0);
-      RotationMatrixTools.applyPitchRotation(CAMERA_PITCH_FROM_ROBOT, cameraPosition, cameraPosition);
-      RotationMatrixTools.applyYawRotation(CAMERA_YAW_FROM_ROBOT, cameraPosition, cameraPosition);
-      RotationMatrixTools.applyYawRotation(robotOrientation.getYaw(), cameraPosition, cameraPosition);
-      cameraPosition.scale(CAMERA_DISTANCE_FROM_ROBOT / cameraPosition.distanceFromOrigin());
-      cameraPosition.add(focusPosition);
-
-      setCamera(focusPosition, cameraPosition);
-   }
-
    // Simulation controls:
    /**
     * Adds a terminal condition that will be used in the subsequent simulations to determine when to
     * stop the simulation.
-    * <p>
-    * The condition can be removed with {@link #removeSimulationTerminalCondition(BooleanSupplier)}.
-    * </p>
     * 
     * @param terminalCondition the new condition used to terminate future simulation.
     */
@@ -219,11 +193,26 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    /**
+    * Adds a terminal condition that will be used in the subsequent simulations to determine when to
+    * stop the simulation.
+    * <p>
+    * The condition can be removed with
+    * {@link #removeSimulationTerminalCondition(SimulationTerminalCondition)}.
+    * </p>
+    * 
+    * @param terminalCondition the new condition used to terminate future simulation.
+    */
+   public void addSimulationTerminalCondition(SimulationTerminalCondition terminalCondition)
+   {
+      getSimulationConstructionSet().addExternalTerminalCondition(terminalCondition);
+   }
+
+   /**
     * Removes a terminal simulation condition that was previously registered.
     * 
     * @param terminalCondition the condition to remove.
     */
-   public void removeSimulationTerminalCondition(BooleanSupplier terminalCondition)
+   public void removeSimulationTerminalCondition(SimulationTerminalCondition terminalCondition)
    {
       getSimulationConstructionSet().removeExternalTerminalCondition(terminalCondition);
    }
@@ -410,10 +399,14 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    // GUI controls:
+   public void setCameraDefaultRobotView()
+   {
+      getAvatarSimulation().setCameraDefaultRobotView();
+   }
+
    public void setCameraZoom(double distanceFromFocus)
    {
-      checkSimulationSessionAlive();
-      getSimulationConstructionSet().setCameraZoom(distanceFromFocus);
+      getAvatarSimulation().setCameraZoom(distanceFromFocus);
    }
 
    /**
@@ -421,19 +414,24 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * <p>
     * The camera is rotated during this operation, its position remains unchanged.
     * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
     * 
     * @param focus the new focus position.
     */
    public void setCameraFocusPosition(Point3DReadOnly focus)
    {
-      checkSimulationSessionAlive();
-      setCameraFocusPosition(focus.getX(), focus.getY(), focus.getZ());
+      getAvatarSimulation().setCameraFocusPosition(focus);
    }
 
    /**
     * Sets the new focus point the camera is looking at.
     * <p>
     * The camera is rotated during this operation, its position remains unchanged.
+    * </p>
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
     * </p>
     *
     * @param x the x-coordinate of the new focus location.
@@ -442,8 +440,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraFocusPosition(double x, double y, double z)
    {
-      checkSimulationSessionAlive();
-      getSimulationConstructionSet().setCameraFocusPosition(x, y, z);
+      getAvatarSimulation().setCameraFocusPosition(x, y, z);
    }
 
    /**
@@ -456,7 +453,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraPosition(Point3DReadOnly position)
    {
-      setCameraPosition(position.getX(), position.getY(), position.getZ());
+      getAvatarSimulation().setCameraPosition(position);
    }
 
    /**
@@ -471,26 +468,31 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     */
    public void setCameraPosition(double x, double y, double z)
    {
-      checkSimulationSessionAlive();
-      getSimulationConstructionSet().setCameraPosition(x, y, z);
+      getAvatarSimulation().setCameraPosition(x, y, z);
    }
 
    /**
     * Sets the camera configuration.
+    * <p>
+    * Note that calling this method will cancel the camera tracking of a node.
+    * </p>
     * 
     * @param cameraFocus    the new focus position (where the camera is looking at).
-    * @param cameraPosition the new camerate position.
+    * @param cameraPosition the new camera position.
     */
    public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
    {
-      setCameraFocusPosition(cameraFocus);
-      setCameraPosition(cameraPosition);
+      getAvatarSimulation().setCamera(cameraFocus, cameraPosition);
+   }
+
+   public void requestCameraRigidBodyTracking(String rigidBodyName)
+   {
+      getAvatarSimulation().requestCameraRigidBodyTracking(rigidBodyName);
    }
 
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
    {
-      checkSimulationSessionAlive();
-      getSimulationConstructionSet().requestCameraRigidBodyTracking(robotName, rigidBodyName);
+      getAvatarSimulation().requestCameraRigidBodyTracking(robotName, rigidBodyName);
    }
 
    public void addStaticVisuals(Collection<? extends VisualDefinition> visualDefinitions)
@@ -514,13 +516,13 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       checkSimulationSessionAlive();
-      SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
+      YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry).forEach(this::addYoGraphicDefinition);
    }
 
    public void addYoGraphic(YoGraphic yoGraphic)
    {
       checkSimulationSessionAlive();
-      addYoGraphicDefinition(SCS1GraphicConversionTools.toYoGraphicDefinition(yoGraphic));
+      addYoGraphicDefinition(YoGraphicConversionTools.toYoGraphicDefinition(yoGraphic));
    }
 
    // Misc.
@@ -547,9 +549,6 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
                SessionVisualizerIOTools.addSCSIconToDialog(alert);
                alert.initOwner(primaryWindow);
                JavaFXMissingTools.centerDialogInOwner(alert);
-               // TODO Seems that on Ubuntu the changes done to the window position/size are not processed properly until the window is showing.
-               // This may be related to the bug reported when using GTK3: https://github.com/javafxports/openjdk-jfx/pull/446, might be fixed in later version.
-               alert.setOnShown(e -> JavaFXMissingTools.runLater(getClass(), () -> JavaFXMissingTools.centerDialogInOwner(alert)));
                alert.showAndWait();
             }
          });

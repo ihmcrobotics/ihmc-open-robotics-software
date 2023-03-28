@@ -2,7 +2,7 @@
 #define __controller_msgs__msg__HandHybridJointspaceTaskspaceTrajectoryMessage__idl__
 
 #include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
-#include "controller_msgs/msg/./SE3TrajectoryMessage_.idl"
+#include "ihmc_common_msgs/msg/./SE3TrajectoryMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -41,7 +41,7 @@ module controller_msgs
         /**
          * The taskspace trajectory information.
          */
-        controller_msgs::msg::dds::SE3TrajectoryMessage taskspace_trajectory_message;
+        ihmc_common_msgs::msg::dds::SE3TrajectoryMessage taskspace_trajectory_message;
         /**
          * The jointspace trajectory information.
          * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.

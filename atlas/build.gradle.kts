@@ -1,6 +1,6 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-ci") version "7.7"
    id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
@@ -16,7 +16,7 @@ ihmc {
 mainDependencies {
    api("org.georegression:georegression:0.22")
    api("org.ddogleg:ddogleg:0.18")
-   api("org.apache.xmlgraphics:batik-dom:1.7")
+   api("org.apache.xmlgraphics:batik-dom:1.14")
    api("org.apache.ant:ant:1.9.0")
    api("com.martiansoftware:jsap:2.1")
    api("org.ejml:ejml-core:0.39")
@@ -29,14 +29,13 @@ mainDependencies {
    api("org.boofcv:boofcv-recognition:0.36")
    api("com.github.wendykierp:JTransforms:3.1")
 
-   api("us.ihmc:euclid:0.17.2")
-   api("us.ihmc:euclid-geometry:0.17.2")
-   api("us.ihmc:euclid-frame:0.17.2")
-   api("us.ihmc:euclid-shape:0.17.2")
-   api("us.ihmc:euclid-frame-shape:0.17.2")
-   api("us.ihmc:ihmc-javafx-toolkit:0.21.1")
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:euclid-geometry:0.19.1")
+   api("us.ihmc:euclid-frame:0.19.1")
+   api("us.ihmc:euclid-shape:0.19.1")
+   api("us.ihmc:euclid-frame-shape:0.19.1")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.1")
    api("us.ihmc:ihmc-humanoid-behaviors:source")
-   api("us.ihmc:ihmc-mocap:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-simple-whole-body-walking:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
@@ -63,9 +62,9 @@ mainDependencies {
 }
 
 testDependencies {
-   api("com.thoughtworks.xstream:xstream:1.4.7")
+   api("com.thoughtworks.xstream:xstream:1.4.19")
 
-   api("us.ihmc:ihmc-commons-testing:0.30.5")
+   api("us.ihmc:ihmc-commons-testing:0.32.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
@@ -73,5 +72,5 @@ testDependencies {
    api("us.ihmc:ihmc-sensor-processing-test:source")
    api("us.ihmc:ihmc-simulation-toolkit-test:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-messager-test:0.1.7")
+   api("us.ihmc:ihmc-messager-test:0.2.0")
 }

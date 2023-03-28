@@ -49,16 +49,16 @@ public class MomentumTrajectoryHandlerTest
       assertEquals(samples, momentumTrajectory.size());
 
       assertEquals(0.0, momentumTrajectory.get(0).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 1.0, 0.0), momentumTrajectory.get(0).getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), momentumTrajectory.get(0).getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Point3D(1.0, 1.0, 0.0), momentumTrajectory.get(0).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Vector3D(1.5, 1.5, 0.0), momentumTrajectory.get(0).getLinearVelocity(), Double.MIN_VALUE);
 
       assertEquals(0.5, momentumTrajectory.get(1).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(27.0 / 16.0, 27.0 / 16.0, 0.0), momentumTrajectory.get(1).getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(1).getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Point3D(27.0 / 16.0, 27.0 / 16.0, 0.0), momentumTrajectory.get(1).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(1).getLinearVelocity(), Double.MIN_VALUE);
 
       assertEquals(1.0, momentumTrajectory.get(2).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(2.0, 2.0, 0.0), momentumTrajectory.get(2).getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 0.0), momentumTrajectory.get(2).getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Point3D(2.0, 2.0, 0.0), momentumTrajectory.get(2).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Vector3D(0.0, 0.0, 0.0), momentumTrajectory.get(2).getLinearVelocity(), Double.MIN_VALUE);
    }
 
    @Test
@@ -195,16 +195,16 @@ public class MomentumTrajectoryHandlerTest
       assertEquals(samples, momentumTrajectory.size());
 
       assertEquals(0.0, momentumTrajectory.get(0).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(5.0 / 16.0, 5.0 / 16.0, 0.0), momentumTrajectory.get(0).getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(0).getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Point3D(5.0 / 16.0, 5.0 / 16.0, 0.0), momentumTrajectory.get(0).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(0).getLinearVelocity(), Double.MIN_VALUE);
 
       assertEquals(0.5, momentumTrajectory.get(1).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 1.0, 0.0), momentumTrajectory.get(1).getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(1.5, 1.5, 0.0), momentumTrajectory.get(1).getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Point3D(1.0, 1.0, 0.0), momentumTrajectory.get(1).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Vector3D(1.5, 1.5, 0.0), momentumTrajectory.get(1).getLinearVelocity(), Double.MIN_VALUE);
 
       assertEquals(1.0, momentumTrajectory.get(2).getTime(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(27.0 / 16.0, 27.0 / 16.0, 0.0), momentumTrajectory.get(2).getPosition(), Double.MIN_VALUE);
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(2).getLinearVelocity(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Point3D(27.0 / 16.0, 27.0 / 16.0, 0.0), momentumTrajectory.get(2).getPosition(), Double.MIN_VALUE);
+      EuclidCoreTestTools.assertEquals(new Vector3D(9.0 / 8.0, 9.0 / 8.0, 0.0), momentumTrajectory.get(2).getLinearVelocity(), Double.MIN_VALUE);
    }
 
    public static void main(String[] args)

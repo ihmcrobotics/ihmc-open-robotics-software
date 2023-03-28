@@ -83,7 +83,7 @@ public class YoSwingTrajectoryParameters
 
       Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, parameters.getDesiredTouchdownVelocity());
       touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity, registry);
-      minLiftOffVerticalVelocity = new DoubleParameter(namePrefix + "MinLiftOffVerticalVelocity", registry, 0.0);
+      minLiftOffVerticalVelocity = new DoubleParameter(namePrefix + "MinLiftOffVerticalVelocity", registry, parameters.getMinLiftOffVerticalVelocity());
       finalCoMVelocityInjectionRatio = new DoubleParameter(namePrefix + "FinalCoMVelocityInjectionRatio",
                                                            registry,
                                                            parameters.getFinalCoMVelocityInjectionRatio());
@@ -112,7 +112,7 @@ public class YoSwingTrajectoryParameters
       liftOffPhaseDuration = new DoubleParameter(namePrefix + "LiftOffPhaseDuration", registry, 0.05);
       liftOffKd = new DoubleParameter(namePrefix + "LiftOffKneeKd", registry, 50.0);
 
-      pelvisVelocityInjectionRatio = new DoubleParameter(namePrefix + "PelvisVelocityInjectionRatio", registry, 0.0);
+      pelvisVelocityInjectionRatio = new DoubleParameter(namePrefix + "PelvisVelocityInjectionRatio", registry, parameters.getPelvisVelocityInjectionRatio());
    }
 
    public boolean addOrientationMidpointForObstacleClearance()

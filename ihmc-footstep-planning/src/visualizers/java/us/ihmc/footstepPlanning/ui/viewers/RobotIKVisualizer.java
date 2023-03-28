@@ -69,7 +69,7 @@ public class RobotIKVisualizer
       ikEnabled = messager.createInput(FootstepPlannerMessagerAPI.IKEnabled, false);
       ikSolution = messager.createInput(FootstepPlannerMessagerAPI.IKSolution);
       ikMode = messager.createInput(FootstepPlannerMessagerAPI.SelectedIKMode);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.SelectedIKMode, b -> newModeFlag.set(true));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.SelectedIKMode, b -> newModeFlag.set(true));
 
       new Thread(() -> loadRobotModelAndGraphics(fullHumanoidRobotModelFactory, jointMap), "RobotVisualizerLoading").start();
 
@@ -120,7 +120,7 @@ public class RobotIKVisualizer
       };
 
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.IKEnabled, enabled ->
+      messager.addTopicListener(FootstepPlannerMessagerAPI.IKEnabled, enabled ->
       {
          if (enabled)
          {
@@ -242,7 +242,7 @@ public class RobotIKVisualizer
       if (robotConfigurationData.getJointNameHash() != jointNameHash)
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
 
-      newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation()));
+      newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition()));
       newJointConfigurationReference.set(robotConfigurationData.getJointAngles().toArray());
    }
 

@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
@@ -35,7 +36,6 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
@@ -59,6 +59,7 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -67,7 +68,6 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -125,20 +125,24 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
                                              SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> footContactSensorNames,
                                              SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
                                              PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              CoPTrajectoryParameters copTrajectoryParameters)
    {
-      this(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames, highLevelControllerParameters, walkingControllerParameters,
-           pushRecoveryControllerParameters, copTrajectoryParameters, new DefaultSplitFractionCalculatorParameters());
+      this(contactableBodiesFactory,
+           footForceSensorNames,
+           wristSensorNames,
+           highLevelControllerParameters,
+           walkingControllerParameters,
+           pushRecoveryControllerParameters,
+           copTrajectoryParameters,
+           new DefaultSplitFractionCalculatorParameters());
    }
 
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
                                              SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> footContactSensorNames,
                                              SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
@@ -193,7 +197,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
    public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript,
-                                                                HeightMap heightMapForFootstepZ,
+                                                                FootstepAdjustment footstepAdjustment,
                                                                 HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
    {
       if (componentBasedFootstepDataMessageGeneratorFactory != null)
@@ -203,7 +207,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
       componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
       componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters);
-      componentBasedFootstepDataMessageGeneratorFactory.setHeightMap(heightMapForFootstepZ);
+      componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(footstepAdjustment);
 
       if (humanoidHighLevelControllerManager != null)
          humanoidHighLevelControllerManager.addControllerPluginFactory(componentBasedFootstepDataMessageGeneratorFactory);
@@ -426,17 +430,17 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       return requestedHighLevelControllerState;
    }
 
-   public RobotController getController(FullHumanoidRobotModel fullRobotModel,
-                                        double controlDT,
-                                        double gravity,
-                                        YoDouble yoTime,
-                                        YoGraphicsListRegistry yoGraphicsListRegistry,
-                                        HumanoidRobotSensorInformation sensorInformation,
-                                        ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                        CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
-                                        CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                        JointDesiredOutputListBasics lowLevelControllerOutput,
-                                        JointBasics... jointsToIgnore)
+   public HumanoidHighLevelControllerManager getController(FullHumanoidRobotModel fullRobotModel,
+                                                           double controlDT,
+                                                           double gravity,
+                                                           YoDouble yoTime,
+                                                           YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                           HumanoidRobotSensorInformation sensorInformation,
+                                                           ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                           CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
+                                                           CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                                           JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                           JointBasics... jointsToIgnore)
    {
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
       YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
@@ -557,6 +561,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
+      for (RobotSide robotSide : RobotSide.values)
+         humanoidHighLevelControllerManager.addYoGraphic(footSwitches.get(robotSide).getSCS2YoGraphics());
       return humanoidHighLevelControllerManager;
    }
 
@@ -627,6 +633,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public StatusMessageOutputManager getStatusOutputManager()
    {
       return statusMessageOutputManager;
+   }
+
+   public WholeBodyControllerCoreFactory getWholeBodyControllerCoreFactory()
+   {
+      return controllerCoreFactory;
    }
 
    public void attachControllerFailureListeners(List<ControllerFailureListener> listeners)
@@ -700,6 +711,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
+   }
+
+   public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
+   {
+      humanoidHighLevelControllerManager.addHighLevelStateChangedListener(stateChangedListener);
    }
 
    public void setListenToHighLevelStatePackets(boolean isListening)

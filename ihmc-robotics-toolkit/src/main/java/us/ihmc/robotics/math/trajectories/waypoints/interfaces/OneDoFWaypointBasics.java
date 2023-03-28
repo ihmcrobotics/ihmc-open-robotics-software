@@ -1,16 +1,12 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
-import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.interfaces.Clearable;
 
-public interface OneDoFWaypointBasics
+public interface OneDoFWaypointBasics extends OneDoFWaypointReadOnly, Clearable
 {
-   abstract void setPosition(double position);
+   void setPosition(double position);
 
-   abstract void setVelocity(double velocity);
-
-   abstract double getPosition();
-
-   abstract double getVelocity();
+   void setVelocity(double velocity);
 
    default void setPositionToZero()
    {
@@ -38,37 +34,29 @@ public interface OneDoFWaypointBasics
       setVelocity(velocity);
    }
 
-   default void get(OneDoFWaypointBasics otherToPack)
-   {
-      otherToPack.set(this);
-   }
-
-   default boolean epsilonEquals(OneDoFWaypointBasics other, double epsilon)
-   {
-      return EuclidCoreTools.epsilonEquals(getPosition(), other.getPosition(), epsilon)
-            && EuclidCoreTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon);
-   }
-
-   default void set(OneDoFWaypointBasics other)
+   default void set(OneDoFWaypointReadOnly other)
    {
       setPosition(other.getPosition());
       setVelocity(other.getVelocity());
    }
 
+   @Override
    default void setToNaN()
    {
       setPositionToNaN();
       setVelocityToNaN();
    }
 
+   @Override
    default void setToZero()
    {
       setPositionToZero();
       setVelocityToZero();
    }
 
+   @Override
    default boolean containsNaN()
    {
-      return Double.isNaN(getPosition()) || Double.isNaN(getVelocity());
+      return OneDoFWaypointReadOnly.super.containsNaN();
    }
 }

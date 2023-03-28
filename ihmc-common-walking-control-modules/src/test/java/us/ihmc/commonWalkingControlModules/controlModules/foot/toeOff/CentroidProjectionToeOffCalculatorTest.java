@@ -196,12 +196,6 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public double defaultOffsetHeightAboveAnkle()
-         {
-            return 0;
-         }
-
-         @Override
          public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
          {
             return false;
@@ -343,12 +337,6 @@ public class CentroidProjectionToeOffCalculatorTest
                {
                   return false;
                }
-
-               @Override
-               public double getMaximumToeOffAngle()
-               {
-                  return 0;
-               }
             };
          }
 
@@ -424,13 +412,6 @@ public class CentroidProjectionToeOffCalculatorTest
          {
             return false;
          }
-
-         @Override
-         public double getMaximumToeOffAngle()
-         {
-            return 0;
-         }
-
       };
 
    }

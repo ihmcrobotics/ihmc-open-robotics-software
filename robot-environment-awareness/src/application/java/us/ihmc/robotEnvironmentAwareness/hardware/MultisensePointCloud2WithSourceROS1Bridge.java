@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import geometry_msgs.Point;
 import scan_to_cloud.PointCloud2WithSource;
 import us.ihmc.communication.IHMCROS2Publisher;

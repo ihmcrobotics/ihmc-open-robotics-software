@@ -3,10 +3,10 @@ package us.ihmc.valkyrie.joystick;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -177,7 +177,7 @@ public class ValkyrieJavaFXMotionPreviewVisualizer
          joints[i] = frame.getDesiredJointAngles().get(i);
       }
 
-      newRootJointPoseReference.set(new RigidBodyTransform(frame.getDesiredRootOrientation(), frame.getDesiredRootTranslation()));
+      newRootJointPoseReference.set(new RigidBodyTransform(frame.getDesiredRootOrientation(), frame.getDesiredRootPosition()));
       newJointConfigurationReference.set(joints);
    }
 

@@ -42,22 +42,22 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 500; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -116,31 +116,31 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getRegionOrigin().size() <= 3000)
+      if(data.getRegionOrigin().size() <= 20)
       cdr.write_type_e(data.getRegionOrigin());else
           throw new RuntimeException("region_origin field exceeds the maximum length");
 
-      if(data.getRegionOrientation().size() <= 3000)
+      if(data.getRegionOrientation().size() <= 20)
       cdr.write_type_e(data.getRegionOrientation());else
           throw new RuntimeException("region_orientation field exceeds the maximum length");
 
-      if(data.getRegionNormal().size() <= 3000)
+      if(data.getRegionNormal().size() <= 20)
       cdr.write_type_e(data.getRegionNormal());else
           throw new RuntimeException("region_normal field exceeds the maximum length");
 
-      if(data.getConcaveHullsSize().size() <= 3000)
+      if(data.getConcaveHullsSize().size() <= 100)
       cdr.write_type_e(data.getConcaveHullsSize());else
           throw new RuntimeException("concave_hulls_size field exceeds the maximum length");
 
-      if(data.getNumberOfHolesInRegion().size() <= 3000)
+      if(data.getNumberOfHolesInRegion().size() <= 100)
       cdr.write_type_e(data.getNumberOfHolesInRegion());else
           throw new RuntimeException("number_of_holes_in_region field exceeds the maximum length");
 
-      if(data.getHolePolygonsSize().size() <= 3000)
+      if(data.getHolePolygonsSize().size() <= 100)
       cdr.write_type_e(data.getHolePolygonsSize());else
           throw new RuntimeException("hole_polygons_size field exceeds the maximum length");
 
-      if(data.getVertexBuffer().size() <= 50000)
+      if(data.getVertexBuffer().size() <= 500)
       cdr.write_type_e(data.getVertexBuffer());else
           throw new RuntimeException("vertex_buffer field exceeds the maximum length");
 

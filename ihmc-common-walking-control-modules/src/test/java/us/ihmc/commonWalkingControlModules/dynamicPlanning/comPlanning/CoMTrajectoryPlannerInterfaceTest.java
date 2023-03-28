@@ -39,7 +39,7 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
    protected abstract CoMTrajectoryPlannerInterface createComTrajectoryPlanner();
 
    @BeforeEach
-   private void setupTest()
+   public void setupTest()
    {
       registry = new YoRegistry("testJacobian");
       omega = new YoDouble("omega", registry);
@@ -50,7 +50,7 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
    }
 
    @AfterEach
-   private void tearDown()
+   public void tearDown()
    {
       registry = null;
       omega = null;
@@ -85,50 +85,50 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
       desiredDCM.addZ(nominalHeight);
       FrameVector3D desiredDCMVelocity = new FrameVector3D();
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
 
       planner.compute(1.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
 
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
 
       planner.compute(10.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
 
       planner.compute(100.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
 
       planner.compute(1000.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
 
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
@@ -137,10 +137,10 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
          planner.compute(time);
          checkPlannerDynamics(planner, omega.getDoubleValue());
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredVRPPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredDCM, planner.getDesiredCoMPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(desiredDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
       }
    }
 
@@ -502,9 +502,9 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
          planner.compute(time);
          checkPlannerDynamics(planner, omega.getDoubleValue());
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("i = " + i, firstVRP, planner.getDesiredVRPPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("i = " + i, firstVRP, planner.getDesiredVRPPosition(), epsilon);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("i = " + i, expectedDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals("i = " + i, expectedDCM, planner.getDesiredDCMPosition(), epsilon);
       }
    }
 
@@ -588,8 +588,8 @@ public abstract class CoMTrajectoryPlannerInterfaceTest
       constructedDCMVelocity.sub(planner.getDesiredVRPPosition());
       constructedDCMVelocity.scale(omega);
 
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("dcm dynamics are wrong.", constructedDCMPosition, planner.getDesiredDCMPosition(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("vrp dynamics are wrong.", constructedDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("dcm dynamics are wrong.", constructedDCMPosition, planner.getDesiredDCMPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("vrp dynamics are wrong.", constructedDCMVelocity, planner.getDesiredDCMVelocity(), epsilon);
 
    }
 }

@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.tools.walkingController;
 
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;

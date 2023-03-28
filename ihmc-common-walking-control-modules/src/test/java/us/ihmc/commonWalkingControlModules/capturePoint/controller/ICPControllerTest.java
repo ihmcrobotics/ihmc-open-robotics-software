@@ -1,13 +1,20 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
-import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,9 +36,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ICPControllerTest
 {
@@ -87,8 +91,7 @@ public class ICPControllerTest
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -110,10 +113,7 @@ public class ICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
 
-      FramePoint2D desiredCMP = new FramePoint2D();
-      controller.getDesiredCMP(desiredCMP);
-
-      Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
+      Assert.assertTrue(controller.getDesiredCMP().epsilonEquals(perfectCMP, epsilon));
    }
 
    @Test
@@ -153,8 +153,7 @@ public class ICPControllerTest
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -177,10 +176,7 @@ public class ICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoM, omega);
 
-      FramePoint2D desiredCMP = new FramePoint2D();
-      controller.getDesiredCMP(desiredCMP);
-
-      Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
+      Assert.assertTrue(controller.getDesiredCMP().epsilonEquals(perfectCMP, epsilon));
    }
 
    @Test
@@ -221,8 +217,7 @@ public class ICPControllerTest
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -244,9 +239,6 @@ public class ICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
 
-      FramePoint2D desiredCMP = new FramePoint2D();
-      controller.getDesiredCMP(desiredCMP);
-
       FramePoint2D desiredCMPExpected = new FramePoint2D();
       desiredCMPExpected.set(icpError);
       desiredCMPExpected.scale(feedbackGain + 1.0);
@@ -258,7 +250,7 @@ public class ICPControllerTest
       desiredCMPExpected.setX(Math.min(maxX, desiredCMPExpected.getX()));
       desiredCMPExpected.setY(Math.min(maxY, desiredCMPExpected.getY()));
 
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredCMPExpected, controller.getDesiredCMP(), epsilon);
    }
 
    @Test
@@ -293,13 +285,12 @@ public class ICPControllerTest
       };
 
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
-         SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(10.0, 5.0, stanceWidth);
+      SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(10.0, 5.0, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                   bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -321,9 +312,6 @@ public class ICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
 
-      FramePoint2D desiredCMP = new FramePoint2D();
-      controller.getDesiredCMP(desiredCMP);
-
       FramePoint2D desiredCMPExpected = new FramePoint2D();
       FrameVector2D expectedCoPFeedbackDelta = new FrameVector2D();
       FrameVector2D expectedCMPFeedbackDelta = new FrameVector2D();
@@ -334,12 +322,12 @@ public class ICPControllerTest
       desiredCMPExpected.add(expectedCMPFeedbackDelta);
       desiredCMPExpected.add(expectedCoPFeedbackDelta);
 
-      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(icpError, controller.icpError, epsilon);
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(perfectCMP, controller.perfectCoP, epsilon);
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(perfectCMP, controller.perfectCMP, epsilon);
-      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(expectedCMPFeedbackDelta, controller.feedbackCMPDelta, epsilon);
-      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(expectedCoPFeedbackDelta, controller.feedbackCoPDelta, epsilon);
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(icpError, controller.icpError, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(perfectCMP, controller.perfectCoP, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(perfectCMP, controller.perfectCMP, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(expectedCMPFeedbackDelta, controller.feedbackCMPDelta, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(expectedCoPFeedbackDelta, controller.feedbackCoPDelta, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredCMPExpected, controller.getDesiredCMP(), epsilon);
    }
 
    @Test
@@ -384,8 +372,7 @@ public class ICPControllerTest
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -407,15 +394,12 @@ public class ICPControllerTest
       controller.initialize();
       controller.compute(supportPolygonInWorld, desiredICP, desiredICPVelocity, new FramePoint2D(), perfectCMP, currentICP, currentCoMPosition, omega);
 
-      FramePoint2D desiredCMP = new FramePoint2D();
-      controller.getDesiredCMP(desiredCMP);
-
       FramePoint2D desiredCMPExpected = new FramePoint2D();
       desiredCMPExpected.set(icpError);
       desiredCMPExpected.scale(feedbackGain + 1.0);
       desiredCMPExpected.add(perfectCMP);
 
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(desiredCMPExpected, controller.getDesiredCMP(), epsilon);
    }
 
    private SideDependentList<FootSpoof> setupContactableFeet(double footLength, double footWidth, double totalWidth)
@@ -463,12 +447,16 @@ public class ICPControllerTest
          soleFrames.put(robotSide, soleFrame);
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
-         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
+         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix
+               + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
          contactStates.put(robotSide, yoPlaneContactState);
       }
 
-      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
+      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame",
+                                                            worldFrame,
+                                                            soleZUpFrames.get(RobotSide.LEFT),
+                                                            soleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, null);
@@ -506,6 +494,7 @@ public class ICPControllerTest
 
          return gains;
       }
+
       @Override
       public double getDynamicsObjectiveWeight()
       {
@@ -667,12 +656,6 @@ public class ICPControllerTest
 
       @Override
       public double maximumHeightAboveAnkle()
-      {
-         return 0;
-      }
-
-      @Override
-      public double defaultOffsetHeightAboveAnkle()
       {
          return 0;
       }

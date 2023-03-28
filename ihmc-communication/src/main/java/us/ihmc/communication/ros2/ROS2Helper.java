@@ -5,8 +5,8 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -21,6 +21,11 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
 {
    protected final ManagedROS2Node managedROS2Node;
    protected final ROS2PublisherMap ros2PublisherMap;
+
+   public ROS2Helper(PubSubImplementation pubSubImplementation, String nodeName)
+   {
+      this(ROS2Tools.createROS2Node(pubSubImplementation, nodeName));
+   }
 
    public ROS2Helper(ROS2NodeInterface ros2Node)
    {
@@ -52,6 +57,12 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    }
 
    @Override
+   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter)
+   {
+      return new IHMCROS2Input<>(managedROS2Node, topic.getType(), topic, messageFilter);
+   }
+
+   @Override
    public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic)
    {
       return new ROS2TypelessInput(managedROS2Node, topic);
@@ -63,6 +74,12 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
       Notification notification = new Notification();
       new ROS2Callback<>(managedROS2Node, Empty.class, topic, message -> notification.set());
       return notification;
+   }
+
+   @Override
+   public <T> void createPublisher(ROS2Topic<T> topic)
+   {
+      ros2PublisherMap.getOrCreatePublisher(topic);
    }
 
    @Override

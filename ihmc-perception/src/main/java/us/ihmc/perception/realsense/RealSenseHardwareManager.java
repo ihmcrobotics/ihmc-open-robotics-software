@@ -61,40 +61,92 @@ public class RealSenseHardwareManager
       return new RealtimeL515(prefix, context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, registry, graphicsListRegistry);
    }
 
-   public BytedecoRealsenseL515 createFullFeaturedL515(String serialNumberToFind)
+   public BytedecoRealsense createFullFeaturedL515(String serialNumberToFind)
+   {
+      return createBytedecoRealsenseDevice(serialNumberToFind, RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ);
+   }
+
+   /**
+    *  Creates Realsense Device handler.
+    *
+    *  @param serialNumberToFind   The device serial number found physically printed on the Realsense sensor
+    *  @param configuration The requested device settings
+    *  @return BytedecoRealsense device object for accessing sensor data and config information
+    */
+   public BytedecoRealsense createBytedecoRealsenseDevice(String serialNumberToFind, RealsenseConfiguration configuration)
+   {
+      return createBytedecoRealsenseDevice(serialNumberToFind,
+                                           configuration.getDepthWidth(),
+                                           configuration.getDepthHeight(),
+                                           configuration.getDepthFPS());
+   }
+
+   /**
+   *  Creates Realsense Device handler.
+   *
+   *  @param serialNumberToFind   The device serial number found physically printed on the Realsense sensor
+   *  @param depthWidth The width of the depth maps to be requested from the sensor firmware
+   *  @param depthHeight  The height of depth maps to be requested from the sensor firmware
+   *  @param fps Frames Per Second which is the frequency of update to be requested from the sensor firmware
+   *  @return BytedecoRealsense device object for accessing sensor data and config information
+   */
+   public BytedecoRealsense createBytedecoRealsenseDevice(String serialNumberToFind, int depthWidth, int depthHeight, int fps)
    {
       String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
-      return new BytedecoRealsenseL515(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind);
+      return new BytedecoRealsense(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, depthWidth, depthHeight, fps);
    }
 
    public rs2_device createDevice(String serialNumberToFind)
    {
       int rs2DeviceCount = updateDeviceCount();
+      LogTools.info("{} Realsense device(s) detected.", rs2DeviceCount);
 
       for (int i = 0; i < rs2DeviceCount; i++)
       {
          rs2_device rs2Device = realsense2.rs2_create_device(devices, i, error);
          checkError();
 
-         int supportsSerialNumber = realsense2.rs2_supports_device_info(rs2Device, realsense2.RS2_CAMERA_INFO_SERIAL_NUMBER, error);
-         checkError();
+         String deviceName = getDeviceInfo(rs2Device, realsense2.RS2_CAMERA_INFO_NAME);
+         if (deviceName != null)
+            LogTools.info("Realsense device found: {}", deviceName);
 
-         if (supportsSerialNumber == 1)
+         String deviceSerialNumber = getDeviceInfo(rs2Device, realsense2.RS2_CAMERA_INFO_SERIAL_NUMBER);
+         if (deviceSerialNumber != null)
          {
-            BytePointer deviceSerialNumberBytePointer = realsense2.rs2_get_device_info(rs2Device, realsense2.RS2_CAMERA_INFO_SERIAL_NUMBER, error);
-            checkError();
+            LogTools.info("Realsense device matched serial number: {}", deviceSerialNumber);
 
-            String serialNumberFromRS2 = deviceSerialNumberBytePointer.getString();
-            LogTools.info("Realsense Sensor detected. Serial Number: = {}", serialNumberFromRS2);
+            String deviceFirmwareVersion = getDeviceInfo(rs2Device, realsense2.RS2_CAMERA_INFO_FIRMWARE_VERSION);
+            if (deviceFirmwareVersion != null)
+               LogTools.info("Realsense device firmware version: {}", deviceFirmwareVersion);
+            String deviceRecommendedFirmwareVersion = getDeviceInfo(rs2Device, realsense2.RS2_CAMERA_INFO_RECOMMENDED_FIRMWARE_VERSION);
+            if (deviceRecommendedFirmwareVersion != null)
+               LogTools.info("Realsense device recommended firmware version: {}", deviceRecommendedFirmwareVersion);
 
-            if (serialNumberFromRS2.contains(serialNumberToFind.toLowerCase()))
+            if (deviceSerialNumber.contains(serialNumberToFind.toLowerCase()))
             {
                return rs2Device;
             }
          }
+
+         // We didn't select this device.
+         realsense2.rs2_delete_device(rs2Device);
       }
 
-      LogTools.error("Device not found. Serial Number: = {}", serialNumberToFind);
+      LogTools.error("Device not found. Serial Number: {}", serialNumberToFind);
+      return null;
+   }
+
+   private String getDeviceInfo(rs2_device rs2Device, int deviceInfoEnum)
+   {
+      int supportsInfo = realsense2.rs2_supports_device_info(rs2Device, deviceInfoEnum, error);
+      checkError();
+
+      if (supportsInfo == 1)
+      {
+         BytePointer infoBytePointer = realsense2.rs2_get_device_info(rs2Device, deviceInfoEnum, error);
+         checkError();
+         return infoBytePointer.getString();
+      }
       return null;
    }
 
@@ -113,9 +165,12 @@ public class RealSenseHardwareManager
 
    public void deleteContext()
    {
+      // LogTools/log4j2 is no longer operational during JVM shutdown
+      System.out.println("Deleting device list...");
       realsense2.rs2_delete_device_list(devices);
+      System.out.println("Deleting context...");
       realsense2.rs2_delete_context(context);
-      LogTools.info("Deleted realsense2 context");
+      System.out.println("Deleted everything.");
    }
 
    private void checkError()

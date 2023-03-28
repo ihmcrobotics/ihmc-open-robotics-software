@@ -3,10 +3,12 @@ package us.ihmc.valkyrie;
 import java.util.HashMap;
 import java.util.Map;
 
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
@@ -15,21 +17,26 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.valkyrie.ValkyrieNetworkProcessor.NetworkProcessorVersion;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamingToolboxModule
 {
-   public ValkyrieKinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
+   public ValkyrieKinematicsStreamingToolboxModule(DRCRobotModel robotModel,
+                                                   KinematicsStreamingToolboxParameters parameters,
+                                                   boolean startYoVariableServer,
+                                                   PubSubImplementation pubSubImplementation)
    {
-      super(robotModel, startYoVariableServer, pubSubImplementation);
+      super(robotModel, parameters, startYoVariableServer, pubSubImplementation);
       controller.setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
    }
 
    @Override
-   public DataServerSettings getYoVariableServerSettings()
+   public DataServerSettings createYoVariableServerSettings()
    {
-      return new DataServerSettings(true);
+      return super.createYoVariableServerSettings(true);
    }
 
    private static Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
@@ -64,7 +71,26 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRosControlController.VERSION);
       boolean startYoVariableServer = true;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
-      ValkyrieKinematicsStreamingToolboxModule module = new ValkyrieKinematicsStreamingToolboxModule(robotModel, startYoVariableServer, pubSubImplementation);
+
+      KinematicsStreamingToolboxParameters parameters = KinematicsStreamingToolboxParameters.defaultParameters();
+
+      if (NetworkProcessorVersion.fromEnvironment() == NetworkProcessorVersion.IHMC)
+      {
+         parameters.setCenterOfMassSafeMargin(0.05);
+         KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = parameters.getDefaultConfiguration();
+         if (robotModel.getRobotVersion() == ValkyrieRobotVersion.ARM_MASS_SIM)
+         {
+            defaultConfiguration.setEnableLeftHandTaskspace(false);
+            defaultConfiguration.setEnableRightHandTaskspace(false);
+            defaultConfiguration.setEnableLeftArmJointspace(true);
+            defaultConfiguration.setEnableRightArmJointspace(true);
+         }
+      }
+
+      ValkyrieKinematicsStreamingToolboxModule module = new ValkyrieKinematicsStreamingToolboxModule(robotModel,
+                                                                                                     parameters,
+                                                                                                     startYoVariableServer,
+                                                                                                     pubSubImplementation);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {

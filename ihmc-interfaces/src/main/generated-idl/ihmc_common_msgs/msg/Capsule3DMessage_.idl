@@ -1,0 +1,40 @@
+#ifndef __ihmc_common_msgs__msg__Capsule3DMessage__idl__
+#define __ihmc_common_msgs__msg__Capsule3DMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This is part of the IHMC Common message package.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::Capsule3DMessage_")
+      struct Capsule3DMessage
+      {
+        /**
+         * Position of the capsule, see Capsule3D.
+         */
+        geometry_msgs::msg::dds::Point position;
+        /**
+         * Axis of the capsule, see Capsule3D.
+         */
+        geometry_msgs::msg::dds::Vector3 axis;
+        /**
+         * Radius of the capsule, see Capsule3D.
+         */
+        double radius;
+        /**
+         * Length of the capsule, see Capsule3D.
+         */
+        double length;
+      };
+    };
+  };
+};
+
+#endif

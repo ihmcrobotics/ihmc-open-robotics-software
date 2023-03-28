@@ -1,6 +1,5 @@
 package us.ihmc.communication;
 
-import controller_msgs.msg.dds.BigVideoPacket;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;

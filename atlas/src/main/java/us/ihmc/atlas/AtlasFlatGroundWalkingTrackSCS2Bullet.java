@@ -40,7 +40,8 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
 
    public AtlasFlatGroundWalkingTrackSCS2Bullet()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ);
+      robotModel.setUseHandMutatorCollisions(true);
       robotModel.setUseSDFCollisions(true);
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
@@ -85,7 +86,6 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
-      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
@@ -104,7 +104,6 @@ public class AtlasFlatGroundWalkingTrackSCS2Bullet
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     feetForceSensorNames,
-                                                                                                    feetContactSensorNames,
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,

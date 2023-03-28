@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning.tools;
 
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -50,6 +50,7 @@ public class FootstepPlannerMessageTools
          return;
       }
 
+      packet.setReferencePlanAlpha(parameters.getReferencePlanAlpha());
       packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
       packet.setCheckForPathCollisions(parameters.checkForPathCollisions());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());

@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -178,7 +178,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
       planarRegionFeatureUpdater.setSurfaceNormalFilterParametersTopic(SegmentationModuleAPI.SurfaceNormalFilterParameters);
       planarRegionFeatureUpdater.bindControls();
 
-      reaMessager.registerTopicListener(SegmentationModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
+      reaMessager.addTopicListener(SegmentationModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
 
       isOcTreeBoundingBoxRequested = reaMessager.createInput(SegmentationModuleAPI.RequestBoundingBox, false);
 
@@ -225,7 +225,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
          loadConfigurationFile(filePropertyHelper);
 
-         reaMessager.registerTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration, (content) -> saveConfigurationFIle(filePropertyHelper));
+         reaMessager.addTopicListener(SegmentationModuleAPI.SaveUpdaterConfiguration, (content) -> saveConfigurationFIle(filePropertyHelper));
       }
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import controller_msgs.msg.dds.MessageCollection;
+import ihmc_common_msgs.msg.dds.MessageCollection;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -20,6 +21,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
+import us.ihmc.scs2.session.Session;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -85,6 +87,15 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
          defaultControllerPublishers.put(messageClass, defaultPublisher);
       }
 
+      List<Class<? extends Command<?, ?>>> stepGeneratorSupportedCommands = StepGeneratorAPIDefinition.getStepGeneratorSupportedCommands();
+
+      for (Class<? extends Command<?, ?>> command : stepGeneratorSupportedCommands)
+      {
+         Class<?> messageClass = ROS2TopicNameTools.newMessageInstance(command).getMessageClass();
+         IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
+         defaultControllerPublishers.put(messageClass, defaultPublisher);
+      }
+
       defaultControllerPublishers.put(WholeBodyTrajectoryMessage.class, createPublisherForController(WholeBodyTrajectoryMessage.class));
       defaultControllerPublishers.put(WholeBodyStreamingMessage.class, createPublisherForController(WholeBodyStreamingMessage.class));
       defaultControllerPublishers.put(MessageCollection.class, createPublisherForController(MessageCollection.class));
@@ -103,7 +114,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       boolean createVideo = this.createVideo.get();
       boolean keepSCSUp = this.keepSCSUp.get();
 
-      setSimulationName(simulationName != null ? simulationName : retrieveCallingTestName());
+      setSimulationName(simulationName != null ? simulationName : Session.retrieveCallingTestName());
       SCS2AvatarTestingSimulation avatarTestingSimulation = new SCS2AvatarTestingSimulation(super.createAvatarSimulation());
       avatarTestingSimulation.setROS2Node(ros2Node);
       avatarTestingSimulation.setDefaultControllerPublishers(defaultControllerPublishers);
@@ -112,36 +123,6 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       // TODO This guy needs to be created before the robot is completely standing. Should cleanup QueuedControllerCommandGenerator, quite a mess.
       avatarTestingSimulation.getQueuedControllerCommands();
       return avatarTestingSimulation;
-   }
-
-   public static String retrieveCallingTestName()
-   {
-      StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-
-      StackTraceElement callingElement = null;
-
-      for (StackTraceElement candidate : stackTrace)
-      {
-         if (candidate.getClassName().startsWith("sun.reflect"))
-            break;
-         else if (candidate.getClassName().startsWith("java.lang"))
-            break;
-         else if (candidate.getClassName().startsWith("org.junit"))
-            break;
-         callingElement = candidate;
-      }
-
-      if (callingElement == null)
-      {
-         return "Unknown test simulation";
-      }
-      else
-      {
-         String className = callingElement.getClassName();
-         String methodName = callingElement.getMethodName();
-         String classSimpleName = className.substring(className.lastIndexOf(".") + 1);
-         return classSimpleName + "-" + methodName;
-      }
    }
 
    @Override

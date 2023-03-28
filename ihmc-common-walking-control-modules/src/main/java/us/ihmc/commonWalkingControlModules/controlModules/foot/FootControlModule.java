@@ -7,11 +7,10 @@ import java.util.Arrays;
 import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.YoPartialFootholdModuleParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -24,10 +23,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProv
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -35,6 +35,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -43,7 +45,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class FootControlModule
+public class FootControlModule implements SCS2YoGraphicHolder
 {
    private final YoRegistry registry;
    private final ContactablePlaneBody contactableFoot;
@@ -99,6 +101,9 @@ public class FootControlModule
    private final ContactWrenchCommand maxWrenchCommand;
    private final ContactWrenchCommand minWrenchCommand;
    private final int numberOfBasisVectors;
+   private final double defaultRhoWeight;
+   private final YoDouble unloadingRhoWeight;
+   private final DoubleProvider unloadedFinalRhoWeight;
 
    public FootControlModule(RobotSide robotSide,
                             ToeOffCalculator toeOffCalculator,
@@ -110,10 +115,11 @@ public class FootControlModule
                             PIDSE3GainsReadOnly toeOffFootControlGains,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
-                            FootholdRotationParameters footholdRotationParameters,
+                            YoPartialFootholdModuleParameters footholdRotationParameters,
                             SupportStateParameters supportStateParameters,
                             DoubleProvider minWeightFractionPerFoot,
                             DoubleProvider maxWeightFractionPerFoot,
+                            DoubleProvider unloadedFinalRhoWeight,
                             YoRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
@@ -176,6 +182,14 @@ public class FootControlModule
          minZForce = null;
          maxZForce = null;
       }
+
+      this.unloadedFinalRhoWeight = unloadedFinalRhoWeight;
+      defaultRhoWeight = footControlHelper.getWalkingControllerParameters().getMomentumOptimizationSettings().getRhoWeight();
+
+      if (unloadedFinalRhoWeight != null)
+         unloadingRhoWeight = new YoDouble(namePrefix + "UnloadingRhoWeight", registry);
+      else
+         unloadingRhoWeight = null;
 
       numberOfBasisVectors = walkingControllerParameters.getMomentumOptimizationSettings().getNumberOfBasisVectorsPerContactPoint();
 
@@ -245,9 +259,12 @@ public class FootControlModule
       setAdjustedFootstepAndTime(adjustedFootstep, null, null, swingTime);
    }
 
-   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration, double swingTime)
+   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep,
+                                          FrameVector3DReadOnly finalCoMVelocity,
+                                          FrameVector3DReadOnly finalCoMAcceleration,
+                                          double swingTime)
    {
-      swingState.setAdjustedFootstepAndTime(adjustedFootstep,finalCoMVelocity, finalCoMAcceleration, swingTime);
+      swingState.setAdjustedFootstepAndTime(adjustedFootstep, finalCoMVelocity, finalCoMAcceleration, swingTime);
    }
 
    public void requestTouchdownForDisturbanceRecovery()
@@ -314,7 +331,6 @@ public class FootControlModule
       if (swingTrajectoryCalculator.getActiveTrajectoryType() != TrajectoryType.WAYPOINTS && swingTrajectoryCalculator.doOptimizationUpdate())
          swingTrajectoryCalculator.initializeTrajectoryWaypoints(false);
    }
-
 
    public void doControl()
    {
@@ -423,8 +439,9 @@ public class FootControlModule
    }
 
    /**
-    * Request the swing trajectory to speed up using the given speed up factor.
-    * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * Request the swing trajectory to speed up using the given speed up factor. It is clamped w.r.t. to
+    * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * 
     * @param speedUpFactor
     * @return the current swing time remaining for the swing foot trajectory
     */
@@ -434,7 +451,8 @@ public class FootControlModule
    }
 
    /**
-    * Computes and returns the swing time remaining while accounting for the active swing time speed up factor.
+    * Computes and returns the swing time remaining while accounting for the active swing time speed up
+    * factor.
     * 
     * @return the estimated swing time remaining.
     */
@@ -524,6 +542,14 @@ public class FootControlModule
 
    public void unload(double percentInUnloading, double rhoMin)
    {
+      if (minWrenchCommand != null)
+         unloadHard(percentInUnloading, rhoMin);
+      else if (unloadedFinalRhoWeight != null)
+         unloadSoft(percentInUnloading);
+   }
+
+   private void unloadHard(double percentInUnloading, double rhoMin)
+   {
       if (minWrenchCommand == null)
          return;
       minZForce.set((1.0 - percentInUnloading) * minWeightFractionPerFoot.getValue() * robotWeightFz);
@@ -533,6 +559,19 @@ public class FootControlModule
       maxZForce.set(Math.max(maxZForce.getValue(), computeMinZForceBasedOnRhoMin(rhoMin) + 1.0E-5));
 
       updateWrenchCommands();
+   }
+
+   private void unloadSoft(double percentInUnloading)
+   {
+      if (unloadedFinalRhoWeight == null)
+      {
+         controllerToolbox.getFootContactState(robotSide).clearRhoWeights();
+         return;
+      }
+
+      double finalWeight = Math.max(unloadedFinalRhoWeight.getValue(), defaultRhoWeight);
+      unloadingRhoWeight.set(EuclidCoreTools.interpolate(defaultRhoWeight, finalWeight, percentInUnloading));
+      controllerToolbox.getFootContactState(robotSide).setRhoWeights(unloadingRhoWeight.getValue());
    }
 
    private final FrameVector3D normalVector = new FrameVector3D();
@@ -553,12 +592,19 @@ public class FootControlModule
 
    public void resetLoadConstraints()
    {
-      if (minWrenchCommand == null)
-         return;
-      minZForce.set(minWeightFractionPerFoot.getValue() * robotWeightFz);
-      maxZForce.set(maxWeightFractionPerFoot.getValue() * robotWeightFz);
+      if (unloadedFinalRhoWeight != null)
+      {
+         unloadingRhoWeight.set(defaultRhoWeight);
+         controllerToolbox.getFootContactState(robotSide).clearRhoWeights();
+      }
 
-      updateWrenchCommands();
+      if (minWrenchCommand != null)
+      {
+         minZForce.set(minWeightFractionPerFoot.getValue() * robotWeightFz);
+         maxZForce.set(maxWeightFractionPerFoot.getValue() * robotWeightFz);
+
+         updateWrenchCommands();
+      }
    }
 
    private void updateWrenchCommands()
@@ -592,5 +638,17 @@ public class FootControlModule
    public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
    {
       return footControlHelper.getSwingTrajectoryCalculator().getSwingTrajectory();
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(footControlHelper.getSCS2YoGraphics());
+      group.addChild(swingState.getSCS2YoGraphics());
+      group.addChild(moveViaWaypointsState.getSCS2YoGraphics());
+      group.addChild(onToesState.getSCS2YoGraphics());
+      group.addChild(supportState.getSCS2YoGraphics());
+      return group;
    }
 }

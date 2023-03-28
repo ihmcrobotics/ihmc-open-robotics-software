@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
@@ -8,6 +8,7 @@ import us.ihmc.tools.UnitConversions;
 public class KinematicsStreamingToolboxParameters
 {
    private double centerOfMassSafeMargin;
+   private double centerOfMassHoldWeight;
    private double publishingSolutionPeriod;
 
    private double defaultArmMessageWeight;
@@ -31,6 +32,8 @@ public class KinematicsStreamingToolboxParameters
    private double inputPoseLPFBreakFrequency;
    private double inputWeightDecayDuration;
    private double inputVelocityDecayDuration;
+   private boolean useStreamingPublisher;
+   private double publishingPeriod;
 
    private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
 
@@ -44,6 +47,7 @@ public class KinematicsStreamingToolboxParameters
    public void setDefault()
    {
       centerOfMassSafeMargin = 0.05;
+      centerOfMassHoldWeight = 0.001;
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
       defaultArmMessageWeight = 10.0;
       defaultNeckMessageWeight = 10.0;
@@ -67,6 +71,9 @@ public class KinematicsStreamingToolboxParameters
       inputWeightDecayDuration = 3.0;
       inputVelocityDecayDuration = 0.5;
 
+      useStreamingPublisher = true;
+      publishingPeriod = 5.0 * 0.006;
+
       defaultConfiguration.setLockPelvis(false);
       defaultConfiguration.setLockChest(false);
       defaultConfiguration.setEnableLeftArmJointspace(true);
@@ -85,6 +92,11 @@ public class KinematicsStreamingToolboxParameters
    public double getCenterOfMassSafeMargin()
    {
       return centerOfMassSafeMargin;
+   }
+
+   public double getCenterOfMassHoldWeight()
+   {
+      return centerOfMassHoldWeight;
    }
 
    public double getPublishingSolutionPeriod()
@@ -172,6 +184,11 @@ public class KinematicsStreamingToolboxParameters
       return inputVelocityDecayDuration;
    }
 
+   public boolean getUseStreamingPublisher()
+   {
+      return useStreamingPublisher;
+   }
+
    public KinematicsStreamingToolboxConfigurationMessage getDefaultConfiguration()
    {
       return defaultConfiguration;
@@ -180,6 +197,11 @@ public class KinematicsStreamingToolboxParameters
    public void setCenterOfMassSafeMargin(double centerOfMassSafeMargin)
    {
       this.centerOfMassSafeMargin = centerOfMassSafeMargin;
+   }
+
+   public void setCenterOfMassHoldWeight(double centerOfMassHoldWeight)
+   {
+      this.centerOfMassHoldWeight = centerOfMassHoldWeight;
    }
 
    public void setPublishingSolutionPeriod(double publishingSolutionPeriod)
@@ -265,5 +287,20 @@ public class KinematicsStreamingToolboxParameters
    public void setInputVelocityDecayDuration(double inputVelocityDecayDuration)
    {
       this.inputVelocityDecayDuration = inputVelocityDecayDuration;
+   }
+
+   public void setUseStreamingPublisher(boolean useStreamingPublisher)
+   {
+      this.useStreamingPublisher = useStreamingPublisher;
+   }
+
+   public void setPublishingPeriod(double publishingPeriod)
+   {
+      this.publishingPeriod = publishingPeriod;
+   }
+
+   public double getPublishingPeriod()
+   {
+      return publishingPeriod;
    }
 }

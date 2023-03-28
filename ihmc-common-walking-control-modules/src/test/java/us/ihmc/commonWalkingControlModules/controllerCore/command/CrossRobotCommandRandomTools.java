@@ -48,6 +48,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
@@ -450,6 +451,7 @@ public class CrossRobotCommandRandomTools
       next.setMaxVelocityError(random.nextDouble());
       next.setVelocityReferenceAlpha(random.nextDouble());
       next.setVelocityResetMode(nextElementIn(random, JointVelocityIntegratorResetMode.values));
+      next.setDisableAccelerationIntegration(random.nextBoolean());
       return next;
    }
 
@@ -638,6 +640,19 @@ public class CrossRobotCommandRandomTools
       next.setJointAccelerationWeight(random.nextDouble());
       next.setJointJerkWeight(random.nextDouble());
       next.setJointTorqueWeight(random.nextDouble());
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJointsToDeactivate = Math.max(random.nextInt(allJoints.size()), 1);
+
+      for (int jointIndex = 0; jointIndex < numberOfJointsToDeactivate; jointIndex++)
+         next.deactivateJoint(allJoints.remove(random.nextInt(allJoints.size())));
+
+      allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJointsToActivate = Math.max(random.nextInt(allJoints.size()), 1);
+
+      for (int jointIndex = 0; jointIndex < numberOfJointsToActivate; jointIndex++)
+         next.activateJoint(allJoints.remove(random.nextInt(allJoints.size())));
+
       return next;
    }
 
@@ -736,6 +751,34 @@ public class CrossRobotCommandRandomTools
       next.setMomentumRate(RandomMatrices_DDRM.rectangle(6, 1, random));
       next.setWeights(nextWeightMatrix6D(random, possibleFrames));
       next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
+      next.setConsiderAllJoints(random.nextBoolean());
+
+      List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
+      int numberOfJoints = allJoints.isEmpty() ? 0 : Math.max(random.nextInt(allJoints.size()), 1);
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         next.addJointToSelection(allJoints.remove(random.nextInt(allJoints.size())));
+      }
+
+      return next;
+   }
+
+   public static QPObjectiveCommand nextQPObjectiveCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      QPObjectiveCommand next = new QPObjectiveCommand();
+
+      int numberOfRows = RandomNumbers.nextInt(random, 1, 10);
+      int numberOfDoFs = RandomNumbers.nextInt(random, 1, 50);
+      int selectionSize = RandomNumbers.nextInt(random, 1, numberOfRows);
+      next.setCommandId(random.nextInt());
+      next.reshape(numberOfRows, numberOfDoFs);
+      next.getJacobian().set(RandomMatrices_DDRM.rectangle(numberOfRows, numberOfDoFs, random));
+      next.getObjective().set(RandomMatrices_DDRM.rectangle(numberOfRows, 1, random));
+      next.getWeightMatrix().set(RandomMatrices_DDRM.rectangle(numberOfRows, numberOfRows, random));
+      next.getSelectionMatrix().set(RandomMatrices_DDRM.rectangle(selectionSize, numberOfDoFs, random));
+      next.setDoNullSpaceProjection(random.nextBoolean());
+
       return next;
    }
 
@@ -800,7 +843,9 @@ public class CrossRobotCommandRandomTools
       next.setCommandId(random.nextInt());
       next.setJointVelocityWeight(random.nextDouble());
       next.setJointAccelerationWeight(random.nextDouble());
+      next.setJointTorqueWeight(random.nextDouble());
       next.setJointVelocityLimitMode(nextElementIn(random, ActivationState.values()));
+      next.setComputeJointTorques(nextElementIn(random, ActivationState.values()));
       return next;
    }
 
@@ -1837,7 +1882,6 @@ public class CrossRobotCommandRandomTools
    {
       LinearMomentumRateControlModuleOutput next = new LinearMomentumRateControlModuleOutput();
       next.setDesiredCMP(nextFramePoint2D(random, possibleFrames));
-      next.setResidualICPErrorForStepAdjustment(nextFrameVector2D(random, possibleFrames));
       return next;
    }
 
@@ -1852,6 +1896,7 @@ public class CrossRobotCommandRandomTools
       next.setCenterOfMassHeightControlCommand(nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setPelvisHeightControlCommand(nextPointFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setUsePelvisHeightCommand(random.nextBoolean());
+      next.setHasHeightCommand(random.nextBoolean());
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));

@@ -58,21 +58,6 @@ public class AtlasToeOffParameters extends ToeOffParameters
       return -1.0;
    }
 
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaximumToeOffAngle()
-   {
-      return Math.toRadians(45.0);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getICPPercentOfStanceForDSToeOff()
-   {
-      return 0.03; // JCarff ToeOff
-   }
-
    @Override
    public double getKneeUpperLimitToTriggerToeOff()
    {

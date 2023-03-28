@@ -2,7 +2,7 @@ package us.ihmc.avatar.sensors.microphone;
 
 import java.io.IOException;
 
-import controller_msgs.msg.dds.DrillDetectionPacket;
+import perception_msgs.msg.dds.DrillDetectionPacket;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;

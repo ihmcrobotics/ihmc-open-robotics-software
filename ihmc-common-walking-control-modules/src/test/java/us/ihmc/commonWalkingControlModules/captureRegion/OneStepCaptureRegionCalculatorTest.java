@@ -202,7 +202,7 @@ public class OneStepCaptureRegionCalculatorTest
       {
          FramePoint2DBasics closestVertex = captureRegion.getClosestVertexCopy(expectedPointsOnBorder.get(i));
          closestVertex.checkReferenceFrameMatch(expectedPointsOnBorder.get(i));
-         EuclidCoreTestTools.assertTuple2DEquals(closestVertex, expectedPointsOnBorder.get(i), 1.0e-6);
+         EuclidCoreTestTools.assertEquals(closestVertex, expectedPointsOnBorder.get(i), 1.0e-6);
          assertTrue(closestVertex.epsilonEquals(expectedPointsOnBorder.get(i), 10e-7));
       }
 
@@ -313,7 +313,6 @@ public class OneStepCaptureRegionCalculatorTest
    {
       // do not change parameters
       // expected results are pre-calculated
-      double midFootAnkleXOffset = 0.1;
       double footWidth = 0.5;
       double footLength = 1.0;
       double kineamaticStepRange = 3.0;
@@ -341,7 +340,6 @@ public class OneStepCaptureRegionCalculatorTest
       {
          FramePoint2D predictedICP = new FramePoint2D();
          CapturePointTools.computeDesiredCapturePointPosition(omega0, swingTimeRemaining, icp, cop, predictedICP);
-         //         CaptureRegionMathTools.predictCapturePoint(icp, cop, swingTimeRemaining, omega0, predictedICP);
          predictedICPList.add(predictedICP);
       }
 

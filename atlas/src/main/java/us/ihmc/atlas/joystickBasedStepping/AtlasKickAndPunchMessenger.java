@@ -2,7 +2,9 @@ package us.ihmc.atlas.joystickBasedStepping;
 
 import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools.createTrajectoryPoint1DMessage;
 
+import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotKickMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotPunchMessenger;
 import us.ihmc.communication.IHMCROS2Publisher;

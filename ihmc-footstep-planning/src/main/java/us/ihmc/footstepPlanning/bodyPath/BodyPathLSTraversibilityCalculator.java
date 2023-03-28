@@ -8,7 +8,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -18,6 +18,9 @@ import java.util.Map;
 public class BodyPathLSTraversibilityCalculator
 {
    private static final int minTraversibleSteps = 3;
+   private static final double alphaNode0 = 0.2;
+   private static final double alphaNode1 = 0.05;
+   private static final double alphaEdge = 0.5;
 
    private final FootstepPlannerParametersReadOnly parameters;
    private final Pose2D bodyPose = new Pose2D();
@@ -39,6 +42,7 @@ public class BodyPathLSTraversibilityCalculator
    private final SideDependentList<YoDouble> inclineAlpha;
 
    private final YoDouble leftTraversibility, rightTraversibility;
+   private final YoDouble previousLeftTraversibility, previousRightTraversibility;
 
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final TDoubleArrayList xOffsets = new TDoubleArrayList();
@@ -71,6 +75,8 @@ public class BodyPathLSTraversibilityCalculator
 
       leftTraversibility = new YoDouble("leftTraversibility", registry);
       rightTraversibility = new YoDouble("rightTraversibility", registry);
+      previousLeftTraversibility = new YoDouble("previousLeftTraversibility", registry);
+      previousRightTraversibility = new YoDouble("previousRightTraversibility", registry);
 
       xOffsets.add(0.0);
       xOffsets.add(0.06);
@@ -111,30 +117,32 @@ public class BodyPathLSTraversibilityCalculator
       leftTraversibility.set(compute(RobotSide.LEFT, parentHeight));
       rightTraversibility.set(compute(RobotSide.RIGHT, parentHeight));
 
-      double alphaNode0 = 0.2;
-      double alphaNode1 = 0.05;
-      double alphaEdge = 0.5;
-
       bodyPose.set(parentNode.getX(), parentNode.getY(), yaw);
-      double previousLeftTraversibility = 0.0;
-      double previousRightTraversibility = 0.0;
+      previousLeftTraversibility.set(0.0);
+      previousRightTraversibility.set(0.0);
 
       if (!parentNode.equals(startNode))
       {
-         previousLeftTraversibility = compute(RobotSide.LEFT, nodeHeight);
-         previousRightTraversibility = compute(RobotSide.RIGHT, nodeHeight);
+         previousLeftTraversibility.set(compute(RobotSide.LEFT, nodeHeight));
+         previousRightTraversibility.set(compute(RobotSide.RIGHT, nodeHeight));
       }
 
-               // Node cost is scored by having one side that has good footholds
-      return alphaNode0 * Math.min(leftTraversibility.getValue(), rightTraversibility.getValue()) +
-//             alphaNode1 * Math.max(leftTraversibility.getValue(), rightTraversibility.getValue()) +
-             // Edge cost is scored by making sure not all good footholds are on the same side
-             alphaEdge * Math.min(leftTraversibility.getValue() * previousRightTraversibility, rightTraversibility.getValue() * previousLeftTraversibility);
+      return getTraversibility();
    }
 
    public boolean isTraversible()
    {
       return validSteps.get(RobotSide.LEFT).getValue() >= minTraversibleSteps || validSteps.get(RobotSide.RIGHT).getValue() >= minTraversibleSteps;
+   }
+
+   public double getTraversibility()
+   {
+      // Node cost is scored by having one side that has good footholds
+      return alphaNode0 * Math.min(leftTraversibility.getValue(), rightTraversibility.getValue()) +
+            //             alphaNode1 * Math.max(leftTraversibility.getValue(), rightTraversibility.getValue()) +
+             // Edge cost is scored by making sure not all good footholds are on the same side
+             alphaEdge * Math.min(leftTraversibility.getValue() * previousRightTraversibility.getValue(),
+                                  rightTraversibility.getValue() * previousLeftTraversibility.getValue());
    }
 
    /**

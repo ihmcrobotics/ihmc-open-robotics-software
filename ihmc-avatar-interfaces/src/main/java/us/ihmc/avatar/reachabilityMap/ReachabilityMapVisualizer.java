@@ -1,6 +1,6 @@
 package us.ihmc.avatar.reachabilityMap;
 
-import static us.ihmc.avatar.scs2.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3DDefinition;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
@@ -32,7 +31,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.util.converter.DoubleStringConverter;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapSimulationHelper.VisualizationType;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
@@ -66,9 +64,9 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.TextureDefinition;
 import us.ihmc.scs2.definition.visual.TriangleMesh3DBuilder;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
-import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.sharedMemory.interfaces.YoBufferPropertiesReadOnly;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.SimulationSessionControls;
@@ -168,7 +166,7 @@ public class ReachabilityMapVisualizer
 
    public boolean loadReachabilityMapFromFile()
    {
-      ReachabilityMapSpreadsheetImporter importer = new ReachabilityMapSpreadsheetImporter();
+      ReachabilityMapMatlabImporter importer = new ReachabilityMapMatlabImporter();
       File file = importer.openSelectionFileDialog();
       if (file == null)
          return false;
@@ -218,11 +216,8 @@ public class ReachabilityMapVisualizer
       session.stopSessionThread();
 
       guiControls.addStaticVisuals(ReachabilityMapTools.createReachibilityColorScaleVisuals());
-      guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
-      guiControls.addYoGraphic(newYoGraphicCoordinateSystem3DDefinition("controlFrame",
-                                                                        new FramePose3D(controlFrame),
-                                                                        0.05,
-                                                                        ColorDefinitions.parse("#A1887F")));
+      guiControls.addYoGraphic(newYoGraphicCoordinateSystem3D("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
+      guiControls.addYoGraphic(newYoGraphicCoordinateSystem3D("controlFrame", new FramePose3D(controlFrame), 0.05, ColorDefinitions.parse("#A1887F")));
 
       createVisualizationControls();
 
@@ -259,11 +254,6 @@ public class ReachabilityMapVisualizer
       return guiControls;
    }
 
-   public void addCustomGUIControl(Node customControl)
-   {
-      controller.addCustomControl(customControl);
-   }
-
    private void createVisualizationControls()
    {
       URL resource = getClass().getClassLoader()
@@ -278,9 +268,9 @@ public class ReachabilityMapVisualizer
       {
          try
          {
-            Stage stage = fxmlLoader.load();
+            guiControls.addCustomGUIPane("Reachability map", fxmlLoader.load());
             controller.initialize();
-            stage.show();
+
             latch.countDown();
          }
          catch (IOException e)
@@ -552,7 +542,7 @@ public class ReachabilityMapVisualizer
       private static final String PoseTarget = "Pose";
 
       @FXML
-      private Stage stage;
+      private VBox mainPane;
       @FXML
       private VBox extraControlsContainer;
       @FXML
@@ -647,17 +637,6 @@ public class ReachabilityMapVisualizer
             qmaxFormatter.valueProperty().addListener((o, oldValue, newValue) -> joint.setJointLimitUpper(newValue));
             taumaxFormatter.valueProperty().addListener((o, oldValue, newValue) -> joint.setEffortLimit(newValue));
          }
-
-         guiControls.addVisualizerShutdownListener(() -> stage.close());
-      }
-
-      private void addCustomControl(Node customControl)
-      {
-         JavaFXMissingTools.runAndWait(getClass(), () ->
-         {
-            extraControlsContainer.getChildren().add(customControl);
-            stage.sizeToScene();
-         });
       }
 
       @FXML

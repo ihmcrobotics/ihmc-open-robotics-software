@@ -1,0 +1,33 @@
+#ifndef __quadruped_msgs__msg__QuadrupedGaitTimingsPacket__idl__
+#define __quadruped_msgs__msg__QuadrupedGaitTimingsPacket__idl__
+
+module quadruped_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC quadruped controller API.
+       * This message sends the x gait settings used for determining gait.
+       */
+      @TypeCode(type="quadruped_msgs::msg::dds_::QuadrupedGaitTimingsPacket_")
+      struct QuadrupedGaitTimingsPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=-1.0)
+        double step_duration;
+        @defaultValue(value=-1.0)
+        double end_double_support_duration;
+        @defaultValue(value=-1.0)
+        double max_speed;
+      };
+    };
+  };
+};
+
+#endif

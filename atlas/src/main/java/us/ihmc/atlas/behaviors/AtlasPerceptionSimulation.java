@@ -1,7 +1,7 @@
 package us.ihmc.atlas.behaviors;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.atlas.sensors.AtlasSLAMBasedREAStandaloneLauncher;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;

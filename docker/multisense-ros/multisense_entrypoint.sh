@@ -1,6 +1,8 @@
 #!/bin/bash
 # Immediately exit on any errors.
 set -e
+# Print commands as they are run.
+set -o xtrace
 
 # Setup the ROS environment.
 source "/opt/ros/$ROS_DISTRO/setup.bash"

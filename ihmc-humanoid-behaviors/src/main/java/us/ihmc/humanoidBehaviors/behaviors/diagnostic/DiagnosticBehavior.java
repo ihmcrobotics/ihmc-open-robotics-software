@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 import java.util.ArrayList;
 import java.util.Random;
 
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DMatrixRMaj;
 

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 
-import controller_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;

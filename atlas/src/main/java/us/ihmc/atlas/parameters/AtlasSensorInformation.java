@@ -451,12 +451,6 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    }
 
    @Override
-   public SideDependentList<String> getFeetContactSensorNames()
-   {
-      return new SideDependentList<String>();
-   }
-
-   @Override
    public ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> getStaticTransformsForRos()
    {
       return staticTranformsForRos;
@@ -487,7 +481,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    }
 
    @Override
-   public RigidBodyTransform getHeadZED2CameraTransform()
+   public RigidBodyTransform getExperimentalCameraTransform()
    {
       return transformChestToZED2;
    }

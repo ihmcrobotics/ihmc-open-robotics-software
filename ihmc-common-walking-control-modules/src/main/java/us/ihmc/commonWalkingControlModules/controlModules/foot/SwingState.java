@@ -6,11 +6,9 @@ import java.util.List;
 import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -24,7 +22,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -45,7 +42,9 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3Tr
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -56,8 +55,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingState extends AbstractFootControlState
 {
-   private static final boolean visualizeAdjustedSwing = true;
-   private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
+   private static final boolean visualizeAdjustedSwing = false;
+
+   // This flag indicates whether or not its the first tick in the transfer state. This is used to avoid double-computing some of the calls.
+   private boolean firstTickInState = true;
 
    private final YoBoolean replanTrajectory;
    private final YoBoolean footstepWasAdjusted;
@@ -77,8 +78,6 @@ public class SwingState extends AbstractFootControlState
 
    private final ReferenceFrame soleFrame;
    private final YoSwingTrajectoryParameters swingTrajectoryParameters;
-
-   private final FootLeapOfFaithModule leapOfFaithModule;
 
    private final YoFrameVector3D touchdownDesiredLinearVelocity;
 
@@ -122,7 +121,6 @@ public class SwingState extends AbstractFootControlState
    private final YoFrameVector3D yoDesiredSoleAngularVelocity;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
-   private final LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
    private final YoFramePoint3D yoDesiredPosition;
    private final YoFrameVector3D yoDesiredLinearVelocity;
    private final YoBoolean yoSetDesiredAccelerationToZero;
@@ -131,8 +129,6 @@ public class SwingState extends AbstractFootControlState
    private final YoDouble secondaryJointWeightScale;
    private Vector3DReadOnly nominalAngularWeight;
    private Vector3DReadOnly nominalLinearWeight;
-   private final YoFrameVector3D currentAngularWeight;
-   private final YoFrameVector3D currentLinearWeight;
    private final ReferenceFrame ankleFrame;
    private final PoseReferenceFrame controlFrame;
    private final PIDSE3GainsReadOnly gains;
@@ -176,15 +172,7 @@ public class SwingState extends AbstractFootControlState
       secondaryJointWeightScale = new YoDouble(namePrefix + "SecondaryJointWeightScale", registry);
       secondaryJointWeightScale.set(1.0);
 
-      currentAngularWeight = new YoFrameVector3D(namePrefix + "CurrentAngularWeight", worldFrame, registry);
-      currentLinearWeight = new YoFrameVector3D(namePrefix + "CurrentLinearWeight", worldFrame, registry);
-
       touchdownDesiredLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredTouchdownAcceleration", worldFrame, registry);
-
-      if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
-         legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, controllerToolbox, robotSide);
-      else
-         legJointLimitAvoidanceControlModule = null;
 
       ankleFrame = contactableFoot.getFrameAfterParentJoint();
       controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -249,9 +237,6 @@ public class SwingState extends AbstractFootControlState
       swingTimeSpeedUpFactor.setToNaN();
 
       scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());
-
-      LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
-      leapOfFaithModule = new FootLeapOfFaithModule(swingDuration, leapOfFaithParameters, registry);
 
       FramePose3D controlFramePose = new FramePose3D(originOfControlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -332,11 +317,16 @@ public class SwingState extends AbstractFootControlState
       spatialFeedbackControlCommand.resetSecondaryTaskJointWeightScale();
 
       initializeTrajectory();
+
+      // reset this counter so that certain operations aren't duplicated
+      firstTickInState = true;
    }
 
    @Override
    public void onExit(double timeInState)
    {
+      firstTickInState = true;
+
       super.onExit(timeInState);
       currentTime.set(0.0);
       swingTimeSpeedUpFactor.set(Double.NaN);
@@ -370,16 +360,6 @@ public class SwingState extends AbstractFootControlState
 
       computeAndPackTrajectory(timeInState);
 
-      if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
-      {
-         legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition,
-                                                                        desiredOrientation,
-                                                                        desiredLinearVelocity,
-                                                                        desiredAngularVelocity,
-                                                                        desiredLinearAcceleration,
-                                                                        desiredAngularAcceleration);
-      }
-
       if (workspaceLimiterControlModule != null)
       {
          desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
@@ -403,15 +383,13 @@ public class SwingState extends AbstractFootControlState
          desiredLinearAcceleration.setToZero();
       }
 
-      computeCurrentWeights(nominalAngularWeight, nominalLinearWeight, currentAngularWeight, currentLinearWeight);
-
       spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation,
                                                        desiredPosition,
                                                        desiredAngularVelocity,
                                                        desiredLinearVelocity,
                                                        desiredAngularAcceleration,
                                                        desiredLinearAcceleration);
-      spatialFeedbackControlCommand.setWeightsForSolver(currentAngularWeight, currentLinearWeight);
+      spatialFeedbackControlCommand.setWeightsForSolver(nominalAngularWeight, nominalLinearWeight);
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setGainsFrames(null, radialFrame);
@@ -456,7 +434,7 @@ public class SwingState extends AbstractFootControlState
       else
       {
          currentTimeWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
-         time = currentTimeWithSwingSpeedUp.getDoubleValue();
+         time = Math.max(currentTime.getValue(), currentTimeWithSwingSpeedUp.getDoubleValue());
       }
 
       FixedFramePoseTrajectoryGenerator activeTrajectory;
@@ -469,10 +447,9 @@ public class SwingState extends AbstractFootControlState
       else
          activeTrajectory = blendedSwingTrajectory;
 
-      if (swingTrajectoryCalculator.getActiveTrajectoryType() != TrajectoryType.WAYPOINTS && swingTrajectoryCalculator.doOptimizationUpdate())
+      if (swingTrajectoryCalculator.getActiveTrajectoryType() != TrajectoryType.WAYPOINTS && (firstTickInState || swingTrajectoryCalculator.doOptimizationUpdate()))
       { // haven't finished original planning
          fillAndInitializeTrajectories(false);
-
       }
       else if (replanTrajectory.getBooleanValue()) // need to update the swing trajectory to account for the end position moving
          fillAndInitializeBlendedTrajectories();
@@ -482,8 +459,6 @@ public class SwingState extends AbstractFootControlState
       activeTrajectory.compute(time);
       activeTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       activeTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-
-      leapOfFaithModule.compute(time);
 
       // set the reference values to get the ones coming from the trajectory
       yoReferenceSolePosition.setMatchingFrame(desiredPosition);
@@ -515,6 +490,7 @@ public class SwingState extends AbstractFootControlState
       transformDesiredsFromSoleFrameToControlFrame();
       secondaryJointWeightScale.set(computeSecondaryJointWeightScale(time));
 
+      firstTickInState = false;
       if (swingVisualizer != null)
          swingVisualizer.visualize();
    }
@@ -695,8 +671,6 @@ public class SwingState extends AbstractFootControlState
             positionTrajectory.initializeBlendingTrajectory();
             swingTrajectorySmoother.updateErrorDynamicsAtTime(timeWhenAdjusted.getDoubleValue(), desiredPositionWhenAdjusted, desiredVelocityWhenAdjusted);
 
-            swingTrajectorySmoother.updateErrorDynamicsAtTime(timeWhenAdjusted.getDoubleValue(), desiredPositionWhenAdjusted, desiredVelocityWhenAdjusted);
-
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),
                                                     touchdownDesiredLinearVelocity,
@@ -719,13 +693,6 @@ public class SwingState extends AbstractFootControlState
             swingWaypointsForViz.get(i).setMatchingFrame(blendedSwingTrajectory.getPosition());
          }
       }
-   }
-
-   private void computeCurrentWeights(Vector3DReadOnly nominalAngularWeight, Vector3DReadOnly nominalLinearWeight, Vector3DBasics currentAngularWeightToPack,
-                                      Vector3DBasics currentLinearWeightToPack)
-   {
-      currentAngularWeightToPack.set(nominalAngularWeight);
-      leapOfFaithModule.scaleFootWeight(nominalLinearWeight, currentLinearWeightToPack);
    }
 
    private void transformDesiredsFromSoleFrameToControlFrame()
@@ -867,4 +834,9 @@ public class SwingState extends AbstractFootControlState
       return spatialFeedbackControlCommand;
    }
 
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      return null;
+   }
 }

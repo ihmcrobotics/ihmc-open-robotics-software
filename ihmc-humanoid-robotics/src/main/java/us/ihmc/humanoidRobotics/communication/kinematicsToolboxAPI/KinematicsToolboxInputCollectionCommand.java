@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import java.util.Objects;
 
-import controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.robotModels.JointHashCodeResolver;
@@ -15,8 +15,8 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
    private final RecyclingArrayList<KinematicsToolboxCenterOfMassCommand> centerOfMassInputs = new RecyclingArrayList<>(KinematicsToolboxCenterOfMassCommand::new);
    private final RecyclingArrayList<KinematicsToolboxRigidBodyCommand> rigidBodyInputs = new RecyclingArrayList<>(KinematicsToolboxRigidBodyCommand::new);
    private final RecyclingArrayList<KinematicsToolboxOneDoFJointCommand> jointInputs = new RecyclingArrayList<>(KinematicsToolboxOneDoFJointCommand::new);
-   private boolean hasConstactStateInput = false;
-   private final KinematicsToolboxContactStateCommand contactStateInput = new KinematicsToolboxContactStateCommand();
+   private boolean hasSupportRegionInput = false;
+   private final KinematicsToolboxSupportRegionCommand supportRegionInput = new KinematicsToolboxSupportRegionCommand();
 
    @Override
    public void clear()
@@ -25,8 +25,8 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
       centerOfMassInputs.clear();
       rigidBodyInputs.clear();
       jointInputs.clear();
-      hasConstactStateInput = false;
-      contactStateInput.clear();
+      hasSupportRegionInput = false;
+      supportRegionInput.clear();
    }
 
    @Override
@@ -51,8 +51,8 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
          jointInputs.add().set(other.jointInputs.get(i));
       }
 
-      hasConstactStateInput = other.hasConstactStateInput;
-      contactStateInput.set(other.contactStateInput);
+      hasSupportRegionInput = other.hasSupportRegionInput;
+      supportRegionInput.set(other.supportRegionInput);
    }
 
    @Override
@@ -87,9 +87,9 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
          jointInputs.add().set(message.getJointInputs().get(i), jointHashCodeResolver);
       }
 
-      hasConstactStateInput = !message.getContactStateInput().isEmpty();
-      if (hasConstactStateInput)
-         contactStateInput.set(message.getContactStateInput().get(0), rigidBodyHashCodeResolver);
+      hasSupportRegionInput = !message.getContactStateInput().isEmpty();
+      if (hasSupportRegionInput)
+         supportRegionInput.set(message.getContactStateInput().get(0), referenceFrameHashCodeResolver);
    }
 
    @Override
@@ -128,14 +128,14 @@ public class KinematicsToolboxInputCollectionCommand implements Command<Kinemati
       return jointInputs;
    }
 
-   public boolean hasConstactStateInput()
+   public boolean hasSupportRegionInput()
    {
-      return hasConstactStateInput;
+      return hasSupportRegionInput;
    }
 
-   public KinematicsToolboxContactStateCommand getContactStateInput()
+   public KinematicsToolboxSupportRegionCommand getSupportRegionInput()
    {
-      return contactStateInput;
+      return supportRegionInput;
    }
 
    @Override

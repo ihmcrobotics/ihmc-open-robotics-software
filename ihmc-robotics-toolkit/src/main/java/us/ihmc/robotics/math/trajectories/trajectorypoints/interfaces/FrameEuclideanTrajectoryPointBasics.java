@@ -3,27 +3,30 @@ package us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointReadOnly;
 
-public interface FrameEuclideanTrajectoryPointBasics extends EuclideanTrajectoryPointBasics, FrameEuclideanWaypointBasics
+public interface FrameEuclideanTrajectoryPointBasics
+      extends FixedFrameEuclideanTrajectoryPointBasics, EuclideanTrajectoryPointBasics, FrameEuclideanWaypointBasics
 {
-   default void set(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
+   @Override
+   default void setToNaN(ReferenceFrame referenceFrame)
    {
-      setTime(time);
-      set(position, linearVelocity);
+      setTimeToNaN();
+      FrameEuclideanWaypointBasics.super.setToNaN(referenceFrame);
    }
 
-   default void set(double time, FrameEuclideanWaypointBasics waypoint)
+   @Override
+   default void setToZero(ReferenceFrame referenceFrame)
    {
-      setTime(time);
-      set(waypoint);
+      setTimeToZero();
+      FrameEuclideanWaypointBasics.super.setToZero(referenceFrame);
    }
 
-   default void setIncludingFrame(double time, FrameEuclideanWaypointBasics waypoint)
+   default void setIncludingFrame(double time, FrameEuclideanWaypointReadOnly waypoint)
    {
       setTime(time);
       setIncludingFrame(waypoint);
@@ -41,43 +44,21 @@ public interface FrameEuclideanTrajectoryPointBasics extends EuclideanTrajectory
       setIncludingFrame(referenceFrame, position, linearVelocity);
    }
 
-   default void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanTrajectoryPointBasics trajectoryPoint)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, EuclideanTrajectoryPointReadOnly trajectoryPoint)
    {
       setTime(trajectoryPoint.getTime());
       FrameEuclideanWaypointBasics.super.setIncludingFrame(referenceFrame, trajectoryPoint);
    }
 
-   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, EuclideanWaypointBasics waypoint)
+   default void setIncludingFrame(ReferenceFrame referenceFrame, double time, EuclideanWaypointReadOnly waypoint)
    {
       setTime(time);
       setIncludingFrame(referenceFrame, waypoint);
    }
 
-   default void setIncludingFrame(FrameEuclideanTrajectoryPointBasics other)
+   default void setIncludingFrame(FrameEuclideanTrajectoryPointReadOnly other)
    {
       setTime(other.getTime());
       FrameEuclideanWaypointBasics.super.setIncludingFrame(other);
-   }
-
-   default void set(FrameEuclideanTrajectoryPointBasics other)
-   {
-      setTime(other.getTime());
-      FrameEuclideanWaypointBasics.super.set(other);
-   }
-
-   default void getIncludingFrame(FrameEuclideanTrajectoryPointBasics otherToPack)
-   {
-      otherToPack.setIncludingFrame(this);
-   }
-
-   default void get(FrameEuclideanTrajectoryPointBasics otherToPack)
-   {
-      otherToPack.set(this);
-   }
-
-   default boolean epsilonEquals(FrameEuclideanTrajectoryPointBasics other, double epsilon)
-   {
-      boolean timeEquals = EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon);
-      return timeEquals && FrameEuclideanWaypointBasics.super.epsilonEquals(other, epsilon);
    }
 }

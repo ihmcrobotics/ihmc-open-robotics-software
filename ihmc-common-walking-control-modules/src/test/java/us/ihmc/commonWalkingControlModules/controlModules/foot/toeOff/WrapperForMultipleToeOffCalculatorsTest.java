@@ -194,12 +194,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public double defaultOffsetHeightAboveAnkle()
-         {
-            return 0;
-         }
-
-         @Override
          public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
          {
             return false;
@@ -346,12 +340,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
                public boolean doToeOffWhenHittingAnkleLimit()
                {
                   return false;
-               }
-
-               @Override
-               public double getMaximumToeOffAngle()
-               {
-                  return 0;
                }
             };
          }

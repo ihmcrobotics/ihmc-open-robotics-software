@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import us.ihmc.commons.InterpolationTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -44,15 +44,15 @@ public class MomentumTrajectoryHandler extends EuclideanTrajectoryHandler
 
          if (!Double.isFinite(time) || position.containsNaN() || velocity.containsNaN())
          {
-            PrintTools.warn("Position or velocity of AM contains NaN at time " + time + ". Skipping this trajectory.");
+            LogTools.warn("Position or velocity of AM contains NaN at time " + time + ". Skipping this trajectory.");
             trajectoryToPack.clear();
             return;
          }
 
          EuclideanTrajectoryPoint trajectoryPoint = trajectoryToPack.add();
          trajectoryPoint.setTime(time - startTime);
-         trajectoryPoint.setPosition(getPosition());
-         trajectoryPoint.setLinearVelocity(getVelocity());
+         trajectoryPoint.getPosition().set(getPosition());
+         trajectoryPoint.getLinearVelocity().set(getVelocity());
       }
    }
 

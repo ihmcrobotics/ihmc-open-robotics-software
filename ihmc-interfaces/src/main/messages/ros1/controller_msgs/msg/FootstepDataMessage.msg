@@ -64,7 +64,7 @@ geometry_msgs/Point[] custom_position_waypoints
 # (which is specified by the location and orientation fields).
 # All waypoints are for the sole frame and expressed in the trajectory frame.
 # The maximum number of points can be found in the Footstep class.
-controller_msgs/SE3TrajectoryPointMessage[] swing_trajectory
+ihmc_common_msgs/SE3TrajectoryPointMessage[] swing_trajectory
 
 # In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to specify the trajectory blend duration in seconds.
 # If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning the desired blend duration)
@@ -100,5 +100,8 @@ float64 liftoff_duration
 
 # Step constraint regions to be used by this footstep
 controller_msgs/StepConstraintsListMessage step_constraints
+
+# If the controller should check and fail if the step is not reachable
+bool should_check_for_reachability
 
 

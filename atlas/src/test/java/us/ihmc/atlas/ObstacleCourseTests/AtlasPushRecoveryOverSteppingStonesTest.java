@@ -84,12 +84,6 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                   return new AtlasToeOffParameters(getJointMap())
                   {
                      @Override
-                     public double getICPPercentOfStanceForDSToeOff()
-                     {
-                        return 0.1;
-                     }
-
-                     @Override
                      public double getAnkleLowerLimitToTriggerToeOff()
                      {
                         return -0.9;

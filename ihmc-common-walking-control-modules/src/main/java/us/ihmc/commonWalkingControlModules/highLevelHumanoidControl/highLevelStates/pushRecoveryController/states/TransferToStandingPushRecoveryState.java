@@ -74,7 +74,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       comHeightManager.setSupportLeg(RobotSide.LEFT);
    }
 
-   private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
 
    public void switchToPointToeOffIfAlreadyInLine()
    {
@@ -87,8 +87,8 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && !feetManager.isUsingPointContactInToeOff(sideOnToes) && !feetManager.useToeLineContactInTransfer())
       {
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
-         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), filteredDesiredCoP);
-         feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, filteredDesiredCoP);
+         controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), desiredCoP);
+         feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, desiredCoP);
       }
    }
 

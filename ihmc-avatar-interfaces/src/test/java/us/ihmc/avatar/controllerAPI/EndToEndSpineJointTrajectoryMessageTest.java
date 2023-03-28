@@ -648,7 +648,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private static void assertChestDesired(YoVariableHolder yoVariableHolder, Quaternion desired, RigidBodyBasics chest)
    {
       QuaternionReadOnly controllerDesired = EndToEndTestTools.findFeedbackControllerDesiredOrientation(chest.getName(), yoVariableHolder);
-      EuclidCoreTestTools.assertQuaternionEquals(desired, controllerDesired, DESIRED_QUAT_EPSILON);
+      EuclidCoreTestTools.assertEquals(desired, controllerDesired, DESIRED_QUAT_EPSILON);
    }
 
    private static YoBoolean findOrientationControlEnabled(YoVariableHolder yoVariableHolder, RigidBodyBasics body)

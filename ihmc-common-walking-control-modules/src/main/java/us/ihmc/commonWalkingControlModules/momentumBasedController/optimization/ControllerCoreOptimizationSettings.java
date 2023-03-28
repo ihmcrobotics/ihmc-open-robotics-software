@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -370,7 +371,7 @@ public interface ControllerCoreOptimizationSettings
     * @return a new instance of the QP solver to be used. By default it is the
     *         {@link SimpleEfficientActiveSetQPSolver}.
     */
-   default ActiveSetQPSolverWithInactiveVariablesInterface getActiveSetQPSolver()
+   default NativeActiveSetQPSolverWithInactiveVariablesInterface getActiveSetQPSolver()
    {
       return new SimpleEfficientActiveSetQPSolverWithInactiveVariables();
    }

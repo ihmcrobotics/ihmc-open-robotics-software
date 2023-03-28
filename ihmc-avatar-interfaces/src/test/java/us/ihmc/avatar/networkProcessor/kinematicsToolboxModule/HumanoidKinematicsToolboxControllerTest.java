@@ -13,17 +13,13 @@ import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.MultiContactBalanceStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -54,6 +50,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -81,7 +78,6 @@ import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
@@ -179,7 +175,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          scs = new SimulationConstructionSet2();
          scs.addRobot(robot);
          scs.addRobot(ghost);
-         scs.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
+         scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
          scs.start(true, true, true);
          scs.setCameraFocusPosition(0.0, 0.0, 1.0);
          scs.setCameraPosition(8.0, 0.0, 3.0);
@@ -604,6 +600,9 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       centerOfMassMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, false));
       centerOfMassMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(0.1));
 
+      HumanoidKinematicsToolboxConfigurationMessage configurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
+      configurationMessage.setEnableMultiContactSupportRegionSolver(true);
+
       for (RobotSide side : RobotSide.values())
       {
          footMessages.put(side,
@@ -629,6 +628,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       commandInputManager.submitMessage(privilegedConfigurationMessage);
       commandInputManager.submitMessage(centerOfMassMessage);
       commandInputManager.submitMessage(chestOrientationObjective);
+      commandInputManager.submitMessage(configurationMessage);
 
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(toolboxController.getDesiredFullRobotModel());
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
@@ -1036,7 +1036,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
       RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuDefinitions);
       RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
-      robotConfigurationData.getRootTranslation().set(fullRobotModel.getRootJoint().getJointPose().getPosition());
+      robotConfigurationData.getRootPosition().set(fullRobotModel.getRootJoint().getJointPose().getPosition());
       robotConfigurationData.getRootOrientation().set(fullRobotModel.getRootJoint().getJointPose().getOrientation());
       return robotConfigurationData;
    }
