@@ -39,7 +39,7 @@ import java.util.ArrayList;
 
 public class RDXRapidHeightMapExtractionDemo
 {
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_GoodPerceptionLog.hdf5").toString();
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ImGuiPanel navigationPanel;

@@ -46,7 +46,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
-   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("IROS_2023/20230228_201947_PerceptionLog.hdf5").toString();
+   private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20230117_161540_GoodPerceptionLog.hdf5").toString();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final TypedNotification<PlanarRegionsList> planarRegionsListToRenderNotification = new TypedNotification<>();
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
@@ -103,10 +103,11 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createL515(720, 1280, false); // Real D455
+            //createL515(720, 1280, false); // Real D455
             //createL515(768, 1024, false); // Real L515
             //createL515(768, 1280, true); // Simulated L515
-            //createOuster(128, 1024);
+
+            createOuster(128, 1024);
          }
 
          private void createOuster(int depthHeight, int depthWidth)

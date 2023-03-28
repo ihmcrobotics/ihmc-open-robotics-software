@@ -15,5 +15,7 @@
   "Publish color" : true,
   "Publish depth" : true,
   "Log color" : false,
-  "Log depth" : false
+  "Log depth" : false,
+  "SLAM enabled" : false,
+  "SLAM reset" : false
 }

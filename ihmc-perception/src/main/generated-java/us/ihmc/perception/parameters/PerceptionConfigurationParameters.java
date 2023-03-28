@@ -26,6 +26,8 @@ public class PerceptionConfigurationParameters extends StoredPropertySet impleme
    public static final BooleanStoredPropertyKey publishDepth = keys.addBooleanKey("Publish depth");
    public static final BooleanStoredPropertyKey logColor = keys.addBooleanKey("Log color");
    public static final BooleanStoredPropertyKey logDepth = keys.addBooleanKey("Log depth");
+   public static final BooleanStoredPropertyKey slamEnabled = keys.addBooleanKey("SLAM enabled");
+   public static final BooleanStoredPropertyKey slamReset = keys.addBooleanKey("SLAM reset");
 
    /**
     * Loads this property set.

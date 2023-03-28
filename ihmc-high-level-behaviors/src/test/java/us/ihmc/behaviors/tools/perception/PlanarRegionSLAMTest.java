@@ -45,10 +45,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.tools.lists.PairList;
 
 class PlanarRegionSLAMTest
@@ -1152,7 +1149,7 @@ class PlanarRegionSLAMTest
 
       TIntIntMap matches = new TIntIntHashMap();
 
-      PlaneRegistrationTools.findBestPlanarRegionMatches(listOne, listTwo, matches, 0.4f, 0.6f, 0.4f, 0.5f);
+      PlaneRegistrationTools.findBestPlanarRegionMatches(new PlanarLandmarkList(listOne), new PlanarLandmarkList(listTwo), matches, 0.4f, 0.6f, 0.4f, 0.5f);
 
       int[] keys = matches.keys();
       for(Integer key : keys)
