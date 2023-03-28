@@ -4,7 +4,11 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+
+import java.util.function.Consumer;
 
 public class ArUcoMarkerObject
 {
@@ -20,6 +24,13 @@ public class ArUcoMarkerObject
    {
       objectTransformToMarker.set(arucoInfo.getMarkerYawPitchRoll(id), arucoInfo.getMarkerTranslation(id));
       objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, objectTransformToMarker);
+   }
+
+   public void updateMarkerTransform(Tuple3DReadOnly position, QuaternionReadOnly orientation)
+   {
+      markerTransformToWorld.getTranslation().set(position);
+      markerTransformToWorld.getRotation().set(orientation);
+      markerFrame.update();
    }
 
    public void updateFrame()

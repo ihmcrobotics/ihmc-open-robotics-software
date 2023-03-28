@@ -32,8 +32,6 @@ public class ArUcoMarkerObjectInfo extends ObjectInfo
          markerSizes = new double[size];
          markerToBodyTranslations = new double[size][3];
          markerToBodyRotations = new double[size][3];
-         bodyToAppendixTranslations = new double[size][3];
-         bodyToAppendixRotations = new double[size][3];
          //iterating objects
          for (int i = 0; i < size; i++)
          {
@@ -52,14 +50,7 @@ public class ArUcoMarkerObjectInfo extends ObjectInfo
                tempArrayNode = propertyObject.get("yawPitchRollMarkerToMainBody");
                for (int j = 0; j < 3; j++)
                   markerToBodyRotations[i][j] = tempArrayNode.get(j).asDouble();
-               tempArrayNode = propertyObject.get("translationMainBodyToAppendix");
-               for (int j = 0; j < 3; j++)
-                  bodyToAppendixTranslations[i][j] = tempArrayNode.get(j).asDouble();
-               tempArrayNode = propertyObject.get("yawPitchRollMainBodyToAppendix");
-               for (int j = 0; j < 3; j++)
-                  bodyToAppendixRotations[i][j] = tempArrayNode.get(j).asDouble();
-               virtualBodyFileName.put(objectNames.get(i), propertyObject.get("virtualMainBodyFileName").asText());
-               virtualAppendixFileName.put(objectNames.get(i), propertyObject.get("virtualAppendixFileName").asText());
+               modelFileName.put(objectNames.get(i), propertyObject.get("modelFileName").asText());
             }
          }
       });
@@ -85,22 +76,5 @@ public class ArUcoMarkerObjectInfo extends ObjectInfo
    {
       int realIndex = IDs.indexOf(id);
       return new YawPitchRoll(markerToBodyRotations[realIndex][0], markerToBodyRotations[realIndex][1], markerToBodyRotations[realIndex][2]);
-   }
-
-   public Point3D getAppendixTranslation(int id)
-   {
-      int realIndex = IDs.indexOf(id);
-      return new Point3D(bodyToAppendixTranslations[realIndex][0], bodyToAppendixTranslations[realIndex][1], bodyToAppendixTranslations[realIndex][2]);
-   }
-
-   public YawPitchRoll getAppendixYawPitchRoll(int id)
-   {
-      int realIndex = IDs.indexOf(id);
-      return new YawPitchRoll(bodyToAppendixRotations[realIndex][0], bodyToAppendixRotations[realIndex][1], bodyToAppendixRotations[realIndex][2]);
-   }
-
-   public boolean hasAppendix(int id)
-   {
-      return virtualAppendixFileName.containsKey(getObjectName(id));
    }
 }

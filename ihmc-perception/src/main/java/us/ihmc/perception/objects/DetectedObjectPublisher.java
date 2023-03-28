@@ -5,19 +5,20 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
 
 public class DetectedObjectPublisher
 {
    private final ROS2PublishSubscribeAPI ros2;
    private final ROS2Topic<DetectedObjectMessage> topic;
-   private final long ID;
+   private final String ID;
    private final ReferenceFrame objectFrame;
    private final RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
    private final DetectedObjectMessage detectedObjectMessage = new DetectedObjectMessage();
    private boolean detected = false;
 
-   public DetectedObjectPublisher(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> topic, long ID, ReferenceFrame objectFrame)
+   public DetectedObjectPublisher(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> topic, String ID, ReferenceFrame objectFrame)
    {
       this.ros2 = ros2;
       this.topic = topic;
@@ -30,9 +31,9 @@ public class DetectedObjectPublisher
       detected = false;
    }
 
-   public void markDetected(long detectedID)
+   public void objectDetected(String detectedID)
    {
-      if (detectedID == ID)
+      if (detectedID.equals(ID))
       {
          detected = true;
       }
@@ -42,7 +43,7 @@ public class DetectedObjectPublisher
    {
       detectedObjectMessage.setDetected(detected);
 
-      detectedObjectMessage.setID(ID);
+      detectedObjectMessage.setId(ID);
 
       objectFrame.getTransformToDesiredFrame(objectTransformToWorld, ReferenceFrame.getWorldFrame());
       MessageTools.toMessage(objectTransformToWorld, detectedObjectMessage.getTransformToWorld());

@@ -8,10 +8,7 @@
           "markerSize": 0.2032,
           "translationMarkerToMainBody": [0.03, -0.188, 0.205],
           "yawPitchRollMarkerToMainBody": [3.1415, 0.0, 0.0],
-          "translationMainBodyToAppendix": [0.03, 0.08, 0.8],
-          "yawPitchRollMainBodyToAppendix": [0.0, 0.0, 3.1416],
-          "virtualMainBodyFileName": "environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj",
-          "virtualAppendixFileName": "environmentObjects/door/doorPanel/DoorPanelSimple.g3dj"
+          "modelFileName": "environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj"
         }
       ]
     }
