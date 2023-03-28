@@ -59,7 +59,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       if (!LEFT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly LEFT with serial number: {}", LEFT_SERIAL_NUMBER);
-         blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER, syncedRobot));
+         blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER, syncedRobot, null));
       }
       else
       {
@@ -68,7 +68,9 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       if (!RIGHT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly RIGHT with serial number: {}", RIGHT_SERIAL_NUMBER);
-         blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER, syncedRobot));
+         blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER,
+                                                                syncedRobot,
+                                                                robotModel.getSensorInformation().getObjectDetectionCameraTransform()));
       }
       else
       {
