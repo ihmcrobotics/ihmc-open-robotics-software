@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.ObjectsPerceptionManager;
+import us.ihmc.perception.ArUcoObjectsPerceptionManager;
 import us.ihmc.perception.objects.ObjectInfo;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -27,9 +27,9 @@ public class RDXObjectsPerceptionUI
    {
       this.ros2 = ros2;
 
-      ArrayList<Integer> IDs = objectInfo.getIDs();
-      for (int i = 0; i < IDs.size(); i++)
-         objectUpdaters.add(new RDXObjectPerceptionUpdater(ros2, ObjectsPerceptionManager.DETECTED_OBJECT, IDs.get(i), objectInfo));
+      ArrayList<String> objectNames = objectInfo.getObjectNames();
+      for (int i = 0; i < objectNames.size(); i++)
+         objectUpdaters.add(new RDXObjectPerceptionUpdater(ros2, ArUcoObjectsPerceptionManager.DETECTED_OBJECT, objectNames.get(i), objectInfo));
    }
 
    public void update()

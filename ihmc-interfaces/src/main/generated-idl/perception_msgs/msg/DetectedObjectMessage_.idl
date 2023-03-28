@@ -1,0 +1,35 @@
+#ifndef __perception_msgs__msg__DetectedObjectMessage__idl__
+#define __perception_msgs__msg__DetectedObjectMessage__idl__
+
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * The topic name identifies the object
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::DetectedObjectMessage_")
+      struct DetectedObjectMessage
+      {
+        /**
+         * Whether or not the object was detected this frame
+         */
+        boolean detected;
+        /**
+         * Unique ID used to identify the object
+         */
+        string id;
+        /**
+         * Transform to world
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
+      };
+    };
+  };
+};
+
+#endif

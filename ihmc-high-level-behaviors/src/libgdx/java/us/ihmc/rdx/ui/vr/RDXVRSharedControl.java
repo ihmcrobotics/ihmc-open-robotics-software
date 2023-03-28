@@ -4,21 +4,27 @@ import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
+import perception_msgs.msg.dds.DetectedObjectMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
+import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.perception.ArUcoObjectsPerceptionManager;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -30,13 +36,16 @@ import java.util.Map;
 
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
+   private final ROS2PublishSubscribeAPI ros2;
+   private final IHMCROS2Input<DetectedObjectMessage> objectDetectorSubscription;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
    private String objectName = "";
-   private FramePose3D objectPose;
-   private ReferenceFrame objectFrame;
+   private RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
+   private ReferenceFrame objectFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                               objectTransformToWorld);
    private boolean previewValidated = false;
    private final FullHumanoidRobotModel ghostRobotModel;
    private final RDXMultiBodyGraphic ghostRobotGraphic;
@@ -49,8 +58,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private int replayPreviewCounter = 0;
    private int speedSplineAdjustmentFactor = 1;
 
-   public RDXVRSharedControl(DRCRobotModel robotModel, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
+   public RDXVRSharedControl(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
+      this.ros2 = ros2;
       this.enabledIKStreaming = enabledIKStreaming;
       this.enabledReplay = enabledReplay;
 
@@ -66,6 +76,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostRobotModel.getElevator());
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
+
+      objectDetectorSubscription = ros2.subscribe(ArUcoObjectsPerceptionManager.DETECTED_OBJECT);
    }
 
    public void processInput(InputDigitalActionData triggerButton)
@@ -143,16 +155,28 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame);
-
-      if (previewSetToActive)
+      if (objectDetectorSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
       {
-         ghostRobotGraphic.setActive(false); // do not show ghost robot since there is no preview available yet
-         // start storing current frames for replay preview with splines
-         if (!bodyPartReplayMotionMap.containsKey(bodyPart))
-            bodyPartReplayMotionMap.put(bodyPart, new ArrayList<>());
-         else
-            bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(observedPose));
+         DetectedObjectMessage detectedObjectMessage = objectDetectorSubscription.getMessageNotification().read();
+         objectName = detectedObjectMessage.getId().toString();
+
+         MessageTools.toEuclid(detectedObjectMessage.getTransformToWorld(), objectTransformToWorld);
+         objectFrame.update();
+      }
+
+      if(!objectName.isEmpty())
+      {
+         proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame);
+
+         if (previewSetToActive)
+         {
+            ghostRobotGraphic.setActive(false); // do not show ghost robot since there is no preview available yet
+            // start storing current frames for replay preview with splines
+            if (!bodyPartReplayMotionMap.containsKey(bodyPart))
+               bodyPartReplayMotionMap.put(bodyPart, new ArrayList<>());
+            else
+               bodyPartReplayMotionMap.get(bodyPart).add(new Pose3D(observedPose));
+         }
       }
    }
 
@@ -220,16 +244,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          {
             firstPreview = true;
 
-            // store detected object name and pose
-            if (objectDetector != null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
-            {
-               objectName = objectDetector.getObjectName();
-               objectPose = objectDetector.getObjectPose();
-               objectFrame = objectDetector.getObjectFrame();
-               objectDetector.setEnabled(false); // stop using it during assistance for the moment (will change this once tested more and improved UI rendering)
-               LogTools.info("Detected object {} pose: {}", objectName, objectPose);
-            }
-
             if (enabledReplay.get())
                this.enabled.set(false); // check no concurrency with replay
 
@@ -243,12 +257,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          {
             // reset promp assistance
             proMPAssistant.reset();
-            // if object detector was active, reactivate it
-            if(objectDetector != null && !objectName.isEmpty() && !objectDetector.isEnabled())
-               objectDetector.setEnabled(true);
             objectName = "";
-            objectPose = null;
-            objectFrame = null;
             firstPreview = true;
             previewValidated = false;
             replayPreviewCounter = 0;

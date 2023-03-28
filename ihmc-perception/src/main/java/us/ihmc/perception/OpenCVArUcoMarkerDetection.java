@@ -322,6 +322,11 @@ public class OpenCVArUcoMarkerDetection
       this.enabled = enabled;
    }
 
+   public boolean isEnabled()
+   {
+      return enabled;
+   }
+
    public SwapReference<Mat> getIds()
    {
       return ids;

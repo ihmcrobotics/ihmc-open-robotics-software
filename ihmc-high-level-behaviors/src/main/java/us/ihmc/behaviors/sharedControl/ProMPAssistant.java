@@ -228,7 +228,7 @@ public class ProMPAssistant
                                  observedPose.getOrientation().getZ(),
                                  observedPose.getOrientation().getS());
 
-            if (!bodyPartGoal.isEmpty() && objectFrame != null) // if there is an observable object and goal
+            if (!bodyPartGoal.isEmpty()) // if there is an observable object and goal
             {
                // change observed pose in object frame
                this.objectFrame = objectFrame;
@@ -293,7 +293,7 @@ public class ProMPAssistant
    //  Learn task for both hands and call them ...L and ...R, check initial pose of hands to determine which one is being used
    private boolean taskDetected(Pose3DReadOnly observedPose, String bodyPart, String objectName, ReferenceFrame objectFrame)
    {
-      if (currentTask.isEmpty() && !objectName.isEmpty())
+      if (currentTask.isEmpty())
       {
          if (contextTasksMap.containsKey(objectName))
          {
@@ -501,5 +501,10 @@ public class ProMPAssistant
    public Set<String> getTaskNames()
    {
       return proMPManagers.keySet();
+   }
+
+   public boolean startedProcessing()
+   {
+      return !currentTask.isEmpty();
    }
 }

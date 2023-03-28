@@ -8,15 +8,15 @@ package perception_msgs.msg.dds;
 * Do not update this file directly, edit DetectedObjectMessage_.idl instead.
 *
 */
-public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType<DetectedObjectMessage>
+public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.DetectedObjectMessage>
 {
-   public static final String name = "perception_msgs::msg::dds_::DetectedObjectMessage_";
+   public static final java.lang.String name = "perception_msgs::msg::dds_::DetectedObjectMessage_";
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(DetectedObjectMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(perception_msgs.msg.dds.DetectedObjectMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +24,7 @@ public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicData
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, DetectedObjectMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.DetectedObjectMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -42,23 +42,26 @@ public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(DetectedObjectMessage data)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.DetectedObjectMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(DetectedObjectMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.DetectedObjectMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getId().length() + 1;
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
 
@@ -66,46 +69,53 @@ public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicData
       return current_alignment - initial_alignment;
    }
 
-   public static void write(DetectedObjectMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(perception_msgs.msg.dds.DetectedObjectMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_7(data.getDetected());
+
+      if(data.getId().length() <= 255)
+      cdr.write_type_d(data.getId());else
+          throw new RuntimeException("id field exceeds the maximum length");
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
    }
 
-   public static void read(DetectedObjectMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(perception_msgs.msg.dds.DetectedObjectMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setDetected(cdr.read_type_7());
       	
+      cdr.read_type_d(data.getId());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
 
    }
 
    @Override
-   public final void serialize(DetectedObjectMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(perception_msgs.msg.dds.DetectedObjectMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_7("detected", data.getDetected());
+      ser.write_type_d("id", data.getId());
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, DetectedObjectMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectedObjectMessage data)
    {
       data.setDetected(ser.read_type_7("detected"));
+      ser.read_type_d("id", data.getId());
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
    }
 
-   public static void staticCopy(DetectedObjectMessage src, DetectedObjectMessage dest)
+   public static void staticCopy(perception_msgs.msg.dds.DetectedObjectMessage src, perception_msgs.msg.dds.DetectedObjectMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public DetectedObjectMessage createData()
+   public perception_msgs.msg.dds.DetectedObjectMessage createData()
    {
-      return new DetectedObjectMessage();
+      return new perception_msgs.msg.dds.DetectedObjectMessage();
    }
    @Override
    public int getTypeSize()
@@ -114,22 +124,22 @@ public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicData
    }
 
    @Override
-   public String getName()
+   public java.lang.String getName()
    {
       return name;
    }
    
-   public void serialize(DetectedObjectMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(perception_msgs.msg.dds.DetectedObjectMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(DetectedObjectMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(perception_msgs.msg.dds.DetectedObjectMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(DetectedObjectMessage src, DetectedObjectMessage dest)
+   public void copy(perception_msgs.msg.dds.DetectedObjectMessage src, perception_msgs.msg.dds.DetectedObjectMessage dest)
    {
       staticCopy(src, dest);
    }

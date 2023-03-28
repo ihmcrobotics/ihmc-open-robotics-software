@@ -4,13 +4,20 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
+import perception_msgs.msg.dds.DetectedObjectMessage;
+import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.ArUcoObjectsPerceptionManager;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -28,15 +35,22 @@ public class KinematicsRecordReplay
    private final ImBoolean enabledKinematicsStreaming;
    private boolean isUserMoving = false;
    private final List<List<Pose3DReadOnly>> framesToRecordHistory = new ArrayList<>();
-   private int partId = 0; // identifier of current frame, used to now what body part among numberParts we are currently handling
+   private int partId = 0; // identifier of current frame, used to now what body part among numberOfParts we are currently handling
+   private final ROS2PublishSubscribeAPI ros2;
+   private final IHMCROS2Input<DetectedObjectMessage> objectDetectorSubscription;
+   private boolean objectLocked = false;
    private ReferenceFrame objectFrame;
 
-   public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming, int numberOfParts)
+
+   public KinematicsRecordReplay(ROS2PublishSubscribeAPI ros2, ImBoolean enabledKinematicsStreaming, int numberOfParts)
    {
+      this.ros2 = ros2;
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
       trajectoryRecorder.setNumberParts(numberOfParts);
       for (int n = 0; n < numberOfParts; n++)
          framesToRecordHistory.add(new ArrayList<>());
+
+      objectDetectorSubscription = ros2.subscribe(ArUcoObjectsPerceptionManager.DETECTED_OBJECT);
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)
@@ -45,12 +59,16 @@ public class KinematicsRecordReplay
       if (enabledKinematicsStreaming.get() && enablerRecording.get() && triggerButton.bChanged() && !triggerButton.bState())
       {
          isRecording = !isRecording;
-         // store object reference frame if using object detection
-         if (objectDetector != null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
+         if (objectDetectorSubscription.getMessageNotification().poll() && !objectLocked)
          {
-            objectFrame = objectDetector.getObjectFrame();
-            objectDetector.setEnabled(false);
+            DetectedObjectMessage detectedObjectMessage = objectDetectorSubscription.getMessageNotification().read();
+            RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
+            MessageTools.toEuclid(detectedObjectMessage.getTransformToWorld(), objectTransformToWorld);
+            ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                   objectTransformToWorld);
+            objectLocked = true;
          }
+
          // check if recording file path has been set to a different one from previous recording. In case update file path.
          if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))
             trajectoryRecorder.setPath(recordPath.get()); //recorder is reset when changing path
@@ -94,6 +112,8 @@ public class KinematicsRecordReplay
          trajectoryRecorder.concatenateData();
          trajectoryRecorder.saveRecording();
          isUserMoving = false;
+         objectLocked = false;
+         objectFrame = null;
       }
    }
 
@@ -207,10 +227,5 @@ public class KinematicsRecordReplay
    public boolean isReplaying()
    {
       return isReplaying;
-   }
-
-   public void setObjectDetector(RDXArUcoObjectDetector objectDetector)
-   {
-      this.objectDetector = objectDetector;
    }
 }
