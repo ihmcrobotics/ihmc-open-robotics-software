@@ -6,25 +6,44 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.thread.Throttler;
 
-public class ROS2SyncedRigidBodyTransform
+public class ROS2TunedRigidBodyTransform
 {
    private final ROS2PublishSubscribeAPI ros2;
    private final ROS2IOTopicPair<RigidBodyTransformMessage> topicPair;
    private final RigidBodyTransform rigidBodyTransformToSync;
    private final IHMCROS2Input<RigidBodyTransformMessage> frameUpdateSubscription;
-   private final Throttler statusThrottler = new Throttler().setFrequency(ROS2Heartbeat.STATUS_FREQUENCY);
+   private final Throttler statusThrottler;
    private final RigidBodyTransformMessage statusMessage = new RigidBodyTransformMessage();
+   private final boolean isRemoteTuner;
    private boolean acceptingUpdates = true;
    private boolean publishingStatus = true;
 
-   public ROS2SyncedRigidBodyTransform(ROS2PublishSubscribeAPI ros2,
+   public static ROS2TunedRigidBodyTransform toBeTuned(ROS2PublishSubscribeAPI ros2,
+                                                       ROS2IOTopicPair<RigidBodyTransformMessage> topicPair,
+                                                       RigidBodyTransform rigidBodyTransformToSync)
+   {
+      return new ROS2TunedRigidBodyTransform(ros2, topicPair, rigidBodyTransformToSync, false);
+   }
+
+   public static ROS2TunedRigidBodyTransform remoteTuner(ROS2PublishSubscribeAPI ros2,
+                                                         ROS2IOTopicPair<RigidBodyTransformMessage> topicPair,
+                                                         RigidBodyTransform rigidBodyTransformToSync)
+   {
+      return new ROS2TunedRigidBodyTransform(ros2, topicPair, rigidBodyTransformToSync, true);
+   }
+
+
+   private ROS2TunedRigidBodyTransform(ROS2PublishSubscribeAPI ros2,
                                        ROS2IOTopicPair<RigidBodyTransformMessage> topicPair,
-                                       RigidBodyTransform rigidBodyTransformToSync)
+                                       RigidBodyTransform rigidBodyTransformToSync,
+                                       boolean isRemoteTuner)
    {
       this.ros2 = ros2;
       this.topicPair = topicPair;
       this.rigidBodyTransformToSync = rigidBodyTransformToSync;
-      frameUpdateSubscription = ros2.subscribe(topicPair.getCommandTopic());
+      this.isRemoteTuner = isRemoteTuner;
+      statusThrottler = new Throttler().setFrequency(isRemoteTuner ? 5.0 : ROS2Heartbeat.STATUS_FREQUENCY);
+      frameUpdateSubscription = ros2.subscribe(isRemoteTuner ? topicPair.getStatusTopic() : topicPair.getCommandTopic());
    }
 
    public void update()
@@ -37,7 +56,7 @@ public class ROS2SyncedRigidBodyTransform
       if (publishingStatus && statusThrottler.run())
       {
          MessageTools.toMessage(rigidBodyTransformToSync, statusMessage);
-         ros2.publish(topicPair.getStatusTopic(), statusMessage);
+         ros2.publish(isRemoteTuner ? topicPair.getCommandTopic() : topicPair.getStatusTopic(), statusMessage);
       }
    }
 

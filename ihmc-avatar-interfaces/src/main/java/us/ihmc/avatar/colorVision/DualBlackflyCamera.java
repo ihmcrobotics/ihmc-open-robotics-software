@@ -20,7 +20,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.ROS2SyncedRigidBodyTransform;
+import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
@@ -84,7 +84,7 @@ public class DualBlackflyCamera
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
    private ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
-   private ROS2SyncedRigidBodyTransform remoteTunableCameraTransform;
+   private ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
 
    public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot, RigidBodyTransform cameraTransformToParent)
    {
@@ -211,9 +211,9 @@ public class DualBlackflyCamera
                                                                             syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(),
                                                                             ros2Helper);
 
-                  remoteTunableCameraTransform = new ROS2SyncedRigidBodyTransform(ros2Helper,
-                                                                                  ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
-                                                                                  cameraTransformToParent);
+                  remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
+                                                                                       ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
+                                                                                       cameraTransformToParent);
                }
 
                remoteTunableCameraTransform.update();
