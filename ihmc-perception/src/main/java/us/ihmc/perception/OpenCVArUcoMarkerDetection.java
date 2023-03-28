@@ -51,9 +51,9 @@ public class OpenCVArUcoMarkerDetection
    private Scalar defaultBorderColor;
    private BytedecoImage optionalSourceColorImage;
    private BytePointer objectPointsDataPointer;
-   private boolean running = true;
+   private volatile boolean running = true;
    private final Timer timer = new Timer();
-   private final Throttler throttler = new Throttler();
+   private final Throttler throttler = new Throttler().setFrequency(20.0);
 
    public void create(ReferenceFrame sensorFrame)
    {
@@ -143,7 +143,8 @@ public class OpenCVArUcoMarkerDetection
    {
       while (running)
       {
-         if (throttler.run(0.05) && timer.isRunning(0.5))
+         throttler.waitAndRun();
+         if (timer.isRunning(0.5))
          {
             OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadOne();
 
@@ -151,6 +152,7 @@ public class OpenCVArUcoMarkerDetection
             {
                data.getStopwatch().lap();
                arucoDetector.setDetectorParameters(data.getDetectorParameters());
+               // detectMarkers is the big slow thing, so we put it on an async thread.
                arucoDetector.detectMarkers(data.getRgb8ImageForDetection().getBytedecoOpenCVMat(),
                                            data.getCorners(),
                                            data.getIds(),
@@ -222,7 +224,7 @@ public class OpenCVArUcoMarkerDetection
             opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
          }
 
-         // ???
+         // Couldn't figure out why we had to apply these transforms here and below, but it works.
          double rx = rotationVector.ptr(0).getDouble();
          double ry = rotationVector.ptr(0).getDouble(Double.BYTES);
          double rz = rotationVector.ptr(0).getDouble(2 * Double.BYTES);
@@ -242,7 +244,9 @@ public class OpenCVArUcoMarkerDetection
                                    basePtr.getDouble(6 * Double.BYTES),
                                    basePtr.getDouble(7 * Double.BYTES),
                                    basePtr.getDouble(8 * Double.BYTES));
-         // ???
+         // These are probably because the coordinate system we define ourselves now for the solvePnP method,
+         // probably why they did it,so the way we define it must be different to the way it was internally
+         // in estimatePoseSingleMarkers.
          euclidLinearTransform.appendRollRotation(-Math.PI / 2.0);
          euclidLinearTransform.appendPitchRotation(Math.PI / 2.0);
 
@@ -312,6 +316,17 @@ public class OpenCVArUcoMarkerDetection
       this.enabled = enabled;
    }
 
+   /**
+    * Providing this because the classes that use this need different data at different times, which is not thread safe anymore, so you can use this to make sure all the stuff you get from the getters is from the same detection result. To use, do
+    * <pre>
+    *    synchronized (arUcoMarkerDetection.getSyncObject())
+    *    {
+    *       arUcoMarkerDetection.getIds()
+    *       arUcoMarkerDetection.updateMarkerPose(...)
+    *       ...
+    *    }
+    * </pre>
+    */
    public Object getSyncObject()
    {
       return detectionSwapReference;

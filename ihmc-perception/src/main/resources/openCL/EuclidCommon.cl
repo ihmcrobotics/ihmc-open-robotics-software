@@ -60,7 +60,7 @@ float4 transform(float x,
    return ret;
 }
 
-float3 transformPoint3D32(float3 point, float* transform)
+float3 transformPoint3D32(float3 point, global float* transform)
 {
    return (float3) (dot((float3) (transform[ROTATION_MATRIX_M00], transform[ROTATION_MATRIX_M01], transform[ROTATION_MATRIX_M02]), point) +
                         transform[TRANSLATION_X],
@@ -335,4 +335,19 @@ float3 computeNormal3DFromThreePoint3Ds(float3 firstPointOnPlane, float3 secondP
    float3 normal = cross(v1, v2);
 
    return normalize(normal);
+}
+
+float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector)
+{
+    float* inverse_covariance_matrix = invert3x3Matrix(covariance_matrix);
+    float coefficients[3] = {0.0f, 0.0f, 0.0f};
+    for (int row = 0; row < 3; row++)
+    {
+        for (int col = 0; col < 3; col++)
+        {
+            coefficients[row] += inverse_covariance_matrix[col + row * 3] * z_variance_vector[col];
+        }
+    }
+
+    return coefficients;
 }

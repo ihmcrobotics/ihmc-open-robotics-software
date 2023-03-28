@@ -77,7 +77,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled, 2);
-   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(streamToController, kinematicsRecorder.isReplayingEnabled());
+//   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(streamToController, kinematicsRecorder.isReplayingEnabled());
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
@@ -175,7 +175,7 @@ public class RDXVRKinematicsStreamingMode
 
          // Check if left B button is pressed in order to trigger shared control assistance
          InputDigitalActionData bButton = controller.getBButtonActionData();
-         sharedControlAssistant.processInput(bButton);
+//         sharedControlAssistant.processInput(bButton);
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -225,13 +225,13 @@ public class RDXVRKinematicsStreamingMode
                kinematicsRecorder.framePoseToRecord(tempFramePose);
                if (kinematicsRecorder.isReplaying())
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
-               else if (sharedControlAssistant.isActive())
-               {
-                  if(sharedControlAssistant.readyToPack())
-                     sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
-                  else
-                     sharedControlAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
-               }
+//               else if (sharedControlAssistant.isActive())
+//               {
+//                  if(sharedControlAssistant.readyToPack())
+//                     sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
+//                  else
+//                     sharedControlAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
+//               }
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
                message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
@@ -345,11 +345,11 @@ public class RDXVRKinematicsStreamingMode
       ImGui.text("Start/Stop replay: Press Left Joystick (cannot stream/record if replay)");
       kinematicsRecorder.renderReplayWidgets(labels);
       // add widget for using shared control assistance in VR
-      if (controllerModel == RDXVRControllerModel.FOCUS3)
-         ImGui.text("Toggle shared control assistance: Y button");
-      else
-         ImGui.text("Toggle shared control assistance: Left B button");
-      sharedControlAssistant.renderWidgets(labels);
+//      if (controllerModel == RDXVRControllerModel.FOCUS3)
+//         ImGui.text("Toggle shared control assistance: Y button");
+//      else
+//         ImGui.text("Toggle shared control assistance: Left B button");
+//      sharedControlAssistant.renderWidgets(labels);
       if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
