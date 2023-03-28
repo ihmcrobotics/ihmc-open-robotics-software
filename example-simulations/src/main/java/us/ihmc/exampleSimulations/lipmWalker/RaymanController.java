@@ -133,17 +133,23 @@ public class RaymanController implements Controller
    private final YoPolynomial dcmTrajectory = new YoPolynomial("dcmTrajectory", 6, registry);
    private final YoFramePoint3D dcmWantedNow = new YoFramePoint3D("dcmWantedNow", WORLD_FRAME, registry);
 
+   private final YoFramePoint3D icp_d_eos_i = new YoFramePoint3D("icp_d_eos_i", WORLD_FRAME, registry);
+   private final YoFramePoint3D vrp_d_i = new YoFramePoint3D("vrp_d_i", WORLD_FRAME, registry);
+
    // walk mode
    private enum WalkMode
    {
       ASIMO, LIP
    }
+
    private final YoEnum<WalkMode> walkModeYoEnum = new YoEnum<>("walkMode", registry, WalkMode.class);
 
    private enum WalkingStateEnum
    {
       STANDING, TRANSFER_TO_LEFT, TRANSFER_TO_RIGHT, LEFT_SUPPORT, RIGHT_SUPPORT
-   };
+   }
+
+   ;
 
    // planning
    private final YoInteger numStepsToPlan = new YoInteger("numStepsToPlan", registry);
@@ -152,6 +158,8 @@ public class RaymanController implements Controller
    private final YoOrientation2D stepDirection = new YoOrientation2D("stepDirection", registry);
    ArrayList<Footstep> plannedFootsteps = new ArrayList<>();
    private final YoFramePoint3D nextICP = new YoFramePoint3D("nextICP", WORLD_FRAME, registry);
+
+   private final ICPCalculator icpCalculator = new ICPCalculator();
 
    private NFootstepListVisualizer visualizerPlannedFootSteps;
    SideDependentList<ContactablePlaneBody> contactableFeet;
@@ -179,8 +187,8 @@ public class RaymanController implements Controller
       bipedSupportPolygons = new BipedSupportPolygons(midFeetFrame, soleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       stateMachine = createStateMachine();
-      transferDuration.set(3.0);
-      swingDuration.set(1.2);
+      transferDuration.set(1.0);
+      swingDuration.set(1.5);
 
       //TODO: this should be calculated
       desiredStepLength.set(0.15);
@@ -200,13 +208,13 @@ public class RaymanController implements Controller
       // planning param
       numStepsToPlan.set(5);
       strideLength.set(0.3);
-      stepWidth.set(0.6);
+      stepWidth.set(0.5);
 
       // planning visual
       contactableFeet = new SideDependentList<>(robotJae::getFootContactableBody);
       visualizerPlannedFootSteps = new NFootstepListVisualizer(contactableFeet, yoGraphicsListRegistry, registry);
 
-      dsICPTraj.set(false);
+      dsICPTraj.set(true);
    }
 
    public YoGraphicDefinition createVisualization()
@@ -214,9 +222,7 @@ public class RaymanController implements Controller
       // define a group of YoGraphic definitions
       YoGraphicGroupDefinition graphicsGroup = new YoGraphicGroupDefinition("Controller");
       //      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredCapturePoint", desiredCapturePointPosition, 0.02, ColorDefinitions.Red()));
-      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("measuredICP", measuredICP,
-                                                                            0.1,
-                                                                            ColorDefinitions.BurlyWood()));
+      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("measuredICP", measuredICP, 0.1, ColorDefinitions.BurlyWood()));
       graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("measuredCoM", measuredCoM, 0.1, ColorDefinitions.Black()));
       graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredCenterOfMass", desiredCoM, 0.1, ColorDefinitions.GreenYellow()));
       graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("leftSoleFramePoint",
@@ -227,7 +233,8 @@ public class RaymanController implements Controller
                                                                             soleFramePoints.get(RobotSide.RIGHT),
                                                                             0.05,
                                                                             ColorDefinitions.Green()));
-      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredNextFootstepPosition", desiredNextFootstepPositionForVisual,
+      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredNextFootstepPosition",
+                                                                            desiredNextFootstepPositionForVisual,
                                                                             0.05,
                                                                             ColorDefinitions.Gold()));
       graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredCurrentFootPosition",
@@ -235,9 +242,15 @@ public class RaymanController implements Controller
                                                                             0.1,
                                                                             ColorDefinitions.Blue()));
 
-      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("leftHipTrajectory", leftHipTrajectoryBalls.getPositions(), 0.1, ColorDefinitions.Blue()));
+      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("leftHipTrajectory",
+                                                                                 leftHipTrajectoryBalls.getPositions(),
+                                                                                 0.1,
+                                                                                 ColorDefinitions.Blue()));
 
       graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("dcmWantedNow", dcmWantedNow, 0.12, ColorDefinitions.LightGoldenrodYellow()));
+
+      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("icp_d_eos_i", icp_d_eos_i, 0.05, ColorDefinitions.Brown()));
+      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("vrp_d_i", vrp_d_i, 0.05, ColorDefinitions.HotPink()));
 
       //      graphicsGroup.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("desiredCentroidalMomentPivotPoint", desiredCentroidalMomentPivotPosition, 0.02, ColorDefinitions.Black()));
       return graphicsGroup;
@@ -438,7 +451,7 @@ public class RaymanController implements Controller
          updateICP();
          if (walkModeYoEnum.getValue() == WalkMode.LIP)
          {
-//            guiDesiredICP.setZ(0.0);
+            //            guiDesiredICP.setZ(0.0);
             sendICPCommand(guiDesiredICP, guiDesiredICPVelocity);
             dcmWantedNow.set(guiDesiredICP);
             dcmStart.set(guiDesiredICP);
@@ -508,10 +521,10 @@ public class RaymanController implements Controller
          initialCenterOfMassPosition.changeFrame(WORLD_FRAME);
          finalCenterOfMassPosition.setToZero(robotJae.getSoleFrame(transferToSide));
          finalCenterOfMassPosition.changeFrame(WORLD_FRAME);
-//         double y1 = robotJae.getSoleFrame(transferToSide).getTransformToWorldFrame().getTranslationY();
-//         double y2 = robotJae.getSoleFrame(transferToSide.getOppositeSide()).getTransformToWorldFrame().getTranslationY();
-//         double y = (y1 + y2) / 2;
-//         finalCenterOfMassPosition.setX(y);
+         //         double y1 = robotJae.getSoleFrame(transferToSide).getTransformToWorldFrame().getTranslationY();
+         //         double y2 = robotJae.getSoleFrame(transferToSide.getOppositeSide()).getTransformToWorldFrame().getTranslationY();
+         //         double y = (y1 + y2) / 2;
+         //         finalCenterOfMassPosition.setX(y);
          // The trajectory is setup such that it will always from 0.0 to 1.0 within the given transferDuration.
          centerOfMassTrajectory.setQuintic(0, transferDuration.getValue(), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
 
@@ -522,11 +535,21 @@ public class RaymanController implements Controller
          plannedFootsteps.clear();
          plannedFootsteps = planSteps(swingSide,
                                       robotJae.getSoleFrame(swingSide),
+                                      robotJae.getSoleFrame(swingSide.getOppositeSide()),
                                       robotJae.getMidFeetFrame(),
                                       strideLength.getDoubleValue(),
                                       stepWidth.getDoubleValue(),
                                       stepDirection.getYaw(),
                                       numStepsToPlan.getIntegerValue());
+
+         FramePose3D pose3D = new FramePose3D();
+         pose3D.setRotationYawAndZeroTranslation(robotJae.getSoleFrame(transferToSide).getTransformToWorldFrame().getRotation().getYaw());
+         pose3D.getTranslation().set(robotJae.getSoleFrame(transferToSide).getTransformToWorldFrame().getTranslation());
+         Footstep supportStep = new Footstep(transferToSide, pose3D);
+         icpCalculator.update(plannedFootsteps, supportStep, transferDuration.getDoubleValue() + swingDuration.getDoubleValue(), OMEGA);
+         icp_d_eos_i.set(icpCalculator.getIcp_d_eos_i());
+         vrp_d_i.set(icpCalculator.getVrp_d_i());
+
          visualizerPlannedFootSteps.update(plannedFootsteps);
 
          // visual of planned steps
@@ -594,12 +617,14 @@ public class RaymanController implements Controller
 
             dcmWantedNow.setToZero();
             dcmWantedNow.interpolate(dcmStart, dcmFinal, dcmTrajAlpha);
+
+            dcmWantedNow.set(icpCalculator.get_icp_desired_at_t(MathTools.clamp(timeInState, 0.0, transferDuration.getValue())));
             dcmWantedNow.setZ(DESIRED_CENTER_OF_MASS_HEIGHT);
 
             if (dsICPTraj.getValue())
             {
                // TODO: testing if putting zerovelocity works
-               dcmVelocityFromTrajectory.setToZero();
+               dcmVelocityFromTrajectory.set(icpCalculator.get_icp_desired_velocity_at_t(MathTools.clamp(timeInState, 0.0, transferDuration.getDoubleValue())));
                sendICPCommand(dcmWantedNow, dcmVelocityFromTrajectory);
             }
             else
@@ -655,6 +680,9 @@ public class RaymanController implements Controller
       private final FramePose3D swingControlFramePose = new FramePose3D();
 
       private final YoFramePoint3D currentDesiredFootstepPosition;
+
+      private FramePoint3D icp_i;
+      private FramePoint3D vrp_i;
 
       public SingleSupportState(RobotSide supportSide)
       {
@@ -725,8 +753,9 @@ public class RaymanController implements Controller
          while (swingPositionTrajectory.doOptimizationUpdate())
             ;
 
-         FramePoint3D icp_i = new FramePoint3D(measuredICP);
-         FramePoint3D vrp_i = new FramePoint3D();
+         // TODO: FIx: no measured here
+         icp_i = new FramePoint3D(measuredICP);
+         vrp_i = new FramePoint3D();
          vrp_i.setFromReferenceFrame(robotJae.getSoleFrame(supportSide));
          ArrayList<FramePoint3D> ssIcpPoint_ini_pos_and_vel = calculateICPAtTime(0, icp_i, vrp_i, swingDuration.getDoubleValue());
          ArrayList<FramePoint3D> ssIcpPoint_end_pos_and_vel = calculateICPAtTime(swingDuration.getDoubleValue(), icp_i, vrp_i, swingDuration.getDoubleValue());
@@ -775,19 +804,26 @@ public class RaymanController implements Controller
 
             dcmWantedNow.setToZero();
             dcmWantedNow.interpolate(dcmStart, dcmFinal, alpha);
+
+            ArrayList<FramePoint3D> icpPoint_pos_and_vel = calculateICPAtTime(MathTools.clamp(timeInState, 0.0, swingDuration.getValue()),
+                                                                              icp_i,
+                                                                              vrp_i,
+                                                                              swingDuration.getDoubleValue());
+            dcmWantedNow.set(icpPoint_pos_and_vel.get(0));
+            dcmWantedNow.set(icpCalculator.get_icp_desired_at_t(MathTools.clamp(transferDuration.getDoubleValue() + timeInState,
+                                                                                0.0,
+                                                                                swingDuration.getDoubleValue() + transferDuration.getDoubleValue())));
             dcmWantedNow.setZ(DESIRED_CENTER_OF_MASS_HEIGHT);
 
             //TODO: testing if sending zero velocity works
-            velocity.setToZero();
+            velocity.set(icpCalculator.get_icp_desired_velocity_at_t(MathTools.clamp(transferDuration.getDoubleValue() + timeInState,
+                                                                                     0.0,
+                                                                                     swingDuration.getDoubleValue() + transferDuration.getDoubleValue())));
             sendICPCommand(dcmWantedNow, velocity);
          }
 
-
          FramePoint3D measuredCoMPosition = new FramePoint3D(WORLD_FRAME, toolbox.getCenterOfMassFrame().getTransformToWorldFrame().getTranslation());
          measuredCoM.set(measuredCoMPosition);
-
-
-
 
          // As in the standing state, the support is specified with the contact state
          // command and zero acceleration command.
@@ -1108,6 +1144,7 @@ public class RaymanController implements Controller
 
    public static ArrayList<Footstep> planSteps(RobotSide swingSide,
                                                ReferenceFrame swingFootFrame,
+                                               ReferenceFrame supportFootFrame,
                                                ReferenceFrame midFeetFrame,
                                                double strideLength,
                                                double stepWidth,
@@ -1117,11 +1154,14 @@ public class RaymanController implements Controller
       ArrayList<Footstep> steps = new ArrayList<>();
       RobotSide side = swingSide;
 
-      FramePose3D pose3D = new FramePose3D(midFeetFrame);
+      FramePose3D pose3D = new FramePose3D();
+      pose3D.setTranslationAndIdentityRotation(midFeetFrame.getTransformToWorldFrame().getTranslation());
+      pose3D.getTranslation().setX(supportFootFrame.getTransformToWorldFrame().getTranslationX());
+
       for (int i = 0; i < numStepsToPlan; ++i)
       {
          Footstep step = new Footstep(side, pose3D);
-         step.getFootstepPose().setRotationYawAndZeroTranslation(directionYaw);
+         step.getFootstepPose().getRotation().setToYawOrientation(directionYaw);
          if (side == RobotSide.LEFT)
          {
             step.getFootstepPose().appendTranslation((i + 1) * strideLength, stepWidth / 2, 0.0);
