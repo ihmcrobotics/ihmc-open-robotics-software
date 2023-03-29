@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.objects.ArUcoMarkerObject;
+import us.ihmc.perception.objects.ArUcoMarkerObjectInfo;
 import us.ihmc.perception.objects.ObjectInfo;
 import us.ihmc.promp.ProMPUtil;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
@@ -118,11 +119,11 @@ public class ProMPAssistantObjectFrameTest
 
    private void createObjectFrameFromAruco()
    {
-      ObjectInfo arucoInfo = new ObjectInfo();
+      ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       ArUcoMarkerObject objectWithArUco;
       // add markers with their respective info
-      for (int id : arucoInfo.getMarkersId())
+      for (int id : arucoInfo.getIDs())
          markersToTrack.add(new OpenCVArUcoMarker(id, arucoInfo.getMarkerSize(id)));
       // get a marker
       OpenCVArUcoMarker marker = markersToTrack.get(0);
@@ -134,7 +135,7 @@ public class ProMPAssistantObjectFrameTest
                                                      new Point3D(1.073, -0.146, 1.016),
                                                      new Quaternion(-0.002, 1.000, 0.001, 0.003));
       // create from this pose, the associated transform stored in objectWithArUco
-      markerPose.get(objectWithArUco.getMarkerToWorld());
+      markerPose.get(objectWithArUco.getMarkerTransformToWorld());
       objectWithArUco.updateFrame(); // update frame of the object
       objectWithArUco.computeObjectPose(markerPose); // compute object pose from marker pose
 

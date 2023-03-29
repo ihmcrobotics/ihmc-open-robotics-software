@@ -5,7 +5,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
 
 public class DetectedObjectPublisher

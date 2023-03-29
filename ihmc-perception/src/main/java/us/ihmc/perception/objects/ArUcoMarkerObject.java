@@ -8,8 +8,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
-import java.util.function.Consumer;
-
 public class ArUcoMarkerObject
 {
    private RigidBodyTransform markerTransformToWorld = new RigidBodyTransform();
@@ -31,6 +29,7 @@ public class ArUcoMarkerObject
       markerTransformToWorld.getTranslation().set(position);
       markerTransformToWorld.getRotation().set(orientation);
       markerFrame.update();
+      objectFrame.update();
    }
 
    public void updateFrame()
