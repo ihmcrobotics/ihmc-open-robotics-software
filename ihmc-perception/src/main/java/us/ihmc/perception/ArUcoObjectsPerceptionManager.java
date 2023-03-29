@@ -29,7 +29,7 @@ public class ArUcoObjectsPerceptionManager
    private ArrayList<String> objectNames;
    private final ArrayList<DetectedObjectPublisher> detectedObjectPublishers = new ArrayList<>();
 
-   public ArUcoObjectsPerceptionManager(ArUcoMarkerObjectInfo objectInfo)
+   public ArUcoObjectsPerceptionManager(ArUcoMarkerObjectsInfo objectInfo)
    {
       ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "objects_perception_manager");
 

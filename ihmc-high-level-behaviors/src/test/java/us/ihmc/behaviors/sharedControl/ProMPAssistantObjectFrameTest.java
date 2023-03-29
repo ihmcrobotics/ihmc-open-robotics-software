@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.objects.ArUcoMarkerObject;
-import us.ihmc.perception.objects.ArUcoMarkerObjectInfo;
+import us.ihmc.perception.objects.ArUcoMarkerObjectsInfo;
 import us.ihmc.promp.ProMPUtil;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
 
@@ -118,7 +118,7 @@ public class ProMPAssistantObjectFrameTest
 
    private void createObjectFrameFromAruco()
    {
-      ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
+      ArUcoMarkerObjectsInfo arucoInfo = new ArUcoMarkerObjectsInfo();
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       ArUcoMarkerObject objectWithArUco;
       // add markers with their respective info

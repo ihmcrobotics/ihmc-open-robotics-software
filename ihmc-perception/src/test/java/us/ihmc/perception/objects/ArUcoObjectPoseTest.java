@@ -22,7 +22,7 @@ public class ArUcoObjectPoseTest
    @Test
    public void framePoseTransformsArUcoTest()
    {
-      ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
+      ArUcoMarkerObjectsInfo arucoInfo = new ArUcoMarkerObjectsInfo();
       arucoInfo.load();
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       ArUcoMarkerObject objectWithArUco;

@@ -18,7 +18,7 @@ public class ArUcoMarkerObject
    private ReferenceFrame objectFrame;
    private FramePose3D objectPose = new FramePose3D();
 
-   public ArUcoMarkerObject(int id, ArUcoMarkerObjectInfo arucoInfo)
+   public ArUcoMarkerObject(int id, ArUcoMarkerObjectsInfo arucoInfo)
    {
       objectTransformToMarker.set(arucoInfo.getMarkerYawPitchRoll(id), arucoInfo.getMarkerTranslation(id));
       objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, objectTransformToMarker);
