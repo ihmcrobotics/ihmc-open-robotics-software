@@ -6,6 +6,9 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelLoader;
 
+/**
+ * Use this to check on environment object models as they look in engine.
+ */
 public class RDXEnvironmentObjectViewer
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -20,6 +23,7 @@ public class RDXEnvironmentObjectViewer
             baseUI.create();
             baseUI.getPrimaryScene().getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
 
+            // Swap out this string to load different models
             Model model = RDXModelLoader.load("environmentObjects/ousterSensor/Ouster.g3dj");
             baseUI.getPrimaryScene().addModelInstance(new ModelInstance(model));
          }
