@@ -6,6 +6,12 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.thread.Throttler;
 
+/**
+ * This class is used to hava UI that tunes a transform running remotely on the robot.
+ * It allows to make sure to handle the case where two UIs are running, they aren't both
+ * sending conflicting updates at the same time, and they both receive the updated
+ * transforms as they are tuned.
+ */
 public class ROS2TunedRigidBodyTransform
 {
    private final ROS2PublishSubscribeAPI ros2;
