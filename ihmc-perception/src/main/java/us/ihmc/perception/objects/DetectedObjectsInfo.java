@@ -10,7 +10,7 @@ import java.util.*;
 
 public class DetectedObjectsInfo
 {
-   protected final ArrayList<Integer> IDs = new ArrayList<>();
+   protected final ArrayList<Integer> ids = new ArrayList<>();
    protected final ArrayList<String> objectNames = new ArrayList<>();
    protected final HashMap<String, String> modelFileName = new HashMap<>();
    protected WorkspaceResourceFile configurationFile;
@@ -38,7 +38,7 @@ public class DetectedObjectsInfo
             JsonNode propertiesArrayNode = objectNode.get("properties");
             for (JsonNode propertyObject : propertiesArrayNode)
             {
-               IDs.add(propertyObject.get("ID").asInt());
+               ids.add(propertyObject.get("ID").asInt());
                modelFileName.put(objectNames.get(i), propertyObject.get("modelFileName").asText());
             }
          }
@@ -47,7 +47,7 @@ public class DetectedObjectsInfo
 
    public String getObjectName(int id)
    {
-      return objectNames.get(IDs.indexOf(id));
+      return objectNames.get(ids.indexOf(id));
    }
 
    public int getNumberOfObjects()
@@ -60,9 +60,9 @@ public class DetectedObjectsInfo
       return objectNames;
    }
 
-   public ArrayList<Integer> getIDs()
+   public ArrayList<Integer> getIds()
    {
-      return IDs;
+      return ids;
    }
 
    public String getModelFileName(String objectName)

@@ -122,7 +122,7 @@ public class ProMPAssistantObjectFrameTest
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       ArUcoMarkerObject objectWithArUco;
       // add markers with their respective info
-      for (int id : arucoInfo.getIDs())
+      for (int id : arucoInfo.getIds())
          markersToTrack.add(new OpenCVArUcoMarker(id, arucoInfo.getMarkerSize(id)));
       // get a marker
       OpenCVArUcoMarker marker = markersToTrack.get(0);
