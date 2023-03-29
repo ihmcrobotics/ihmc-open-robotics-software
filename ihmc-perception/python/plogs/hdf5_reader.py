@@ -94,7 +94,7 @@ def collect_channels(data):
             elif any(x in group for x in byte_types):
                 type = 'byte'
 
-            channels.append(dict(name=group, count=len(data[group].keys()), dtype='byte'))
+            channels.append(dict(name=group, count=len(data[group].keys()), dtype=type))
 
     return channels
 
