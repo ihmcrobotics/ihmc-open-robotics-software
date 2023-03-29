@@ -25,7 +25,7 @@ import java.util.List;
 
 public class KinematicsRecordReplay
 {
-   private final TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, "", 1);
+   private final TrajectoryRecordReplay trajectoryRecorder = new TrajectoryRecordReplay("", 1);
    private final ImString recordPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs").toString());
    private final ImBoolean enablerRecording = new ImBoolean(false);
    private boolean isRecording = false;
@@ -46,7 +46,7 @@ public class KinematicsRecordReplay
    {
       this.ros2 = ros2;
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
-      trajectoryRecorder.setNumberParts(numberOfParts);
+      trajectoryRecorder.setNumberOfParts(numberOfParts);
       for (int n = 0; n < numberOfParts; n++)
          framesToRecordHistory.add(new ArrayList<>());
 
@@ -96,14 +96,9 @@ public class KinematicsRecordReplay
                frameToRecord.changeFrame(objectFrame);
 
             // Store trajectories in file: store a setpoint per timestep until trigger button is pressed again
-            // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-            Double[] dataTrajectories = new Double[] {frameToRecord.getOrientation().getX(),
-                                                      frameToRecord.getOrientation().getY(),
-                                                      frameToRecord.getOrientation().getZ(),
-                                                      frameToRecord.getOrientation().getS(),
-                                                      frameToRecord.getPosition().getX(),
-                                                      frameToRecord.getPosition().getY(),
-                                                      frameToRecord.getPosition().getZ()};
+            double[] dataTrajectories = new double[7];
+            frameToRecord.getOrientation().get(dataTrajectories);
+            frameToRecord.getPosition().get(4, dataTrajectories);
             trajectoryRecorder.record(dataTrajectories);
          }
       }
@@ -153,7 +148,7 @@ public class KinematicsRecordReplay
    {
       framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
       // Read file with stored trajectories: read set point per timestep until file is over
-      Double[] dataPoint = trajectoryRecorder.play(true); //play split data (a body part per time)
+      double[] dataPoint = trajectoryRecorder.play(true); //play split data (a body part per time)
       // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
       framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
       framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
