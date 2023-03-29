@@ -8,6 +8,8 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -38,7 +40,6 @@ public class RapidHeightMapWithHistoryExtractor
 
    private OpenCLFloatBuffer sensorToWorldTransformBuffer;
    private float[] sensorToWorldTransformArray = new float[16];
-   private OpenCLFloatBuffer oldOriginBuffer;
 
    private OpenCLFloatBuffer groundPlaneBuffer;
    private _cl_program rapidHeightMapUpdaterProgram;
@@ -87,9 +88,6 @@ public class RapidHeightMapWithHistoryExtractor
       sensorToWorldTransformBuffer = new OpenCLFloatBuffer(16);
       sensorToWorldTransformBuffer.createOpenCLBufferObject(openCLManager);
 
-      oldOriginBuffer = new OpenCLFloatBuffer(2);
-      oldOriginBuffer.createOpenCLBufferObject(openCLManager);
-
       groundPlaneBuffer = new OpenCLFloatBuffer(4);
       groundPlaneBuffer.createOpenCLBufferObject(openCLManager);
 
@@ -124,16 +122,26 @@ public class RapidHeightMapWithHistoryExtractor
       computeHeightMapOutputValuesKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeHeightMapOutputValuesKernel");
    }
 
-   private void populateParameterBuffer(Tuple3DReadOnly gridCenter)
+   private void populateParameterBuffer(Tuple3DReadOnly gridCenter, Point2DReadOnly previousCenter)
    {
       //// Fill parameters buffer
       parametersBuffer.setParameter(cellSizeXYInMeters);
       parametersBuffer.setParameter(centerIndex);
       parametersBuffer.setParameter((float) inputDepthImage.getImageHeight());
       parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
-      parametersBuffer.setParameter((float) gridCenter.getX());
-      parametersBuffer.setParameter((float) gridCenter.getY());
+      parametersBuffer.setParameter(gridCenter.getX32());
+      parametersBuffer.setParameter(gridCenter.getY32());
       parametersBuffer.setParameter((float) bufferLengthPerCell);
+      if (!previousCenter.containsNaN())
+      {
+         parametersBuffer.setParameter(previousCenter.getX32());
+         parametersBuffer.setParameter(previousCenter.getY32());
+      }
+      else
+      {
+         parametersBuffer.setParameter(0.0f);
+         parametersBuffer.setParameter(0.0f);
+      }
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -152,7 +160,7 @@ public class RapidHeightMapWithHistoryExtractor
 
          Point3D gridCenter = new Point3D(sensorToWorldTransform.getTranslation());
 
-         populateParameterBuffer(gridCenter);
+         populateParameterBuffer(gridCenter, previousOrigin);
 
          // Fill world-to-sensor transform buffer
          worldToSensorTransform.get(worldToSensorTransformArray);
@@ -175,7 +183,13 @@ public class RapidHeightMapWithHistoryExtractor
                                                                                        (float) (planeHeight - sensorToWorldTransform.getTranslationZ())});
          groundPlaneBuffer.writeOpenCLBufferObject(openCLManager);
 
-         if (firstRun || previousOrigin.containsNaN())
+         Vector2D translation = new Vector2D(gridCenter);
+         translation.sub(previousOrigin);
+
+         LogTools.info("New origin, " + gridCenter);
+         LogTools.info("Old origin, " + previousOrigin);
+
+         if (firstRun || previousOrigin.containsNaN() || translation.norm() > 0.5)
          {
             activeDataKeyImage = dataKeyImage1;
             openCLManager.setKernelArgument(initializeDataStructureKernel, 0, parametersBuffer.getOpenCLBufferObject());
@@ -190,24 +204,22 @@ public class RapidHeightMapWithHistoryExtractor
          }
          else
          {
-            oldOriginBuffer.getBackingDirectFloatBuffer().put(0, (float) previousOrigin.getX());
-            oldOriginBuffer.getBackingDirectFloatBuffer().put(1, (float) previousOrigin.getY());
-            oldOriginBuffer.writeOpenCLBufferObject(openCLManager);
-
             BytedecoImage newDataKeyImage;
             if (activeDataKeyImage == dataKeyImage1)
                newDataKeyImage = dataKeyImage2;
             else
                newDataKeyImage = dataKeyImage1;
+
+
+
             openCLManager.setKernelArgument(translateHeightMapKernel, 0, parametersBuffer.getOpenCLBufferObject());
             openCLManager.setKernelArgument(translateHeightMapKernel, 1, activeDataKeyImage.getOpenCLImageObject());
             openCLManager.setKernelArgument(translateHeightMapKernel, 2, newDataKeyImage.getOpenCLImageObject());
-            openCLManager.setKernelArgument(translateHeightMapKernel, 3, oldOriginBuffer.getOpenCLBufferObject());
-            openCLManager.setKernelArgument(translateHeightMapKernel, 4, heightSamplesBuffer.getOpenCLBufferObject());
-            openCLManager.setKernelArgument(translateHeightMapKernel, 5, varianceSamplesBuffer.getOpenCLBufferObject());
-            openCLManager.setKernelArgument(translateHeightMapKernel, 6, samplesPerBufferedValueBuffer.getOpenCLBufferObject());
-            openCLManager.setKernelArgument(translateHeightMapKernel, 7, bufferWriteKeysBuffer.getOpenCLBufferObject());
-            openCLManager.setKernelArgument(translateHeightMapKernel, 8, entriesInBufferBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 3, heightSamplesBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 4, varianceSamplesBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 5, samplesPerBufferedValueBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 6, bufferWriteKeysBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(translateHeightMapKernel, 7, entriesInBufferBuffer.getOpenCLBufferObject());
 
             openCLManager.execute2D(translateHeightMapKernel, cellsPerAxis, cellsPerAxis);
             activeDataKeyImage = newDataKeyImage;
@@ -246,6 +258,7 @@ public class RapidHeightMapWithHistoryExtractor
          outputVarianceImage.readOpenCLImage(openCLManager);
 
          latestHeightMapData = convertToHeightMapData(gridCenter);
+
 
          firstRun = false;
          previousOrigin.set(gridCenter);

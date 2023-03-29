@@ -4,8 +4,10 @@
 #define DEPTH_INPUT_WIDTH 3
 #define HEIGHT_MAP_CENTER_X 4
 #define HEIGHT_MAP_CENTER_Y 5
-
 #define BUFFER_LENGTH 6
+#define HEIGHT_MAP_PREVIOUS_CENTER_X 7
+#define HEIGHT_MAP_PREVIOUS_CENTER_Y 8
+
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -63,6 +65,15 @@ float get_height_on_plane(float x, float y, global float *plane)
   return height;
 }
 
+int get_next_write_key(int write_key, int buffer_length)
+{
+  write_key++;
+  if (write_key >= buffer_length)
+    write_key -= buffer_length;
+
+  return write_key;
+}
+
 void initializeCellData(global float *params,
                         int data_key,
                         global float *height_samples,
@@ -73,10 +84,14 @@ void initializeCellData(global float *params,
 {
   int buffer_length = params[BUFFER_LENGTH];
 
-  height_samples[buffer_length * data_key] = -2.0f;
-  variance_samples[buffer_length * data_key] = 0.0f;
-  samples_per_buffered_value[buffer_length * data_key] = 1;
-  buffer_write_keys[data_key] = 0;
+  for (int i = 0; i < buffer_length; i++)
+  {
+    height_samples[buffer_length * data_key + i] = 0.0f;
+    variance_samples[buffer_length * data_key + i] = 0.0f;
+    samples_per_buffered_value[buffer_length * data_key + i] = 0;
+  }
+
+  buffer_write_keys[data_key] = -1;
   entries_in_buffer[data_key] = 0;
 }
 
@@ -110,7 +125,6 @@ void kernel initializeDataStructureKernel(global float *params,
 void kernel translateHeightMapKernel(global float *params,
                                      read_only image2d_t old_data_keys,
                                      write_only image2d_t new_data_keys,
-                                     global float *old_origin,
                                      global float *height_samples,
                                      global float *variance_samples,
                                      global int *samples_per_buffered_value,
@@ -127,16 +141,24 @@ void kernel translateHeightMapKernel(global float *params,
 
   int center_index = (int) params[HEIGHT_MAP_CENTER_INDEX];
   float2 center = (float2) (params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]);
+  float2 old_center = (float2) (params[HEIGHT_MAP_PREVIOUS_CENTER_X], params[HEIGHT_MAP_PREVIOUS_CENTER_Y]);
   float resolution = params[HEIGHT_MAP_RESOLUTION];
 
-  int center_x_index = key_to_x_index(center_index, center_index);
-  int center_y_index = key_to_y_index(center_index, center_index);
+  int center_x_index = center_index;
+  int center_y_index = center_index;
 
-  int old_center_x_index = coordinate_to_index(old_origin[0], center.x, resolution, center_index);
-  int old_center_y_index = coordinate_to_index(old_origin[1], center.y, resolution, center_index);
+  int old_center_x_index = coordinate_to_index(old_center.x, center.x, resolution, center_index);
+  int old_center_y_index = coordinate_to_index(old_center.y, center.y, resolution, center_index);
 
   int x_translation = center_x_index - old_center_x_index;
   int y_translation = center_y_index - old_center_y_index;
+
+  if (xIndex == 0 && yIndex == 0)
+  {
+    printf("origin, old = (%f, %f), new = (%f, %f)\n", old_center.x, old_center.y, center.x, center.y);
+    printf("origin index, old = (%d, %d), new = (%d, %d)\n", old_center_x_index, old_center_y_index, center_x_index, center_y_index);
+    printf("translation = (%d, %d)\n", x_translation, y_translation);
+  }
 
   int cells_per_side = 2 * center_index + 1;
   int old_x_index = xIndex - x_translation;
@@ -152,19 +174,28 @@ void kernel translateHeightMapKernel(global float *params,
   }
   else
   {
-    while (old_x_index < 0)
+    if (xIndex == 0 && yIndex == 0)
+         printf("started shifting, old (%d, %d), new (%d, %d)\n", old_x_index, old_y_index, xIndex, yIndex);
+
+    if (old_x_index < 0)
       old_x_index += cells_per_side;
-    while (old_x_index >= cells_per_side)
+    else if (old_x_index >= cells_per_side)
       old_x_index -= cells_per_side;
-    while (old_y_index < 0)
+    if (old_y_index < 0)
       old_y_index += cells_per_side;
-    while (old_y_index >= cells_per_side)
+    else if (old_y_index >= cells_per_side)
       old_y_index -= cells_per_side;
 
     int2 old_indices = (int2) (old_x_index, old_y_index);
     data_buffer_key = read_imageui(old_data_keys, old_indices).x;
 
+    if (xIndex == 0 && yIndex == 0)
+       printf("started initializing shift, old (%d, %d), new (%d, %d)\n", old_x_index, old_y_index, xIndex, yIndex);
+
     initializeCellData(params, data_buffer_key, height_samples, variance_samples, samples_per_buffered_value, buffer_write_keys, entries_in_buffer);
+
+    if (xIndex == 0 && yIndex == 0)
+             printf("finished shifting\n");
   }
 
   write_imageui(new_data_keys, indices, (uint4)(data_buffer_key, 0, 0, 0));
@@ -360,12 +391,14 @@ void kernel heightMapUpdateDataKernel(read_only image2d_t depth_map_in,
     averageHeightZ = clamp(averageHeightZ, -20.f, 1.5f);
 
     float variance = sumOfSquare / countf;
+    int write_key = buffer_write_keys[data_key];
+    write_key = get_next_write_key(write_key, buffer_length);
 
-    height_samples[data_key * buffer_length] = averageHeightZ;
-    variance_samples[data_key * buffer_length] = variance;
-    samples_per_buffered_value[data_key * buffer_length] = count;
-    buffer_write_keys[data_key] = 0;
-    entries_in_buffer[data_key] = 1;
+    height_samples[data_key * buffer_length + write_key] = averageHeightZ;
+    variance_samples[data_key * buffer_length + write_key] = variance;
+    samples_per_buffered_value[data_key * buffer_length + write_key] = count;
+    buffer_write_keys[data_key] = write_key;
+    entries_in_buffer[data_key] = min(entries_in_buffer[data_key] + 1, buffer_length);
   }
 
    if (xIndex == 0 && yIndex == 0)
@@ -411,8 +444,11 @@ void kernel computeHeightMapOutputValuesKernel(global float *params,
       float variance_sample = variance_samples[start + entry_to_read];
       int samples = samples_per_buffered_value[start + entry_to_read];
 
+      // just average the data for now
+      total_height += samples * height_sample;
       // TODO double check this math, since it's probably wrong
-      total_height += (total_height * total_samples * variance_sample + height_sample * samples * total_variance) / (total_samples * total_variance + samples * variance_sample);
+    //  total_height += (total_height * total_samples * variance_sample + height_sample * samples * total_variance) / (total_samples * total_variance + samples * variance_sample);
+
       total_variance += total_variance * total_samples * variance_sample * samples / (total_samples * total_variance + samples * variance_sample);
       total_samples += samples;
     }
