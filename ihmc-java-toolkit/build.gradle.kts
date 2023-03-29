@@ -28,7 +28,7 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.19.1")
    api("us.ihmc:euclid-shape:0.19.1")
    api("us.ihmc:euclid-geometry:0.19.1")
-   api("us.ihmc:ihmc-graphics-description:0.20.1")
+   api("us.ihmc:ihmc-graphics-description:0.20.2")
    api("us.ihmc:ihmc-native-library-loader:2.0.1")
 }
 

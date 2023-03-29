@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class OusterHeightMapUpdater
 {
@@ -66,6 +67,11 @@ public class OusterHeightMapUpdater
    public void start()
    {
       executorService.scheduleAtFixedRate(this::update, 0, updateDTMillis, TimeUnit.MILLISECONDS);
+   }
+
+   public void attachHeightMapConsumer(Consumer<HeightMapMessage> heightMapConsumer)
+   {
+      heightMapUpdater.attachHeightMapConsumer(heightMapConsumer);
    }
 
    public void updateWithDataBuffer(ReferenceFrame sensorFrame, ReferenceFrame groundFrame, FloatBuffer pointCloudInSensorFrame, int numberOfPoints, Instant instant)
