@@ -5,10 +5,8 @@ import perception_msgs.msg.dds.DetectedObjectMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.objects.*;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Topic;
@@ -31,7 +29,7 @@ public class ArUcoObjectsPerceptionManager
    private ArrayList<String> objectNames;
    private final ArrayList<DetectedObjectPublisher> detectedObjectPublishers = new ArrayList<>();
 
-   public ArUcoObjectsPerceptionManager(ReferenceFrame cameraFrame, ArUcoMarkerObjectInfo objectInfo)
+   public ArUcoObjectsPerceptionManager(ArUcoMarkerObjectInfo objectInfo)
    {
       ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "objects_perception_manager");
 
@@ -62,7 +60,8 @@ public class ArUcoObjectsPerceptionManager
          ArUcoMarkerPoses arUcoMarkerPosesMessage = arUcoMarkerPosesSubscription.getMessageNotification().read();
          for (int i = 0; i < arUcoMarkerPosesMessage.getMarkerId().size(); i++)
          {
-            var markerUpdater = markerUpdaters.get(arUcoMarkerPosesMessage.getMarkerId().get(i));
+            int markerId = (int) arUcoMarkerPosesMessage.getMarkerId().get(i);
+            var markerUpdater = markerUpdaters.get(markerId);
             if (markerUpdater != null)
             {
                markerUpdater.accept(arUcoMarkerPosesMessage.getPosition().get(i),
@@ -71,8 +70,6 @@ public class ArUcoObjectsPerceptionManager
 
             for (DetectedObjectPublisher detectedObjectPublisher : detectedObjectPublishers)
             {
-               int markerId = (int) arUcoMarkerPosesMessage.getMarkerId().get(i);
-               LogTools.info("Manager id marker {}", markerId);
                detectedObjectPublisher.objectDetected(objectNames.get(markerId));
                detectedObjectPublisher.publish();
             }
