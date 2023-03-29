@@ -1,8 +1,6 @@
 package us.ihmc.perception.objects;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -10,14 +8,14 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.*;
 
-public class ObjectInfo
+public class DetectedObjectInfo
 {
    protected final ArrayList<Integer> IDs = new ArrayList<>();
    protected final ArrayList<String> objectNames = new ArrayList<>();
    protected final HashMap<String, String> modelFileName = new HashMap<>();
    protected WorkspaceResourceFile configurationFile;
 
-   public ObjectInfo()
+   public DetectedObjectInfo()
    {
       // read parameters regarding the properties of available objects with ArUco markers attached
       String file = "ObjectsInfo.json";
