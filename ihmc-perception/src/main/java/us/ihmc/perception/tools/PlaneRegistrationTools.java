@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
@@ -75,8 +76,14 @@ public class PlaneRegistrationTools
          }
 
          transform = PlaneRegistrationTools.computeQuaternionAveragingTransform(previousRegions, currentRegions, matches);
-         currentRegions.applyTransform(transform);
 
+         if(transform.containsNaN())
+         {
+            LogTools.warn("Transform contains NaNs, breaking out of IQA loop.");
+            break;
+         }
+
+         currentRegions.applyTransform(transform);
          double error = PlaneRegistrationTools.computeRegistrationError(previousRegions, currentRegions, matches);
          double ratio = (previousError - error) / previousError;
 

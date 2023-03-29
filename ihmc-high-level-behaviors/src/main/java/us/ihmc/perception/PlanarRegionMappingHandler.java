@@ -272,7 +272,7 @@ public class PlanarRegionMappingHandler
 
    public void autoIncrementButtonCallback()
    {
-      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 100, TimeUnit.MILLISECONDS);
+      updateMapFuture = executorService.scheduleAtFixedRate(this::nextButtonCallback, 0, 120, TimeUnit.MILLISECONDS);
    }
 
    public void pauseButtonCallback()

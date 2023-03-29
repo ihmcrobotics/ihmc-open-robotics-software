@@ -23,7 +23,6 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -42,7 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class LocalizationAndMappingProcess
 {
-   private final static long SLAM_UPDATE_FREQUENCY = 30;
+   private final static long STATISTICS_COLLECTION_PERIOD_MS = 100;
 
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
@@ -59,7 +58,6 @@ public class LocalizationAndMappingProcess
                                                                                                         getClass(),
                                                                                                         ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-   private ScheduledFuture<?> updateMapFuture;
    private boolean enableLiveMode = true;
 
    private ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic;
@@ -91,18 +89,20 @@ public class LocalizationAndMappingProcess
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS, planarRegionMap.getParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, configurationParameters);
 
-      launchMapper();
+      executorService.scheduleAtFixedRate(this::statisticsCollectionThread, 0, STATISTICS_COLLECTION_PERIOD_MS, TimeUnit.MILLISECONDS);
    }
 
-   private void launchMapper()
+   private void statisticsCollectionThread()
    {
-      updateMapFuture = executorService.scheduleAtFixedRate(this::updateMap, 0, SLAM_UPDATE_FREQUENCY, TimeUnit.MILLISECONDS);
+      planarRegionMap.printStatistics(true);
    }
 
    public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message)
    {
-      latestIncomingRegions.set(message);
-      LogTools.info("Received Regions: {}", message.getSensorPosition());
+      if (latestIncomingRegions.get() == null)
+         latestIncomingRegions.set(message);
+
+      executorService.submit(this::updateMap);
    }
 
    public synchronized void updateMap()
@@ -150,8 +150,6 @@ public class LocalizationAndMappingProcess
    {
       planarRegionMap.reset();
       planarRegionMap.setModified(true);
-      if (updateMapFuture.isCancelled() || updateMapFuture.isDone())
-         launchMapper();
    }
 
    public void setEnableLiveMode(boolean enableLiveMode)
