@@ -334,10 +334,11 @@ public class VideoDataPlayer
       Camera camera = new Camera();
       camera.setName("test");
       camera.setInterlaced(false);
-      camera.setTimestampFile("Camera-1_Timestamps.dat");
-      camera.setVideoFile("Camera-1_Video.mov");
+      String videoName = "ValkyrieTripodNorth";
+      camera.setTimestampFile(videoName + "_Timestamps.dat");
+      camera.setVideoFile(videoName + "_Video.mov");
 
-      File dataDirectory = new File("/home/jesper/robotLogs/20170724_135638_AtlasControllerFactory/");
+      File dataDirectory = new File("/opt/ihmc/LogData/LoggerDevLogs/Comparison/Valkyrie_GStreamer_HDMI_timestamps_getPTS/");
 
       VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, true);
 
@@ -359,10 +360,24 @@ public class VideoDataPlayer
       player.viewer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       player.setVisible(true);
 
+      long previousRobotTimestamp = player.robotTimestamps[0];
+      long previousNanos = System.nanoTime();
+      boolean playRealtime = false;
+      
       for (int i = 1; i < player.robotTimestamps.length; i++)
       {
+         long nextRobotTimestamp = player.robotTimestamps[i];
+         long nextNanos = previousNanos + nextRobotTimestamp - previousRobotTimestamp;
 
-         player.showVideoFrame(player.robotTimestamps[i]);
+         if (playRealtime)
+         {
+            while (System.nanoTime() < nextNanos);
+         }
+
+         previousNanos = System.nanoTime();
+
+         player.showVideoFrame(nextRobotTimestamp);
+         previousRobotTimestamp = nextRobotTimestamp;
       }
 
    }
