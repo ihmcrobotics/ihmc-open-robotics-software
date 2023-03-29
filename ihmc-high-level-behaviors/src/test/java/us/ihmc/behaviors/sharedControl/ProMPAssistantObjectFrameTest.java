@@ -10,7 +10,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.objects.ArUcoMarkerObject;
 import us.ihmc.perception.objects.ArUcoMarkerObjectInfo;
-import us.ihmc.perception.objects.ObjectInfo;
 import us.ihmc.promp.ProMPUtil;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
 

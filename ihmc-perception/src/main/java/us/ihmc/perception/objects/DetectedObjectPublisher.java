@@ -11,17 +11,17 @@ public class DetectedObjectPublisher
 {
    private final ROS2PublishSubscribeAPI ros2;
    private final ROS2Topic<DetectedObjectMessage> topic;
-   private final String ID;
+   private final String id;
    private final ReferenceFrame objectFrame;
    private final RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
    private final DetectedObjectMessage detectedObjectMessage = new DetectedObjectMessage();
    private boolean detected = false;
 
-   public DetectedObjectPublisher(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> topic, String ID, ReferenceFrame objectFrame)
+   public DetectedObjectPublisher(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> topic, String id, ReferenceFrame objectFrame)
    {
       this.ros2 = ros2;
       this.topic = topic;
-      this.ID = ID;
+      this.id = id;
       this.objectFrame = objectFrame;
    }
 
@@ -32,7 +32,7 @@ public class DetectedObjectPublisher
 
    public void objectDetected(String detectedID)
    {
-      if (detectedID.equals(ID))
+      if (detectedID.equals(id))
       {
          detected = true;
       }
@@ -42,7 +42,7 @@ public class DetectedObjectPublisher
    {
       detectedObjectMessage.setDetected(detected);
 
-      detectedObjectMessage.setId(ID);
+      detectedObjectMessage.setId(id);
 
       objectFrame.getTransformToDesiredFrame(objectTransformToWorld, ReferenceFrame.getWorldFrame());
       MessageTools.toMessage(objectTransformToWorld, detectedObjectMessage.getTransformToWorld());

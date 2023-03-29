@@ -7,7 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.ArUcoObjectsPerceptionManager;
-import us.ihmc.perception.objects.ObjectInfo;
+import us.ihmc.perception.objects.DetectedObjectInfo;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -23,7 +23,7 @@ public class RDXObjectsPerceptionUI
    private final ROS2PublishSubscribeAPI ros2;
    private final ArrayList<RDXObjectPerceptionUpdater> objectUpdaters = new ArrayList<>();
 
-   public RDXObjectsPerceptionUI(ROS2PublishSubscribeAPI ros2, ObjectInfo objectInfo)
+   public RDXObjectsPerceptionUI(ROS2PublishSubscribeAPI ros2, DetectedObjectInfo objectInfo)
    {
       this.ros2 = ros2;
 

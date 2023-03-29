@@ -7,10 +7,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class ArUcoMarkerObjectInfo extends ObjectInfo
+public class ArUcoMarkerObjectInfo extends DetectedObjectInfo
 {
    private double[] markerSizes;
    private double[][] markerToBodyTranslations;
