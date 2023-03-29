@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -40,16 +39,18 @@ public class ArUcoObjectPoseTest
       // get object with attached aruco marker
       objectWithArUco = new ArUcoMarkerObject(objectId, arucoInfo);
       // get marker pose in world frame, in reality this would be detected by camera
-      FramePose3DBasics markerPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+      FramePose3D markerPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      new Point3D(1.073, -0.146, 1.016),
                                                      new Quaternion(-0.002, 1.000, 0.001, 0.003));
+      RigidBodyTransform markerTransformToWorld = new RigidBodyTransform(objectWithArUco.getMarkerTransformToWorld());
       // create from this pose, the associated transform stored in objectWithArUco
-      markerPose.get(objectWithArUco.getMarkerTransformToWorld());
+      markerPose.get(markerTransformToWorld);
       objectWithArUco.updateFrame(); // update frame of the object
       objectWithArUco.computeObjectPose(markerPose); // compute object pose from marker pose
       LogTools.info("Marker: {}", markerPose);
 
-      FramePose3D objectPose = objectWithArUco.getObjectPose();
+      FramePose3D objectPose = new FramePose3D();
+      objectPose.set(objectWithArUco.getObjectPose());
       LogTools.info("Object: {}", objectPose);
       objectPose.changeFrame(objectWithArUco.getMarkerFrame()); // transform object pose in marker frame
       LogTools.info("Object: {}", objectPose);

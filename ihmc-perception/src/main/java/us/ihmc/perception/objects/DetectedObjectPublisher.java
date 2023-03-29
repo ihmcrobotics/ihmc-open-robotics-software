@@ -13,7 +13,6 @@ public class DetectedObjectPublisher
    private final ROS2Topic<DetectedObjectMessage> topic;
    private final String id;
    private final ReferenceFrame objectFrame;
-   private final RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
    private final DetectedObjectMessage detectedObjectMessage = new DetectedObjectMessage();
    private boolean detected = false;
 
@@ -44,8 +43,7 @@ public class DetectedObjectPublisher
 
       detectedObjectMessage.setId(id);
 
-      objectFrame.getTransformToDesiredFrame(objectTransformToWorld, ReferenceFrame.getWorldFrame());
-      MessageTools.toMessage(objectTransformToWorld, detectedObjectMessage.getTransformToWorld());
+      MessageTools.toMessage(objectFrame.getTransformToWorldFrame(), detectedObjectMessage.getTransformToWorld());
 
       ros2.publish(topic, detectedObjectMessage);
    }

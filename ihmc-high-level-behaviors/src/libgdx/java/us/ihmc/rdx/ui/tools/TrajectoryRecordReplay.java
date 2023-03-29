@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.stream.Stream;
 
 /**
- * Class to record and replay multidimensional trajectories of primitive Number types.
+ * Class to record and replay multidimensional trajectories.
  * The multi-dimension represents the number of elements that are considered.
  * For each dimension, at each time step the class stores or reads a set point.
  * The collection of set points defines the trajectory.
