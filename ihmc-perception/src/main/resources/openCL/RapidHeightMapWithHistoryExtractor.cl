@@ -442,8 +442,8 @@ void kernel computeHeightMapOutputValuesKernel(global float *params,
     int entry_to_read = 0;
     int start = data_key * buffer_length;
     int total_samples = samples_per_buffered_value[start];
-    total_height = height_samples[start] * total_samples;
-    total_variance = total_samples * variance_samples[start];
+    total_height = height_samples[start];
+    total_variance = variance_samples[start];
     entry_to_read++;
     for (; entry_to_read < entries_to_read; entry_to_read++)
     {
@@ -451,14 +451,12 @@ void kernel computeHeightMapOutputValuesKernel(global float *params,
       float variance_sample = variance_samples[start + entry_to_read];
       int samples = samples_per_buffered_value[start + entry_to_read];
 
-      // just average the data for now
-      total_height += samples * height_sample;
-      // TODO double check this math, since it's probably wrong
-      //total_height = (total_height * variance_sample + height_sample * total_variance) / (samples * total_variance + total_samples * variance_sample);
+      // perform a kalman filter update on the data, ignoring the weight provided by the number of samples
+      total_height = (total_height * variance_sample + height_sample * total_variance) / (total_variance + variance_sample);
       total_variance = total_variance * variance_sample / (total_variance + variance_sample);
       total_samples += samples;
     }
-    total_height /= total_samples;
+    //total_height /= total_samples;
   }
   else
   {
