@@ -17,10 +17,12 @@ import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -42,6 +44,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -169,9 +172,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
       footstepPlanning = new RDXFootstepPlanning(robotModel, teleoperationParameters, syncedRobot);
 
       // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(ROS2Tools.PERSPECTIVE_RAPID_REGIONS, regions ->
+      ros2Helper.subscribeViaCallback(ROS2Tools.SLAM_OUTPUT_RAPID_REGIONS, frameRegions ->
       {
-         footstepPlanning.setPlanarRegions(regions);
+         PlanarRegionsList regions = PlanarRegionMessageConverter.convertToPlanarRegionsList(frameRegions);
+         footstepPlanning.setPlanarRegionsList(regions);
          interactableFootstepPlan.setPlanarRegionsList(regions);
       });
       ros2Helper.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, heightMap ->
