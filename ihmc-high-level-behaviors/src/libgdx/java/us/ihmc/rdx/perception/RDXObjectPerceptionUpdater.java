@@ -14,10 +14,10 @@ public class RDXObjectPerceptionUpdater
    private final IHMCROS2Input<DetectedObjectMessage> subscription;
    private final String id;
 
-   public RDXObjectPerceptionUpdater(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> updateTopic, String id, DetectedObjectsInfo objectInfo)
+   public RDXObjectPerceptionUpdater(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> updateTopic, String id, DetectedObjectsInfo objectsInfo)
    {
       this.id = id;
-      String modelFileName = objectInfo.getModelFileName(id);
+      String modelFileName = objectsInfo.getModelFileName(id);
       object = new RDXVirtualGhostObject(modelFileName);
 
       subscription = ros2.subscribe(updateTopic);

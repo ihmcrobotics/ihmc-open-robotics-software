@@ -23,13 +23,13 @@ public class RDXObjectsPerceptionUI
    private final ROS2PublishSubscribeAPI ros2;
    private final ArrayList<RDXObjectPerceptionUpdater> objectUpdaters = new ArrayList<>();
 
-   public RDXObjectsPerceptionUI(ROS2PublishSubscribeAPI ros2, DetectedObjectsInfo objectInfo)
+   public RDXObjectsPerceptionUI(ROS2PublishSubscribeAPI ros2, DetectedObjectsInfo objectsInfo)
    {
       this.ros2 = ros2;
 
-      ArrayList<String> objectNames = objectInfo.getObjectNames();
+      ArrayList<String> objectNames = objectsInfo.getObjectNames();
       for (int i = 0; i < objectNames.size(); i++)
-         objectUpdaters.add(new RDXObjectPerceptionUpdater(ros2, ArUcoObjectsPerceptionManager.DETECTED_OBJECT, objectNames.get(i), objectInfo));
+         objectUpdaters.add(new RDXObjectPerceptionUpdater(ros2, ArUcoObjectsPerceptionManager.DETECTED_OBJECT, objectNames.get(i), objectsInfo));
    }
 
    public void update()

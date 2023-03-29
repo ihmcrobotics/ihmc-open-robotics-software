@@ -39,7 +39,7 @@ public class ArUcoMarkerObjectsInfo extends DetectedObjectsInfo
             JsonNode propertiesArrayNode = objectNode.get("properties");
             for (JsonNode propertyObject : propertiesArrayNode)
             {
-               IDs.add(propertyObject.get("ID").asInt());
+               ids.add(propertyObject.get("ID").asInt());
                markerSizes[i] = propertyObject.get("markerSize").asDouble();
                JsonNode tempArrayNode = propertyObject.get("translationMarkerToMainBody");
                for (int j = 0; j < 3; j++)
@@ -57,23 +57,23 @@ public class ArUcoMarkerObjectsInfo extends DetectedObjectsInfo
 
    public List<Integer> getMarkersId()
    {
-      return IDs;
+      return ids;
    }
 
    public double getMarkerSize(int id)
    {
-      return markerSizes[IDs.indexOf(id)];
+      return markerSizes[ids.indexOf(id)];
    }
 
    public Point3D getMarkerTranslation(int id)
    {
-      int realIndex = IDs.indexOf(id);
+      int realIndex = ids.indexOf(id);
       return new Point3D(markerToBodyTranslations[realIndex][0], markerToBodyTranslations[realIndex][1], markerToBodyTranslations[realIndex][2]);
    }
 
    public YawPitchRoll getMarkerYawPitchRoll(int id)
    {
-      int realIndex = IDs.indexOf(id);
+      int realIndex = ids.indexOf(id);
       return new YawPitchRoll(markerToBodyRotations[realIndex][0], markerToBodyRotations[realIndex][1], markerToBodyRotations[realIndex][2]);
    }
 }

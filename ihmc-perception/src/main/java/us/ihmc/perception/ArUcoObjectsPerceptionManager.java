@@ -29,17 +29,17 @@ public class ArUcoObjectsPerceptionManager
    private ArrayList<String> objectNames;
    private final ArrayList<DetectedObjectPublisher> detectedObjectPublishers = new ArrayList<>();
 
-   public ArUcoObjectsPerceptionManager(ArUcoMarkerObjectsInfo objectInfo)
+   public ArUcoObjectsPerceptionManager(ArUcoMarkerObjectsInfo objectsInfo)
    {
       ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "objects_perception_manager");
 
       arUcoMarkerPosesSubscription = ros2.subscribe(ROS2Tools.ARUCO_MARKER_POSES);
 
-      ArrayList<Integer> IDs = objectInfo.getIDs();
-      objectNames = objectInfo.getObjectNames();
+      ArrayList<Integer> IDs = objectsInfo.getIds();
+      objectNames = objectsInfo.getObjectNames();
       for (int i = 0; i < IDs.size(); i++)
       {
-         markers.add(new ArUcoMarkerObject(IDs.get(i), objectInfo));
+         markers.add(new ArUcoMarkerObject(IDs.get(i), objectsInfo));
          markerUpdaters.put(IDs.get(i), markers.get(i)::updateMarkerTransform);
          detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
                                                                   DETECTED_OBJECT,
