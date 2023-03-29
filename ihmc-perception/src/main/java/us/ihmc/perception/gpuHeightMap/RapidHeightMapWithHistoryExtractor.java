@@ -9,7 +9,9 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -122,7 +124,7 @@ public class RapidHeightMapWithHistoryExtractor
       computeHeightMapOutputValuesKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "computeHeightMapOutputValuesKernel");
    }
 
-   private void populateParameterBuffer(Tuple3DReadOnly gridCenter, Point2DReadOnly previousCenter)
+   private void populateParameterBuffer(Tuple2DReadOnly gridCenter, Point2DReadOnly previousCenter)
    {
       //// Fill parameters buffer
       parametersBuffer.setParameter(cellSizeXYInMeters);
@@ -146,6 +148,16 @@ public class RapidHeightMapWithHistoryExtractor
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   private static void alignPointToGrid(Point2DBasics pointToAlign, double gridResolution)
+   {
+      pointToAlign.setX(alignValueToGrid(pointToAlign.getX(), gridResolution));
+      pointToAlign.setY(alignValueToGrid(pointToAlign.getY(), gridResolution));
+   }
+
+   private static double alignValueToGrid(double value, double gridResolution)
+   {
+      return (int) (Math.round(value / gridResolution)) * gridResolution;
+   }
 
    public void update(RigidBodyTransform sensorToWorldTransform, float planeHeight)
    {
@@ -158,7 +170,8 @@ public class RapidHeightMapWithHistoryExtractor
          RigidBodyTransform worldToSensorTransform = new RigidBodyTransform(sensorToWorldTransform);
          worldToSensorTransform.invert();
 
-         Point3D gridCenter = new Point3D(sensorToWorldTransform.getTranslation());
+         Point2D gridCenter = new Point2D(sensorToWorldTransform.getTranslation());
+         alignPointToGrid(gridCenter, cellSizeXYInMeters);
 
          populateParameterBuffer(gridCenter, previousOrigin);
 
@@ -265,7 +278,7 @@ public class RapidHeightMapWithHistoryExtractor
       }
    }
 
-   private HeightMapData convertToHeightMapData(Tuple3DReadOnly center)
+   private HeightMapData convertToHeightMapData(Tuple2DReadOnly center)
    {
       HeightMapData heightMapData = new HeightMapData(cellSizeXYInMeters, gridWidthInMeters, center.getX(), center.getY());
       BytePointer heightMapPointer = outputHeightMapImage.getBytedecoByteBufferPointer();
