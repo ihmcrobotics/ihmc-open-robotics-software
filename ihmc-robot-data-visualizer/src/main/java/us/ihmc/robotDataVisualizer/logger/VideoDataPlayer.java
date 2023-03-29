@@ -113,13 +113,14 @@ public class VideoDataPlayer
 
       try
       {
-         demuxer.seekToPTS(videoTimestamp);
-         YUVPicture nextFrame = demuxer.getNextFrame();
-
          FrameData copyForWriting = imageBuffer.getCopyForWriting();
          copyForWriting.cameraTargetPTS = videoTimestamp;
          copyForWriting.cameraCurrentPTS = demuxer.getCurrentPTS();
+         copyForWriting.cameraPreviousPTS = previousTimestamp;
          copyForWriting.robotTimestamp = currentlyShowingRobottimestamp;
+
+         demuxer.seekToPTS(videoTimestamp);
+         YUVPicture nextFrame = demuxer.getNextFrame();
 
          viewer.update(nextFrame, copyForWriting);
 
@@ -288,10 +289,11 @@ public class VideoDataPlayer
       Object[][] data = new Object[][]{
               {"cameraTargetPTS", 0},
               {"cameraCurrentPTS", 0},
+              {"cameraPreviousPTS", 0},
               {"robotTimestamp", 0},
       };
 
-      String[] columnNames = { "cameraTargetPTS", "cameraCurrentPTS', robotTimestamp"};
+      String[] columnNames = { "Timestamp type", "Value"};
 
       JTable table = new JTable(data, columnNames);
 
@@ -325,7 +327,8 @@ public class VideoDataPlayer
             {
                table.setValueAt(timestampData.cameraTargetPTS, 0, 1);
                table.setValueAt(timestampData.cameraCurrentPTS, 1, 1);
-               table.setValueAt(timestampData.robotTimestamp, 2, 1);
+               table.setValueAt(timestampData.cameraPreviousPTS, 2, 1);
+               table.setValueAt(timestampData.robotTimestamp, 3, 1);
 
                img = converter.toBufferedImage(nextFrame, img);
                nextFrame.delete();
@@ -358,7 +361,8 @@ public class VideoDataPlayer
       camera.setTimestampFile(videoName + "_Timestamps.dat");
       camera.setVideoFile(videoName + "_Video.mov");
 
-      File dataDirectory = new File("//Gideon/LogData/LoggerDevLogs/Comparison/Valkyrie_GStreamer_HDMI_timestamps_getPTS/");
+//      File dataDirectory = new File("//Gideon/LogData/LoggerDevLogs/Comparison/Valkyrie_Capture_SDI_timestamps_3003/");
+      File dataDirectory = new File("//Gideon/LogData/LoggerDevLogs/Comparison/Valkyrie_GStreamer_HDMI_timestamps_3003/");
 
       VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, true);
 
@@ -418,6 +422,7 @@ public class VideoDataPlayer
       public WritableImage frame;
       public long cameraTargetPTS;
       public long cameraCurrentPTS;
+      public long cameraPreviousPTS;
       public long robotTimestamp;
    }
 }
