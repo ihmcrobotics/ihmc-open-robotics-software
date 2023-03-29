@@ -8,6 +8,7 @@
 #define HEIGHT_MAP_PREVIOUS_CENTER_X 7
 #define HEIGHT_MAP_PREVIOUS_CENTER_Y 8
 
+#define ADDED_VARIANCE 0.2f
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -171,6 +172,13 @@ void kernel translateHeightMapKernel(global float *params,
   {
     int2 old_indices = (int2) (old_x_index, old_y_index);
     data_buffer_key = read_imageui(old_data_keys, old_indices).x;
+      // TODO add variance to everything, since we just translated.
+
+    int entries = entries_in_buffer[data_buffer_key];
+    int buffer_length = params[BUFFER_LENGTH];
+    int key = data_buffer_key * buffer_length;
+    for (int i = 0; i < entries; i++)
+      variance_samples[key++] += ADDED_VARIANCE;
   }
   else
   {
@@ -199,7 +207,6 @@ void kernel translateHeightMapKernel(global float *params,
   }
 
   write_imageui(new_data_keys, indices, (uint4)(data_buffer_key, 0, 0, 0));
-  // TODO add variance to everything, since we just translated.
 
   if (xIndex == 0 && yIndex == 0)
       printf("finished translate\n");
