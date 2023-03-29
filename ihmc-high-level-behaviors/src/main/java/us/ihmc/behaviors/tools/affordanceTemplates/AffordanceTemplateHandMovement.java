@@ -3,14 +3,14 @@ package us.ihmc.behaviors.tools.affordanceTemplates;
 import ihmc_common_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class AffordanceTemplateHandMovement
+public class AffordanceTemplateHandMovement implements AffordanceTemplateAction
 {
    private final ReferenceFrame affordanceFrame;
    private final FramePose3D handPose = new FramePose3D();
@@ -21,7 +21,7 @@ public class AffordanceTemplateHandMovement
       this.affordanceFrame = affordanceFrame;
    }
 
-   private void moveHand(double x, double y, double z, double yaw, double pitch, double roll, RobotSide side, double trajectoryTime, ROS2ControllerHelper helper)
+   private void moveHand(double x, double y, double z, double yaw, double pitch, double roll, RobotSide side, double trajectoryTime, BehaviorHelper helper)
    {
       handPose.setToZero(affordanceFrame);
       handPose.getPosition().set(x, y, z);
