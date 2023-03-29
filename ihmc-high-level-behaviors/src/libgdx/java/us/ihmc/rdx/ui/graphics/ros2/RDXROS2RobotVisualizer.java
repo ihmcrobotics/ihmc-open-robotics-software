@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.RDXFocusBasedCamera;
+import us.ihmc.rdx.imgui.ImGuiSliderFloat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -33,10 +34,11 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    private final Point3D latestRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D robotTranslationDifference = new Point3D();
    private final DRCRobotModel robotModel;
+   private final String chestName;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
-   private String chestName;
+   private final ImGuiSliderFloat opacitySlider = new ImGuiSliderFloat("Opacity", "%.2f", 1.0f);
 
    public RDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
@@ -59,9 +61,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       this.syncedRobot = syncedRobot;
       this.cameraForTrackingSupplier = cameraForTrackingSupplier;
       syncedRobot.addRobotConfigurationDataReceivedCallback(frequencyPlot::recordEvent);
-
       previousRobotMidFeetUnderPelvis.setToNaN();
-
       chestName = robotModel.getJointMap().getChestName();
    }
 
@@ -73,17 +73,14 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       cameraForTracking = cameraForTrackingSupplier.get();
       RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
-//      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Black().derive(0.0, 1.0, 1.0, 0.5));
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         String handName = robotModel.getJointMap().getHandName(robotSide);
-//         RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRigidBodyDefinition(handName),
-//                                                    body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
-//      }
-      ColorDefinition ghostColor = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
-      MaterialDefinition material = new MaterialDefinition(ghostColor);
-      SCS2DefinitionMissingTools.forEachRigidBodyDefinitionIncludingFourBars(robotDefinition.getRootBodyDefinition(),
-                                                                             body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
+      // We are just making the hands black here
+      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Black());
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String handName = robotModel.getJointMap().getHandName(robotSide);
+         RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRigidBodyDefinition(handName),
+                                                    body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
+      }
       loadRobotModelAndGraphics(robotDefinition, syncedRobot.getFullRobotModel().getElevator());
    }
 
@@ -144,6 +141,10 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       }
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Hide chest"), hideChest);
+      if (isRobotLoaded() && opacitySlider.render(0.0f, 1.0f))
+      {
+         setOpacity(opacitySlider.getFloatValue());
+      }
    }
 
    public void destroy()
