@@ -48,6 +48,8 @@ public class ROS2TunedRigidBodyTransform
       this.topicPair = topicPair;
       this.rigidBodyTransformToSync = rigidBodyTransformToSync;
       this.isRemoteTuner = isRemoteTuner;
+      // The tuning part is higher frequency to see the updates smoother as you tune. (5 Hz)
+      // The status is just and update of the current transform where an observer is not actively tuning. (2.5 Hz)
       statusThrottler = new Throttler().setFrequency(isRemoteTuner ? 5.0 : ROS2Heartbeat.STATUS_FREQUENCY);
       frameUpdateSubscription = ros2.subscribe(isRemoteTuner ? topicPair.getStatusTopic() : topicPair.getCommandTopic());
    }
