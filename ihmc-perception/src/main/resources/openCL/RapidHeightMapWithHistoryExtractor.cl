@@ -99,7 +99,7 @@ void kernel initializeDataStructureKernel(global float *params,
 
   int data_key = indices_to_key(xIndex, yIndex, params[HEIGHT_MAP_CENTER_INDEX]);
 
-  write_imageui(data_keys, indices, (uint4)(0, 0, 0, 0));
+  write_imageui(data_keys, indices, (uint4)(data_key, 0, 0, 0));
 
   initializeCellData(params, data_key, height_samples, variance_samples, samples_per_buffered_value, buffer_write_keys, entries_in_buffer);
 
@@ -402,8 +402,8 @@ void kernel computeHeightMapOutputValuesKernel(global float *params,
     int entry_to_read = 0;
     int start = data_key * buffer_length;
     int total_samples = samples_per_buffered_value[start];
-    total_height = height_samples[start];
-    total_variance = variance_samples[start];
+    total_height = total_samples * height_samples[start];
+    total_variance = total_samples * variance_samples[start];
     entry_to_read++;
     for (; entry_to_read < entries_to_read; entry_to_read++)
     {
