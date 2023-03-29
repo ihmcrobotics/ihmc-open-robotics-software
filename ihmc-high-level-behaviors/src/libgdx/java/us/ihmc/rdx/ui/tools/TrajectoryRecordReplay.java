@@ -1,11 +1,16 @@
 package us.ihmc.rdx.ui.tools;
 
+import us.ihmc.log.LogTools;
+
 import java.io.*;
 import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -16,34 +21,31 @@ import java.util.stream.Stream;
  * The trajectories are saved and loaded from .csv files.
  * Each column represents the trajectory of a distinct element (e.g., X position of the right hand, or Y position of the right hand, etc...).
  */
-public class TrajectoryRecordReplay<T extends Number>
+public class TrajectoryRecordReplay
 {
    private String filePath;
-   private final Class<T> clazz;
-   private int numberParts; // specify the number of parts you want to record (e.g., left hand, right hand, chest)
-   private ArrayList<T[]> dataMatrix = new ArrayList<>();
-   private ArrayList<T[]> concatenatedDataMatrix = new ArrayList<>();
-   private ArrayList<T[]> splitDataMatrix = new ArrayList<>();
+   private int numberOfParts; // specify the number of parts you want to record (e.g., left hand, right hand, chest)
+   private final ArrayList<double[]> dataMatrix = new ArrayList<>();
+   private final ArrayList<double[]> concatenatedDataMatrix = new ArrayList<>();
+   private final ArrayList<double[]> splitDataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
    private boolean savedRecording = true;
    private boolean doneReplaying = true;
    private boolean concatenated = false;
    private String recordFileName = "";
 
-   public TrajectoryRecordReplay(Class<T> clazz, String filePath, int numberParts)
+   public TrajectoryRecordReplay(String filePath, int numberParts)
    {
-      super();
-      this.clazz = clazz;
       this.filePath = filePath;
-      this.numberParts = numberParts;
+      this.numberOfParts = numberParts;
    }
 
-   public T[] play()
+   public double[] play()
    {
       return this.play(false);
    }
 
-   public T[] play(boolean split)
+   public double[] play(boolean split)
    {
       if (timeStepReplay < 1)
       {
@@ -51,7 +53,7 @@ public class TrajectoryRecordReplay<T extends Number>
          if (split)
             this.splitData();
       }
-      T[] values;
+      double[] values;
       int size;
       if (split)
       {
@@ -77,11 +79,11 @@ public class TrajectoryRecordReplay<T extends Number>
       return values;
    }
 
-   public void record(T[] values)
+   public void record(double[] values)
    {
       if (savedRecording)
          savedRecording = false;
-      T[] localValues = newNumberArray(values.length);
+      double[] localValues = new double[values.length];
       System.arraycopy(values, 0, localValues, 0, localValues.length);
       dataMatrix.add(localValues);
    }
@@ -93,10 +95,10 @@ public class TrajectoryRecordReplay<T extends Number>
     */
    public void concatenateData()
    {
-      for (int i = 0; i < dataMatrix.size(); i = i + numberParts)
+      for (int i = 0; i < dataMatrix.size(); i = i + numberOfParts)
       {
-         T[] concatenatedRow = dataMatrix.get(i);
-         for (int j = 1; j <= numberParts - 1; j++)
+         double[] concatenatedRow = dataMatrix.get(i);
+         for (int j = 1; j <= numberOfParts - 1; j++)
          {
             concatenatedRow = concatenateWithCopy(concatenatedRow, dataMatrix.get(i + j));
          }
@@ -114,10 +116,10 @@ public class TrajectoryRecordReplay<T extends Number>
    {
       for (int i = 0; i < dataMatrix.size(); i++)
       {
-         T[] row = dataMatrix.get(i);
-         for (int n = 0; n <= numberParts - 1; n++)
+         double[] row = dataMatrix.get(i);
+         for (int n = 0; n <= numberOfParts - 1; n++)
          {
-            T[] splitRow = newNumberArray(row.length / numberParts);
+            double[] splitRow = new double[row.length / numberOfParts];
             for (int j = 0; j < splitRow.length; j++)
             {
                splitRow[j] = row[j + n * splitRow.length];
@@ -140,14 +142,21 @@ public class TrajectoryRecordReplay<T extends Number>
    public void readCSV()
    {
       doneReplaying = false;
-      try (BufferedReader fileReader = new BufferedReader(new FileReader(filePath)))
+      try
       {
+         BufferedReader fileReader = new BufferedReader(new FileReader(filePath));
          String line;
          while ((line = fileReader.readLine()) != null)
          {
-            T[] dataValues = Stream.of(line.split(",")).map(this::setValue).toArray(this::newNumberArray);
+            String[] values = line.split(",");
+            double[] dataValues = new double[values.length];
+            for (int i = 0; i < values.length; i++)
+            {
+               dataValues[i] = Double.parseDouble(values[i]);
+            }
             dataMatrix.add(dataValues);
          }
+         fileReader.close();
       }
       catch (IOException e)
       {
@@ -155,35 +164,35 @@ public class TrajectoryRecordReplay<T extends Number>
       }
    }
 
-   public void writeCSV(ArrayList<T[]> dataMatrix)
+   public void writeCSV(ArrayList<double[]> dataMatrix)
    {
-      // If recordFile name has not been set, generate file with current date and time as name
-      String fileName = recordFileName.isEmpty() ? new SimpleDateFormat("yyMMddHHmmssZ'.csv'").format(new Date()) : recordFileName;
+      // if recordFile name has not been set, generate file with current date and time as name
+      String fileName = "";
+      if (recordFileName.isEmpty())
+      {
+         fileName = new SimpleDateFormat("yyMMddHHmmssZ'.csv'").format(new Date());
+         recordFileName = fileName;
+      }
+      else
+         fileName = recordFileName;
       File csvFile = new File(filePath + "/" + fileName);
       try (PrintWriter writer = new PrintWriter(csvFile))
       {
-         for (T[] dataLine : dataMatrix)
+         for (double[] dataLine : dataMatrix)
          {
-            String[] stringValues = Arrays.stream(dataLine).map(this::escapeSpecialCharacters).toArray(String[]::new);
-            String line = String.join(",", stringValues);
-            writer.println(line);
+            for (int i = 0; i < dataLine.length; i++)
+            {
+               writer.print(dataLine[i]);
+               if (i < dataLine.length - 1)
+                  writer.append(",");
+            }
+            writer.println();
          }
       }
       catch (IOException e)
       {
          e.printStackTrace();
       }
-   }
-
-   private String escapeSpecialCharacters(T data)
-   {
-      String string = String.valueOf(data);
-      if (string.contains(",") || string.contains("\"") || string.contains("\n"))
-      {
-         string = string.replace("\"", "\"\"");
-         string = "\"" + string + "\"";
-      }
-      return string;
    }
 
    private void reset()
@@ -196,92 +205,11 @@ public class TrajectoryRecordReplay<T extends Number>
       recordFileName = "";
    }
 
-   @SuppressWarnings("unchecked")
-   private T[] newNumberArray(int size)
+   private double[] concatenateWithCopy(double[] array1, double[] array2)
    {
-      T[] value;
-      if (clazz.isAssignableFrom(Integer.class))
-      {
-         value = (T[]) new Integer[size];
-      }
-      else if (clazz.isAssignableFrom(Short.class))
-      {
-         value = (T[]) new Short[size];
-      }
-      else if (clazz.isAssignableFrom(Long.class))
-      {
-         value = (T[]) new Long[size];
-      }
-      else if (clazz.isAssignableFrom(Double.class))
-      {
-         value = (T[]) new Double[size];
-      }
-      else if (clazz.isAssignableFrom(Float.class))
-      {
-         value = (T[]) new Float[size];
-      }
-      else
-      {
-         throw new IllegalArgumentException("Invalid type for TrajectoryRecordReplay. It only accepts primitive Number types.");
-      }
-      return value;
-   }
-
-   @SuppressWarnings("unchecked")
-   private T setValue(String input)
-   {
-      T value;
-      if (clazz.isAssignableFrom(Integer.class))
-      {
-         value = (T) Integer.valueOf(input);
-      }
-      else if (clazz.isAssignableFrom(Short.class))
-      {
-         value = (T) Short.valueOf(input);
-      }
-      else if (clazz.isAssignableFrom(Long.class))
-      {
-         value = (T) Long.valueOf(input);
-      }
-      else if (clazz.isAssignableFrom(Double.class))
-      {
-         value = (T) Double.valueOf(input);
-      }
-      else if (clazz.isAssignableFrom(Float.class))
-      {
-         value = (T) Float.valueOf(input);
-      }
-      else
-      {
-         throw new IllegalArgumentException("Invalid type for TrajectoryRecordReplay. It only accepts primitive Number types.");
-      }
-      return value;
-   }
-
-   private <T> T concatenateWithCopy(T array1, T array2)
-   {
-      if (!array1.getClass().isArray() || !array2.getClass().isArray())
-      {
-         throw new IllegalArgumentException("Only arrays are accepted.");
-      }
-
-      Class<?> componentType1 = array1.getClass().getComponentType();
-      Class<?> componentType2 = array2.getClass().getComponentType();
-
-      if (!componentType1.equals(componentType2))
-      {
-         throw new IllegalArgumentException("Two arrays have different types.");
-      }
-
-      int len1 = Array.getLength(array1);
-      int len2 = Array.getLength(array2);
-
-      @SuppressWarnings("unchecked")
-      // the cast is safe due to the previous checks
-      T result = (T) Array.newInstance(componentType1, len1 + len2);
-
-      System.arraycopy(array1, 0, result, 0, len1);
-      System.arraycopy(array2, 0, result, len1, len2);
+      double[] result = new double[array1.length + array2.length];
+      System.arraycopy(array1, 0, result, 0, array1.length);
+      System.arraycopy(array2, 0, result, array1.length, array2.length);
 
       return result;
    }
@@ -319,17 +247,17 @@ public class TrajectoryRecordReplay<T extends Number>
          this.reset();
    }
 
-   public void setNumberParts(int numberParts)
+   public void setNumberOfParts(int numberOfParts)
    {
-      this.numberParts = numberParts;
+      this.numberOfParts = numberOfParts;
    }
 
-   public ArrayList<T[]> getData()
+   public ArrayList<double[]> getData()
    {
       return dataMatrix;
    }
 
-   public ArrayList<T[]> getConcatenatedData()
+   public ArrayList<double[]> getConcatenatedData()
    {
       return concatenatedDataMatrix;
    }

@@ -63,7 +63,7 @@ public final class ProMPUtil
          {
             for (int j = 0; j < dataMatrix.cols(); j++)
             {
-               writer.append(String.valueOf(dataMatrix.coeff(i, j)));
+               writer.print(dataMatrix.coeff(i, j));
                if (j < dataMatrix.cols() - 1)
                {
                   writer.append(",");

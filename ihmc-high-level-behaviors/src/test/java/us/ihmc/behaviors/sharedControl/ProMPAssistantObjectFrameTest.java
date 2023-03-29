@@ -53,7 +53,7 @@ public class ProMPAssistantObjectFrameTest
       Files.copy(originalPath, copyForPlottingPath, StandardCopyOption.REPLACE_EXISTING);
 
       // replay that file
-      TrajectoryRecordReplay<Double> trajectoryPlayer = new TrajectoryRecordReplay<>(Double.class, testFilePath, 2); //2 body parts: the hands
+      TrajectoryRecordReplay trajectoryPlayer = new TrajectoryRecordReplay(testFilePath, 2); //2 body parts: the hands
       trajectoryPlayer.setDoneReplay(false);
       // start parsing data immedediately, assuming user is moving from beginning of recorded test trajectory
       proMPAssistant.setIsMovingThreshold(0.00001);
@@ -62,7 +62,7 @@ public class ProMPAssistantObjectFrameTest
       List<String> bodyParts = new ArrayList<>();
       bodyParts.add("leftHand");
       bodyParts.add("rightHand");
-      TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, etcDirectory, bodyParts.size());
+      TrajectoryRecordReplay trajectoryRecorder = new TrajectoryRecordReplay(etcDirectory, bodyParts.size());
       trajectoryRecorder.setRecordFileName("generatedMotion.csv");
       LogTools.info("Processing trajectory ...");
 
@@ -72,7 +72,7 @@ public class ProMPAssistantObjectFrameTest
          {
             FramePose3D framePose = new FramePose3D(objectFrame);
             // Read file with stored trajectories: read set point per timestep until file is over
-            Double[] dataPoint = trajectoryPlayer.play(true);
+            double[] dataPoint = trajectoryPlayer.play(true);
             // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
             framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
             framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
@@ -92,20 +92,17 @@ public class ProMPAssistantObjectFrameTest
             }
             //record frame and store it in csv file
             framePose.changeFrame(objectFrame);
-            Double[] bodyPartTrajectories = new Double[] {framePose.getOrientation().getX(),
-                                                          framePose.getOrientation().getY(),
-                                                          framePose.getOrientation().getZ(),
-                                                          framePose.getOrientation().getS(),
-                                                          framePose.getPosition().getX(),
-                                                          framePose.getPosition().getY(),
-                                                          framePose.getPosition().getZ()};
+            double[] bodyPartTrajectories = new double[7];
+            framePose.getOrientation().get(bodyPartTrajectories);
+            framePose.getPosition().get(4, bodyPartTrajectories);
+
             if(!proMPAssistant.isCurrentTaskDone())
                trajectoryRecorder.record(bodyPartTrajectories);
          }
       }
       //concatenate each set point of hands in single row
       trajectoryRecorder.concatenateData();
-      ArrayList<Double[]> dataConcatenated = trajectoryRecorder.getData();
+      ArrayList<double[]> dataConcatenated = trajectoryRecorder.getData();
       assertTrue(dataConcatenated.size() > 0); // check data is not empty
       // save recorded file name
       String recordFile = trajectoryRecorder.getRecordFileName();
@@ -119,17 +116,18 @@ public class ProMPAssistantObjectFrameTest
 
    private void createObjectFrameFromAruco()
    {
-      ArUcoMarkerObjectsInfo arucoInfo = new ArUcoMarkerObjectsInfo();
+      ArUcoMarkerObjectsInfo arucosInfo = new ArUcoMarkerObjectsInfo();
+      arucosInfo.load();
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       ArUcoMarkerObject objectWithArUco;
       // add markers with their respective info
-      for (int id : arucoInfo.getIds())
-         markersToTrack.add(new OpenCVArUcoMarker(id, arucoInfo.getMarkerSize(id)));
+      for (int id : arucosInfo.getIds())
+         markersToTrack.add(new OpenCVArUcoMarker(id, arucosInfo.getMarkerSize(id)));
       // get a marker
       OpenCVArUcoMarker marker = markersToTrack.get(0);
       int objectId = marker.getId();
       // get object with attached aruco marker
-      objectWithArUco = new ArUcoMarkerObject(objectId, arucoInfo);
+      objectWithArUco = new ArUcoMarkerObject(objectId, arucosInfo);
       // get marker pose in world frame, in reality this would be detected by camera
       FramePose3DBasics markerPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      new Point3D(1.073, -0.146, 1.016),

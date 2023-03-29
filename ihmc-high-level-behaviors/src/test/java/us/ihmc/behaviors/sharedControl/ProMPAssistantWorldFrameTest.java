@@ -43,7 +43,7 @@ public class ProMPAssistantWorldFrameTest
       Files.copy(originalPath, copyForPlottingPath, StandardCopyOption.REPLACE_EXISTING);
 
       // replay that file
-      TrajectoryRecordReplay<Double> trajectoryPlayer = new TrajectoryRecordReplay<>(Double.class, testFilePath, 2); //2 body parts: the hands
+      TrajectoryRecordReplay trajectoryPlayer = new TrajectoryRecordReplay(testFilePath, 2); //2 body parts: the hands
       trajectoryPlayer.setDoneReplay(false);
       // start parsing data immedediately, assuming user is moving from beginning of recorded test trajectory
       proMPAssistant.setIsMovingThreshold(0.00001);
@@ -52,7 +52,7 @@ public class ProMPAssistantWorldFrameTest
       List<String> bodyParts = new ArrayList<>();
       bodyParts.add("leftHand");
       bodyParts.add("rightHand");
-      TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, etcDirectory, bodyParts.size());
+      TrajectoryRecordReplay trajectoryRecorder = new TrajectoryRecordReplay(etcDirectory, bodyParts.size());
       trajectoryRecorder.setRecordFileName("generatedMotion.csv");
       LogTools.info("Processing trajectory ...");
 
@@ -63,7 +63,7 @@ public class ProMPAssistantWorldFrameTest
             FramePose3D framePose = new FramePose3D();
             framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
             // Read file with stored trajectories: read set point per timestep until file is over
-            Double[] dataPoint = trajectoryPlayer.play(true);
+            double[] dataPoint = trajectoryPlayer.play(true);
             // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
             framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
             framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
@@ -81,19 +81,15 @@ public class ProMPAssistantWorldFrameTest
                proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart, "Door", observedGoalPose);
             }
             //record frame and store it in csv file
-            Double[] bodyPartTrajectories = new Double[] {framePose.getOrientation().getX(),
-                                                          framePose.getOrientation().getY(),
-                                                          framePose.getOrientation().getZ(),
-                                                          framePose.getOrientation().getS(),
-                                                          framePose.getPosition().getX(),
-                                                          framePose.getPosition().getY(),
-                                                          framePose.getPosition().getZ()};
+            double[] bodyPartTrajectories = new double[7];
+            framePose.getOrientation().get(bodyPartTrajectories);
+            framePose.getPosition().get(4, bodyPartTrajectories);
             trajectoryRecorder.record(bodyPartTrajectories);
          }
       }
       //concatenate each set point of hands in single row
       trajectoryRecorder.concatenateData();
-      ArrayList<Double[]> dataConcatenated = trajectoryRecorder.getData();
+      ArrayList<double[]> dataConcatenated = trajectoryRecorder.getData();
       assertTrue(dataConcatenated.size() > 0); // check data is not empty
       // save recorded file name
       String recordFile = trajectoryRecorder.getRecordFileName();

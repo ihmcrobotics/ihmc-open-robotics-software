@@ -21,23 +21,23 @@ public class ArUcoObjectPoseTest
    @Test
    public void framePoseTransformsArUcoTest()
    {
-      ArUcoMarkerObjectsInfo arucoInfo = new ArUcoMarkerObjectsInfo();
-      arucoInfo.load();
+      ArUcoMarkerObjectsInfo arucosInfo = new ArUcoMarkerObjectsInfo();
+      arucosInfo.load();
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
       ArUcoMarkerObject objectWithArUco;
 
       // add markers with their respective info
-      for (int id : arucoInfo.getMarkersId())
+      for (int id : arucosInfo.getMarkersId())
       {
-         markersToTrack.add(new OpenCVArUcoMarker(id, arucoInfo.getMarkerSize(id)));
+         markersToTrack.add(new OpenCVArUcoMarker(id, arucosInfo.getMarkerSize(id)));
       }
 
       // get a marker
       OpenCVArUcoMarker marker = markersToTrack.get(0);
-      int objectId = marker.getId();
+      int id = marker.getId();
 
       // get object with attached aruco marker
-      objectWithArUco = new ArUcoMarkerObject(objectId, arucoInfo);
+      objectWithArUco = new ArUcoMarkerObject(id, arucosInfo);
       // get marker pose in world frame, in reality this would be detected by camera
       FramePose3D markerPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      new Point3D(1.073, -0.146, 1.016),
@@ -57,10 +57,8 @@ public class ArUcoObjectPoseTest
       YawPitchRoll objectYawPitchRoll = new YawPitchRoll();
       objectPose.getOrientation().get(objectYawPitchRoll);
       // check that object pose in marker frame equals to transform marker to object
-      assertEquals(objectPose.getTranslation().getX(), arucoInfo.getMarkerTranslation(objectId).getX(), 1e-10);
-      assertEquals(objectPose.getTranslation().getY(), arucoInfo.getMarkerTranslation(objectId).getY(), 1e-10);
-      assertEquals(objectPose.getTranslation().getZ(), arucoInfo.getMarkerTranslation(objectId).getZ(), 1e-10);
-      assertGeometricallyEquals(objectYawPitchRoll, arucoInfo.getMarkerYawPitchRoll(objectId), 1e-3);
+      assertGeometricallyEquals(objectPose.getTranslation(), arucosInfo.getMarkerTranslation(id), 1e-10);
+      assertGeometricallyEquals(objectYawPitchRoll, arucosInfo.getMarkerYawPitchRoll(id), 1e-3);
       objectPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform back to world frame
 
       ReferenceFrame objectFrame = objectWithArUco.getObjectFrame();
