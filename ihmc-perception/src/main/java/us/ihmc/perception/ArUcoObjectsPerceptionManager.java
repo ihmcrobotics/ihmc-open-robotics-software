@@ -5,8 +5,12 @@ import perception_msgs.msg.dds.DetectedObjectMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.perception.objects.*;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Topic;
@@ -22,7 +26,9 @@ public class ArUcoObjectsPerceptionManager
          = BASE_TOPIC.withType(DetectedObjectMessage.class).withSuffix("detected_object");
 
    private final IHMCROS2Input<ArUcoMarkerPoses> arUcoMarkerPosesSubscription;
-   private final HashMap<Integer, BiConsumer<Tuple3DReadOnly, QuaternionReadOnly>> markerUpdaters = new HashMap<>();
+   private final HashMap<Integer, BiConsumer<FrameTuple3DReadOnly, FrameQuaternionReadOnly>> markerUpdaters = new HashMap<>();
+   private final FramePoint3D detectedMarkerTranslation = new FramePoint3D();
+   private final FrameQuaternion detectedMarkerOrientation = new FrameQuaternion();
    private final ArrayList<ArUcoMarkerObject> markers = new ArrayList<>();
    private final ROS2Helper ros2;
 
@@ -64,8 +70,9 @@ public class ArUcoObjectsPerceptionManager
             var markerUpdater = markerUpdaters.get(markerId);
             if (markerUpdater != null)
             {
-               markerUpdater.accept(arUcoMarkerPosesMessage.getPosition().get(i),
-                                    arUcoMarkerPosesMessage.getOrientation().get(i));
+               detectedMarkerTranslation.set(arUcoMarkerPosesMessage.getPosition().get(i));
+               detectedMarkerOrientation.set(arUcoMarkerPosesMessage.getOrientation().get(i));
+               markerUpdater.accept(detectedMarkerTranslation, detectedMarkerOrientation);
             }
 
             for (DetectedObjectPublisher detectedObjectPublisher : detectedObjectPublishers)

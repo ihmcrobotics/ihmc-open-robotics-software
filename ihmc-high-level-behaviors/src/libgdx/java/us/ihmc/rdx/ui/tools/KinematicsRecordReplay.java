@@ -121,13 +121,7 @@ public class KinematicsRecordReplay
    {
       if (!isUserMoving)
       {
-         Pose3D lastFramePose = new Pose3D();
-         lastFramePose.getPosition().set(framePose.getPosition().getX(), framePose.getPosition().getY(), framePose.getPosition().getZ());
-         lastFramePose.getOrientation()
-                      .set(framePose.getOrientation().getX(),
-                           framePose.getOrientation().getY(),
-                           framePose.getOrientation().getZ(),
-                           framePose.getOrientation().getS());
+         Pose3D lastFramePose = new Pose3D(framePose);
          framesToRecordHistory.get(partId).add(lastFramePose);
          // check if last value of frame pose translated by 4cm with respect to first value of frame pose
          if (framesToRecordHistory.get(partId).size() > 1)

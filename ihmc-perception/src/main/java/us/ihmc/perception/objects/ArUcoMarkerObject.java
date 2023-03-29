@@ -2,34 +2,35 @@ package us.ihmc.perception.objects;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class ArUcoMarkerObject
 {
-   private RigidBodyTransform markerTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform markerTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                                      markerTransformToWorld);
-   private final RigidBodyTransform objectTransformToMarker = new RigidBodyTransform();
+   private final RigidBodyTransform markerTransformToObject = new RigidBodyTransform();
    // object frame might be different from marker location, for example the door handle is not exactly where the marker is on the door
-   private ReferenceFrame objectFrame;
-   private FramePose3D objectPose = new FramePose3D();
+   private final ReferenceFrame objectFrame;
+   private final FramePose3D objectPose = new FramePose3D();
 
    public ArUcoMarkerObject(int id, ArUcoMarkerObjectsInfo arucoInfo)
    {
-      objectTransformToMarker.set(arucoInfo.getMarkerYawPitchRoll(id), arucoInfo.getMarkerTranslation(id));
-      objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, objectTransformToMarker);
+      markerTransformToObject.set(arucoInfo.getMarkerYawPitchRoll(id), arucoInfo.getMarkerTranslation(id));
+      objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, markerTransformToObject);
    }
 
-   public void updateMarkerTransform(Tuple3DReadOnly position, QuaternionReadOnly orientation)
+   public void updateMarkerTransform(FrameTuple3DReadOnly markerTranslation, FrameQuaternionReadOnly markerOrientation)
    {
-      markerTransformToWorld.getTranslation().set(position);
-      markerTransformToWorld.getRotation().set(orientation);
+      markerTranslation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      markerOrientation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      markerTransformToWorld.set(markerOrientation, markerTranslation);
       markerFrame.update();
-      objectFrame.update();
    }
 
    public void updateFrame()
@@ -38,13 +39,13 @@ public class ArUcoMarkerObject
       objectFrame.update();
    }
 
-   public void computeObjectPose(FramePose3DBasics markerPose)
+   public void computeObjectPose(FramePose3DReadOnly markerPose)
    {
       objectPose.set(markerPose);
-      objectPose.appendTransform(objectTransformToMarker);
+      objectPose.appendTransform(markerTransformToObject);
    }
 
-   public RigidBodyTransform getMarkerTransformToWorld()
+   public RigidBodyTransformReadOnly getMarkerTransformToWorld()
    {
       return markerTransformToWorld;
    }
@@ -59,7 +60,7 @@ public class ArUcoMarkerObject
       return objectFrame;
    }
 
-   public FramePose3D getObjectPose()
+   public FramePose3DReadOnly getObjectPose()
    {
       return objectPose;
    }
