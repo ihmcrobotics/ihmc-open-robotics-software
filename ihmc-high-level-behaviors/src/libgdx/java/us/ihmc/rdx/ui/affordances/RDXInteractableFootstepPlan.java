@@ -27,6 +27,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -54,7 +55,8 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private RDXTeleoperationParameters teleoperationParameters;
 
    private final AtomicReference<HeightMapMessage> heightMapReference = new AtomicReference<>();
-   private final AtomicReference<PlanarRegionsListMessage> planarRegionsListReference = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsListMessage> planarRegionsListMessageReference = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>();
    private final AtomicReference<SwingPlannerParametersReadOnly> swingPlannerParametersReference = new AtomicReference<>();
 
    private int previousPlanLength;
@@ -96,7 +98,12 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       }
    }
 
-   public void setPlanarRegionsList(PlanarRegionsListMessage planarRegionsList)
+   public void setPlanarRegionsListMessage(PlanarRegionsListMessage planarRegionsListMessage)
+   {
+      planarRegionsListMessageReference.set(planarRegionsListMessage);
+   }
+
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       planarRegionsListReference.set(planarRegionsList);
    }
@@ -230,7 +237,10 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       stepChecker.update(footsteps);
       if (wasPlanUpdated && teleoperationParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
-         PlanarRegionsListMessage planarRegionsList = planarRegionsListReference.getAndSet(null);
+         PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListMessageReference.getAndSet(null);
+         PlanarRegionsList planarRegionsList = planarRegionsListReference.getAndSet(null);
+         if (planarRegionsListMessage != null)
+            swingPlanningModule.setPlanarRegionList(planarRegionsList);
          if (planarRegionsList != null)
             swingPlanningModule.setPlanarRegionList(planarRegionsList);
          HeightMapMessage heightMapMessage = heightMapReference.getAndSet(null);

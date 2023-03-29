@@ -60,6 +60,7 @@ public class ActiveMappingLocomotionModule
       ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "active_mapping_locomotion");
       ros2Helper = new ROS2Helper(ros2Node);
       publisherMap = new ROS2PublisherMap(ros2Node);
+      executorService.scheduleAtFixedRate(this::update, 0, 500, TimeUnit.MILLISECONDS);
 
       ros2Helper.subscribeViaCallback(ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE, this::onPlanarRegionsReceived);
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), walkingStatusMessage::set);
@@ -69,7 +70,6 @@ public class ActiveMappingLocomotionModule
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(ros2Node, robotModel);
 
-      executorService.scheduleAtFixedRate(this::update, 0, 500, TimeUnit.MILLISECONDS);
    }
 
    public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message)
@@ -92,6 +92,8 @@ public class ActiveMappingLocomotionModule
 
    public void update()
    {
+      LogTools.info("Update Called");
+
       if (planarRegionsListMessage.get() == null)
       {
          LogTools.warn("No Planar Regions Available");
@@ -108,17 +110,18 @@ public class ActiveMappingLocomotionModule
       request.setPlanarRegionsList(planarRegionsInWorldFrame);
       request.setPlanBodyPath(false);
       request.setGoalFootPoses(robotModel.getFootstepPlannerParameters().getIdealFootstepWidth(), goalPose);
+      request.setPerformAStarSearch(true);
 
       FootstepPlannerOutput plannerOutput = footstepPlanner.handleRequest(request);
 
       LogTools.info("Footstep Plan Result: {}", plannerOutput.getFootstepPlanningResult().validForExecution());
-      //FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 1.3, 0.4);
-      //
-      //LogTools.info("------------------------ Run -----------------------------");
-      //LogTools.info(String.format("Planar Regions: %d\t Plan Length: %d\t Walking Status: %s",
-      //                            planarRegionsInWorldFrame.getNumberOfPlanarRegions(),
-      //                            footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(),
-      //                            WalkingStatus.fromByte(walkingStatusMessage.get().getWalkingStatus())));
+//      FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(), 1.3, 0.4);
+
+      LogTools.info("------------------------ Run -----------------------------");
+      LogTools.info(String.format("Planar Regions: %d\t Plan Length: %d\t Walking Status: %s",
+                                  planarRegionsInWorldFrame.getNumberOfPlanarRegions(),
+                                  footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps(),
+                                  WalkingStatus.fromByte(walkingStatusMessage.get().getWalkingStatus())));
 
       //LogTools.info("Publishing Plan Result");
       //publisherMap.publish(controllerFootstepDataTopic, new FootstepDataListMessage());
