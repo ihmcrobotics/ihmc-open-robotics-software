@@ -9,13 +9,13 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.List;
 
-public class ArUcoMarkerObjectInfo extends DetectedObjectInfo
+public class ArUcoMarkerObjectsInfo extends DetectedObjectsInfo
 {
    private double[] markerSizes;
    private double[][] markerToBodyTranslations;
    private double[][] markerToBodyRotations;
 
-   public ArUcoMarkerObjectInfo()
+   public ArUcoMarkerObjectsInfo()
    {
       super();
    }

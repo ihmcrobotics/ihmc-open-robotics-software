@@ -8,14 +8,14 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.*;
 
-public class DetectedObjectInfo
+public class DetectedObjectsInfo
 {
    protected final ArrayList<Integer> IDs = new ArrayList<>();
    protected final ArrayList<String> objectNames = new ArrayList<>();
    protected final HashMap<String, String> modelFileName = new HashMap<>();
    protected WorkspaceResourceFile configurationFile;
 
-   public DetectedObjectInfo()
+   public DetectedObjectsInfo()
    {
       // read parameters regarding the properties of available objects with ArUco markers attached
       String file = "ObjectsInfo.json";

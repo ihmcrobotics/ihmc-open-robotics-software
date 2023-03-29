@@ -12,7 +12,7 @@ public class ArUcoMarkerInfoTest
    @Test
    public void markerInfoTest()
    {
-      ArUcoMarkerObjectInfo objectInfo = new ArUcoMarkerObjectInfo();
+      ArUcoMarkerObjectsInfo objectInfo = new ArUcoMarkerObjectsInfo();
       objectInfo.load();
       String name = objectInfo.getObjectName(0);
       System.out.println("Name: " + name);

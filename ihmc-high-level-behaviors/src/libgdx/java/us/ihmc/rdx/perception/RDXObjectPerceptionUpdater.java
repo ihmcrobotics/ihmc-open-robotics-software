@@ -4,7 +4,7 @@ import perception_msgs.msg.dds.DetectedObjectMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.objects.DetectedObjectInfo;
+import us.ihmc.perception.objects.DetectedObjectsInfo;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXVirtualGhostObject;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -14,7 +14,7 @@ public class RDXObjectPerceptionUpdater
    private final IHMCROS2Input<DetectedObjectMessage> subscription;
    private final String id;
 
-   public RDXObjectPerceptionUpdater(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> updateTopic, String id, DetectedObjectInfo objectInfo)
+   public RDXObjectPerceptionUpdater(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> updateTopic, String id, DetectedObjectsInfo objectInfo)
    {
       this.id = id;
       String modelFileName = objectInfo.getModelFileName(id);
