@@ -115,7 +115,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
       for (StoredPropertyKey<?> key : keys.keys())
       {
-         if (key.hasDefaultValue())
+          if (key.hasDefaultValue())
          {
             setInternal(key, key.getDefaultValue());
          }

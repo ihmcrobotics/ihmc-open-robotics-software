@@ -8,8 +8,7 @@
     "type" : "Boolean",
     "description" : "If true, the footstep planning algorithm will assume flat ground and walk regardless of sensor input, staying on the same plane and simply generating footsteps on that plane. Only use if the robot has plenty of space and the ground is very flat along the path you're taking."
   },
-  "Detect flat ground" : {
-    "type" : "Boolean",
+  "Detect flat ground" : {    "type" : "Boolean",
     "description" : "If true, there will be virtual (not sensor based) flat regions introduced when the sensor generated planar regions seem locally flat. This parameter is included to help the robot turn in place and take tight corners when the sensor field of view doesn't include the feet, but also because the feet are going to always prevent clean flat regions beneath you. This is an option because it can be a little risky depending on the environment."
   },
   "Detect flat ground z tolerance" : {

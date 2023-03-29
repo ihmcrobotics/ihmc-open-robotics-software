@@ -12,18 +12,23 @@ import imgui.type.ImDouble;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
+import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
@@ -71,6 +76,10 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final ImBoolean showPlannedSteps = new ImBoolean(true);
    private final ImBoolean showLastCommandedSteps = new ImBoolean(false);
 
+   private final ImGuiStoredPropertySetTuner lookAndStepParameterTuner = new ImGuiStoredPropertySetTuner("lookAndStepParameterTuner");
+   private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("footstepPlannerParameterTuner");
+   private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("swingPlannerParameterTuner");
+
    private boolean reviewingBodyPath = true;
    private final ImString latestFootstepPlannerLogPath = new ImString();
    private ArrayList<Pair<Integer, Double>> latestFootstepPlannerRejectionReasons = new ArrayList<>();
@@ -88,8 +97,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final ImGuiRemoteROS2StoredPropertySet swingPlannerRemotePropertySet;
    private final RDXBallAndArrowPosePlacement goalAffordance = new RDXBallAndArrowPosePlacement();
    private final RDXBoxVisualizer obstacleBoxVisualizer = new RDXBoxVisualizer();
-   private final ImBoolean invertShowGraphics = new ImBoolean(false);
-   private final ImBoolean showReceivedRegions = new ImBoolean(false);
    private static LookAndStepBehaviorParameters lookAndStepParameters;
    private final Notification planningFailedNotification = new Notification();
    private volatile int numberOfPlannedSteps = 0;
@@ -173,10 +180,10 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void create(RDXBaseUI baseUI)
    {
-      lookAndStepParameters = new LookAndStepBehaviorParameters();
+      lookAndStepParameters = new LookAndStepBehaviorParameters("ForNadia");
       lookAndStepParameterTuner.create(lookAndStepParameters,
-                                       () -> helper.publish(LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepParameters)));
-      stopForImpassibilities.set(lookAndStepParameters.getStopForImpassibilities());
+                                       () -> helper.publish(PARAMETERS.getCommandTopic(), StoredPropertySetMessageTools.newMessage(lookAndStepParameters)));
+//      stopForImpassibilities.set(lookAndStepParameters.getStopForImpassibilities());
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
       footstepPlannerParameterTuner.create(footstepPlannerParameters,

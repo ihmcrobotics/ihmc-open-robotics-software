@@ -273,17 +273,17 @@ public class LookAndStepPlanarRegionsManager
          LogTools.info("checking for convex hull points . . .");
          for (PlanarRegion region : planarRegionsListForPlanning.getPlanarRegionsAsList())
          {
-            if (region.getConvexHull().getNumberOfVertices() < 1)
-            {
-               int numberOfPlanarRegions = region.getNumberOfConvexPolygons();
-               int numberOfVertices = 0;
-               for (int i = 0; i < numberOfPlanarRegions; i++)
-               {
-                  numberOfVertices += region.getConvexPolygon(i).getNumberOfVertices();
-               }
-               planarRegionsListForPlanning.getPlanarRegionsAsList().remove(region);
-               LogTools.info("REMOVED planar region with no points");
-            }
+//            if (region.getConvexHull().getNumberOfVertices() < 1)
+//            {
+//               int numberOfPlanarRegions = region.getNumberOfConvexPolygons();
+//               int numberOfVertices = 0;
+//               for (int i = 0; i < numberOfPlanarRegions; i++)
+//               {
+//                  numberOfVertices += region.getConvexPolygon(i).getNumberOfVertices();
+//               }
+//               planarRegionsListForPlanning.getPlanarRegionsAsList().remove(region);
+//               LogTools.info("REMOVED planar region with no points");
+//            }
          }
          removeCloseRegionsToExcludeThoseFromTheBody(planarRegionsListForPlanning);
       }
