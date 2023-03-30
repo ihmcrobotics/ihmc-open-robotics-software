@@ -27,7 +27,7 @@ public class RDXArUcoMarkerDetectionDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final Activator nativesLoadedActivator;
    private RDXEnvironmentBuilder environmentBuilder;
-   private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();;
+   private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXHighLevelDepthSensorSimulator cameraSensor;
    private BytedecoImage testRGB888ColorImage;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
