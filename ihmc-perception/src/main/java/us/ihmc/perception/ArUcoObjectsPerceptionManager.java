@@ -4,13 +4,12 @@ import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import perception_msgs.msg.dds.DetectedObjectMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.perception.objects.*;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
@@ -28,15 +27,14 @@ public class ArUcoObjectsPerceptionManager
    private final FramePoint3D detectedMarkerTranslation = new FramePoint3D();
    private final FrameQuaternion detectedMarkerOrientation = new FrameQuaternion();
    private final ArrayList<ArUcoMarkerObject> markers = new ArrayList<>();
-   private final ROS2Helper ros2;
+   private final ROS2PublishSubscribeAPI ros2;
 
    private ArrayList<String> objectNames;
    private final ArrayList<DetectedObjectPublisher> detectedObjectPublishers = new ArrayList<>();
 
-   public ArUcoObjectsPerceptionManager(ArUcoMarkerObjectsInfo objectsInfo)
+   public ArUcoObjectsPerceptionManager(ROS2PublishSubscribeAPI ros2, ArUcoMarkerObjectsInfo objectsInfo)
    {
-      ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "objects_perception_manager");
-
+      this.ros2 = ros2;
       arUcoMarkerPosesSubscription = ros2.subscribe(ROS2Tools.ARUCO_MARKER_POSES);
 
       ArrayList<Integer> IDs = objectsInfo.getIds();
