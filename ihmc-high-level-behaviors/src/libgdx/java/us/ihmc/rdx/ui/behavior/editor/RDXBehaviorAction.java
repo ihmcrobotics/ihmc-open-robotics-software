@@ -7,6 +7,10 @@ import imgui.type.ImBoolean;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 
+/**
+ * The UI representation of a robot behavior action. It provides a base
+ * template for implementing an interactable action.
+ */
 public abstract class RDXBehaviorAction
 {
    private String nameForDisplay = "";
