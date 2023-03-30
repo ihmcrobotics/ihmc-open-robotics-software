@@ -5,6 +5,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
 
 public class DetectedObjectPublisher
@@ -39,12 +40,13 @@ public class DetectedObjectPublisher
 
    public void publish()
    {
-      detectedObjectMessage.setDetected(detected);
+      if (detected)
+      {
+         detectedObjectMessage.setId(id);
 
-      detectedObjectMessage.setId(id);
+         MessageTools.toMessage(objectFrame.getTransformToWorldFrame(), detectedObjectMessage.getTransformToWorld());
 
-      MessageTools.toMessage(objectFrame.getTransformToWorldFrame(), detectedObjectMessage.getTransformToWorld());
-
-      ros2.publish(topic, detectedObjectMessage);
+         ros2.publish(topic, detectedObjectMessage);
+      }
    }
 }
