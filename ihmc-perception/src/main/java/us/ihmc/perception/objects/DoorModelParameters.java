@@ -1,5 +1,11 @@
 package us.ihmc.perception.objects;
 
+/**
+ * The parameters for a door.
+ * TODO: Currently this is the simulation door.
+ *   - Turn into a stored property set to represent both
+ *     simulation and real lab door parameters
+ */
 public class DoorModelParameters
 {
    /* These measurements from the simulation door model, measured in Blender. */

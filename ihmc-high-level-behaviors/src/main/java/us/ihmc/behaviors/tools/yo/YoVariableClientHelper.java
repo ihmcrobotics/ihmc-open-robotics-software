@@ -12,6 +12,10 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
 
+/**
+ * Tries to make it seemless to connect to a YoVariable server, observe and change
+ * YoVariables.
+ */
 public class YoVariableClientHelper implements YoVariableClientPublishSubscribeAPI
 {
    private final String registryName;

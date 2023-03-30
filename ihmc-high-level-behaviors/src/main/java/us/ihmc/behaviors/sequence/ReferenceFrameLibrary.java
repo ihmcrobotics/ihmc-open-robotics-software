@@ -7,6 +7,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A library of reference frames. Useful for putting together a specific collection
+ * of frames for a specific purpose, rather than offering the full tree which would
+ * be overwhelming. This can get passed around to places that don't have access to
+ * robot specific frames as well, so things can be generalized better.
+ */
 public class ReferenceFrameLibrary
 {
    private final ArrayList<ReferenceFrame> referenceFrames = new ArrayList<>();

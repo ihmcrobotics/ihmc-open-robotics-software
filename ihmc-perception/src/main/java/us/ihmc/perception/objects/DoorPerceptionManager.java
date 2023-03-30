@@ -5,6 +5,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
+/**
+ * Manages the perception of a door and it's frame, which requires heuristics.
+ */
 public class DoorPerceptionManager
 {
    private final long markerID;

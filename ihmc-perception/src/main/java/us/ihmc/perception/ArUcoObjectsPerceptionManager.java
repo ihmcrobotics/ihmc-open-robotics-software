@@ -22,6 +22,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
+/**
+ * On-robot process that currently takes pre-registered ArUco markers detected and re-publishes them
+ * as our predefined objects, like doors, boxes, etc.
+ */
 public class ArUcoObjectsPerceptionManager
 {
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("perception_manager");
