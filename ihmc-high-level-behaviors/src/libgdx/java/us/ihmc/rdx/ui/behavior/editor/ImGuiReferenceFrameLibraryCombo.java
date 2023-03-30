@@ -6,6 +6,9 @@ import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
+/**
+ * Used to select between the reference frames in a library by human readable names.
+ */
 public class ImGuiReferenceFrameLibraryCombo
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -17,7 +20,7 @@ public class ImGuiReferenceFrameLibraryCombo
       this.referenceFrameLibrary = referenceFrameLibrary;
    }
 
-   public boolean combo()
+   public boolean render()
    {
       return ImGui.combo(labels.get("Reference frame"), referenceFrameIndex, referenceFrameLibrary.getReferenceFrameNames());
    }

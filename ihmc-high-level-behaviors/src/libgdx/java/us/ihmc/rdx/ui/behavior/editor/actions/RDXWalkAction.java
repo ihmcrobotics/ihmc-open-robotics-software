@@ -143,7 +143,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    @Override
    public void renderImGuiSettingWidgets()
    {
-      if (referenceFrameLibraryCombo.combo())
+      if (referenceFrameLibraryCombo.render())
       {
          FramePose3D poseToKeep = new FramePose3D();
          poseToKeep.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());
