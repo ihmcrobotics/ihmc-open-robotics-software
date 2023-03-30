@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
-public class BehaviorSequencePerceptionManager
+public class ArUcoObjectsPerceptionManager
 {
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("perception_manager");
    public static final ROS2Topic<DetectedObjectMessage> DETECTED_PULL_DOOR_FRAME
@@ -81,7 +81,7 @@ public class BehaviorSequencePerceptionManager
 
    private final ArrayList<DetectedObjectPublisher> detectedObjectPublishers = new ArrayList<>();
 
-   public BehaviorSequencePerceptionManager(ReferenceFrame cameraFrame)
+   public ArUcoObjectsPerceptionManager(ReferenceFrame cameraFrame)
    {
       ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_manager");
 

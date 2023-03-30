@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.BehaviorSequencePerceptionManager;
+import us.ihmc.perception.ArUcoObjectsPerceptionManager;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -32,21 +32,21 @@ public class RDXBehaviorSequencePerceptionManagerUI
       this.ros2 = ros2;
 
       pullDoorFrame = new RDXPerceptionObjectUpdater(ros2,
-                                                     BehaviorSequencePerceptionManager.DETECTED_PULL_DOOR_FRAME,
+                                                     ArUcoObjectsPerceptionManager.DETECTED_PULL_DOOR_FRAME,
                                                      "environmentObjects/door/doorFrame/DoorFrame.g3dj",
-                                                     String.format("PullDoor%dFrame", BehaviorSequencePerceptionManager.PULL_DOOR_MARKER_ID));
+                                                     String.format("PullDoor%dFrame", ArUcoObjectsPerceptionManager.PULL_DOOR_MARKER_ID));
       pullDoorPanel = new RDXPerceptionObjectUpdater(ros2,
-                                                     BehaviorSequencePerceptionManager.DETECTED_PULL_DOOR_PANEL,
+                                                     ArUcoObjectsPerceptionManager.DETECTED_PULL_DOOR_PANEL,
                                                      "environmentObjects/door/doorPanel/DoorPanel.g3dj",
-                                                     String.format("PullDoor%dPanel", BehaviorSequencePerceptionManager.PULL_DOOR_MARKER_ID));
+                                                     String.format("PullDoor%dPanel", ArUcoObjectsPerceptionManager.PULL_DOOR_MARKER_ID));
       pushDoorFrame = new RDXPerceptionObjectUpdater(ros2,
-                                                     BehaviorSequencePerceptionManager.DETECTED_PUSH_DOOR_FRAME,
+                                                     ArUcoObjectsPerceptionManager.DETECTED_PUSH_DOOR_FRAME,
                                                      "environmentObjects/door/doorFrame/DoorFrame.g3dj",
-                                                     String.format("PushDoor%dFrame", BehaviorSequencePerceptionManager.PUSH_DOOR_MARKER_ID));
+                                                     String.format("PushDoor%dFrame", ArUcoObjectsPerceptionManager.PUSH_DOOR_MARKER_ID));
       pushDoorPanel = new RDXPerceptionObjectUpdater(ros2,
-                                                     BehaviorSequencePerceptionManager.DETECTED_PUSH_DOOR_PANEL,
+                                                     ArUcoObjectsPerceptionManager.DETECTED_PUSH_DOOR_PANEL,
                                                      "environmentObjects/door/doorPanel/DoorPanel.g3dj",
-                                                     String.format("PushDoor%dPanel", BehaviorSequencePerceptionManager.PUSH_DOOR_MARKER_ID));
+                                                     String.format("PushDoor%dPanel", ArUcoObjectsPerceptionManager.PUSH_DOOR_MARKER_ID));
    }
 
    public void update()
