@@ -4,7 +4,6 @@ import perception_msgs.msg.dds.DetectedObjectMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.objects.DetectedObjectsInfo;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXVirtualGhostObject;
 import us.ihmc.ros2.ROS2Topic;
