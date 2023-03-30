@@ -191,40 +191,6 @@ public class BytedecoOpenCVTools
       opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, image);
    }
 
-   public static void printMat(String name, Mat image)
-   {
-      LogTools.info(matToString(name, image));
-   }
-
-   public static void printMatVector(String name, MatVector matVector)
-   {
-      for (int i = 0; i < matVector.size(); i++)
-      {
-         LogTools.info(matToString("%s %d:".formatted(name, i), matVector.get(i)) + "\n");
-      }
-   }
-
-   public static String matToString(String name, Mat image)
-   {
-      StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
-
-      for (int i = 0; i < image.rows(); i++)
-      {
-         for (int j = 0; j < image.cols(); j++)
-         {
-            if (image.type() == opencv_core.CV_16UC1)
-               matString.append(image.ptr(i, j).getShort()).append("\t");
-            if (image.type() == opencv_core.CV_64FC1)
-               matString.append("%.5f\t".formatted(image.ptr(i, j).getDouble()));
-            if (image.type() == opencv_core.CV_32FC2)
-               matString.append("%.5f\t%.5f\t\t".formatted(image.ptr(i, j).getFloat(), image.ptr(i, j).getFloat(Float.BYTES)));
-         }
-         matString.append("\n");
-      }
-
-      return matString.toString();
-   }
-
    public static Mat decompressImageJPGUsingYUV(BytePointer messageEncodedBytePointer)
    {
       Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
