@@ -33,6 +33,22 @@ import us.ihmc.tools.io.*;
 import java.util.LinkedList;
 import java.util.UUID;
 
+/**
+ * This class is primarily an interactable sequence/list of robot actions.
+ * Rendering it all gets kind of intense, it has some functionality to collapse everything
+ * into a more simplified view.
+ *
+ * For example, this class is a panel that would render several hand poses and a walk goal
+ * all in a sequence and allow you to run them on the real robot, but also preview and
+ * tune them.
+ *
+ * TODO: Improve usability. Some things that need improving:
+ *   - Actions get inserted in a weird place currently, I know I changed this a couple times,
+ *     it may need to be dynamic.
+ *   - Maybe including separators between the actions would help.
+ *   - Icons like a little hand for the hand poses, and feet for walk goal would likely help.
+ *     A little clock for the wait actions. etc.
+ */
 public class RDXBehaviorActionSequenceEditor
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
