@@ -18,7 +18,6 @@ import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.robotDataVisualizer.logger.converters.VideoConverter;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
@@ -31,6 +30,8 @@ public class VideoDataPlayer
    private final boolean hasTimebase;
    private final boolean interlaced;
 
+   private static HideableMediaFrame viewer;
+
    private long[] robotTimestamps;
    private long[] videoTimestamps;
 
@@ -38,16 +39,13 @@ public class VideoDataPlayer
    private long bmdTimeBaseDen;
 
    private final MP4VideoDemuxer demuxer;
-   private static HideableMediaFrame viewer;
-
    private final YUVPictureConverter converter = new YUVPictureConverter();
+
+   private final File videoFile;
 
    private int currentlyShowingIndex = 0;
    private long currentlyShowingRobottimestamp = 0;
    private long upcomingRobottimestamp = 0;
-
-   private final File videoFile;
-   private final ConcurrentCopier<FrameData> imageBuffer = new ConcurrentCopier<>(FrameData::new);
 
    public VideoDataPlayer(Camera camera, File dataDirectory, boolean hasTimeBase) throws IOException
    {
@@ -84,17 +82,24 @@ public class VideoDataPlayer
       long previousTimestamp = videoTimestamps[currentlyShowingIndex];
 
       long videoTimestamp;
+      long nextVideoTimestamp = videoTimestamps[currentlyShowingIndex];
+
+
       if (robotTimestamps.length > currentlyShowingIndex + 1 && robotTimestamps[currentlyShowingIndex + 1] == timestamp)
       {
          currentlyShowingIndex++;
          videoTimestamp = videoTimestamps[currentlyShowingIndex];
          currentlyShowingRobottimestamp = robotTimestamps[currentlyShowingIndex];
-
       }
       else
       {
          videoTimestamp = getVideoTimestamp(timestamp);
 
+      }
+
+      if (robotTimestamps.length > currentlyShowingIndex + 1)
+      {
+         nextVideoTimestamp = videoTimestamps[currentlyShowingIndex + 1];
       }
 
       if (currentlyShowingIndex + 1 < robotTimestamps.length)
@@ -113,8 +118,8 @@ public class VideoDataPlayer
 
       try
       {
-         FrameData copyForWriting = imageBuffer.getCopyForWriting();
-         copyForWriting.cameraTargetPTS = videoTimestamp;
+         FrameData copyForWriting = new FrameData();
+         copyForWriting.cameraTargetPTS = nextVideoTimestamp;
          copyForWriting.cameraCurrentPTS = demuxer.getCurrentPTS();
          copyForWriting.cameraPreviousPTS = previousTimestamp;
          copyForWriting.robotTimestamp = currentlyShowingRobottimestamp;
@@ -123,8 +128,6 @@ public class VideoDataPlayer
          YUVPicture nextFrame = demuxer.getNextFrame();
 
          viewer.update(nextFrame, copyForWriting);
-
-         imageBuffer.commit();
       }
       catch (IOException e)
       {
@@ -280,13 +283,12 @@ public class VideoDataPlayer
    private class HideableMediaFrame extends JFrame
    {
       private static final long serialVersionUID = -3494797002318746347L;
-      final JLabel label = new JLabel();
+      private final JLabel label = new JLabel();
       private BufferedImage img;
       private int width, height;
-      JPanel panel = new JPanel(new BorderLayout());
+      private final JPanel panel = new JPanel(new BorderLayout());
 
-      //actual data for the table in a 2d array
-      Object[][] data = new Object[][]{
+      private final Object[][] data = new Object[][]{
               {"cameraTargetPTS", 0},
               {"cameraCurrentPTS", 0},
               {"cameraPreviousPTS", 0},
@@ -306,8 +308,8 @@ public class VideoDataPlayer
          this.height = height;
 
          panel.add(label, BorderLayout.CENTER);
-         panel.setBackground(Color.WHITE);
          panel.add(table, BorderLayout.SOUTH);
+         panel.setBackground(Color.WHITE);
 
          pack();
       }
@@ -332,6 +334,7 @@ public class VideoDataPlayer
 
                img = converter.toBufferedImage(nextFrame, img);
                nextFrame.delete();
+
                ImageIcon icon = new ImageIcon(img);
                label.setIcon(icon);
 
@@ -361,8 +364,8 @@ public class VideoDataPlayer
       camera.setTimestampFile(videoName + "_Timestamps.dat");
       camera.setVideoFile(videoName + "_Video.mov");
 
-//      File dataDirectory = new File("//Gideon/LogData/LoggerDevLogs/Comparison/Valkyrie_Capture_SDI_timestamps_3003/");
-      File dataDirectory = new File("//Gideon/LogData/LoggerDevLogs/Comparison/Valkyrie_GStreamer_HDMI_timestamps_3003/");
+      File dataDirectory = new File("//Gideon/LogData/LoggerDevLogs/Comparison/Valkyrie_Capture_SDI_timestamps_3003/");
+//      File dataDirectory = new File("//Gideon/LogData/LoggerDevLogs/Comparison/Valkyrie_GStreamer_HDMI_timestamps_3003/");
 
       VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, true);
 
@@ -410,12 +413,10 @@ public class VideoDataPlayer
 
          previousNanos = System.nanoTime();
 
-         System.out.println(player.videoTimestamps[i]);
          player.showVideoFrame(nextRobotTimestamp);
          previousRobotTimestamp = nextRobotTimestamp;
       }
    }
-
 
    public static class FrameData
    {
