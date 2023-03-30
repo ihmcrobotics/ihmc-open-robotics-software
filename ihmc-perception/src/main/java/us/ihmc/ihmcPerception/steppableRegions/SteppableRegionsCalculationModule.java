@@ -173,6 +173,8 @@ public class SteppableRegionsCalculationModule
       polygonizerParameters.setLengthThreshold(0.4 * heightMapData.getGridResolutionXY());
 
       regionCollection.clear();
+      regionCollection.resizeCollection(parameters.getYawDiscretizations());
+
       regionEnvironments.clear();
       for (int yawValue = 0; yawValue < parameters.getYawDiscretizations(); yawValue++)
       {
@@ -202,7 +204,9 @@ public class SteppableRegionsCalculationModule
          snapNormalZImages.get(yawValue).readOpenCLImage(openCLManager);
          steppabilityConnections.get(yawValue).readOpenCLImage(openCLManager);
 
-         double yawAngle = ((double) yawValue) / (parameters.getYawDiscretizations() - 1) * Math.PI;
+         double yawAngle = 0.0;
+         if (parameters.getYawDiscretizations() > 1)
+            yawAngle = ((double) yawValue) / (parameters.getYawDiscretizations() - 1) * Math.PI;
 
          SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(
                steppabilityImages.get(yawValue),
