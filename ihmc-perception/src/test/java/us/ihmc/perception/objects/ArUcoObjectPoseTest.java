@@ -46,11 +46,11 @@ public class ArUcoObjectPoseTest
       // create from this pose, the associated transform stored in objectWithArUco
       markerPose.get(markerTransformToWorld);
       objectWithArUco.updateFrame(); // update frame of the object
-      objectWithArUco.computeObjectPose(markerPose); // compute object pose from marker pose
+      objectWithArUco.updateMarkerPose(markerPose); // compute object pose from marker pose
       LogTools.info("Marker: {}", markerPose);
 
       FramePose3D objectPose = new FramePose3D();
-      objectPose.set(objectWithArUco.getObjectPose());
+      objectPose.set(objectWithArUco.getObjectPose(ReferenceFrame.getWorldFrame()));
       LogTools.info("Object: {}", objectPose);
       objectPose.changeFrame(objectWithArUco.getMarkerFrame()); // transform object pose in marker frame
       LogTools.info("Object: {}", objectPose);

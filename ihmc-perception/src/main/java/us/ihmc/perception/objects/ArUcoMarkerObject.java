@@ -17,7 +17,6 @@ public class ArUcoMarkerObject
    private final RigidBodyTransform markerTransformToObject = new RigidBodyTransform();
    // object frame might be different from marker location, for example the door handle is not exactly where the marker is on the door
    private final ReferenceFrame objectFrame;
-   private final FramePose3D objectPose = new FramePose3D();
 
    public ArUcoMarkerObject(int id, ArUcoMarkerObjectsInfo arucoInfo)
    {
@@ -39,10 +38,9 @@ public class ArUcoMarkerObject
       objectFrame.update();
    }
 
-   public void computeObjectPose(FramePose3DReadOnly markerPose)
+   public void updateMarkerPose(FramePose3DReadOnly markerPose)
    {
-      objectPose.set(markerPose);
-      objectPose.appendTransform(markerTransformToObject);
+      updateMarkerTransform(markerPose.getPosition(), markerPose.getOrientation());
    }
 
    public RigidBodyTransformReadOnly getMarkerTransformToWorld()
@@ -60,8 +58,10 @@ public class ArUcoMarkerObject
       return objectFrame;
    }
 
-   public FramePose3DReadOnly getObjectPose()
+   public FramePose3DReadOnly getObjectPose(ReferenceFrame desiredFrame)
    {
+      FramePose3D objectPose = new FramePose3D(objectFrame);
+      objectPose.changeFrame(desiredFrame);
       return objectPose;
    }
 }

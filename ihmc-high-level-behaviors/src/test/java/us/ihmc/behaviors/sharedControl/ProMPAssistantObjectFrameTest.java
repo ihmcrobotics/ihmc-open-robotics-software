@@ -136,7 +136,7 @@ public class ProMPAssistantObjectFrameTest
       // create from this pose, the associated transform stored in objectWithArUco
       markerPose.get(markerTransformToWorld);
       objectWithArUco.updateFrame(); // update frame of the object
-      objectWithArUco.computeObjectPose(markerPose); // compute object pose from marker pose
+      objectWithArUco.updateMarkerPose(markerPose); // compute object pose from marker pose
 
       objectFrame = objectWithArUco.getObjectFrame();
    }
