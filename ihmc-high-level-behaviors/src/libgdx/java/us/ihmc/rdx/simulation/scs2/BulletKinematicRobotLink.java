@@ -9,10 +9,14 @@ import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletTerrainObject;
 
+/**
+ * Facilitates adding a robot link as a Bullet "kinematic object" as an SCS 2 terrain definition.
+ * This means an SCS 2 robot link can exert forces on the environment in realtime, but
+ * with the caveat that it does not receive forces.
+ */
 public class BulletKinematicRobotLink
 {
    private final Object referenceFrameAccessSync = new Object();
@@ -48,7 +52,8 @@ public class BulletKinematicRobotLink
 
    public void addCollidableShape(GeometryDefinition geometryDefinition)
    {
-//      terrainObjectDefinition.addVisualDefinition(new VisualDefinition(originPose, geometryDefinition, materialDefinition));
+      // Adding a visual is not necessary
+      // terrainObjectDefinition.addVisualDefinition(new VisualDefinition(originPose, geometryDefinition, materialDefinition));
       terrainObjectDefinition.addCollisionShapeDefinition(new CollisionShapeDefinition(originPose, geometryDefinition));
    }
 
