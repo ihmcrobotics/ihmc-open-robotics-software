@@ -14,6 +14,14 @@ import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 
+/**
+ * SCS 2 definition of the door we have in the lab.
+ * TODO: It's decently accurate, but still missing some features like:
+ *   - Accurate hinge axis
+ *   - Lever handle latch
+ *   - Dimensions stored as JSON for different varieties
+ *   - Dimensions of actual door double checked to match a sim door
+ */
 public class DoorDefinition extends RobotDefinition
 {
    private SixDoFJointState initialSixDoFState;
