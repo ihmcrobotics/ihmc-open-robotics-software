@@ -10,6 +10,13 @@ import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
+/**
+ * A lever style door handle, as an SCS 2 definition.
+ * It's a good-looking visual with a simple cylinder collision.
+ *
+ * At one point I was trying to actually add the full poly mesh as the
+ * collision, which didn't work well and it's commented.
+ */
 public class DoorLeverHandleDefinition extends RigidBodyDefinition
 {
    public DoorLeverHandleDefinition()
