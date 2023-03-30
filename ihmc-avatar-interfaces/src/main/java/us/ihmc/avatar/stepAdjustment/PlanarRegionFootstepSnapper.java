@@ -31,6 +31,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PlanarRegionFootstepSnapper implements FootstepAdjustment
@@ -70,10 +71,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    // These are the step constraint regions to be used by the footstep. Theoretically, it could be a list, but in practice, it's just the single region
    private final StepConstraintRegion constraintRegion = new StepConstraintRegion();
-   private final List<StepConstraintRegion> constraintRegionList = new ArrayList<>();
-   {
-      constraintRegionList.add(constraintRegion);
-   }
+   private final List<StepConstraintRegion> constraintRegionList = Collections.singletonList(constraintRegion);
 
    private final ConvexPolygon2D unsnappedFootstepPolygonInWorld = new ConvexPolygon2D();
    private final ConvexPolygon2D snappedAndWiggledFootstepPolygon = new ConvexPolygon2D();
