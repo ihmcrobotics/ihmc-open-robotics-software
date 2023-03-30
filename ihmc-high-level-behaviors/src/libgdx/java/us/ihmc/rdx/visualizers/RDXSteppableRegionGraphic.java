@@ -98,7 +98,12 @@ public class RDXSteppableRegionGraphic implements RenderableProvider
 
    private void generatePlanarRegionMeshes(List<SteppableRegion> steppableRegionsToView)
    {
-      List<PlanarRegion> planarRegions = steppableRegionsToView.stream().map(region -> region.toPlanarRegion()).toList();
+      List<PlanarRegion> planarRegions = steppableRegionsToView.stream().map(region ->
+                                                                             {
+                                                                                PlanarRegion planarRegion = new PlanarRegion();
+                                                                                region.toPlanarRegion(planarRegion);
+                                                                                return planarRegion;
+                                                                             }).toList();
       regionGraphics.generateMeshes(new PlanarRegionsList(planarRegions));
    }
 

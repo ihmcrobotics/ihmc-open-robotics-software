@@ -102,17 +102,15 @@ public class SteppableRegion
       return footYaw;
    }
 
-   public PlanarRegion toPlanarRegion()
+   public void toPlanarRegion(PlanarRegion planarRegionToPack)
    {
-      return toPlanarRegion(this);
+      toPlanarRegion(this, planarRegionToPack);
    }
 
-   public static PlanarRegion toPlanarRegion(SteppableRegion steppableRegion)
+   public static void toPlanarRegion(SteppableRegion steppableRegion, PlanarRegion planarRegionToPack)
    {
-      PlanarRegion planarRegion = new PlanarRegion(steppableRegion.transformFromRegionToWorld, steppableRegion.getConcaveHullInRegionFrame());
-      planarRegion.setRegionId(steppableRegion.getRegionId());
-
-      return planarRegion;
+      planarRegionToPack.set(steppableRegion.transformFromRegionToWorld, steppableRegion.getConcaveHullInRegionFrame());
+      planarRegionToPack.setRegionId(steppableRegion.getRegionId());
    }
 }
 
