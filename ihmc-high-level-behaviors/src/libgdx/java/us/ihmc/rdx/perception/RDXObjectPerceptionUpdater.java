@@ -7,6 +7,10 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXVirtualGhostObject;
 import us.ihmc.ros2.ROS2Topic;
 
+/**
+ * Keeps a ghost graphic object updated from a ROS 2 message.
+ * Like a door, chair, can of soup, etc.
+ */
 public class RDXObjectPerceptionUpdater
 {
    private final RDXVirtualGhostObject object;
