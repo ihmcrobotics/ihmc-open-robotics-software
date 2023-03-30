@@ -9,6 +9,9 @@ import us.ihmc.perception.ArUcoObjectsPerceptionManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.tools.thread.Throttler;
 
+/**
+ * The entry point and initial setup of the behavior sequence on-robot process.
+ */
 public class BehaviorActionSequenceModule
 {
    private final ROS2SyncedRobotModel syncedRobot;

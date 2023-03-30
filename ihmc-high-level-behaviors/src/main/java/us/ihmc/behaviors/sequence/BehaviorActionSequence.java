@@ -22,6 +22,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.UUID;
 
+/**
+ * Manages running a sequence of actions on the robot with shared autonomy.
+ * Since this class always currently gets it's instructions from the operator, it never loads
+ * a sequence from file, and the sequence is always completely updated by the operator, even
+ * when switching sequences entirely.
+ */
 public class BehaviorActionSequence
 {
    public static final ROS2Topic<?> ROOT_TOPIC = ROS2Tools.IHMC_ROOT.withRobot("behavior_action_sequence");

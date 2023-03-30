@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This class helps synchronize actions that are being interacted with and modified in a user interface,
+ * and helps to update the actions on the robot.
+ */
 public class BehaviorActionReceiver<T>
 {
    private final HashMap<Long, ArrayList<T>> receivedActionsByUUID = new HashMap<>();

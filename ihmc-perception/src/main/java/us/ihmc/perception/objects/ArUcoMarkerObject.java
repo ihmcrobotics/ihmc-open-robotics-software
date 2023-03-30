@@ -9,6 +9,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.util.function.Consumer;
 
+/**
+ * Keeps the base state of an ArUco marker based detectable object.
+ */
 public class ArUcoMarkerObject
 {
    private final RigidBodyTransform markerTransformToWorld = new RigidBodyTransform();

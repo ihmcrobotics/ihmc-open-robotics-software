@@ -35,6 +35,10 @@ import java.time.temporal.ChronoUnit;
 import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT;
 import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT;
 
+/**
+ * Manages a behavior tree based process on the real robot and syncs it
+ * with an operator UI with shared autonomy.
+ */
 public class BehaviorModule
 {
    private static SharedMemoryMessager sharedMemoryMessager;

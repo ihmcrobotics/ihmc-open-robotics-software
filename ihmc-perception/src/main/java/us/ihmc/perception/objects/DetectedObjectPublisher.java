@@ -7,6 +7,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ros2.ROS2Topic;
 
+/**
+ * Handles the ROS 2 publication of detected objects.
+ */
 public class DetectedObjectPublisher
 {
    private final ROS2PublishSubscribeAPI ros2;
