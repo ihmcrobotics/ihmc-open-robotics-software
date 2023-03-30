@@ -21,6 +21,18 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 import java.util.Comparator;
 import java.util.TreeSet;
 
+/**
+ * This panel renders a list of available action sequences found as JSON on disk,
+ * allows you to create new ones, and select one as active, which will show its
+ * panel and allow you to interact with it.
+ *
+ * For example, this will show a list of:
+ * - Push door (simulation)
+ * - Pull door (simulation)
+ * - Push door (real robot)
+ * - Pick up box marker ID 3
+ * - etc...
+ */
 public class RDXBehaviorActionSequenceUI
 {
    private final ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
