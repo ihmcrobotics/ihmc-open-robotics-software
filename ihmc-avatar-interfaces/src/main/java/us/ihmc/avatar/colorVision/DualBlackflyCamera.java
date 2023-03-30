@@ -18,12 +18,15 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
@@ -40,6 +43,7 @@ public class DualBlackflyCamera
 {
    private final String serialNumber;
    private final ROS2SyncedRobotModel syncedRobot;
+   private RigidBodyTransform cameraTransformToParent;
    private SpinnakerBlackfly blackfly;
    private final spinImage spinImage = new spinImage();
    private BytePointer spinImageDataPointer;
@@ -78,24 +82,30 @@ public class DualBlackflyCamera
    private List<OpenCVArUcoMarker> arUcoMarkersToTrack;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
+   private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
+   private ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
+   private ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
 
-   public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot)
+   public DualBlackflyCamera(String serialNumber, ROS2SyncedRobotModel syncedRobot, RigidBodyTransform cameraTransformToParent)
    {
       this.serialNumber = serialNumber;
       this.syncedRobot = syncedRobot;
+      this.cameraTransformToParent = cameraTransformToParent;
    }
 
    public void create(SpinnakerBlackfly blackfly,
                       RobotSide side,
                       ROS2Helper ros2Helper,
                       RealtimeROS2Node realtimeROS2Node,
-                      List<OpenCVArUcoMarker> arUcoMarkersToTrack)
+                      List<OpenCVArUcoMarker> arUcoMarkersToTrack,
+                      IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics)
    {
       this.blackfly = blackfly;
       this.side = side;
       this.ros2Helper = ros2Helper;
       this.realtimeROS2Node = realtimeROS2Node;
       this.arUcoMarkersToTrack = arUcoMarkersToTrack;
+      this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
 
       blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
       blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
@@ -115,15 +125,19 @@ public class DualBlackflyCamera
             imageWidth = blackfly.getWidth(spinImage);
             imageHeight = blackfly.getHeight(spinImage);
             LogTools.info("Blackfly {} resolution detected: {} x {}", serialNumber, imageWidth, imageHeight);
-            numberOfBytesInFrame = imageWidth * imageHeight * 4;
+            numberOfBytesInFrame = (long) imageWidth * imageHeight; // BayerRG8
             spinImageDataPointer = new BytePointer(numberOfBytesInFrame);
 
-            blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8U);
+            blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
 
-            yuv420Image = new Mat(imageHeight, imageWidth, opencv_core.CV_8U);
-            rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8U); // Mat for color conversion
+            yuv420Image = new Mat(imageHeight * 1.5, imageWidth, opencv_core.CV_8UC1);
+            rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4); // Mat for color conversion
 
             compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+
+            ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(ros2Helper,
+                                                                              DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
+                                                                              ousterFisheyeColoringIntrinsics);
 
             ROS2Topic<ImageMessage> imageTopic = ROS2Tools.BLACKFLY_FISHEYE_COLOR_IMAGE.get(side);
             LogTools.info("Publishing ROS 2 color images: {}", imageTopic);
@@ -196,8 +210,13 @@ public class DualBlackflyCamera
                                                                             arUcoMarkersToTrack,
                                                                             syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(),
                                                                             ros2Helper);
+
+                  remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
+                                                                                       ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
+                                                                                       cameraTransformToParent);
                }
 
+               remoteTunableCameraTransform.update();
                syncedRobot.update();
                ousterLidarFrame.getTransformToDesiredFrame(ousterToBlackflyTransfrom, blackflyCameraFrame);
 
@@ -229,16 +248,18 @@ public class DualBlackflyCamera
             opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, compressionParameters);
             encodingDuration.suspend();
 
+            ousterFisheyeColoringIntrinsicsROS2.updateAndPublishThrottledStatus();
+
             copyDuration.start();
             compressedImageDataPacker.pack(imageMessage, jpegImageBytePointer);
             copyDuration.suspend();
             MessageTools.toMessage(now, imageMessage.getAcquisitionTime());
             imageMessage.setImageWidth(imageWidth);
             imageMessage.setImageHeight(imageHeight);
-            imageMessage.setFocalLengthXPixels((float) SensorHeadParameters.FOCAL_LENGTH_X_FOR_COLORING);
-            imageMessage.setFocalLengthYPixels((float) SensorHeadParameters.FOCAL_LENGTH_Y_FOR_COLORING);
-            imageMessage.setPrincipalPointXPixels((float) SensorHeadParameters.PRINCIPAL_POINT_X_FOR_COLORING);
-            imageMessage.setPrincipalPointYPixels((float) SensorHeadParameters.PRINCIPAL_POINT_Y_FOR_COLORING);
+            imageMessage.setFocalLengthXPixels((float) ousterFisheyeColoringIntrinsics.getFocalLengthX());
+            imageMessage.setFocalLengthYPixels((float) ousterFisheyeColoringIntrinsics.getFocalLengthY());
+            imageMessage.setPrincipalPointXPixels((float) ousterFisheyeColoringIntrinsics.getPrinciplePointX());
+            imageMessage.setPrincipalPointYPixels((float) ousterFisheyeColoringIntrinsics.getPrinciplePointY());
             CameraModel.EQUIDISTANT_FISHEYE.packMessageFormat(imageMessage);
             imageMessage.setSequenceNumber(sequenceNumber++);
             ImageMessageFormat.COLOR_JPEG_YUVI420.packMessageFormat(imageMessage);

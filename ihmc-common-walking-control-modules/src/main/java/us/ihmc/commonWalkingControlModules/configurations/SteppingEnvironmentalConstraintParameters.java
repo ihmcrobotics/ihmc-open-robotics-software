@@ -7,7 +7,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SteppingEnvironmentalConstraintParameters
 {
-
    private final ConstraintOptimizerParametersReadOnly constraintOptimizerParameters;
 
    private static final double minPlanarRegionAreaForStepping = 0.05;
