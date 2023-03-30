@@ -16,34 +16,34 @@ import java.util.Set;
 /**
  * Should just display the ghost objects and provide the reference frame library.
  */
-public class RDXBehaviorSequencePerceptionManagerUI
+public class RDXObjectsPerceptionUI
 {
-   private final ImGuiPanel panel = new ImGuiPanel("Perception Manager", this::renderImGuiWidgets);
+   private final ImGuiPanel panel = new ImGuiPanel("Objects Perception UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ROS2PublishSubscribeAPI ros2;
-   private final RDXPerceptionObjectUpdater pullDoorFrame;
-   private final RDXPerceptionObjectUpdater pullDoorPanel;
-   private final RDXPerceptionObjectUpdater pushDoorFrame;
-   private final RDXPerceptionObjectUpdater pushDoorPanel;
+   private final RDXObjectPerceptionUpdater pullDoorFrame;
+   private final RDXObjectPerceptionUpdater pullDoorPanel;
+   private final RDXObjectPerceptionUpdater pushDoorFrame;
+   private final RDXObjectPerceptionUpdater pushDoorPanel;
 
-   public RDXBehaviorSequencePerceptionManagerUI(ROS2PublishSubscribeAPI ros2)
+   public RDXObjectsPerceptionUI(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
 
-      pullDoorFrame = new RDXPerceptionObjectUpdater(ros2,
+      pullDoorFrame = new RDXObjectPerceptionUpdater(ros2,
                                                      ArUcoObjectsPerceptionManager.DETECTED_PULL_DOOR_FRAME,
                                                      "environmentObjects/door/doorFrame/DoorFrame.g3dj",
                                                      String.format("PullDoor%dFrame", ArUcoObjectsPerceptionManager.PULL_DOOR_MARKER_ID));
-      pullDoorPanel = new RDXPerceptionObjectUpdater(ros2,
+      pullDoorPanel = new RDXObjectPerceptionUpdater(ros2,
                                                      ArUcoObjectsPerceptionManager.DETECTED_PULL_DOOR_PANEL,
                                                      "environmentObjects/door/doorPanel/DoorPanel.g3dj",
                                                      String.format("PullDoor%dPanel", ArUcoObjectsPerceptionManager.PULL_DOOR_MARKER_ID));
-      pushDoorFrame = new RDXPerceptionObjectUpdater(ros2,
+      pushDoorFrame = new RDXObjectPerceptionUpdater(ros2,
                                                      ArUcoObjectsPerceptionManager.DETECTED_PUSH_DOOR_FRAME,
                                                      "environmentObjects/door/doorFrame/DoorFrame.g3dj",
                                                      String.format("PushDoor%dFrame", ArUcoObjectsPerceptionManager.PUSH_DOOR_MARKER_ID));
-      pushDoorPanel = new RDXPerceptionObjectUpdater(ros2,
+      pushDoorPanel = new RDXObjectPerceptionUpdater(ros2,
                                                      ArUcoObjectsPerceptionManager.DETECTED_PUSH_DOOR_PANEL,
                                                      "environmentObjects/door/doorPanel/DoorPanel.g3dj",
                                                      String.format("PushDoor%dPanel", ArUcoObjectsPerceptionManager.PUSH_DOOR_MARKER_ID));
@@ -78,22 +78,22 @@ public class RDXBehaviorSequencePerceptionManagerUI
       return panel;
    }
 
-   public RDXPerceptionObjectUpdater getPullDoorFrame()
+   public RDXObjectPerceptionUpdater getPullDoorFrame()
    {
       return pullDoorFrame;
    }
 
-   public RDXPerceptionObjectUpdater getPullDoorPanel()
+   public RDXObjectPerceptionUpdater getPullDoorPanel()
    {
       return pullDoorPanel;
    }
 
-   public RDXPerceptionObjectUpdater getPushDoorFrame()
+   public RDXObjectPerceptionUpdater getPushDoorFrame()
    {
       return pushDoorFrame;
    }
 
-   public RDXPerceptionObjectUpdater getPushDoorPanel()
+   public RDXObjectPerceptionUpdater getPushDoorPanel()
    {
       return pushDoorPanel;
    }
