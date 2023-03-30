@@ -55,7 +55,7 @@ public class RDXFrameNodePart
       modelInstance.getRenderables(renderables, pool);
    }
 
-   public ModelInstance getModelInstance()
+   public RDXVisualModelInstance getModelInstance()
    {
       return modelInstance;
    }
