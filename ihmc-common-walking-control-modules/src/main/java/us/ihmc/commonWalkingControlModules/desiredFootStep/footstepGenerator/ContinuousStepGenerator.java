@@ -328,8 +328,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
          nextFootstepPose3D.set(nextFootstepPose2D);
+         FootstepDataMessage footstep = footsteps.add();
+
          for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
-            footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, nextFootstepPose2D, swingSide, nextFootstepPose3D);
+            footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, nextFootstepPose2D, swingSide, footstep);
 
 //         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
 //         {
@@ -337,15 +339,13 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 //            nextFootstepPose2D.set(nextFootstepPose3D);
 //         }
 
-         FootstepDataMessage footstep = footsteps.add();
          footstep.setRobotSide(swingSide.toByte());
-         footstep.getLocation().set(nextFootstepPose3D.getPosition());
-         footstep.getOrientation().set(nextFootstepPose3D.getOrientation());
          footstep.setSwingHeight(parameters.getSwingHeight());
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
-         previousFootstepPose.set(nextFootstepPose3D);
+         previousFootstepPose.getPosition().set(footstep.getLocation());
+         previousFootstepPose.getOrientation().set(footstep.getOrientation());
       }
 
       // adjust the whole footstep plan for the environment
@@ -379,10 +379,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
          if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
          {
-            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
-
-            footstepData.getLocation().set(nextFootstepPose3D.getPosition());
-            footstepData.getOrientation().set(nextFootstepPose3D.getOrientation());
+            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, footstepData);
 
             // remove all the other steps after the invalid one.
             while (footstepDataListMessage.getFootstepDataList().size() > i + 1)
@@ -391,24 +388,25 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
             }
          }
 
-         previousFootstepPose.set(nextFootstepPose3D);
-         footstepPose2D.set(nextFootstepPose3D);
+         previousFootstepPose.getPosition().set(footstepData.getLocation());
+         previousFootstepPose.getOrientation().set(footstepData.getOrientation());
+         footstepPose2D.set(previousFootstepPose);
       }
 
       // Update the visualizers
       for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
       {
-         int vizualizerIndex = i / 2;
+         int visualizerIndex = i / 2;
          List<FootstepVisualizer> footstepVisualizers = footstepSideDependentVisualizers.get(swingSide);
 
-         if (vizualizerIndex < footstepVisualizers.size())
+         if (visualizerIndex < footstepVisualizers.size())
          {
             FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
 
             nextFootstepPose3D.getPosition().set(footstepData.getLocation());
             nextFootstepPose3D.getOrientation().set(footstepData.getOrientation());
 
-            FootstepVisualizer footstepVisualizer = footstepVisualizers.get(vizualizerIndex);
+            FootstepVisualizer footstepVisualizer = footstepVisualizers.get(visualizerIndex);
             nextFootstepPose3DViz.setIncludingFrame(nextFootstepPose3D);
             nextFootstepPose3DViz.appendTranslation(0.0, 0.0, -0.005); // Sink the viz slightly so it is below the controller footstep viz.
             footstepVisualizer.update(nextFootstepPose3DViz);
@@ -765,10 +763,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
 
          @Override
-         public boolean adjustFootstep(FramePose3DReadOnly supportFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPose)
+         public boolean adjustFootstep(FramePose3DReadOnly supportFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedPose)
          {
-            adjustedPose.getPosition().set(footstepPose.getPosition());
-            adjustedPose.setZ(supportFootPose.getZ());
+            adjustedPose.getLocation().set(footstepPose.getPosition());
+            adjustedPose.getLocation().setZ(supportFootPose.getZ());
             if (adjustPitchAndRoll)
             {
                yawPitchRoll.set(supportFootPose.getOrientation());
@@ -948,7 +946,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private void calculateSquareUpStep(FramePose2DReadOnly stanceFootPose,
                                       FramePose2DReadOnly defaultTouchdownPose,
                                       RobotSide swingSide,
-                                      FramePose3D touchdownPoseToPack)
+                                      FootstepDataMessage touchdownPoseToPack)
    {
       alternateStepPose2D.set(stanceFootPose);
       alternateStepPose2D.appendTranslation(0.0, swingSide.negateIfRightSide(parameters.getDefaultStepWidth()));

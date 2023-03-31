@@ -14,7 +14,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
@@ -22,9 +21,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
-public class RDXBehaviorActionSequenceManager
+public class RDXBehaviorActionSequenceUI
 {
-   private ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
+   private final ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private WorkspaceResourceDirectory behaviorSequenceStorageDirectory;
    private RDX3DPanel panel3D;

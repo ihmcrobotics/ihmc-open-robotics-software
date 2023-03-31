@@ -58,7 +58,8 @@ public class WorkspaceDirectory
     */
    public WorkspaceDirectory(String directoryNameToAssumePresent)
    {
-      filesystemDirectory = PathTools.findDirectoryInline(directoryNameToAssumePresent).toAbsolutePath();
+      Path path = PathTools.findDirectoryInline(directoryNameToAssumePresent);
+      filesystemDirectory = path == null ? null : path.toAbsolutePath();
    }
 
    /**
@@ -70,7 +71,8 @@ public class WorkspaceDirectory
     */
    public WorkspaceDirectory(String directoryNameToAssumePresent, String subsequentPath)
    {
-      filesystemDirectory = WorkspacePathTools.findPath(directoryNameToAssumePresent, subsequentPath).toAbsolutePath();
+      Path path = WorkspacePathTools.findPath(directoryNameToAssumePresent, subsequentPath);
+      filesystemDirectory = path == null ? null : path.toAbsolutePath();
    }
 
    /**
