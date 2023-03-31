@@ -62,6 +62,11 @@ public class RDXVirtualGhostObject extends RDXModelInstance
       return transformToParent;
    }
 
+   public void setTransformToParent(RigidBodyTransform transform)
+   {
+      transformToParent.set(transform);
+   }
+
    public ReferenceFrame getReferenceFrame()
    {
       return referenceFrame;

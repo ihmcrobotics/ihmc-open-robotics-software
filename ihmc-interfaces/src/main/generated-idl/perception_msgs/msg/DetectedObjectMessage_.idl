@@ -16,9 +16,9 @@ module perception_msgs
       struct DetectedObjectMessage
       {
         /**
-         * Whether or not the object was detected this frame
+         * Unique ID used to identify the object
          */
-        boolean detected;
+        string id;
         /**
          * Transform to world
          */

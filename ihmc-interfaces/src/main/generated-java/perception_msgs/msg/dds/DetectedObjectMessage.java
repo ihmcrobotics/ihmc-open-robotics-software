@@ -12,9 +12,9 @@ import us.ihmc.pubsub.TopicDataType;
 public class DetectedObjectMessage extends Packet<DetectedObjectMessage> implements Settable<DetectedObjectMessage>, EpsilonComparable<DetectedObjectMessage>
 {
    /**
-            * Whether or not the object was detected this frame
+            * Unique ID used to identify the object
             */
-   public boolean detected_;
+   public java.lang.StringBuilder id_;
    /**
             * Transform to world
             */
@@ -22,6 +22,7 @@ public class DetectedObjectMessage extends Packet<DetectedObjectMessage> impleme
 
    public DetectedObjectMessage()
    {
+      id_ = new java.lang.StringBuilder(255);
       transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
@@ -33,24 +34,34 @@ public class DetectedObjectMessage extends Packet<DetectedObjectMessage> impleme
 
    public void set(DetectedObjectMessage other)
    {
-      detected_ = other.detected_;
+      id_.setLength(0);
+      id_.append(other.id_);
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
    }
 
    /**
-            * Whether or not the object was detected this frame
+            * Unique ID used to identify the object
             */
-   public void setDetected(boolean detected)
+   public void setId(java.lang.String id)
    {
-      detected_ = detected;
+      id_.setLength(0);
+      id_.append(id);
+   }
+
+   /**
+            * Unique ID used to identify the object
+            */
+   public java.lang.String getIdAsString()
+   {
+      return getId().toString();
    }
    /**
-            * Whether or not the object was detected this frame
+            * Unique ID used to identify the object
             */
-   public boolean getDetected()
+   public java.lang.StringBuilder getId()
    {
-      return detected_;
+      return id_;
    }
 
 
@@ -80,7 +91,7 @@ public class DetectedObjectMessage extends Packet<DetectedObjectMessage> impleme
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.detected_, other.detected_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.id_, other.id_, epsilon)) return false;
 
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
 
@@ -96,7 +107,7 @@ public class DetectedObjectMessage extends Packet<DetectedObjectMessage> impleme
 
       DetectedObjectMessage otherMyClass = (DetectedObjectMessage) other;
 
-      if(this.detected_ != otherMyClass.detected_) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.id_, otherMyClass.id_)) return false;
 
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
 
@@ -109,8 +120,8 @@ public class DetectedObjectMessage extends Packet<DetectedObjectMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("DetectedObjectMessage {");
-      builder.append("detected=");
-      builder.append(this.detected_);      builder.append(", ");
+      builder.append("id=");
+      builder.append(this.id_);      builder.append(", ");
       builder.append("transform_to_world=");
       builder.append(this.transform_to_world_);
       builder.append("}");
