@@ -90,7 +90,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
   int2 unitSphericalCoordinates = spherical_projection(cellCenterInSensor, params); // (x, y) <-> (pitch, yaw)
 
-  int WINDOW_WIDTH = 20;
+  int WINDOW_WIDTH = 40;
 
   float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 2.0f;
   float minX = cellCenterInWorld.x - halfCellWidth;
