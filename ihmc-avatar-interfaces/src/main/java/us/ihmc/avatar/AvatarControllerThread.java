@@ -99,7 +99,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  double gravity,
                                  double estimatorDT)
    {
-      controllerFullRobotModel = robotModel.createFullRobotModel();
+      controllerFullRobotModel = robotModel.createFullRobotModel("controller");
       if (robotInitialSetup != null)
       {
          robotInitialSetup.initializeFullRobotModel(controllerFullRobotModel);

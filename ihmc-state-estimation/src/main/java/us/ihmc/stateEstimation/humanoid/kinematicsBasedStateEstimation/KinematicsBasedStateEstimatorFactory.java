@@ -130,7 +130,7 @@ public class KinematicsBasedStateEstimatorFactory
 
       FullInverseDynamicsStructure fullInverseDynamicsStructure = createFullInverseDynamicsStructure(fullRobotModel);
 
-      HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames("estimator_", fullRobotModel);
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = contactableBodiesFactoryField.get();
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(estimatorReferenceFrames);
