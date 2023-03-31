@@ -42,7 +42,7 @@ public class DetectedObjectPublisher
       {
          detectedObjectMessage.setId(id);
 
-         MessageTools.toMessage(objectFrame.getTransformToWorldFrame(), detectedObjectMessage.getTransformToWorld());
+         MessageTools.toMessage(objectFrame.getTransformToRoot(), detectedObjectMessage.getTransformToWorld());
 
          ros2.publish(topic, detectedObjectMessage);
       }
