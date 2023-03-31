@@ -24,7 +24,6 @@ mainDependencies {
    api("com.github.wendykierp:JTransforms:3.1")
    api("org.reflections:reflections:0.9.10")
    api("com.hierynomus:sshj:0.32.0")
-   api("com.googlecode.json-simple:json-simple:1.1.1")
 
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("us.ihmc:euclid:0.19.1")
