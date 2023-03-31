@@ -14,17 +14,17 @@ public class DetectedObjectPublisher
 {
    private final ROS2PublishSubscribeAPI ros2;
    private final ROS2Topic<DetectedObjectMessage> topic;
-   private final long markerID;
+   private final String id;
    private final ReferenceFrame objectFrame;
    private final RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
    private final DetectedObjectMessage detectedObjectMessage = new DetectedObjectMessage();
    private boolean detected = false;
 
-   public DetectedObjectPublisher(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> topic, long markerID, ReferenceFrame objectFrame)
+   public DetectedObjectPublisher(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> topic, String id, ReferenceFrame objectFrame)
    {
       this.ros2 = ros2;
       this.topic = topic;
-      this.markerID = markerID;
+      this.id = id;
       this.objectFrame = objectFrame;
    }
 
@@ -33,9 +33,9 @@ public class DetectedObjectPublisher
       detected = false;
    }
 
-   public void markDetected(long detectedMarkerID)
+   public void objectDetected(String detectedID)
    {
-      if (detectedMarkerID == markerID)
+      if (detectedID.equals(id))
       {
          detected = true;
       }
@@ -43,11 +43,12 @@ public class DetectedObjectPublisher
 
    public void publish()
    {
-      detectedObjectMessage.setDetected(detected);
+      if (detected)
+      {
+         detectedObjectMessage.setId(id);
 
-      objectFrame.getTransformToDesiredFrame(objectTransformToWorld, ReferenceFrame.getWorldFrame());
-      MessageTools.toMessage(objectTransformToWorld, detectedObjectMessage.getTransformToWorld());
+         MessageTools.toMessage(objectFrame.getTransformToRoot(), detectedObjectMessage.getTransformToWorld());
 
-      ros2.publish(topic, detectedObjectMessage);
+         ros2.publish(topic, detectedObjectMessage);
+      }
    }
-}

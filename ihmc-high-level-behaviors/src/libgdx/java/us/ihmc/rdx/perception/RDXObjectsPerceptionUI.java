@@ -7,30 +7,35 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.ArUcoObjectsPerceptionManager;
+import us.ihmc.perception.objects.DetectedObjectsInfo;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
+import java.util.ArrayList;
 import java.util.Set;
 
-/**
- * Should just display the ghost objects and provide the reference frame library.
- */
 public class RDXObjectsPerceptionUI
 {
    private final ImGuiPanel panel = new ImGuiPanel("Objects Perception UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ROS2PublishSubscribeAPI ros2;
+   private final ArrayList<RDXObjectPerceptionUpdater> objectUpdaters = new ArrayList<>();
    private final RDXObjectPerceptionUpdater pullDoorFrame;
    private final RDXObjectPerceptionUpdater pullDoorPanel;
    private final RDXObjectPerceptionUpdater pushDoorFrame;
    private final RDXObjectPerceptionUpdater pushDoorPanel;
 
-   public RDXObjectsPerceptionUI(ROS2PublishSubscribeAPI ros2)
+   public RDXObjectsPerceptionUI(ROS2PublishSubscribeAPI ros2, DetectedObjectsInfo objectsInfo)
    {
       this.ros2 = ros2;
 
+      ArrayList<String> objectNames = objectsInfo.getObjectNames();
+      for (int i = 0; i < objectNames.size(); i++)
+         objectUpdaters.add(new RDXObjectPerceptionUpdater(ros2, ArUcoObjectsPerceptionManager.DETECTED_OBJECT, objectNames.get(i), objectsInfo));
+
+      
       pullDoorFrame = new RDXObjectPerceptionUpdater(ros2,
                                                      ArUcoObjectsPerceptionManager.DETECTED_PULL_DOOR_FRAME,
                                                      "environmentObjects/door/doorFrame/DoorFrame.g3dj",
@@ -51,6 +56,9 @@ public class RDXObjectsPerceptionUI
 
    public void update()
    {
+      for (RDXObjectPerceptionUpdater objectUpdater : objectUpdaters)
+         objectUpdater.update();
+         
       pullDoorFrame.update();
       pullDoorPanel.update();
       pushDoorFrame.update();
@@ -66,6 +74,10 @@ public class RDXObjectsPerceptionUI
    {
       if (showGraphics.get())
       {
+         for (RDXObjectPerceptionUpdater objectUpdater : objectUpdaters)
+            objectUpdater.getObject().getRenderables(renderables, pool, sceneLevels);
+
+            
          pullDoorFrame.getObject().getRenderables(renderables, pool, sceneLevels);
          pullDoorPanel.getObject().getRenderables(renderables, pool, sceneLevels);
          pushDoorFrame.getObject().getRenderables(renderables, pool, sceneLevels);
