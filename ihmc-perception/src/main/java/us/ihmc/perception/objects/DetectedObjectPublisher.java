@@ -52,3 +52,4 @@ public class DetectedObjectPublisher
          ros2.publish(topic, detectedObjectMessage);
       }
    }
+}
