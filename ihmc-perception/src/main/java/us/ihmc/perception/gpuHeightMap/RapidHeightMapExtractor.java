@@ -19,6 +19,8 @@ import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
+import java.util.Arrays;
+
 public class RapidHeightMapExtractor
 {
    private static final float gridWidthInMeters = 8.0f;
@@ -108,11 +110,13 @@ public class RapidHeightMapExtractor
          worldToSensorTransform.get(worldToSensorTransformArray);
          worldToSensorTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(worldToSensorTransformArray);
          worldToSensorTransformBuffer.writeOpenCLBufferObject(openCLManager);
+         LogTools.info("World to sensor transform: " + Arrays.toString(worldToSensorTransformArray));
 
          // Fill sensor-to-world transform buffer
          sensorToWorldTransform.get(sensorToWorldTransformArray);
          sensorToWorldTransformBuffer.getBytedecoFloatBufferPointer().asBuffer().put(sensorToWorldTransformArray);
          sensorToWorldTransformBuffer.writeOpenCLBufferObject(openCLManager);
+         LogTools.info("Sensor to world transform: " + Arrays.toString(sensorToWorldTransformArray));
 
          // Generate a +Z vector in world frame
          Vector3D groundNormalSensorFrame = new Vector3D(0.0, 0.0, 1.0);
@@ -139,7 +143,7 @@ public class RapidHeightMapExtractor
          // Read height map image into CPU memory
          outputHeightMapImage.readOpenCLImage(openCLManager);
 
-         latestHeightMapData = convertToHeightMapData(gridCenter);
+         //latestHeightMapData = convertToHeightMapData(gridCenter);
       }
    }
 

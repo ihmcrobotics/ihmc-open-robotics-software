@@ -21,6 +21,8 @@ public class RDXHeightMapRenderer implements RenderableProvider
 {
    private Renderable renderable;
 
+   private boolean active = true;
+
    public static final int FLOATS_PER_CELL = 8;
    public static final int BYTES_PER_VERTEX = FLOATS_PER_CELL * Float.BYTES;
    private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position,
@@ -133,7 +135,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (renderable != null)
+      if (active && renderable != null)
          renderables.add(renderable);
    }
 
@@ -141,5 +143,10 @@ public class RDXHeightMapRenderer implements RenderableProvider
    {
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
+   }
+
+   public void setActive(boolean active)
+   {
+      this.active = active;
    }
 }

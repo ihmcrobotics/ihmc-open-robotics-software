@@ -1,10 +1,10 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -60,8 +60,12 @@ public class RDXRapidHeightMapExtractionDemo
                                                                                                                                          true,
                                                                                                                                          1);
 
+   private final ImBoolean fastRendererEnabled = new ImBoolean(true);
+   private final ImBoolean basicVisualizerEnabled = new ImBoolean(false);
+
    private final ImInt frameIndex = new ImInt(0);
    private final ImFloat planeHeight = new ImFloat(1.5f); // 2.133f
+   private final ImFloat sensorpitch = new ImFloat(30.0f);
 
    private final Pose3D cameraPose = new Pose3D();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
@@ -77,6 +81,7 @@ public class RDXRapidHeightMapExtractionDemo
    private PerceptionDataLoader perceptionDataLoader;
 
    private boolean initialized = false;
+   private int totalDepthCount = 0;
 
    public RDXRapidHeightMapExtractionDemo()
    {
@@ -124,6 +129,8 @@ public class RDXRapidHeightMapExtractionDemo
 
             rapidHeightMapUpdater.create(openCLManager, loadedDepthImage);
             heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
+
+            totalDepthCount = (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1);
          }
 
          @Override
@@ -159,9 +166,10 @@ public class RDXRapidHeightMapExtractionDemo
             boolean changed = ImGui.sliderInt("Frame Index",
                                               frameIndex.getData(),
                                               0,
-                                              (int) (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1));
+                                              totalDepthCount);
 
             changed |= ImGui.sliderFloat("Plane Height", planeHeight.getData(), -3.0f, 3.0f);
+            changed |= ImGui.sliderFloat("Sensor Pitch", sensorpitch.getData(), -30.0f, 30.0f);
 
             if (ImGui.button("Load Previous"))
             {
@@ -174,6 +182,9 @@ public class RDXRapidHeightMapExtractionDemo
                frameIndex.set(frameIndex.get() + 1);
                changed = true;
             }
+
+            ImGui.checkbox("Fast Renderer", fastRendererEnabled);
+            ImGui.checkbox("Basic Visualizer", basicVisualizerEnabled);
 
             if (changed)
             {
@@ -202,6 +213,7 @@ public class RDXRapidHeightMapExtractionDemo
                                       LogTools.info("Update Height Map: " + frameIndex.get());
                                       Point3D position = sensorPositionBuffer.get(frameIndex.get());
                                       Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
+                                      orientation.multiply(new Quaternion(0, Math.toRadians(sensorpitch.get()), 0));
                                       cameraPose.set(position, orientation);
                                       cameraFrame.setPoseAndUpdate(cameraPose);
 
@@ -225,13 +237,30 @@ public class RDXRapidHeightMapExtractionDemo
       if (heightMapUpdateNotification.poll())
       {
          Point2D gridCenter = rapidHeightMapUpdater.getLatestHeightMapData() != null ? rapidHeightMapUpdater.getLatestHeightMapData().getGridCenter() : new Point2D();
-         heightMapRenderer.update(rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
-                                  gridCenter,
-                                  rapidHeightMapUpdater.getCenterIndex(),
-                                  rapidHeightMapUpdater.getCellSizeXYInMeters());
 
-         heightMapVisualizer.acceptHeightMapMessage(HeightMapMessageTools.toMessage(rapidHeightMapUpdater.getLatestHeightMapData()));
-         heightMapVisualizer.update();
+         if(fastRendererEnabled.get())
+         {
+            heightMapRenderer.setActive(true);
+            heightMapRenderer.update(rapidHeightMapUpdater.getOutputHeightMapImage().getPointerForAccessSpeed(),
+                                     gridCenter,
+                                     rapidHeightMapUpdater.getCenterIndex(),
+                                     rapidHeightMapUpdater.getCellSizeXYInMeters());
+         }
+         else
+         {
+            heightMapRenderer.setActive(false);
+         }
+
+         if(basicVisualizerEnabled.get())
+         {
+            heightMapVisualizer.setActive(true);
+            heightMapVisualizer.acceptHeightMapMessage(HeightMapMessageTools.toMessage(rapidHeightMapUpdater.getLatestHeightMapData()));
+            heightMapVisualizer.update();
+         }
+         else
+         {
+            heightMapVisualizer.setActive(false);
+         }
 
          rapidHeightMapUpdater.setModified(false);
          rapidHeightMapUpdater.setProcessing(false);
