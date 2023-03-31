@@ -329,7 +329,7 @@ public class RDXVRKinematicsStreamingMode
          }
       }
       ghostRobotGraphic.update();
-      if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewGraphicActive()) // if graphic active update also graphic
+      if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if graphic active update also graphic
          sharedControlAssistant.getGhostPreviewGraphic().update();
    }
 
