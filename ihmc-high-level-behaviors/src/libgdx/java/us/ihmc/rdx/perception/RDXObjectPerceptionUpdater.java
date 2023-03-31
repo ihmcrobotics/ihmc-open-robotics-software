@@ -18,7 +18,11 @@ public class RDXObjectPerceptionUpdater
    private final IHMCROS2Input<DetectedObjectMessage> subscription;
    private final String id;
 
-   public RDXObjectPerceptionUpdater(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> updateTopic, String id, DetectedObjectsInfo objectsInfo, String frameName)
+   public RDXObjectPerceptionUpdater(ROS2PublishSubscribeAPI ros2,
+                                     ROS2Topic<DetectedObjectMessage> updateTopic,
+                                     String id,
+                                     DetectedObjectsInfo objectsInfo,
+                                     String frameName)
    {
       this.id = id;
       String modelFileName = objectsInfo.getModelFileName(id);
