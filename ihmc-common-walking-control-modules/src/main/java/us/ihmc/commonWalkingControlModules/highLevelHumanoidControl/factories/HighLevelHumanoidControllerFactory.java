@@ -476,7 +476,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          }
       };
 
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames("controller_", fullRobotModel, centerOfMassStateProvider, null);
 
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(referenceFrames);

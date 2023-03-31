@@ -237,7 +237,7 @@ public class SCS2AvatarSimulationFactory
       {
          RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
          if (collisionModel != null)
-            RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
+            RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel("collisionModel").getElevator()),
                                                                 robotDefinition);
       }
 
@@ -459,7 +459,7 @@ public class SCS2AvatarSimulationFactory
       DRCRobotModel robotModel = this.robotModel.get();
 
       // Create intermediate data buffer for threading.
-      FullHumanoidRobotModel masterFullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel masterFullRobotModel = robotModel.createFullRobotModel("master");
       robotInitialSetup.get().initializeFullRobotModel(masterFullRobotModel);
       masterContext = new HumanoidRobotContextData(masterFullRobotModel);
 
