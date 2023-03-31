@@ -455,7 +455,9 @@ void kernel computeHeightMapOutputValuesKernel(global float *params,
       float height_weight_new = samples / variance_sample;
 
       // perform a kalman filter update on the data, ignoring the weight provided by the number of samples
+      // this is just a kalman filter average
       total_height = (total_height * height_weight_old + height_sample * height_weight_new) / (height_weight_old + height_weight_new);
+      // this is wrong, and done so it doesn't bias too much to the old data, but something better needs to be figured out.
       total_variance = (total_variance * total_samples + variance_sample * samples) / (total_samples + samples);
       total_samples += samples;
     }
