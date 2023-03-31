@@ -32,7 +32,7 @@ public class RDXObjectPerceptionUpdater
       if (subscription.getMessageNotification().poll())
       {
          DetectedObjectMessage detectedObjectMessage = subscription.getMessageNotification().read();
-         if(id.equals(detectedObjectMessage.getId().getAsString()))
+         if (id.equals(detectedObjectMessage.getId().toString()))
          {
             object.setShowing(detectedObjectMessage.getDetected());
             MessageTools.toEuclid(detectedObjectMessage.getTransformToWorld(), object.getTransformToParent());
