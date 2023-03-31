@@ -2,7 +2,7 @@
   "testNumberUseOnlyForTesting": 1,
   "logging" : false,
   "numberBasisFunctions": 20,
-  "numberObservations": 5,
+  "numberObservations": 10,
   "conditionOnlyLastObservation": false,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
