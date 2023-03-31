@@ -6,4 +6,7 @@ public interface FullHumanoidRobotModelFactory extends FullLeggedRobotModelFacto
 {
    @Override
    FullHumanoidRobotModel createFullRobotModel();
+
+   @Override
+   FullHumanoidRobotModel createFullRobotModel(String namePrefix);
 }

@@ -2,10 +2,13 @@ package us.ihmc.robotModels;
 
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.euclid.referenceFrame.FrameNameRestrictionLevel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -24,6 +27,8 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper implements FullHumanoidRobotModel
 {
+   private static final AtomicInteger modelCounter = new AtomicInteger();
+
    private HumanoidJointNameMap jointNameMap;
    private RigidBodyBasics chest;
    private SideDependentList<RigidBodyBasics> feet;
@@ -43,14 +48,24 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
    public FullHumanoidRobotModelWrapper(RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
    {
-      this(robotDefinition.newInstance(ReferenceFrame.getWorldFrame()));
+      this("model" + modelCounter.incrementAndGet(), robotDefinition, jointNameMap);
+   }
+
+   public FullHumanoidRobotModelWrapper(String namePrefix, RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
+   {
+      this(robotDefinition.newInstance(generateUniqueStaticFrame(namePrefix)));
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
 
    public FullHumanoidRobotModelWrapper(RobotDescription robotDescription, HumanoidJointNameMap jointNameMap)
    {
-      this(instantiateRobot(robotDescription, ReferenceFrame.getWorldFrame()));
+      this("model" + modelCounter.incrementAndGet(), robotDescription, jointNameMap);
+   }
+
+   public FullHumanoidRobotModelWrapper(String namePrefix, RobotDescription robotDescription, HumanoidJointNameMap jointNameMap)
+   {
+      this(instantiateRobot(robotDescription, generateUniqueStaticFrame(namePrefix)));
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDescription(robotDescription);
    }
@@ -65,6 +80,13 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
    public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator)
    {
       super(elevator);
+   }
+
+   private static ReferenceFrame generateUniqueStaticFrame(String namePrefix)
+   {
+      ReferenceFrame staticFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent(namePrefix + "StaticFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
+      staticFrame.setNameRestrictionLevel(FrameNameRestrictionLevel.FRAME_NAME);
+      return staticFrame;
    }
 
    protected void setupHumanoidJointNameMap(HumanoidJointNameMap jointNameMap)

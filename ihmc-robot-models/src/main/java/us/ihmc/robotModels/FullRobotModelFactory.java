@@ -7,4 +7,6 @@ public interface FullRobotModelFactory
    RobotDefinition getRobotDefinition();
 
    FullRobotModel createFullRobotModel();
+
+   FullRobotModel createFullRobotModel(String namePrefix);
 }

@@ -415,6 +415,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public FullHumanoidRobotModel createFullRobotModel(String namePrefix)
+   {
+      return new FullHumanoidRobotModelWrapper(namePrefix, getRobotDefinition(), getJointMap());
+   }
+
+   @Override
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;

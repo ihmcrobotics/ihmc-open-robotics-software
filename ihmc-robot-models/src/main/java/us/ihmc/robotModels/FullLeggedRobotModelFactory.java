@@ -6,4 +6,7 @@ public interface FullLeggedRobotModelFactory<E extends Enum<E> & RobotSegment<E>
 {
    @Override
    FullLeggedRobotModel<E> createFullRobotModel();
+
+   @Override
+   FullLeggedRobotModel<E> createFullRobotModel(String namePrefix);
 }
