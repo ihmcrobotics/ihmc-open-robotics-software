@@ -90,17 +90,17 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
   int2 unitSphericalCoordinates = spherical_projection(cellCenterInSensor, params); // (x, y) <-> (pitch, yaw)
 
-  int WINDOW_WIDTH = 40;
+  int WINDOW_WIDTH = 20;
 
   float halfCellWidth = params[HEIGHT_MAP_RESOLUTION] / 2.0f;
-  float minX = cellCenterInWorld.x - halfCellWidth;
-  float maxX = cellCenterInWorld.x + halfCellWidth;
-  float minY = cellCenterInWorld.y - halfCellWidth;
-  float maxY = cellCenterInWorld.y + halfCellWidth;
+//  float minX = cellCenterInSensor.x - halfCellWidth;
+//  float maxX = cellCenterInSensor.x + halfCellWidth;
+//  float minY = cellCenterInSensor.y - halfCellWidth;
+//  float maxY = cellCenterInSensor.y + halfCellWidth;
 
   int count = 0;
 
-  for (int pitch_count = 3 / 4 * (int)params[DEPTH_INPUT_HEIGHT]; pitch_count < (int)params[DEPTH_INPUT_HEIGHT]; pitch_count++)
+  for (int pitch_count = (int)params[DEPTH_INPUT_HEIGHT]; pitch_count < (int)params[DEPTH_INPUT_HEIGHT]; pitch_count++)
   {
     for (int yaw_count_offset = -WINDOW_WIDTH / 2; yaw_count_offset < WINDOW_WIDTH / 2 + 1; yaw_count_offset++)
     {
@@ -111,32 +111,23 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
         float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float)1000;
 
         float3 testPointInSensorFrame = back_project_spherical(yaw_count, pitch_count, radius, params);
-        float3 testPointInWorldFrame = transformPoint3D32_2(
-            testPointInSensorFrame,
-            (float3)(sensorToWorldTf[0], sensorToWorldTf[1], sensorToWorldTf[2]),
-            (float3)(sensorToWorldTf[4], sensorToWorldTf[5], sensorToWorldTf[6]),
-            (float3)(sensorToWorldTf[8], sensorToWorldTf[9], sensorToWorldTf[10]),
-            (float3)(sensorToWorldTf[3], sensorToWorldTf[7], sensorToWorldTf[11]));
 
-
-        if (fabs(testPointInWorldFrame.x - cellCenterInWorld.x) < halfCellWidth
-            && fabs(testPointInWorldFrame.y - cellCenterInWorld.y) < halfCellWidth)
+        if (fabs(testPointInSensorFrame.x - cellCenterInSensor.x) < halfCellWidth
+            && fabs(testPointInSensorFrame.y - cellCenterInSensor.y) < halfCellWidth)
         {
-      //printf("testPointInWorldFrame: %f, %f, %f <-> cellCenterInWorld: %f, %f, %f \n", testPointInWorldFrame.x, testPointInWorldFrame.y, testPointInWorldFrame.z, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z);
+      //printf("testPointInSensorFrame: %f, %f, %f <-> cellCenterInWorld: %f, %f, %f \n", testPointInSensorFrame.x, testPointInSensorFrame.y, testPointInSensorFrame.z, cellCenterInWorld.x, cellCenterInWorld.y, cellCenterInWorld.z);
 
           count++;
-          averageHeightZ += testPointInWorldFrame.z;
+          averageHeightZ += testPointInSensorFrame.z;
         }
       }
     }
   }
 
-
-
   if (count > 0)
   {
-    //averageHeightZ = averageHeightZ / (float)(count) - get_height_on_plane(cellCenterInSensor.x, cellCenterInSensor.y, plane);
-    averageHeightZ = averageHeightZ / (float)(count);
+    averageHeightZ = averageHeightZ / (float)(count) - get_height_on_plane(cellCenterInSensor.x, cellCenterInSensor.y, plane);
+//    averageHeightZ = averageHeightZ / (float)(count);
     averageHeightZ = clamp(averageHeightZ, -2.0f, 1.5f);
 
     write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)((2.0f + averageHeightZ) * 10000), 0, 0, 0));
