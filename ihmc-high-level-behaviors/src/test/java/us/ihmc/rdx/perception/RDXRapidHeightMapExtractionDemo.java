@@ -213,7 +213,6 @@ public class RDXRapidHeightMapExtractionDemo
                                       LogTools.info("Update Height Map: " + frameIndex.get());
                                       Point3D position = sensorPositionBuffer.get(frameIndex.get());
                                       Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
-                                      orientation.multiply(new Quaternion(0, Math.toRadians(sensorpitch.get()), 0));
                                       cameraPose.set(position, orientation);
                                       cameraFrame.setPoseAndUpdate(cameraPose);
 

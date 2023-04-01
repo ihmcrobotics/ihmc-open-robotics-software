@@ -143,7 +143,7 @@ public class RapidHeightMapExtractor
          // Read height map image into CPU memory
          outputHeightMapImage.readOpenCLImage(openCLManager);
 
-         //latestHeightMapData = convertToHeightMapData(gridCenter);
+         latestHeightMapData = convertToHeightMapData(gridCenter);
       }
    }
 
