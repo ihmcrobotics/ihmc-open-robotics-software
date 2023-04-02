@@ -40,7 +40,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
    private ImGuiStoredPropertySetTuner concaveHullParametersTuner;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean enabled = new ImBoolean(false);
+   private final ImBoolean enabled = new ImBoolean(true);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(false);
