@@ -21,6 +21,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class RDXRapidRegionsUIPanel implements RenderableProvider
@@ -137,17 +138,20 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
       debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
    }
 
-   public void render3DGraphics(PlanarRegionsList planarRegions, ReferenceFrame cameraFrame)
+   public void render3DGraphics(FramePlanarRegionsList planarRegions)
    {
-      framePose.setToZero(cameraFrame);
-      framePose.changeFrame(ReferenceFrame.getWorldFrame());
+      framePose.setToZero(ReferenceFrame.getWorldFrame());
+      framePose.set(planarRegions.getSensorToWorldFrameTransform());
       LibGDXTools.toLibGDX(framePose, tempTransform, sensorFrameGraphic.transform);
+
+      PlanarRegionsList regionsToRender = planarRegions.getPlanarRegionsList().copy();
+      regionsToRender.applyTransform(planarRegions.getSensorToWorldFrameTransform());
 
       synchronized (planarRegionsGraphic)
       {
          if(render3DPlanarRegions.get())
          {
-            planarRegionsGraphic.generateMeshes(planarRegions);
+            planarRegionsGraphic.generateMeshes(regionsToRender);
             planarRegionsGraphic.update();
          }
       }
