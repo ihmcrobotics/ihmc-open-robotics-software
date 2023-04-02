@@ -60,7 +60,7 @@ public class ActiveMappingModule
       LogTools.info("Start Pose: {}, Goal Pose: {}", leftSolePose, leftGoalPose);
 
       request = new FootstepPlannerRequest();
-      request.setTimeout(0.5);
+      request.setTimeout(0.25);
       request.setStartFootPoses(leftSolePose, rightSolePose);
       request.setPlanarRegionsList(planarRegionMap.getMapRegions());
       request.setPlanBodyPath(false);

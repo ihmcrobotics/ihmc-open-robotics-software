@@ -8,6 +8,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.activeMapping.ActiveMappingModule;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
@@ -31,12 +32,9 @@ public class RDXActiveMappingUIPanel implements RenderableProvider
    {
       ImGui.checkbox(labels.get("Render Enabled"), renderEnabled);
 
-      if (ImGui.button("Calculate Footstep Plan"))
+      if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
       {
          activeMappingModule.updateFootstepPlan();
-      }
-      if (ImGui.button("Execute Footstep Plan"))
-      {
          activeMappingModule.setWalkingEnabled(true);
       }
    }
