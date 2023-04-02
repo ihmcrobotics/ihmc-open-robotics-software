@@ -61,11 +61,8 @@ public class PlanarRegionMap
    private final RigidBodyTransform sensorToWorldTransformPrior = new RigidBodyTransform();
    private final RigidBodyTransform sensorToWorldTransformPosterior = new RigidBodyTransform();
    private final RigidBodyTransform initialTransformToWorld = new RigidBodyTransform();
-   private final RigidBodyTransform previousTransformToWorld = new RigidBodyTransform();
    private final RigidBodyTransform estimatedTransformToPrevious = new RigidBodyTransform();
-   private final PlanarRegionsList previousRegions = new PlanarRegionsList();
    private final PlanarLandmarkList mapLandmarks = new PlanarLandmarkList();
-   private final PlanarLandmarkList previousLandmarks = new PlanarLandmarkList();
 
    private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
    private final Stopwatch quaternionAveragingStopwatch = new Stopwatch();
@@ -84,6 +81,9 @@ public class PlanarRegionMap
    private final TIntArrayList mapIDs = new TIntArrayList();
    private final TIntArrayList incomingIDs = new TIntArrayList();
    private final HashSet<Integer> mapRegionIDSet = new HashSet<>();
+
+   private final PlanarLandmarkList previousLandmarks = new PlanarLandmarkList();
+   private final PlanarRegionsList previousRegions = new PlanarRegionsList();
 
 
    private PlanarRegionsList finalMap;
@@ -677,6 +677,9 @@ public class PlanarRegionMap
 
       PlanarLandmarkList landmarks = new PlanarLandmarkList(regions);
 
+      PlanarRegionsList originalRegions = regions.copy();
+      PlanarLandmarkList originalLandmarks = landmarks.copy();
+
       currentTimeIndex++;
       boolean isKeyframe = false;
       RigidBodyTransform transformToPrevious = new RigidBodyTransform();
@@ -696,13 +699,9 @@ public class PlanarRegionMap
          // L515-only
          //initialTransformToWorld.set(new RigidBodyTransform(new Quaternion(0.0, Math.toRadians(60.0), 0.0), new Point3D()));
          initialTransformToWorld.set(estimatedTransformToWorld);
-         previousTransformToWorld.set(initialTransformToWorld);
-
-         previousRegions.addPlanarRegionsList(regions.copy());
-         previousLandmarks.addAll(landmarks.copy());
 
          regions.applyTransform(initialTransformToWorld);
-         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, initialTransformToWorld, regions.copy()));
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, initialTransformToWorld, estimatedTransformToWorld));
          finalMap.addPlanarRegionsList(regions);
          mapLandmarks.addAll(finalMap);
 
@@ -729,9 +728,14 @@ public class PlanarRegionMap
 //            return null;
          }
 
-         //isKeyframe = performKeyframeCheck(transformToPrevious);
+         // Compute state estimator based odometry
+         estimatedTransformToPrevious.set(keyframes.get(keyframes.size() - 1).getTransformToWorld());
+         estimatedTransformToPrevious.invert();
+         estimatedTransformToPrevious.multiply(estimatedTransformToWorld);
 
-         isKeyframe = true;
+         LogTools.debug("Estimated Transform to previous: {}", estimatedTransformToPrevious);
+
+         isKeyframe = performKeyframeCheck(estimatedTransformToPrevious);
       }
 
       if (isKeyframe)
@@ -778,12 +782,6 @@ public class PlanarRegionMap
          PlanarRegionsList graphRegions = regions.copy();
          graphRegions.applyTransform(transformToSensor);
 
-         // Compute state estimator based odometry
-         previousTransformToWorld.invert();
-         estimatedTransformToPrevious.set(previousTransformToWorld);
-         estimatedTransformToPrevious.multiply(estimatedTransformToWorld);
-
-         LogTools.debug("Estimated Transform to previous: {}", estimatedTransformToPrevious);
          LogTools.debug("Transform to previous: {}", transformToPrevious);
 
          quaternionAveragingStopwatch.lap();
@@ -826,8 +824,7 @@ public class PlanarRegionMap
          factorGraph.clearISAM2();
          sensorPoseIndex++;
 
-         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, previousRegions.copy()));
-         previousTransformToWorld.set(estimatedTransformToWorld);
+         keyframes.add(new PlanarRegionKeyframe(currentTimeIndex, transformToWorld, estimatedTransformToWorld));
 
          regionMergingStopwatch.lap();
          //regionMergingStopwatch.suspend();

@@ -42,7 +42,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
    private final ImBoolean enabled = new ImBoolean(false);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
-   private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
+   private final ImBoolean render3DPlanarRegions = new ImBoolean(false);
    private final ImBoolean renderPointCloud = new ImBoolean(false);
 
    private ImGuiPlot wholeAlgorithmDurationPlot;
@@ -160,6 +160,10 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
 
       ImGui.text("Input image dimensions: " + imageWidth + " x " + imageHeight);
       ImGui.checkbox(labels.get("Enabled"), enabled);
+      ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
+      ImGui.checkbox(labels.get("Render Point Cloud"), renderPointCloud);
+      ImGui.checkbox(labels.get("Draw patches"), drawPatches);
+      ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
 
       wholeAlgorithmDurationPlot.render(rapidPlanarRegionsExtractor.getWholeAlgorithmDurationStopwatch().totalElapsed());
       gpuDurationPlot.render(rapidPlanarRegionsExtractor.getGpuDurationStopwatch().totalElapsed());
@@ -176,10 +180,6 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
 
       svdDurationPlot.render((float) rapidPlanarRegionsExtractor.getMaxSVDSolveTime());
 
-      ImGui.checkbox(labels.get("Render Point Cloud"), renderPointCloud);
-      ImGui.checkbox(labels.get("Draw patches"), drawPatches);
-      ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
-      ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
    }
 
    public void destroy()
