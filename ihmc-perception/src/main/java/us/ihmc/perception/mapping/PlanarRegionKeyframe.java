@@ -13,27 +13,17 @@ public class PlanarRegionKeyframe
 {
    private int timeIndex = 0;
 
-   private PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private RigidBodyTransform transformToWorld = new RigidBodyTransform();
+   private RigidBodyTransform estimatedTransformToWorld = new RigidBodyTransform();
    private RigidBodyTransform transformToPrevious = new RigidBodyTransform();
 
-   public PlanarRegionKeyframe(int index, RigidBodyTransform transformToPrevious, RigidBodyTransform previousToWorldTransform, PlanarRegionsList planarRegionsList)
+   public PlanarRegionKeyframe(int index, RigidBodyTransform transformToWorld, RigidBodyTransform estimatedTransformToWorld)
    {
-      this.planarRegionsList.addPlanarRegionsList(planarRegionsList);
-      this.timeIndex = index;
-      this.transformToPrevious.set(transformToPrevious);
-
-      this.transformToWorld.set(transformToPrevious);
-      this.transformToWorld.multiply(previousToWorldTransform);
-   }
-
-   public PlanarRegionKeyframe(int index, RigidBodyTransform transformToWorld, PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList.addPlanarRegionsList(planarRegionsList);
       this.timeIndex = index;
       this.transformToPrevious.set(transformToPrevious);
 
       this.transformToWorld.set(transformToWorld);
+      this.estimatedTransformToWorld.set(estimatedTransformToWorld);
    }
 
    public RigidBodyTransform getTransformToWorld()
