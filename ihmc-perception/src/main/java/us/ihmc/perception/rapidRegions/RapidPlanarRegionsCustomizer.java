@@ -64,12 +64,9 @@ public class RapidPlanarRegionsCustomizer
    {
       return rapidRegion.getBoundaryVertices()
                         .stream()
-                        .map(boundaryVertex ->
-                             {
-                                return PolygonizerTools.toPointInPlane(new Point3D(boundaryVertex),
-                                                                       origin,
-                                                                       orientation);
-                             })
+                        .map(boundaryVertex -> PolygonizerTools.toPointInPlane(new Point3D(boundaryVertex),
+                                                               origin,
+                                                               orientation))
                         .filter(point2D -> Double.isFinite(point2D.getX()) && Double.isFinite(point2D.getY()))
                         .collect(Collectors.toList());
    }
@@ -121,7 +118,7 @@ public class RapidPlanarRegionsCustomizer
       }
    }
 
-   public void applyConcaveHullFilters(ConcaveHullCollection concaveHulls)
+   public ConcaveHullCollection applyConcaveHullFilters(ConcaveHullCollection concaveHulls)
    {
       // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
       double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
@@ -131,7 +128,9 @@ public class RapidPlanarRegionsCustomizer
       ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHulls);
       ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHulls);
       if (polygonizerParameters.getCutNarrowPassage())
-         concaveHulls = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHulls);
+         return ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHulls);
+      else
+         return concaveHulls;
    }
 
    public ConcaveHullFactoryParameters getConcaveHullFactoryParameters()

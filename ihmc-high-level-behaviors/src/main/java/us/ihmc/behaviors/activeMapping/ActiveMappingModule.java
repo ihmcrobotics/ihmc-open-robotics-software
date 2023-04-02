@@ -2,15 +2,15 @@ package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -21,25 +21,20 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class ActiveMappingModule
 {
-
    private final FootstepPlanningModule footstepPlanner;
    private final DRCRobotModel robotModel;
+   private final HumanoidReferenceFrames referenceFrames;
+   private final PlanarRegionMap planarRegionMap;
 
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(
-         "ActiveMappingRunner"));
-
-   private PlanarRegionMap planarRegionMap;
    private FootstepPlannerRequest request;
    private FootstepPlannerOutput plannerOutput;
 
-   private Pose3D goalPose = new Pose3D(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-
    private boolean walkingEnabled = false;
    private boolean active = true;
-   ;
 
-   public ActiveMappingModule(DRCRobotModel robotModel)
+   public ActiveMappingModule(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
    {
+      this.referenceFrames = humanoidReferenceFrames;
       this.planarRegionMap = new PlanarRegionMap(true);
       this.robotModel = robotModel;
 
@@ -53,19 +48,28 @@ public class ActiveMappingModule
 
    public void updateFootstepPlan()
    {
+      Pose3D leftSolePose = new Pose3D(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+      Pose3D rightSolePose = new Pose3D(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+
+      Pose3D leftGoalPose = new Pose3D(leftSolePose);
+      leftGoalPose.appendTranslation(1.0, 0.0, 0.0);
+
+      Pose3D rightGoalPose = new Pose3D(rightSolePose);
+      rightGoalPose.appendTranslation(1.0, 0.0, 0.0);
+
+      LogTools.info("Start Pose: {}, Goal Pose: {}", leftSolePose, leftGoalPose);
+
       request = new FootstepPlannerRequest();
-      request.setTimeout(3.5);
-      Pose3D initialMidFootPose = new Pose3D(new Point3D(), new Quaternion());
-      request.setStartFootPoses(robotModel.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
-      request.setRequestedInitialStanceSide(RobotSide.LEFT);
+      request.setTimeout(0.5);
+      request.setStartFootPoses(leftSolePose, rightSolePose);
       request.setPlanarRegionsList(planarRegionMap.getMapRegions());
       request.setPlanBodyPath(false);
-      request.setGoalFootPoses(robotModel.getFootstepPlannerParameters().getIdealFootstepWidth(), goalPose);
+      request.setGoalFootPoses(leftGoalPose, rightGoalPose);
       request.setPerformAStarSearch(true);
 
       plannerOutput = footstepPlanner.handleRequest(request);
 
-      LogTools.info("------------------------ Run -----------------------------");
+
       LogTools.info(String.format("Planar Regions: %d\t Plan Length: %d\n",
                                   planarRegionMap.getMapRegions().getNumberOfPlanarRegions(),
                                   footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps()));
@@ -90,6 +94,11 @@ public class ActiveMappingModule
    public void setWalkingEnabled(boolean walkingEnabled)
    {
       this.walkingEnabled = walkingEnabled;
+   }
+
+   public boolean isWalkingEnabled()
+   {
+      return walkingEnabled;
    }
 
    public boolean isActive()

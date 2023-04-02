@@ -5,7 +5,7 @@
   "Orthogonal distance threshold" : 0.04,
   "Max Inter Region Distance" : 0.03,
   "Minimum overlap threshold" : 0.60,
-  "Minimum planar region area" : 0.02,
+  "Minimum planar region area" : 0.04,
   "Minimum bounding box size" : 0.08,
   "Plane noise variance" : 0.04,
   "Odometry noise variance" : 0.0001,

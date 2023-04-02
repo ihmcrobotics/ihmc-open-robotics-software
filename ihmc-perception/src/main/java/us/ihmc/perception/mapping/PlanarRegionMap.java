@@ -677,9 +677,6 @@ public class PlanarRegionMap
 
       PlanarLandmarkList landmarks = new PlanarLandmarkList(regions);
 
-      PlanarRegionsList originalRegions = regions.copy();
-      PlanarLandmarkList originalLandmarks = landmarks.copy();
-
       currentTimeIndex++;
       boolean isKeyframe = false;
       RigidBodyTransform transformToPrevious = new RigidBodyTransform();
@@ -696,8 +693,6 @@ public class PlanarRegionMap
 
       if(!initialized)
       {
-         // L515-only
-         //initialTransformToWorld.set(new RigidBodyTransform(new Quaternion(0.0, Math.toRadians(60.0), 0.0), new Point3D()));
          initialTransformToWorld.set(estimatedTransformToWorld);
 
          regions.applyTransform(initialTransformToWorld);
@@ -708,7 +703,6 @@ public class PlanarRegionMap
          initializeFactorGraphForSmoothing(regions, initialTransformToWorld);
 
          initialized = true;
-         //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, new RigidBodyTransform()));
       }
       else
       {
@@ -720,8 +714,6 @@ public class PlanarRegionMap
 
          boolean valid = PlaneRegistrationTools.computeIterativeQuaternionAveragingBasedRegistration(previousLandmarks, landmarks.copy(), transformToPrevious, parameters);
 
-//         PerceptionPrintTools.printTransform("Transform to previous", transformToPrevious);
-
          if (!valid)
          {
 //            LogTools.warn("[FAILED] Last Index: {}, Current Index: {}", keyframes.get(keyframes.size() - 1).getTimeIndex(), currentTimeIndex);
@@ -732,8 +724,6 @@ public class PlanarRegionMap
          estimatedTransformToPrevious.set(keyframes.get(keyframes.size() - 1).getTransformToWorld());
          estimatedTransformToPrevious.invert();
          estimatedTransformToPrevious.multiply(estimatedTransformToWorld);
-
-         LogTools.debug("Estimated Transform to previous: {}", estimatedTransformToPrevious);
 
          isKeyframe = performKeyframeCheck(estimatedTransformToPrevious);
       }
@@ -760,12 +750,6 @@ public class PlanarRegionMap
             regions.applyTransform(residualTransform);
          }
 
-         //submitRegionsUsingIterativeReduction(new FramePlanarRegionsList(regions, transformToWorld));
-         //transformToWorld.set(sensorToWorldTransformPosterior);
-
-//         PerceptionPrintTools.printRegionIDs("Regions", regions);
-//         PerceptionPrintTools.printRegionIDs("Map", finalMap);
-
          PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
                                                        regions,
                                                        incomingToMapMatches,
@@ -773,8 +757,6 @@ public class PlanarRegionMap
                                                        (float) parameters.getSimilarityThresholdBetweenNormals(),
                                                        (float) parameters.getOrthogonalDistanceThreshold(),
                                                        (float) parameters.getMinimumBoundingBoxSize());
-
-//         PerceptionPrintTools.printMatches("Cross Matches", finalMap, regions, incomingToMapMatches);
 
          RigidBodyTransform transformToSensor = new RigidBodyTransform(transformToWorld);
          transformToSensor.invert();
@@ -832,9 +814,6 @@ public class PlanarRegionMap
          wholeAlgorithmDurationStopwatch.lap();
          //wholeAlgorithmDurationStopwatch.suspend();
 
-         PerceptionDebugTools.printTransform(String.valueOf(sensorPoseIndex), transformToWorld, false);
-         LogTools.debug("Adding keyframe: " + keyframes.size() + " Map: " + finalMap.getNumberOfPlanarRegions() + " regions");
-
          return transformToWorld;
       }
 
@@ -845,22 +824,10 @@ public class PlanarRegionMap
 
    private boolean performKeyframeCheck(RigidBodyTransform transformToPrevious)
    {
-      // Add a keyframe if either the translation or rotation is large enough in separate if blocks
       Point3D euler = new Point3D();
       Vector3DBasics translation = transformToPrevious.getTranslation();
       transformToPrevious.getRotation().getEuler(euler);
-
-      PerceptionDebugTools.printTransform("ICP", transformToPrevious, false);
-
-      boolean isKeyframe = (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
-
-      if (translation.norm() > parameters.getKeyframeDistanceThreshold())
-         LogTools.warn("[Keyframe] High Translation: " + translation.norm());
-
-      if (euler.norm() > parameters.getKeyframeAngularThreshold())
-         LogTools.warn("[Keyframe] High Rotation: " + euler.norm());
-
-      return isKeyframe;
+      return (translation.norm() > parameters.getKeyframeDistanceThreshold()) || (euler.norm() > parameters.getKeyframeAngularThreshold());
    }
 
    public void performMapCleanUp()
