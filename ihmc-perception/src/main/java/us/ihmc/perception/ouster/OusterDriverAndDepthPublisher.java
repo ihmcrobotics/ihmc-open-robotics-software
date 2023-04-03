@@ -131,7 +131,7 @@ public class OusterDriverAndDepthPublisher
          humanoidReferenceFrames.getOusterLidarFrame().getTransformToDesiredFrame(ousterSensorFrame.getTransformToParent(), ReferenceFrame.getWorldFrame());
          ousterSensorFrame.getReferenceFrame().update();
       }
-      depthPublisher.extractCompressAndPublish(ousterSensorFrame.getReferenceFrame().getTransformToRoot(),
+      depthPublisher.extractCompressAndPublish(ousterSensorFrame.getReferenceFrame(),
                                                depthExtractionKernel,
                                                ouster.getAquisitionInstant(),
                                                ouster.getPixelShiftBuffer(),
