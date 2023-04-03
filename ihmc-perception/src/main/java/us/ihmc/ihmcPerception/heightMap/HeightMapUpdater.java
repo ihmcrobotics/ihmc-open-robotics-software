@@ -39,6 +39,7 @@ import java.util.function.Consumer;
 public class HeightMapUpdater
 {
    private static final boolean snapCenterToGrid = true;
+   public static final double defaultVarianceForInferredData = 0.1;
 
    private static final boolean printFrequency = false;
    private static final boolean printQueueSize = false;
@@ -455,7 +456,7 @@ public class HeightMapUpdater
                resetHeight += heightMap.getHeightAt(xNeighbor, yNeighbor);
             }
          }
-         heightMap.resetAtHeight(cellNumber, resetHeight / numberOfNeighbors);
+         heightMap.resetAtHeight(cellNumber, resetHeight / numberOfNeighbors, defaultVarianceForInferredData);
       }
    }
 

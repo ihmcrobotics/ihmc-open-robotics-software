@@ -14,6 +14,7 @@ public class HeightMapCell
 
    /** Observed heights within cell */
    private final TDoubleArrayList heightMeasurements = new TDoubleArrayList();
+   private final TDoubleArrayList varianceMeasurements = new TDoubleArrayList();
    private final HeightMapParametersReadOnly parameters;
 
    private int oldestIndex;
@@ -29,17 +30,17 @@ public class HeightMapCell
       clear();
    }
 
-   public void addPoint(double height)
+   public void addPoint(double heightMeasurement, double varianceMeasurement)
    {
       if (QUICK_UPDATE)
       {
          if (Double.isNaN(estimatedHeight.get()))
          {
-            estimatedHeight.set(height);
+            estimatedHeight.set(heightMeasurement);
          }
          else
          {
-            estimatedHeight.set(Math.max(estimatedHeight.get(), height));
+            estimatedHeight.set(Math.max(estimatedHeight.get(), heightMeasurement));
          }
       }
       else
@@ -47,28 +48,31 @@ public class HeightMapCell
          double lowerBound = estimatedHeight.get() - parameters.getMahalanobisScale() * parameters.getNominalStandardDeviation();
          double upperBound = estimatedHeight.get() + parameters.getMahalanobisScale() * parameters.getNominalStandardDeviation();
 
-         if (heightMeasurements.isEmpty() || height > upperBound)
+         if (heightMeasurements.isEmpty() || heightMeasurement > upperBound)
          {
             // Reset, point is above height threshold to merge
             clear();
-            estimatedHeight.set(height);
-            heightMeasurements.add(height);
+            estimatedHeight.set(heightMeasurement);
+            heightMeasurements.add(heightMeasurement);
+            varianceMeasurements.add(varianceMeasurement);
          }
-         else if (height < lowerBound)
+         else if (heightMeasurement < lowerBound)
          {
             // Ignore, point is below height threshold to consider
          }
          else if (heightMeasurements.size() >= parameters.getMaxPointsPerCell())
          {
             // Replace oldest point
-            heightMeasurements.set(oldestIndex, height);
+            heightMeasurements.set(oldestIndex, heightMeasurement);
+            varianceMeasurements.set(oldestIndex, varianceMeasurement);
             oldestIndex = (oldestIndex + 1) % parameters.getMaxPointsPerCell();
             updateHeightEstimate();
          }
          else
          {
             // Merge with height estimate
-            heightMeasurements.add(height);
+            heightMeasurements.add(heightMeasurement);
+            varianceMeasurements.add(varianceMeasurement);
             updateHeightEstimate();
          }
       }
@@ -76,21 +80,30 @@ public class HeightMapCell
 
    private void updateHeightEstimate()
    {
-      estimatedHeight.set(heightMeasurements.sum() / heightMeasurements.size());
+      double heightSum = 0.0;
+      double varianceSum = 0.0;
+      for (int i = 0; i < heightMeasurements.size(); i++)
+      {
+         heightSum += heightMeasurements.get(i) / varianceMeasurements.get(i);
+         varianceSum += varianceMeasurements.get(i);
+      }
+      estimatedHeight.set(heightSum / varianceSum);
    }
 
    public void clear()
    {
       heightMeasurements.clear();
+      varianceMeasurements.clear();
       oldestIndex = 0;
       estimatedHeight.set(Double.NaN);
    }
 
-   public void resetAtHeight(double height)
+   public void resetAtHeight(double heightMeasurement, double varianceMeasurement)
    {
       clear();
-      estimatedHeight.set(height);
-      heightMeasurements.add(height);
+      estimatedHeight.set(heightMeasurement);
+      heightMeasurements.add(heightMeasurement);
+      varianceMeasurements.add(varianceMeasurement);
    }
 
    public double getEstimatedHeight()

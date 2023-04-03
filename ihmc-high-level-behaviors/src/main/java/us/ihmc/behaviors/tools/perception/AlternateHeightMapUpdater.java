@@ -7,6 +7,7 @@ import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -178,7 +179,7 @@ public class AlternateHeightMapUpdater
                   resetHeight += heightMap.getHeightAt(xNeighbor, yNeighbor);
                }
             }
-            heightMap.resetAtHeight(i, resetHeight / numberOfNeighbors);
+            heightMap.resetAtHeight(i, resetHeight / numberOfNeighbors, HeightMapUpdater.defaultVarianceForInferredData);
          }
       }
 
