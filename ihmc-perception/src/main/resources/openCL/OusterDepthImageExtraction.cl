@@ -57,14 +57,8 @@ kernel void computePointCloud(global float* parameters,
    float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (unshiftedX, y)).x * parameters[DISCRETE_RESOLUTION];
 
    float encoderAngle = 2.0f * M_PI_F * (1.0f - ((float) x / (float) parameters[DEPTH_IMAGE_WIDTH]));
-   float azimuthAngle = -azimuthAngles[ousterY];
-
-   // Adjust the altitude angle to add points above and below for color detail
-   int verticalColorDetailOffsetIndex = y % totalVerticalPointsForColorDetail - parameters[LEVEL_OF_COLOR_DETAIL];
-   float altitudeStep = M_PI_F / 2.0 / (totalVerticalPointsForColorDetail * parameters[DEPTH_IMAGE_HEIGHT]);
-   float altitudeAdjustment = verticalColorDetailOffsetIndex * altitudeStep;
-
-   float altitudeAngle = altitudeAngles[y] + altitudeAdjustment;
+   float azimuthAngle = -azimuthAngles[y];
+   float altitudeAngle = altitudeAngles[y];
 
    // This uses the model from the user manual
    float beamLength = eyeDepthInMeters - parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN]; // Subtract the length of the sensor arm
