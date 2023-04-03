@@ -67,7 +67,7 @@ kernel void computePointCloud(global float* parameters,
        -beamLength * sin(encoderAngle + azimuthAngle) * cos(altitudeAngle) + parameters[LIDAR_ORIGIN_TO_BEAM_ORIGIN] * sin(encoderAngle),
        beamLength * sin(altitudeAngle));
 
-   // float3 worldFramePoint = transformPoint3D32(ousterFramePoint, ousterToWorldTransform);
+   float3 worldFramePoint = transformPoint3D32(ousterFramePoint, ousterToWorldTransform);
 
    int pointStartIndex = (parameters[DEPTH_IMAGE_WIDTH] * y + x) * 3;
 
@@ -79,8 +79,8 @@ kernel void computePointCloud(global float* parameters,
    }
    else
    {
-      pointCloudBuffer[pointStartIndex]     = ousterFramePoint.x;
-      pointCloudBuffer[pointStartIndex + 1] = ousterFramePoint.y;
-      pointCloudBuffer[pointStartIndex + 2] = ousterFramePoint.z;
+      pointCloudBuffer[pointStartIndex]     = worldFramePoint.x;
+      pointCloudBuffer[pointStartIndex + 1] = worldFramePoint.y;
+      pointCloudBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }
 }

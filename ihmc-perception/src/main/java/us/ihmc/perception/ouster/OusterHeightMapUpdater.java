@@ -82,8 +82,8 @@ public class OusterHeightMapUpdater
    {
       double groundHeight = groundFrame.getTransformToRoot().getTranslationZ();
 
-      FramePose3D sensorPose = new FramePose3D(sensorFrame);
-      sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+//      sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
       Point3D gridCenter = new Point3D(sensorPose.getX(), sensorPose.getY(), groundHeight);
       PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInSensorFrame);
 
