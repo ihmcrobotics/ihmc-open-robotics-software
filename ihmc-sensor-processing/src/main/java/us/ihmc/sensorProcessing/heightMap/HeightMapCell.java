@@ -92,7 +92,7 @@ public class HeightMapCell
       for (int i = 0; i < heightMeasurements.size(); i++)
       {
          heightSum += heightMeasurements.get(i) / varianceMeasurements.get(i);
-         varianceSum += varianceMeasurements.get(i);
+         varianceSum += 1.0 / varianceMeasurements.get(i);
       }
       estimatedHeight.set(heightSum / varianceSum);
    }
