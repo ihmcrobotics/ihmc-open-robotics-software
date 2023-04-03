@@ -7,7 +7,6 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.*;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
@@ -140,7 +139,7 @@ public class OusterDepthExtractionKernel
       return extractedDepthImage;
    }
 
-   public FloatBuffer getPointCloudInSensorFrame()
+   public FloatBuffer getPointCloudInWorldFrame()
    {
       return pointCloudXYZBuffer.getBackingDirectFloatBuffer();
    }
