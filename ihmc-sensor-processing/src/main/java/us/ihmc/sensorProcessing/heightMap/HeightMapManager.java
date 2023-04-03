@@ -138,6 +138,7 @@ public class HeightMapManager
 
          int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
          heightMapCells[key] = oldCellArray[oldKey];
+         // todo increment all the variances
          occupiedCells.add(key);
       }
 
@@ -154,6 +155,11 @@ public class HeightMapManager
    }
 
    public void update(Point3D[] pointCloud)
+   {
+      update(pointCloud, 1.0);
+   }
+
+   public void update(Point3D[] pointCloud, double verticalMeasurementVariance)
    {
 //      List<Point3D> pointList = new ArrayList<>();
 //
@@ -240,7 +246,7 @@ public class HeightMapManager
                occupiedCells.add(key);
             }
 
-            heightMapCells[key].addPoint(point.getZ());
+            heightMapCells[key].addPoint(point.getZ(), verticalMeasurementVariance);
          }
       }
 
@@ -306,12 +312,12 @@ public class HeightMapManager
       heightMapCells[occupiedCells.get(i)].setHasSufficientNeighbors(hasSufficientNeighbors);
    }
 
-   public void resetAtHeight(int i, double height)
+   public void resetAtHeight(int i, double height, double variance)
    {
-      heightMapCells[occupiedCells.get(i)].resetAtHeight(height);
+      heightMapCells[occupiedCells.get(i)].resetAtHeight(height, variance);
    }
 
-   public void resetAtHeightByKey(int key, double height)
+   public void resetAtHeightByKey(int key, double height, double variance)
    {
       if (heightMapCells[key] == null)
       {
@@ -323,7 +329,7 @@ public class HeightMapManager
          throw new RuntimeException("Should not get here");
       }
 
-      heightMapCells[key].resetAtHeight(height);
+      heightMapCells[key].resetAtHeight(height, variance);
    }
 
    public boolean cellHasData(int key)
