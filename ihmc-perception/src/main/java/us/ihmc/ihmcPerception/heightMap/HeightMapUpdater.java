@@ -1,17 +1,13 @@
 package us.ihmc.ihmcPerception.heightMap;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -39,7 +35,6 @@ import java.util.function.Consumer;
 public class HeightMapUpdater
 {
    private static final boolean snapCenterToGrid = true;
-   public static final double defaultVarianceForInferredData = 0.1;
 
    private static final boolean printFrequency = false;
    private static final boolean printQueueSize = false;
@@ -76,7 +71,7 @@ public class HeightMapUpdater
    private final TIntArrayList holeKeyList = new TIntArrayList();
    private final TFloatArrayList holeHeights = new TFloatArrayList();
 
-   private final ConcurrentLinkedQueue<Triple<PointCloudData, FramePose3D, Point3D>> pointCloudQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<HeightMapInputData> pointCloudQueue = new ConcurrentLinkedQueue<>();
 
    private int publishFrequencyCounter = 0;
    private final AtomicInteger publishFrequency = new AtomicInteger();
@@ -164,10 +159,10 @@ public class HeightMapUpdater
       ThreadTools.startAThread(this::export, "Height map exporter");
    }
 
-   public void addPointCloudToQueue(Triple<PointCloudData, FramePose3D, Point3D> pointCloudData)
+   public void addPointCloudToQueue(HeightMapInputData inputData)
    {
       if (!isPaused.get())
-         this.pointCloudQueue.add(pointCloudData);
+         this.pointCloudQueue.add(inputData);
    }
 
    public boolean runUpdateThread()
@@ -178,7 +173,7 @@ public class HeightMapUpdater
 
       while (updatesWithoutDataCounter < maxIdleTimeMillis / sleepTimeMillis)
       {
-         Triple<PointCloudData, FramePose3D, Point3D> data = pointCloudQueue.poll();
+         HeightMapInputData data = pointCloudQueue.poll();
          if (data == null)
          {
             updatesWithoutDataCounter++;
@@ -207,7 +202,7 @@ public class HeightMapUpdater
 
       while (cumulativeUpdateDuration + estimatedUpdatePeriod < maxUpdatePeriod && !pointCloudQueue.isEmpty())
       {
-         Triple<PointCloudData, FramePose3D, Point3D> data = pointCloudQueue.poll();
+         HeightMapInputData data = pointCloudQueue.poll();
          if (data == null)
          {
             break;
@@ -223,12 +218,12 @@ public class HeightMapUpdater
       }
    }
 
-   private void update(Triple<PointCloudData, FramePose3D, Point3D> pointCloudData)
+   private void update(HeightMapInputData pointCloudData)
    {
-      update(pointCloudData.getLeft().getPointCloud(), pointCloudData.getMiddle(), pointCloudData.getRight());
+      update(pointCloudData.pointCloud.getPointCloud(), pointCloudData.sensorPose, pointCloudData.gridCenter, pointCloudData.verticalMeasurementVariance);
    }
 
-   private void update(Point3D[] pointCloud, FramePose3DReadOnly pointCloudFramePose, Point3DReadOnly gridCenter)
+   private void update(Point3D[] pointCloud, FramePose3DReadOnly pointCloudFramePose, Point3DReadOnly gridCenter, double verticalVarianceMeasurement)
    {
       if (printFrequency)
       {
@@ -456,7 +451,7 @@ public class HeightMapUpdater
                resetHeight += heightMap.getHeightAt(xNeighbor, yNeighbor);
             }
          }
-         heightMap.resetAtHeight(cellNumber, resetHeight / numberOfNeighbors, defaultVarianceForInferredData);
+         heightMap.resetAtHeight(cellNumber, resetHeight / numberOfNeighbors, HeightMapManager.defaultVariance);
       }
    }
 

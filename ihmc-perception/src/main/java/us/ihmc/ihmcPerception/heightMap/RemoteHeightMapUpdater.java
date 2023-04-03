@@ -68,7 +68,12 @@ public class RemoteHeightMapUpdater
             PointCloudData pointCloudData = new PointCloudData(data);
             FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
 
-            heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, sensorPose, gridCenter));
+            HeightMapInputData inputData = new HeightMapInputData();
+            inputData.pointCloud = pointCloudData;
+            inputData.sensorPose = sensorPose;
+            inputData.gridCenter = gridCenter;
+            // TODO variance
+            heightMapUpdater.addPointCloudToQueue(inputData);
          }
       });
 
