@@ -6,6 +6,8 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -36,6 +38,8 @@ import java.util.function.Consumer;
 
 public class HeightMapUpdater
 {
+   private static final boolean snapCenterToGrid = true;
+
    private static final boolean printFrequency = false;
    private static final boolean printQueueSize = false;
    private static final int maxQueueLength = 5;
@@ -242,15 +246,21 @@ public class HeightMapUpdater
          }
       }
 
+      Point2D snappedGridCenter = new Point2D(gridCenter);
+      if (snapCenterToGrid)
+         snapPointToGrid(snappedGridCenter, parameters.getGridResolutionXY());
+
       if (clearRequested.getAndSet(false))
       {
          heightMap.resetAtGridCenter(gridCenterX.get(), gridCenterY.get());
       }
       else
       {
-         heightMap.translateToNewGridCenter(gridCenter.getX(), gridCenter.getY());
+         gridCenterX.set(snappedGridCenter.getX());
+         gridCenterY.set(snappedGridCenter.getY());
+         heightMap.translateToNewGridCenter(snappedGridCenter.getX(), snappedGridCenter.getY());
          if (gridCenterConsumer != null)
-            gridCenterConsumer.accept(new Point2D(gridCenter));
+            gridCenterConsumer.accept(new Point2D(snappedGridCenter));
       }
 
       // Update height map
@@ -570,5 +580,16 @@ public class HeightMapUpdater
       {
          e.printStackTrace();
       }
+   }
+
+   private static double snapValueToGrid(double value, double gridResolution)
+   {
+      return ((int) Math.round(value / gridResolution)) * gridResolution;
+   }
+
+   private static void snapPointToGrid(Point2DBasics pointToSnap, double gridResolution)
+   {
+      pointToSnap.setX(snapValueToGrid(pointToSnap.getX(), gridResolution));
+      pointToSnap.setY(snapValueToGrid(pointToSnap.getY(), gridResolution));
    }
 }
