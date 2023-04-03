@@ -45,6 +45,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
+
    private final RecyclingArrayList<Point2D> concaveHullsVertices = new RecyclingArrayList<>(Point2D::new);
    /**
     * List of the convex polygons representing this planar region. They are in the local frame of
