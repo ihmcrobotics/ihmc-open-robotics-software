@@ -254,7 +254,7 @@ public class HeightMapUpdater
       {
          gridCenterX.set(snappedGridCenter.getX());
          gridCenterY.set(snappedGridCenter.getY());
-         heightMap.translateToNewGridCenter(snappedGridCenter.getX(), snappedGridCenter.getY());
+         heightMap.translateToNewGridCenter(snappedGridCenter.getX(), snappedGridCenter.getY(), parameters.getVarianceAddedWhenTranslating());
          if (gridCenterConsumer != null)
             gridCenterConsumer.accept(new Point2D(snappedGridCenter));
       }

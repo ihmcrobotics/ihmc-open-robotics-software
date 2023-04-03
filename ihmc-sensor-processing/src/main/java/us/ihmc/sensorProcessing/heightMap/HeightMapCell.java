@@ -78,6 +78,13 @@ public class HeightMapCell
       }
    }
 
+   public void addVariance(double varianceToAdd)
+   {
+      for (int i = 0; i < varianceMeasurements.size(); i++)
+         varianceMeasurements.set(i, varianceMeasurements.get(i) + varianceToAdd);
+   }
+
+
    private void updateHeightEstimate()
    {
       double heightSum = 0.0;
