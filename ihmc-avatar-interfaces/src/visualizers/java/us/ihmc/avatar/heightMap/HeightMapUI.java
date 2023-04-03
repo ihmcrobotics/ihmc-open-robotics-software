@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -94,7 +95,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
             inputData.pointCloud = pointCloudData;
             inputData.sensorPose = sensorPose;
             inputData.gridCenter = gridCenter;
-            // TODO variance
+            inputData.verticalMeasurementVariance = MathTools.square(parameters.getNominalStandardDeviation());
 
             messager.submitMessage(HeightMapMessagerAPI.PointCloudData, inputData);
          }

@@ -3,6 +3,7 @@ package us.ihmc.behaviors.tools.perception;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import perception_msgs.msg.dds.HeightMapMessage;
+import us.ihmc.commons.MathTools;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -178,7 +179,7 @@ public class AlternateHeightMapUpdater
                   resetHeight += heightMap.getHeightAt(xNeighbor, yNeighbor);
                }
             }
-            heightMap.resetAtHeight(i, resetHeight / numberOfNeighbors, HeightMapManager.defaultVariance);
+            heightMap.resetAtHeight(i, resetHeight / numberOfNeighbors, MathTools.square(parameters.getNominalStandardDeviation()));
          }
       }
 
