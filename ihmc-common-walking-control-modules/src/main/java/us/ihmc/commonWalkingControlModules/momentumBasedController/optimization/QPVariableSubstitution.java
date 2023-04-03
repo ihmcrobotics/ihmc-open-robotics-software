@@ -244,13 +244,13 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
       // 1. Compute G^T*H
       // Extracting the rows from H to facilitate the operation.
       DMatrixRMaj GTH = tempC;
-      sub_H.reshape(variableIndices.length, H.getNumCols());
+      sub_H.reshape(numberOfVariablesToSubstitute, H.getNumCols());
       MatrixTools.extractRows(H, variableIndices, sub_H, 0);
       GTH.reshape(G.getNumCols(), H.getNumCols());
       CommonOps_DDRM.multTransA(G, sub_H, GTH);
 
       // Re-inserting the rows into H. Since there are less rows than when we started, we'll add padding with zeros to prevent changing H size.
-      for (int i = 0; i < variableIndices.length; i++)
+      for (int i = 0; i < numberOfVariablesToSubstitute; i++)
       {
          int rowH = variableIndices[i];
 
@@ -263,7 +263,7 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
       // 2. Compute f = G^T*f + G^T*H*g (ignoring the size mismatch between the (H, f) and (G, g)).
       DMatrixRMaj GTf = tempD;
       sub_f.reshape(G.getNumRows(), 1);
-      CommonOps_DDRM.extract(f, variableIndices, variableIndices.length, sub_f);
+      CommonOps_DDRM.extract(f, variableIndices, numberOfVariablesToSubstitute, sub_f);
       // G^T*f
       GTf.reshape(G.getNumCols(), 1);
       CommonOps_DDRM.multTransA(G, sub_f, GTf);
@@ -276,7 +276,7 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
       {
          // G^T*H*g
          DMatrixRMaj sub_GTH = tempE;
-         sub_GTH.reshape(G.getNumCols(), variableIndices.length);
+         sub_GTH.reshape(G.getNumCols(), numberOfVariablesToSubstitute);
          MatrixTools.extractColumns(GTH, variableIndices, sub_GTH, 0);
          sub_f.reshape(G.getNumCols(), 1);
          CommonOps_DDRM.mult(sub_GTH, g, sub_f);
@@ -285,7 +285,7 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
       }
 
       // Re-inserting the elements into f. Since there are less elements than when we started, we'll add padding with zeros to prevent changing f size.
-      for (int i = 0; i < variableIndices.length; i++)
+      for (int i = 0; i < numberOfVariablesToSubstitute; i++)
       {
          int row_f = variableIndices[i];
 
@@ -298,13 +298,13 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
       // 3. Compute H*G
       // Extracting the columns from H to facilitate the operation.
       DMatrixRMaj HG = tempC;
-      sub_H.reshape(H.getNumRows(), variableIndices.length);
+      sub_H.reshape(H.getNumRows(), numberOfVariablesToSubstitute);
       MatrixTools.extractColumns(H, variableIndices, sub_H, 0);
       HG.reshape(H.getNumRows(), G.getNumCols());
       CommonOps_DDRM.mult(sub_H, G, HG);
 
       // Re-inserting the columns into H. Since there are less columns than when we started, we'll add padding with zeros to prevent changing H size.
-      for (int i = 0; i < variableIndices.length; i++)
+      for (int i = 0; i < numberOfVariablesToSubstitute; i++)
       {
          int colH = variableIndices[i];
 
@@ -357,13 +357,13 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
 
       // 1. Compute A*G
       DMatrixRMaj AG = tempC;
-      sub_A.reshape(A.getNumRows(), variableIndices.length);
+      sub_A.reshape(A.getNumRows(), numberOfVariablesToSubstitute);
       MatrixTools.extractColumns(A, variableIndices, sub_A, 0);
       AG.reshape(A.getNumRows(), G.getNumCols());
       CommonOps_DDRM.mult(sub_A, G, AG);
 
       // Re-inserting the columns into A. Since there are less columns than when we started, we'll add padding with zeros to prevent changing A size.
-      for (int i = 0; i < variableIndices.length; i++)
+      for (int i = 0; i < numberOfVariablesToSubstitute; i++)
       {
          int colA = variableIndices[i];
 
@@ -380,7 +380,7 @@ public class QPVariableSubstitution implements QPVariableSubstitutionInterface<D
          Ag.reshape(g.getNumRows(), 1);
          CommonOps_DDRM.mult(sub_A, g, Ag);
 
-         for (int i = 0; i < variableIndices.length; i++)
+         for (int i = 0; i < numberOfVariablesToSubstitute; i++)
          {
             int row_b = variableIndices[i];
             b.set(row_b, b.get(row_b) - Ag.get(i));
