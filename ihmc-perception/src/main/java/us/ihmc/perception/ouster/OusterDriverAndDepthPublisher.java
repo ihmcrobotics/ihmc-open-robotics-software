@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.steppableRegions.RemoteSteppableRegionsUpdater;
 import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsAPI;
-import us.ihmc.ihmcPerception.steppableRegions.SteppableRegionsUpdater;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.netty.NettyOuster;
@@ -132,7 +131,7 @@ public class OusterDriverAndDepthPublisher
          humanoidReferenceFrames.getOusterLidarFrame().getTransformToDesiredFrame(ousterSensorFrame.getTransformToParent(), ReferenceFrame.getWorldFrame());
          ousterSensorFrame.getReferenceFrame().update();
       }
-      depthPublisher.extractCompressAndPublish(ousterSensorFrame.getReferenceFrame(),
+      depthPublisher.extractCompressAndPublish(ousterSensorFrame.getReferenceFrame().getTransformToRoot(),
                                                depthExtractionKernel,
                                                ouster.getAquisitionInstant(),
                                                ouster.getPixelShiftBuffer(),

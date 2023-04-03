@@ -11,7 +11,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.ImageMessageFormat;
@@ -82,18 +82,14 @@ public class OusterDepthPublisher
       compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
    }
 
-   public void extractCompressAndPublish(ReferenceFrame ousterSensorFrame,
+   public void extractCompressAndPublish(RigidBodyTransform ousterToWorldTransform,
                                          OusterDepthExtractionKernel depthExtractionKernel,
                                          Instant acquisitionInstant,
                                          ByteBuffer pixelShiftBuffer,
                                          ByteBuffer beamAltitudeAnglesBuffer,
                                          ByteBuffer beamAzimuthAnglesBuffer)
    {
-      // Important not to store as a field, as update() needs to be called each frame
-      cameraPose.setToZero(ousterSensorFrame);
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      depthExtractionKernel.runKernel(cameraPose);
+      depthExtractionKernel.runKernel(ousterToWorldTransform);
       // Encode as PNG which is lossless and handles single channel images.
       opencv_imgcodecs.imencode(".png",
                                 depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(),
