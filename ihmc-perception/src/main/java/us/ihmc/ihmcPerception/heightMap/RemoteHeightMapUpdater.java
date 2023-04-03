@@ -78,7 +78,6 @@ public class RemoteHeightMapUpdater
             inputData.pointCloud = pointCloudData;
             inputData.sensorPose = sensorPose;
             inputData.gridCenter = gridCenter;
-            // TODO variance
             if (currentWalkingStatus.get() == WalkingStatus.STARTED)
             {
                inputData.verticalMeasurementVariance = heightMapUpdater.getHeightMapParameters().getSensorVarianceWhenMoving();

@@ -5,6 +5,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -451,7 +452,7 @@ public class HeightMapUpdater
                resetHeight += heightMap.getHeightAt(xNeighbor, yNeighbor);
             }
          }
-         heightMap.resetAtHeight(cellNumber, resetHeight / numberOfNeighbors, HeightMapManager.defaultVariance);
+         heightMap.resetAtHeight(cellNumber, resetHeight / numberOfNeighbors, MathTools.square(parameters.getNominalStandardDeviation()));
       }
    }
 
