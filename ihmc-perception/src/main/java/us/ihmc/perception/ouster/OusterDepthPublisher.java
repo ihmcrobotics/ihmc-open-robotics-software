@@ -12,7 +12,6 @@ import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.ImageMessageFormat;
@@ -123,15 +122,13 @@ public class OusterDepthPublisher
       if (lidarScanPublisher != null && publishLidarScan.get())
       {
          lidarScanMessage.setUniqueId(sequenceNumber);
-//         lidarScanMessage.getLidarPosition().setToZero();
-//         lidarScanMessage.getLidarOrientation().setToZero();
          lidarScanMessage.getLidarPosition().set(cameraPose.getPosition());
          lidarScanMessage.getLidarOrientation().set(cameraPose.getOrientation());
          lidarScanMessage.setRobotTimestamp(Conversions.secondsToNanoseconds(acquisitionInstant.getEpochSecond()) + acquisitionInstant.getNano());
          lidarScanMessage.getScan().reset();
          LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan,
                                                        lidarScanMessage,
-                                                       (i, j) -> depthExtractionKernel.getPointCloudInSensorFrame().get(3 * i + j));
+                                                       (i, j) -> depthExtractionKernel.getPointCloudInWorldFrame().get(3 * i + j));
          lidarScanPublisher.publish(lidarScanMessage);
       }
    }
