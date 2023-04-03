@@ -64,8 +64,6 @@ float get_height_on_plane(float x, float y, global float *plane)
 void kernel heightMapUpdateKernel(read_only image2d_t in,
                                   read_write image2d_t out,
                                   global float *params,
-                                  global float *sensorToWorldTf,
-                                  global float *worldToSensorTf,
                                   global float *plane)
 {
   int xIndex = get_global_id(0);
@@ -75,15 +73,13 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
   float3 centroid;
 
   float averageHeightZ = 0;
-  float3 cellCenterInSensor = (float3) (0.0f, 0.0f, -2.0f);;
+  float3 cellCenterInSensor = (float3) (0.0f, 0.0f, -2.0f);
   cellCenterInSensor.xy = indices_to_coordinate((int2) (xIndex, yIndex),
-                                               (float2) (params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
+                                               (float2) (0, 0),
                                                params[HEIGHT_MAP_RESOLUTION],
                                                params[HEIGHT_MAP_CENTER_INDEX]);
 
   int2 unitSphericalCoordinates = spherical_projection(cellCenterInSensor, params); // (x, y) <-> (pitch, yaw)
-
-   //printf("cellCenterInSensor: %f, %f, %f <-> unitSphericalCoordinates: %d, %d \n", cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z, unitSphericalCoordinates.x, unitSphericalCoordinates.y);
 
   int WINDOW_WIDTH = 20;
 
@@ -101,8 +97,6 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
     {
       int yaw_count = unitSphericalCoordinates.y + yaw_count_offset;
 
-      //printf("(yaw_count: %d, pitch_count: %d) -> X: %f, Y: %f\n", yaw_count, pitch_count, cellCenterInSensor.x, cellCenterInSensor.y);
-
       if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
       {
         float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float)1000;
@@ -114,12 +108,9 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
         float3 testPointInSensorFrame = back_project_spherical(yaw_count, pitch_count, radius, params);
 
-      //printf("testPointInSensorFrame: %f, %f, %f <-> cellCenterInSensor: %f, %f, %f \n", testPointInSensorFrame.x, testPointInSensorFrame.y, testPointInSensorFrame.z, cellCenterInSensor.x, cellCenterInSensor.y, cellCenterInSensor.z);
-
         if (fabs(testPointInSensorFrame.x - cellCenterInSensor.x) < halfCellWidth
             && fabs(testPointInSensorFrame.y - cellCenterInSensor.y) < halfCellWidth)
         {
-
 
           count++;
           averageHeightZ += testPointInSensorFrame.z;
@@ -131,7 +122,6 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
   if (count > 0)
   {
     averageHeightZ = averageHeightZ / (float)(count) - get_height_on_plane(cellCenterInSensor.x, cellCenterInSensor.y, plane);
-//    averageHeightZ = averageHeightZ / (float)(count);
     averageHeightZ = clamp(averageHeightZ, -2.0f, 1.5f);
 
     write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)((2.0f + averageHeightZ) * 10000), 0, 0, 0));
@@ -141,3 +131,34 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
     write_imageui(out, (int2)(xIndex, yIndex), (uint4)(0, 0, 0, 0));
   }
 }
+
+void kernel heightMapRegistrationKernel(read_only image2d_t heightMapInSensor,
+      read_write image2d_t heightMapInWorld,
+      global float *params,
+      global float *sensorToWorldTf,
+      global float *worldToSensorTf,
+      global float *plane)
+{
+      int xIndex = get_global_id(0);
+      int yIndex = get_global_id(1);
+
+      float3 normal;
+      float3 centroid;
+
+      float averageHeightZ = 0;
+      float3 cellCenterInWorld = (float3) (0.0f, 0.0f, -2.0f);
+      cellCenterInSensor.xy = indices_to_coordinate((int2) (xIndex, yIndex),
+                                                   (float2) (params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
+                                                   params[HEIGHT_MAP_RESOLUTION],
+                                                   params[HEIGHT_MAP_CENTER_INDEX]);
+
+      float3 cellCenterInWorld = transformPoint3D32_2(cellCenterInSensor,
+            float3(sensorToWorldTf[0], sensorToWorldTf[1], sensorToWorldTf[2])),
+            float3(sensorToWorldTf[4], sensorToWorldTf[5], sensorToWorldTf[6]),
+            float3(sensorToWorldTf[8], sensorToWorldTf[9], sensorToWorldTf[10]),
+            float3(sensorToWorldTf[3], sensorToWorldTf[7], sensorToWorldTf[11]));
+
+      int2 indices = (int2) (coordinate_to_index(), coordinate_to_index());
+
+}
+
