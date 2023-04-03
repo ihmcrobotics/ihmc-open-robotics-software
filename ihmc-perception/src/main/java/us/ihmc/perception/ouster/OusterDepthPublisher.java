@@ -93,7 +93,7 @@ public class OusterDepthPublisher
       cameraPose.setToZero(ousterSensorFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      depthExtractionKernel.runKernel(cameraPose);
+      depthExtractionKernel.runKernel(ousterSensorFrame.getTransformToRoot());
       // Encode as PNG which is lossless and handles single channel images.
       opencv_imgcodecs.imencode(".png",
                                 depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(),
@@ -128,7 +128,7 @@ public class OusterDepthPublisher
          lidarScanMessage.getScan().reset();
          LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan,
                                                        lidarScanMessage,
-                                                       (i, j) -> depthExtractionKernel.getPointCloudInSensorFrame().get(3 * i + j));
+                                                       (i, j) -> depthExtractionKernel.getPointCloudInWorldFrame().get(3 * i + j));
          lidarScanPublisher.publish(lidarScanMessage);
       }
    }
