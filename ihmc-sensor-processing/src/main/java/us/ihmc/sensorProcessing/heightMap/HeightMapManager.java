@@ -12,6 +12,7 @@ import java.util.Arrays;
 
 public class HeightMapManager
 {
+   public static final double defaultVariance = 0.1;
    private static final boolean debug = false;
 
    /*  From HeightMapMessage.msg  */

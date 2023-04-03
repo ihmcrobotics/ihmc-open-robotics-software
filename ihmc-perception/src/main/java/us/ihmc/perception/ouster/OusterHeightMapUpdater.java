@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
+import us.ihmc.ihmcPerception.heightMap.HeightMapInputData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -86,9 +87,14 @@ public class OusterHeightMapUpdater
       sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
       Point3D gridCenter = new Point3D(sensorPose.getX(), sensorPose.getY(), groundHeight);
       PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInWorldFrame);
-
+      HeightMapInputData inputData = new HeightMapInputData();
+      inputData.pointCloud = pointCloudData;
+      inputData.gridCenter = gridCenter;
       // submitting the world frame for the sensor pose, as that's the frame the data is in.
-      heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, new FramePose3D(ReferenceFrame.getWorldFrame()), gridCenter));
+      inputData.sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+      // TODO add variance
+
+      heightMapUpdater.addPointCloudToQueue(inputData);
    }
 
    public void consumeStateRequestMessage(HeightMapStateRequestMessage message)

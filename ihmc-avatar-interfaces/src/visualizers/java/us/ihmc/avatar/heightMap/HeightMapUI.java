@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
+import us.ihmc.ihmcPerception.heightMap.HeightMapInputData;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.messager.javafx.JavaFXMessager;
@@ -89,8 +90,13 @@ public abstract class HeightMapUI extends ApplicationNoModule
             PointCloudData pointCloudData = new PointCloudData(data);
             Point3D gridCenter = new Point3D(data.getLidarPosition().getX(), data.getLidarPosition().getY(), groundHeight);
             FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
+            HeightMapInputData inputData = new HeightMapInputData();
+            inputData.pointCloud = pointCloudData;
+            inputData.sensorPose = sensorPose;
+            inputData.gridCenter = gridCenter;
+            // TODO variance
 
-            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Triple.of(pointCloudData, sensorPose, gridCenter));
+            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, inputData);
          }
       } );
       /*
