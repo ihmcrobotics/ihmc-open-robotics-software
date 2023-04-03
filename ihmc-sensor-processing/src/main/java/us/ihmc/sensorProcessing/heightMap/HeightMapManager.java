@@ -88,15 +88,15 @@ public class HeightMapManager
    /**
     * Translates the existing height map to a new center location. It keeps all the cells that are still in range and translates them to new locations.
     */
-   public void translateToNewGridCenter(Point2DReadOnly gridCenter)
+   public void translateToNewGridCenter(Point2DReadOnly gridCenter, double varianceToAdd)
    {
-      translateToNewGridCenter(gridCenter.getX(), gridCenter.getY());
+      translateToNewGridCenter(gridCenter.getX(), gridCenter.getY(), varianceToAdd);
    }
 
    /**
     * Translates the existing height map to a new center location. It keeps all the cells that are still in range and translates them to new locations.
     */
-   public void translateToNewGridCenter(double xCenter, double yCenter)
+   public void translateToNewGridCenter(double xCenter, double yCenter, double varianceToAdd)
    {
 //      int xIndexShift = HeightMapTools.coordinateToIndex(xCenter - this.gridCenterXY.getX(), 0.0, gridResolutionXY, centerIndex);
 //      int yIndexShift = HeightMapTools.coordinateToIndex(yCenter - this.gridCenterXY.getY(), 0.0, gridResolutionXY, centerIndex);
@@ -139,7 +139,8 @@ public class HeightMapManager
 
          int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
          heightMapCells[key] = oldCellArray[oldKey];
-         // todo increment all the variances
+         if (key != oldKey)
+            heightMapCells[key].addVariance(varianceToAdd);
          occupiedCells.add(key);
       }
 
