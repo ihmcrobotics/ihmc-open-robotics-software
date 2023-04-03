@@ -76,7 +76,7 @@ public class OusterHeightMapUpdater
 
    public void updateWithDataBuffer(ReferenceFrame sensorFrame,
                                     ReferenceFrame groundFrame,
-                                    FloatBuffer pointCloudInWorldFrame,
+                                    FloatBuffer pointCloudInSensorFrame,
                                     int numberOfPoints,
                                     Instant instant)
    {
@@ -85,7 +85,7 @@ public class OusterHeightMapUpdater
       FramePose3D sensorPose = new FramePose3D(sensorFrame);
       sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
       Point3D gridCenter = new Point3D(sensorPose.getX(), sensorPose.getY(), groundHeight);
-      PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInWorldFrame);
+      PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInSensorFrame);
 
       heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, sensorPose, gridCenter));
    }
