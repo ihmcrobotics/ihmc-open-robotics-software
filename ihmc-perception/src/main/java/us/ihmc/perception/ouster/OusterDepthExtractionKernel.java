@@ -139,7 +139,7 @@ public class OusterDepthExtractionKernel
       return extractedDepthImage;
    }
 
-   public FloatBuffer getPointCloudInWorldFrame()
+   public FloatBuffer getPointCloudInSensorFrame()
    {
       return pointCloudXYZBuffer.getBackingDirectFloatBuffer();
    }
