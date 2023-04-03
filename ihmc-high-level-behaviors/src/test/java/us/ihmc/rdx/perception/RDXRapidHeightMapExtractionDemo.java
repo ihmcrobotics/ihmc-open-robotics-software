@@ -240,7 +240,7 @@ public class RDXRapidHeightMapExtractionDemo
          if(fastRendererEnabled.get())
          {
             heightMapRenderer.setActive(true);
-            heightMapRenderer.update(rapidHeightMapUpdater.getHeightMapInSensor().getPointerForAccessSpeed(),
+            heightMapRenderer.update(rapidHeightMapUpdater.getHeightMapInWorld().getPointerForAccessSpeed(),
                                      gridCenter,
                                      rapidHeightMapUpdater.getCenterIndex(),
                                      rapidHeightMapUpdater.getCellSizeXYInMeters());
@@ -265,7 +265,7 @@ public class RDXRapidHeightMapExtractionDemo
          rapidHeightMapUpdater.setProcessing(false);
 
          PerceptionDebugTools.displayHeightMap("Output Height Map",
-                                               rapidHeightMapUpdater.getHeightMapInSensor().getBytedecoOpenCVMat(),
+                                               rapidHeightMapUpdater.getHeightMapInWorld().getBytedecoOpenCVMat(),
                                                1,
                                               1 / (0.3f + 0.20f * rapidHeightMapUpdater.getCellSizeXYInMeters()));
       }

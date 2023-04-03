@@ -91,6 +91,7 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) inputDepthImage.getImageWidth());
       parametersBuffer.setParameter((float) gridCenter.getX());
       parametersBuffer.setParameter((float) gridCenter.getY());
+      parametersBuffer.setParameter((float) cellsPerAxis);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -143,7 +144,7 @@ public class RapidHeightMapExtractor
          // Set kernel arguments for the height map registration kernel
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 0, heightMapInSensor.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 1, heightMapInWorld.getOpenCLImageObject());
-         openCLManager.setKernelArgument(heightMapRegistrationKernel, 2, parametersBuffer.getOpenCLBufferObject()
+         openCLManager.setKernelArgument(heightMapRegistrationKernel, 2, parametersBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 3, sensorToWorldTransformBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 4, worldToSensorTransformBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(heightMapRegistrationKernel, 5, groundPlaneBuffer.getOpenCLBufferObject());
@@ -155,7 +156,7 @@ public class RapidHeightMapExtractor
          openCLManager.execute2D(heightMapRegistrationKernel, cellsPerAxis, cellsPerAxis);
 
          // Read height map image into CPU memory
-         heightMapInSensor.readOpenCLImage(openCLManager);
+         heightMapInWorld.readOpenCLImage(openCLManager);
 
          latestHeightMapData = convertToHeightMapData(gridCenter);
       }
@@ -164,7 +165,7 @@ public class RapidHeightMapExtractor
    private HeightMapData convertToHeightMapData(Tuple3DReadOnly center)
    {
       HeightMapData heightMapData = new HeightMapData(cellSizeXYInMeters, gridWidthInMeters, center.getX(), center.getY());
-      BytePointer heightMapPointer = heightMapInSensor.getBytedecoByteBufferPointer();
+      BytePointer heightMapPointer = heightMapInWorld.getBytedecoByteBufferPointer();
 
       float maxHeight = 0.7f;
       float minHeight = 0.0f;
@@ -213,9 +214,9 @@ public class RapidHeightMapExtractor
       return cellSizeXYInMeters;
    }
 
-   public BytedecoImage getHeightMapInSensor()
+   public BytedecoImage getHeightMapInWorld()
    {
-      return heightMapInSensor;
+      return heightMapInWorld;
    }
 
    public int getCellsPerAxis()

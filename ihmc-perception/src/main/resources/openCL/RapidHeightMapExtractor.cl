@@ -4,6 +4,7 @@
 #define DEPTH_INPUT_WIDTH 3
 #define HEIGHT_MAP_CENTER_X 4
 #define HEIGHT_MAP_CENTER_Y 5
+#define CELLS_PER_AXIS 6
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -61,8 +62,8 @@ float get_height_on_plane(float x, float y, global float *plane)
   return height;
 }
 
-void kernel heightMapUpdateKernel(read_only image2d_t in,
-                                  read_write image2d_t out,
+void kernel heightMapUpdateKernel(read_only image2d_t input_depth,
+                                  read_write image2d_t heightMapInSensor,
                                   global float *params,
                                   global float *plane)
 {
@@ -99,7 +100,7 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
 
       if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
       {
-        float radius = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float)1000;
+        float radius = ((float)read_imageui(input_depth, (int2) (yaw_count, pitch_count)).x) / (float)1000;
 
         if (radius < 0.1f)
         {
@@ -124,41 +125,52 @@ void kernel heightMapUpdateKernel(read_only image2d_t in,
     averageHeightZ = averageHeightZ / (float)(count) - get_height_on_plane(cellCenterInSensor.x, cellCenterInSensor.y, plane);
     averageHeightZ = clamp(averageHeightZ, -2.0f, 1.5f);
 
-    write_imageui(out, (int2)(xIndex, yIndex), (uint4)((int)((2.0f + averageHeightZ) * 10000), 0, 0, 0));
+    write_imageui(heightMapInSensor, (int2)(xIndex, yIndex), (uint4)((int)((2.0f + averageHeightZ) * 10000), 0, 0, 0));
   }
   else
   {
-    write_imageui(out, (int2)(xIndex, yIndex), (uint4)(0, 0, 0, 0));
+    write_imageui(heightMapInSensor, (int2)(xIndex, yIndex), (uint4)(0, 0, 0, 0));
   }
 }
 
-void kernel heightMapRegistrationKernel(read_only image2d_t heightMapInSensor,
-      read_write image2d_t heightMapInWorld,
-      global float *params,
-      global float *sensorToWorldTf,
-      global float *worldToSensorTf,
-      global float *plane)
+void kernel heightMapRegistrationKernel(read_write image2d_t heightMapInSensor,
+                                       read_write image2d_t heightMapInWorld,
+                                       global float *params,
+                                       global float *sensorToWorldTf,
+                                       global float *worldToSensorTf,
+                                       global float *plane)
 {
       int xIndex = get_global_id(0);
       int yIndex = get_global_id(1);
+
+      write_imageui(heightMapInWorld, (int2)(xIndex, yIndex), (uint4)(0, 0, 0, 0));
 
       float3 normal;
       float3 centroid;
 
       float averageHeightZ = 0;
       float3 cellCenterInWorld = (float3) (0.0f, 0.0f, -2.0f);
-      cellCenterInSensor.xy = indices_to_coordinate((int2) (xIndex, yIndex),
+      cellCenterInWorld.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                    (float2) (params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
                                                    params[HEIGHT_MAP_RESOLUTION],
                                                    params[HEIGHT_MAP_CENTER_INDEX]);
 
-      float3 cellCenterInWorld = transformPoint3D32_2(cellCenterInSensor,
-            float3(sensorToWorldTf[0], sensorToWorldTf[1], sensorToWorldTf[2])),
-            float3(sensorToWorldTf[4], sensorToWorldTf[5], sensorToWorldTf[6]),
-            float3(sensorToWorldTf[8], sensorToWorldTf[9], sensorToWorldTf[10]),
-            float3(sensorToWorldTf[3], sensorToWorldTf[7], sensorToWorldTf[11]));
+      float3 cellCenterInSensor = transformPoint3D32_2(cellCenterInWorld,
+                                 (float3)(worldToSensorTf[0], worldToSensorTf[1], worldToSensorTf[2]),
+                                 (float3)(worldToSensorTf[4], worldToSensorTf[5], worldToSensorTf[6]),
+                                 (float3)(worldToSensorTf[8], worldToSensorTf[9], worldToSensorTf[10]),
+                                 (float3)(worldToSensorTf[3], worldToSensorTf[7], worldToSensorTf[11]));
 
-      int2 indices = (int2) (coordinate_to_index(), coordinate_to_index());
+      // TODO: Get the point projection of sensor frame on the sensor-frame ground plane, and then query 
 
+      int2 indices = (int2) (coordinate_to_index(cellCenterInSensor.x, params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_RESOLUTION], params[HEIGHT_MAP_CENTER_INDEX]),
+                              coordinate_to_index(cellCenterInSensor.y, params[HEIGHT_MAP_CENTER_Y], params[HEIGHT_MAP_RESOLUTION], params[HEIGHT_MAP_CENTER_INDEX]));
+
+      if ((indices.x >= 0) && (indices.x < (int)params[CELLS_PER_AXIS]) && (indices.y >= 0) && (indices.y < (int)params[CELLS_PER_AXIS]))
+      {
+         uint height = read_imageui(heightMapInSensor, indices).x;
+
+         write_imageui(heightMapInWorld, (int2)(xIndex, yIndex), (uint4)(height, 0, 0, 0));
+      }
 }
 
