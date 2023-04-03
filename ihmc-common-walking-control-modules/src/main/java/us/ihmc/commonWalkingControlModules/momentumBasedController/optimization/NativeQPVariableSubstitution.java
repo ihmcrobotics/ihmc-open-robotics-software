@@ -247,13 +247,13 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
       // 1. Compute G^T*H
       // Extracting the rows from H to facilitate the operation.
       NativeMatrix GTH = tempC;
-      sub_H.reshape(variableIndices.length, H.getNumCols());
+      sub_H.reshape(numberOfVariablesToSubstitute, H.getNumCols());
       sub_H.zero();
       NativeMatrixTools.extractRows(H, variableIndices, sub_H, 0);
       GTH.multTransA(G, sub_H);
 
       // Re-inserting the rows into H. Since there are less rows than when we started, we'll add padding with zeros to prevent changing H size.
-      for (int i = 0; i < variableIndices.length; i++)
+      for (int i = 0; i < numberOfVariablesToSubstitute; i++)
       {
          int rowH = variableIndices[i];
 
@@ -267,7 +267,7 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
       NativeMatrix GTf = tempD;
       sub_f.reshape(G.getNumRows(), 1);
       sub_f.zero();
-      NativeMatrixTools.extract(f, variableIndices, variableIndices.length, sub_f);
+      NativeMatrixTools.extract(f, variableIndices, numberOfVariablesToSubstitute, sub_f);
       // G^T*f
       GTf.multTransA(G, sub_f);
 
@@ -279,7 +279,7 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
       {
          // G^T*H*g
          NativeMatrix sub_GTH = tempE;
-         sub_GTH.reshape(G.getNumCols(), variableIndices.length);
+         sub_GTH.reshape(G.getNumCols(), numberOfVariablesToSubstitute);
          sub_GTH.zero();
          NativeMatrixTools.extractColumns(GTH, variableIndices, sub_GTH, 0);
          sub_f.mult(sub_GTH, g);
@@ -288,7 +288,7 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
       }
 
       // Re-inserting the elements into f. Since there are less elements than when we started, we'll add padding with zeros to prevent changing f size.
-      for (int i = 0; i < variableIndices.length; i++)
+      for (int i = 0; i < numberOfVariablesToSubstitute; i++)
       {
          int row_f = variableIndices[i];
 
@@ -301,13 +301,13 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
       // 3. Compute H*G
       // Extracting the columns from H to facilitate the operation.
       NativeMatrix HG = tempC;
-      sub_H.reshape(H.getNumRows(), variableIndices.length);
+      sub_H.reshape(H.getNumRows(), numberOfVariablesToSubstitute);
       sub_H.zero();
       NativeMatrixTools.extractColumns(H, variableIndices, sub_H, 0);
       HG.mult(sub_H, G);
 
       // Re-inserting the columns into H. Since there are less columns than when we started, we'll add padding with zeros to prevent changing H size.
-      for (int i = 0; i < variableIndices.length; i++)
+      for (int i = 0; i < numberOfVariablesToSubstitute; i++)
       {
          int colH = variableIndices[i];
 
@@ -360,13 +360,13 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
 
       // 1. Compute A*G
       NativeMatrix AG = tempC;
-      sub_A.reshape(A.getNumRows(), variableIndices.length);
+      sub_A.reshape(A.getNumRows(), numberOfVariablesToSubstitute);
       sub_A.zero();
       NativeMatrixTools.extractColumns(A, variableIndices, sub_A, 0);
       AG.mult(sub_A, G);
 
       // Re-inserting the columns into A. Since there are less columns than when we started, we'll add padding with zeros to prevent changing A size.
-      for (int i = 0; i < variableIndices.length; i++)
+      for (int i = 0; i < numberOfVariablesToSubstitute; i++)
       {
          int colA = variableIndices[i];
 
@@ -382,7 +382,7 @@ public class NativeQPVariableSubstitution implements QPVariableSubstitutionInter
          NativeMatrix Ag = tempB;
          Ag.mult(sub_A, g);
 
-         for (int i = 0; i < variableIndices.length; i++)
+         for (int i = 0; i < numberOfVariablesToSubstitute; i++)
          {
             int row_b = variableIndices[i];
             b.set(row_b, 0, b.get(row_b, 0) - Ag.get(i, 0));
