@@ -23,6 +23,7 @@ ihmc {
 mainDependencies {
    api(ihmc.sourceSetProject("javacv"))
    api(ihmc.sourceSetProject("slam-wrapper"))
+   api(ihmc.sourceSetProject("mapsense-wrapper"))
    // For experimenting with local OpenCV:
    // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
@@ -50,7 +51,6 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:robot-environment-awareness:source")
-   api("us.ihmc:ihmc-perception-mapsense-wrapper:source")
 }
 
 openpnpDependencies {
