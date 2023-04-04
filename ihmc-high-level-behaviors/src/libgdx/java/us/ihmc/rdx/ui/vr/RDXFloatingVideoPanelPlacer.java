@@ -43,6 +43,7 @@ public class RDXFloatingVideoPanelPlacer
                   panelDistanceFromHeadset = panelDistanceFromHeadset + panelZoom;
                }
                else
+
                {
                   lastTouchpadFloatingPanelY = Double.NaN;
                }
@@ -68,8 +69,6 @@ public class RDXFloatingVideoPanelPlacer
             {
                if (floatingVideoPanel.getModelInstance() != null)
                {
-                  floatingPanelFramePose.setToZero(floatingPanelFrame.getReferenceFrame());
-                  floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                   boolean controllerIsCloseToPanel = controller.getXForwardZUpPose().getPosition().distance(floatingPanelFramePose.getPosition()) < 0.05;
                   boolean isGripping = controller.getGripActionData().x() > 0.9;
                   if ((grippedLastTime || controllerIsCloseToPanel) && isGripping)
@@ -104,7 +103,15 @@ public class RDXFloatingVideoPanelPlacer
    public void setMode(RDXPanelPlacementMode mode)
    {
       if (this.mode != mode)
+      {
          this.mode = mode;
+         if(mode == RDXPanelPlacementMode.MANUAL_PLACEMENT)
+         {
+            floatingPanelFramePose.setToZero(floatingPanelFrame.getReferenceFrame());
+            floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+      }
+
    }
 
    public RDX3DSituatedImagePanel getFloatingVideoPanel()

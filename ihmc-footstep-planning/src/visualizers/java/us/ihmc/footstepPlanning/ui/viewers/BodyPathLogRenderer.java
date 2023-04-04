@@ -51,15 +51,15 @@ public class BodyPathLogRenderer extends AnimationTimer
 
    public BodyPathLogRenderer(Messager messager)
    {
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathStartNodeToVisualize, d -> latestStanceHeight.set(d.getRight()));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.BodyPathStartNodeToVisualize, d -> latestStanceHeight.set(d.getRight()));
       startNodeToVisualize = messager.createInput(FootstepPlannerMessagerAPI.BodyPathStartNodeToVisualize);
       candidateNodeToVisualize = messager.createInput(FootstepPlannerMessagerAPI.BodyPathCandidateNodeToVisualize);
       showBodyPathPlanData = messager.createInput(FootstepPlannerMessagerAPI.ShowBodyPathPlanData, false);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowBodyPathLogGraphics, root::setVisible);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ShowBodyPathLogGraphics, root::setVisible);
       root.setVisible(false);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathGraphData, (data) -> executorService.execute(() -> this.buildFullPlanMesh(data)));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.BodyPathGraphData, (data) -> executorService.execute(() -> this.buildFullPlanMesh(data)));
    }
 
    @Override

@@ -76,8 +76,8 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
-   private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled, 2);
-   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(streamToController, kinematicsRecorder.isReplayingEnabled());
+   private KinematicsRecordReplay kinematicsRecorder;
+   private RDXVRSharedControl sharedControlAssistant;
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
@@ -145,11 +145,14 @@ public class RDXVRKinematicsStreamingMode
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()));
 
       wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
+
+      kinematicsRecorder = new KinematicsRecordReplay(ros2ControllerHelper, enabled, 2);
+      sharedControlAssistant = new RDXVRSharedControl(robotModel, ros2ControllerHelper, streamToController, kinematicsRecorder.isReplayingEnabled());
    }
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      if(controllerModel == RDXVRControllerModel.UNKNOWN)
+      if (controllerModel == RDXVRControllerModel.UNKNOWN)
          controllerModel = vrContext.getControllerModel();
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
@@ -261,7 +264,7 @@ public class RDXVRKinematicsStreamingMode
 //                                                                                               ReferenceFrame.getWorldFrame()));
 //            toolboxInputMessage.getInputs().add().set(message);
 //         });
-         if(enabled.get())
+         if (enabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
@@ -293,6 +296,7 @@ public class RDXVRKinematicsStreamingMode
          }
          else
          {
+            // update IK ghost robot
             ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
             ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
             for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
@@ -300,9 +304,33 @@ public class RDXVRKinematicsStreamingMode
                ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
             }
             ghostFullRobotModel.getElevator().updateFramesRecursively();
+
+            // update preview assistance
+            if (sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if preview is enabled
+            {
+               if (sharedControlAssistant.isFirstPreview()) // first preview
+               {
+                  sharedControlAssistant.saveStatusForPreview(latestStatus); // store the status
+                  sharedControlAssistant.updatePreviewModel(latestStatus); // update shared control ghost robot
+               }
+               else if (sharedControlAssistant.isPreviewGraphicActive()) // replay preview
+               {
+                  // update IK ghost
+                  KinematicsToolboxOutputStatus statusPreview = sharedControlAssistant.getPreviewStatus();
+                  ghostFullRobotModel.getRootJoint().setJointPosition(statusPreview.getDesiredRootPosition());
+                  ghostFullRobotModel.getRootJoint().setJointOrientation(statusPreview.getDesiredRootOrientation());
+                  for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
+                     ghostOneDoFJointsExcludingHands[i].setQ(statusPreview.getDesiredJointAngles().get(i));
+                  ghostFullRobotModel.getElevator().updateFramesRecursively();
+                  // update shared control ghost
+                  sharedControlAssistant.replayPreviewModel();
+               }
+            }
          }
       }
       ghostRobotGraphic.update();
+      if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if graphic active update also graphic
+         sharedControlAssistant.getGhostPreviewGraphic().update();
    }
 
    public void renderImGuiWidgets()
@@ -404,7 +432,16 @@ public class RDXVRKinematicsStreamingMode
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (status.hasReceivedFirstMessage())
-         ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
+      {
+         ghostRobotGraphic.getRenderables(renderables, pool,sceneLevels);
+         if (sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
+         {
+            sharedControlAssistant.getGhostPreviewGraphic().getRenderables(renderables, pool, sceneLevels);
+            var splineGraphics = sharedControlAssistant.getSplinePreviewGraphic();
+            for (var spline : splineGraphics.keySet())
+               splineGraphics.get(spline).getRenderables(renderables, pool);
+         }
+      }
       if (showReferenceFrameGraphics.get())
       {
 //         headsetFrameGraphic.getRenderables(renderables, pool);
@@ -419,6 +456,7 @@ public class RDXVRKinematicsStreamingMode
    public void destroy()
    {
       ghostRobotGraphic.destroy();
+      sharedControlAssistant.destroy();
       headsetFrameGraphic.dispose();
       for (RobotSide side : RobotSide.values)
       {

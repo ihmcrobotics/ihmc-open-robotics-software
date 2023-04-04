@@ -29,16 +29,16 @@ public class NavigationBehaviorUI extends JavaFXBehaviorUIInterface
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       get3DGroup().getChildren().add(footstepPlanGraphic);
-      behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlan ->
+      behaviorMessager.addTopicListener(FootstepPlanForUI, footstepPlan ->
             footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepPlan, DEFINITION.getName())));
 
       bodyPathPlanGraphic = new BodyPathPlanGraphic();
       get3DGroup().getChildren().add(bodyPathPlanGraphic);
-      behaviorMessager.registerTopicListener(BodyPathPlanForUI, bodyPathPlanGraphic::generateMeshesAsynchronously);
+      behaviorMessager.addTopicListener(BodyPathPlanForUI, bodyPathPlanGraphic::generateMeshesAsynchronously);
 
       JavaFXLivePlanarRegionsGraphic livePlanarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(false);
       get3DGroup().getChildren().add(livePlanarRegionsGraphic);
-      behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
+      behaviorMessager.addTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
    }
 
    @Override

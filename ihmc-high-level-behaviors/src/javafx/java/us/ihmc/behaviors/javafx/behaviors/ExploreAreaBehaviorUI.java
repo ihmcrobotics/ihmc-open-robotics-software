@@ -90,32 +90,32 @@ public class ExploreAreaBehaviorUI extends JavaFXBehaviorUIInterface
       get3DGroup().getChildren().add(lookAndStepVisualizationGroup);
       pointToLookAtGroup.add(pointToLookAt);
 
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,
                                              position -> Platform.runLater(() -> displayObservationPosition(position)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ExplorationBoundingBoxes,
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.ExplorationBoundingBoxes,
                                              boxes -> Platform.runLater(() -> displayExplorationBoundingBoxes(boxes)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.PotentialPointsToExplore,
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.PotentialPointsToExplore,
                                              points -> Platform.runLater(() -> displayPotentialPointsToExplore(points)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.WalkingToPose,
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.WalkingToPose,
                                              pose -> Platform.runLater(() -> displayPlanningToPose(pose)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.FoundBodyPath,
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.FoundBodyPath,
                                              bodyPath -> Platform.runLater(() -> displayFoundBodyPathTo(bodyPath)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ClearPlanarRegions,
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.ClearPlanarRegions,
                                              unused -> Platform.runLater(this::clearPlanarRegions));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.AddPlanarRegionToMap,
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.AddPlanarRegionToMap,
                                              region -> Platform.runLater(() -> addPlanarRegionToMap(region)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion,
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.AddPolygonToPlanarRegion,
                                              polygon -> Platform.runLater(() -> addPolygonToPlanarRegion(polygon)));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.DrawMap,
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.DrawMap,
                                              unused -> Platform.runLater(this::drawMap));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.CurrentState,
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.CurrentState,
                                              state -> Platform.runLater(() ->
                                              {
                                                 this.currentState = state;
                                                 stateTextField.setText(state.name());
                                                 lookAndStepVisualizationGroup.setEnabled(state == LookAndStep);
                                              }));
-      behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, point -> Platform.runLater(() -> setPointToLookAt(point)));
+      behaviorMessager.addTopicListener(ExploreAreaBehaviorAPI.EnvironmentGapToLookAt, point -> Platform.runLater(() -> setPointToLookAt(point)));
 
       sceneNode.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);

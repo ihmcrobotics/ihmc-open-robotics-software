@@ -24,7 +24,7 @@ float32 depth_discretization
 byte[<=25000000] data
 
 # The image format. Ordinal of OpenCVImageFormat
-uint16 format
+uint8 format
 
 # Position of the focal point at sensor data aquisition
 geometry_msgs/Point position
@@ -32,16 +32,8 @@ geometry_msgs/Point position
 # Orientation of the focal point at sensor data aquisition
 geometry_msgs/Quaternion orientation
 
-# Is of the pinhole camera model (See https://en.wikipedia.org/wiki/Pinhole_camera_model
-bool is_pinhole_camera_model
-
-# Is equidistant fisheye camera model (See https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function)
-bool is_equidistant_fisheye_camera_model
-
-# If the camera model is the Ouster camera model.
-# With the Ouster camera model, the vertical and horizonal fields of view
-# are used instead of the focal length and principal point parameters.
-bool is_ouster_camera_model
+# Camera model of the sensor. Ordinal of us.ihmc.perception.CameraModel
+uint8 camera_model
 
 # Horizontal focal length in units of pixels (Fx)
 float32 focal_length_x_pixels
@@ -55,8 +47,11 @@ float32 principal_point_x_pixels
 # Principal point Y in units of pixels (Cy)
 float32 principal_point_y_pixels
 
-# If Ouster camera model, the vertical field of view in radians
-float32 ouster_vertical_field_of_view
+# If Ouster camera model, the pixel offsets used to re-stagger the depth image.
+int8[<=128] ouster_pixel_shifts
 
-# If Ouster camera model, the horizontal field of view in radians
-float32 ouster_horizontal_field_of_view
+# If Ouster camera model, the calibrated beam altitude angles used to get 3D points.
+float32[<=128] ouster_beam_altitude_angles
+
+# If Ouster camera model, the calibrated beam azimuth angles used to get 3D points.
+float32[<=128] ouster_beam_azimuth_angles

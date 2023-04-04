@@ -83,11 +83,11 @@ public class FootstepPathCalculatorModule
       snapGoalSteps = messager.createInput(SnapGoalSteps, false);
       abortIfGoalStepSnapFails = messager.createInput(AbortIfGoalStepSnapFails, false);
 
-      messager.registerTopicListener(ComputePath, request -> computePathOnThread());
+      messager.addTopicListener(ComputePath, request -> computePathOnThread());
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
 
-      messager.registerTopicListener(HaltPlanning, halt -> planningModule.halt());
+      messager.addTopicListener(HaltPlanning, halt -> planningModule.halt());
    }
 
    public void clear()

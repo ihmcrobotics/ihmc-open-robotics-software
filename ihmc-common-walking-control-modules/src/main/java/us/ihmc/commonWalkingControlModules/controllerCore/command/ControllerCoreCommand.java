@@ -64,6 +64,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList.clear();
       feedbackControlCommandList.clear();
       inverseKinematicsCommandList.clear();
+      virtualModelControlCommandList.clear();
       lowLevelOneDoFJointDesiredDataHolder.clear();
       reinitialize = false;
    }

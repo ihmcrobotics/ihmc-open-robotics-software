@@ -12,10 +12,7 @@ import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.rdx.ui.yo.*;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.HybridDirectory;
-import us.ihmc.tools.io.HybridFile;
-import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.*;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.nio.file.Path;
@@ -30,7 +27,7 @@ public class SCS2YoImPlotManager
    private ImGuiPanel parentPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString panelToCreateName = new ImString("", 100);
-   private HybridFile configurationFile;
+   private HybridResourceFile configurationFile;
    private boolean layoutReloadQueued = false;
    private int delayedLayoutReloadCounter = 0;
 
@@ -83,9 +80,9 @@ public class SCS2YoImPlotManager
       loadConfiguration(layoutManager.getCurrentConfigurationLocation());
    }
 
-   private void updateConfigurationFile(HybridDirectory layoutDirectory)
+   private void updateConfigurationFile(HybridResourceDirectory layoutDirectory)
    {
-      configurationFile = new HybridFile(layoutDirectory, getClass().getSimpleName() + ".json");
+      configurationFile = new HybridResourceFile(layoutDirectory, getClass().getSimpleName() + ".json");
    }
 
    private boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)

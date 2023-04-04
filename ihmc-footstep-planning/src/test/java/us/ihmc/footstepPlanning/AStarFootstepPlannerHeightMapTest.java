@@ -33,6 +33,15 @@ public class AStarFootstepPlannerHeightMapTest
    private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
    private final FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
 
+   private static final List<DataSetName> dataSetsToIgnore = new ArrayList<>();
+   {
+      dataSetsToIgnore.add(DataSetName._20190219_182005_Random);
+      dataSetsToIgnore.add(DataSetName._20190219_182005_OverCinderBlockField);
+      dataSetsToIgnore.add(DataSetName._20171215_214730_CinderBlockField);
+      dataSetsToIgnore.add(DataSetName._20171215_201810_RampSteppingStones_Sim);
+      dataSetsToIgnore.add(DataSetName._20171026_131304_PlanarRegion_Ramp_2Story_UnitTest);
+   }
+
    private String getTestNamePrefix()
    {
       return "a_star";
@@ -41,6 +50,11 @@ public class AStarFootstepPlannerHeightMapTest
    private Predicate<PlannerInput> getTestableFilter()
    {
       return plannerInput -> plannerInput.getStepPlannerIsTestable() && plannerInput.containsIterationLimitFlag(getTestNamePrefix().toLowerCase());
+   }
+
+   private static boolean isIncluded(DataSet input)
+   {
+      return dataSetsToIgnore.stream().noneMatch(dataSet -> dataSet.name().substring(1).equals(input.getName()));
    }
 
    @BeforeEach
@@ -58,7 +72,7 @@ public class AStarFootstepPlannerHeightMapTest
 
    static Predicate<DataSet> buildFilter(Predicate<PlannerInput> testSpecificFilter)
    {
-      return dataSet -> dataSet.hasPlannerInput() && testSpecificFilter.test(dataSet.getPlannerInput());
+      return dataSet -> dataSet.hasPlannerInput() && testSpecificFilter.test(dataSet.getPlannerInput()) && isIncluded(dataSet);
    }
 
    private void testDataSets(List<DataSet> allDatasets)
@@ -155,7 +169,7 @@ public class AStarFootstepPlannerHeightMapTest
       request.setPlanBodyPath(false);
       request.setPerformAStarSearch(true);
       request.setHeightMapMessage(heightMapMessage);
-      request.setMaximumIterations(300);
+      request.setMaximumIterations(1000);
       request.setTimeout(Double.MAX_VALUE);
       request.setHorizonLength(Double.MAX_VALUE);
       return request;

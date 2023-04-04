@@ -41,19 +41,19 @@ public class LookAndStepVisualizationGroup extends Group
       startAndGoalFootPoses.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootPoses.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootPoses.setTransparency(0.4);
-      messager.registerTopicListener(ImminentFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
+      messager.addTopicListener(ImminentFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
       footstepPlanGraphic = new FootstepPlanGraphic();
       footstepPlanGraphic.setTransparency(0.2);
-      messager.registerTopicListener(PlannedFootstepsForUI, footsteps ->
+      messager.addTopicListener(PlannedFootstepsForUI, footsteps ->
       {
          reviewingBodyPath = false;
          footstepPlanGraphic.generateMeshesAsynchronously(footsteps);
       });
       commandedFootsteps = new FootstepPlanGraphic();
-      messager.registerTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
+      messager.addTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
 
       planarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(false);
-      messager.registerTopicListener(PlanarRegionsForUI, planarRegionsGraphic::acceptPlanarRegions);
+      messager.addTopicListener(PlanarRegionsForUI, planarRegionsGraphic::acceptPlanarRegions);
 
       goalGraphic = new PoseGraphic("Goal", Color.DEEPSKYBLUE, 0.03);
       new IHMCROS2Callback<>(ros2Node, GOAL_INPUT, goal ->
@@ -62,12 +62,12 @@ public class LookAndStepVisualizationGroup extends Group
       });
 
       closestPointAlongPathGraphic = new PoseGraphic("Closest", Color.BLUE, 0.027);
-      messager.registerTopicListener(ClosestPointForUI, pose -> Platform.runLater(() -> closestPointAlongPathGraphic.setPose(pose)));
+      messager.addTopicListener(ClosestPointForUI, pose -> Platform.runLater(() -> closestPointAlongPathGraphic.setPose(pose)));
       subGoalGraphic = new PoseGraphic("Sub goal", Color.YELLOW, 0.027);
-      messager.registerTopicListener(SubGoalForUI, pose -> Platform.runLater(() -> subGoalGraphic.setPose(pose)));
+      messager.addTopicListener(SubGoalForUI, pose -> Platform.runLater(() -> subGoalGraphic.setPose(pose)));
 
       bodyPathPlanGraphic = new BodyPathPlanGraphic();
-      messager.registerTopicListener(BodyPathPlanForUI, bodyPathPlan ->
+      messager.addTopicListener(BodyPathPlanForUI, bodyPathPlan ->
       {
          reviewingBodyPath = true;
          Platform.runLater(() -> bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPathPlan));

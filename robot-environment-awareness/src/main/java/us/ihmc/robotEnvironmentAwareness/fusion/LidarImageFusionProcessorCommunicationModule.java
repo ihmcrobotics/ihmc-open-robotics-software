@@ -1,5 +1,10 @@
 package us.ihmc.robotEnvironmentAwareness.fusion;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,21 +13,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import perception_msgs.msg.dds.Image32;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import perception_msgs.msg.dds.VideoPacket;
-import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
-import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
@@ -32,10 +34,11 @@ import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.FusionSensorObje
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
+import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
+import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class LidarImageFusionProcessorCommunicationModule
 {
@@ -74,12 +77,12 @@ public class LidarImageFusionProcessorCommunicationModule
 
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 
-      messager.registerTopicListener(LidarImageFusionAPI.RequestSocketConnection, (content) -> connect());
-      messager.registerTopicListener(LidarImageFusionAPI.RequestObjectDetection, (content) -> request());
+      messager.addTopicListener(LidarImageFusionAPI.RequestSocketConnection, (content) -> connect());
+      messager.addTopicListener(LidarImageFusionAPI.RequestObjectDetection, (content) -> request());
       selectedObjecTypes = messager.createInput(LidarImageFusionAPI.SelectedObjecTypes, new ArrayList<ObjectType>());
       socketHostIPAddress = messager.createInput(LidarImageFusionAPI.ObjectDetectionModuleAddress);
 
-      messager.registerTopicListener(LidarImageFusionAPI.RunStereoREA, (content) -> stereoREAModule.singleRun());
+      messager.addTopicListener(LidarImageFusionAPI.RunStereoREA, (content) -> stereoREAModule.singleRun());
 
       scheduler = new ExceptionHandlingThreadScheduler(this.getClass().getSimpleName(), t -> {
          LogTools.error(t.getMessage());

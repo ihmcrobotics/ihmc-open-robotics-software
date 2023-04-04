@@ -2,6 +2,7 @@ package us.ihmc.rdx.logging;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
+import imgui.type.ImInt;
 import imgui.type.ImLong;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
@@ -12,7 +13,9 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.rdx.ui.tools.ImGuiDirectory;
@@ -42,6 +45,7 @@ public class RDXHDF5ImageBrowser
    private final Mat decompressionOutputMat;
    private boolean isPNG;
    private String encoding;
+   private final ImInt imageIndexToDelete = new ImInt();
 
    public RDXHDF5ImageBrowser()
    {
@@ -91,6 +95,13 @@ public class RDXHDF5ImageBrowser
                if (ImGui.sliderScalar(labels.get("Index"), ImGuiDataType.U32, imageIndex, 0, numberOfObjects - 1, "%d"))
                {
                   loadDatasetImage();
+               }
+               ImGuiTools.volatileInputInt(labels.get("Index to delete"), imageIndexToDelete, 1);
+               ImGui.sameLine();
+               if (ImGui.button(labels.get("Delete")))
+               {
+                  // TODO: How to delete?
+                  LogTools.error("Not implemented!");
                }
             }
          }

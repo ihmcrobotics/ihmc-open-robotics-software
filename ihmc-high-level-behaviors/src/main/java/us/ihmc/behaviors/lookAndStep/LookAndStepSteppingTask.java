@@ -79,6 +79,8 @@ public class LookAndStepSteppingTask
                                        + ". Planning again...", () -> !(footstepPlan != null && footstepPlan.getNumberOfSteps() > 0), doneWaitingForSwingOutput);
          suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
          suppressor.addCondition("Robot not in walking state", () -> !lookAndStep.controllerStatusTracker.isInWalkingState());
+
+         lookAndStepParameters = syncedRobot.getRobotModel().getLookAndStepParameters();
       }
 
       public void reset()

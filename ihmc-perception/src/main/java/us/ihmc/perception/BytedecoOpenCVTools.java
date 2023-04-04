@@ -4,19 +4,12 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.VideoPacket;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.log.LogTools;
 
 import java.awt.image.BufferedImage;
-import java.time.Instant;
 
 public class BytedecoOpenCVTools
 {
@@ -198,189 +191,6 @@ public class BytedecoOpenCVTools
       opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, image);
    }
 
-   public static String getTypeString(int type)
-   {
-      int numImgTypes = 35; // 7 base types, with five channel options each (none or C1, ..., C4)
-
-      int enum_ints[] = {opencv_core.CV_8U,
-                         opencv_core.CV_8UC1,
-                         opencv_core.CV_8UC2,
-                         opencv_core.CV_8UC3,
-                         opencv_core.CV_8UC4,
-                         opencv_core.CV_8S,
-                         opencv_core.CV_8SC1,
-                         opencv_core.CV_8SC2,
-                         opencv_core.CV_8SC3,
-                         opencv_core.CV_8SC4,
-                         opencv_core.CV_16U,
-                         opencv_core.CV_16UC1,
-                         opencv_core.CV_16UC2,
-                         opencv_core.CV_16UC3,
-                         opencv_core.CV_16UC4,
-                         opencv_core.CV_16S,
-                         opencv_core.CV_16SC1,
-                         opencv_core.CV_16SC2,
-                         opencv_core.CV_16SC3,
-                         opencv_core.CV_16SC4,
-                         opencv_core.CV_32S,
-                         opencv_core.CV_32SC1,
-                         opencv_core.CV_32SC2,
-                         opencv_core.CV_32SC3,
-                         opencv_core.CV_32SC4,
-                         opencv_core.CV_32F,
-                         opencv_core.CV_32FC1,
-                         opencv_core.CV_32FC2,
-                         opencv_core.CV_32FC3,
-                         opencv_core.CV_32FC4,
-                         opencv_core.CV_64F,
-                         opencv_core.CV_64FC1,
-                         opencv_core.CV_64FC2,
-                         opencv_core.CV_64FC3,
-                         opencv_core.CV_64FC4};
-
-      String enum_strings[] = {"CV_8U",
-                               "CV_8UC1",
-                               "CV_8UC2",
-                               "CV_8UC3",
-                               "CV_8UC4",
-                               "CV_8S",
-                               "CV_8SC1",
-                               "CV_8SC2",
-                               "CV_8SC3",
-                               "CV_8SC4",
-                               "CV_16U",
-                               "CV_16UC1",
-                               "CV_16UC2",
-                               "CV_16UC3",
-                               "CV_16UC4",
-                               "CV_16S",
-                               "CV_16SC1",
-                               "CV_16SC2",
-                               "CV_16SC3",
-                               "CV_16SC4",
-                               "CV_32S",
-                               "CV_32SC1",
-                               "CV_32SC2",
-                               "CV_32SC3",
-                               "CV_32SC4",
-                               "CV_32F",
-                               "CV_32FC1",
-                               "CV_32FC2",
-                               "CV_32FC3",
-                               "CV_32FC4",
-                               "CV_64F",
-                               "CV_64FC1",
-                               "CV_64FC2",
-                               "CV_64FC3",
-                               "CV_64FC4"};
-
-      for (int i = 0; i < numImgTypes; i++)
-      {
-         if (type == enum_ints[i])
-            return enum_strings[i];
-      }
-      return "unknown image type";
-   }
-
-   public static void printMat(Mat image, String prefix)
-   {
-      LogTools.info(matToString(image, prefix));
-   }
-
-   public static String matToString(Mat image, String prefix)
-   {
-      StringBuilder matString = new StringBuilder("Mat: [" + prefix + "] \n");
-
-      for (int i = 0; i < image.rows(); i++)
-      {
-         for (int j = 0; j < image.cols(); j++)
-         {
-            matString.append(image.ptr(i, j).getShort()).append("\t");
-         }
-         matString.append("\n");
-      }
-
-      return matString.toString();
-   }
-
-   public static void display(String tag, Mat image, int delay)
-   {
-      opencv_highgui.imshow(tag, image);
-      int code = opencv_highgui.waitKeyEx(delay);
-      if (code == 113) // Keycode for 'q'
-      {
-         System.exit(0);
-      }
-   }
-
-   public static void displayDepth(String tag, Mat image, int delay)
-   {
-      displayDepth(tag, image, delay, 1.0f);
-   }
-
-   public static void displayDepth(String tag, Mat image, int delay, float scale)
-   {
-      Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
-      Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
-
-      displayDepth.convertTo(displayDepth, opencv_core.CV_8UC1, 0.8, 50);
-      BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
-      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
-
-      opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
-      display(tag, finalDisplayDepth, delay);
-   }
-
-   public static void displayHeightMap(String tag, Mat image, int delay, float scale)
-   {
-      Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
-      Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
-
-      BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 250.0);
-
-      opencv_imgproc.threshold(displayDepth, displayDepth, 100, 255, opencv_imgproc.CV_THRESH_TOZERO_INV);
-      opencv_core.normalize(displayDepth, displayDepth, 255, 0, opencv_core.NORM_MINMAX, opencv_core.CV_8UC1, new Mat());
-
-      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
-
-      opencv_imgproc.resize(finalDisplayDepth, finalDisplayDepth, new Size((int) (image.cols() * scale), (int) (image.rows() * scale)));
-      display(tag, finalDisplayDepth, delay);
-   }
-
-   public static void packVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)
-   {
-      compressedBytes.asBuffer().get(heapArray, 0, compressedBytes.asBuffer().remaining());
-      packet.setTimestamp(nanoTime);
-      packet.getData().resetQuick();
-      packet.getData().add(heapArray);
-      packet.setImageHeight(height);
-      packet.setImageWidth(width);
-      packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
-   }
-
-   public static void packImageMessage(ImageMessage imageMessage,
-                                       BytePointer data,
-                                       FramePose3D cameraPose,
-                                       Instant aquisitionTime,
-                                       long sequenceNumber,
-                                       int height,
-                                       int width,
-                                       int format)
-   {
-      imageMessage.getData().resetQuick();
-      for (int i = 0; i < data.limit(); i++)
-      {
-         imageMessage.getData().add(data.get(i));
-      }
-      imageMessage.setFormat(format);
-      imageMessage.setImageHeight(height);
-      imageMessage.setImageWidth(width);
-      imageMessage.getPosition().set(cameraPose.getPosition());
-      imageMessage.getOrientation().set(cameraPose.getOrientation());
-      imageMessage.setSequenceNumber(sequenceNumber);
-      MessageTools.toMessage(aquisitionTime, imageMessage.getAcquisitionTime());
-   }
-
    public static Mat decompressImageJPGUsingYUV(BytePointer messageEncodedBytePointer)
    {
       Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
@@ -407,5 +217,32 @@ public class BytedecoOpenCVTools
    public static boolean dimensionsMatch(BytedecoImage a, BytedecoImage b)
    {
       return a.getImageWidth() == b.getImageWidth() && a.getImageHeight() == b.getImageHeight();
+   }
+
+   public static boolean dimensionsMatch(Mat a, int imageWidth, int imageHeight)
+   {
+      return a.cols() == imageWidth && a.rows() == imageHeight;
+   }
+
+   /**
+    * Puts 3 floats in a Mat that is an array of Float3s i.e. type == CV_32FC3
+    * Assumes Mat is continuous. i.e. Mat::isContinuous == true
+    */
+   public static void putFloat3(BytePointer dataPointer, int float3Index, float float1, float float2, float float3)
+   {
+      dataPointer.putFloat(getFloat3ByteIndexContinuous(float3Index, 0), float1);
+      dataPointer.putFloat(getFloat3ByteIndexContinuous(float3Index, 1), float2);
+      dataPointer.putFloat(getFloat3ByteIndexContinuous(float3Index, 2), float3);
+   }
+
+   /**
+    * Calculate the index of the first byte of float in a CV_32FC3 in a Mat that is an array of Float3s.
+    * Assumes Mat is continuous. i.e. Mat::isContinuous == true
+    * @param float3Index index of the float3 i.e. the triplet
+    * @param floatIndex index of the float in the triplet, 0, 1, or 2
+    */
+   public static long getFloat3ByteIndexContinuous(int float3Index, int floatIndex)
+   {
+      return (long) float3Index * 3 * Float.BYTES + floatIndex * Float.BYTES;
    }
 }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 public class RDX3DPanelToolbar
 {
+   private boolean show = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final float iconSize = 35.0f;
    private final float gap = 17.7f;
@@ -24,7 +25,7 @@ public class RDX3DPanelToolbar
 
    public void render(float mainWindowWidth, float mainWindowPosX, float mainWindowPosY)
    {
-      if (buttons.size() > 0)
+      if (buttons.size() > 0 && show)
       {
          int numButtons = buttons.size();
          float offsetY = 12.0f;
@@ -58,5 +59,15 @@ public class RDX3DPanelToolbar
          }
          ImGui.end();
       }
+   }
+
+   public boolean isShow()
+   {
+      return show;
+   }
+
+   public void setShow(boolean show)
+   {
+      this.show = show;
    }
 }

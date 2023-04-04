@@ -70,7 +70,7 @@ public class StartGoalPositionEditor extends AnimationTimer
 
       if (planarRegionDataTopic != null)
       {
-         messager.registerTopicListener(planarRegionDataTopic, planarRegionSelector::setPlanarRegionsList);
+         messager.addTopicListener(planarRegionDataTopic, planarRegionSelector::setPlanarRegionsList);
       }
 
       leftClickInterceptor = mouseEvent ->

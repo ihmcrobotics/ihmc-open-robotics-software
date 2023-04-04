@@ -59,11 +59,11 @@ public class RDXCalibrationPatternDetectionUI
    /**
     * Can be called asynchronously from a thread that's reading from a camera.
     */
-   public void copyInSourceImage(Mat imageToCopy)
+   public void copyBayerBGImage(Mat bayerBGImageToCopy)
    {
       synchronized (avoidCopiedImageTearing)
       {
-         opencv_imgproc.cvtColor(imageToCopy, bgrSourceCopy, opencv_imgproc.COLOR_RGB2BGR);
+         opencv_imgproc.cvtColor(bayerBGImageToCopy, bgrSourceCopy, opencv_imgproc.COLOR_BayerBG2BGR);
       }
    }
 

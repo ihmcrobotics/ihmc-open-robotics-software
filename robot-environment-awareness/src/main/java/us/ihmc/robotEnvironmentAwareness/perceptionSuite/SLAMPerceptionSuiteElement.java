@@ -1,8 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
 import javafx.stage.Stage;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;

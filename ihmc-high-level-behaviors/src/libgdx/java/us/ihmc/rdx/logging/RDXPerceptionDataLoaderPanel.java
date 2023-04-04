@@ -6,9 +6,9 @@ import imgui.type.ImString;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLogChannel;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -135,13 +135,13 @@ public class RDXPerceptionDataLoaderPanel extends ImGuiPanel
                {
                   cvImage = new Mat();
                   loader.loadCompressedDepth(channel.getName(), channel.getIndex(), imageBytePointer, cvImage);
-                  BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
+                  PerceptionDebugTools.displayDepth(channel.getName(), cvImage, 1);
                }
                if (channel.getName().contains("color"))
                {
                   cvImage = new Mat();
                   loader.loadCompressedColor(channel.getName(), channel.getIndex(), cvImage);
-                  BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
+                  PerceptionDebugTools.displayDepth(channel.getName(), cvImage, 1);
                }
 
                // TODO: Maybe replace these with trajectory graphics buffer replay

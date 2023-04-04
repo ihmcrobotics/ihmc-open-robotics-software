@@ -8,6 +8,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
+import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -38,10 +39,14 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
    private final List<OpenCVArUcoMarker> arUcoMarkersToTrack;
+   private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
-   public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel, List<OpenCVArUcoMarker> arUcoMarkersToTrack)
+   public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel,
+                                                   List<OpenCVArUcoMarker> arUcoMarkersToTrack,
+                                                   IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics)
    {
       this.arUcoMarkersToTrack = arUcoMarkersToTrack;
+      this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
@@ -54,12 +59,22 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       if (!LEFT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly LEFT with serial number: {}", LEFT_SERIAL_NUMBER);
-         blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER, syncedRobot));
+         blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER, syncedRobot, null));
+      }
+      else
+      {
+         LogTools.warn("No serial number for left Blackfly specified. The sensor will not be available.");
       }
       if (!RIGHT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly RIGHT with serial number: {}", RIGHT_SERIAL_NUMBER);
-         blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER, syncedRobot));
+         blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER,
+                                                                syncedRobot,
+                                                                robotModel.getSensorInformation().getObjectDetectionCameraTransform()));
+      }
+      else
+      {
+         LogTools.warn("No serial number for right Blackfly specified. The sensor will not be available.");
       }
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
@@ -82,7 +97,12 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                for (RobotSide side : blackflies.sides())
                {
                   DualBlackflyCamera blackfly = blackflies.get(side);
-                  blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()), side, ros2Helper, realtimeROS2Node, arUcoMarkersToTrack);
+                  blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()),
+                                  side,
+                                  ros2Helper,
+                                  realtimeROS2Node,
+                                  arUcoMarkersToTrack,
+                                  ousterFisheyeColoringIntrinsics);
                }
             }
 

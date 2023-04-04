@@ -17,13 +17,13 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.stage.Stage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -48,9 +48,9 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.starter.ApplicationRunner;
 import us.ihmc.messager.SharedMemoryMessager;
+import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;

@@ -6,9 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
-import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
-import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
+import us.ihmc.rdx.simulation.scs2.*;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
@@ -115,9 +113,9 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
       }
    }
 
-   public void getVisualReferenceFrameRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getVisualReferenceFrameRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive() && robotLoadedActivator.poll())
+      if (isActive() && robotLoadedActivator.poll() && sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
          multiBody.getVisualReferenceFrameRenderables(renderables, pool);
       }
@@ -126,6 +124,24 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
    public void destroy()
    {
 
+   }
+
+   public void setOpacity(float opacity)
+   {
+      for (RDXRigidBody rigidBody : multiBody.subtreeIterable())
+      {
+         RDXVisualTools.collectRDXRigidBodiesIncludingPossibleFourBars(rigidBody, rdxRigidBody ->
+         {
+            RDXFrameGraphicsNode visualGraphicsNode = rdxRigidBody.getVisualGraphicsNode();
+            if (visualGraphicsNode != null) // This is null for the elevator
+            {
+               for (RDXFrameNodePart part : visualGraphicsNode.getParts())
+               {
+                  part.getModelInstance().setOpacity(opacity);
+               }
+            }
+         });
+      }
    }
 
    public boolean isRobotLoaded()

@@ -52,7 +52,7 @@ public class ExploreAreaTurnInPlace extends AsynchronousActionNode
       this.footstepPlanner = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
       this.footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
 
-      helper.getMessager().registerTopicListener(ExploreAreaBehaviorAPI.UserRequestedPointToLookAt, userRequestedPointToLookAt::set);
+      helper.getMessager().addTopicListener(ExploreAreaBehaviorAPI.UserRequestedPointToLookAt, userRequestedPointToLookAt::set);
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
    }
 

@@ -1,4 +1,3 @@
-
 float4 createRGB(double input)
 {
    // Using interpolation between keu color points

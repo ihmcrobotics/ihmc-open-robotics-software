@@ -1,10 +1,21 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.EnableWalkerAnimation;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowBodyPath;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterRawPoints;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowGoalVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInnerRegionVisibilityMapEdges;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowInterRegionVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowPlanarRegions;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowStartVisibilityMap;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.VisibilityGraphsComputePath;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.VisibilityGraphsComputePathWithOcclusions;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.ToggleButton;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.*;
+import us.ihmc.messager.javafx.JavaFXMessager;
 
 public class VisibilityGraphsAnchorPaneController
 {

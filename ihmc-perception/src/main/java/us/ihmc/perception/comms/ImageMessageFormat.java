@@ -20,7 +20,7 @@ public enum ImageMessageFormat
 
    public void packMessageFormat(ImageMessage imageMessage)
    {
-      imageMessage.setFormat(ordinal());
+      imageMessage.setFormat((byte) ordinal());
    }
 
    public static ImageMessageFormat getFormat(ImageMessage imageMessage)

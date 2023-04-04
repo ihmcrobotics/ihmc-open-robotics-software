@@ -108,12 +108,23 @@ public class SimpleGPUHeightMapUpdater
       localizationBuffer.destroy(openCLManager);
       parametersBuffer.destroy(openCLManager);
       intrinsicsBuffer.destroy(openCLManager);
-      openCLManager.releaseBufferObject(centroidData);
-      openCLManager.releaseBufferObject(varianceData);
-      openCLManager.releaseBufferObject(counterData);
-      centroidData.releaseReference();
-      varianceData.releaseReference();
-      counterData.releaseReference();
+      if (centroidData != null)
+      {
+         openCLManager.releaseBufferObject(centroidData);
+         centroidData.releaseReference();
+      }
+
+      if (varianceData != null)
+      {
+         openCLManager.releaseBufferObject(varianceData);
+         varianceData.releaseReference();
+      }
+
+      if (counterData != null)
+      {
+         openCLManager.releaseBufferObject(counterData);
+         counterData.releaseReference();
+      }
 
       depthImageMeters.destroy(openCLManager);
       centroidXImage.destroy(openCLManager);

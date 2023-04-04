@@ -40,7 +40,7 @@ public class REAModuleROS2Subscription<T>
       this.listener = listener;
       this.qosProfile = qosProfile;
 
-      messager.registerTopicListener(enableTopic, (enable) -> handle(node, enable));
+      messager.addTopicListener(enableTopic, (enable) -> handle(node, enable));
    }
 
    public void handle(ROS2NodeInterface ros2Node, boolean enable)

@@ -1,7 +1,6 @@
 package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -18,15 +17,13 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
-import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
+import us.ihmc.rdx.ui.interactable.RDXInteractableOuster;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
@@ -44,11 +41,9 @@ public class RDXNettyOusterUI
    private OusterDepthExtractionKernel depthExtractionKernel;
    private RDXOusterFisheyeColoredPointCloudKernel ousterFisheyeKernel;
    private RDXPointCloudRenderer pointCloudRenderer;
-   private final ImFloat verticalFieldOfView = new ImFloat((float) Math.toRadians(90.0));
-   private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
    private final ImFloat pointSize = new ImFloat(0.01f);
    private ModifiableReferenceFrame sensorFrame;
-   private RDXInteractableFrameModel ousterInteractable;
+   private RDXInteractableOuster ousterInteractable;
    private int depthWidth;
    private int depthHeight;
    private BytedecoImage fisheyeImage;
@@ -68,20 +63,10 @@ public class RDXNettyOusterUI
 
    public void create(RDXBaseUI baseUI)
    {
-      ModelData ousterSensorModel = RDXModelLoader.loadModelData("environmentObjects/ousterSensor/Ouster.g3dj");
-      CylinderRayIntersection cylinderIntersection = new CylinderRayIntersection();
-      ousterInteractable = new RDXInteractableFrameModel();
       sensorFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
-      ousterInteractable.create(sensorFrame.getReferenceFrame(),
-                                sensorFrame.getTransformToParent(),
-                                baseUI.getPrimary3DPanel(),
-                                ousterSensorModel,
-                                pickRay ->
-                                {
-                                   cylinderIntersection.update(0.0734, 0.04, -0.0372, ousterInteractable.getReferenceFrame().getTransformToWorldFrame());
-                                   return cylinderIntersection.intersect(pickRay);
-                                });
-
+      ousterInteractable = new RDXInteractableOuster(baseUI.getPrimary3DPanel(),
+                                                     sensorFrame.getReferenceFrame(),
+                                                     sensorFrame.getTransformToParent());
       ouster = new NettyOuster();
       ouster.setOnFrameReceived(this::onFrameReceived);
       ouster.bind();
@@ -113,14 +98,14 @@ public class RDXNettyOusterUI
     */
    private void createPointCloudAndKernel()
    {
-      depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager);
+      depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, () -> false, () -> false);
 
       int totalNumberOfPoints = ousterFisheyeKernel.calculateNumberOfPointsForLevelOfColorDetail(ouster.getImageWidth(),
                                                                                                  ouster.getImageHeight(),
                                                                                                  levelOfColorDetail.get());
 
       if (pointCloudVertexBuffer == null
-          || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX < totalNumberOfPoints)
+          || pointCloudVertexBuffer.getBackingDirectFloatBuffer().capacity() / RDXPointCloudRenderer.FLOATS_PER_VERTEX != totalNumberOfPoints)
       {
          LogTools.info("Allocating new buffers. {} total points", totalNumberOfPoints);
 
@@ -133,6 +118,8 @@ public class RDXNettyOusterUI
                                                         pointCloudRenderer.getVertexBuffer());
          pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
       }
+
+      ousterFisheyeKernel.setInstrinsicParameters(ouster.getPixelShiftBuffer(), ouster.getBeamAltitudeAnglesBuffer(), ouster.getBeamAzimuthAnglesBuffer());
    }
 
    public void setFisheyeImageToColorPoints(BytedecoImage fThetaFisheyeRGBA8Image,
@@ -174,7 +161,7 @@ public class RDXNettyOusterUI
          {
             depthExtractionSynchronizedBlockStopwatchPlot.stop();
             depthExtractionKernelStopwatchPlot.start();
-            depthExtractionKernel.runKernel(ousterInteractable.getReferenceFrame().getTransformToRoot());
+            depthExtractionKernel.runKernel(ousterInteractable.getInteractableFrameModel().getReferenceFrame().getTransformToRoot());
             depthExtractionKernelStopwatchPlot.stop();
          }
 
@@ -185,14 +172,13 @@ public class RDXNettyOusterUI
          pointCloudRenderer.updateMeshFastestBeforeKernel();
          pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
 
-         ousterFisheyeKernel.updateSensorTransform(ousterInteractable.getReferenceFrame());
+         ousterFisheyeKernel.updateSensorTransform(ousterInteractable.getInteractableFrameModel().getReferenceFrame());
          depthImageToPointCloudStopwatchPlot.start();
-         ousterFisheyeKernel.runKernel(horizontalFieldOfView.get(),
-                                       verticalFieldOfView.get(),
+         ousterFisheyeKernel.runKernel(ouster.getLidarOriginToBeamOrigin(),
                                        pointSize.get(),
                                        true,
                                        RDXColorGradientMode.WORLD_Z.ordinal(),
-                                       false,
+                                       true,
                                        depthExtractionKernel.getExtractedDepthImage(),
                                        fisheyeFocalLengthPixelsX,
                                        fisheyeFocalLengthPixelsY,
@@ -220,8 +206,6 @@ public class RDXNettyOusterUI
    {
       ImGui.text("System native byte order: " + ByteOrder.nativeOrder().toString());
 
-      ImGuiTools.volatileInputFloat(labels.get("Vertical field of view"), verticalFieldOfView);
-      ImGuiTools.volatileInputFloat(labels.get("Horizontal field of view"), horizontalFieldOfView);
       ImGui.sliderFloat(labels.get("Point size"), pointSize.getData(), 0.0005f, 0.05f);
       if (ImGui.sliderInt(labels.get("Level of color detail"), levelOfColorDetail.getData(), 0, 3))
          levelOfColorDetailChanged.set();
@@ -262,7 +246,7 @@ public class RDXNettyOusterUI
 
    public RDXInteractableFrameModel getOusterInteractable()
    {
-      return ousterInteractable;
+      return ousterInteractable.getInteractableFrameModel();
    }
 
    public RDXOusterFisheyeColoredPointCloudKernel getOusterFisheyeKernel()

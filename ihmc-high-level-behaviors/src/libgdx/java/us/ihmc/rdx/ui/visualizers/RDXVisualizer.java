@@ -15,7 +15,7 @@ import java.util.Set;
 
 public abstract class RDXVisualizer implements RDXRenderableProvider
 {
-   private ImBoolean active = new ImBoolean(false);
+   private final ImBoolean active = new ImBoolean(false);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String title;
    private boolean createdYet = false;
@@ -31,16 +31,22 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       createdYet = true;
       if (getPanel() != null)
       {
-         active = getPanel().getIsShowing();
+         setActive(getPanel().getIsShowing().get());
       }
    }
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(labels.get(title), active);
+      if (ImGui.checkbox(labels.get(title), active))
+      {
+         setActive(active.get());
+      }
       ImGuiTools.previousWidgetTooltip("Active");
    }
 
+   /**
+    * Only called when active.
+    */
    public void update()
    {
       if (!createdYet)
@@ -49,6 +55,10 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       }
    }
 
+   /**
+    * It is assumed by extending classes that this will be called when the active
+    * state changes.
+    */
    public void setActive(boolean active)
    {
       this.active.set(active);
@@ -59,6 +69,9 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       return active.get();
    }
 
+   /**
+    * Only called when active.
+    */
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {

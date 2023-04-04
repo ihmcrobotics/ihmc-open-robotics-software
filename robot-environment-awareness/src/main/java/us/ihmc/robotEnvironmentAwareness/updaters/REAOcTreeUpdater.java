@@ -75,7 +75,7 @@ public class REAOcTreeUpdater
       normalEstimationParameters = reaMessager.createInput(REAModuleAPI.NormalEstimationParameters, new NormalEstimationParameters());
       nodeLifetimeMilliseconds = reaMessager.createInput(REAModuleAPI.OcTreeNodeLifetimeMillis, 60000L);
 
-      reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
+      reaMessager.addTopicListener(REAModuleAPI.RequestEntireModuleState, messageContent -> sendCurrentState());
    }
 
    public void initializeReferenceOctree(double octreeResolution)

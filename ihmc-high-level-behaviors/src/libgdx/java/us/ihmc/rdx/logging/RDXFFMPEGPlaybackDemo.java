@@ -15,8 +15,8 @@ import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -35,10 +35,7 @@ public class RDXFFMPEGPlaybackDemo
 
    // example.webm contains licensing information at attribution.txt in same directory.
    // Used with permission from https://en.wikipedia.org/wiki/File:Schlossbergbahn.webm
-   private final WorkspaceFile exampleVideo = new WorkspaceFile(new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                                       "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                                                       RDXFFMPEGPlaybackDemo.class),
-                                                                "example.webm");
+   private final WorkspaceResourceFile exampleVideo = new WorkspaceResourceFile(new WorkspaceResourceDirectory(getClass()), "example.webm");
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXBytedecoImagePanel imagePanel;
@@ -88,7 +85,7 @@ public class RDXFFMPEGPlaybackDemo
             if (nativesLoadedActivator.poll())
             {
                if (nativesLoadedActivator.isNewlyActivated())
-                  loadVideo(exampleVideo.getFilePath().toString());
+                  loadVideo(exampleVideo.getFilesystemFile().toString());
             }
 
             if (imagePanel != null && !seeking)

@@ -65,7 +65,7 @@ public class MissionControlService
          if (firstConnectedTick)
          {
             firstConnectedTick = false;
-            kryoMessagerServer.registerTopicListener(ServiceNameToTrack, servicesToTrackQueue::add);
+            kryoMessagerServer.addTopicListener(ServiceNameToTrack, servicesToTrackQueue::add);
          }
 
          while (!servicesToTrackQueue.isEmpty())

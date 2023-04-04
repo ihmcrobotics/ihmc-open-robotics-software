@@ -12,11 +12,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.util.TreeSet;
 
 public class WorkspacePathTools
 {
+   private static final ThreadLocal<TreeSet<String>> printedInferredSourceSetDirectory = ThreadLocal.withInitial(TreeSet::new);
+
    /**
     * Use this method when applications are being run from source and need to access a project file.
+    * This is necessary because the working directory when running applications is inconsistent.
     *
     * This method will find the directoryNameToAssumePresent and then traverse that path to find
     * the file system path to a resource.
@@ -31,6 +35,25 @@ public class WorkspacePathTools
       Path directoryInline = PathTools.findDirectoryInline(directoryNameToAssumePresent);
       if (directoryInline != null)
          return directoryInline.resolve(subsequentPathToResourceFolder).resolve(resourcePathString).toAbsolutePath().normalize();
+      return null;
+   }
+
+   /**
+    * Use this method when applications are being run from source and need to access a project file.
+    * This is necessary because the working directory when running applications is inconsistent.
+    *
+    * This method will find the directoryNameToAssumePresent and then traverse that path to find
+    * the file system path.
+    *
+    * @param directoryNameToAssumePresent i.e. ihmc-open-robotics-software
+    * @param subsequentPath i.e. ihmc-java-toolkit
+    * @return absolute, normalized path to that directory, or null if fails
+    */
+   public static Path findPath(String directoryNameToAssumePresent, String subsequentPath)
+   {
+      Path directoryInline = PathTools.findDirectoryInline(directoryNameToAssumePresent);
+      if (directoryInline != null)
+         return directoryInline.resolve(subsequentPath).toAbsolutePath().normalize();
       return null;
    }
 
@@ -92,19 +115,19 @@ public class WorkspacePathTools
    }
 
    /**
-    * Uses Java's security functionality to find the source code path and
-    * use it, along with the current working directory, to figure out where
-    * the resources directory is, if possible. This method probably works
-    * for most of our use cases, which is just to save configuration files
-    * to version control from applications as we are developing them.
+    * Uses Java's security functionality to find the source code path and use it to
+    * figure out where the source set directory containing the Java source file is,
+    * if possible. This method probably works for most of our use cases, which is just
+    * to save configuration files to version control from applications as we are
+    * developing them.
     */
-   public static WorkingDirectoryPathComponents inferWorkingDirectoryPathComponents(Class<?> classForLoading)
+   public static Path inferFilesystemSourceSetDirectory(Class<?> classForFindingSourceSetDirectory)
    {
-      WorkingDirectoryPathComponents inferredPathComponents = null;
+      Path inferredSourceSetDirectory = null;
       ProtectionDomain protectionDomain;
       try
       {
-         protectionDomain = classForLoading.getProtectionDomain();
+         protectionDomain = classForFindingSourceSetDirectory.getProtectionDomain();
          CodeSource codeSource = protectionDomain.getCodeSource();
          URL location = codeSource == null ? null : codeSource.getLocation();
          // Going through URI is required to support Windows
@@ -113,70 +136,37 @@ public class WorkspacePathTools
          {
             Path codeSourceDirectory = Paths.get(locationURI);
             LogTools.debug("Code source directory: {}", codeSourceDirectory);
-            Path workingDirectory = WorkspacePathTools.getWorkingDirectory();
-            LogTools.debug("Working directory: {}", workingDirectory);
 
-            if (codeSourceDirectory.getNameCount() < 1 || workingDirectory.getNameCount() < 1
-             || !codeSourceDirectory.getName(0).toString().equals(workingDirectory.getName(0).toString()))
+            // We want to remove the build folder part of the path.
+            // We do this armed with the knowledge of what the default build folder names are.
+            int lastIndexOfOut = findLastIndexOfPart(codeSourceDirectory, "out"); // Handle IntelliJ
+            int lastIndexOfBin = findLastIndexOfPart(codeSourceDirectory, "bin"); // Handle Eclipse
+            int indexOfBuildFolder = Math.max(lastIndexOfOut, lastIndexOfBin);
+
+            if (indexOfBuildFolder >= 0)
             {
-               throw new RuntimeException("""
-               The code source directory and working directory need to share a common root.
-                  Code source path: %s
-                  Working directory: %s
-               """.formatted(codeSourceDirectory, workingDirectory));
-            }
+               // This removes out/production/classes from [...]project/out/production/classes
+               // This removes out/production/classes from [...]project/src/extra/out/production/classes
+               // This removes bin from [...]project/bin
+               // This removes bin from [...]project/src/extra/bin
+               inferredSourceSetDirectory = Paths.get("/").resolve(codeSourceDirectory.subpath(0, indexOfBuildFolder));
 
-            int lastIndexOfSrc = -1;
-            for (int nameElementIndex = 0; nameElementIndex < codeSourceDirectory.getNameCount(); nameElementIndex++)
-            {
-               if (codeSourceDirectory.getName(nameElementIndex).toString().equals("src"))
+               // Since src/main gets built in the project folder, we need to add it back.
+               int lastIndexOfSrc = findLastIndexOfPart(codeSourceDirectory, "src");
+               if (lastIndexOfSrc < 0)
+                  inferredSourceSetDirectory = inferredSourceSetDirectory.resolve("src/main");
+
+               TreeSet<String> classesPrinted = printedInferredSourceSetDirectory.get();
+               boolean printed = classesPrinted.contains(classForFindingSourceSetDirectory.getName());
+               if (!printed)
                {
-                  lastIndexOfSrc = nameElementIndex;
+                  classesPrinted.add(classForFindingSourceSetDirectory.getName());
+                  LogTools.info("Inferred source set directory:\n {}", removePathPartsBeforeProjectFolder(inferredSourceSetDirectory));
                }
-            }
-
-            if (lastIndexOfSrc >= 0)
-            {
-               // Add 2 to keep 'src' and the source set part after 'src' i.e. ../src/main
-               // i.e This removes out/production/classes from [...]/src/main/out/production/classes
-               Path pathBeforeResources = codeSourceDirectory.subpath(0, lastIndexOfSrc + 2);
-               LogTools.debug("Path before resources: {}", pathBeforeResources);
-
-               Path pathWithResources = pathBeforeResources.resolve("resources").normalize();
-               LogTools.debug("Path with resources: {}", pathWithResources);
-
-               // We go through both working directory and code source directory to find the common part
-               int afterLastCommonPathElement = -1;
-               for (int pathNameElement = 0; pathNameElement < pathWithResources.getNameCount()
-                                          && pathNameElement < workingDirectory.getNameCount(); pathNameElement++)
-               {
-                  if (pathWithResources.getName(pathNameElement).toString().equals(workingDirectory.getName(pathNameElement).toString()))
-                  {
-                     // We add 1 here, to make sure the directory to assume present
-                     // is closer to the 'src' folder, which is what the other tools assume right now.
-                     afterLastCommonPathElement = pathNameElement + 1;
-                  }
-               }
-
-               // Sometimes the working directory is set to within the src folder heirarchy.
-               // In that case, let's back out and make the parent of 'src' our directory to assume present.
-               if (afterLastCommonPathElement >= lastIndexOfSrc)
-               {
-                  afterLastCommonPathElement = lastIndexOfSrc - 1;
-               }
-
-               String directoryNameToAssumePresent = pathWithResources.getName(afterLastCommonPathElement).toString();
-               int firstElementOfSubsequentPath = afterLastCommonPathElement + 1;
-               String subsequentPathToResourceFolder
-                     = pathWithResources.subpath(firstElementOfSubsequentPath, pathWithResources.getNameCount()).toString();
-               inferredPathComponents = new WorkingDirectoryPathComponents(directoryNameToAssumePresent, subsequentPathToResourceFolder);
-
-               LogTools.info("Inferred workspace directory components:\n Directory name to assume present: {}\n Subsequent path to resource folder: {}",
-                             directoryNameToAssumePresent, subsequentPathToResourceFolder);
             }
             else
             {
-               LogTools.warn("No src folder found.");
+               LogTools.warn("No out or bin folder found and we don't know how to deal with that.");
             }
          }
          else
@@ -189,6 +179,32 @@ public class WorkspacePathTools
          LogTools.error(securityException.getMessage());
       }
 
-      return inferredPathComponents;
+      return inferredSourceSetDirectory;
+   }
+
+   /**
+    * @param absolutePathInSourceDirectory i.e. /home/user/workspace/project/src/main/java/foo
+    * @return Path from the project directory i.e. project/src/main/java/foo
+    */
+   public static Path removePathPartsBeforeProjectFolder(Path absolutePathInSourceDirectory)
+   {
+      int lastIndexOfSrc = findLastIndexOfPart(absolutePathInSourceDirectory, "src");
+      if (lastIndexOfSrc > 0)
+         return absolutePathInSourceDirectory.subpath(lastIndexOfSrc - 1, absolutePathInSourceDirectory.getNameCount());
+      else
+         return absolutePathInSourceDirectory; // failure, just return original path
+   }
+
+   private static int findLastIndexOfPart(Path pathToSearch, String partName)
+   {
+      int lastIndexOfPart = -1;
+      for (int nameElementIndex = 0; nameElementIndex < pathToSearch.getNameCount(); nameElementIndex++)
+      {
+         if (pathToSearch.getName(nameElementIndex).toString().equals(partName))
+         {
+            lastIndexOfPart = nameElementIndex;
+         }
+      }
+      return lastIndexOfPart;
    }
 }

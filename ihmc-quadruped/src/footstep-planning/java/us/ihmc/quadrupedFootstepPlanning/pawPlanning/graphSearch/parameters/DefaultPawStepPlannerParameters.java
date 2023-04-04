@@ -9,19 +9,9 @@ public class DefaultPawStepPlannerParameters extends StoredPropertySet implement
       this(null);
    }
 
-   public DefaultPawStepPlannerParameters(String projectName, String pathToResources) // for robots and UIs that want their own defaults and saves
+   private DefaultPawStepPlannerParameters(PawStepPlannerParametersReadOnly pawPlannerParameters)
    {
-      this(projectName, pathToResources, null);
-   }
-
-   public DefaultPawStepPlannerParameters(PawStepPlannerParametersReadOnly pawPlannerParameters) // for message passing or temp access
-   {
-      this("ihmc-open-robotics-software", "ihmc-quadruped/src/footstep-planning/resources", pawPlannerParameters);
-   }
-
-   private DefaultPawStepPlannerParameters(String projectName, String pathToResources, PawStepPlannerParametersReadOnly pawPlannerParameters)
-   {
-      super(PawStepPlannerParameterKeys.keys, DefaultPawStepPlannerParameters.class, projectName, pathToResources);
+      super(PawStepPlannerParameterKeys.keys, DefaultPawStepPlannerParameters.class);
 
       if (pawPlannerParameters != null)
       {

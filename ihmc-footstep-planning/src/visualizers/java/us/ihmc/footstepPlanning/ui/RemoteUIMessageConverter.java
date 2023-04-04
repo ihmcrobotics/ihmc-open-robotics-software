@@ -243,8 +243,8 @@ public class RemoteUIMessageConverter
       headTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HeadTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
       neckTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, NeckTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, request -> requestNewPlan());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ReplanSwing, request ->
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ComputePath, request -> requestNewPlan());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ReplanSwing, request ->
       {
          if (requestedSwingPlanner.get() != SwingPlannerType.NONE)
          {
@@ -254,22 +254,22 @@ public class RemoteUIMessageConverter
          }
       });
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.HaltPlanning, request -> requestHaltPlanning());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.HaltPlanning, request -> requestHaltPlanning());
+      messager.addTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
 
       IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher =
             ROS2Tools.createPublisher(ros2Node,
                                       BipedalSupportPlanarRegionParametersMessage.class,
                                       ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput().withType(BipedalSupportPlanarRegionParametersMessage.class));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters,  message ->
+      messager.addTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters,  message ->
       {
          LogTools.info("Publishing bipedal support regions message. Enabled: " + message.getEnable());
          supportRegionsParametersPublisher.publish(message);
       });
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestedArmJointAngles, request ->
+      messager.addTopicListener(FootstepPlannerMessagerAPI.RequestedArmJointAngles, request ->
       {
          RobotSide robotSide = request.getKey();
          double[] jointAngles = request.getValue();
@@ -280,13 +280,13 @@ public class RemoteUIMessageConverter
 
       });
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ArmTrajectoryMessageTopic, armTrajectoryMessagePublisher::publish);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.HandTrajectoryMessageTopic, handTrajectoryMessagePublisher::publish);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootTrajectoryMessageTopic, footTrajectoryMessagePublisher::publish);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ChestTrajectoryMessageTopic, chestTrajectoryMessagePublisher::publish);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.SpineTrajectoryMessageTopic, spineTrajectoryMessagePublisher::publish);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.HeadTrajectoryMessageTopic, headTrajectoryMessagePublisher::publish);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.NeckTrajectoryMessageTopic, neckTrajectoryMessagePublisher::publish);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ArmTrajectoryMessageTopic, armTrajectoryMessagePublisher::publish);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.HandTrajectoryMessageTopic, handTrajectoryMessagePublisher::publish);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.FootTrajectoryMessageTopic, footTrajectoryMessagePublisher::publish);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.ChestTrajectoryMessageTopic, chestTrajectoryMessagePublisher::publish);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.SpineTrajectoryMessageTopic, spineTrajectoryMessagePublisher::publish);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.HeadTrajectoryMessageTopic, headTrajectoryMessagePublisher::publish);
+      messager.addTopicListener(FootstepPlannerMessagerAPI.NeckTrajectoryMessageTopic, neckTrajectoryMessagePublisher::publish);
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)

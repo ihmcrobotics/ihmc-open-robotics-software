@@ -12,31 +12,15 @@ from hdf5_converter import *
 from transform_utils import *
 from hdf5_generator import *
 
-def convert_main():
+def convert_main(path, src_file_name, dst_file_name):
 
-    # Simulation:
-    # 20230225_235428_PerceptionLog.hdf5
+    new_file = dst_file_name
 
-    # Real:
-    # 20221212_184748_PerceptionLog.hdf5
-    # 20221212_184906_PerceptionLog.hdf5
-    # 20221212_184940_PerceptionLog.hdf5
-
-    # 20221216_141954_PerceptionLog.hdf5
-    # 20221216_143619_PerceptionLog.hdf5
-    # 20221216_144027_PerceptionLog.hdf5
-
-    home = os.path.expanduser('~')
-
-    # path = home + '/.ihmc/logs/perception/'
-
-    path = '/home/bmishra/Workspace/Data/LogData/Perception/'
-
-    old_file = '20230207_214209_PerceptionLog.hdf5'
-    new_file = old_file.replace('.hdf5', 'Fixed.hdf5')
+    if dst_file_name is None:
+        new_file = src_file_name.replace('.hdf5', 'Fixed.hdf5')
 
 
-    data = h5py.File(path + old_file, 'r')
+    data = h5py.File(path + src_file_name, 'r')
 
     channels = collect_channels(data)
 
@@ -45,12 +29,7 @@ def convert_main():
     for channel in channels:
         conversions.append(dict(dtype=channel['dtype'], src_name=channel['name'], dst_name=channel['name'], count=channel['count']))
 
-
-    # conversions = [dict(type='byte', src_name='ouster/depth/', dst_name='ouster/depth/', count=507),
-    #                dict(type='float', src_name='ouster/sensor/position/', dst_name='ouster/sensor/position/', count=50),
-    #                dict(type='float', src_name='ouster/sensor/orientation/', dst_name='ouster/sensor/orientation/', count=50)]
-
-    convert_hdf5_file(path, old_file, new_file, conversions)
+    convert_hdf5_file(path, src_file_name, new_file, conversions)
 
 
 
@@ -258,6 +237,8 @@ if __name__ == '__main__':
     parser.add_argument("--info", help="file name for which to print info", type=str)
     parser.add_argument("--play", help="file name to play", type=str)
     parser.add_argument("--plot", help="file name to plot", type=str)
+    parser.add_argument("--fix", help="file name to fix", type=str)
+    parser.add_argument("--dst", help="destination file name", type=str)
 
     args = parser.parse_args()
     home = os.path.expanduser('~')
@@ -278,3 +259,6 @@ if __name__ == '__main__':
     if args.play:
         data = h5py.File(path + args.play, 'r')
         player_main(data)
+
+    if args.fix:
+        convert_main(path, args.fix, args.dst)

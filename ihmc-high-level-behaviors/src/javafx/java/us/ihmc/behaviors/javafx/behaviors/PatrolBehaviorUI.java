@@ -92,9 +92,9 @@ public class PatrolBehaviorUI extends JavaFXBehaviorUIInterface
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);
 
-      behaviorMessager.registerTopicListener(CurrentFootstepPlan, footstepPlan ->
+      behaviorMessager.addTopicListener(CurrentFootstepPlan, footstepPlan ->
             footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepPlan, DEFINITION.getName())));
-      behaviorMessager.registerTopicListener(UpDownGoalPoses, result -> Platform.runLater(() -> upDownGoalGraphic.setResult(result)));
+      behaviorMessager.addTopicListener(UpDownGoalPoses, result -> Platform.runLater(() -> upDownGoalGraphic.setResult(result)));
 
       Platform.runLater(() ->
       {
@@ -112,7 +112,7 @@ public class PatrolBehaviorUI extends JavaFXBehaviorUIInterface
                                                                         1.0));
          perceiveDuration.getValueFactory().valueProperty().addListener((ChangeListener) -> publishPerceiveDuration());
       });
-      behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() ->
+      behaviorMessager.addTopicListener(CurrentState, state -> Platform.runLater(() ->
       {
          remoteCurrentState.setText(state.name());
          replan.setDisable(!(state == PatrolBehaviorState.REVIEW && operatorPlanReview.isSelected()));
@@ -141,7 +141,7 @@ public class PatrolBehaviorUI extends JavaFXBehaviorUIInterface
          });
       });
 
-      behaviorMessager.registerTopicListener(CurrentWaypointIndexStatus,
+      behaviorMessager.addTopicListener(CurrentWaypointIndexStatus,
                                              index ->
                                              {
                                                 waypointManager.setNextFromIndex(index);

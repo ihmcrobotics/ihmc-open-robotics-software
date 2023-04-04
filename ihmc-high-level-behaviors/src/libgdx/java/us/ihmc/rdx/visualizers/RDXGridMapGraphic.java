@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -27,7 +28,6 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntFunction;
 import java.util.function.IntToDoubleFunction;
@@ -41,9 +41,12 @@ public class RDXGridMapGraphic implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-   private boolean inPaintHeight = false;
+   private boolean colorFromHeight = true;
+   private boolean inPaintHeight = true;
    private boolean renderGroundCells = false;
    private boolean renderGroundPlane = false;
+
+   private static final RDXIDMappedColorFunction idColorFunction = new RDXIDMappedColorFunction();
 
    private final AtomicReference<List<RDXMultiColorMeshBuilder>> latestMeshBuilder = new AtomicReference<>(null);
    private final AtomicReference<ModelInstance> latestModel = new AtomicReference<>(null);
@@ -57,6 +60,11 @@ public class RDXGridMapGraphic implements RenderableProvider
    public void update()
    {
       createModelFromMeshBuilders();
+   }
+
+   public void colorFromHeight(boolean colorFromHeight)
+   {
+      this.colorFromHeight = colorFromHeight;
    }
 
    public void setInPaintHeight(boolean inPaintHeight)
@@ -81,7 +89,7 @@ public class RDXGridMapGraphic implements RenderableProvider
       executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
    }
 
-   private void generateMeshes(HeightMapMessage heightMapMessage)
+   public void generateMeshes(HeightMapMessage heightMapMessage)
    {
       IntToDoubleFunction heightProvider = (d) -> (double) heightMapMessage.getHeights().get(d);
       IntFunction<Integer> keyProvider = (d) -> heightMapMessage.getKeys().get(d);
@@ -106,6 +114,7 @@ public class RDXGridMapGraphic implements RenderableProvider
                      heightMapMessage.getGridCenterX(),
                      heightMapMessage.getGridCenterY(),
                      heightMapMessage.getEstimatedGroundHeight(),
+                     heightMapMessage.getSequenceId(),
                      inPaintHeight);
    }
 
@@ -119,6 +128,7 @@ public class RDXGridMapGraphic implements RenderableProvider
                                double gridCenterX,
                                double gridCenterY,
                                double groundHeight,
+                               long id,
                                boolean inPaintHeight)
    {
       List<RDXMultiColorMeshBuilder> meshBuilders = generateHeightCells(heightsProvider,
@@ -129,8 +139,10 @@ public class RDXGridMapGraphic implements RenderableProvider
                                                                         gridCenterX,
                                                                         gridCenterY,
                                                                         groundHeight,
+                                                                        id,
                                                                         inPaintHeight,
-                                                                        renderGroundCells);
+                                                                        renderGroundCells,
+                                                                        colorFromHeight);
 
       if (renderGroundPlane)
          meshBuilders.add(generateGroundPlaneMesh(gridSizeXy, gridCenterX, gridCenterY, groundHeight));
@@ -146,8 +158,10 @@ public class RDXGridMapGraphic implements RenderableProvider
                                                                      double gridCenterX,
                                                                      double gridCenterY,
                                                                      double groundHeight,
+                                                                     long id,
                                                                      boolean inPaintHeight,
-                                                                     boolean renderGroundCells)
+                                                                     boolean renderGroundCells,
+                                                                     boolean computeColorFromHeight)
    {
       List<RDXMultiColorMeshBuilder> meshBuilders = new ArrayList<>();
 
@@ -220,7 +234,11 @@ public class RDXGridMapGraphic implements RenderableProvider
                      continue;
                }
 
-               Color color = computeColorFromHeight(0.5 * (maxHeight + minHeight));
+               Color color;
+               if (computeColorFromHeight)
+                  color = computeColorFromHeight(0.5 * (maxHeight + minHeight));
+               else
+                  color = idColorFunction.getColor((int) id);
 
                meshBuilder.addPolygon(Arrays.asList(topLeft, topRight, bottomRight, bottomLeft), color);
                cellsPerBuilder++;
@@ -266,7 +284,11 @@ public class RDXGridMapGraphic implements RenderableProvider
                   continue;
             }
 
-            Color color = computeColorFromHeight(0.5 * (maxHeight + minHeight));
+            Color color;
+            if (computeColorFromHeight)
+               color = computeColorFromHeight(0.5 * (maxHeight + minHeight));
+            else
+               color = idColorFunction.getColor((int) id);
 
             meshBuilder.addPolygon(Arrays.asList(topLeft, topRight, bottomRight, bottomLeft), color);
             cellsPerBuilder++;
@@ -327,7 +349,10 @@ public class RDXGridMapGraphic implements RenderableProvider
    {
       double height = Double.MIN_VALUE;
       for (double val : values)
-         height = Math.max(height, val);
+      {
+         if (Double.isFinite(val))
+            height = Math.max(height, val);
+      }
 
       return height;
    }
@@ -336,7 +361,10 @@ public class RDXGridMapGraphic implements RenderableProvider
    {
       double height = Double.MAX_VALUE;
       for (double val : values)
-         height = Math.min(height, val);
+      {
+         if (Double.isFinite(val))
+            height = Math.min(height, val);
+      }
 
       return height;
    }
@@ -356,6 +384,9 @@ public class RDXGridMapGraphic implements RenderableProvider
       double alpha = height % gradientLength;
       if (alpha < 0)
          alpha = 1 + alpha;
+      while (alpha > 5 * gradientSize)
+         alpha -=  5 * gradientSize;
+
       if (alpha <= gradientSize * 1)
       {
          r = InterpolationTools.linearInterpolate(magentaR, blueR, (alpha) / gradientSize);
@@ -386,7 +417,13 @@ public class RDXGridMapGraphic implements RenderableProvider
          g = InterpolationTools.linearInterpolate(orangeG, redG, (alpha - gradientSize * 4) / gradientSize);
          b = InterpolationTools.linearInterpolate(orangeB, redB, (alpha - gradientSize * 4) / gradientSize);
       }
+      else
+      {
+         throw new RuntimeException("no valid color");
+      }
 
+      if (r == 0.0 && g == 0.0 && b == 0.0)
+         throw new RuntimeException("Shouldn't return black.)");
       return new Color((float) r, (float) g, (float) b, 1.0f);
    }
 

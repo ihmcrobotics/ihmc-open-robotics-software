@@ -76,6 +76,7 @@ public class RDXArUcoMarkerDetectionDemo
 
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
                   arUcoMarkerDetection.create(cameraSensor.getSensorFrame());
+                  arUcoMarkerDetection.getDetectorParameters().markerBorderBits(2);
                   arUcoMarkerDetection.setSourceImageForDetection(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
                   arUcoMarkerDetection.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
                   arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" from Sensor");
@@ -90,6 +91,7 @@ public class RDXArUcoMarkerDetectionDemo
 
                   testImageArUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
                   testImageArUcoMarkerDetection.create(cameraSensor.getSensorFrame());
+                  arUcoMarkerDetection.getDetectorParameters().markerBorderBits(2);
                   testImageArUcoMarkerDetection.setSourceImageForDetection(testRGB888ColorImage);
                   testImageArUcoMarkerDetection.setCameraInstrinsics(cameraSensor.getDepthCameraIntrinsics());
                   testImageArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI(" Test");
@@ -119,7 +121,7 @@ public class RDXArUcoMarkerDetectionDemo
             WorkspaceFile testImageFile = new WorkspaceFile(new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                                    "ihmc-high-level-behaviors/src/test/resources"),
                                                             "testArUcoDetection.jpg");
-            Mat readImage = opencv_imgcodecs.imread(testImageFile.getFilePath().toString());
+            Mat readImage = opencv_imgcodecs.imread(testImageFile.getFilesystemFile().toString());
             testRGB888ColorImage = new BytedecoImage(readImage);
          }
 

@@ -444,4 +444,14 @@ public class RDX3DPanel
    {
       return windowPositionY;
    }
+
+   public RDX3DPanelToolbar getToolbar()
+   {
+      return toolbar;
+   }
+
+   public String getPanelName()
+   {
+      return panelName;
+   }
 }

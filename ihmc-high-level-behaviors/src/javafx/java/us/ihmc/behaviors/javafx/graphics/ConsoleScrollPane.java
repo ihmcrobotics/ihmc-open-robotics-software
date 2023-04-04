@@ -64,7 +64,7 @@ public class ConsoleScrollPane extends ScrollPane
 
    public void setupAtEnd()
    {
-      behaviorMessager.registerTopicListener(BehaviorModule.API.StatusLog, logEntry -> Platform.runLater(() -> receivedMessageForTopic(logEntry)));
+      behaviorMessager.addTopicListener(BehaviorModule.API.StatusLog, logEntry -> Platform.runLater(() -> receivedMessageForTopic(logEntry)));
       new IHMCROS2Callback<>(ros2Node, ROS2Tools.TEXT_STATUS, textStatus ->
             Platform.runLater(() -> receivedMessageForTopic(Pair.of(400, textStatus.getTextToSpeakAsString()))));
    }

@@ -16,10 +16,6 @@ import us.ihmc.tools.property.*;
  */
 public class PerceptionConfigurationParameters extends StoredPropertySet implements PerceptionConfigurationParametersBasics
 {
-   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
-   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-perception/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-perception/src/main/generated-java";
-
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final IntegerStoredPropertyKey l515ThrottlerFrequency = keys.addIntegerKey("L515 throttler frequency");
@@ -41,32 +37,29 @@ public class PerceptionConfigurationParameters extends StoredPropertySet impleme
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public PerceptionConfigurationParameters(String versionSpecifier)
+   public PerceptionConfigurationParameters(String versionSuffix)
    {
-      this(PerceptionConfigurationParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(PerceptionConfigurationParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public PerceptionConfigurationParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public PerceptionConfigurationParameters(Class<?> classForLoading, String versionSuffix)
    {
-      super(keys, classForLoading, PerceptionConfigurationParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, PerceptionConfigurationParameters.class, versionSuffix);
       load();
    }
 
    public PerceptionConfigurationParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, PerceptionConfigurationParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, PerceptionConfigurationParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           PerceptionConfigurationParameters.class,
-                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
-      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+      StoredPropertySet parameters = new StoredPropertySet(keys, PerceptionConfigurationParameters.class);
+      parameters.generateJavaFiles();
    }
 }

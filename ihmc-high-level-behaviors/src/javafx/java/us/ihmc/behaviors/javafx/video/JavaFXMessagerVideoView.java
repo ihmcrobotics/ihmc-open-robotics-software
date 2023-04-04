@@ -23,7 +23,7 @@ public class JavaFXMessagerVideoView extends JavaFXVideoView
 
    public void start()
    {
-      messager.registerTopicListener(topic, acceptVideoTopicListener);
+      messager.addTopicListener(topic, acceptVideoTopicListener);
       super.start();
    }
 

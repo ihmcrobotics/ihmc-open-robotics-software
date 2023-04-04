@@ -39,8 +39,8 @@ public class PlanarRegionViewer
    public PlanarRegionViewer(Messager messager, Topic<PlanarRegionsList> planarRegionDataTopic, Topic<Boolean> showPlanarRegionsTopic)
    {
       this();
-      messager.registerTopicListener(planarRegionDataTopic, this::buildMeshAndMaterialOnThread);
-      messager.registerTopicListener(showPlanarRegionsTopic, this::setVisibile);
+      messager.addTopicListener(planarRegionDataTopic, this::buildMeshAndMaterialOnThread);
+      messager.addTopicListener(showPlanarRegionsTopic, this::setVisibile);
    }
 
    public PlanarRegionViewer()

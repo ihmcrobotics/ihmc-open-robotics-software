@@ -39,16 +39,8 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
 
    public PlanarRegionSLAMParameters(String fileNameSuffix)
    {
-      this(fileNameSuffix, "robot-environment-awareness");
-   }
-
-   public PlanarRegionSLAMParameters(String fileNameSuffix, String projectName)
-   {
       super(keys,
-            PlanarRegionSLAMParameters.class,
-            "ihmc-open-robotics-software",
-            projectName + "/src/main/resources",
-            fileNameSuffix);
+            PlanarRegionSLAMParameters.class, fileNameSuffix);
 
       load();
    }
