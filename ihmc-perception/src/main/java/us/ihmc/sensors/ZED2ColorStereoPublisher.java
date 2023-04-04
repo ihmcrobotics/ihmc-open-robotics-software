@@ -139,23 +139,29 @@ public class ZED2ColorStereoPublisher
 
          boolean valid = readImage(color8UC3CombinedImage);
 
-         if(valid)
+         if (valid)
          {
             BytedecoOpenCVTools.compressRGBImageJPG(color8UC3CombinedImage, yuvCombinedImage, compressedColorPointer);
             CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
-            PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer, colorTopic, colorImageMessage, ros2Helper,
-                                                                  cameraPose, now, colorSequenceNumber++, imageHeight, imageWidth, 0.0f);
+            PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer,
+                                                                  colorTopic,
+                                                                  colorImageMessage,
+                                                                  ros2Helper,
+                                                                  cameraPose,
+                                                                  now,
+                                                                  colorSequenceNumber++,
+                                                                  imageHeight,
+                                                                  imageWidth,
+                                                                  0.0f);
          }
-
       }
-
    }
 
    public boolean readImage(Mat mat)
    {
       boolean status = zed.getFrameStereoYUVExternal(imageYUVBytes, dims);
 
-      if(status)
+      if (status)
       {
          BytePointer yuvBytePointer = new BytePointer(imageYUVBytes);
          Mat yuvImage = new Mat(dims[0], dims[1], opencv_core.CV_8UC2, yuvBytePointer);
