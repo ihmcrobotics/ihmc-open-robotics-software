@@ -45,9 +45,9 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -246,7 +246,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopFunctions.get(i).getLoopJoints();
          
          // Check if the kinematic loop has joints. If no joints are returned, do not add a substitution
-         if(loopJoints != null && loopJoints.isEmpty())
+         if(loopJoints != null && !loopJoints.isEmpty())
          {
             motionQPInputCalculator.convertKinematicLoopFunction(kinematicLoopFunctions.get(i), motionQPVariableSubstitution);
             qpSolver.addAccelerationSubstitution(motionQPVariableSubstitution);
