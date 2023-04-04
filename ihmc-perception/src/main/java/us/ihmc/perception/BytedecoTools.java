@@ -8,6 +8,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
+import us.ihmc.perception.zedDriver.ZedDriverNativeLibrary;
 import us.ihmc.tools.thread.Activator;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -41,6 +42,11 @@ public class BytedecoTools
          nativesActivated.activate();
       }, "Bytedeco loader");
       return nativesActivated;
+   }
+
+   public static void loadZEDDriverNative()
+   {
+      ZedDriverNativeLibrary.load();
    }
 
    public static Activator loadNativesOnAThread()
