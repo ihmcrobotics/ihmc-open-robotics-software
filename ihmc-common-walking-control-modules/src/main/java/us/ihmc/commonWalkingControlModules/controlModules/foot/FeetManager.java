@@ -257,6 +257,11 @@ public class FeetManager implements SCS2YoGraphicHolder
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
+   public AbstractFootControlState getCurrentControlState(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getCurrentControlState();
+   }
+
    public void adjustSwingTrajectory(RobotSide swingSide, Footstep adjustedFootstep, double swingTime)
    {
       adjustSwingTrajectory(swingSide, adjustedFootstep, null, null, swingTime);

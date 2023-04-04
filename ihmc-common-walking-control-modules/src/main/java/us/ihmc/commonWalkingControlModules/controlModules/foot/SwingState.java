@@ -839,4 +839,10 @@ public class SwingState extends AbstractFootControlState
    {
       return null;
    }
+
+   @Override
+   public boolean isLoadBearing()
+   {
+      return false;
+   }
 }
