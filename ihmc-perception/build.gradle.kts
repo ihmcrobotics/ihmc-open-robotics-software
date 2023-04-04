@@ -16,12 +16,14 @@ ihmc {
    configureDependencyResolution()
    javaDirectory("main", "generated-java")
    javaDirectory("slam-wrapper", "generated-java")
+   javaDirectory("mapsense-wrapper", "generated-java")
    configurePublications()
 }
 
 mainDependencies {
    api(ihmc.sourceSetProject("javacv"))
    api(ihmc.sourceSetProject("slam-wrapper"))
+   api(ihmc.sourceSetProject("mapsense-wrapper"))
    // For experimenting with local OpenCV:
    // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
@@ -69,6 +71,11 @@ javacvDependencies {
 }
 
 slamWrapperDependencies {
+   apiBytedecoNatives("javacpp", "", "-20230222.151859-137")
+   api("us.ihmc:ihmc-java-toolkit:source")
+}
+
+mapsenseWrapperDependencies {
    apiBytedecoNatives("javacpp", "", "-20230222.151859-137")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
