@@ -38,14 +38,14 @@ set(ZED_SOURCES
     external/zed_open_driver_external.h
     external/zed_open_driver_external.cpp
 
-    drivers/zed_open_driver.h
-    drivers/zed_open_driver.cpp
+    headers/zed_open_driver.h
+    headers/zed_open_driver.cpp
 
-    drivers/defines.hpp
-    drivers/sensorcapture_def.hpp
-    drivers/sensorcapture.hpp
-    drivers/videocapture_def.hpp
-    drivers/videocapture.hpp
+    headers/defines.hpp
+    headers/sensorcapture_def.hpp
+    headers/sensorcapture.hpp
+    headers/videocapture_def.hpp
+    headers/videocapture.hpp
 )
 
 add_library(zed-driver SHARED ${ZED_SOURCES})
@@ -57,7 +57,7 @@ target_link_libraries(zed-driver
 target_include_directories(zed-driver PUBLIC
      /usr/include/
      /usr/include/hidapi/
-     drivers/
+     headers/
      launcher/
      external/
 )
@@ -78,7 +78,7 @@ target_link_libraries(ZEDPlayer
 target_include_directories(ZEDPlayer PUBLIC
     /usr/include/
     launcher/
-    drivers/
+    headers/
     ${OpenCV_INCLUDE_DIRS}
 )
 

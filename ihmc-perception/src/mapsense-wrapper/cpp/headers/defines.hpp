@@ -60,15 +60,15 @@
 
 
 /*!
- * \brief Get the current system clock as steady clock, so with no jumps even if the system time changes
- * \return the current steady system clock in nanoseconds
- */
+* \brief Get the current system clock as steady clock, so with no jumps even if the system time changes
+* \return the current steady system clock in nanoseconds
+*/
 inline uint64_t getSteadyTimestamp() {return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();}
 
 /*!
- * \brief Get the current system clock as wall clock (it can have jumps if the system clock is updated by a sync service)
- * \return the current wall system clock in nanoseconds
- */
+* \brief Get the current system clock as wall clock (it can have jumps if the system clock is updated by a sync service)
+* \return the current wall system clock in nanoseconds
+*/
 inline uint64_t getWallTimestamp() {return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
 
 namespace sl_oc {
@@ -86,10 +86,10 @@ static const uint16_t SL_USB_PROD_MCU_ZED2_REVA = 0xf781; //!< MCU sensor device
 static const uint16_t SL_USB_PROD_MCU_ZED2i_REVA = 0xf881; //!< MCU sensor device for ZED2i
 
 enum VERBOSITY {
-    NONE = 0,
-    ERROR = 1,
-    WARNING = 2,
-    INFO = 3
+   NONE = 0,
+   ERROR = 1,
+   WARNING = 2,
+   INFO = 3
 };
 
 }
