@@ -161,7 +161,10 @@ void kernel heightMapRegistrationKernel(read_write image2d_t heightMapInSensor,
                                  (float3)(worldToSensorTf[8], worldToSensorTf[9], worldToSensorTf[10]),
                                  (float3)(worldToSensorTf[3], worldToSensorTf[7], worldToSensorTf[11]));
 
-      // TODO: Get the point projection of sensor frame on the sensor-frame ground plane, and then query 
+      // TODO: Get the point projection of sensor frame on the sensor-frame ground plane, and then query
+      // the height map in sensor frame to get the height of the point in sensor frame.
+      // Then, transform the point back to world frame and write the height to the height map in world frame.
+
 
       int2 indices = (int2) (coordinate_to_index(cellCenterInSensor.x, params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_RESOLUTION], params[HEIGHT_MAP_CENTER_INDEX]),
                               coordinate_to_index(cellCenterInSensor.y, params[HEIGHT_MAP_CENTER_Y], params[HEIGHT_MAP_RESOLUTION], params[HEIGHT_MAP_CENTER_INDEX]));
