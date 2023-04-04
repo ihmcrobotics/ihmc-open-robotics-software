@@ -16,6 +16,7 @@ ihmc {
    configureDependencyResolution()
    javaDirectory("main", "generated-java")
    javaDirectory("slam-wrapper", "generated-java")
+   javaDirectory("mapsense-wrapper", "generated-java")
    configurePublications()
 }
 
@@ -49,6 +50,7 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:robot-environment-awareness:source")
+   api("us.ihmc:ihmc-perception-mapsense-wrapper:source")
 }
 
 openpnpDependencies {
@@ -69,6 +71,11 @@ javacvDependencies {
 }
 
 slamWrapperDependencies {
+   apiBytedecoNatives("javacpp", "", "-20230222.151859-137")
+   api("us.ihmc:ihmc-java-toolkit:source")
+}
+
+mapsenseWrapperDependencies {
    apiBytedecoNatives("javacpp", "", "-20230222.151859-137")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
