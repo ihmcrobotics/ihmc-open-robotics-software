@@ -38,8 +38,8 @@ set(ZED_SOURCES
     external/zed_open_driver_external.h
     external/zed_open_driver_external.cpp
 
-    headers/zed_open_driver.h
-    headers/zed_open_driver.cpp
+    driver/zed_open_driver.h
+    driver/zed_open_driver.cpp
 
     headers/defines.hpp
     headers/sensorcapture_def.hpp
@@ -58,6 +58,7 @@ target_include_directories(zed-driver PUBLIC
      /usr/include/
      /usr/include/hidapi/
      headers/
+     driver/
      launcher/
      external/
 )
