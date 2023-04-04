@@ -116,7 +116,8 @@ public class OusterDriverAndDepthPublisher
          if (publishHeightMapMonitor.isAlive())
          {
             heightMapUpdater.updateWithDataBuffer(humanoidReferenceFrames.getMidFeetZUpFrame(),
-                                                  depthExtractionKernel.getPointCloudInWorldFrame(),
+                                                  ousterSensorFrame.getReferenceFrame(),
+                                                  depthExtractionKernel.getPointCloudInWorldFrame(),sensorPose
                                                   ouster.getImageHeight() * ouster.getImageWidth(),
                                                   ouster.getAquisitionInstant());
          }
