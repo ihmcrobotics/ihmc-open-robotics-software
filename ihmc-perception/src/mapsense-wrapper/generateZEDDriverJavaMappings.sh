@@ -14,7 +14,7 @@ make install
 # https://github.com/bytedeco/javacpp/releases
 JAVACPP_VERSION=1.5.8
 
-# Copy all Java code from the root of slam-wrapper into the build directory
+# Copy all Java code from the root of mapsense-wrapper into the build directory
 cp -r ../../java/ .
 
 # Move into the java directory; javacpp.jar needs to reside here
