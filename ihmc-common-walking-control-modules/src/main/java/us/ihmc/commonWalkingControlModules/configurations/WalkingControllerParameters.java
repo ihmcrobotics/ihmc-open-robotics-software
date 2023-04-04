@@ -830,4 +830,9 @@ public abstract class WalkingControllerParameters
    {
       return Double.POSITIVE_INFINITY;
    }
+
+   public double getFractionOfSwingToSwitchToLoaded()
+   {
+      return 0.05;
+   }
 }

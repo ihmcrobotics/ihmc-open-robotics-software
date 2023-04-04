@@ -586,4 +586,10 @@ public class SupportState extends AbstractFootControlState
          return null;
       return group;
    }
+
+   @Override
+   public boolean isLoadBearing()
+   {
+      return true;
+   }
 }
