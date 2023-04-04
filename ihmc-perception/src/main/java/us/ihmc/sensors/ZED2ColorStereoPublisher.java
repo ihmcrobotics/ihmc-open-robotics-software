@@ -2,8 +2,6 @@ package us.ihmc.sensors;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import perception_msgs.msg.dds.ImageMessage;
@@ -14,10 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.perception.zedDriver.ZEDOpenDriver;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -63,9 +58,11 @@ public class ZED2ColorStereoPublisher
    private final Mat yuvCombinedImage = new Mat();
    private final Mat color8UC3CombinedImage = new Mat();
 
+   private final BytePointer compressedColorPointer = new BytePointer();
+   private final BytePointer compressedDepthPointer = new BytePointer();;
+
    private final ImageMessage colorImageMessage = new ImageMessage();
 
-   private final BytePointer compressedColorPointer = new BytePointer();
    private final String cameraId;
    private final int fps;
    private final ROS2Topic<ImageMessage> colorTopic;
@@ -80,10 +77,7 @@ public class ZED2ColorStereoPublisher
    private final double outputPeriod = UnitConversions.hertzToSeconds(30.0);
    private final Throttler throttler = new Throttler();
 
-   private byte[] imageYUVBytes;
-   private int[] dims;
-
-   private ZEDOpenDriver.ZEDOpenDriverExternal zed;
+   private VideoCapture stereoVideoCapture;
 
    private volatile boolean running = true;
 
@@ -101,12 +95,8 @@ public class ZED2ColorStereoPublisher
       this.colorTopic = colorTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
 
-      BytedecoTools.loadZEDDriverNative();
-      zed = new ZEDOpenDriver.ZEDOpenDriverExternal(imageHeight, fps);
-      dims = new int[] {0, 0, 0};
-      zed.getFrameDimensions(dims);
-
-      imageYUVBytes = new byte[dims[0] * dims[1] * dims[2]];
+      stereoVideoCapture = new VideoCapture(cameraId);
+      setVideoCaptureProperties(stereoVideoCapture);
 
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
@@ -137,39 +127,42 @@ public class ZED2ColorStereoPublisher
          cameraPose.setToZero(cameraFrame);
          cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         boolean valid = readImage(color8UC3CombinedImage);
+         readImage(color8UC3CombinedImage);
 
-         if(valid)
-         {
-            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3CombinedImage, yuvCombinedImage, compressedColorPointer);
-            CameraModel.PINHOLE.packMessageFormat(colorImageMessage);
-            PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer, colorTopic, colorImageMessage, ros2Helper,
-                                                                  cameraPose, now, colorSequenceNumber++, imageHeight, imageWidth, 0.0f);
-         }
-
+         BytedecoOpenCVTools.compressRGBImageJPG(color8UC3CombinedImage, yuvCombinedImage, compressedColorPointer);
+         PerceptionMessageTools.publishJPGCompressedColorImage(compressedColorPointer, colorTopic, colorImageMessage, ros2Helper,
+                                                               cameraPose, now, colorSequenceNumber++, imageHeight, imageWidth, 0.001f);
       }
 
    }
 
-   public boolean readImage(Mat mat)
+   public void setVideoCaptureProperties(VideoCapture capture)
    {
-      boolean status = zed.getFrameStereoYUVExternal(imageYUVBytes, dims);
+      /* Supported Stereo Resolutions: {'1344.0x376.0': 'OK', '2560.0x720.0': 'OK', '3840.0x1080.0': 'OK', '4416.0x1242.0': 'OK'} */
 
-      if(status)
-      {
-         BytePointer yuvBytePointer = new BytePointer(imageYUVBytes);
-         Mat yuvImage = new Mat(dims[0], dims[1], opencv_core.CV_8UC2, yuvBytePointer);
-         opencv_imgproc.cvtColor(yuvImage, mat, opencv_imgproc.COLOR_YUV2BGR_YUYV);
+      LogTools.info("Setting Camera Parameters for ZED2.");
+      capture.set(CAP_PROP_FRAME_WIDTH, 2560);
+      capture.set(CAP_PROP_FRAME_HEIGHT, 720);
+      LogTools.info("Frame Rate Available: {}", capture.get(CAP_PROP_FPS));
 
-         //PerceptionDebugTools.display("Image", mat, 1);
-      }
+      // TODO: Find more optimal parameters for the following.
+      //capture.set(CAP_PROP_BUFFERSIZE, 3);
+      //capture.set(CAP_PROP_FPS, 30);
+      //capture.set(CAP_PROP_FOURCC, VideoWriter.fourcc((byte)'M', (byte)'J', (byte)'P', (byte)'G'));
+      //capture.set(CAP_PROP_AUTO_EXPOSURE, 0.25);
+      //capture.set(CAP_PROP_AUTO_WB, 0.25);
+      //capture.set(CAP_PROP_AUTOFOCUS, 0.25);
+      //capture.set(CAP_PROP_MODE, CAP_OPENCV_MJPEG);
+   }
 
-      return status;
+   public void readImage(Mat mat)
+   {
+      boolean status = stereoVideoCapture.read(mat);
    }
 
    public static void main(String[] args)
    {
-      String cameraId = "";
-      ZED2ColorStereoPublisher zed = new ZED2ColorStereoPublisher(cameraId, 1080, 3840, 30, ROS2Tools.ZED2_STEREO_COLOR, ReferenceFrame::getWorldFrame);
+      String cameraId = System.getProperty("zed2.camera.id", "/dev/v4l/by-id/usb-Technologies__Inc._ZED_2-video-index0");
+      ZED2ColorStereoPublisher zed = new ZED2ColorStereoPublisher(cameraId, 720, 2560, 30, ROS2Tools.ZED2_STEREO_COLOR, ReferenceFrame::getWorldFrame);
    }
 }
