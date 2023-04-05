@@ -19,7 +19,6 @@
 #define GRADIENT_MODE_SENSOR_X 1
 
 kernel void computeVertexBuffer(global float* parameters,
-                                global int* pixelShifts,
                                 global float* altitudeAngles,
                                 global float* azimuthAngles,
                                 global float* ousterToWorldTransform,
@@ -37,15 +36,7 @@ kernel void computeVertexBuffer(global float* parameters,
    int totalVerticalPointsForColorDetail = 1 + 2 * parameters[LEVEL_OF_COLOR_DETAIL];
    int ousterY = y / totalVerticalPointsForColorDetail;
 
-   // Undo depth image pixel shifts. Using the azimuth angles is more precise.
-   int unshiftedX = x;
-   unshiftedX += pixelShifts[ousterY];
-   if (unshiftedX < 0)
-      unshiftedX += parameters[DEPTH_IMAGE_WIDTH];
-   if (unshiftedX > parameters[DEPTH_IMAGE_WIDTH] - 1)
-      unshiftedX -= parameters[DEPTH_IMAGE_WIDTH];
-
-   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (unshiftedX, ousterY)).x * parameters[DISCRETE_RESOLUTION];
+   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, ousterY)).x * parameters[DISCRETE_RESOLUTION];
 
    float encoderAngle = 2.0f * M_PI_F * (1.0f - ((float) x / (float) parameters[DEPTH_IMAGE_WIDTH]));
    float azimuthAngle = -azimuthAngles[ousterY];
