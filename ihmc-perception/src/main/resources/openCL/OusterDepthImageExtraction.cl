@@ -4,7 +4,6 @@
 #define CHANNEL_DATA_BLOCK_BYTES 3
 
 kernel void extractDepthImage(global float* parameters,
-                              global int* pixelShifts,
                               global unsigned char* lidarFrameBuffer,
                               read_write image2d_t depthImage16UC1)
 {
@@ -19,15 +18,7 @@ kernel void extractDepthImage(global float* parameters,
    // OpenCV is little endian
    unsigned short range = (range_LSB << 8) | range_MSB;
 
-   int shiftedX = x;
-   shiftedX += pixelShifts[y];
-
-   if (shiftedX < 0)
-      shiftedX += parameters[COLUMNS_PER_FRAME];
-   if (shiftedX > parameters[COLUMNS_PER_FRAME] - 1)
-      shiftedX -= parameters[COLUMNS_PER_FRAME];
-
-   write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
+   write_imageui(depthImage16UC1, (int2) (x, y), (uint4) (range, 0, 0, 0));
 }
 
 #define DEPTH_IMAGE_WIDTH 0
@@ -36,7 +27,6 @@ kernel void extractDepthImage(global float* parameters,
 #define DISCRETE_RESOLUTION 3
 
 kernel void computePointCloud(global float* parameters,
-                              global int* pixelShifts,
                               global float* altitudeAngles,
                               global float* azimuthAngles,
                               global float* ousterToWorldTransform,
@@ -46,15 +36,7 @@ kernel void computePointCloud(global float* parameters,
    int x = get_global_id(0);
    int y = get_global_id(1);
 
-   // Undo depth image pixel shifts. Using the azimuth angles is more precise.
-   int unshiftedX = x;
-   unshiftedX += pixelShifts[y];
-   if (unshiftedX < 0)
-      unshiftedX += parameters[DEPTH_IMAGE_WIDTH];
-   if (unshiftedX > parameters[DEPTH_IMAGE_WIDTH] - 1)
-      unshiftedX -= parameters[DEPTH_IMAGE_WIDTH];
-
-   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (unshiftedX, y)).x * parameters[DISCRETE_RESOLUTION];
+   float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, y)).x * parameters[DISCRETE_RESOLUTION];
 
    float encoderAngle = 2.0f * M_PI_F * (1.0f - ((float) x / (float) parameters[DEPTH_IMAGE_WIDTH]));
    float azimuthAngle = -azimuthAngles[y];
