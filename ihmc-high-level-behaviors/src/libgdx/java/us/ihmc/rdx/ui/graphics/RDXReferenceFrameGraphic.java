@@ -52,4 +52,11 @@ public class RDXReferenceFrameGraphic extends RDXModelInstance
    {
       model.dispose();
    }
+
+   public void updateFromFramePose(FramePose3D framePose3D)
+   {
+      referenceFrame = framePose3D.getReferenceFrame();
+      this.framePose3D.set(framePose3D);
+      updateFromFramePose();
+   }
 }

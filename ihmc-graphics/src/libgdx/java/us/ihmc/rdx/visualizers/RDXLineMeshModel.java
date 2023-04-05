@@ -137,4 +137,9 @@ public class RDXLineMeshModel implements RenderableProvider
    {
       executorService.destroy();
    }
+
+   public ModelInstance getModelInstance()
+   {
+      return modelInstance;
+   }
 }

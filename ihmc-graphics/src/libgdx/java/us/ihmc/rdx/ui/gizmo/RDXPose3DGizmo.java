@@ -818,6 +818,11 @@ public class RDXPose3DGizmo implements RenderableProvider
       return framePose3D;
    }
 
+   public RigidBodyTransform getTransformToWorld()
+   {
+      return transformToWorld;
+   }
+
    // TODO: Make this transform the ground truth and give the pose as needed only
    public RigidBodyTransform getTransformToParent()
    {
