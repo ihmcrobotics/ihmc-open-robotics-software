@@ -661,6 +661,8 @@ public class KinematicsToolboxController extends ToolboxController
                                                                             optimizationSettings,
                                                                             null,
                                                                             registry);
+//      toolbox.addInactiveJoint((OneDoFJointBasics) MultiBodySystemTools.findJoint(rootBody, "torsoRoll"));
+//      toolbox.addInactiveJoint((OneDoFJointBasics) MultiBodySystemTools.findJoint(rootBody, "torsoPitch"));
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       jointTorqueMinimizationWeightCalculator = new JointTorqueSoftLimitWeightCalculator(toolbox.getJointIndexHandler());
       jointTorqueMinimizationWeightCalculator.setParameters(0.0, 0.001, 0.10);

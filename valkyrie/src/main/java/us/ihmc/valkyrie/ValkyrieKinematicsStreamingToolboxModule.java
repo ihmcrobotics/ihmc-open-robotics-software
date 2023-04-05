@@ -123,7 +123,7 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
             for (RobotSide robotSide : RobotSide.values)
             {
                OneDoFJointDefinition shoulderPitch = robotDefinition.getOneDoFJointDefinition(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH));
-               shoulderPitch.setPositionLimits(-1.5, 1.2);
+               shoulderPitch.setPositionLimits(-1.5, 0.8);
 
                OneDoFJointDefinition shoulderRoll = robotDefinition.getOneDoFJointDefinition(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL));
                if (robotSide == RobotSide.LEFT)
