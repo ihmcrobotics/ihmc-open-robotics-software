@@ -14,6 +14,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -610,11 +611,9 @@ public class GPUPlanarRegionExtraction
                ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
 
                // Pack the data in PlanarRegion
-               FramePose3D regionPose = new FramePose3D();
-               regionPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), origin, orientation);
-               RigidBodyTransform tempTransform = new RigidBodyTransform();
-               regionPose.get(tempTransform);
-               PlanarRegion planarRegion = new PlanarRegion(tempTransform,
+               Pose3D regionPose = new Pose3D(origin, orientation);
+               RigidBodyTransform transformToWorld = new RigidBodyTransform(regionPose);
+               PlanarRegion planarRegion = new PlanarRegion(transformToWorld,
                                                             concaveHull.getConcaveHullVertices(),
                                                             decomposedPolygons);
                planarRegion.setRegionId(regionId);

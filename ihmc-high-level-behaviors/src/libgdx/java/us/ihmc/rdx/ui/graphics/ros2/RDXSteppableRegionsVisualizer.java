@@ -26,6 +26,8 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
    private final ResettableExceptionHandlingExecutorService executorService;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImInt yawToShow = new ImInt(0);
+   private final ImBoolean renderHeightMap = new ImBoolean(true);
+   private final ImBoolean renderPlanes = new ImBoolean(false);
    private final ImBoolean inPaintHeight = new ImBoolean(false);
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
@@ -64,6 +66,8 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
          receivedRegions = steppableRegionsListCollection.getRegionsPerYaw().get(yawToShow.get());
          executorService.clearQueueAndExecute(() ->
                                               {
+                                                 steppableRegionGraphic.setRenderHeightMap(renderHeightMap.get());
+                                                 steppableRegionGraphic.setRenderPlanes(renderPlanes.get());
                                                  steppableRegionGraphic.setInPaintHeight(inPaintHeight.get());
                                                  steppableRegionGraphic.setRenderGroundPlane(renderGroundPlane.get());
                                                  steppableRegionGraphic.setRenderGroundCells(renderGroundCells.get());
@@ -87,6 +91,8 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
    {
       super.renderImGuiWidgets();
 
+      ImGui.checkbox("Render Height Map", renderHeightMap);
+      ImGui.checkbox("Render Planes", renderPlanes);
       ImGui.checkbox("In Paint Height", inPaintHeight);
       ImGui.checkbox("Render Ground Plane", renderGroundPlane);
       ImGui.checkbox("Render Ground Cells", renderGroundCells);

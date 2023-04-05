@@ -57,6 +57,7 @@ public class RDXSteppableRegionCalculatorDemo
 
       SteppableRegionCalculatorParametersReadOnly defaultSteppableParameters = new SteppableRegionCalculatorParameters();
       steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2Helper, defaultSteppableParameters);
+      steppableRegionsUpdater.start();
       steppableRegionsUI = new RDXSteppableRegionsPanel(ros2Helper, defaultSteppableParameters);
 
       baseUI.getImGuiPanelManager().addPanel(heightMapUI.getPanel());
@@ -155,7 +156,6 @@ public class RDXSteppableRegionCalculatorDemo
                ousterLidarSimulator.render(baseUI.getPrimaryScene());
 
                heightMap.update();
-               steppableRegionsUpdater.compute();
                heightMapVisualizer.update();
                steppableRegionsVisualizer.update();
 
