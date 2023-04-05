@@ -20,7 +20,7 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 
-public class RDXLineMeshModel implements RenderableProvider
+public class RDXLineGraphic implements RenderableProvider
 {
    private final ModelBuilder modelBuilder = new ModelBuilder();
 
@@ -34,7 +34,7 @@ public class RDXLineMeshModel implements RenderableProvider
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-   public RDXLineMeshModel(float lineWidth, Color color)
+   public RDXLineGraphic(float lineWidth, Color color)
    {
       this.color = color;
       this.lineWidth = lineWidth;
