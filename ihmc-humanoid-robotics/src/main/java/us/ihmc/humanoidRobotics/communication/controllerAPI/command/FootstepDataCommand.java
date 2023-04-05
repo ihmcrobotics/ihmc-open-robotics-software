@@ -317,7 +317,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return stepConstraints;
    }
 
-   public boolean getShouldCheckForReacahbility()
+   public boolean getShouldCheckForReachability()
    {
       return shouldCheckForReachability;
    }
