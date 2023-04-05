@@ -70,7 +70,6 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    private int depthWidth;
    private int depthHeight;
-   private final ByteBuffer ousterPixelShiftsBuffer = NativeMemoryTools.allocate(Integer.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
    private final ByteBuffer ousterBeamAltitudeAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
    private final ByteBuffer ousterBeamAzimuthAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
 
@@ -127,7 +126,6 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
             {
                depthWidth = imageMessage.getImageWidth();
                depthHeight = imageMessage.getImageHeight();
-               MessageTools.extractIDLSequenceCastingBytesToInts(imageMessage.getOusterPixelShifts(), ousterPixelShiftsBuffer);
                MessageTools.extractIDLSequence(imageMessage.getOusterBeamAltitudeAngles(), ousterBeamAltitudeAnglesBuffer);
                MessageTools.extractIDLSequence(imageMessage.getOusterBeamAzimuthAngles(), ousterBeamAzimuthAnglesBuffer);
                totalNumberOfPoints = depthWidth * depthHeight;
@@ -179,9 +177,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
          pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
 
          ousterFisheyeKernel.getOusterToWorldTransformToPack().set(imageMessage.getOrientation(), imageMessage.getPosition());
-         ousterFisheyeKernel.setInstrinsicParameters(ousterPixelShiftsBuffer,
-                                                     ousterBeamAltitudeAnglesBuffer,
-                                                     ousterBeamAzimuthAnglesBuffer);
+         ousterFisheyeKernel.setInstrinsicParameters(ousterBeamAltitudeAnglesBuffer, ousterBeamAzimuthAnglesBuffer);
          ousterFisheyeKernel.runKernel(0.0f,
                                        pointSize.get(),
                                        false,
