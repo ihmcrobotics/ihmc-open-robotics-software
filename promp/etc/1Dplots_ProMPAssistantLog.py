@@ -132,9 +132,14 @@ for bodyPart in bodyParts:
     plotter.plot(meanZ,colorZ,linewidth=4.0,label='ProMP mean before')
     plotter.fill_between(numpy.linspace(0, meanZ.size, num=meanZ.size), meanZ - stdZ, meanZ + stdZ, color=colorZ, alpha=0.2)
 
-    plotter.plot(observed[:,4],testcolorX)
-    plotter.plot(observed[:,5],testcolorY)
-    plotter.plot(observed[:,6],testcolorZ,label='actual trajectory')
+    if  observed.ndim == 2:
+        plotter.plot(observed[:,4],testcolorX)
+        plotter.plot(observed[:,5],testcolorY)
+        plotter.plot(observed[:,6],testcolorZ,label='actual trajectory')
+    else:
+        plotter.plot(observed[4],testcolorX)
+        plotter.plot(observed[5],testcolorY)
+        plotter.plot(observed[6],testcolorZ,label='actual trajectory')  
         
 
     plotter.plot(meanModulatedX,democolorX,linewidth=4.0)
@@ -158,10 +163,16 @@ for bodyPart in bodyParts:
     plotter.plot(meanQS,colorS,linewidth=4.0)
     plotter.fill_between(numpy.linspace(0, meanQS.size, num=meanQS.size), meanQS - stdQS, meanQS + stdQS, color=colorS, alpha=0.2)
     
-    plotter.plot(observed[:,0],testcolorX)
-    plotter.plot(observed[:,1],testcolorY)
-    plotter.plot(observed[:,2],testcolorZ,label='actual trajectory')
-    plotter.plot(observed[:,3],testcolorS)
+    if  observed.ndim == 2:
+        plotter.plot(observed[:,0],testcolorX)
+        plotter.plot(observed[:,1],testcolorY)
+        plotter.plot(observed[:,2],testcolorZ,label='actual trajectory')
+        plotter.plot(observed[:,3],testcolorS)
+    else:
+        plotter.plot(observed[0],testcolorX)
+        plotter.plot(observed[1],testcolorY)
+        plotter.plot(observed[2],testcolorZ,label='actual trajectory')
+        plotter.plot(observed[3],testcolorS)
     
     plotter.plot(meanModulatedQX,democolorX,linewidth=4.0)
     plotter.plot(meanModulatedQY,democolorY,linewidth=4.0)
@@ -213,9 +224,14 @@ for bodyPart in bodyParts:
         plotter.plot(meanConditionedZ,democolorZ,linewidth=1.0,label='ProMP mean after')
         plotter.fill_between(numpy.linspace(0, meanConditionedZ.size, num=meanConditionedZ.size), meanConditionedZ - stdConditionedZ, meanConditionedZ + stdConditionedZ, color=democolorZ, alpha=0.2)
     
-        plotter.plot(observed[:,4],testcolorX)
-        plotter.plot(observed[:,5],testcolorY)
-        plotter.plot(observed[:,6],testcolorZ,label='actual trajectory')
+        if  observed.ndim == 2:
+            plotter.plot(observed[:,4],testcolorX)
+            plotter.plot(observed[:,5],testcolorY)
+            plotter.plot(observed[:,6],testcolorZ,label='actual trajectory')
+        else:
+            plotter.plot(observed[4],testcolorX)
+            plotter.plot(observed[5],testcolorY)
+            plotter.plot(observed[6],testcolorZ,label='actual trajectory')  
         
         plotter.xlabel('#samples')
         plotter.ylabel(bodyPart + ' position [m]')
@@ -244,10 +260,17 @@ for bodyPart in bodyParts:
         plotter.plot(meanConditionedQS,democolorS,linewidth=1.0)
         plotter.fill_between(numpy.linspace(0, meanConditionedQS.size, num=meanConditionedQS.size), meanConditionedQS - stdConditionedQS, meanConditionedQS + stdConditionedQS, color=democolorS, alpha=0.2)
         
-        plotter.plot(observed[:,0],testcolorX)
-        plotter.plot(observed[:,1],testcolorY)
-        plotter.plot(observed[:,2],testcolorZ,label='actual trajectory')
-        plotter.plot(observed[:,3],testcolorS)
+        if  observed.ndim == 2:
+            plotter.plot(observed[:,0],testcolorX)
+            plotter.plot(observed[:,1],testcolorY)
+            plotter.plot(observed[:,2],testcolorZ,label='actual trajectory')
+            plotter.plot(observed[:,3],testcolorS)
+        else:
+            plotter.plot(observed[0],testcolorX)
+            plotter.plot(observed[1],testcolorY)
+            plotter.plot(observed[2],testcolorZ,label='actual trajectory')
+            plotter.plot(observed[3],testcolorS)
+       
         
         plotter.xlabel('#samples')
         plotter.ylabel(bodyPart + ' quaternions [rad]')

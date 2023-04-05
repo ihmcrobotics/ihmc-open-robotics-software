@@ -14,7 +14,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-public class RDXFrustumVisualizer implements RenderableProvider
+public class RDXFrustumGraphic implements RenderableProvider
 {
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private ModelInstance modelInstance;
@@ -24,7 +24,7 @@ public class RDXFrustumVisualizer implements RenderableProvider
    private final Point3D[] vertices = new Point3D[16];
    private final Color color = new Color(0.7f, 0.7f, 0.7f, 1.0f);
 
-   public RDXFrustumVisualizer()
+   public RDXFrustumGraphic()
    {
       for (int i = 0; i < vertices.length; i++)
       {

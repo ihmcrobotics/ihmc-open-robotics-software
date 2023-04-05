@@ -437,9 +437,10 @@ public class RDXVRKinematicsStreamingMode
          if (sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
          {
             sharedControlAssistant.getGhostPreviewGraphic().getRenderables(renderables, pool, sceneLevels);
-            var splineGraphics = sharedControlAssistant.getSplinePreviewGraphic();
-            for (var spline : splineGraphics.keySet())
-               splineGraphics.get(spline).getRenderables(renderables, pool);
+            for (var spline : sharedControlAssistant.getSplinePreviewGraphic().entrySet())
+               spline.getValue().getRenderables(renderables, pool);
+            for (var stdDeviationRegion : sharedControlAssistant.getStdDeviationGraphic().entrySet())
+               stdDeviationRegion.getValue().getRenderables(renderables, pool);
          }
       }
       if (showReferenceFrameGraphics.get())

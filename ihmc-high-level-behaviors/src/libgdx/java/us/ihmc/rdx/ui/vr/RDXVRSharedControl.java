@@ -17,10 +17,12 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.ArUcoObjectsPerceptionManager;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
+import us.ihmc.rdx.visualizers.RDXEdgeDefinedPolygonGraphic;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -50,6 +52,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private final FullHumanoidRobotModel ghostRobotModel;
    private final RDXMultiBodyGraphic ghostRobotGraphic;
    private final HashMap<String, RDXSplineGraphic> splineGraphics = new HashMap<>();
+   private final HashMap<String, RDXEdgeDefinedPolygonGraphic> stdDeviationGraphics = new HashMap<>();
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartReplayMotionMap = new HashMap<>();
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
@@ -138,7 +141,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          {
             // since update() method of kinematics streaming can be faster than processVRInput(), the spline size can be shorter than the status list of the ghost robot
             // we do an approximate speed adjustment consisting in waiting before adding the next point of the spline
-            int speedAdjuster = replayPreviewCounter/speedSplineAdjustmentFactor;
+            int speedAdjuster = replayPreviewCounter / speedSplineAdjustmentFactor;
             if (speedAdjuster < entryPartMotion.getValue().size() - 1)
             {
                splineGraphics.get(entryPartMotion.getKey()).createAdditionalPoint(entryPartMotion.getValue().get(speedAdjuster).getPosition(), Color.YELLOW);
@@ -147,9 +150,55 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             {
                splineGraphics.get(entryPartMotion.getKey()).createEnd(Color.BLUE);
             }
-
          }
       }
+   }
+
+   private void enableStdDeviationVisualization(String bodyPart)
+   {
+      if (stdDeviationGraphics.get(bodyPart) == null)
+      {
+         Point3D[] mean = proMPAssistant.getInitialMean(bodyPart);
+         Point3D[] stdDeviation = proMPAssistant.getInitialStdDeviation(bodyPart);
+
+         stdDeviationGraphics.put(bodyPart, new RDXEdgeDefinedPolygonGraphic(Color.GREEN, Color.OLIVE, 0.5f));
+         stdDeviationGraphics.get(bodyPart).generateMeshAsync(createStdDeviationEdges(mean, stdDeviation));
+         stdDeviationGraphics.get(bodyPart).update();
+      }
+   }
+
+   private Point3D[][] createStdDeviationEdges(Point3D[] mean, Point3D[] stdDeviation) {
+      Point3D[][] edges = new Point3D[8][mean.length];
+
+      for (int edgeNumber = 0; edgeNumber < 8; edgeNumber++) {
+         for (int i = 0; i < mean.length; i++) {
+            double x = mean[i].getX();
+            double y = mean[i].getY();
+            double z = mean[i].getZ();
+            // check whether a particular bit is set or not in the binary representation of the edge index i.
+            // Each edge is identified by an integer index i in the range [0, 7], which can be represented as a binary number with three bits.
+            if ((edgeNumber & 1) != 0) {
+               x -= stdDeviation[i].getX();
+            } else {
+               x += stdDeviation[i].getX();
+            }
+
+            if ((edgeNumber & 2) != 0) {
+               y -= stdDeviation[i].getY();
+            } else {
+               y += stdDeviation[i].getY();
+            }
+
+            if ((edgeNumber & 4) != 0) {
+               z -= stdDeviation[i].getZ();
+            } else {
+               z += stdDeviation[i].getZ();
+            }
+
+            edges[edgeNumber][i] = new Point3D(x, y, z);
+         }
+      }
+      return edges;
    }
 
    @Override
@@ -164,7 +213,12 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          objectFrame.update();
       }
 
-      if(!objectName.isEmpty())
+      if (proMPAssistant.startedProcessing())
+      {
+         enableStdDeviationVisualization(bodyPart);
+      }
+
+      if (!objectName.isEmpty())
       {
          proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame);
 
@@ -199,6 +253,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          {
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
             splineGraphics.clear(); // stop displaying preview splines
+            stdDeviationGraphics.clear(); // stop displaying stdDeviation region
             previewValidated = true;
          }
          if (!firstPreview) // if second replay or more, keep promp assistant in pause at beginning
@@ -265,6 +320,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             assistanceStatusList.clear();
             ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
             splineGraphics.clear();
+            stdDeviationGraphics.clear();
          }
       }
    }
@@ -277,6 +333,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public HashMap<String, RDXSplineGraphic> getSplinePreviewGraphic()
    {
       return splineGraphics;
+   }
+
+   public HashMap<String, RDXEdgeDefinedPolygonGraphic> getStdDeviationGraphic()
+   {
+      return stdDeviationGraphics;
    }
 
    public boolean isActive()
