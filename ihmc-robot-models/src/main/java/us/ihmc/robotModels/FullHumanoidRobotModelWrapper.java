@@ -84,7 +84,7 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
    private static ReferenceFrame generateUniqueStaticFrame(String namePrefix)
    {
-      ReferenceFrame staticFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent(namePrefix + "StaticFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
+      ReferenceFrame staticFrame = new FixedMovingReferenceFrame(namePrefix + "StationaryFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
       staticFrame.setNameRestrictionLevel(FrameNameRestrictionLevel.FRAME_NAME);
       return staticFrame;
    }

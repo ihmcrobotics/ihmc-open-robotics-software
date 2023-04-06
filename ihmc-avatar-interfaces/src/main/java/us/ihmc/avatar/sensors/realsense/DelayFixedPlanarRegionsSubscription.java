@@ -95,7 +95,7 @@ public class DelayFixedPlanarRegionsSubscription
       sensorPosePublisher = new RosPoseStampedPublisher(false);
       pelvisPosePublisher = new RosPoseStampedPublisher(false);
 
-      referenceFrames = new HumanoidReferenceFrames("", fullRobotModel, robotModel.getSensorInformation());
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
 
       collisionBoxProvider = robotModel.getCollisionBoxProvider();
       CollisionShapeTester shapeTester = new CollisionShapeTester();
