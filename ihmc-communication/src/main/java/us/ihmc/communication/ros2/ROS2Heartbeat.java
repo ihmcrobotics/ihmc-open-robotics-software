@@ -25,6 +25,14 @@ import us.ihmc.tools.thread.Throttler;
  * status. To solve this ever present issue, a periodic status is required. If publishing
  * a periodic status, one way to do that is to do what this class does and just have 
  * the act of publishing in itself be a signifier of being enabled.
+ * One might think that you could instead publish a periodic status that contains a
+ * boolean for alive, and always publishing it, but when the process containing this
+ * heartbeat is stopped, that breaks down, and the monitor would have to handle the case
+ * of it not existing anyway.
+ * This class is inspired by the common term in computing:
+ * https://en.wikipedia.org/wiki/Heartbeat_(computing)
+ * 
+ * @author Duncan Calvert
  */
 public class ROS2Heartbeat
 {
