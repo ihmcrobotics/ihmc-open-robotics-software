@@ -1,21 +1,13 @@
 package us.ihmc.rdx.ui.graphics;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.visualizers.RDXLineMeshModel;
-
-import java.util.ArrayList;
 
 public class RDXAxisCircleDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private RDXFocusBasedCamera focusBasedCamera;
    private RDXAxisBody axisBody;
 
    public RDXAxisCircleDemo()
@@ -26,12 +18,10 @@ public class RDXAxisCircleDemo
          public void create()
          {
             baseUI.create();
-            focusBasedCamera = baseUI.getPrimary3DPanel().getCamera3D();
             baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
 
             axisBody = new RDXAxisBody(baseUI);
             baseUI.getPrimaryScene().addRenderableProvider(axisBody);
-//            startTime = System.currentTimeMillis();
          }
 
          @Override

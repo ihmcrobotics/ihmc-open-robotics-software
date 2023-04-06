@@ -11,14 +11,9 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector3D;
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -31,10 +26,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.DiscreteTorusRayIntersection;
 import us.ihmc.rdx.ui.gizmo.DynamicLibGDXModel;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.gizmo.SixDoFSelection;
 import us.ihmc.rdx.visualizers.RDXLineMeshModel;
-import us.ihmc.rdx.visualizers.RDXSplineBody;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 
@@ -52,7 +44,6 @@ public class RDXAxisBody implements RenderableProvider
    // in world
    private ArrayList<Point3DReadOnly> linePts = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-
 
    // -----------> for torus (circle)
    private final ImFloat torusRadius = new ImFloat(1.0f);
@@ -77,7 +68,6 @@ public class RDXAxisBody implements RenderableProvider
 
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
-
 
       pointA.set(poseGizmo.getPose().getPosition());
       pointA.addZ(lineLength / 2.0);
@@ -117,15 +107,11 @@ public class RDXAxisBody implements RenderableProvider
       linePts.set(1, pointB);
       pointB.changeFrame(poseGizmo.getGizmoFrame());
 
-//      lineMeshModel.clear();
-
       if (lineMeshModel.getModelInstance() != null)
       {
          LibGDXTools.toLibGDX(poseGizmo.getPose(), tempTransform, lineMeshModel.getModelInstance().transform);
-//      lineMeshModel.generateMeshForMatchLines(linePts);
          lineMeshModel.update();
       }
-
    }
 
    public void update()
@@ -144,12 +130,10 @@ public class RDXAxisBody implements RenderableProvider
       {
          lineMeshModel.getRenderables(renderables, pool);
       }
-
       if (poseGizmo != null)
       {
          poseGizmo.getRenderables(renderables, pool);
       }
-
       torusModel.getOrCreateModelInstance().getRenderables(renderables, pool);
    }
 
@@ -176,7 +160,10 @@ public class RDXAxisBody implements RenderableProvider
 
       if (isWindowHovered && pickedTorus)
       {
-         torusRadius.set(torusRadius.get() + manipulationDragData.getMouseDraggedX());
+         if (leftButtonDown)
+            torusRadius.set(torusRadius.get() + 0.01f);
+         else
+            torusRadius.set(torusRadius.get() - 0.01f);
       }
    }
 

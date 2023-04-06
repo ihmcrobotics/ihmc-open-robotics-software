@@ -16,7 +16,6 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -32,8 +31,8 @@ public class RDXBoxAffordanceDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private RDXInteractableBox interactableBox;
    private RDXInteractableBox dummyHand;
+   private RDXAxisBody axisBody;
 
-   private ImGuiPanel affordancePanel = new ImGuiPanel("Affordance developer");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    // this is expressed in interacting object's frame
@@ -41,6 +40,7 @@ public class RDXBoxAffordanceDemo
    private ImBoolean showGraspPose = new ImBoolean(true);
    private RDXReferenceFrameGraphic graspPoseGraphic;
 
+   // this is expressed in interacting object's frame
    private FramePose3D pressPose = new FramePose3D();
    private ImBoolean showPressPose = new ImBoolean(true);
    private RDXReferenceFrameGraphic pressPoseGraphic;
@@ -48,16 +48,14 @@ public class RDXBoxAffordanceDemo
    private final PoseReferenceFrame boxFrame = new PoseReferenceFrame("boxFrame", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame graspFrame = new PoseReferenceFrame("graspFrame", boxFrame);
    private final PoseReferenceFrame pressFrame = new PoseReferenceFrame("pressFrame", boxFrame);
-   private final FramePose3D tempPose = new FramePose3D();
-
-   private RDXAxisBody axisBody;
 
    private final WorkspaceResourceDirectory configurationsDirectory = new WorkspaceResourceDirectory(getClass(), "/boxAffordance");
-
    private boolean initialized = false;
 
-   public RDXBoxAffordanceDemo() {
-      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter() {
+   public RDXBoxAffordanceDemo()
+   {
+      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      {
          @Override
          public void create() {
             baseUI.create();
@@ -90,10 +88,7 @@ public class RDXBoxAffordanceDemo
             axisBody.getPoseGizmo().getTransformToParent().appendTranslation(0.0, -1.0, 0.0);
             axisBody.update();
             baseUI.getPrimaryScene().addRenderableProvider(axisBody);
-
-//            baseUI.getPrimaryScene().addRenderableProvider(graspPoseGraphic);
             baseUI.getPrimaryScene().addRenderableProvider(RDXBoxAffordanceDemo.this::getRenderables);
-
             baseUI.getImGuiPanelManager().addPanel("Affordance Develop Panel", RDXBoxAffordanceDemo.this::renderImGuiWidgets);
          }
 
@@ -103,9 +98,7 @@ public class RDXBoxAffordanceDemo
             dummyHand.update();
             interactableBox.update();
             axisBody.update();
-//            update();
             updateFramePosesWRTBox();
-
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -122,16 +115,12 @@ public class RDXBoxAffordanceDemo
       FramePose3D boxPose = new FramePose3D(interactableBox.getPose3DGizmo().getPose());
       boxFrame.setPoseAndUpdate(boxPose);
       boxFrame.update();
-//      if (update)
-//      {
-         graspPose = new FramePose3D(graspFrame);
-         graspPose.changeFrame(ReferenceFrame.getWorldFrame());
-         graspPoseGraphic.updateFromFramePose(graspPose);
-
-         pressPose = new FramePose3D(pressFrame);
-         pressPose.changeFrame(ReferenceFrame.getWorldFrame());
-         pressPoseGraphic.updateFromFramePose(pressPose);
-//      }
+      graspPose = new FramePose3D(graspFrame);
+      graspPose.changeFrame(ReferenceFrame.getWorldFrame());
+      graspPoseGraphic.updateFromFramePose(graspPose);
+      pressPose = new FramePose3D(pressFrame);
+      pressPose.changeFrame(ReferenceFrame.getWorldFrame());
+      pressPoseGraphic.updateFromFramePose(pressPose);
    }
 
    private boolean update = false;
@@ -304,7 +293,7 @@ public class RDXBoxAffordanceDemo
       }
       else
       {
-         LogTools.warn("Could not write to " + file.toString());
+         LogTools.warn("Could not write to " + file);
       }
    }
 
