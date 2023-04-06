@@ -2474,9 +2474,9 @@ public class HumanoidMessageTools
    {
       long expectedId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
 
-      if (expectedId != referenceFrame.hashCode() && expectedId != referenceFrame.getAdditionalNameBasedHashCode())
+      if (expectedId != referenceFrame.getFrameNameHashCode() && expectedId != referenceFrame.getAdditionalNameBasedHashCode())
       {
-         String msg = "Argument's hashcode " + referenceFrame + " " + referenceFrame.hashCode() + " does not match " + expectedId;
+         String msg = "Argument's hashcode " + referenceFrame + " " + referenceFrame.getFrameNameHashCode() + " does not match " + expectedId;
          throw new ReferenceFrameMismatchException(msg);
       }
    }

@@ -73,15 +73,15 @@ public abstract class ReferenceFrameHashTest
          ReferenceFrame comLinkBefore = joint.getPredecessor().getBodyFixedFrame();
          ReferenceFrame comLinkAfter = joint.getSuccessor().getBodyFixedFrame();
    
-         System.out.println(frameBeforeJoint.getName() + " hashCode: " + frameBeforeJoint.hashCode());
-         System.out.println(frameAfterJoint.getName() + " hashCode: " + frameAfterJoint.hashCode());
-         System.out.println(comLinkBefore.getName() + " hashCode: " + comLinkBefore.hashCode());
-         System.out.println(comLinkAfter.getName() + " hashCode: " + comLinkAfter.hashCode());
-         
-         ReferenceFrame otherFrameBeforeJoint = referenceFrameHashCodeResolverA.getReferenceFrame(frameBeforeJoint.hashCode());
-         ReferenceFrame otherFrameAfterJoint = referenceFrameHashCodeResolverA.getReferenceFrame(frameAfterJoint.hashCode());
-         ReferenceFrame otherCoMlinkBefore = referenceFrameHashCodeResolverA.getReferenceFrame(comLinkBefore.hashCode());
-         ReferenceFrame otherCoMLinkAfter = referenceFrameHashCodeResolverA.getReferenceFrame(comLinkAfter.hashCode());
+         System.out.println(frameBeforeJoint.getName() + " hashCode: " + frameBeforeJoint.getFrameNameHashCode());
+         System.out.println(frameAfterJoint.getName() + " hashCode: " + frameAfterJoint.getFrameNameHashCode());
+         System.out.println(comLinkBefore.getName() + " hashCode: " + comLinkBefore.getFrameNameHashCode());
+         System.out.println(comLinkAfter.getName() + " hashCode: " + comLinkAfter.getFrameNameHashCode());
+
+         ReferenceFrame otherFrameBeforeJoint = referenceFrameHashCodeResolverA.getReferenceFrame(frameBeforeJoint.getFrameNameHashCode());
+         ReferenceFrame otherFrameAfterJoint = referenceFrameHashCodeResolverA.getReferenceFrame(frameAfterJoint.getFrameNameHashCode());
+         ReferenceFrame otherCoMlinkBefore = referenceFrameHashCodeResolverA.getReferenceFrame(comLinkBefore.getFrameNameHashCode());
+         ReferenceFrame otherCoMLinkAfter = referenceFrameHashCodeResolverA.getReferenceFrame(comLinkAfter.getFrameNameHashCode());
    
          checkReferenceFramesMatch(frameBeforeJoint, otherFrameBeforeJoint);
          checkReferenceFramesMatch(frameAfterJoint, otherFrameAfterJoint);
