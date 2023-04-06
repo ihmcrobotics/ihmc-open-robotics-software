@@ -13,7 +13,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -21,12 +20,12 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.*;
 
 import java.util.LinkedList;
-import java.util.List;
 
 public class RDXBehaviorActionSequenceEditor
 {
@@ -43,7 +42,7 @@ public class RDXBehaviorActionSequenceEditor
    private int playbackNextIndex = 0;
    private FootstepPlanningModule footstepPlanner;
    private ROS2SyncedRobotModel syncedRobot;
-   private List<ReferenceFrame> referenceFrameLibrary;
+   private ReferenceFrameLibrary referenceFrameLibrary;
    private ROS2ControllerHelper ros2ControllerHelper;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
 
@@ -71,7 +70,7 @@ public class RDXBehaviorActionSequenceEditor
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
-                      List<ReferenceFrame> referenceFrameLibrary)
+                      ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.camera3D = panel3D.getCamera3D();
       this.panel3D = panel3D;
