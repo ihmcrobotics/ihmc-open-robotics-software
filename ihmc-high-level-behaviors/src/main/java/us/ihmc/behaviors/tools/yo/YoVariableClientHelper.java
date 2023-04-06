@@ -239,4 +239,3 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
       return connectedNotification;
    }
 }
-
