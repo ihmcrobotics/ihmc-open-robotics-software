@@ -170,7 +170,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
          if (previewSetToActive)
          {
-            ghostRobotGraphic.setActive(false); // do not show ghost robot since there is no preview available yet
             // start storing current frames for replay preview with splines
             if (!bodyPartReplayMotionMap.containsKey(bodyPart))
                bodyPartReplayMotionMap.put(bodyPart, new ArrayList<>());
@@ -252,6 +251,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             else if (isPreviewGraphicActive())
                enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller
             previewSetToActive = isPreviewGraphicActive();
+            ghostRobotGraphic.setActive(false); // do not show ghost robot immediately, wait that prediction is available
          }
          else // deactivated
          {

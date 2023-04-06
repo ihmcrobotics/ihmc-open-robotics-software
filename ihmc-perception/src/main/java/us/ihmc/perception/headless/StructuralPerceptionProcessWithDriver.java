@@ -165,10 +165,8 @@ public class StructuralPerceptionProcessWithDriver
    {
       // Important not to store as a field, as update() needs to be called each frame
       ReferenceFrame cameraFrame = sensorFrameUpdater.get();
-      cameraPose.setToZero(cameraFrame);
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      depthExtractionKernel.runKernel(cameraPose);
+      depthExtractionKernel.runKernel(cameraFrame.getTransformToRoot());
       // Encode as PNG which is lossless and handles single channel images.
       opencv_imgcodecs.imencode(".png", depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(), pngImageBytePointer, compressionParameters);
 
