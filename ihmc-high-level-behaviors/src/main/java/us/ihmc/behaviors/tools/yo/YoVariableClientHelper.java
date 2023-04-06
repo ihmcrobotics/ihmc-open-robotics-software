@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
 
 /**
- * Tries to make it seemless to connect to a YoVariable server, observe and change
+ * Tries to make it seamless to connect to a YoVariable server, observe and change
  * YoVariables.
  */
 public class YoVariableClientHelper implements YoVariableClientPublishSubscribeAPI
@@ -234,6 +234,10 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
       };
    }
 
+   /**
+    * Allows the user to get notified when we are connected, so they can
+    * set YoVariables and stuff.
+    */
    public Notification getConnectedNotification()
    {
       return connectedNotification;
