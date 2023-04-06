@@ -9,6 +9,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -54,6 +55,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 {
+   private static final boolean MORE_YOVARIABLES = false;
+
    private static final double minForceZInPercentThresholdToFilterFoot = 0.0;
    private static final double maxForceZInPercentThresholdToFilterFoot = 0.45;
 
@@ -66,6 +69,11 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    private final YoFramePoint3D rootJointPosition = new YoFramePoint3D("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector3D rootJointVelocity = new YoFrameVector3D("estimatedRootJointLinearVelocity", worldFrame, registry);
 
+   private final FixedFrameVector3DBasics rootJointVelocityIMUPart;
+   private final FixedFramePoint3DBasics rootJointPositionIMUPart;
+   private final FixedFrameVector3DBasics rootJointVelocityKinPart;
+   private final FixedFramePoint3DBasics rootJointPositionKinPart;
+
    private final DoubleProvider imuAgainstKinematicsForVelocityBreakFrequency;
    private final DoubleProvider imuAgainstKinematicsForPositionBreakFrequency;
 
@@ -73,10 +81,10 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
    private final DoubleProvider linearVelocityFusingKp, linearVelocityFusingKi;
    private final IntegratorBiasCompensatorYoFrameVector3D mainIMULinearVelocityEstimate;
-   private final YoFrameVector3D pelvisNewLinearVelocityEstimate;
+   private final YoFrameVector3D rootJointNewLinearVelocityEstimate;
 
    private final DoubleProvider positionFusingKp, positionFusingKi;
-   private final IntegratorBiasCompensatorYoFrameVector3D pelvisPositionEstimate;
+   private final IntegratorBiasCompensatorYoFrameVector3D rootJointPositionEstimate;
 
    private final YoInteger numberOfEndEffectorsTrusted = new YoInteger("numberOfEndEffectorsTrusted", registry);
    private final YoInteger numberOfEndEffectorsFilteredByLoad = new YoInteger("numberOfEndEffectorsFilteredByLoad", registry);
@@ -216,15 +224,30 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                                                                    linearVelocityFusingKi,
                                                                                    imuBasedLinearStateCalculator.getIMUMeasurementFrame(),
                                                                                    estimatorDT);
-      pelvisNewLinearVelocityEstimate = new YoFrameVector3D("newEstimatedRootJointLinearVelocity", worldFrame, registry);
+      rootJointNewLinearVelocityEstimate = new YoFrameVector3D("newEstimatedRootJointLinearVelocity", worldFrame, registry);
 
-      pelvisPositionEstimate = new IntegratorBiasCompensatorYoFrameVector3D("newPelvisPositionEstimate",
-                                                                            registry,
-                                                                            positionFusingKp,
-                                                                            positionFusingKi,
-                                                                            worldFrame,
-                                                                            rootJointFrame, // Keep the bias in the local frame instead of world.
-                                                                            estimatorDT);
+      rootJointPositionEstimate = new IntegratorBiasCompensatorYoFrameVector3D("newRootJointPositionEstimate",
+                                                                               registry,
+                                                                               positionFusingKp,
+                                                                               positionFusingKi,
+                                                                               worldFrame,
+                                                                               rootJointFrame, // Keep the bias in the local frame instead of world.
+                                                                               estimatorDT);
+
+      if (MORE_YOVARIABLES)
+      {
+         rootJointVelocityIMUPart = new YoFrameVector3D("estimatedRootJointLinearVelocity_IMUPart", worldFrame, registry);
+         rootJointPositionIMUPart = new YoFramePoint3D("estimatedRootJointLinearPosition_IMUPart", worldFrame, registry);
+         rootJointVelocityKinPart = new YoFrameVector3D("estimatedRootJointLinearVelocity_KinPart", worldFrame, registry);
+         rootJointPositionKinPart = new YoFramePoint3D("estimatedRootJointLinearPosition_KinPart", worldFrame, registry);
+      }
+      else
+      {
+         rootJointVelocityIMUPart = new FrameVector3D();
+         rootJointPositionIMUPart = new FramePoint3D();
+         rootJointVelocityKinPart = new FrameVector3D();
+         rootJointPositionKinPart = new FramePoint3D();
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -301,8 +324,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       imuBasedLinearStateCalculator.initialize();
       mainIMULinearVelocityEstimate.getPositionEstimation().setToZero();
       mainIMULinearVelocityEstimate.getRateEstimation().setToZero();
-      pelvisPositionEstimate.getPositionEstimation().set(rootJointPosition);
-      pelvisPositionEstimate.getRateEstimation().setToZero();
+      rootJointPositionEstimate.getPositionEstimation().set(rootJointPosition);
+      rootJointPositionEstimate.getRateEstimation().setToZero();
    }
 
    public void initializeRootJointPosition(Tuple3DReadOnly rootJointPosition)
@@ -361,10 +384,10 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
             mainIMULinearVelocityEstimate.update(null, imuBasedLinearStateCalculator.getLinearAccelerationMeasurement());
             tempTwist.setToZero(rootJointFrame, rootJointFrame.getRootFrame(), imuBasedLinearStateCalculator.getIMUMeasurementFrame());
             tempTwist.getAngularPart().setMatchingFrame(rootJointFrame.getTwistOfFrame().getAngularPart());
-            tempTwist.getLinearPart().set((Vector3DReadOnly) mainIMULinearVelocityEstimate);
+            tempTwist.getLinearPart().set(mainIMULinearVelocityEstimate);
             tempTwist.changeFrame(rootJointFrame);
-            pelvisNewLinearVelocityEstimate.setMatchingFrame(tempTwist.getLinearPart());
-            pelvisPositionEstimate.update(null, pelvisNewLinearVelocityEstimate);
+            rootJointNewLinearVelocityEstimate.setMatchingFrame(tempTwist.getLinearPart());
+            rootJointPositionEstimate.update(null, rootJointNewLinearVelocityEstimate);
             kinematicsBasedLinearStateCalculator.updateNoTrustedFeet(rootJointPosition, rootJointVelocity);
          }
          else
@@ -593,12 +616,6 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       return filteredNumberOfEndEffectorsTrusted;
    }
 
-   private final FrameVector3D pelvisVelocityIMUPart = new FrameVector3D();
-   private final FramePoint3D pelvisPositionIMUPart = new FramePoint3D();
-
-   private final FrameVector3D pelvisVelocityKinPart = new FrameVector3D();
-   private final FramePoint3D pelvisPositionKinPart = new FramePoint3D();
-
    private void computeLinearStateFromMergingMeasurements()
    {
       computeLinearVelocityFromMergingMeasurements();
@@ -609,18 +626,16 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
    private void computeLinearVelocityFromMergingMeasurements()
    {
-      imuBasedLinearStateCalculator.estimateRootJointLinearVelocity(rootJoint.getJointTwist(), pelvisVelocityIMUPart);
-
       if (!useNewFusingFilter.getValue())
       {
-         // TODO Check out AlphaFusedYoVariable to that
-         pelvisVelocityKinPart.setIncludingFrame(kinematicsBasedLinearStateCalculator.getPelvisVelocity());
+         tempTwist.setToZero(rootJointFrame, rootJointFrame.getRootFrame(), rootJointFrame);
+         tempTwist.getAngularPart().setMatchingFrame(rootJointFrame.getTwistOfFrame().getAngularPart());
+         tempTwist.getLinearPart().setMatchingFrame(rootJointVelocity);
+         imuBasedLinearStateCalculator.estimateRootJointLinearVelocity(tempTwist, rootJointVelocityIMUPart);
+         rootJointVelocityKinPart.setMatchingFrame(kinematicsBasedLinearStateCalculator.getPelvisVelocity());
 
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForVelocityBreakFrequency.getValue(), estimatorDT);
-         pelvisVelocityIMUPart.scale(alpha);
-         pelvisVelocityKinPart.scale(1.0 - alpha);
-
-         rootJointVelocity.add(pelvisVelocityIMUPart, pelvisVelocityKinPart);
+         rootJointVelocity.interpolate(rootJointVelocityKinPart, rootJointVelocityIMUPart, alpha);
       }
 
       tempTwist.setToZero(rootJointFrame, rootJointFrame.getRootFrame(), rootJointFrame);
@@ -631,11 +646,11 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       mainIMULinearVelocityEstimate.update(tempTwist.getLinearPart(), imuBasedLinearStateCalculator.getLinearAccelerationMeasurement());
       tempTwist.getLinearPart().set((Vector3DReadOnly) mainIMULinearVelocityEstimate);
       tempTwist.changeFrame(rootJointFrame);
-      pelvisNewLinearVelocityEstimate.setMatchingFrame(tempTwist.getLinearPart());
+      rootJointNewLinearVelocityEstimate.setMatchingFrame(tempTwist.getLinearPart());
 
       if (useNewFusingFilter.getValue())
       {
-         rootJointVelocity.set(pelvisNewLinearVelocityEstimate);
+         rootJointVelocity.set(rootJointNewLinearVelocityEstimate);
       }
    }
 
@@ -643,21 +658,18 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    {
       if (!useNewFusingFilter.getValue())
       {
-         imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition, rootJoint.getJointTwist(), pelvisPositionIMUPart);
-         pelvisPositionKinPart.setIncludingFrame(kinematicsBasedLinearStateCalculator.getPelvisPosition());
+         imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition, rootJoint.getJointTwist(), rootJointPositionIMUPart);
+         rootJointPositionKinPart.setMatchingFrame(kinematicsBasedLinearStateCalculator.getPelvisPosition());
 
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForPositionBreakFrequency.getValue(), estimatorDT);
-         pelvisPositionIMUPart.scale(alpha);
-         pelvisPositionKinPart.scale(1.0 - alpha);
-
-         rootJointPosition.add(pelvisPositionIMUPart, pelvisPositionKinPart);
+         rootJointPosition.interpolate(rootJointPositionKinPart, rootJointPositionIMUPart, alpha);
       }
 
-      pelvisPositionEstimate.update(kinematicsBasedLinearStateCalculator.getPelvisPosition(), pelvisNewLinearVelocityEstimate);
+      rootJointPositionEstimate.update(kinematicsBasedLinearStateCalculator.getPelvisPosition(), rootJointNewLinearVelocityEstimate);
 
       if (useNewFusingFilter.getValue())
       {
-         rootJointPosition.set(pelvisPositionEstimate);
+         rootJointPosition.set(rootJointPositionEstimate);
       }
    }
 
