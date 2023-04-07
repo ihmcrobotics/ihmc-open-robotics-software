@@ -175,9 +175,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
 
          ousterFisheyeKernel.getOusterToWorldTransformToPack().set(depthChannel.getRotationMatrixToWorld(), depthChannel.getTranslationToWorld());
          ousterFisheyeKernel.getOusterToFisheyeTransformToPack().set(colorChannel.getRotationMatrixToWorld(), colorChannel.getTranslationToWorld());
-         ousterFisheyeKernel.setInstrinsicParameters(depthChannel.getOusterPixelShiftsBuffer(),
-                                                     depthChannel.getOusterBeamAltitudeAnglesBuffer(),
-                                                     depthChannel.getOusterBeamAzimuthAnglesBuffer());
+         ousterFisheyeKernel.setInstrinsicParameters(depthChannel.getOusterBeamAltitudeAnglesBuffer(), depthChannel.getOusterBeamAzimuthAnglesBuffer());
          ousterFisheyeKernel.runKernel(0.0f,
                                        pointSize.get(),
                                        usingColor && useSensorColor.get(),
