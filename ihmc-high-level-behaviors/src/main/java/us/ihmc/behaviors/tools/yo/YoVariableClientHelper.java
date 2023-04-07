@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.tools.yo;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableClient;
@@ -11,6 +12,10 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
 
+/**
+ * Tries to make it seamless to connect to a YoVariable server, observe and change
+ * YoVariables.
+ */
 public class YoVariableClientHelper implements YoVariableClientPublishSubscribeAPI
 {
    private final String registryName;
@@ -18,6 +23,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
    private YoVariablesUpdatedListener listener;
    private YoVariableClient yoVariableClient;
    private final MutableBoolean connecting = new MutableBoolean(false);
+   private final Notification connectedNotification = new Notification();
 
    public YoVariableClientHelper(String registryName)
    {
@@ -34,20 +40,28 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
       String caller = callerStackElement.getFileName() + ":" + callerStackElement.getLineNumber();
       ThreadTools.startAThread(() ->
       {
-         int tries = 5;
-         while (!isConnected() && tries > 0 && connecting.getValue())
+         int numberOfTriesLeft = 5;
+         while (!isConnected() && numberOfTriesLeft > 0 && connecting.getValue())
          {
+            --numberOfTriesLeft;
             try
             {
                LogTools.info(caller + ": Connecting to {}:{}", hostname, port);
                yoVariableClient.start(hostname, port);
                LogTools.info(caller + ": Connected to {}:{}", hostname, port);
+               connectedNotification.set();
             }
             catch (RuntimeException e)
             {
-               LogTools.warn(caller + ": Couldn't connect to {}:{}. {} Trying again...", hostname, port, e.getMessage());
-               ThreadTools.sleep(1000);
-               --tries;
+               if (numberOfTriesLeft > 0)
+               {
+                  LogTools.warn("%s: Couldn't connect to %s:%d. Trying again %d more time(s).\n\t%s".formatted(caller, hostname, port, numberOfTriesLeft, e.getMessage()));
+                  ThreadTools.sleep(1000);
+               }
+               else
+               {
+                  LogTools.warn("%s: Couldn't connect to %s:%d. Giving up.\n\t%s".formatted(caller, hostname, port, e.getMessage()));
+               }
             }
          }
          connecting.setValue(false);
@@ -218,5 +232,14 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
             return variable == null ? "" : variable.getDescription();
          }
       };
+   }
+
+   /**
+    * Allows the user to get notified when we are connected, so they can
+    * set YoVariables and stuff.
+    */
+   public Notification getConnectedNotification()
+   {
+      return connectedNotification;
    }
 }
