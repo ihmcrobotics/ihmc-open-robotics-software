@@ -1,0 +1,22 @@
+#ifndef __perception_msgs__msg__SteppableRegionDebugImagesMessage__idl__
+#define __perception_msgs__msg__SteppableRegionDebugImagesMessage__idl__
+
+#include "perception_msgs/msg/./SteppableRegionDebugImageMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::SteppableRegionDebugImagesMessage_")
+      struct SteppableRegionDebugImagesMessage
+      {
+        sequence<perception_msgs::msg::dds::SteppableRegionDebugImageMessage, 10> steppability_images;
+        sequence<perception_msgs::msg::dds::SteppableRegionDebugImageMessage, 10> region_images;
+      };
+    };
+  };
+};
+
+#endif

@@ -745,7 +745,7 @@ public class ConvexPolygonTools
    }
 
    private static boolean computeIfPolygonsIntersectIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2DReadOnly polygonWithExactlyTwoVertices,
-                                                                                                               ConvexPolygon2DReadOnly polygonWithAtLeastTwoVertices)
+                                                                                                                      ConvexPolygon2DReadOnly polygonWithAtLeastTwoVertices)
    {
       return EuclidGeometryPolygonMissingTools.doLineSegment2DAndConvexPolygon2DIntersect(polygonWithExactlyTwoVertices.getVertex(0),
                                                                                           polygonWithExactlyTwoVertices.getVertex(1),

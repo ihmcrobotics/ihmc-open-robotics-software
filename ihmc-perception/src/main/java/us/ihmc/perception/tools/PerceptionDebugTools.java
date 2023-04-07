@@ -5,6 +5,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -187,6 +188,14 @@ public class PerceptionDebugTools
       LogTools.info(matToString(name, image));
    }
 
+   public static void printMatVector(String name, MatVector matVector)
+   {
+      for (int i = 0; i < matVector.size(); i++)
+      {
+         LogTools.info(matToString("%s %d:".formatted(name, i), matVector.get(i)) + "\n");
+      }
+   }
+
    public static String matToString(String name, Mat image)
    {
       StringBuilder matString = new StringBuilder("Mat: [" + name + "]\n");
@@ -199,6 +208,8 @@ public class PerceptionDebugTools
                matString.append(image.ptr(i, j).getShort()).append("\t");
             if (image.type() == opencv_core.CV_64FC1)
                matString.append("%.5f\t".formatted(image.ptr(i, j).getDouble()));
+            if (image.type() == opencv_core.CV_32FC2)
+               matString.append("%.5f\t%.5f\t\t".formatted(image.ptr(i, j).getFloat(), image.ptr(i, j).getFloat(Float.BYTES)));
          }
          matString.append("\n");
       }

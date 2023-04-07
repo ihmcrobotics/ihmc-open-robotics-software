@@ -652,6 +652,10 @@ public class CollisionFreeSwingCalculator
                                           for (int i = 0; i < trajectoriesToCopy; i++)
                                           {
                                              PolynomialReadOnly polynomialReadOnly = trajectories.get(axis).get(i);
+                                             double duration = polynomialReadOnly.getTimeInterval().getDuration();
+                                             if (Double.isNaN(duration) || duration < 1e-4)
+                                                continue;
+
                                              Polynomial polynomialCopy = new Polynomial(polynomialReadOnly.getNumberOfCoefficients());
                                              polynomialCopy.set(polynomialReadOnly);
                                              listCopy.add(polynomialCopy);
