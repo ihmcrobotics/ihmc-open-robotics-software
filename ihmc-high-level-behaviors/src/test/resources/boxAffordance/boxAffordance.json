@@ -1,20 +1,29 @@
 {
   "pre-graspingPoint" : {
-    "referenceFrame" : "boxFrame, originPose = Pose 3D: position = ( 0.000,  0.000,  0.000 ), orientation = ( 0.000,  0.000,  0.210,  0.978 ), World",
+    "referenceFrame" : "boxFrame, originPose = Pose 3D: position = ( 0.000,  0.000,  0.000 ), orientation = ( 0.000,  0.000,  0.000,  1.000 ), World",
     "x" : 0.31025806339097206,
     "y" : 2.0281869813025235,
     "z" : -0.36933700668909797,
-    "roll" : 0.040066906997488015,
-    "pitch" : -0.04073425994218441,
+    "roll" : 0.0400669069974881,
+    "pitch" : -0.04073425994218439,
     "yaw" : 3.006620759759831
   },
   "pressPoint" : {
-    "referenceFrame" : "boxFrame, originPose = Pose 3D: position = ( 0.000,  0.000,  0.000 ), orientation = ( 0.000,  0.000,  0.210,  0.978 ), World",
+    "referenceFrame" : "boxFrame, originPose = Pose 3D: position = ( 0.000,  0.000,  0.000 ), orientation = ( 0.000,  0.000,  0.000,  1.000 ), World",
     "x" : 0.07121943250660208,
     "y" : 0.03364878379351089,
     "z" : 2.063049570557567,
     "roll" : -1.3825261636041335,
     "pitch" : 5.551115123125783E-16,
     "yaw" : 2.213369472862647
+  },
+  "test" : {
+    "referenceFrame" : "boxFrame, originPose = Pose 3D: position = ( 0.000,  0.000,  0.000 ), orientation = ( 0.000,  0.000,  0.000,  1.000 ), World",
+    "x" : 0.0,
+    "y" : 1.0000000000000002,
+    "z" : 0.8144510226687904,
+    "roll" : 0.0,
+    "pitch" : -0.0,
+    "yaw" : -3.123857544468841
   }
 }
