@@ -73,10 +73,6 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             */
    public float principal_point_y_pixels_;
    /**
-            * If Ouster camera model, the pixel offsets used to re-stagger the depth image.
-            */
-   public us.ihmc.idl.IDLSequence.Byte  ouster_pixel_shifts_;
-   /**
             * If Ouster camera model, the calibrated beam altitude angles used to get 3D points.
             */
    public us.ihmc.idl.IDLSequence.Float  ouster_beam_altitude_angles_;
@@ -92,8 +88,6 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      ouster_pixel_shifts_ = new us.ihmc.idl.IDLSequence.Byte (128, "type_9");
-
       ouster_beam_altitude_angles_ = new us.ihmc.idl.IDLSequence.Float (128, "type_5");
 
       ouster_beam_azimuth_angles_ = new us.ihmc.idl.IDLSequence.Float (128, "type_5");
@@ -132,7 +126,6 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       principal_point_y_pixels_ = other.principal_point_y_pixels_;
 
-      ouster_pixel_shifts_.set(other.ouster_pixel_shifts_);
       ouster_beam_altitude_angles_.set(other.ouster_beam_altitude_angles_);
       ouster_beam_azimuth_angles_.set(other.ouster_beam_azimuth_angles_);
    }
@@ -333,15 +326,6 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
 
    /**
-            * If Ouster camera model, the pixel offsets used to re-stagger the depth image.
-            */
-   public us.ihmc.idl.IDLSequence.Byte  getOusterPixelShifts()
-   {
-      return ouster_pixel_shifts_;
-   }
-
-
-   /**
             * If Ouster camera model, the calibrated beam altitude angles used to get 3D points.
             */
    public us.ihmc.idl.IDLSequence.Float  getOusterBeamAltitudeAngles()
@@ -401,8 +385,6 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.principal_point_y_pixels_, other.principal_point_y_pixels_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.ouster_pixel_shifts_, other.ouster_pixel_shifts_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.ouster_beam_altitude_angles_, other.ouster_beam_altitude_angles_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.ouster_beam_azimuth_angles_, other.ouster_beam_azimuth_angles_, epsilon)) return false;
@@ -444,7 +426,6 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if(this.principal_point_y_pixels_ != otherMyClass.principal_point_y_pixels_) return false;
 
-      if (!this.ouster_pixel_shifts_.equals(otherMyClass.ouster_pixel_shifts_)) return false;
       if (!this.ouster_beam_altitude_angles_.equals(otherMyClass.ouster_beam_altitude_angles_)) return false;
       if (!this.ouster_beam_azimuth_angles_.equals(otherMyClass.ouster_beam_azimuth_angles_)) return false;
 
@@ -485,8 +466,6 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       builder.append(this.principal_point_x_pixels_);      builder.append(", ");
       builder.append("principal_point_y_pixels=");
       builder.append(this.principal_point_y_pixels_);      builder.append(", ");
-      builder.append("ouster_pixel_shifts=");
-      builder.append(this.ouster_pixel_shifts_);      builder.append(", ");
       builder.append("ouster_beam_altitude_angles=");
       builder.append(this.ouster_beam_altitude_angles_);      builder.append(", ");
       builder.append("ouster_beam_azimuth_angles=");

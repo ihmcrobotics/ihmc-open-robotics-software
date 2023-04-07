@@ -68,8 +68,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (128 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (128 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (128 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -128,10 +126,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getOusterPixelShifts().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getOusterBeamAltitudeAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -172,10 +166,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       cdr.write_type_5(data.getPrincipalPointYPixels());
 
-      if(data.getOusterPixelShifts().size() <= 128)
-      cdr.write_type_e(data.getOusterPixelShifts());else
-          throw new RuntimeException("ouster_pixel_shifts field exceeds the maximum length");
-
       if(data.getOusterBeamAltitudeAngles().size() <= 128)
       cdr.write_type_e(data.getOusterBeamAltitudeAngles());else
           throw new RuntimeException("ouster_beam_altitude_angles field exceeds the maximum length");
@@ -212,7 +202,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       	
       data.setPrincipalPointYPixels(cdr.read_type_5());
       	
-      cdr.read_type_e(data.getOusterPixelShifts());	
       cdr.read_type_e(data.getOusterBeamAltitudeAngles());	
       cdr.read_type_e(data.getOusterBeamAzimuthAngles());	
 
@@ -238,7 +227,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       ser.write_type_5("focal_length_y_pixels", data.getFocalLengthYPixels());
       ser.write_type_5("principal_point_x_pixels", data.getPrincipalPointXPixels());
       ser.write_type_5("principal_point_y_pixels", data.getPrincipalPointYPixels());
-      ser.write_type_e("ouster_pixel_shifts", data.getOusterPixelShifts());
       ser.write_type_e("ouster_beam_altitude_angles", data.getOusterBeamAltitudeAngles());
       ser.write_type_e("ouster_beam_azimuth_angles", data.getOusterBeamAzimuthAngles());
    }
@@ -263,7 +251,6 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       data.setFocalLengthYPixels(ser.read_type_5("focal_length_y_pixels"));
       data.setPrincipalPointXPixels(ser.read_type_5("principal_point_x_pixels"));
       data.setPrincipalPointYPixels(ser.read_type_5("principal_point_y_pixels"));
-      ser.read_type_e("ouster_pixel_shifts", data.getOusterPixelShifts());
       ser.read_type_e("ouster_beam_altitude_angles", data.getOusterBeamAltitudeAngles());
       ser.read_type_e("ouster_beam_azimuth_angles", data.getOusterBeamAzimuthAngles());
    }
