@@ -39,6 +39,7 @@ public class RDXPerceptionUI
       logger = new PerceptionDataLogger();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "perception_ui_node");
+      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       globalVisualizersUI = new RDXGlobalVisualizersPanel();
       baseUI = new RDXBaseUI("Perception UI");
@@ -162,7 +163,7 @@ public class RDXPerceptionUI
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
 
-            remotePerceptionUI = new RDXRemotePerceptionUI(new ROS2Helper(ros2Node));
+            remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
             baseUI.getImGuiPanelManager().addPanel(remotePerceptionUI.getPanel());
 
             environmentBuilder.create();

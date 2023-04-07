@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class OusterHeightMapUpdater
 {
@@ -68,16 +69,26 @@ public class OusterHeightMapUpdater
       executorService.scheduleAtFixedRate(this::update, 0, updateDTMillis, TimeUnit.MILLISECONDS);
    }
 
-   public void updateWithDataBuffer(ReferenceFrame sensorFrame, ReferenceFrame groundFrame, FloatBuffer pointCloudInSensorFrame, int numberOfPoints, Instant instant)
+   public void attachHeightMapConsumer(Consumer<HeightMapMessage> heightMapConsumer)
+   {
+      heightMapUpdater.attachHeightMapConsumer(heightMapConsumer);
+   }
+
+   public void updateWithDataBuffer(ReferenceFrame groundFrame,
+                                    ReferenceFrame sensorFrame,
+                                    FloatBuffer pointCloudInWorldFrame,
+                                    int numberOfPoints,
+                                    Instant instant)
    {
       double groundHeight = groundFrame.getTransformToRoot().getTranslationZ();
 
       FramePose3D sensorPose = new FramePose3D(sensorFrame);
       sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
       Point3D gridCenter = new Point3D(sensorPose.getX(), sensorPose.getY(), groundHeight);
-      PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInSensorFrame);
+      PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInWorldFrame);
 
-      heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, sensorPose, gridCenter));
+      // submitting the world frame for the sensor pose, as that's the frame the data is in.
+      heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, new FramePose3D(ReferenceFrame.getWorldFrame()), gridCenter));
    }
 
    public void consumeStateRequestMessage(HeightMapStateRequestMessage message)
