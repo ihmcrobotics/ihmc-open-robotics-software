@@ -18,6 +18,7 @@ public class YoAvatarWalkingModeManagerParameters
    private final YoDouble detectFlatGroundMinRegionAreaToConsider = new YoDouble("detectFlatGroundMinRegionAreaToConsider", registry);
    private final YoDouble detectFlatGroundOrientationTolerance = new YoDouble("detectFlatGroundOrientationTolerance", registry);
    private final YoDouble detectFlatGroundZTolerance = new YoDouble("detectFlatGroundZTolerance", registry);
+   private final YoDouble assumedSquaredUpXTolerance = new YoDouble("assumedSquaredUpXTolerance", registry);
    private final YoDouble supportRegionScaleFactor = new YoDouble("supportRegionScaleFactor", registry);
 
    private final YoInteger planarRegionsHistorySize = new YoInteger("planarRegionsHistorySize", registry);
@@ -33,6 +34,7 @@ public class YoAvatarWalkingModeManagerParameters
       detectFlatGroundMinRegionAreaToConsider.set(parameters.getDetectFlatGroundMinRegionAreaToConsider());
       detectFlatGroundOrientationTolerance.set(parameters.getDetectFlatGroundOrientationTolerance());
       detectFlatGroundZTolerance.set(parameters.getDetectFlatGroundZTolerance());
+      assumedSquaredUpXTolerance.set(parameters.getAssumedSquaredUpXTolerance());
       supportRegionScaleFactor.set(parameters.getSupportRegionScaleFactor());
 
       planarRegionsHistorySize.set(parameters.getPlanarRegionsHistorySize());
@@ -122,6 +124,14 @@ public class YoAvatarWalkingModeManagerParameters
    public double getDetectFlatGroundZTolerance()
    {
       return detectFlatGroundZTolerance.getDoubleValue();
+   }
+
+   /**
+    * This is used to determine if the robot's feet are sufficiently squared up.
+    */
+   public double getAssumedSquaredUpXTolerance()
+   {
+      return assumedSquaredUpXTolerance.getDoubleValue();
    }
 
    /**

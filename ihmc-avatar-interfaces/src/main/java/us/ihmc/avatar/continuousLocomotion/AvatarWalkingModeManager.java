@@ -16,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -64,12 +65,12 @@ public class AvatarWalkingModeManager implements Updatable
       this.stepGeneratorCommandInputManager = stepGeneratorCommandInputManager;
 
       rcValueThreshold.set(1.0);
-      ignoreAutoWalkingModeSwitch.set(true);
+      ignoreAutoWalkingModeSwitch.set(false);
 
       currentWalkingStatus.set(WalkingStatus.PAUSED);
       walkingStatusBeforeTransition.set(WalkingStatus.PAUSED);
 
-      yoJoystickRequestedWalkingMode.set(JoystickRequestedWalkingMode.WALKING);
+      yoJoystickRequestedWalkingMode.set(JoystickRequestedWalkingMode.AUTO);
       yoJoystickRequestedWalkingMode.addListener(change -> updateRequestedWalkingState());
 
       locomotionManagerRequestedWalkingState.set(HighLevelControllerName.WALKING);
@@ -78,7 +79,7 @@ public class AvatarWalkingModeManager implements Updatable
                                                             if (locomotionManagerRequestedWalkingState.getEnumValue() != currentController)
                                                             {
                                                                recordWalkingStatusBeforeTransition();
-                                                               pauseWalking();
+                                                               //pauseWalking();
                                                                requestedTransitionInProgress.set(true);
                                                             }
                                                             else
@@ -111,13 +112,15 @@ public class AvatarWalkingModeManager implements Updatable
 
    private void pauseWalking()
    {
-//      pauseWalkingCommand.setPauseRequested(true);
-//      walkingCommandInputManager.submitCommand(pauseWalkingCommand);
-      if (stepGeneratorCommandInputManager.getCommandInputManager().isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
+      if (isReadyForPause())
       {
-         ContinuousStepGeneratorInputCommand command = stepGeneratorCommandInputManager.getCommandInputManager().pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
-         command.setWalk(false);
-         stepGeneratorCommandInputManager.getCommandInputManager().submitCommand(command);
+         stepGeneratorInputCommand.setWalk(false);
+      }
+      else
+      {
+         stepGeneratorInputCommand.setForwardVelocity(0.0);
+         stepGeneratorInputCommand.setLateralVelocity(0.0);
+         stepGeneratorInputCommand.setTurnVelocity(0.0);
       }
    }
 
@@ -126,35 +129,50 @@ public class AvatarWalkingModeManager implements Updatable
       return currentWalkingStatus.getEnumValue() == WalkingStatus.PAUSED || currentWalkingStatus.getEnumValue() == WalkingStatus.COMPLETED;
    }
 
+   private boolean isReadyForPause()
+   {
+      return terrainIdentifier.areFeetSquared();
+      //return currentWalkingStatus.getEnumValue() == WalkingStatus.PAUSED || currentWalkingStatus.getEnumValue() == WalkingStatus.COMPLETED;
+   }
+
    @Override
    public void update(double time)
    {
       consumeMessages();
 
+      if (yoJoystickRequestedWalkingMode.getEnumValue() == JoystickRequestedWalkingMode.AUTO)
+         terrainIdentifier.update();
+
       if (!ignoreRCWalkingModeSelection.getBooleanValue() && requestedTransitionInProgress.getBooleanValue())
       {
-         // If walking is paused, submit high level controller state change command
-         if (isWalkingPaused())
+         if (stepGeneratorCommandInputManager.getCommandInputManager().isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
          {
-            controllerStateCommand.setHighLevelControllerName(locomotionManagerRequestedWalkingState.getEnumValue());
-            walkingCommandInputManager.submitCommand(controllerStateCommand);
+            stepGeneratorInputCommand.set(stepGeneratorCommandInputManager.getCommandInputManager().pollNewestCommand(ContinuousStepGeneratorInputCommand.class));
+            stepGeneratorCommandInputManager.getCommandInputManager().clearCommands(ContinuousStepGeneratorInputCommand.class);
+         }
+
+         // If walking is paused, submit high level controller state change command
+         // Once high level state has successfully changed, set walking status to whatever it was before state change was requested
+         if (locomotionManagerRequestedWalkingState.getEnumValue() != currentController)
+         {
+            if (isWalkingPaused())
+            {
+               stepGeneratorInputCommand.setWalk(false);
+               controllerStateCommand.setHighLevelControllerName(locomotionManagerRequestedWalkingState.getEnumValue());
+               walkingCommandInputManager.submitCommand(controllerStateCommand);
+            }
+            else
+            {
+               pauseWalking();
+            }
          }
          else
          {
-            pauseWalking();
-         }
-
-         // Once high level state has successfully changed, set walking status to whatever it was before state change was requested
-         if (locomotionManagerRequestedWalkingState.getEnumValue() == currentController)
-         {
-            if (stepGeneratorCommandInputManager.getCommandInputManager().isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
-            {
-               ContinuousStepGeneratorInputCommand command = stepGeneratorCommandInputManager.getCommandInputManager().pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
-               command.setWalk(walkingStatusBeforeTransition.getEnumValue() != WalkingStatus.PAUSED);
-               stepGeneratorCommandInputManager.getCommandInputManager().submitCommand(command);
-            }
+            stepGeneratorInputCommand.setWalk(walkingStatusBeforeTransition.getEnumValue() != WalkingStatus.PAUSED || walkingStatusBeforeTransition.getEnumValue() != WalkingStatus.COMPLETED);
             requestedTransitionInProgress.set(false);
          }
+
+         stepGeneratorCommandInputManager.getCommandInputManager().submitCommand(stepGeneratorInputCommand);
       }
    }
 
@@ -170,9 +188,9 @@ public class AvatarWalkingModeManager implements Updatable
       {
          WalkingStatusMessage walkingStatusMessage = messageListener.pollNewestMessage(WalkingStatusMessage.class);
 
-         if (walkingStatusMessage.getWalkingStatus() == -1)
-            currentWalkingStatus.set(WalkingStatus.PAUSED);
-         else
+//         if (walkingStatusMessage.getWalkingStatus() == -1)
+//            currentWalkingStatus.set(WalkingStatus.PAUSED);
+//         else
             currentWalkingStatus.set(WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()));
 
          messageListener.clearMessages(WalkingStatusMessage.class);

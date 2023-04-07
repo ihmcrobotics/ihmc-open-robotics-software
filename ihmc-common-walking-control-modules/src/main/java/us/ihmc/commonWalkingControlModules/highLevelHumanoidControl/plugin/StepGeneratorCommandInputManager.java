@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 
 public class StepGeneratorCommandInputManager implements Updatable
 {
-   private final CommandInputManager commandInputManager = new CommandInputManager(supportedCommands());
+   private final CommandInputManager commandInputManager = new CommandInputManager(null, supportedCommands(), 30);
 
    private boolean isOpen = false;
    private boolean walk = false;

@@ -22,8 +22,8 @@ public class YoVelocityBasedSteppingParameters implements VelocityBasedSteppingP
       maxDesiredTurningVelocity = new YoDouble("maxDesiredTurningVelocity" + suffix, registry);
 
       // These are default parameters
-      maxDesiredForwardVelocity.set(0.5);
-      maxDesiredBackwardVelocity.set(0.3);
+      maxDesiredForwardVelocity.set(1.5);
+      maxDesiredBackwardVelocity.set(0.7);
       maxDesiredLateralVelocity.set(0.2);
       maxDesiredTurningVelocity.set(0.2);
 

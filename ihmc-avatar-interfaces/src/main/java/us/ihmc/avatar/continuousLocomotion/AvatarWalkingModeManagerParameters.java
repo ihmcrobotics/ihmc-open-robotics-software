@@ -11,6 +11,7 @@ public class AvatarWalkingModeManagerParameters
    private static final double detectFlatGroundMinRegionAreaToConsider = 0.03;
    private static final double detectFlatGroundOrientationTolerance = 0.1;
    private static final double detectFlatGroundZTolerance = 0.05;
+   private static final double assumedSquaredUpXTolerance = 0.25;
    private static final double supportRegionScaleFactor = 3.0;
 
    private static final int planarRegionsHistorySize = 1;
@@ -97,6 +98,14 @@ public class AvatarWalkingModeManagerParameters
    public double getDetectFlatGroundZTolerance()
    {
       return detectFlatGroundZTolerance;
+   }
+
+   /**
+    * This is used to determine if the robot's feet are sufficiently squared up.
+    */
+   public double getAssumedSquaredUpXTolerance()
+   {
+      return assumedSquaredUpXTolerance;
    }
 
    /**

@@ -46,7 +46,7 @@ public class AvatarFlatGroundDetector
    private final double minimumRotationToAppend = Math.toRadians(30);
    private final double maxDistanceToRemember = 2.0;
    private final boolean useSLAMToCombineRegions = true;
-   private enum detectedTerrain{ROUGH, FLAT}
+   enum detectedTerrain{ROUGH, FLAT}
    private String status;
 
    private final YoEnum<detectedTerrain> yoDetectedTerrain;
@@ -104,6 +104,15 @@ public class AvatarFlatGroundDetector
    {
       //consumeMessages();
 
+//      if(planarRegions == null)
+//         return;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footPoses.put(robotSide, new FramePose3D(referenceFrames.getSoleFrame(robotSide)));
+         footPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
+      }
+
       for (RobotSide robotSide : RobotSide.values)
       {
          footPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
@@ -145,15 +154,12 @@ public class AvatarFlatGroundDetector
          }
 
          // are the feet coplanar
-         if (capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() > 0.5 * capturabilityBasedStatus.getLeftFootSupportPolygon3d().getCurrentCapacity()
-             && capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() > 0.5 * capturabilityBasedStatus.getLeftFootSupportPolygon3d().getCurrentCapacity()
-             && !areFeetCoplanar(footPoses))
+         if (isFootOnGround(RobotSide.LEFT) && isFootOnGround(RobotSide.RIGHT) && !areFeetCoplanar())
          {
             status = "Flat ground not detected.";
             flatGroundDetected.set(false);
          }
-         else if (capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() > 0.5 * capturabilityBasedStatus.getLeftFootSupportPolygon3d().getCurrentCapacity()
-                  || capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() > 0.5 * capturabilityBasedStatus.getLeftFootSupportPolygon3d().getCurrentCapacity())
+         else if (isFootOnGround(RobotSide.LEFT) || isFootOnGround(RobotSide.RIGHT))
          {
             if (capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() > capturabilityBasedStatus.getRightFootSupportPolygon3d().size()
                 && FootstepStatus.fromByte(leftFootstepStatusMessage.getRobotSide()) == FootstepStatus.COMPLETED)
@@ -277,7 +283,12 @@ public class AvatarFlatGroundDetector
          planarRegionsListCommand.getPlanarRegionCommand(i).getPlanarRegion(planarRegionsList.getPlanarRegion(i));
       }
 
+      if (planarRegionsList.isEmpty())
+         return;
       planarRegions = planarRegionsList;
+      if (planarRegions.isEmpty())
+         return;
+
 
       if (parameters.getAssumeFlatGround())
       {
@@ -329,7 +340,8 @@ public class AvatarFlatGroundDetector
 
    public boolean flatGroundDetected()
    {
-      update();
+      //update();
+      System.out.println(status);
       return flatGroundDetected.getBooleanValue();
    }
 
@@ -396,18 +408,52 @@ public class AvatarFlatGroundDetector
       return midFeetPose;
    }
 
-   private boolean areFeetCoplanar(SideDependentList<FramePose3D> startFootPoses)
+   public boolean isFootOnGround(RobotSide robotSide)
    {
-      double leftZ = startFootPoses.get(RobotSide.LEFT).getPosition().getZ();
-      double rightZ = startFootPoses.get(RobotSide.RIGHT).getPosition().getZ();
+      if (robotSide == RobotSide.LEFT)
+      {
+         double number = capturabilityBasedStatus.getLeftFootSupportPolygon3d().getCurrentCapacity();
+         double number2 = capturabilityBasedStatus.getLeftFootSupportPolygon3d().size();
+         boolean test =  number2>number;
+         return test;
+      }
+      else
+      {
+         double number = capturabilityBasedStatus.getRightFootSupportPolygon3d().getCurrentCapacity();
+         double number2 = capturabilityBasedStatus.getRightFootSupportPolygon3d().size();
+         return capturabilityBasedStatus.getRightFootSupportPolygon3d().size() > 0.5 * capturabilityBasedStatus.getRightFootSupportPolygon3d().getCurrentCapacity();
+      }
+   }
+
+   public boolean areFeetCoplanar()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footPoses.put(robotSide, new FramePose3D(referenceFrames.getSoleFrame(robotSide)));
+         footPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
+      }
+
+      double leftZ = footPoses.get(RobotSide.LEFT).getPosition().getZ();
+      double rightZ = footPoses.get(RobotSide.RIGHT).getPosition().getZ();
       if (!EuclidCoreTools.epsilonEquals(leftZ, rightZ, parameters.getDetectFlatGroundZTolerance()))
          return false;
-      //      else
-      //         return true;
 
-      Vector3DReadOnly leftZUp = getFootNormal(startFootPoses.get(RobotSide.LEFT));
-      Vector3DReadOnly rightZUp = getFootNormal(startFootPoses.get(RobotSide.RIGHT));
+      Vector3DReadOnly leftZUp = getFootNormal(footPoses.get(RobotSide.LEFT));
+      Vector3DReadOnly rightZUp = getFootNormal(footPoses.get(RobotSide.RIGHT));
       return leftZUp.angle(rightZUp) < parameters.getDetectFlatGroundOrientationTolerance();
+   }
+
+   public boolean areFeetSquared()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footPoses.put(robotSide, new FramePose3D(referenceFrames.getSoleFrame(robotSide)));
+         footPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
+      }
+
+      double leftX = footPoses.get(RobotSide.LEFT).getPosition().getX();
+      double rightX = footPoses.get(RobotSide.RIGHT).getPosition().getX();
+      return EuclidCoreTools.epsilonEquals(leftX, rightX, parameters.getAssumedSquaredUpXTolerance());
    }
 
    private Vector3DReadOnly getFootNormal(FramePose3D footPose)
