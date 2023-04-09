@@ -16,6 +16,13 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 import java.util.Set;
 
+/**
+ * A "ghost" colored model, with reference frame graphic in the virtual scene
+ * to be used for debugging and know where the frame is.
+ *
+ * TODO: Add pose "override", via right click context menu, and gizmo.
+ *   Possibly do this in a higher level class or class that extends this.
+ */
 public class RDXVirtualGhostObject extends RDXModelInstance
 {
    private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
