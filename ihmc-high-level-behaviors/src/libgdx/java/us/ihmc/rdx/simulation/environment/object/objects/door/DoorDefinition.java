@@ -4,6 +4,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.perception.objects.DoorModelParameters;
 import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -13,15 +14,21 @@ import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 
+/**
+ * SCS 2 definition of the door we have in the lab.
+ * TODO: It's decently accurate, but still missing some features like:
+ *   - Accurate hinge axis
+ *   - Lever handle latch
+ *   - Dimensions stored as JSON for different varieties
+ *   - Dimensions of actual door double checked to match a sim door
+ */
 public class DoorDefinition extends RobotDefinition
 {
-   public static final double DOOR_PANEL_THICKNESS = 0.0508;
-
    private SixDoFJointState initialSixDoFState;
    private OneDoFJointState initialHingeState;
    private OneDoFJointState initialLeverState;
 
-   private DoorPanelDefinition doorPanelDefinition = new DoorPanelDefinition();
+   private final DoorPanelDefinition doorPanelDefinition = new DoorPanelDefinition();
 
    public DoorDefinition()
    {
@@ -49,7 +56,9 @@ public class DoorDefinition extends RobotDefinition
       RevoluteJointDefinition doorHingeJoint = new RevoluteJointDefinition("doorHingeJoint");
       doorHingeJoint.setAxis(Axis3D.Z);
       doorFrameDefinition.addChildJoint(doorHingeJoint);
-      doorHingeJoint.getTransformToParent().getTranslation().add(0.0, 0.005, 0.02);
+      doorHingeJoint.getTransformToParent()
+                    .getTranslation()
+                    .add(0.0, DoorModelParameters.DOOR_PANEL_HINGE_OFFSET, DoorModelParameters.DOOR_PANEL_GROUND_GAP_HEIGHT);
       initialHingeState = new OneDoFJointState();
       doorHingeJoint.setInitialJointState(initialHingeState);
       doorHingeJoint.setPositionLowerLimit(-1.7);
@@ -61,7 +70,11 @@ public class DoorDefinition extends RobotDefinition
       RevoluteJointDefinition doorLeverJoint = new RevoluteJointDefinition("doorLeverJoint");
       doorLeverJoint.setAxis(Axis3D.X);
       doorPanelDefinition.addChildJoint(doorLeverJoint);
-      doorLeverJoint.getTransformToParent().getTranslation().add(-DOOR_PANEL_THICKNESS / 2.0, 0.9144 - 0.05, (2.0447 / 2.0) - 0.13);
+      doorLeverJoint.getTransformToParent()
+                    .getTranslation()
+                    .add(-DoorModelParameters.DOOR_PANEL_THICKNESS / 2.0,
+                         DoorModelParameters.DOOR_PANEL_WIDTH - DoorModelParameters.DOOR_LEVER_HANDLE_INSET,
+                         (DoorModelParameters.DOOR_PANEL_HEIGHT / 2.0) - DoorModelParameters.DOOR_LEVER_HANDLE_DISTANCE_BELOW_MID_HEIGHT);
       initialLeverState = new OneDoFJointState();
       doorLeverJoint.setInitialJointState(initialLeverState);
 

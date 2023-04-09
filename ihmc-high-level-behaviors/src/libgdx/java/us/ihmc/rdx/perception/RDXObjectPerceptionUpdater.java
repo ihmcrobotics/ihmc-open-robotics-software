@@ -8,17 +8,25 @@ import us.ihmc.perception.objects.DetectedObjectsInfo;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXVirtualGhostObject;
 import us.ihmc.ros2.ROS2Topic;
 
+/**
+ * Keeps a ghost graphic object updated from a ROS 2 message.
+ * Like a door, chair, can of soup, etc.
+ */
 public class RDXObjectPerceptionUpdater
 {
    private final RDXVirtualGhostObject object;
    private final IHMCROS2Input<DetectedObjectMessage> subscription;
    private final String id;
 
-   public RDXObjectPerceptionUpdater(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> updateTopic, String id, DetectedObjectsInfo objectsInfo)
+   public RDXObjectPerceptionUpdater(ROS2PublishSubscribeAPI ros2,
+                                     ROS2Topic<DetectedObjectMessage> updateTopic,
+                                     String id,
+                                     DetectedObjectsInfo objectsInfo,
+                                     String frameName)
    {
       this.id = id;
       String modelFileName = objectsInfo.getModelFileName(id);
-      object = new RDXVirtualGhostObject(modelFileName);
+      object = new RDXVirtualGhostObject(modelFileName, frameName);
 
       subscription = ros2.subscribe(updateTopic);
    }
@@ -28,14 +36,12 @@ public class RDXObjectPerceptionUpdater
       if (subscription.getMessageNotification().poll())
       {
          DetectedObjectMessage detectedObjectMessage = subscription.getMessageNotification().read();
-         if(id.equals(detectedObjectMessage.getId().toString()))
+         if (id.equals(detectedObjectMessage.getId().toString()))
          {
-            object.setShowing(true);
+            object.setShowing(detectedObjectMessage.getDetected());
             MessageTools.toEuclid(detectedObjectMessage.getTransformToWorld(), object.getTransformToParent());
             object.update();
          }
-         else
-            object.setShowing(false);
       }
    }
 
