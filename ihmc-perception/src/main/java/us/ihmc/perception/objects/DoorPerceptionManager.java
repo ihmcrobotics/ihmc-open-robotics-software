@@ -2,8 +2,8 @@ package us.ihmc.perception.objects;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 /**
  * Manages the perception of a door and it's frame, which requires heuristics.
@@ -27,7 +27,7 @@ public class DoorPerceptionManager
       doorFrame = new ArUcoMarkerObject(markerID, String.format("%sDoor%dFrame", name, markerID));
    }
 
-   public void updateMarkerTransform(Tuple3DReadOnly position, QuaternionReadOnly orientation)
+   public void updateMarkerTransform(Tuple3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
       doorPanel.updateMarkerTransform(position, orientation);
 

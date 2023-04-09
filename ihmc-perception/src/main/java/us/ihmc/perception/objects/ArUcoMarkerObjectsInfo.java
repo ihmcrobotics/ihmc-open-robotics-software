@@ -9,6 +9,11 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.List;
 
+/**
+ * Represents the data for an ArUco marker based detected object.
+ *
+ * TODO: Should be ArUcoMarkerObjectInfo, should not have 3 arrays
+ */
 public class ArUcoMarkerObjectsInfo extends DetectedObjectsInfo
 {
    private double[] markerSizes;
@@ -20,8 +25,10 @@ public class ArUcoMarkerObjectsInfo extends DetectedObjectsInfo
       super();
    }
 
+   @Override
    public void load()
    {
+      // FIXME: Why don't we call super.load()?
       LogTools.info("Loading parameters from resource: {}", configurationFile.getFileName());
       WorkspaceResourceFile configurationFile = super.configurationFile;
       JSONFileTools.load(configurationFile, jsonNode ->

@@ -25,6 +25,9 @@ import java.util.function.BiConsumer;
 /**
  * On-robot process that currently takes pre-registered ArUco markers detected and re-publishes them
  * as our predefined objects, like doors, boxes, etc.
+ *
+ * TODO: Should just be DetectedObjectsPerceptionManager or something.
+ *   It should support detected objects abstractly, using our ArUco & other implementations.
  */
 public class ArUcoObjectsPerceptionManager
 {
@@ -83,7 +86,6 @@ public class ArUcoObjectsPerceptionManager
    private final FramePoint3D detectedMarkerTranslation = new FramePoint3D();
    private final FrameQuaternion detectedMarkerOrientation = new FrameQuaternion();
    private final ArrayList<ArUcoMarkerObject> markers = new ArrayList<>();
-   private final HashMap<Long, BiConsumer<Tuple3DReadOnly, QuaternionReadOnly>> markerUpdaters = new HashMap<>();
    private final DoorPerceptionManager pullDoorManager;
    private final DoorPerceptionManager pushDoorManager;
    private final ArUcoMarkerObject box = new ArUcoMarkerObject(BOX_MARKER_ID, "Box");

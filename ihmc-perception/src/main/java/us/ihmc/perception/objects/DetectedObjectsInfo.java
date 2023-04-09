@@ -8,7 +8,14 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.util.*;
 
-public class DetectedObjectsInfo
+/**
+ * Common implementation for a detected object.
+ * Currently implemented by:
+ * - ArUco detected objects
+ *
+ * TODO: Should be info for a single detected object.
+ */
+public abstract class DetectedObjectsInfo
 {
    protected final ArrayList<Integer> ids = new ArrayList<>();
    protected final ArrayList<String> objectNames = new ArrayList<>();
@@ -18,6 +25,7 @@ public class DetectedObjectsInfo
    public DetectedObjectsInfo()
    {
       // read parameters regarding the properties of available objects with ArUco markers attached
+      // FIXME: Introduce parameter. Each detected object should have it's own JSON description.
       String file = "ObjectsInfo.json";
       WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/us/ihmc/perception/objects");
       configurationFile = new WorkspaceResourceFile(directory, file);
@@ -30,7 +38,7 @@ public class DetectedObjectsInfo
       {
          JsonNode objectsArrayNode = jsonNode.get("objects");
          int size = objectsArrayNode.size();
-         //iterating objects
+         // iterating objects
          for (int i = 0; i < size; i++)
          {
             JsonNode objectNode = objectsArrayNode.get(i);

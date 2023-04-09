@@ -9,6 +9,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
+import java.util.function.Consumer;
+
+/**
+ * Represents an actively tracked detected object based on ArUco marker detection.
+ *
+ * TODO: Add DetectedObject interface or abstract, like the info classes
+ */
 public class ArUcoMarkerObject
 {
    private final RigidBodyTransform markerTransformToWorld = new RigidBodyTransform();
