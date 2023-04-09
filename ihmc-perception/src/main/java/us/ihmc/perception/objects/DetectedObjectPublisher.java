@@ -4,14 +4,19 @@ import perception_msgs.msg.dds.DetectedObjectMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ros2.ROS2Topic;
 
+/**
+ * Handles the ROS 2 publication of detected objects.
+ */
 public class DetectedObjectPublisher
 {
    private final ROS2PublishSubscribeAPI ros2;
    private final ROS2Topic<DetectedObjectMessage> topic;
    private final String id;
    private final ReferenceFrame objectFrame;
+   private final RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
    private final DetectedObjectMessage detectedObjectMessage = new DetectedObjectMessage();
    private boolean detected = false;
 

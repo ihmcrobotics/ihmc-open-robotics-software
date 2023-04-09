@@ -41,6 +41,8 @@ public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicData
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -58,6 +60,9 @@ public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getId().length() + 1;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
 
 
@@ -70,12 +75,16 @@ public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicData
       cdr.write_type_d(data.getId());else
           throw new RuntimeException("id field exceeds the maximum length");
 
+      cdr.write_type_7(data.getDetected());
+
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.DetectedObjectMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getId());	
+      data.setDetected(cdr.read_type_7());
+      	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
 
    }
@@ -84,6 +93,7 @@ public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicData
    public final void serialize(perception_msgs.msg.dds.DetectedObjectMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("id", data.getId());
+      ser.write_type_7("detected", data.getDetected());
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
    }
@@ -92,6 +102,7 @@ public class DetectedObjectMessagePubSubType implements us.ihmc.pubsub.TopicData
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectedObjectMessage data)
    {
       ser.read_type_d("id", data.getId());
+      data.setDetected(ser.read_type_7("detected"));
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
    }
