@@ -348,13 +348,13 @@ public class ProMPAssistant
             if (!currentTask.isEmpty())
             {
                LogTools.info("Found task! {}", currentTask);
-               if (!initialStdDeviations.containsKey(bodyPart))
+               for (Map.Entry<String, String> entryPart : proMPManagers.get(currentTask).getBodyPartsGeometry().entrySet())
                {
                   // store stdDeviation trajectories for informing user through graphics
-                  initialStdDeviations.put("rightHand",
-                                           proMPManagers.get(currentTask).generateStdDeviationTrajectory("rightHand"));
-                  initialMeans.put("rightHand",
-                                   proMPManagers.get(currentTask).generateMeanTrajectory("rightHand", objectFrame));
+                  initialStdDeviations.put(entryPart.getKey(),
+                                           proMPManagers.get(currentTask).generateStdDeviationTrajectory(entryPart.getKey()));
+                  initialMeans.put(entryPart.getKey(),
+                                   proMPManagers.get(currentTask).generateMeanTrajectory(entryPart.getKey(), objectFrame));
                }
             }
          }
