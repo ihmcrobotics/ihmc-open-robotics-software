@@ -47,9 +47,6 @@ float32 principal_point_x_pixels
 # Principal point Y in units of pixels (Cy)
 float32 principal_point_y_pixels
 
-# If Ouster camera model, the pixel offsets used to re-stagger the depth image.
-int8[] ouster_pixel_shifts
-
 # If Ouster camera model, the calibrated beam altitude angles used to get 3D points.
 float32[] ouster_beam_altitude_angles
 

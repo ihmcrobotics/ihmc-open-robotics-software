@@ -11,8 +11,12 @@ import us.ihmc.tools.thread.Throttler;
 import java.util.function.Consumer;
 
 /**
- * Use this class to get the state of a remote heartbeat. We just want
+ * Use this class to get the state of a remote {@link ROS2Heartbeat}. We just want
  * to know when that thing is online, active, or something is being requested.
+ * This class uses a timer to measure the recency of the last received heartbeat.
+ * It also uses an asynchronous thread if a callback is desired, which will at 
+ * some rate check and see if the heartbeat is still going and if it changed,
+ * callback to the user of this class.
  */
 public class ROS2HeartbeatMonitor
 {
@@ -39,11 +43,18 @@ public class ROS2HeartbeatMonitor
       timer.reset();
    }
 
+   /**
+    * Used to get the current "alive" status. i.e. "active" or "enabled"
+    */
    public synchronized boolean isAlive()
    {
       return timer.isRunning(HEARTBEAT_EXPIRATION);
    }
 
+   /**
+    * Start a thread and will callback to the user when the "aliveness" changes.
+    * i.e. alive -> not alive or not alive -> alive
+    */
    public void setAlivenessChangedCallback(Consumer<Boolean> callback)
    {
       if (!monitorThreadStarted)
