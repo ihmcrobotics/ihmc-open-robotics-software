@@ -22,7 +22,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.ArUcoObjectsPerceptionManager;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
-import us.ihmc.rdx.visualizers.RDXEdgeDefinedPolygonGraphic;
+import us.ihmc.rdx.visualizers.RDXEdgeDefinedShapeGraphic;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -52,7 +52,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private final FullHumanoidRobotModel ghostRobotModel;
    private final RDXMultiBodyGraphic ghostRobotGraphic;
    private final HashMap<String, RDXSplineGraphic> splineGraphics = new HashMap<>();
-   private final HashMap<String, RDXEdgeDefinedPolygonGraphic> stdDeviationGraphics = new HashMap<>();
+   private final HashMap<String, RDXEdgeDefinedShapeGraphic> stdDeviationGraphics = new HashMap<>();
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartReplayMotionMap = new HashMap<>();
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
@@ -158,46 +158,61 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    {
       if (stdDeviationGraphics.get(bodyPart) == null)
       {
-         Point3D[] mean = proMPAssistant.getInitialMean(bodyPart);
-         Point3D[] stdDeviation = proMPAssistant.getInitialStdDeviation(bodyPart);
+         Point3D[][] edges = createStdDeviationEdges(proMPAssistant.getInitialMean(bodyPart), proMPAssistant.getInitialStdDeviation(bodyPart));
+         stdDeviationGraphics.put(bodyPart, new RDXEdgeDefinedShapeGraphic(edges, Color.GREEN, Color.FOREST, 0.3f));
+         var stdDeviationGraphic = stdDeviationGraphics.get(bodyPart);
+         stdDeviationGraphic.createMainShape();
+         stdDeviationGraphic.update();
 
-         stdDeviationGraphics.put(bodyPart, new RDXEdgeDefinedPolygonGraphic(Color.GREEN, Color.OLIVE, 0.5f));
-         stdDeviationGraphics.get(bodyPart).generateMeshAsync(createStdDeviationEdges(mean, stdDeviation));
-         stdDeviationGraphics.get(bodyPart).update();
+         Point3D[] startPoints = stdDeviationGraphic.getStartPoints();
+         Point3D[] endPoints = stdDeviationGraphic.getEndPoints();
+         // Define an array of indices for each rectangular patch
+         // these indices are derived from how the edges are created in createStdDeviationEdges() and are always the same
+         int[][] patchStartIndices = {{1, 2, 3, 0}, {0, 3, 4, 7}, {7, 4, 5, 6}};
+         int[][] patchEndIndices = {{2, 3, 4, 5}, {0, 1, 6, 7}};
+         for (int[] indices : patchStartIndices) {
+            stdDeviationGraphic.addRectangularPatch(startPoints[indices[0]], startPoints[indices[1]], startPoints[indices[2]], startPoints[indices[3]]);
+         }
+         for (int[] indices : patchEndIndices) {
+            stdDeviationGraphic.addRectangularPatch(endPoints[indices[0]], endPoints[indices[1]], endPoints[indices[2]], endPoints[indices[3]]);
+         }
+
+         stdDeviationGraphic.generateMesh();
       }
    }
 
-   private Point3D[][] createStdDeviationEdges(Point3D[] mean, Point3D[] stdDeviation) {
+   private Point3D[][] createStdDeviationEdges(Point3D[] mean, Point3D[] stdDeviation)
+   {
       Point3D[][] edges = new Point3D[8][mean.length];
 
-      for (int edgeNumber = 0; edgeNumber < 8; edgeNumber++) {
-         for (int i = 0; i < mean.length; i++) {
+      for (int edgeNumber = 0; edgeNumber < 8; edgeNumber++)
+      {
+         for (int i = 0; i < mean.length; i++)
+         {
             double x = mean[i].getX();
             double y = mean[i].getY();
             double z = mean[i].getZ();
-            // check whether a particular bit is set or not in the binary representation of the edge index i.
-            // Each edge is identified by an integer index i in the range [0, 7], which can be represented as a binary number with three bits.
-            if ((edgeNumber & 1) != 0) {
+            // Each edge is identified by an integer index i in the range [0, 7].
+            // create the edges in the correct order so to form a convex polygon
+            if (edgeNumber == 0 || edgeNumber == 3 || edgeNumber == 4 || edgeNumber == 7)
                x -= stdDeviation[i].getX();
-            } else {
+            else
                x += stdDeviation[i].getX();
-            }
 
-            if ((edgeNumber & 2) != 0) {
+            if (edgeNumber == 0 || edgeNumber == 1 || edgeNumber == 2 || edgeNumber == 3)
                y -= stdDeviation[i].getY();
-            } else {
+            else
                y += stdDeviation[i].getY();
-            }
 
-            if ((edgeNumber & 4) != 0) {
+            if (edgeNumber == 0 || edgeNumber == 1 || edgeNumber == 6 || edgeNumber == 7)
                z -= stdDeviation[i].getZ();
-            } else {
+            else
                z += stdDeviation[i].getZ();
-            }
 
             edges[edgeNumber][i] = new Point3D(x, y, z);
          }
       }
+
       return edges;
    }
 
@@ -335,7 +350,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       return splineGraphics;
    }
 
-   public HashMap<String, RDXEdgeDefinedPolygonGraphic> getStdDeviationGraphic()
+   public HashMap<String, RDXEdgeDefinedShapeGraphic> getStdDeviationGraphic()
    {
       return stdDeviationGraphics;
    }
