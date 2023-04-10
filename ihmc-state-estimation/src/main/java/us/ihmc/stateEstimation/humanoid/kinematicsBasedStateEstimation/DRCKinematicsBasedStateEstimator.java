@@ -372,7 +372,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             break;
          case NORMAL:
          default:
-            pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
+            /*
+             * TODO A more comprehensive implementation would be to not update the root joint state in
+             * pelvisRotationalStateUpdater and pass in here the current values for the estimated root joint
+             * rotational state.
+             */
+            pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity(pelvisRotationalStateUpdater.getPreviousEstimatedOrientation(),
+                                                                              pelvisRotationalStateUpdater.getPreviousEstimatedAngularVelocity());
             break;
       }
 

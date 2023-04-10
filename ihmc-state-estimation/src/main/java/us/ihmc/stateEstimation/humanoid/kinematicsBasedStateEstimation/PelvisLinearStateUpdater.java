@@ -11,8 +11,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -104,6 +105,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    private final List<RigidBodyBasics> listOfTrustedFeet = new ArrayList<>();
    private final List<RigidBodyBasics> listOfUnTrustedFeet = new ArrayList<>();
 
+   private final Twist previousRootJointTwist = new Twist();
    private final MovingReferenceFrame rootJointFrame;
    private final Map<RigidBodyBasics, ReferenceFrame> footFrames;
 
@@ -336,6 +338,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
    public void updateForFrozenState()
    {
+      previousRootJointTwist.setToZero(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
       // Keep setting the position so the localization updater works properly.
       rootJoint.setJointPosition(rootJointPosition);
       kinematicsBasedLinearStateCalculator.updateKinematics();
@@ -349,10 +352,15 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       rootJointVelocity.setToZero();
    }
 
-   public void updateRootJointPositionAndLinearVelocity()
+   public void updateRootJointPositionAndLinearVelocity(FrameOrientation3DReadOnly previousEstimatedRootJointOrientation,
+                                                        FrameVector3DReadOnly previousEstimatedRootJointAngularVelocity)
    {
       if (requestStopEstimationOfPelvisLinearState.getBooleanValue())
          return;
+
+      previousRootJointTwist.setToZero(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
+      previousRootJointTwist.getAngularPart().setMatchingFrame(previousEstimatedRootJointAngularVelocity);
+      previousRootJointTwist.getLinearPart().setMatchingFrame(rootJointVelocity);
 
       kinematicsBasedLinearStateCalculator.updateKinematics();
 
@@ -378,12 +386,16 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       {
          if (trustImuWhenNoFeetAreInContact.getValue())
          {
-            imuBasedLinearStateCalculator.estimateRootJointLinearVelocity(rootJoint.getJointTwist(), rootJointVelocity);
-            imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition, rootJoint.getJointTwist(), rootJointPosition);
+            FixedFrameVector3DBasics estimatedRootJointAngularVelocity = rootJoint.getJointTwist().getAngularPart();
+            imuBasedLinearStateCalculator.estimateRootJointLinearVelocity(previousRootJointTwist, estimatedRootJointAngularVelocity, rootJointVelocity);
+            imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition,
+                                                                    previousRootJointTwist,
+                                                                    estimatedRootJointAngularVelocity,
+                                                                    rootJointPosition);
 
             mainIMULinearVelocityEstimate.update(null, imuBasedLinearStateCalculator.getLinearAccelerationMeasurement());
             tempTwist.setToZero(rootJointFrame, rootJointFrame.getRootFrame(), imuBasedLinearStateCalculator.getIMUMeasurementFrame());
-            tempTwist.getAngularPart().setMatchingFrame(rootJointFrame.getTwistOfFrame().getAngularPart());
+            tempTwist.getAngularPart().setMatchingFrame(estimatedRootJointAngularVelocity);
             tempTwist.getLinearPart().set(mainIMULinearVelocityEstimate);
             tempTwist.changeFrame(rootJointFrame);
             rootJointNewLinearVelocityEstimate.setMatchingFrame(tempTwist.getLinearPart());
@@ -626,12 +638,11 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
    private void computeLinearVelocityFromMergingMeasurements()
    {
+      FixedFrameVector3DBasics estimatedRootJointAngularVelocity = rootJoint.getJointTwist().getAngularPart();
+
       if (!useNewFusingFilter.getValue())
       {
-         tempTwist.setToZero(rootJointFrame, rootJointFrame.getRootFrame(), rootJointFrame);
-         tempTwist.getAngularPart().setMatchingFrame(rootJointFrame.getTwistOfFrame().getAngularPart());
-         tempTwist.getLinearPart().setMatchingFrame(rootJointVelocity);
-         imuBasedLinearStateCalculator.estimateRootJointLinearVelocity(tempTwist, rootJointVelocityIMUPart);
+         imuBasedLinearStateCalculator.estimateRootJointLinearVelocity(previousRootJointTwist, estimatedRootJointAngularVelocity, rootJointVelocityIMUPart);
          rootJointVelocityKinPart.setMatchingFrame(kinematicsBasedLinearStateCalculator.getPelvisVelocity());
 
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForVelocityBreakFrequency.getValue(), estimatorDT);
@@ -639,12 +650,12 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       }
 
       tempTwist.setToZero(rootJointFrame, rootJointFrame.getRootFrame(), rootJointFrame);
-      tempTwist.getAngularPart().setMatchingFrame(rootJointFrame.getTwistOfFrame().getAngularPart());
+      tempTwist.getAngularPart().setMatchingFrame(estimatedRootJointAngularVelocity);
       tempTwist.getLinearPart().setMatchingFrame(kinematicsBasedLinearStateCalculator.getPelvisVelocity());
       tempTwist.changeFrame(imuBasedLinearStateCalculator.getIMUMeasurementFrame());
 
       mainIMULinearVelocityEstimate.update(tempTwist.getLinearPart(), imuBasedLinearStateCalculator.getLinearAccelerationMeasurement());
-      tempTwist.getLinearPart().set((Vector3DReadOnly) mainIMULinearVelocityEstimate);
+      tempTwist.getLinearPart().set(mainIMULinearVelocityEstimate);
       tempTwist.changeFrame(rootJointFrame);
       rootJointNewLinearVelocityEstimate.setMatchingFrame(tempTwist.getLinearPart());
 
@@ -658,7 +669,10 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    {
       if (!useNewFusingFilter.getValue())
       {
-         imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition, rootJoint.getJointTwist(), rootJointPositionIMUPart);
+         imuBasedLinearStateCalculator.estimateRootJointPosition(rootJointPosition,
+                                                                 previousRootJointTwist,
+                                                                 rootJoint.getJointTwist().getAngularPart(),
+                                                                 rootJointPositionIMUPart);
          rootJointPositionKinPart.setMatchingFrame(kinematicsBasedLinearStateCalculator.getPelvisPosition());
 
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForPositionBreakFrequency.getValue(), estimatorDT);

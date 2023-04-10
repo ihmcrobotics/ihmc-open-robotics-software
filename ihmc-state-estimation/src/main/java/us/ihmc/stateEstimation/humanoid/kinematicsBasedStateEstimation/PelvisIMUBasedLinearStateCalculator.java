@@ -141,15 +141,18 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       yoLinearAccelerationMeasurement.setMatchingFrame(linearAcceleration);
    }
 
-   public void estimateRootJointLinearVelocity(TwistReadOnly previousRootJointTwistEstimate, FixedFrameVector3DBasics rootJointVelocityUpdate)
+   public void estimateRootJointLinearVelocity(TwistReadOnly previousRootJointTwistEstimate,
+                                               FrameVector3DReadOnly estimatedRootJointAngularVelocity,
+                                               FixedFrameVector3DBasics rootJointVelocityToUpdate)
    {
       updateLinearAccelerationMeasurement();
 
       twist.setIncludingFrame(previousRootJointTwistEstimate);
       twist.changeFrame(measurementFrame);
       twist.getLinearPart().scaleAdd(estimatorDT, yoLinearAccelerationMeasurement, twist.getLinearPart());
+      twist.getAngularPart().setMatchingFrame(estimatedRootJointAngularVelocity);
       twist.changeFrame(rootJointFrame);
-      rootJointVelocityUpdate.setMatchingFrame(twist.getLinearPart());
+      rootJointVelocityToUpdate.setMatchingFrame(twist.getLinearPart());
 
       // Update debug variables
       linearVelocity.setIncludingFrame(yoLinearAccelerationMeasurementInWorld);
@@ -158,21 +161,24 @@ public class PelvisIMUBasedLinearStateCalculator implements SCS2YoGraphicHolder
       twist.setIncludingFrame(previousRootJointTwistEstimate);
       twist.changeFrame(measurementFrame);
       twist.getLinearPart().setMatchingFrame(imuLinearVelocityIMUOnly);
+      twist.getAngularPart().setMatchingFrame(estimatedRootJointAngularVelocity);
       twist.changeFrame(rootJointFrame);
       rootJointLinearVelocityIMUOnly.setMatchingFrame(twist.getLinearPart());
    }
 
    public void estimateRootJointPosition(FramePoint3DReadOnly previousRootJointPosition,
                                          TwistReadOnly previousRootJointTwistEstimate,
-                                         FixedFramePoint3DBasics rootJointPositionUpdate)
+                                         FrameVector3DReadOnly estimatedRootJointAngularVelocity,
+                                         FixedFramePoint3DBasics rootJointPositionToUpdate)
    {
       twist.setIncludingFrame(previousRootJointTwistEstimate);
       twist.changeFrame(measurementFrame);
       twist.getLinearPart().scaleAdd(0.5 * estimatorDT, yoLinearAccelerationMeasurement, twist.getLinearPart());
+      twist.getAngularPart().setMatchingFrame(estimatedRootJointAngularVelocity);
       twist.changeFrame(rootJointFrame);
       linearVelocity.setIncludingFrame(twist.getLinearPart());
       linearVelocity.changeFrame(worldFrame);
-      rootJointPositionUpdate.scaleAdd(estimatorDT, linearVelocity, previousRootJointPosition);
+      rootJointPositionToUpdate.scaleAdd(estimatorDT, linearVelocity, previousRootJointPosition);
 
       // Update debug variables
       if (resetRootJointPositionIMUOnly.getValue())

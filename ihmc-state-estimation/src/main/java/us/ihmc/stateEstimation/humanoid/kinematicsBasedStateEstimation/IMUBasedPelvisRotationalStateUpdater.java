@@ -5,9 +5,10 @@ import java.util.List;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -23,9 +24,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
- * PelvisRotationalStateUpdater reads and transforms the orientation and angular velocity obtained from the IMU to update the pelvis orientation and angular velocity in world. 
+ * PelvisRotationalStateUpdater reads and transforms the orientation and angular velocity obtained
+ * from the IMU to update the pelvis orientation and angular velocity in world.
+ * 
  * @author Sylvain
- *
  */
 public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalStateUpdaterInterface
 {
@@ -34,9 +36,11 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameYawPitchRoll yoRootJointFrameOrientation;
    private final YoFrameQuaternion yoRootJointFrameQuaternion;
+   private final YoFrameQuaternion yoPreviousRootJointFrameQuaternion;
 
    private final YoFrameVector3D yoRootJointAngularVelocityMeasFrame;
    private final YoFrameVector3D yoRootJointAngularVelocity;
+   private final YoFrameVector3D yoPreviousRootJointAngularVelocity;
    private final YoFrameVector3D yoRootJointAngularVelocityInWorld;
 
    private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, false);
@@ -54,14 +58,20 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final ReferenceFrame measurementFrame;
    private final RigidBodyBasics measurementLink;
 
-   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-         double dt, YoRegistry parentRegistry)
+   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure,
+                                               List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+                                               double dt,
+                                               YoRegistry parentRegistry)
    {
       this(inverseDynamicsStructure, imuProcessedOutputs, null, null, dt, parentRegistry);
    }
 
-   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-         IMUBiasProvider imuBiasProvider, YawDriftProvider imuYawDriftEstimator, double dt, YoRegistry parentRegistry)
+   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure,
+                                               List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+                                               IMUBiasProvider imuBiasProvider,
+                                               YawDriftProvider imuYawDriftEstimator,
+                                               double dt,
+                                               YoRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
       this.imuYawDriftEstimator = imuYawDriftEstimator;
@@ -77,16 +87,19 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
       yoRootJointFrameOrientation = new YoFrameYawPitchRoll("estimatedRootJoint", worldFrame, registry);
       yoRootJointFrameQuaternion = new YoFrameQuaternion("estimatedRootJoint", worldFrame, registry);
+      yoPreviousRootJointFrameQuaternion = new YoFrameQuaternion("previousEstimatedRootJoint", worldFrame, registry);
 
       yoRootJointAngularVelocity = new YoFrameVector3D("estimatedRootJointAngularVelocity", rootJointFrame, registry);
+      yoPreviousRootJointAngularVelocity = new YoFrameVector3D("previousEstimatedRootJointAngularVelocityWorld", worldFrame, registry);
       yoRootJointAngularVelocityInWorld = new YoFrameVector3D("estimatedRootJointAngularVelocityWorld", worldFrame, registry);
       yoRootJointAngularVelocityMeasFrame = new YoFrameVector3D("estimatedRootJointAngularVelocityMeasFrame", measurementFrame, registry);
 
-      yoRootJointAngularVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector("estimatedRootJointAngularVelocityFromFD", yoRootJointFrameQuaternion, dt, registry);
+      yoRootJointAngularVelocityFromFD = new FiniteDifferenceAngularVelocityYoFrameVector("estimatedRootJointAngularVelocityFromFD",
+                                                                                          yoRootJointFrameQuaternion,
+                                                                                          dt,
+                                                                                          registry);
 
       parentRegistry.addChild(registry);
-
-      angularVelocityRootJointFrameRelativeToWorld = new FrameVector3D(rootJointFrame);
    }
 
    public IMUSensorReadOnly getIMUUsedForEstimation()
@@ -102,7 +115,6 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       if (imuProcessedOutputs.size() == 0)
          throw new RuntimeException("No sensor set up for the IMU.");
    }
-
 
    @Override
    public void initialize()
@@ -124,6 +136,9 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    @Override
    public void updateRootJointOrientationAndAngularVelocity()
    {
+      yoPreviousRootJointFrameQuaternion.set(rootJoint.getJointPose().getOrientation());
+      yoPreviousRootJointAngularVelocity.setMatchingFrame(rootJoint.getJointTwist().getAngularPart());
+
       updateRootJointRotation();
       updateRootJointTwistAngularPart();
       updateViz();
@@ -154,18 +169,23 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    }
 
    /**
-    * Computes the orientation of {@code estimateFrame} given the orientation at {@code measurementFrame}.
+    * Computes the orientation of {@code estimateFrame} given the orientation at
+    * {@code measurementFrame}.
     * <p>
-    * This method assumes that {@code estimateFrame} and {@code measurementFrame} are connected and that the relative transform between the two frames is known.
+    * This method assumes that {@code estimateFrame} and {@code measurementFrame} are connected and
+    * that the relative transform between the two frames is known.
     * </p>
     * 
-    * @param measurementFrame reference frame in which the measurement was taken.
-    * @param orientationMeasurement the measurement of the {@code measurementFrame} orientation. Not modified.
-    * @param estimateFrame the reference frame for which the orientation is to be computed.
-    * @param orientationEstimateToPack result: the orientation of {@code estimateFrame}. 
+    * @param measurementFrame          reference frame in which the measurement was taken.
+    * @param orientationMeasurement    the measurement of the {@code measurementFrame} orientation. Not
+    *                                  modified.
+    * @param estimateFrame             the reference frame for which the orientation is to be computed.
+    * @param orientationEstimateToPack result: the orientation of {@code estimateFrame}.
     */
-   public static void computeOrientationAtEstimateFrame(ReferenceFrame measurementFrame, Orientation3DReadOnly orientationMeasurement,
-                                                        ReferenceFrame estimateFrame, Orientation3DBasics orientationEstimateToPack)
+   public static void computeOrientationAtEstimateFrame(ReferenceFrame measurementFrame,
+                                                        Orientation3DReadOnly orientationMeasurement,
+                                                        ReferenceFrame estimateFrame,
+                                                        Orientation3DBasics orientationEstimateToPack)
    {
       orientationEstimateToPack.setToZero();
       // R_{estimateFrame}^{measurementFrame}
@@ -183,13 +203,8 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    /** Angular velocity of the estimation link, with respect to the measurement link. */
    private final FrameVector3D angularVelocityRootJointFrameRelativeToMeasurementLink = new FrameVector3D();
 
-   /** Angular velocity of the root body, with respect to world. */
-   private final FrameVector3D angularVelocityRootJointFrameRelativeToWorld;
-
    /** Twist of the estimation link, with respect to the measurement link. */
    private final Twist twistRootJointFrameRelativeToMeasurementLink = new Twist();
-   /** Twist of the root body, with respect to world. */
-   private final Twist twistRootBodyRelativeToWorld = new Twist();
 
    private void updateRootJointTwistAngularPart()
    {
@@ -215,16 +230,12 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       angularVelocityMeasurementLinkRelativeToWorld.changeFrame(rootJointFrame);
 
       // omega_{rootJointFrame}^{rootJointFrame, world} = omega_{rootJointFrame}^{rootJointFrame, measurementLink} + omega_{measurementLink}^{rootJointFrame, world}
-      angularVelocityRootJointFrameRelativeToWorld.add(angularVelocityRootJointFrameRelativeToMeasurementLink, angularVelocityMeasurementLinkRelativeToWorld);
-
-      twistRootBodyRelativeToWorld.setIncludingFrame(rootJoint.getJointTwist());
-      twistRootBodyRelativeToWorld.getAngularPart().set(angularVelocityRootJointFrameRelativeToWorld);
-      rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
+      rootJoint.getJointTwist().getAngularPart().add(angularVelocityRootJointFrameRelativeToMeasurementLink, angularVelocityMeasurementLinkRelativeToWorld);
       rootJoint.updateFrame();
 
-      yoRootJointAngularVelocity.setMatchingFrame(angularVelocityMeasurementLinkRelativeToWorld);
+      yoRootJointAngularVelocity.setMatchingFrame(rootJoint.getJointTwist().getAngularPart());
       yoRootJointAngularVelocityMeasFrame.setMatchingFrame(angularVelocityMeasurementLinkRelativeToWorld);
-      yoRootJointAngularVelocityInWorld.setMatchingFrame(angularVelocityRootJointFrameRelativeToWorld);
+      yoRootJointAngularVelocityInWorld.setMatchingFrame(rootJoint.getJointTwist().getAngularPart());
    }
 
    private void updateViz()
@@ -238,14 +249,26 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    }
 
    @Override
-   public void getEstimatedOrientation(FrameQuaternion estimatedOrientation)
+   public FrameOrientation3DReadOnly getEstimatedOrientation()
    {
-      estimatedOrientation.set(rotationFromRootJointFrameToWorld);
+      return yoRootJointFrameQuaternion;
    }
 
    @Override
-   public void getEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocityToPack)
+   public FrameVector3DReadOnly getEstimatedAngularVelocity()
    {
-      estimatedAngularVelocityToPack.setIncludingFrame(angularVelocityRootJointFrameRelativeToWorld);
+      return yoRootJointAngularVelocityInWorld;
+   }
+
+   @Override
+   public FrameOrientation3DReadOnly getPreviousEstimatedOrientation()
+   {
+      return yoPreviousRootJointFrameQuaternion;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getPreviousEstimatedAngularVelocity()
+   {
+      return yoPreviousRootJointAngularVelocity;
    }
 }
