@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import gnu.trove.list.array.TLongArrayList;
 import javafx.scene.image.WritableImage;
@@ -249,11 +250,11 @@ public class VideoDataPlayer
       long startVideoTimestamp = getVideoTimestamp(startTimestamp);
       long endVideoTimestamp = getVideoTimestamp(endTimestamp);
 
-      int framerate = VideoConverter.crop(videoFile, outputFile, startVideoTimestamp, endVideoTimestamp, monitor);
+      int frameRate = VideoConverter.crop(videoFile, outputFile, startVideoTimestamp, endVideoTimestamp, monitor);
 
       PrintWriter timestampWriter = new PrintWriter(timestampFile);
       timestampWriter.println(1);
-      timestampWriter.println(framerate);
+      timestampWriter.println(frameRate);
 
       long pts = 0;
       /*
@@ -280,36 +281,71 @@ public class VideoDataPlayer
       timestampWriter.close();
    }
 
+   private static class BoldCellRenderer extends DefaultTableCellRenderer
+   {
+      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+      {
+         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+         // Check if we are in the first row and BOLD that text
+         if (row == 0)
+         {
+            Font boldFont = new Font(component.getFont().getName(), Font.BOLD, component.getFont().getSize());
+            component.setFont(boldFont);
+
+            ((JLabel) component).setHorizontalAlignment(SwingConstants.CENTER);
+         }
+         else
+         {
+            // Otherwise don't BOLD anything
+            Font plainFont = new Font(component.getFont().getName(), Font.PLAIN, component.getFont().getSize());
+            component.setFont(plainFont);
+
+            ((JLabel) component).setHorizontalAlignment(SwingConstants.LEFT);
+         }
+
+         return component;
+      }
+   }
+
+
    private class HideableMediaFrame extends JFrame
    {
       private static final long serialVersionUID = -3494797002318746347L;
       private final JLabel label = new JLabel();
+      private final JPanel panel = new JPanel();
       private BufferedImage img;
       private int width, height;
-      private final JPanel panel = new JPanel(new BorderLayout());
+      SpringLayout springLayout = new SpringLayout();
 
-      private final Object[][] data = new Object[][]{
-              {"cameraTargetPTS", 0},
-              {"cameraCurrentPTS", 0},
-              {"cameraPreviousPTS", 0},
-              {"robotTimestamp", 0},
-      };
+      private final Object[][] data = new Object[][]{ {"Timestamp Lable:", "Value:"},
+                                                      {" cameraTargetPTS", 0},
+                                                      {" cameraCurrentPTS", 0},
+                                                      {" cameraPreviousPTS", 0},
+                                                      {" robotTimestamp", 0} };
 
-      String[] columnNames = { "Timestamp type", "Value"};
-
-      JTable table = new JTable(data, columnNames);
+      JTable table = new JTable(data, new String[]{"Timestamp Lable:", "Value: "});
 
       public HideableMediaFrame(String name, int width, int height)
       {
          super(name);
-         label.setPreferredSize(new Dimension(width, height));
-         getContentPane().add(label);
          this.width = width;
          this.height = height;
 
-         panel.add(label, BorderLayout.CENTER);
-         panel.add(table, BorderLayout.SOUTH);
-         panel.setBackground(Color.WHITE);
+         panel.setLayout(springLayout);
+         panel.add(table);
+         panel.add(label);
+
+         table.setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
+         table.setRowHeight(20);
+         table.getColumnModel().getColumn(0).setPreferredWidth(42);
+         table.setDefaultRenderer(Object.class, new BoldCellRenderer());
+         table.setPreferredSize(new Dimension(280, data.length * 20 + 2));
+
+         springLayout.putConstraint(SpringLayout.SOUTH, label,0, SpringLayout.SOUTH, panel);
+         springLayout.putConstraint(SpringLayout.WEST, label,0, SpringLayout.WEST, panel);
+         springLayout.putConstraint(SpringLayout.SOUTH, table,0, SpringLayout.SOUTH, panel);
+         springLayout.putConstraint(SpringLayout.WEST, table,0, SpringLayout.WEST, panel);
 
          pack();
       }
@@ -319,7 +355,6 @@ public class VideoDataPlayer
          return panel;
       }
 
-
       public void update(final YUVPicture nextFrame, FrameData timestampData)
       {
          SwingUtilities.invokeLater(new Runnable()
@@ -327,10 +362,10 @@ public class VideoDataPlayer
             @Override
             public void run()
             {
-               table.setValueAt(timestampData.cameraTargetPTS, 0, 1);
-               table.setValueAt(timestampData.cameraCurrentPTS, 1, 1);
-               table.setValueAt(timestampData.cameraPreviousPTS, 2, 1);
-               table.setValueAt(timestampData.robotTimestamp, 3, 1);
+               table.setValueAt(timestampData.cameraTargetPTS, 1, 1);
+               table.setValueAt(timestampData.cameraCurrentPTS, 2, 1);
+               table.setValueAt(timestampData.cameraPreviousPTS, 3, 1);
+               table.setValueAt(timestampData.robotTimestamp, 4, 1);
 
                img = converter.toBufferedImage(nextFrame, img);
                nextFrame.delete();
@@ -385,7 +420,6 @@ public class VideoDataPlayer
       }
 
       viewer.add(viewer.getPanel());
-
       viewer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
       Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
