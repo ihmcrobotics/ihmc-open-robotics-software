@@ -39,7 +39,6 @@ public class OusterDepthExtractionKernel
    private final _cl_mem lidarFrameBufferObject;
    private final OpenCLFloatParameters depthImageExtractionParametersBuffer = new OpenCLFloatParameters();
    private final BytedecoImage extractedDepthImage;
-   private final OpenCLIntBuffer pixelShiftOpenCLBuffer;
    private final OpenCLFloatParameters pointCloudComputationParametersBuffer = new OpenCLFloatParameters();
    private final OpenCLRigidBodyTransformParameter ousterToWorldTransformParameter = new OpenCLRigidBodyTransformParameter();
    private final OpenCLFloatBuffer altitudeAnglesOpenCLBuffer;
@@ -73,8 +72,6 @@ public class OusterDepthExtractionKernel
 
       lidarFrameBufferObject = openCLManager.createBufferObject(lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
       extractedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      pixelShiftOpenCLBuffer = new OpenCLIntBuffer(nettyOuster.getPixelShiftBuffer());
-      pixelShiftOpenCLBuffer.createOpenCLBufferObject(openCLManager);
       altitudeAnglesOpenCLBuffer = new OpenCLFloatBuffer(nettyOuster.getBeamAltitudeAnglesBuffer());
       altitudeAnglesOpenCLBuffer.createOpenCLBufferObject(openCLManager);
       azimuthAnglesOpenCLBuffer = new OpenCLFloatBuffer(nettyOuster.getBeamAzimuthAnglesBuffer());
@@ -99,13 +96,11 @@ public class OusterDepthExtractionKernel
       depthImageExtractionParametersBuffer.setParameter(NettyOuster.CHANNEL_DATA_BLOCK_BYTES);
 
       depthImageExtractionParametersBuffer.writeOpenCLBufferObject(openCLManager);
-      pixelShiftOpenCLBuffer.writeOpenCLBufferObject(openCLManager);
       openCLManager.enqueueWriteBuffer(lidarFrameBufferObject, lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
 
       openCLManager.setKernelArgument(extractDepthImageKernel, 0, depthImageExtractionParametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(extractDepthImageKernel, 1, pixelShiftOpenCLBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(extractDepthImageKernel, 2, lidarFrameBufferObject);
-      openCLManager.setKernelArgument(extractDepthImageKernel, 3, extractedDepthImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(extractDepthImageKernel, 1, lidarFrameBufferObject);
+      openCLManager.setKernelArgument(extractDepthImageKernel, 2, extractedDepthImage.getOpenCLImageObject());
       openCLManager.execute2D(extractDepthImageKernel, nettyOuster.getImageWidth(), nettyOuster.getImageHeight());
 
       extractedDepthImage.readOpenCLImage(openCLManager);
@@ -122,12 +117,11 @@ public class OusterDepthExtractionKernel
          ousterToWorldTransformParameter.writeOpenCLBufferObject(openCLManager);
 
          openCLManager.setKernelArgument(computePointCloudKernel, 0, pointCloudComputationParametersBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(computePointCloudKernel, 1, pixelShiftOpenCLBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(computePointCloudKernel, 2, altitudeAnglesOpenCLBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(computePointCloudKernel, 3, azimuthAnglesOpenCLBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(computePointCloudKernel, 4, ousterToWorldTransformParameter.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(computePointCloudKernel, 5, extractedDepthImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(computePointCloudKernel, 6, pointCloudXYZBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computePointCloudKernel, 1, altitudeAnglesOpenCLBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computePointCloudKernel, 2, azimuthAnglesOpenCLBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computePointCloudKernel, 3, ousterToWorldTransformParameter.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(computePointCloudKernel, 4, extractedDepthImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(computePointCloudKernel, 5, pointCloudXYZBuffer.getOpenCLBufferObject());
          openCLManager.execute2D(computePointCloudKernel, nettyOuster.getImageWidth(), nettyOuster.getImageHeight());
 
          pointCloudXYZBuffer.readOpenCLBufferObject(openCLManager);
