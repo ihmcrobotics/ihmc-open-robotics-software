@@ -85,7 +85,6 @@ public class OusterDepthPublisher
    public void extractCompressAndPublish(ReferenceFrame ousterSensorFrame,
                                          OusterDepthExtractionKernel depthExtractionKernel,
                                          Instant acquisitionInstant,
-                                         ByteBuffer pixelShiftBuffer,
                                          ByteBuffer beamAltitudeAnglesBuffer,
                                          ByteBuffer beamAzimuthAnglesBuffer)
    {
@@ -114,7 +113,6 @@ public class OusterDepthPublisher
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);
       CameraModel.OUSTER.packMessageFormat(outputImageMessage);
-      MessageTools.packIDLSequenceCastingIntsToBytes(pixelShiftBuffer, outputImageMessage.getOusterPixelShifts());
       MessageTools.packIDLSequence(beamAltitudeAnglesBuffer, outputImageMessage.getOusterBeamAltitudeAngles());
       MessageTools.packIDLSequence(beamAzimuthAnglesBuffer, outputImageMessage.getOusterBeamAzimuthAngles());
       imagePublisher.publish(outputImageMessage);
