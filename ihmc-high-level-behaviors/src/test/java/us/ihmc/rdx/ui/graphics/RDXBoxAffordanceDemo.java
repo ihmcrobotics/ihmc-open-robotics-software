@@ -347,7 +347,7 @@ public class RDXBoxAffordanceDemo
                pose.set(x, y, z, yaw, pitch, roll);
                pose.changeFrame(ReferenceFrame.getWorldFrame());
                customPoses.add(pose);
-               customPoseGraphics.add(new RDXReferenceFrameGraphic(0.3, colors.get(colorIndex)));
+               customPoseGraphics.add(new RDXReferenceFrameGraphic(0.3, colors.get(colorIndex % colors.size())));
                colorIndex++;
                PoseReferenceFrame frame = new PoseReferenceFrame(customAffordanceName.get() +"Frame", boxFrame);
                pose.changeFrame(boxFrame);
