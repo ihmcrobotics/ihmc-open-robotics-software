@@ -46,7 +46,7 @@ public class RDXAxisBody implements RenderableProvider
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    // -----------> for torus (circle)
-   private final ImFloat torusRadius = new ImFloat(1.0f);
+   private final ImFloat torusRadius = new ImFloat(0.7f);
    private final ImFloat torusCameraSize = new ImFloat(0.067f);
    private final ImFloat torusTubeRadiusRatio = new ImFloat(0.024f);
    private final RigidBodyTransform axisTransformToWorld = new RigidBodyTransform();
