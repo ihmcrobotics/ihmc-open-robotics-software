@@ -14,7 +14,6 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -180,7 +179,6 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       int steps = footMessage.getFootstepDataList().size();
 
       simulationTestHelper.publishToController(footMessage);
-      ThreadTools.sleep(10);
       double simulationTime = initialTransfer + (transfer + swing) * steps + 1.0;
 
       FrameVector3D forceDirection = new FrameVector3D(stepFrame, new Vector3D(0.0, 1.0, 0.0));
