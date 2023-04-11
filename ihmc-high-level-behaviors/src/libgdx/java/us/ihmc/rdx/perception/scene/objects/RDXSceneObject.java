@@ -1,4 +1,4 @@
-package us.ihmc.rdx.simulation.environment.object.objects.door;
+package us.ihmc.rdx.perception.scene.objects;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -23,15 +23,16 @@ import java.util.Set;
  * TODO: Add pose "override", via right click context menu, and gizmo.
  *   Possibly do this in a higher level class or class that extends this.
  */
-public class RDXVirtualGhostObject extends RDXModelInstance
+public class RDXSceneObject extends RDXModelInstance
 {
    private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
    private final ReferenceFrame referenceFrame;
    private boolean showing = false;
+   private RDXModelInstance modelInstance;
 
-   public RDXVirtualGhostObject(String modelName, String frameName)
+   public RDXSceneObject(String modelName, String frameName)
    {
       super(RDXModelLoader.load(modelName));
       setColor(GHOST_COLOR);

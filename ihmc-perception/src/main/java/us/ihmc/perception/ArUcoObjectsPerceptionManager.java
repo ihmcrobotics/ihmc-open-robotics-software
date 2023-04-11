@@ -88,7 +88,7 @@ public class ArUcoObjectsPerceptionManager
    private final ArrayList<ArUcoMarkerObject> markers = new ArrayList<>();
    private final DoorPerceptionManager pullDoorManager;
    private final DoorPerceptionManager pushDoorManager;
-   private final ArUcoMarkerObject box = new ArUcoMarkerObject(BOX_MARKER_ID, "Box");
+   private final ArUcoMarkerObject box = new ArUcoMarkerObject((int) BOX_MARKER_ID, null, "Box");
    private final ROS2PublishSubscribeAPI ros2;
 
    private ArrayList<String> objectNames;
@@ -103,7 +103,7 @@ public class ArUcoObjectsPerceptionManager
       objectNames = objectsInfo.getObjectNames();
       for (int i = 0; i < IDs.size(); i++)
       {
-         markers.add(new ArUcoMarkerObject(IDs.get(i), objectsInfo));
+         markers.add(new ArUcoMarkerObject(IDs.get(i), objectsInfo, objectNames.get(IDs.get(i)) + "Marker"));
          markerUpdaters.put(IDs.get(i), markers.get(i)::updateMarkerTransform);
          detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
                                                                   DETECTED_OBJECT,
@@ -116,15 +116,15 @@ public class ArUcoObjectsPerceptionManager
       pullDoorManager = new DoorPerceptionManager(PULL_DOOR_MARKER_ID, "Pull", cameraFrame);
       pullDoorManager.getDoorFrame().setObjectTransformToMarker(transform -> transform.set(PULL_DOOR_FRAME_TRANSFORM_TO_MARKER));
       pullDoorManager.getDoorPanel().setObjectTransformToMarker(transform -> transform.set(PULL_DOOR_PANEL_TRANSFORM_TO_MARKER));
-      markerUpdaters.put(PULL_DOOR_MARKER_ID, pullDoorManager::updateMarkerTransform);
+      markerUpdaters.put((int) PULL_DOOR_MARKER_ID, pullDoorManager::updateMarkerTransform);
 
       pushDoorManager = new DoorPerceptionManager(PUSH_DOOR_MARKER_ID, "Push", cameraFrame);
       pushDoorManager.getDoorFrame().setObjectTransformToMarker(transform -> transform.set(PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER));
       pushDoorManager.getDoorPanel().setObjectTransformToMarker(transform -> transform.set(PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER));
-      markerUpdaters.put(PUSH_DOOR_MARKER_ID, pushDoorManager::updateMarkerTransform);
+      markerUpdaters.put((int) PUSH_DOOR_MARKER_ID, pushDoorManager::updateMarkerTransform);
 
       box.setObjectTransformToMarker(transform -> transform.set(BOX_TRANSFORM_TO_MARKER));
-      markerUpdaters.put(BOX_MARKER_ID, box::updateMarkerTransform);
+      markerUpdaters.put((int) BOX_MARKER_ID, box::updateMarkerTransform);
 
       detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
                                                                DETECTED_PULL_DOOR_FRAME,
@@ -158,7 +158,7 @@ public class ArUcoObjectsPerceptionManager
          {
             int markerId = (int) arUcoMarkerPosesMessage.getMarkerId().get(i);
             var markerUpdater = markerUpdaters.get(markerId);
-            var markerUpdater = markerUpdaters.get(arUcoMarkerPosesMessage.getMarkerId().get(i));
+//            var markerUpdater = markerUpdaters.get(arUcoMarkerPosesMessage.getMarkerId().get(i));
             if (markerUpdater != null)
             {
                //detectedMarkerTranslation.set(arUcoMarkerPosesMessage.getPosition().get(i));
@@ -166,15 +166,15 @@ public class ArUcoObjectsPerceptionManager
                //markerUpdater.accept(detectedMarkerTranslation, detectedMarkerOrientation);
 
                
-               markerUpdater.accept(arUcoMarkerPosesMessage.getPosition().get(i),
-                                    arUcoMarkerPosesMessage.getOrientation().get(i));
+               markerUpdater.accept(new FramePoint3D(ReferenceFrame.getWorldFrame(), arUcoMarkerPosesMessage.getPosition().get(i)),
+                                    new FrameQuaternion(ReferenceFrame.getWorldFrame(), arUcoMarkerPosesMessage.getOrientation().get(i)));
             }
 
             for (DetectedObjectPublisher detectedObjectPublisher : detectedObjectPublishers)
             {
                //detectedObjectPublisher.objectDetected(objectNames.get(markerId));
                //detectedObjectPublisher.publish();
-               detectedObjectPublisher.markDetected(arUcoMarkerPosesMessage.getMarkerId().get(i));
+//               detectedObjectPublisher.markDetected(arUcoMarkerPosesMessage.getMarkerId().get(i));
             }
          }
       }

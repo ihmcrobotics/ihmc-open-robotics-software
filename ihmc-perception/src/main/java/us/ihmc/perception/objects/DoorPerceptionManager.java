@@ -1,5 +1,6 @@
 package us.ihmc.perception.objects;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
@@ -23,19 +24,19 @@ public class DoorPerceptionManager
    {
       this.markerID = markerID;
       this.cameraFrame = cameraFrame;
-      doorPanel = new ArUcoMarkerObject(markerID, String.format("%sDoor%dPanel", name, markerID));
-      doorFrame = new ArUcoMarkerObject(markerID, String.format("%sDoor%dFrame", name, markerID));
+      doorPanel = new ArUcoMarkerObject((int) markerID, null, String.format("%sDoor%dPanel", name, markerID));
+      doorFrame = new ArUcoMarkerObject((int) markerID, null, String.format("%sDoor%dFrame", name, markerID));
    }
 
    public void updateMarkerTransform(Tuple3DReadOnly position, FrameQuaternionReadOnly orientation)
    {
-      doorPanel.updateMarkerTransform(position, orientation);
+      doorPanel.updateMarkerTransform(new FramePoint3D(ReferenceFrame.getWorldFrame(), position), orientation);
 
       // Hack, once we see the door panel up close, lock in the frame pose, because after a while or the panel moves
       // we won't know where it is anymore
       if (!doorFrameLockedIn)
       {
-         doorFrame.updateMarkerTransform(position, orientation);
+         doorFrame.updateMarkerTransform(new FramePoint3D(ReferenceFrame.getWorldFrame(), position), orientation);
 
          cameraPose.setToZero(cameraFrame);
          cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
