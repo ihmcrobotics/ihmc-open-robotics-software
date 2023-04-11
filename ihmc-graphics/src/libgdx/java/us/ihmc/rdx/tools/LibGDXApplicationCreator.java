@@ -50,14 +50,11 @@ public class LibGDXApplicationCreator
 
    public static void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter, String title, double width, double height)
    {
-      launchGDXApplication(getDefaultConfiguration(title, width, height), applicationAdapter, title);
+      launchGDXApplication(getDefaultConfiguration(title, width, height), applicationAdapter);
    }
 
-   public static void launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration, Lwjgl3ApplicationAdapter applicationAdapter, String title)
+   public static void launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration, Lwjgl3ApplicationAdapter applicationAdapter)
    {
-      ThreadTools.startAThread(() ->
-      {
-         new Lwjgl3Application(applicationAdapter, applicationConfiguration);
-      }, title);
+      new Lwjgl3Application(applicationAdapter, applicationConfiguration);
    }
 }
