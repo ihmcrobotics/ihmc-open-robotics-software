@@ -195,8 +195,7 @@ public class RDXBaseUI
       // consifusing and error-prone.
       applicationConfiguration.setInitialVisible(false);
       LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration,
-                                                    applicationAdapter,
-                                                    windowTitle);
+                                                    applicationAdapter);
    }
 
    public void create()
