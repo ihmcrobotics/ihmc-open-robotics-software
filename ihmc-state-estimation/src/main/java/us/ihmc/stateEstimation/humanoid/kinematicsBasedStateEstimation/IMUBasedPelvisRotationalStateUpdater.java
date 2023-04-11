@@ -36,11 +36,9 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameYawPitchRoll yoRootJointFrameOrientation;
    private final YoFrameQuaternion yoRootJointFrameQuaternion;
-   private final YoFrameQuaternion yoPreviousRootJointFrameQuaternion;
 
    private final YoFrameVector3D yoRootJointAngularVelocityMeasFrame;
    private final YoFrameVector3D yoRootJointAngularVelocity;
-   private final YoFrameVector3D yoPreviousRootJointAngularVelocity;
    private final YoFrameVector3D yoRootJointAngularVelocityInWorld;
 
    private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, false);
@@ -87,10 +85,8 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
       yoRootJointFrameOrientation = new YoFrameYawPitchRoll("estimatedRootJoint", worldFrame, registry);
       yoRootJointFrameQuaternion = new YoFrameQuaternion("estimatedRootJoint", worldFrame, registry);
-      yoPreviousRootJointFrameQuaternion = new YoFrameQuaternion("previousEstimatedRootJoint", worldFrame, registry);
 
       yoRootJointAngularVelocity = new YoFrameVector3D("estimatedRootJointAngularVelocity", rootJointFrame, registry);
-      yoPreviousRootJointAngularVelocity = new YoFrameVector3D("previousEstimatedRootJointAngularVelocityWorld", worldFrame, registry);
       yoRootJointAngularVelocityInWorld = new YoFrameVector3D("estimatedRootJointAngularVelocityWorld", worldFrame, registry);
       yoRootJointAngularVelocityMeasFrame = new YoFrameVector3D("estimatedRootJointAngularVelocityMeasFrame", measurementFrame, registry);
 
@@ -136,9 +132,6 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    @Override
    public void updateRootJointOrientationAndAngularVelocity()
    {
-      yoPreviousRootJointFrameQuaternion.set(rootJoint.getJointPose().getOrientation());
-      yoPreviousRootJointAngularVelocity.setMatchingFrame(rootJoint.getJointTwist().getAngularPart());
-
       updateRootJointRotation();
       updateRootJointTwistAngularPart();
       updateViz();
@@ -258,17 +251,5 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    public FrameVector3DReadOnly getEstimatedAngularVelocity()
    {
       return yoRootJointAngularVelocityInWorld;
-   }
-
-   @Override
-   public FrameOrientation3DReadOnly getPreviousEstimatedOrientation()
-   {
-      return yoPreviousRootJointFrameQuaternion;
-   }
-
-   @Override
-   public FrameVector3DReadOnly getPreviousEstimatedAngularVelocity()
-   {
-      return yoPreviousRootJointAngularVelocity;
    }
 }
