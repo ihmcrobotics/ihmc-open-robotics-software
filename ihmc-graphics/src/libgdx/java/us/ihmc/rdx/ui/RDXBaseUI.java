@@ -187,8 +187,8 @@ public class RDXBaseUI
 
    /**
     * Launches an RDX application using the specified adapter.
-    * Will hang until a shutdown is requested.
-    * 
+    * Will block until a shutdown is requested.
+    *
     * @param applicationAdapter the adapter for the application
     */
    public void launchRDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)

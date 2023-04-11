@@ -50,7 +50,7 @@ public class LibGDXApplicationCreator
 
    /**
     * Launches a LibGDX application with the specified adapter, window title, width, and height.
-    * Will hang until a shutdown is requested.
+    * Will block until a shutdown is requested.
     *
     * @param applicationAdapter the adapter for the application
     * @param title the title of the application window
@@ -64,7 +64,7 @@ public class LibGDXApplicationCreator
 
    /**
     * Launches a LibGDX application using the specified configuration and adapter.
-    * Will hang until a shutdown is requested.
+    * Will block until a shutdown is requested.
     *
     * @param applicationConfiguration the configuration for the application
     * @param applicationAdapter the adapter for the application
