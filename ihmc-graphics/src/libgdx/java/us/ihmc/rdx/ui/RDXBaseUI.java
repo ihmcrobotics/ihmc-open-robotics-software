@@ -185,6 +185,12 @@ public class RDXBaseUI
       primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
    }
 
+   /**
+    * Launches an RDX application using the specified adapter.
+    * Will hang until a shutdown is requested.
+    * 
+    * @param applicationAdapter the adapter for the application
+    */
    public void launchRDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
    {
       LogTools.info("Launching RDX application");
