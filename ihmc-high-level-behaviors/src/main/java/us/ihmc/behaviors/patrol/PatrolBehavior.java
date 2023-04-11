@@ -186,7 +186,6 @@ public class PatrolBehavior extends BehaviorTreeControlFlowNode implements Behav
       LogTools.info("Patrol behavior selected = {}", enabled);
 
       mainThread.setRunning(enabled);
-      helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    private void onStopStateEntry()

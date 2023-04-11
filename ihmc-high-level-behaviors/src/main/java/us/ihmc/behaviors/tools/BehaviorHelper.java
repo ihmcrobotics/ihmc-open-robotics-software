@@ -79,7 +79,7 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    // TODO: Considerations for ROS 1, Messager, and YoVariableClient with reconnecting
    public BehaviorHelper(String titleCasedBehaviorName, DRCRobotModel robotModel, ROS2NodeInterface ros2Node, boolean enableROS1)
    {
-      super(robotModel, ros2Node, commsEnabledToStart);
+      super(robotModel, ros2Node);
       String ros1NodeName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, titleCasedBehaviorName.replace(" ", ""));
       String yoVariableRegistryName = WordUtils.capitalize(titleCasedBehaviorName).replace(" ", "");
       if (enableROS1)
@@ -217,12 +217,6 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    public void subscribeToDoorLocationViaCallback(Consumer<DoorLocationPacket> callback)
    {
       subscribeViaCallback(ROS2Tools.getDoorLocationTopic(getRobotModel().getSimpleRobotName()), callback);
-   }
-
-   public void setCommunicationCallbacksEnabled(boolean enabled)
-   {
-      super.setCommunicationCallbacksEnabled(enabled);
-      messagerHelper.setCommunicationCallbacksEnabled(enabled);
    }
 
    public MessagerHelper getMessagerHelper()
