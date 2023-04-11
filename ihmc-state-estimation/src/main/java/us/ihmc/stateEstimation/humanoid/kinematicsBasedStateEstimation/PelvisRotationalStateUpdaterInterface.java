@@ -5,7 +5,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 public interface PelvisRotationalStateUpdaterInterface
 {
-
    void initialize();
 
    void updateRootJointOrientationAndAngularVelocity();
@@ -13,9 +12,4 @@ public interface PelvisRotationalStateUpdaterInterface
    FrameOrientation3DReadOnly getEstimatedOrientation();
 
    FrameVector3DReadOnly getEstimatedAngularVelocity();
-   
-   FrameOrientation3DReadOnly getPreviousEstimatedOrientation();
-   
-   FrameVector3DReadOnly getPreviousEstimatedAngularVelocity();
-
 }

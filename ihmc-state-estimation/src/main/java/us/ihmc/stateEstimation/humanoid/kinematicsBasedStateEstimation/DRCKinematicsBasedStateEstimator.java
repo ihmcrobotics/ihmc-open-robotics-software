@@ -377,8 +377,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
              * pelvisRotationalStateUpdater and pass in here the current values for the estimated root joint
              * rotational state.
              */
-            pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity(pelvisRotationalStateUpdater.getPreviousEstimatedOrientation(),
-                                                                              pelvisRotationalStateUpdater.getPreviousEstimatedAngularVelocity());
+            pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
             break;
       }
 
