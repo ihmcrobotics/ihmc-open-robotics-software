@@ -47,6 +47,8 @@ public class RDXInteractableFrameModel
    private final Notification contextMenuNotification = new Notification();
    private Runnable extendedContextMenu;
    private ROS2TunedRigidBodyTransform syncedTransformForTuning;
+   /** When interacting with the scene, sometimes the graphics will get in the way. TODO: Disable interactions too. */
+   private boolean showing = true;
 
    public void create(ReferenceFrame parentFrame, RDX3DPanel panel3D, ModelData modelData, RDXMousePickRayCollisionCalculator collisionCalculator)
    {
@@ -143,11 +145,11 @@ public class RDXInteractableFrameModel
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (sceneLevels.contains(RDXSceneLevel.MODEL) || sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      if (showing && (sceneLevels.contains(RDXSceneLevel.MODEL) || sceneLevels.contains(RDXSceneLevel.VIRTUAL)))
       {
          modelInstance.getRenderables(renderables, pool);
       }
-      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      if (showing && sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
          if (isMouseHovering || selectablePose3DGizmo.isSelected())
          {
@@ -181,5 +183,10 @@ public class RDXInteractableFrameModel
    public boolean isSelected()
    {
       return selectablePose3DGizmo.isSelected();
+   }
+
+   public void setShowing(boolean showing)
+   {
+      this.showing = showing;
    }
 }
