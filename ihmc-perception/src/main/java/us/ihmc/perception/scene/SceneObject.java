@@ -8,6 +8,8 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
  * Represents an object node on the Scene Knowledge Graph (to be defined).
  *
  * We give each object a name, unique identifier, and a reference frame.
+ *
+ * Object as in a door, chair, can of soup, etc.
  */
 public abstract class SceneObject
 {
