@@ -48,11 +48,27 @@ public class LibGDXApplicationCreator
       return applicationConfiguration;
    }
 
+   /**
+    * Launches a LibGDX application with the specified adapter, window title, width, and height.
+    * Will hang until a shutdown is requested.
+    *
+    * @param applicationAdapter the adapter for the application
+    * @param title the title of the application window
+    * @param width the width of the application window
+    * @param height the height of the application window
+    */
    public static void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter, String title, double width, double height)
    {
       launchGDXApplication(getDefaultConfiguration(title, width, height), applicationAdapter);
    }
 
+   /**
+    * Launches a LibGDX application using the specified configuration and adapter.
+    * Will hang until a shutdown is requested.
+    *
+    * @param applicationConfiguration the configuration for the application
+    * @param applicationAdapter the adapter for the application
+    */
    public static void launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration, Lwjgl3ApplicationAdapter applicationAdapter)
    {
       new Lwjgl3Application(applicationAdapter, applicationConfiguration);
