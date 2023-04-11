@@ -127,7 +127,7 @@ public class ProMPAssistantObjectFrameTest
       OpenCVArUcoMarker marker = markersToTrack.get(0);
       int objectId = marker.getId();
       // get object with attached aruco marker
-      objectWithArUco = new ArUcoMarkerObject(objectId, arucosInfo);
+      objectWithArUco = new ArUcoMarkerObject(objectId, arucosInfo, "ArUcoObject");
       // get marker pose in world frame, in reality this would be detected by camera
       FramePose3DBasics markerPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      new Point3D(1.073, -0.146, 1.016),

@@ -20,6 +20,11 @@ public class DetectedObjectPublisher
    private final DetectedObjectMessage detectedObjectMessage = new DetectedObjectMessage();
    private boolean detected = false;
 
+   public DetectedObjectPublisher(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> topic, long id, ReferenceFrame objectFrame)
+   {
+      this(ros2, topic, Long.toString(id), objectFrame);
+   }
+
    public DetectedObjectPublisher(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> topic, String id, ReferenceFrame objectFrame)
    {
       this.ros2 = ros2;

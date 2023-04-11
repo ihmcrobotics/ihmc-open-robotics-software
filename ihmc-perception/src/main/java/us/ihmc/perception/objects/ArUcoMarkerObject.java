@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.perception.scene.DetectableSceneObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.util.function.Consumer;
@@ -16,21 +17,20 @@ import java.util.function.Consumer;
  *
  * TODO: Add DetectedObject interface or abstract, like the info classes
  */
-public class ArUcoMarkerObject
+public class ArUcoMarkerObject extends DetectableSceneObject
 {
-   private final RigidBodyTransform markerTransformToWorld = new RigidBodyTransform();
-   private final ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                                     markerTransformToWorld);
    private final RigidBodyTransform markerTransformToObject = new RigidBodyTransform();
-   private final long markerID;
+//   private final long markerID;
    private final RigidBodyTransform objectTransformToMarker = new RigidBodyTransform();
-   // object frame might be different from marker location, for example the door handle is not exactly where the marker is on the door
+   // Object frame might be different from marker location, for example the door handle is not exactly where the marker is on the door
    private final ReferenceFrame objectFrame;
 
    public ArUcoMarkerObject(int id, ArUcoMarkerObjectsInfo arucoInfo, String name)
    {
+      super(name, id);
       markerTransformToObject.set(arucoInfo.getMarkerYawPitchRoll(id), arucoInfo.getMarkerTranslation(id));
-      objectFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(name, markerFrame, markerTransformToObject);
+//      objectFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(name, markerFrame, markerTransformToObject);
+      objectFrame = null;
    }
 
    public void setObjectTransformToMarker(Consumer<RigidBodyTransform> setter)
@@ -41,19 +41,13 @@ public class ArUcoMarkerObject
 
    public void updateMarkerTransform(FrameTuple3DReadOnly markerTranslation, FrameQuaternionReadOnly markerOrientation)
    {
-      markerTranslation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      markerOrientation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      markerTransformToWorld.set(markerOrientation, markerTranslation);
-
-      markerTransformToWorld.getTranslation().set(position);
-      markerTransformToWorld.getRotation().set(orientation);
-      
-      markerFrame.update();
+      getTransformToParent().set(markerOrientation, markerTranslation);
+      getReferenceFrame().update();
    }
 
    public void updateFrame()
    {
-      markerFrame.update();
+      getReferenceFrame().update();
       objectFrame.update();
    }
 
@@ -64,12 +58,14 @@ public class ArUcoMarkerObject
 
    public RigidBodyTransformReadOnly getMarkerTransformToWorld()
    {
-      return markerTransformToWorld;
+//      return markerTransformToWorld;
+      return null;
    }
 
    public ReferenceFrame getMarkerFrame()
    {
-      return markerFrame;
+//      return markerFrame;
+      return null;
    }
 
    public ReferenceFrame getObjectFrame()
