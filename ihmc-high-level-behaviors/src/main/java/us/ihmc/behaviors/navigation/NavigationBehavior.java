@@ -132,7 +132,6 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
       LogTools.info("Navigation behavior selected = {}", enabled);
 
       mainThread.setRunning(enabled);
-      helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    private void stepThroughAlgorithm(String message)
