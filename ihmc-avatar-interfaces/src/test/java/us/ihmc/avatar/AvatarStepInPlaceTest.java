@@ -109,11 +109,6 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
    @AfterEach
    public void tearDown()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
@@ -185,6 +180,7 @@ public abstract class AvatarStepInPlaceTest implements MultiRobotTestInterface
       int steps = footMessage.getFootstepDataList().size();
 
       simulationTestHelper.publishToController(footMessage);
+      ThreadTools.sleep(10);
       double simulationTime = initialTransfer + (transfer + swing) * steps + 1.0;
 
       FrameVector3D forceDirection = new FrameVector3D(stepFrame, new Vector3D(0.0, 1.0, 0.0));
