@@ -56,16 +56,4 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
    {
       return twistRootBodyRelativeToWorld.getAngularPart();
    }
-
-   @Override
-   public FrameOrientation3DReadOnly getPreviousEstimatedOrientation()
-   {
-      return getEstimatedOrientation();
-   }
-
-   @Override
-   public FrameVector3DReadOnly getPreviousEstimatedAngularVelocity()
-   {
-      return getEstimatedAngularVelocity();
-   }
 }

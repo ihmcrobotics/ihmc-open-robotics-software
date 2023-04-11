@@ -1049,6 +1049,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       }
 
       simulationTestHelper.publishToController(pelvisTrajectoryMessage);
+      ThreadTools.sleep(10);
 
       success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT());
       assertTrue(success);
