@@ -69,7 +69,6 @@ public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements 
       LogTools.info("Step in place behavior selected = {}", enabled);
 
       mainThread.setRunning(enabled);
-      helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    private void doOnAbort(boolean abort)
