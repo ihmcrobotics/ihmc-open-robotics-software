@@ -39,17 +39,17 @@ public class ArUcoMarkerInfo extends StoredPropertySet implements ArUcoMarkerInf
     */
    public static final DoubleStoredPropertyKey markerZTranslationToParent = keys.addDoubleKey("Marker Z translation to parent");
    /**
-    * ArUco marker origin yaw rotation to parent
+    * ArUco marker origin yaw rotation to parent (in degrees)
     */
-   public static final DoubleStoredPropertyKey markerYawRotationToParent = keys.addDoubleKey("Marker yaw rotation to parent");
+   public static final DoubleStoredPropertyKey markerYawRotationToParentDegrees = keys.addDoubleKey("Marker yaw rotation to parent degrees");
    /**
-    * ArUco marker origin pitch rotation to parent
+    * ArUco marker origin pitch rotation to parent (in degrees)
     */
-   public static final DoubleStoredPropertyKey markerPitchRotationToParent = keys.addDoubleKey("Marker pitch rotation to parent");
+   public static final DoubleStoredPropertyKey markerPitchRotationToParentDegrees = keys.addDoubleKey("Marker pitch rotation to parent degrees");
    /**
-    * ArUco marker origin roll rotation to parent
+    * ArUco marker origin roll rotation to parent (in degrees)
     */
-   public static final DoubleStoredPropertyKey markerRollRotationToParent = keys.addDoubleKey("Marker roll rotation to parent");
+   public static final DoubleStoredPropertyKey markerRollRotationToParentDegrees = keys.addDoubleKey("Marker roll rotation to parent degrees");
 
    /**
     * Loads this property set.

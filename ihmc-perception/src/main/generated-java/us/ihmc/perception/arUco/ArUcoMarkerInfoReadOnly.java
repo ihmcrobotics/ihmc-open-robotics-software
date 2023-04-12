@@ -51,26 +51,26 @@ public interface ArUcoMarkerInfoReadOnly extends StoredPropertySetReadOnly
    }
 
    /**
-    * ArUco marker origin yaw rotation to parent
+    * ArUco marker origin yaw rotation to parent (in degrees)
     */
-   default double getMarkerYawRotationToParent()
+   default double getMarkerYawRotationToParentDegrees()
    {
-      return get(markerYawRotationToParent);
+      return get(markerYawRotationToParentDegrees);
    }
 
    /**
-    * ArUco marker origin pitch rotation to parent
+    * ArUco marker origin pitch rotation to parent (in degrees)
     */
-   default double getMarkerPitchRotationToParent()
+   default double getMarkerPitchRotationToParentDegrees()
    {
-      return get(markerPitchRotationToParent);
+      return get(markerPitchRotationToParentDegrees);
    }
 
    /**
-    * ArUco marker origin roll rotation to parent
+    * ArUco marker origin roll rotation to parent (in degrees)
     */
-   default double getMarkerRollRotationToParent()
+   default double getMarkerRollRotationToParentDegrees()
    {
-      return get(markerRollRotationToParent);
+      return get(markerRollRotationToParentDegrees);
    }
 }
