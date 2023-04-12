@@ -8,5 +8,8 @@ public interface FullRobotModelFactory
 
    FullRobotModel createFullRobotModel();
 
-   FullRobotModel createFullRobotModel(String namePrefix);
+   default FullRobotModel createFullRobotModel(String namePrefix)
+   {
+      return createFullRobotModel();
+   }
 }
