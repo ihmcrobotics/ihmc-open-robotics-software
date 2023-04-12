@@ -9,6 +9,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
+import us.ihmc.perception.scene.SceneObjectLibrary;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -38,14 +39,14 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final SideDependentList<DualBlackflyCamera> blackflies = new SideDependentList<>();
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
-   private final List<OpenCVArUcoMarker> arUcoMarkersToTrack;
+   private final SceneObjectLibrary sceneObjectLibrary;
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
    public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel,
-                                                   List<OpenCVArUcoMarker> arUcoMarkersToTrack,
+                                                   SceneObjectLibrary sceneObjectLibrary,
                                                    IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics)
    {
-      this.arUcoMarkersToTrack = arUcoMarkersToTrack;
+      this.sceneObjectLibrary = sceneObjectLibrary;
       this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
@@ -101,7 +102,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                                   side,
                                   ros2Helper,
                                   realtimeROS2Node,
-                                  arUcoMarkersToTrack,
+                                  sceneObjectLibrary,
                                   ousterFisheyeColoringIntrinsics);
                }
             }

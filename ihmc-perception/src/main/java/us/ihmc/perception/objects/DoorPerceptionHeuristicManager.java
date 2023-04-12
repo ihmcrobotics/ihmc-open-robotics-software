@@ -8,8 +8,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 /**
  * Manages the perception of a door and it's frame, which requires heuristics.
+ *
+ * We don't place an ArUco marker on the door frame, so the frame must be "locked in"
+ * the first time the panel is seen, and assuming the door is in the closed
+ * configuration.
+ *
+ * This lives on the robot in the perception process.
  */
-public class DoorPerceptionManager
+public class DoorPerceptionHeuristicManager
 {
    private final long markerID;
    private final ReferenceFrame cameraFrame;
@@ -20,12 +26,12 @@ public class DoorPerceptionManager
 
    private boolean doorFrameLockedIn = false;
 
-   public DoorPerceptionManager(long markerID, String name, ReferenceFrame cameraFrame)
+   public DoorPerceptionHeuristicManager(long markerID, String name, ReferenceFrame cameraFrame)
    {
       this.markerID = markerID;
       this.cameraFrame = cameraFrame;
-      doorPanel = new ArUcoMarkerObject((int) markerID, null, String.format("%sDoor%dPanel", name, markerID));
-      doorFrame = new ArUcoMarkerObject((int) markerID, null, String.format("%sDoor%dFrame", name, markerID));
+      doorPanel = new ArUcoMarkerObject(null, String.format("%sDoor%dPanel", name, markerID));
+      doorFrame = new ArUcoMarkerObject(null, String.format("%sDoor%dFrame", name, markerID));
    }
 
    public void updateMarkerTransform(Tuple3DReadOnly position, FrameQuaternionReadOnly orientation)

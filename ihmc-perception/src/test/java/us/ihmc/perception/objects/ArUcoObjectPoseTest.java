@@ -37,7 +37,7 @@ public class ArUcoObjectPoseTest
       int id = marker.getId();
 
       // get object with attached aruco marker
-      objectWithArUco = new ArUcoMarkerObject(id, arucosInfo, "objectWithArUco");
+      objectWithArUco = new ArUcoMarkerObject(arucosInfo, "objectWithArUco");
       // get marker pose in world frame, in reality this would be detected by camera
       FramePose3D markerPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      new Point3D(1.073, -0.146, 1.016),

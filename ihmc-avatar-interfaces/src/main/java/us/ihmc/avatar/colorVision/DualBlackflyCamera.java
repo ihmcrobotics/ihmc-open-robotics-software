@@ -27,6 +27,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
+import us.ihmc.perception.scene.SceneObjectLibrary;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
@@ -97,7 +98,7 @@ public class DualBlackflyCamera
                       RobotSide side,
                       ROS2Helper ros2Helper,
                       RealtimeROS2Node realtimeROS2Node,
-                      List<OpenCVArUcoMarker> arUcoMarkersToTrack,
+                      SceneObjectLibrary sceneObjectLibrary,
                       IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics)
    {
       this.blackfly = blackfly;
@@ -152,6 +153,7 @@ public class DualBlackflyCamera
             // TODO: Still need a flip anywhere?
             // opencv_core.flip(blackflySourceImage.getBytedecoOpenCVMat(), blackflySourceImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_BOTH);
 
+            // TODO: This whole block belongs in a separate perception class
             if (side == RobotSide.RIGHT)
             {
                ReferenceFrame blackflyCameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
@@ -214,6 +216,10 @@ public class DualBlackflyCamera
                   remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
                                                                                        ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
                                                                                        cameraTransformToParent);
+
+                  // TODO: Instantiate door heuristic manager
+
+                  // TODO: Set up detectable scene object manager and publisher
                }
 
                remoteTunableCameraTransform.update();
