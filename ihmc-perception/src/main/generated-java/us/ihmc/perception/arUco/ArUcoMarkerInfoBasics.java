@@ -49,26 +49,26 @@ public interface ArUcoMarkerInfoBasics extends ArUcoMarkerInfoReadOnly, StoredPr
    }
 
    /**
-    * ArUco marker origin yaw rotation to parent
+    * ArUco marker origin yaw rotation to parent (in degrees)
     */
-   default void setMarkerYawRotationToParent(double markerYawRotationToParent)
+   default void setMarkerYawRotationToParentDegrees(double markerYawRotationToParentDegrees)
    {
-      set(ArUcoMarkerInfo.markerYawRotationToParent, markerYawRotationToParent);
+      set(ArUcoMarkerInfo.markerYawRotationToParentDegrees, markerYawRotationToParentDegrees);
    }
 
    /**
-    * ArUco marker origin pitch rotation to parent
+    * ArUco marker origin pitch rotation to parent (in degrees)
     */
-   default void setMarkerPitchRotationToParent(double markerPitchRotationToParent)
+   default void setMarkerPitchRotationToParentDegrees(double markerPitchRotationToParentDegrees)
    {
-      set(ArUcoMarkerInfo.markerPitchRotationToParent, markerPitchRotationToParent);
+      set(ArUcoMarkerInfo.markerPitchRotationToParentDegrees, markerPitchRotationToParentDegrees);
    }
 
    /**
-    * ArUco marker origin roll rotation to parent
+    * ArUco marker origin roll rotation to parent (in degrees)
     */
-   default void setMarkerRollRotationToParent(double markerRollRotationToParent)
+   default void setMarkerRollRotationToParentDegrees(double markerRollRotationToParentDegrees)
    {
-      set(ArUcoMarkerInfo.markerRollRotationToParent, markerRollRotationToParent);
+      set(ArUcoMarkerInfo.markerRollRotationToParentDegrees, markerRollRotationToParentDegrees);
    }
 }

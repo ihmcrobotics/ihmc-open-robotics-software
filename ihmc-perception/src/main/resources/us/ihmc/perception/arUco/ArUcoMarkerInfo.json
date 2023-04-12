@@ -20,16 +20,16 @@
     "type" : "Double",
     "description" : "ArUco marker origin Z translation to parent"
   },
-  "Marker yaw rotation to parent" : {
+  "Marker yaw rotation to parent degrees" : {
     "type" : "Double",
-    "description" : "ArUco marker origin yaw rotation to parent"
+    "description" : "ArUco marker origin yaw rotation to parent (in degrees)"
   },
-  "Marker pitch rotation to parent" : {
+  "Marker pitch rotation to parent degrees" : {
     "type" : "Double",
-    "description" : "ArUco marker origin pitch rotation to parent"
+    "description" : "ArUco marker origin pitch rotation to parent (in degrees)"
   },
-  "Marker roll rotation to parent" : {
+  "Marker roll rotation to parent degrees" : {
     "type" : "Double",
-    "description" : "ArUco marker origin roll rotation to parent"
+    "description" : "ArUco marker origin roll rotation to parent (in degrees)"
   }
 }

@@ -10,14 +10,14 @@ public abstract class DetectableSceneObject extends SceneObject
 {
    private boolean currentlyDetected;
 
-   public DetectableSceneObject(String name, long uuid)
+   public DetectableSceneObject(String name)
    {
-      super(name, uuid);
+      super(name);
    }
 
-   public DetectableSceneObject(String name, long uuid, ReferenceFrame parentFrame)
+   public DetectableSceneObject(String name, ReferenceFrame parentFrame)
    {
-      super(name, uuid, parentFrame);
+      super(name, parentFrame);
    }
 
    public boolean getCurrentlyDetected()

@@ -14,29 +14,22 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 public abstract class SceneObject
 {
    private final String name;
-   private final long uuid;
    private final ModifiableReferenceFrame referenceFrame;
 
-   public SceneObject(String name, long uuid)
+   public SceneObject(String name)
    {
-      this(name, uuid, ReferenceFrame.getWorldFrame());
+      this(name, ReferenceFrame.getWorldFrame());
    }
 
-   public SceneObject(String name, long uuid, ReferenceFrame parentFrame)
+   public SceneObject(String name, ReferenceFrame parentFrame)
    {
       this.name = name;
-      this.uuid = uuid;
       this.referenceFrame = new ModifiableReferenceFrame(parentFrame);
    }
 
    public String getName()
    {
       return name;
-   }
-
-   public long getUUID()
-   {
-      return uuid;
    }
 
    public ReferenceFrame getReferenceFrame()
