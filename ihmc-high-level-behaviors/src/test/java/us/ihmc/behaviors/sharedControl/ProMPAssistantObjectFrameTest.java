@@ -9,8 +9,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
-import us.ihmc.perception.objects.ArUcoMarkerObject;
-import us.ihmc.perception.objects.ArUcoMarkerObjectsInfo;
 import us.ihmc.promp.ProMPUtil;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
 
@@ -127,7 +125,7 @@ public class ProMPAssistantObjectFrameTest
       OpenCVArUcoMarker marker = markersToTrack.get(0);
       int objectId = marker.getId();
       // get object with attached aruco marker
-      objectWithArUco = new ArUcoMarkerObject(objectId, arucosInfo, "ArUcoObject");
+      objectWithArUco = new ArUcoMarkerObject(arucosInfo, "ArUcoObject");
       // get marker pose in world frame, in reality this would be detected by camera
       FramePose3DBasics markerPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      new Point3D(1.073, -0.146, 1.016),

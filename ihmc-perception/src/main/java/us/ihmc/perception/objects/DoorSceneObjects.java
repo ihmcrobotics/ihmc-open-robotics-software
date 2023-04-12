@@ -6,7 +6,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.scene.ROS2ArUcoDetectableObject;
-import us.ihmc.perception.scene.ROS2DetectableSceneObject;
 import us.ihmc.perception.scene.SceneObjectAPI;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -38,6 +37,12 @@ public class DoorSceneObjects
                      -DoorModelParameters.ARUCO_MARKER_PUSH_SIDE_BOTTOM_RIGHT_CORNER_Z_IN_PANEL_FRAME)
    );
    public static final RigidBodyTransform PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER = new RigidBodyTransform(PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER);
+   static
+   {
+      PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER.getTranslation().add(0.0,
+                                                               -DoorModelParameters.DOOR_FRAME_HINGE_OFFSET,
+                                                               -DoorModelParameters.DOOR_PANEL_GROUND_GAP_HEIGHT);
+   }
 
    public static ROS2ArUcoDetectableObject createPullDoorPanel(ROS2PublishSubscribeAPI ros2)
    {

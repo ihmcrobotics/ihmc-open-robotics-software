@@ -1,7 +1,7 @@
 {
   "title" : "ArUco marker information",
   "Marker ID" : {
-    "type" : "Double",
+    "type" : "Integer",
     "description" : "ArUco marker ID in the ArUco dictionary"
   },
   "Marker size" : {
