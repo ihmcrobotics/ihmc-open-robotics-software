@@ -236,7 +236,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       double groundHeight = EuclidCoreRandomTools.nextDouble(random, 0.1);
       Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, 2.0);
       double offsetYaw = EuclidCoreRandomTools.nextDouble(random, Math.PI);
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration("holdBodyPose", getRobotModel(), groundHeight, offset, offsetYaw);
       snapGhostToFullRobotModel(initialFullRobotModel);
 
       commandInputManager.submitMessage(holdRigidBodyCurrentPose(initialFullRobotModel.getPelvis()));
@@ -268,10 +268,10 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       double groundHeight = EuclidCoreRandomTools.nextDouble(random, 0.1);
       Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, 2.0);
       double offsetYaw = EuclidCoreRandomTools.nextDouble(random, Math.PI);
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration("initial", getRobotModel(), groundHeight, offset, offsetYaw);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
 
-      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
+      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration("random", getRobotModel(), groundHeight, offset, offsetYaw);
 
       for (int i = 0; i < 10; i++)
       {
@@ -328,10 +328,10 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       double groundHeight = EuclidCoreRandomTools.nextDouble(random, 0.1);
       Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, 2.0);
       double offsetYaw = EuclidCoreRandomTools.nextDouble(random, Math.PI);
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration("initial", getRobotModel(), groundHeight, offset, offsetYaw);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
 
-      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
+      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration("random", getRobotModel(), groundHeight, offset, offsetYaw);
 
       double averageSolutionQuality = 0.0;
       double worstSolutionQuality = -1.0;
@@ -398,10 +398,10 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       double groundHeight = EuclidCoreRandomTools.nextDouble(random, 0.1);
       Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, 2.0);
       double offsetYaw = EuclidCoreRandomTools.nextDouble(random, Math.PI);
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration("initial", getRobotModel(), groundHeight, offset, offsetYaw);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
 
-      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
+      FullHumanoidRobotModel randomizedFullRobotModel = createFullRobotModelAtInitialConfiguration("random", getRobotModel(), groundHeight, offset, offsetYaw);
       RobotSide supportFootSide = RobotSide.LEFT;
 
       double averageSolutionQuality = 0.0;
@@ -487,7 +487,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       double groundHeight = EuclidCoreRandomTools.nextDouble(random, 0.1);
       Point2D offset = EuclidCoreRandomTools.nextPoint2D(random, 2.0);
       double offsetYaw = EuclidCoreRandomTools.nextDouble(random, Math.PI);
-      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
+      FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration("initial", getRobotModel(), groundHeight, offset, offsetYaw);
       RigidBodyBasics chest = initialFullRobotModel.getChest();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -916,22 +916,23 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       };
    }
 
-   public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(DRCRobotModel robotModel)
+   public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(String prefix, DRCRobotModel robotModel)
    {
-      return createFullRobotModelAtInitialConfiguration(robotModel, 0.0, 0.0);
+      return createFullRobotModelAtInitialConfiguration(prefix, robotModel, 0.0, 0.0);
    }
 
-   public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(DRCRobotModel robotModel, double groundHeight, double offsetYaw)
+   public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(String prefix, DRCRobotModel robotModel, double groundHeight, double offsetYaw)
    {
-      return createFullRobotModelAtInitialConfiguration(robotModel, groundHeight, new Point2D(), offsetYaw);
+      return createFullRobotModelAtInitialConfiguration(prefix, robotModel, groundHeight, new Point2D(), offsetYaw);
    }
 
-   public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(DRCRobotModel robotModel,
+   public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(String prefix,
+                                                                                   DRCRobotModel robotModel,
                                                                                    double groundHeight,
                                                                                    Tuple2DReadOnly offset,
                                                                                    double offsetYaw)
    {
-      FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel(prefix, false);
       robotModel.getDefaultRobotInitialSetup(groundHeight, offsetYaw).initializeFullRobotModel(initialFullRobotModel);
       initialFullRobotModel.getRootJoint().getJointPose().prependTranslation(offset.getX(), offset.getY(), 0.0);
       initialFullRobotModel.updateFrames();

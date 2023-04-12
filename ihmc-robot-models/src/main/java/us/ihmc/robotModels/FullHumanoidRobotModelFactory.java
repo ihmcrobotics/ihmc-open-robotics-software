@@ -8,5 +8,11 @@ public interface FullHumanoidRobotModelFactory extends FullLeggedRobotModelFacto
    FullHumanoidRobotModel createFullRobotModel();
 
    @Override
-   FullHumanoidRobotModel createFullRobotModel(String namePrefix);
+   default FullHumanoidRobotModel createFullRobotModel(String namePrefix)
+   {
+      return createFullRobotModel(namePrefix, true);
+   }
+
+   @Override
+   FullHumanoidRobotModel createFullRobotModel(String namePrefix, boolean enforceUniqueReferenceFrames);
 }

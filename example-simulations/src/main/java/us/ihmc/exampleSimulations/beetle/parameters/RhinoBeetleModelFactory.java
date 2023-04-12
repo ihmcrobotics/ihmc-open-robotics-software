@@ -45,6 +45,13 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
       return new FullRobotModelWrapper(robotDefinition, jointMapAndContactInfo);
    }
 
+   @Override
+   public FullRobotModel createFullRobotModel(String namePrefix, boolean enforceUniqueReferenceFrames)
+   {
+      /* TODO impose frame uniqueness if needed */
+      return new FullRobotModelWrapper(robotDefinition, jointMapAndContactInfo);
+   }
+
    public LogModelProvider createLogModelProvider()
    {
       return new DefaultLogModelProvider<>(SDFModelLoader.class,

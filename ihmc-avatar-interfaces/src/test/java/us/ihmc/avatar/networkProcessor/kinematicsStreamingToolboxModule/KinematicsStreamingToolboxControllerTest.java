@@ -304,7 +304,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    {
       DRCRobotModel robotModel = newRobotModel();
       setupNoWalkingController(robotModel.getHumanoidRobotKinematicsCollisionModel());
-      FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(robotModel);
+      FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration("handMotionTest", robotModel);
       toolboxController.updateRobotConfigurationData(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration));
       toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(fullRobotModelAtInitialConfiguration, robotModel, true, true));
 

@@ -48,12 +48,17 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
    public FullHumanoidRobotModelWrapper(RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
    {
-      this("model" + modelCounter.incrementAndGet(), robotDefinition, jointNameMap);
+      this("model" + modelCounter.incrementAndGet(), robotDefinition, jointNameMap, true);
    }
 
    public FullHumanoidRobotModelWrapper(String namePrefix, RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
    {
-      this(robotDefinition.newInstance(generateUniqueStaticFrame(namePrefix)));
+      this(namePrefix, robotDefinition, jointNameMap, true);
+   }
+
+   public FullHumanoidRobotModelWrapper(String namePrefix, RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
+   {
+      this(robotDefinition.newInstance(generateUniqueStationaryFrame(namePrefix, enforceUniqueReferenceFrames)));
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
@@ -65,7 +70,12 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
    public FullHumanoidRobotModelWrapper(String namePrefix, RobotDescription robotDescription, HumanoidJointNameMap jointNameMap)
    {
-      this(instantiateRobot(robotDescription, generateUniqueStaticFrame(namePrefix)));
+      this(namePrefix, robotDescription, jointNameMap, true);
+   }
+
+   public FullHumanoidRobotModelWrapper(String namePrefix, RobotDescription robotDescription, HumanoidJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
+   {
+      this(instantiateRobot(robotDescription, generateUniqueStationaryFrame(namePrefix, enforceUniqueReferenceFrames)));
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDescription(robotDescription);
    }
@@ -82,11 +92,12 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
       super(elevator);
    }
 
-   private static ReferenceFrame generateUniqueStaticFrame(String namePrefix)
+   private static ReferenceFrame generateUniqueStationaryFrame(String namePrefix, boolean enforceUniqueReferenceFrames)
    {
-      ReferenceFrame staticFrame = new FixedMovingReferenceFrame(namePrefix + "StationaryFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-      staticFrame.setNameRestrictionLevel(FrameNameRestrictionLevel.FRAME_NAME);
-      return staticFrame;
+      ReferenceFrame stationaryFrame = new FixedMovingReferenceFrame(namePrefix + "StationaryFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
+      if (enforceUniqueReferenceFrames)
+         stationaryFrame.setNameRestrictionLevel(FrameNameRestrictionLevel.FRAME_NAME);
+      return stationaryFrame;
    }
 
    protected void setupHumanoidJointNameMap(HumanoidJointNameMap jointNameMap)
