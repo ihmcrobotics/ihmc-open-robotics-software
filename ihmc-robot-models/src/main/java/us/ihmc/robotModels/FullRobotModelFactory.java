@@ -10,6 +10,8 @@ public interface FullRobotModelFactory
 
    default FullRobotModel createFullRobotModel(String namePrefix)
    {
-      return createFullRobotModel();
+      return createFullRobotModel(namePrefix, true);
    }
+
+   FullRobotModel createFullRobotModel(String namePrefix, boolean enforceUniqueReferenceFrames);
 }

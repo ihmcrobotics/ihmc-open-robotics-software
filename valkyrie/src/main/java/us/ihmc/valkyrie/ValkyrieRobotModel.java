@@ -415,9 +415,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public FullHumanoidRobotModel createFullRobotModel(String namePrefix)
+   public FullHumanoidRobotModel createFullRobotModel(String namePrefix, boolean enforceUniqueReferenceFrames)
    {
-      return new FullHumanoidRobotModelWrapper(namePrefix, getRobotDefinition(), getJointMap());
+      return new FullHumanoidRobotModelWrapper(namePrefix, getRobotDefinition(), getJointMap(), enforceUniqueReferenceFrames);
    }
 
    @Override

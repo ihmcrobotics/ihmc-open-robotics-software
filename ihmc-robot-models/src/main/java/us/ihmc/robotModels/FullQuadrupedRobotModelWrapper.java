@@ -12,6 +12,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import us.ihmc.euclid.referenceFrame.FrameNameRestrictionLevel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -67,7 +68,12 @@ public class FullQuadrupedRobotModelWrapper extends FullRobotModelWrapper implem
 
    public FullQuadrupedRobotModelWrapper(String namePrefix, RobotDefinition robotDefinition, QuadrupedJointNameMap jointNameMap)
    {
-      super(robotDefinition.newInstance(generateUniqueStaticFrame(namePrefix)));
+      this(namePrefix, robotDefinition, jointNameMap, true);
+   }
+
+   public FullQuadrupedRobotModelWrapper(String namePrefix, RobotDefinition robotDefinition, QuadrupedJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
+   {
+      super(robotDefinition.newInstance(generateUniqueStationaryFrame(namePrefix, enforceUniqueReferenceFrames)));
       setupQuadrupedJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
@@ -79,14 +85,23 @@ public class FullQuadrupedRobotModelWrapper extends FullRobotModelWrapper implem
 
    public FullQuadrupedRobotModelWrapper(String namePrefix, RobotDescription robotDescription, QuadrupedJointNameMap jointNameMap)
    {
-      super(instantiateRobot(robotDescription, generateUniqueStaticFrame(namePrefix)));
+      this(namePrefix, robotDescription, jointNameMap, true);
+   }
+
+   public FullQuadrupedRobotModelWrapper(String namePrefix, RobotDescription robotDescription, QuadrupedJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
+   {
+      super(instantiateRobot(robotDescription, generateUniqueStationaryFrame(namePrefix, enforceUniqueReferenceFrames)));
       setupQuadrupedJointNameMap(jointNameMap);
       setupRobotDescription(robotDescription);
    }
 
-   private static ReferenceFrame generateUniqueStaticFrame(String namePrefix)
+   private static ReferenceFrame generateUniqueStationaryFrame(String namePrefix, boolean enforceUniqueReferenceFrames)
    {
-      return ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent(namePrefix + "StaticFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
+      ReferenceFrame staticFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent(namePrefix + "StationaryFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
+      if (enforceUniqueReferenceFrames)
+         staticFrame.setNameRestrictionLevel(FrameNameRestrictionLevel.FRAME_NAME);
+
+      return staticFrame;
    }
 
    protected void setupQuadrupedJointNameMap(QuadrupedJointNameMap jointNameMap)

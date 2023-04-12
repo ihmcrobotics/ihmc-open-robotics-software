@@ -400,9 +400,9 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public FullHumanoidRobotModel createFullRobotModel(String namePrefix)
+   public FullHumanoidRobotModel createFullRobotModel(String namePrefix, boolean enforceUniqueReferenceFrames)
    {
-      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelWrapper(namePrefix, getRobotDefinition(), getJointMap());
+      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelWrapper(namePrefix, getRobotDefinition(), getJointMap(), enforceUniqueReferenceFrames);
       return doArmJointRestriction(fullRobotModel);
    }
 

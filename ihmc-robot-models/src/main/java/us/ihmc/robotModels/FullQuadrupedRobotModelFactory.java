@@ -8,5 +8,11 @@ public interface FullQuadrupedRobotModelFactory extends FullLeggedRobotModelFact
    FullQuadrupedRobotModel createFullRobotModel();
 
    @Override
-   FullQuadrupedRobotModel createFullRobotModel(String namePrefix);
+   default FullQuadrupedRobotModel createFullRobotModel(String namePrefix)
+   {
+      return createFullRobotModel(namePrefix, true);
+   }
+
+   @Override
+   FullQuadrupedRobotModel createFullRobotModel(String namePrefix, boolean enforceUniqueReferenceFrames);
 }
