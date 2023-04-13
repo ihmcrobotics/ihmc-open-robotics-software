@@ -26,7 +26,7 @@ public class DoorPerceptionHeuristicManager
 
    private boolean doorFrameLockedIn = false;
 
-   public DoorPerceptionHeuristicManager(long markerID, String name, ReferenceFrame cameraFrame)
+   public DoorPerceptionHeuristicManager()
    {
       this.markerID = markerID;
       this.cameraFrame = cameraFrame;

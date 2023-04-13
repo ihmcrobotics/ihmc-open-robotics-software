@@ -7,9 +7,8 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
-import us.ihmc.perception.scene.SceneObjectLibrary;
+import us.ihmc.perception.scene.PredefinedSceneObjectLibrary;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,8 +18,6 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.Throttler;
-
-import java.util.List;
 
 /** To run this you have to download the Spinnaker SDK, move it to the robot computer, then run
  *  the install script inside of it.
@@ -39,14 +36,14 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final SideDependentList<DualBlackflyCamera> blackflies = new SideDependentList<>();
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
-   private final SceneObjectLibrary sceneObjectLibrary;
+   private final PredefinedSceneObjectLibrary predefinedSceneObjectLibrary;
    private final IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
    public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel,
-                                                   SceneObjectLibrary sceneObjectLibrary,
+                                                   PredefinedSceneObjectLibrary predefinedSceneObjectLibrary,
                                                    IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics)
    {
-      this.sceneObjectLibrary = sceneObjectLibrary;
+      this.predefinedSceneObjectLibrary = predefinedSceneObjectLibrary;
       this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
@@ -101,8 +98,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                   blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()),
                                   side,
                                   ros2Helper,
-                                  realtimeROS2Node,
-                                  sceneObjectLibrary,
+                                  realtimeROS2Node, predefinedSceneObjectLibrary,
                                   ousterFisheyeColoringIntrinsics);
                }
             }

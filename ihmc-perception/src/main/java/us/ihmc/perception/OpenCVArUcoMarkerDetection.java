@@ -20,8 +20,10 @@ import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.scene.ArUcoDetectableObject;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.tools.thread.Throttler;
@@ -173,27 +175,28 @@ public class OpenCVArUcoMarkerDetection
       rgb8ImageForDetection.getBytedecoOpenCVMat().copyTo(imageToPack.getBytedecoOpenCVMat());
    }
 
-   public boolean isDetected(OpenCVArUcoMarker marker)
+   public boolean isDetected(int markerID)
    {
-      return detectionSwapReference.getForThreadTwo().getMarkerIDToCornersIndexMap().containsKey(marker.getId());
+      return detectionSwapReference.getForThreadTwo().getMarkerIDToCornersIndexMap().containsKey(markerID);
    }
 
-   public FramePose3DBasics getPose(OpenCVArUcoMarker marker)
+   public void getPose(int markerID, double markerSize, ReferenceFrame desiredFrame, RigidBodyTransform transformToDesiredFrameToPack)
    {
-      updateMarkerPose(marker);
+      updateMarkerPose(markerID, markerSize);
       markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
-      return markerPose;
+      markerPose.changeFrame(desiredFrame);
+      markerPose.get(transformToDesiredFrameToPack);
    }
 
-   public void getPose(OpenCVArUcoMarker marker, Pose3DBasics poseToPack)
+   public void getPose(int markerID, double markerSize, Pose3DBasics poseToPack)
    {
-      updateMarkerPose(marker);
+      updateMarkerPose(markerID, markerSize);
       poseToPack.set(euclidPosition, euclidLinearTransform.getAsQuaternion());
    }
 
-   public void getPose(OpenCVArUcoMarker marker, RigidBodyTransform transformToSensor)
+   public void getPose(int markerID, double markerSize, RigidBodyTransform transformToSensor)
    {
-      updateMarkerPose(marker);
+      updateMarkerPose(markerID, markerSize);
       transformToSensor.set(euclidLinearTransform.getAsQuaternion(), euclidPosition);
    }
 
@@ -201,7 +204,7 @@ public class OpenCVArUcoMarkerDetection
     * Estimates the pose of the single marker ID.
     * Multiple markers of the same ID is not supported.
     */
-   private void updateMarkerPose(OpenCVArUcoMarker marker)
+   private void updateMarkerPose(int markerID, double markerSize)
    {
       if (enabled)
       {
@@ -212,15 +215,15 @@ public class OpenCVArUcoMarkerDetection
           * Third corner is bottom right of marker.
           * Fourth corner is bottom left of marker.
           */
-         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 0, 0.0f, (float) -marker.getSideLength(), (float) marker.getSideLength());
-         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 1, 0.0f, 0.0f, (float) marker.getSideLength());
+         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 0, 0.0f, (float) -markerSize, (float) markerSize);
+         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 1, 0.0f, 0.0f, (float) markerSize);
          BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 2, 0.0f, 0.0f, 0.0f);
-         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 3, 0.0f, (float) -marker.getSideLength(), 0.0f);
+         BytedecoOpenCVTools.putFloat3(objectPointsDataPointer, 3, 0.0f, (float) -markerSize, 0.0f);
 
          synchronized (detectionSwapReference)
          {
             OpenCVArUcoMakerDetectionSwapData data = detectionSwapReference.getForThreadTwo();
-            Mat markerCorners = data.getCorners().get(data.getMarkerIDToCornersIndexMap().get(marker.getId()));
+            Mat markerCorners = data.getCorners().get(data.getMarkerIDToCornersIndexMap().get(markerID));
             opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
          }
 
