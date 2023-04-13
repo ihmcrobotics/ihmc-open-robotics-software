@@ -79,4 +79,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.sensorVarianceWhenMoving, sensorVarianceWhenMoving);
    }
+
+   default void setEstimateHeightWithKalmanFilter(boolean estimateHeightWithKalmanFilter)
+   {
+      set(HeightMapParameters.estimateHeightWithKalmanFilter, estimateHeightWithKalmanFilter);
+   }
 }

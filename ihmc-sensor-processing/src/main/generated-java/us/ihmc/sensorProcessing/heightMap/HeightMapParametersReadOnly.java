@@ -81,4 +81,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(sensorVarianceWhenMoving);
    }
+
+   default boolean getEstimateHeightWithKalmanFilter()
+   {
+      return get(estimateHeightWithKalmanFilter);
+   }
 }
