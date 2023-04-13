@@ -157,8 +157,9 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       pelvisTrajectoryMessage.setSequenceId(random.nextLong());
 
       simulationTestHelper.publishToController(pelvisTrajectoryMessage);
+      ThreadTools.sleep(10); // Need to wait a little for the message to make through the intraprocess threads.
 
-      success = simulationTestHelper.simulateNow(3.0 * controllerDT);
+      success = simulationTestHelper.simulateNow(controllerDT);
       assertTrue(success);
 
       assertEquals(1, statusMessages.size());
@@ -1048,6 +1049,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       }
 
       simulationTestHelper.publishToController(pelvisTrajectoryMessage);
+      ThreadTools.sleep(10);
 
       success = simulationTestHelper.simulateNow(getRobotModel().getControllerDT());
       assertTrue(success);

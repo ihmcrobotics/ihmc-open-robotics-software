@@ -96,7 +96,6 @@ public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements B
       LogTools.info("Fancy poses behavior selected = {}", enabled);
 
       mainThread.setRunning(enabled);
-      helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    private void doOnAbort(boolean abort)
