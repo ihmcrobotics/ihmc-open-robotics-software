@@ -34,7 +34,12 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.tools.RDXModelInstance;
+import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.visualizers.RDXHeightMapGraphic;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -46,6 +51,7 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import java.nio.FloatBuffer;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 
 public class RDXHeightMapExtractionDemo
 {
@@ -61,15 +67,18 @@ public class RDXHeightMapExtractionDemo
 
    private final HeightMapUpdater heightMapUpdater = new HeightMapUpdater();
    private final RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
+   private final ImGuiStoredPropertySetTuner heightMapParameters;
+   private final ImGuiStoredPropertySetTuner heightMapFitlerParameters;
 
    private final Notification userChangedIndex = new Notification();
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
 
-   private ImInt frameIndex = new ImInt(0);
-   private ImFloat planeHeight = new ImFloat(1.5f); // 2.133f
+   private final ImInt frameIndex = new ImInt(0);
+   private final ImFloat planeHeight = new ImFloat(1.5f); // 2.133f
 
+   private final Pose3D previousPose = new Pose3D();
    private final Pose3D cameraPose = new Pose3D();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
 
@@ -79,9 +88,9 @@ public class RDXHeightMapExtractionDemo
 
    private BytedecoImage loadedDepthImage;
    private final BytePointer depthBytePointer = new BytePointer(1000000);
+   private double translation = Double.NaN;
 
    private OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
    private PerceptionDataLoader perceptionDataLoader;
 
    private boolean initialized = false;
@@ -89,6 +98,10 @@ public class RDXHeightMapExtractionDemo
    public RDXHeightMapExtractionDemo()
    {
       perceptionDataLoader = new PerceptionDataLoader();
+      previousPose.setToNaN();
+
+      heightMapParameters = new ImGuiStoredPropertySetTuner("heightMapParameters");
+      heightMapFitlerParameters = new ImGuiStoredPropertySetTuner("Filter Parameters");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -99,14 +112,18 @@ public class RDXHeightMapExtractionDemo
             baseUI.create();
 
             openCLManager = new OpenCLManager();
-            openCLProgram = openCLManager.loadProgram("RapidHeightMapExtractor");
 
             heightMapVisualizer.create();
             heightMapVisualizer.setActive(true);
             heightMapUpdater.attachHeightMapConsumer(heightMapVisualizer::acceptHeightMapMessage);
 
+            heightMapParameters.create(heightMapUpdater.getHeightMapParameters());
+            heightMapFitlerParameters.create(heightMapUpdater.getHeightMapFilterParameters());
+
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
+            baseUI.getImGuiPanelManager().addPanel(heightMapParameters);
+            baseUI.getImGuiPanelManager().addPanel(heightMapFitlerParameters);
 
             baseUI.getPrimaryScene().addRenderableProvider(heightMapVisualizer);
 
@@ -168,7 +185,7 @@ public class RDXHeightMapExtractionDemo
             boolean changed = ImGui.sliderInt("Frame Index",
                                               frameIndex.getData(),
                                               0,
-                                              (int) (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1));
+                                              (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1));
 
             changed |= ImGui.sliderFloat("Plane Height", planeHeight.getData(), -3.0f, 3.0f);
 
@@ -188,6 +205,12 @@ public class RDXHeightMapExtractionDemo
             {
                userChangedIndex.set();
             }
+            imgui.internal.ImGui.text("Distance " + translation);
+
+
+            ImGui.separator();
+
+            heightMapVisualizer.renderImGuiWidgets();
          }
 
          @Override
@@ -204,7 +227,8 @@ public class RDXHeightMapExtractionDemo
                                     ReferenceFrame sensorFrame,
                                     BytedecoImage depthImage,
                                     int numberOfPoints,
-                                    Instant instant)
+                                    Instant instant,
+                                    boolean isMoving)
    {
 
       FramePose3D sensorPose = new FramePose3D(sensorFrame);
@@ -218,35 +242,48 @@ public class RDXHeightMapExtractionDemo
       // submitting the world frame for the sensor pose, as that's the frame the data is in.
       inputData.sensorPose = sensorPose;
       // TODO add variance
-//      if (currentWalkingStatus.get() == WalkingStatus.STARTED)
-//      {
+      if (isMoving)
+      {
          inputData.verticalMeasurementVariance = heightMapUpdater.getHeightMapParameters().getSensorVarianceWhenMoving();
-//      }
-//      else
-//      {
+      }
+      else
+      {
          inputData.verticalMeasurementVariance = heightMapUpdater.getHeightMapParameters().getSensorVarianceWhenStanding();
-//      }
+      }
+
+      double size = isMoving ? 0.05 : 0.1;
+      RDXModelInstance coordinateFrame = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(size));
+      LibGDXTools.toLibGDX(new RigidBodyTransform(sensorPose), coordinateFrame.transform);
+      baseUI.getPrimaryScene().addRenderableProvider(coordinateFrame);
 
       heightMapUpdater.addPointCloudToQueue(inputData);
    }
 
    private void updateHeightMap()
    {
-
          LogTools.info("Update Height Map: " + frameIndex.get());
          Point3D position = sensorPositionBuffer.get(frameIndex.get());
          Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
          cameraPose.set(position, orientation);
          cameraFrame.setPoseAndUpdate(cameraPose);
 
-         updateWithDataBuffer(ReferenceFrame.getWorldFrame(),
-                              cameraFrame,
-                              loadedDepthImage,
-                              loadedDepthImage.getImageHeight() * loadedDepthImage.getImageWidth(),
-                              Instant.now());
-         heightMapUpdater.runUpdateThread();
+         boolean validTranslation = cameraPose.getTranslation().distance(previousPose.getTranslation()) < 5.0;
+         boolean validRotation = cameraPose.getRotation().distance(previousPose.getOrientation()) < 0.1;
+         if (previousPose.containsNaN() || validTranslation && validRotation)
+         {
+            translation = cameraPose.getTranslation().distance(previousPose.getTranslation());
+            boolean isMoving = translation > 0.005;
+            updateWithDataBuffer(ReferenceFrame.getWorldFrame(),
+                                 cameraFrame,
+                                 loadedDepthImage,
+                                 loadedDepthImage.getImageHeight() * loadedDepthImage.getImageWidth(),
+                                 Instant.now(),
+                                 isMoving);
+            heightMapUpdater.runUpdateThread();
 
-         heightMapVisualizer.update();
+            heightMapVisualizer.update();
+            previousPose.set(cameraPose);
+         }
 
 //      if (heightMapUpdateNotification.poll())
 //      {
@@ -263,6 +300,7 @@ public class RDXHeightMapExtractionDemo
 //                                               1,
 //                                              1 / (0.3f + 0.20f * rapidHeightMapUpdater.getCellSizeXYInMeters()));
 //      }
+
    }
 
 
