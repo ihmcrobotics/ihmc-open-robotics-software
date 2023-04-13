@@ -36,7 +36,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
                                                                                     statusOutputManager,
                                                                                     yoGraphicsListRegistry,
                                                                                     registry);
-      commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(fullRobotModel));
+      commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(fullRobotModel, kinematicsPlanningToolboxController.getCurrentReferenceFrames()));
       startYoVariableServer();
    }
 

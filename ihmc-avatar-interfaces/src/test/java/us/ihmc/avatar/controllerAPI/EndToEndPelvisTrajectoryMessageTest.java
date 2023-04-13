@@ -79,6 +79,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -305,7 +306,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPosition, desiredOrientation, simulationTestHelper, isUsingPelvisHeightControlOnly());
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       referenceFrames.updateFrames();
       double walkingTime = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, simulationTestHelper.getRootRegistry());
       success = simulationTestHelper.simulateNow(2.0 + walkingTime);
@@ -314,7 +315,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    private double sendWalkingPacket(DRCRobotModel robotModel,
                                     FullHumanoidRobotModel fullRobotModel,
-                                    HumanoidReferenceFrames referenceFrames,
+                                    CommonHumanoidReferenceFrames referenceFrames,
                                     YoRegistry registry)
    {
       referenceFrames.updateFrames();
@@ -384,7 +385,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       int numberOfTrajectoryPoints = 100;
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       referenceFrames.updateFrames();
 
       FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
@@ -583,7 +584,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       int numberOfTrajectoryPoints = 100;
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       referenceFrames.updateFrames();
 
       FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
@@ -717,7 +718,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       int numberOfTrajectoryPoints = 100;
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
       referenceFrames.updateFrames();
 
       FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
@@ -1107,7 +1108,9 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       success = simulationTestHelper.simulateNow(trajectoryTime);
       assertTrue(success);
 
-      ReferenceFrame supportFrame = new HumanoidReferenceFrames(fullRobotModel).getMidFeetZUpFrame();
+      CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getControllerReferenceFrames();
+      referenceFrames.updateFrames();
+      ReferenceFrame supportFrame = referenceFrames.getMidFeetZUpFrame();
 
       SE3TrajectoryPointMessage fromMessage = pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast();
       SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
@@ -1380,7 +1383,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue());
       assertTrue(success);
 
-      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      CommonHumanoidReferenceFrames humanoidReferenceFrames = simulationTestHelper.getControllerReferenceFrames();
+      humanoidReferenceFrames.updateFrames();
       ReferenceFrame supportFrame = humanoidReferenceFrames.getMidFeetZUpFrame();
 
       humanoidReferenceFrames.updateFrames();

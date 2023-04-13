@@ -1008,7 +1008,7 @@ public class HumanoidMessageTools
                                                                              Vector3DReadOnly desiredLinearVelocity,
                                                                              ReferenceFrame trajectoryReferenceFrame)
    {
-      return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, desiredLinearVelocity, trajectoryReferenceFrame.hashCode());
+      return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, desiredLinearVelocity, trajectoryReferenceFrame.getFrameNameHashCode());
    }
 
    public static LocalizationPacket createLocalizationPacket(boolean reset, boolean toggle)
@@ -1038,7 +1038,7 @@ public class HumanoidMessageTools
       message.getEuclideanTrajectory()
              .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime,
                                                                         new Point3D(0.0, 0.0, desiredHeight),
-                                                                        trajectoryReferenceFrame.hashCode()));
+                                                                        trajectoryReferenceFrame.getFrameNameHashCode()));
       message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(dataReferenceFrame));
       message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
       message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
@@ -1187,7 +1187,7 @@ public class HumanoidMessageTools
                                                                  Vector3DReadOnly desiredAngularVelocity,
                                                                  ReferenceFrame trajectoryFrame)
    {
-      return createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame.hashCode());
+      return createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, desiredAngularVelocity, trajectoryFrame.getFrameNameHashCode());
    }
 
    public static SO3TrajectoryMessage createSO3TrajectoryMessage(double trajectoryTime,
