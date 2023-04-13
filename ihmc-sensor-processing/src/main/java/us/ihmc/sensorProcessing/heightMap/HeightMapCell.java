@@ -87,14 +87,21 @@ public class HeightMapCell
 
    private void updateHeightEstimate()
    {
-      double heightSum = 0.0;
-      double varianceSum = 0.0;
-      for (int i = 0; i < heightMeasurements.size(); i++)
+      if (parameters.getEstimateHeightWithKalmanFilter())
       {
-         heightSum += heightMeasurements.get(i) / varianceMeasurements.get(i);
-         varianceSum += 1.0 / varianceMeasurements.get(i);
+         double heightSum = 0.0;
+         double varianceSum = 0.0;
+         for (int i = 0; i < heightMeasurements.size(); i++)
+         {
+            heightSum += heightMeasurements.get(i) / varianceMeasurements.get(i);
+            varianceSum += 1.0 / varianceMeasurements.get(i);
+         }
+         estimatedHeight.set(heightSum / varianceSum);
       }
-      estimatedHeight.set(heightSum / varianceSum);
+      else
+      {
+         estimatedHeight.set(heightMeasurements.sum() / heightMeasurements.size());
+      }
    }
 
    public void clear()

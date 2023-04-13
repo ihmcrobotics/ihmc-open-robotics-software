@@ -54,6 +54,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
     * This is the measurement variance when the robot is moving
     */
    public static final DoubleStoredPropertyKey sensorVarianceWhenMoving = keys.addDoubleKey("Sensor variance when moving");
+   public static final BooleanStoredPropertyKey estimateHeightWithKalmanFilter = keys.addBooleanKey("Estimate height with kalman filter");
 
    /**
     * Loads this property set.
