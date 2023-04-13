@@ -19,10 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.*;
 import us.ihmc.tools.property.StoredPropertySet;
 
 import java.io.*;
@@ -87,7 +84,7 @@ public class HeightMapUpdater
       heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
    }
 
-   public StoredPropertySet getHeightMapParameters()
+   public HeightMapParametersBasics getHeightMapParameters()
    {
       return parameters;
    }
@@ -288,6 +285,11 @@ public class HeightMapUpdater
 
       if (printQueueSize)
          LogTools.info("Point cloud queue: " + pointCloudQueue.size());
+   }
+
+   public HeightMapData getLatestHeightMap()
+   {
+      return HeightMapMessageTools.unpackMessage(buildMessage());
    }
 
    private HeightMapMessage buildMessage()

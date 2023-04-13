@@ -1,0 +1,34 @@
+{
+  "objects":[
+    {
+      "name": "Door",
+      "affordance": [
+        {
+          "name": "openPushDoor",
+          "sequence": ["closeGripper", "turnHandle", "pushOpen"]
+        },
+        {
+          "name": "openPullDoor",
+          "sequence": ["closeGripper", "turnHandle", "pullOpen"]
+        },
+        {
+          "name": "closePushDoor",
+          "sequence": []
+        },
+        {
+          "name": "closePullDoor",
+          "sequence": []
+        }
+      ]
+    },
+    {
+      "name": "Ketchup",
+      "affordance": [
+        {
+          "name": "applyOnFood",
+          "sequence": ["positionOnTopOfFood","closeGripper","zigZag"]
+        }
+      ]
+    }
+  ]
+}

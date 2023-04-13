@@ -13,21 +13,6 @@ import static us.ihmc.robotics.Assert.assertEquals;
 public class HeightMapCollisionDetectorTest
 {
    @Test
-   public void testPointOnBox()
-   {
-      FrameBox3D box = new FrameBox3D();
-      box.getSize().set(0.2, 0.1, 0.5);
-
-      Point3D point = new Point3D(0.05, 0.0, 0.05);
-      Point3DReadOnly pointOnBox = HeightMapCollisionDetector.getPointOnBoxWhenTheWholeBottomPenetrates(point, box);
-
-      assertEquals(0.0, box.distance(pointOnBox), 1e-5);
-
-      Point3D pointExpected = new Point3D(0.1, 0.0, 0.05);
-      EuclidCoreTestTools.assertEquals(pointExpected, pointOnBox, 1e-6);
-   }
-
-   @Test
    public void testPointOnBoxFromData()
    {
       FrameBox3D box = new FrameBox3D();

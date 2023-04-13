@@ -85,7 +85,6 @@ public class OusterDepthPublisher
    public void extractCompressAndPublish(ReferenceFrame ousterSensorFrame,
                                          OusterDepthExtractionKernel depthExtractionKernel,
                                          Instant acquisitionInstant,
-                                         ByteBuffer pixelShiftBuffer,
                                          ByteBuffer beamAltitudeAnglesBuffer,
                                          ByteBuffer beamAzimuthAnglesBuffer)
    {
@@ -93,7 +92,7 @@ public class OusterDepthPublisher
       cameraPose.setToZero(ousterSensorFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      depthExtractionKernel.runKernel(cameraPose);
+      depthExtractionKernel.runKernel(ousterSensorFrame.getTransformToRoot());
       // Encode as PNG which is lossless and handles single channel images.
       opencv_imgcodecs.imencode(".png",
                                 depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(),
@@ -114,7 +113,6 @@ public class OusterDepthPublisher
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);
       CameraModel.OUSTER.packMessageFormat(outputImageMessage);
-      MessageTools.packIDLSequenceCastingIntsToBytes(pixelShiftBuffer, outputImageMessage.getOusterPixelShifts());
       MessageTools.packIDLSequence(beamAltitudeAnglesBuffer, outputImageMessage.getOusterBeamAltitudeAngles());
       MessageTools.packIDLSequence(beamAzimuthAnglesBuffer, outputImageMessage.getOusterBeamAzimuthAngles());
       imagePublisher.publish(outputImageMessage);
@@ -128,7 +126,7 @@ public class OusterDepthPublisher
          lidarScanMessage.getScan().reset();
          LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan,
                                                        lidarScanMessage,
-                                                       (i, j) -> depthExtractionKernel.getPointCloudInSensorFrame().get(3 * i + j));
+                                                       (i, j) -> depthExtractionKernel.getPointCloudInWorldFrame().get(3 * i + j));
          lidarScanPublisher.publish(lidarScanMessage);
       }
    }

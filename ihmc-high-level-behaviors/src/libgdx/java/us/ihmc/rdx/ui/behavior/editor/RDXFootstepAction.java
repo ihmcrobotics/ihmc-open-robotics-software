@@ -16,16 +16,17 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
 
-import java.util.List;
 import java.util.UUID;
 
 public class RDXFootstepAction implements RDXBehaviorAction
@@ -47,7 +48,7 @@ public class RDXFootstepAction implements RDXBehaviorAction
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper ros2ControllerHelper,
-                      List<ReferenceFrame> referenceFrameLibrary,
+                      ReferenceFrameLibrary referenceFrameLibrary,
                       RDXFootstepAction possiblyNullPreviousFootstepAction)
    {
       this.syncedRobot = syncedRobot;
@@ -107,7 +108,7 @@ public class RDXFootstepAction implements RDXBehaviorAction
    @Override
    public void renderImGuiWidgets()
    {
-      if (referenceFrameLibraryCombo.combo())
+      if (referenceFrameLibraryCombo.render())
       {
          FramePose3D poseToKeep = new FramePose3D();
          poseToKeep.setToZero(poseGizmo.getGizmoFrame());
