@@ -8,6 +8,7 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -28,7 +29,7 @@ import us.ihmc.robotics.lists.DenseMatrixArrayList;
  * @author Robert Griffin
  *
  */
-public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqueCommand>
+public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqueCommand>, InverseDynamicsCommand<JointTorqueCommand>
 {
    /**
     * Initial capacity for the lists used in this command. It is to prevent memory allocation at the
