@@ -1,5 +1,8 @@
 package us.ihmc.perception.scene;
 
+import us.ihmc.perception.objects.BasicSceneObjects;
+import us.ihmc.perception.objects.DoorSceneObjects;
+
 /**
  * Use to specify which scene objects a robot is looking for.
  *
@@ -15,18 +18,30 @@ package us.ihmc.perception.scene;
  */
 public class SceneObjectLibrary
 {
+   private static ArUcoDetectableObject pushDoorPanel;
+   private static ArUcoDetectableObject pushDoorFrame;
+   private static ArUcoDetectableObject pullDoorPanel;
+   private static ArUcoDetectableObject pullDoorFrame;
+   private static ArUcoDetectableObject box;
+   private static ArUcoDetectableObject canOfSoup;
+
    public static SceneObjectLibrary defaultObjects()
    {
       SceneObjectLibrary sceneObjectLibrary = new SceneObjectLibrary();
 
       // Add door stuff
+      pushDoorPanel = DoorSceneObjects.createPushDoorPanel();
+      pushDoorFrame = DoorSceneObjects.createPushDoorFrame();
+      pullDoorPanel = DoorSceneObjects.createPullDoorPanel();
+      pullDoorFrame = DoorSceneObjects.createPullDoorFrame();
 
-
-      // Add ArUco box
+      box = BasicSceneObjects.createBox();
+      canOfSoup = BasicSceneObjects.createCanOfSoup();
 
       // Add non-ArUco cup -- detected by neural net
 
       return sceneObjectLibrary;
    }
+
 
 }

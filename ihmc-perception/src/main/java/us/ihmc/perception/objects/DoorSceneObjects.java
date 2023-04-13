@@ -1,24 +1,14 @@
 package us.ihmc.perception.objects;
 
-import perception_msgs.msg.dds.DetectedObjectMessage;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.perception.scene.ROS2ArUcoDetectableObject;
-import us.ihmc.perception.scene.SceneObjectAPI;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.perception.scene.ArUcoDetectableObject;
 
 public class DoorSceneObjects
 {
-   public static final ROS2Topic<DetectedObjectMessage> DETECTED_PULL_DOOR_FRAME = SceneObjectAPI.BASE_TOPIC.withType(DetectedObjectMessage.class)
-                                                                                                            .withSuffix("detected_pull_door_frame");
-   public static final ROS2Topic<DetectedObjectMessage> DETECTED_PULL_DOOR_PANEL = SceneObjectAPI.BASE_TOPIC.withType(DetectedObjectMessage.class)
-                                                                                                            .withSuffix("detected_pull_door_panel");
-   public static final ROS2Topic<DetectedObjectMessage> DETECTED_PUSH_DOOR_FRAME = SceneObjectAPI.BASE_TOPIC.withType(DetectedObjectMessage.class)
-                                                                                                            .withSuffix("detected_push_door_frame");
-   public static final ROS2Topic<DetectedObjectMessage> DETECTED_PUSH_DOOR_PANEL = SceneObjectAPI.BASE_TOPIC.withType(DetectedObjectMessage.class)
-                                                                                                            .withSuffix("detected_push_door_panel");
+   /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
+   public static final double DOOR_ARUCO_MARKER_WIDTH = 0.2032;
 
    public static final long PULL_DOOR_MARKER_ID = 0;
    public static final RigidBodyTransform PULL_DOOR_FRAME_TRANSFORM_TO_MARKER = new RigidBodyTransform(
@@ -44,31 +34,23 @@ public class DoorSceneObjects
                                                                -DoorModelParameters.DOOR_PANEL_GROUND_GAP_HEIGHT);
    }
 
-   public static ROS2ArUcoDetectableObject createPullDoorPanel(ROS2PublishSubscribeAPI ros2)
+   public static ArUcoDetectableObject createPullDoorPanel()
    {
-      ROS2ArUcoDetectableObject sceneObject = new ROS2ArUcoDetectableObject("PullDoor0Panel");
-      sceneObject.setupForROS2Publishing(ros2, DETECTED_PULL_DOOR_PANEL);
-      return sceneObject;
+      return new ArUcoDetectableObject("PullDoor0Panel", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_PANEL_TRANSFORM_TO_MARKER);
    }
 
-   public static ROS2ArUcoDetectableObject createPullDoorFrame(ROS2PublishSubscribeAPI ros2)
+   public static ArUcoDetectableObject createPullDoorFrame()
    {
-      ROS2ArUcoDetectableObject sceneObject = new ROS2ArUcoDetectableObject("PullDoor0Frame");
-      sceneObject.setupForROS2Publishing(ros2, DETECTED_PULL_DOOR_FRAME);
-      return sceneObject;
+      return new ArUcoDetectableObject("PullDoor0Frame", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_FRAME_TRANSFORM_TO_MARKER);
    }
 
-   public static ROS2ArUcoDetectableObject createPushDoorPanel(ROS2PublishSubscribeAPI ros2)
+   public static ArUcoDetectableObject createPushDoorPanel()
    {
-      ROS2ArUcoDetectableObject sceneObject = new ROS2ArUcoDetectableObject("PushDoor0Panel");
-      sceneObject.setupForROS2Publishing(ros2, DETECTED_PUSH_DOOR_PANEL);
-      return sceneObject;
+      return new ArUcoDetectableObject("PushDoor0Panel", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER);
    }
 
-   public static ROS2ArUcoDetectableObject createPushDoorFrame(ROS2PublishSubscribeAPI ros2)
+   public static ArUcoDetectableObject createPushDoorFrame()
    {
-      ROS2ArUcoDetectableObject sceneObject = new ROS2ArUcoDetectableObject("PullDoor0Frame");
-      sceneObject.setupForROS2Publishing(ros2, DETECTED_PUSH_DOOR_FRAME);
-      return sceneObject;
+      return new ArUcoDetectableObject("PullDoor0Frame", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER);
    }
 }

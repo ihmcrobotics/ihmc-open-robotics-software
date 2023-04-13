@@ -20,6 +20,11 @@ public abstract class DetectableSceneObject extends SceneObject
       super(name, parentFrame);
    }
 
+   public void setCurrentlyDetected(boolean currentlyDetected)
+   {
+      this.currentlyDetected = currentlyDetected;
+   }
+
    public boolean getCurrentlyDetected()
    {
       return currentlyDetected;
