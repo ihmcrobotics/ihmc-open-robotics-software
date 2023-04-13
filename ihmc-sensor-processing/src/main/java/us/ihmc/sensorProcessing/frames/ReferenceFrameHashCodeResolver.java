@@ -300,7 +300,7 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
    @Override
    public long getFrameIndex(ReferenceFrame referenceFrame)
    {
-      long hashCode = referenceFrame.hashCode();
+      long hashCode = referenceFrame.getFrameNameHashCode();
 
       if (!hashCodeToReferenceFrameMap.contains(hashCode))
          throw new RuntimeException("Unknown reference frame.");
