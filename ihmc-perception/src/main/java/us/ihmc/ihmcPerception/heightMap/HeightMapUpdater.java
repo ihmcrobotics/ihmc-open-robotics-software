@@ -416,9 +416,9 @@ public class HeightMapUpdater
          return;
       }
 
-      boolean muchHigherThanAllNeighbors = true;
       double heightThreshold = heightMap.getHeightAt(cellNumber) - filterParameters.getOutlierCellHeightResetEpsilon();
       int numberOfNeighbors = 0;
+      int neighborsAtSameHeight = 0;
       for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
       {
          int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
@@ -426,10 +426,11 @@ public class HeightMapUpdater
          if (heightMap.cellHasData(xNeighbor, yNeighbor))
          {
             numberOfNeighbors++;
-            muchHigherThanAllNeighbors &= heightMap.getHeightAt(xNeighbor, yNeighbor) < heightThreshold;
+            if (heightMap.getHeightAt(xNeighbor, yNeighbor) > heightThreshold)
+               neighborsAtSameHeight++;
          }
 
-         if (numberOfNeighbors >= filterParameters.getMinNeighborsAtSameHeightForValid() && !muchHigherThanAllNeighbors)
+         if (neighborsAtSameHeight >= filterParameters.getMinNeighborsAtSameHeightForValid())
          {
             heightMap.setHasSufficientNeighbors(cellNumber, true);
             return;
@@ -440,7 +441,7 @@ public class HeightMapUpdater
       {
          heightMap.setHasSufficientNeighbors(cellNumber, false);
       }
-      else if (numberOfNeighbors >= filterParameters.getMinNeighborsToDetermineOutliers() && muchHigherThanAllNeighbors)
+      else if (numberOfNeighbors >= filterParameters.getMinNeighborsToDetermineOutliers() && neighborsAtSameHeight < filterParameters.getMinNeighborsAtSameHeightForValid())
       {
          double resetHeight = 0.0;
          for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
