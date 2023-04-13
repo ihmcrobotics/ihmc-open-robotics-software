@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.scene.ArUcoDetectableObject;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.SwapReference;
@@ -186,6 +187,14 @@ public class OpenCVArUcoMarkerDetection
       markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
       markerPose.changeFrame(desiredFrame);
       markerPose.get(transformToDesiredFrameToPack);
+   }
+
+   public void getPose(int markerID, double markerSize, ReferenceFrame desiredFrame, Point3D translationToPack, Quaternion orientationToPack)
+   {
+      updateMarkerPose(markerID, markerSize);
+      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
+      markerPose.changeFrame(desiredFrame);
+      markerPose.get(orientationToPack, translationToPack);
    }
 
    public void getPose(int markerID, double markerSize, Pose3DBasics poseToPack)
