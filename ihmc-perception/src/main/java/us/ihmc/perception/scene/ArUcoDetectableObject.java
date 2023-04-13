@@ -8,7 +8,7 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
  * A scene object detectable via an ArUco marker.
  * Loads a stored property set for the marker information.
  */
-public class ROS2ArUcoDetectableObject extends ROS2DetectableSceneObject
+public class ArUcoDetectableObject extends DetectableSceneObject
 {
    private final long markerID;
    private final double markerSize;
@@ -17,7 +17,7 @@ public class ROS2ArUcoDetectableObject extends ROS2DetectableSceneObject
    /**
     * Give the marker info directly from code.
     */
-   public ROS2ArUcoDetectableObject(String name, long markerID, double markerSize, RigidBodyTransform markerTransformToParent)
+   public ArUcoDetectableObject(String name, long markerID, double markerSize, RigidBodyTransform markerTransformToParent)
    {
       super(name);
 
@@ -29,7 +29,7 @@ public class ROS2ArUcoDetectableObject extends ROS2DetectableSceneObject
    /**
     * Loads info from StoredPropertySet with name as suffix
     */
-   public ROS2ArUcoDetectableObject(String name)
+   public ArUcoDetectableObject(String name)
    {
       super(name);
 
@@ -43,5 +43,20 @@ public class ROS2ArUcoDetectableObject extends ROS2DetectableSceneObject
                                                     arUcoMarkerInfo.getMarkerYawRotationToParentDegrees(),
                                                     arUcoMarkerInfo.getMarkerPitchRotationToParentDegrees(),
                                                     arUcoMarkerInfo.getMarkerRollRotationToParentDegrees());
+   }
+
+   public long getMarkerID()
+   {
+      return markerID;
+   }
+
+   public double getMarkerSize()
+   {
+      return markerSize;
+   }
+
+   public RigidBodyTransform getMarkerTransformToParent()
+   {
+      return markerTransformToParent;
    }
 }

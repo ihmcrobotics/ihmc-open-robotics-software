@@ -1,13 +1,24 @@
 package us.ihmc.perception.objects;
 
-import perception_msgs.msg.dds.DetectedObjectMessage;
-import us.ihmc.perception.scene.SceneObjectAPI;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.scene.ArUcoDetectableObject;
 
 /**
  * Static methods to create boxes, cylinders, etc.
  */
 public class BasicSceneObjects
 {
-   public static final ROS2Topic<DetectedObjectMessage> DETECTED_BOX = SceneObjectAPI.BASE_TOPIC.withType(DetectedObjectMessage.class).withSuffix("detected_box");
+   public static ArUcoDetectableObject createBox()
+   {
+      return new ArUcoDetectableObject("Box", 3, 0.2, new RigidBodyTransform());
+   }
+
+   /**
+    * Represents a can of soup detected by a statically nearby placed ArUco
+    * marker,
+    */
+   public static ArUcoDetectableObject createCanOfSoup()
+   {
+      return new ArUcoDetectableObject("CanOfSoup", 3, 0.2, new RigidBodyTransform());
+   }
 }
