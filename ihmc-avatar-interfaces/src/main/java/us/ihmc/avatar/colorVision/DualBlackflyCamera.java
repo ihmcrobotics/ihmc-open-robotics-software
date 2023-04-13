@@ -22,12 +22,15 @@ import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
-import us.ihmc.perception.scene.SceneObjectLibrary;
+import us.ihmc.perception.scene.ArUcoDetectableObject;
+import us.ihmc.perception.scene.ArUcoSceneTools;
+import us.ihmc.perception.scene.PredefinedSceneObjectLibrary;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
@@ -38,7 +41,6 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.time.Instant;
-import java.util.List;
 
 public class DualBlackflyCamera
 {
@@ -80,7 +82,7 @@ public class DualBlackflyCamera
    private final Stopwatch encodingDuration = new Stopwatch();
    private final Stopwatch copyDuration = new Stopwatch();
    private long sequenceNumber = 0;
-   private List<OpenCVArUcoMarker> arUcoMarkersToTrack;
+   private PredefinedSceneObjectLibrary predefinedSceneObjectLibrary;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
@@ -98,14 +100,14 @@ public class DualBlackflyCamera
                       RobotSide side,
                       ROS2Helper ros2Helper,
                       RealtimeROS2Node realtimeROS2Node,
-                      SceneObjectLibrary sceneObjectLibrary,
+                      PredefinedSceneObjectLibrary predefinedSceneObjectLibrary,
                       IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics)
    {
       this.blackfly = blackfly;
       this.side = side;
       this.ros2Helper = ros2Helper;
       this.realtimeROS2Node = realtimeROS2Node;
-      this.arUcoMarkersToTrack = arUcoMarkersToTrack;
+      this.predefinedSceneObjectLibrary = predefinedSceneObjectLibrary;
       this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
 
       blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
@@ -209,7 +211,7 @@ public class DualBlackflyCamera
                   arUcoMarkerDetection.setSourceImageForDetection(undistortedImage);
                   newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
                   arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
-                                                                            arUcoMarkersToTrack,
+                                                                            predefinedSceneObjectLibrary,
                                                                             syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(),
                                                                             ros2Helper);
 
@@ -218,6 +220,8 @@ public class DualBlackflyCamera
                                                                                        cameraTransformToParent);
 
                   // TODO: Instantiate door heuristic manager
+//                  predefinedSceneObjectLibrary.
+
 
                   // TODO: Set up detectable scene object manager and publisher
                }
@@ -240,6 +244,8 @@ public class DualBlackflyCamera
                // arUcoMarkerDetection.drawDetectedMarkers(blackflySourceImage.getBytedecoOpenCVMat());
                // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
                arUcoMarkerPublisher.update();
+
+               ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneObjectLibrary);
             }
 
             convertColorDuration.start();

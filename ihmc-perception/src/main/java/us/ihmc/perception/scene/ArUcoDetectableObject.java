@@ -10,14 +10,14 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
  */
 public class ArUcoDetectableObject extends DetectableSceneObject
 {
-   private final long markerID;
+   private final int markerID;
    private final double markerSize;
    private final RigidBodyTransform markerTransformToParent = new RigidBodyTransform();
 
    /**
     * Give the marker info directly from code.
     */
-   public ArUcoDetectableObject(String name, long markerID, double markerSize, RigidBodyTransform markerTransformToParent)
+   public ArUcoDetectableObject(String name, int markerID, double markerSize, RigidBodyTransform markerTransformToParent)
    {
       super(name);
 
@@ -34,7 +34,7 @@ public class ArUcoDetectableObject extends DetectableSceneObject
       super(name);
 
       ArUcoMarkerInfo arUcoMarkerInfo = new ArUcoMarkerInfo(name);
-      markerID = (long) arUcoMarkerInfo.getMarkerID();
+      markerID = arUcoMarkerInfo.getMarkerID();
       markerSize = arUcoMarkerInfo.getMarkerSize();
       markerTransformToParent.getTranslation().set(arUcoMarkerInfo.getMarkerXTranslationToParent(),
                                                    arUcoMarkerInfo.getMarkerYTranslationToParent(),
@@ -45,7 +45,7 @@ public class ArUcoDetectableObject extends DetectableSceneObject
                                                     arUcoMarkerInfo.getMarkerRollRotationToParentDegrees());
    }
 
-   public long getMarkerID()
+   public int getMarkerID()
    {
       return markerID;
    }

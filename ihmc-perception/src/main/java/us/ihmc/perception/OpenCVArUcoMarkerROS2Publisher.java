@@ -6,9 +6,10 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.scene.ArUcoDetectableObject;
+import us.ihmc.perception.scene.PredefinedSceneObjectLibrary;
 
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * Used to publish detected ArUco marker poses over ROS 2.
@@ -16,14 +17,14 @@ import java.util.List;
 public class OpenCVArUcoMarkerROS2Publisher
 {
    private final OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-   private final HashMap<Integer, OpenCVArUcoMarker> arUcoMarkersToTrack = new HashMap<>();
+   private final HashMap<Integer, ArUcoDetectableObject> arUcoDetectableObjects = new HashMap<>();
    private final FramePose3D framePoseOfMarker = new FramePose3D();
    private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
    private final ReferenceFrame cameraFrame;
    private final ROS2PublishSubscribeAPI ros2;
 
    public OpenCVArUcoMarkerROS2Publisher(OpenCVArUcoMarkerDetection arUcoMarkerDetection,
-                                         List<OpenCVArUcoMarker> arUcoMarkersToTrack,
+                                         PredefinedSceneObjectLibrary predefinedSceneObjectLibrary,
                                          ReferenceFrame cameraFrame,
                                          ROS2PublishSubscribeAPI ros2)
    {
@@ -31,9 +32,9 @@ public class OpenCVArUcoMarkerROS2Publisher
       this.cameraFrame = cameraFrame;
       this.ros2 = ros2;
 
-      for (OpenCVArUcoMarker openCVArUcoMarker : arUcoMarkersToTrack)
+      for (ArUcoDetectableObject arUcoDetectableObject : predefinedSceneObjectLibrary.getArUcoDetectableObjects())
       {
-         this.arUcoMarkersToTrack.put(openCVArUcoMarker.getId(), openCVArUcoMarker);
+         this.arUcoDetectableObjects.put(arUcoDetectableObject.getMarkerID(), arUcoDetectableObject);
       }
    }
 
@@ -47,14 +48,17 @@ public class OpenCVArUcoMarkerROS2Publisher
             arUcoMarkerPoses.getMarkerId().clear();
             arUcoMarkerPoses.getOrientation().clear();
             arUcoMarkerPoses.getPosition().clear();
+            // Iterat
             for (int i = 0; i < ids.rows(); i++)
             {
                int markerID = ids.ptr(i, 0).getInt();
-               OpenCVArUcoMarker markerToTrack = arUcoMarkersToTrack.get(markerID);
+               ArUcoDetectableObject detectedObject = arUcoDetectableObjects.get(markerID);
 
-               if (markerToTrack != null)
+               if (detectedObject != null)
                {
-                  framePoseOfMarker.setIncludingFrame(cameraFrame, arUcoMarkerDetection.getPose(markerToTrack));
+                  arUcoMarkerDetection.getPose(detectedObject);
+
+                  framePoseOfMarker.setIncludingFrame(cameraFrame, arUcoMarkerDetection.getPose(detectedObject));
                   framePoseOfMarker.changeFrame(ReferenceFrame.getWorldFrame());
 
                   arUcoMarkerPoses.getMarkerId().add(markerID);
