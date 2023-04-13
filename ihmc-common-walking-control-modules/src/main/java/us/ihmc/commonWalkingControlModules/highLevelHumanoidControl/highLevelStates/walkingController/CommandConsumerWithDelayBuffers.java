@@ -9,6 +9,7 @@ import us.ihmc.concurrent.Builder;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.log.LogTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -20,7 +21,7 @@ public class CommandConsumerWithDelayBuffers
 {
    public static final int NUMBER_OF_COMMANDS_TO_QUEUE = 16;
 
-   private final YoDouble yoTime;
+   private final DoubleProvider yoTime;
    private final CommandInputManager commandInputManager;
    
    /** Controller's copy of the new commands to be processed. */
@@ -30,7 +31,7 @@ public class CommandConsumerWithDelayBuffers
    private final Map<Class<? extends Settable<?>>, Class<? extends Command<?,?>>> messageToCommandMap = new HashMap<>();
    private final List<Class<? extends Command<?, ?>>> listOfSupportedCommands = new ArrayList<>();
 
-   public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, List<Class<? extends Command<?, ?>>> commandsToRegister, YoDouble yoTime)
+   public CommandConsumerWithDelayBuffers(CommandInputManager commandInputManager, List<Class<? extends Command<?, ?>>> commandsToRegister, DoubleProvider yoTime)
    {
       this.yoTime = yoTime;
       this.commandInputManager = commandInputManager;
@@ -145,7 +146,7 @@ public class CommandConsumerWithDelayBuffers
       if(command != null)
       {
          double startTime = command.getExecutionTime();
-         if(yoTime.getDoubleValue() >= startTime)
+         if(yoTime.getValue() >= startTime)
          {
             return true;
          }
@@ -173,7 +174,7 @@ public class CommandConsumerWithDelayBuffers
       //not all commands implement setExecution time, if they don't the execution time will be 0 and should move to the front of the queue
       if(commandCopy.isDelayedExecutionSupported())
       {
-         commandCopy.setExecutionTime(commandCopy.getExecutionDelayTime() + yoTime.getDoubleValue());
+         commandCopy.setExecutionTime(commandCopy.getExecutionDelayTime() + yoTime.getValue());
       }
       priorityQueue.add(commandCopy);
    }
