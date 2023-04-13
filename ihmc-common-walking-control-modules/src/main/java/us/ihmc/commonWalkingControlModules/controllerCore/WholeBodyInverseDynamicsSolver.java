@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsOptimizationControlModule;
@@ -374,7 +375,10 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
                optimizationControlModule.submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
                break;
             case JOINTSPACE:
-               optimizationControlModule.submitJointspaceAccelerationCommand((JointspaceAccelerationCommand) command);
+               if (command instanceof JointspaceAccelerationCommand accelerationCommand)
+                  optimizationControlModule.submitJointspaceAccelerationCommand(accelerationCommand);
+               if (command instanceof JointTorqueCommand torqueCommand)
+                  optimizationControlModule.submitJointTorqueCommand(torqueCommand);
                break;
             case MOMENTUM:
                optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
