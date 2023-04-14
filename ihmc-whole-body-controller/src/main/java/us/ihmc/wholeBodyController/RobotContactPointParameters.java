@@ -233,7 +233,7 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
          xyDamping = (2000.0 * scale);
       }
 
-      groundContactModelParameters = new GroundContactModelParameters(zStiffness, zDamping, xyStiffness, xyDamping);
+      setGroundContactModelParameters(new GroundContactModelParameters(zStiffness, zDamping, xyStiffness, xyDamping));
    }
 
    public GroundContactModelParameters getGroundContactModelParameters()
