@@ -37,6 +37,19 @@ public final class MissionControlTools
       return true;
    }
 
+   public static boolean lmSensorsAvailable()
+   {
+      try
+      {
+         ProcessTools.execSimpleCommand("sensors");
+      }
+      catch (IOException | InterruptedException ignored)
+      {
+         return false;
+      }
+      return true;
+   }
+
    /**
     * Find any service file in /etc/systemd/system that contains:
     *    `IsMissionControllable=yes`

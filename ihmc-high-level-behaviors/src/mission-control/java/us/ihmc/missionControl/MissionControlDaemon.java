@@ -11,6 +11,7 @@ import us.ihmc.missionControl.resourceMonitor.FreeMemoryMonitor;
 import us.ihmc.missionControl.resourceMonitor.NVIDIAGPUMonitor;
 import us.ihmc.missionControl.resourceMonitor.SysstatNetworkMonitor;
 import us.ihmc.missionControl.resourceMonitor.cpu.CPUCoreTracker;
+import us.ihmc.missionControl.resourceMonitor.cpu.LmSensorsMonitor;
 import us.ihmc.missionControl.resourceMonitor.cpu.ProcStatCPUMonitor;
 import us.ihmc.missionControl.systemd.SystemdServiceMonitor;
 import us.ihmc.pubsub.DomainFactory;
@@ -34,6 +35,7 @@ public class MissionControlDaemon
 
    private final ProcStatCPUMonitor cpuMonitor;
    private final FreeMemoryMonitor memoryMonitor;
+   private LmSensorsMonitor sensorsMonitor; // Optional - requires lm_sensors
    private SysstatNetworkMonitor networkMonitor; // Optional - requires sysstat
    private NVIDIAGPUMonitor nvidiaGPUMonitor; // Optional - requires an NVIDIA GPU
    private final Map<String, SystemdServiceMonitor> serviceMonitors = new HashMap<>();
@@ -53,6 +55,16 @@ public class MissionControlDaemon
 
       memoryMonitor = new FreeMemoryMonitor();
       memoryMonitor.start();
+
+      if (MissionControlTools.lmSensorsAvailable())
+      {
+         sensorsMonitor = new LmSensorsMonitor();
+         sensorsMonitor.start();
+      }
+      else
+      {
+         LogTools.info("Not using lm_sensors monitor");
+      }
 
       if (MissionControlTools.sysstatAvailable())
       {
@@ -142,6 +154,17 @@ public class MissionControlDaemon
       message.setCpuCount(cpuCount);
       cpuCoreTrackers.values().forEach(cpuCoreTracker -> message.getCpuUsages().add(cpuCoreTracker.getPercentUsage()));
 
+      if (sensorsMonitor != null)
+      {
+         // Do not assume there are the same amount of CPUs as the CPU Monitor
+         Map<Integer, Integer> cpuTemps = sensorsMonitor.getCpuTemps();
+         for (int cpu : cpuTemps.keySet())
+         {
+            int temp = cpuTemps.get(cpu);
+            message.getCpuTemps().add(temp);
+         }
+      }
+
       if (networkMonitor != null)
       {
          Map<String, Float> ifaceRxKbps = networkMonitor.getIfaceRxKbps();
@@ -170,6 +193,7 @@ public class MissionControlDaemon
          message.getNvidiaGpuUtilization().add(nvidiaGPUMonitor.getGpuUsage());
          message.getNvidiaGpuMemoryUsed().add(nvidiaGPUMonitor.getMemoryUsed());
          message.getNvidiaGpuMemoryTotal().add(nvidiaGPUMonitor.getMemoryTotal());
+         message.getNvidiaGpuTemps().add(nvidiaGPUMonitor.getTemperature());
       }
 
       // Publish the message
