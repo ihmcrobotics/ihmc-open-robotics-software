@@ -237,13 +237,27 @@ public class ImGuiMachine
       ImGui.text(hostname);
       ImGui.popFont();
 
+      String cpuWarning = "";
       // Render usage graphs
-      ImGui.text("CPU");
+      float highestLastCPUTemp = 0f;
+      for (int i = 0; i < lastResourceUsageMessage.getCpuCount(); i++)
+         if (lastResourceUsageMessage.getCpuTemps().get(i) > highestLastCPUTemp)
+            highestLastCPUTemp = lastResourceUsageMessage.getCpuTemps().get(i);
+      if (highestLastCPUTemp > 85f)
+         cpuWarning = " [high CPU temperature (" + highestLastCPUTemp + "C)]";
+      ImGui.text("CPU" + cpuWarning);
       cpuPlot.render();
       ImGui.text("RAM");
       ramPlot.render();
       if (!gpuPlots.isEmpty())
-         ImGui.text("GPUs");
+      {
+         String warning = "";
+         float lastGPUTemp = lastResourceUsageMessage.getNvidiaGpuTemps().get(0);
+         if (lastGPUTemp > 85f)
+            warning = " [high GPU temperature (" + lastGPUTemp + "C)]";
+         ImGui.text("GPU" + warning);
+      }
+
       gpuPlots.forEach(ImPlotPlot::render);
       if (!vramPlots.isEmpty())
          ImGui.text("VRAM");
