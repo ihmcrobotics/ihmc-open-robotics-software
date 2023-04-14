@@ -22,13 +22,11 @@ import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
-import us.ihmc.perception.scene.ArUcoDetectableObject;
 import us.ihmc.perception.scene.ArUcoSceneTools;
 import us.ihmc.perception.scene.PredefinedSceneObjectLibrary;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
@@ -211,9 +209,8 @@ public class DualBlackflyCamera
                   arUcoMarkerDetection.setSourceImageForDetection(undistortedImage);
                   newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
                   arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
-                                                                            predefinedSceneObjectLibrary,
-                                                                            syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(),
-                                                                            ros2Helper);
+                                                                            ros2Helper,
+                                                                            predefinedSceneObjectLibrary.getArUcoMarkerIDsToSizes());
 
                   remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
                                                                                        ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
@@ -243,9 +240,6 @@ public class DualBlackflyCamera
                // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
                // arUcoMarkerDetection.drawDetectedMarkers(blackflySourceImage.getBytedecoOpenCVMat());
                // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
-
-
-
                arUcoMarkerPublisher.update();
 
                ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneObjectLibrary);

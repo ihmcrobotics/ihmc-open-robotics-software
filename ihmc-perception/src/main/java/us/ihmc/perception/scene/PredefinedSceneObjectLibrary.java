@@ -1,5 +1,6 @@
 package us.ihmc.perception.scene;
 
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.objects.BasicSceneObjects;
 import us.ihmc.perception.objects.DoorSceneObjects;
@@ -31,6 +32,7 @@ public class PredefinedSceneObjectLibrary
 
    private final HashSet<ArUcoDetectableObject> arUcoDetectableObjects = new HashSet<>();
    private final HashMap<Integer, StaticArUcoRelativeDetectableSceneObject> staticArUcoRelativeDetectableObjects = new HashMap<>();
+   private final TIntDoubleHashMap arUcoMarkerIDsToSizes = new TIntDoubleHashMap();
 
    public static PredefinedSceneObjectLibrary defaultObjects()
    {
@@ -44,6 +46,8 @@ public class PredefinedSceneObjectLibrary
       pullDoorPanel = DoorSceneObjects.createPullDoorPanel();
       arUcoDetectableObjects.add(pushDoorPanel);
       arUcoDetectableObjects.add(pullDoorPanel);
+      arUcoMarkerIDsToSizes.put(pushDoorPanel.getMarkerID(), pushDoorPanel.getMarkerSize());
+      arUcoMarkerIDsToSizes.put(pullDoorPanel.getMarkerID(), pullDoorPanel.getMarkerSize());
 
       // The frames stay in place after being seen
       pushDoorFrame = DoorSceneObjects.createPushDoorFrame();
@@ -55,6 +59,8 @@ public class PredefinedSceneObjectLibrary
       canOfSoup = BasicSceneObjects.createCanOfSoup();
       arUcoDetectableObjects.add(box);
       arUcoDetectableObjects.add(canOfSoup);
+      arUcoMarkerIDsToSizes.put(box.getMarkerID(), box.getMarkerSize());
+      arUcoMarkerIDsToSizes.put(canOfSoup.getMarkerID(), canOfSoup.getMarkerSize());
 
       // TODO: Add non-ArUco cup -- detected by neural net
 
@@ -88,5 +94,10 @@ public class PredefinedSceneObjectLibrary
    public HashMap<Integer, StaticArUcoRelativeDetectableSceneObject> getStaticArUcoRelativeDetectableObjects()
    {
       return staticArUcoRelativeDetectableObjects;
+   }
+
+   public TIntDoubleHashMap getArUcoMarkerIDsToSizes()
+   {
+      return arUcoMarkerIDsToSizes;
    }
 }
