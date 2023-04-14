@@ -13,7 +13,7 @@ public class LmSensorsMonitor extends ResourceMonitor
 
    public LmSensorsMonitor()
    {
-      super(1.0, "sensors");
+      super("sensors");
    }
 
    public Map<Integer, Integer> getCpuTemps()
