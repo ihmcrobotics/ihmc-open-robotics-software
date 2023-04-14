@@ -56,10 +56,11 @@ public class LmSensorsMonitor extends ResourceMonitor
             {
                try
                {
-                  int cpu = Integer.parseInt(lines[nextCPULine].split("\\s+")[1]);
+                  int cpu = Integer.parseInt(lines[nextCPULine].split("\\s+")[1].replace(":", ""));
                   String tempString = lines[nextCPULine].split("\\s+")[2];
                   int temp = (int) Float.parseFloat(tempString.replace("°C", ""));
                   cpuTemps.put(cpu, temp);
+                  nextCPULine++;
                }
                catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored)
                {
