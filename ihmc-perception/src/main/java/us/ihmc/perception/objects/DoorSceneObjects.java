@@ -4,6 +4,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.scene.ArUcoDetectableObject;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 public class DoorSceneObjects
 {
@@ -36,31 +37,65 @@ public class DoorSceneObjects
 
    public static final double DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN = 3.0;
 
+   public static final RigidBodyTransform PULL_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER = new RigidBodyTransform();
+   static
+   {
+      PULL_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getTranslation().add(0.03, 0.09, -0.105);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(PULL_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation(), 90.0, 0.0, 90.0);
+   }
+
+   public static final RigidBodyTransform PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER = new RigidBodyTransform();
+   static
+   {
+      PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getTranslation().add(0.03, 0.09, -0.105);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation(), 90.0, 0.0, 90.0);
+   }
+
+   public static final double DOOR_LEVER_HANDLE_MAXIMUM_DISTANCE_TO_LOCK_IN = 3.0;
+
    public static ArUcoDetectableObject createPullDoorPanel()
    {
-      return new ArUcoDetectableObject("PullDoor0Panel", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_PANEL_TRANSFORM_TO_MARKER);
+      return new ArUcoDetectableObject("PullDoorPanel", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_PANEL_TRANSFORM_TO_MARKER);
+   }
+
+   public static ArUcoDetectableObject createPushDoorPanel()
+   {
+      return new ArUcoDetectableObject("PushDoorPanel", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER);
    }
 
    public static StaticArUcoRelativeDetectableSceneObject createPullDoorFrame()
    {
-      return new StaticArUcoRelativeDetectableSceneObject("PullDoor0Frame",
+      return new StaticArUcoRelativeDetectableSceneObject("PullDoorFrame",
                                                           PULL_DOOR_MARKER_ID,
                                                           DOOR_ARUCO_MARKER_WIDTH,
                                                           PULL_DOOR_FRAME_TRANSFORM_TO_MARKER,
                                                           DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
    }
 
-   public static ArUcoDetectableObject createPushDoorPanel()
-   {
-      return new ArUcoDetectableObject("PushDoor0Panel", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER);
-   }
-
    public static StaticArUcoRelativeDetectableSceneObject createPushDoorFrame()
    {
-      return new StaticArUcoRelativeDetectableSceneObject("PullDoor0Frame",
+      return new StaticArUcoRelativeDetectableSceneObject("PullDoorFrame",
                                                           PUSH_DOOR_MARKER_ID,
                                                           DOOR_ARUCO_MARKER_WIDTH,
                                                           PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER,
                                                           DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+   }
+
+   public static StaticArUcoRelativeDetectableSceneObject createPushDoorLeverHandle()
+   {
+      return new StaticArUcoRelativeDetectableSceneObject("PushDoorLeverHandle",
+                                                          PUSH_DOOR_MARKER_ID,
+                                                          DOOR_ARUCO_MARKER_WIDTH,
+                                                          PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER,
+                                                          DOOR_LEVER_HANDLE_MAXIMUM_DISTANCE_TO_LOCK_IN);
+   }
+
+   public static StaticArUcoRelativeDetectableSceneObject createPullDoorLeverHandle()
+   {
+      return new StaticArUcoRelativeDetectableSceneObject("PullDoorLeverHandle",
+                                                          PULL_DOOR_MARKER_ID,
+                                                          DOOR_ARUCO_MARKER_WIDTH,
+                                                          PULL_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER,
+                                                          DOOR_LEVER_HANDLE_MAXIMUM_DISTANCE_TO_LOCK_IN);
    }
 }
