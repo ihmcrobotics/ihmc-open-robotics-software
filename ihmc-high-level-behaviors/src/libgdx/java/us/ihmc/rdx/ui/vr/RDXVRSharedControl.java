@@ -27,6 +27,8 @@ import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -41,7 +43,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private final ROS2PublishSubscribeAPI ros2;
    private final IHMCROS2Input<DetectedObjectMessage> objectDetectorSubscription;
    private final ImBoolean enabledReplay;
-   private final ImBoolean enabledIKStreaming;
+   private final SideDependentList<ImBoolean> enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
    private String objectName = "";
@@ -61,7 +63,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private int replayPreviewCounter = 0;
    private int speedSplineAdjustmentFactor = 1;
 
-   public RDXVRSharedControl(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
+   public RDXVRSharedControl(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, SideDependentList<ImBoolean> enabledIKStreaming, ImBoolean enabledReplay)
    {
       this.ros2 = ros2;
       this.enabledIKStreaming = enabledIKStreaming;
@@ -264,7 +266,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          ghostRobotGraphic.setActive(true); // show ghost robot of preview
          if (proMPAssistant.isCurrentTaskDone()) // if first motion preview is over and not validated yet
             firstPreview = false;
-         if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
+         // if streaming to controller has been activated again, it means the user validated the motion
+         if (enabledIKStreaming.get(RobotSide.LEFT).get() || enabledIKStreaming.get(RobotSide.RIGHT).get())
          {
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
             splineGraphics.clear(); // stop displaying preview splines
@@ -283,10 +286,15 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       else // if user did not use the preview or preview has been validated
       {
          // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
-         if (!enabledIKStreaming.get()) //prevent jump by first disabling streaming to controller and then shared control
+         // prevent jump by first disabling streaming to controller and then shared control
+         if (!enabledIKStreaming.get(RobotSide.LEFT).get() && !enabledIKStreaming.get(RobotSide.RIGHT).get())
             setEnabled(false);
          if (proMPAssistant.isCurrentTaskDone())
-            enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
+         {
+            // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
+            enabledIKStreaming.get(RobotSide.LEFT).set(false);
+            enabledIKStreaming.get(RobotSide.RIGHT).set(false);
+         }
       }
    }
 
@@ -316,10 +324,15 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             if (enabledReplay.get())
                this.enabled.set(false); // check no concurrency with replay
 
-            if (!enabledIKStreaming.get() && !isPreviewGraphicActive())
+            if (!(enabledIKStreaming.get(RobotSide.LEFT).get() || enabledIKStreaming.get(RobotSide.RIGHT).get()) && !isPreviewGraphicActive())
                this.enabled.set(false);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
             else if (isPreviewGraphicActive())
-               enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller
+            {
+               // if preview is enabled we do not want to stream to the controller
+               enabledIKStreaming.get(RobotSide.LEFT).set(false);
+               enabledIKStreaming.get(RobotSide.RIGHT).set(false);
+            }
+
             previewSetToActive = isPreviewGraphicActive();
             ghostRobotGraphic.setActive(false); // do not show ghost robot immediately, wait that prediction is available
          }

@@ -11,6 +11,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.IHMCROS2Input;
@@ -37,6 +38,7 @@ import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -52,6 +54,7 @@ import java.util.Set;
 public class RDXVRKinematicsStreamingMode
 {
    private final DRCRobotModel robotModel;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RestartableJavaProcess kinematicsStreamingToolboxProcess;
    private RDXMultiBodyGraphic ghostRobotGraphic;
@@ -74,7 +77,8 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
-   private final ImBoolean streamToController = new ImBoolean(false);
+   private final SideDependentList<FramePose3D> lastFramePose =  new SideDependentList<>();
+   private final SideDependentList<ImBoolean> streamToController = new SideDependentList<>();
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private RDXVRSharedControl sharedControlAssistant;
@@ -84,11 +88,12 @@ public class RDXVRKinematicsStreamingMode
    private int rightIndex = -1;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
-   public RDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
+   public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
-      this.robotModel = robotModel;
+      this.syncedRobot = syncedRobot;
+      this.robotModel = syncedRobot.getRobotModel();
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.kinematicsStreamingToolboxProcess = kinematicsStreamingToolboxProcess;
    }
@@ -140,6 +145,8 @@ public class RDXVRKinematicsStreamingMode
          ArmJointName lastWristJoint = robotModel.getJointMap().getArmJointNames()[robotModel.getJointMap().getArmJointNames().length - 1];
          wristJoints.put(side, ghostFullRobotModel.getArmJoint(side, lastWristJoint));
          wristJointAnglePlots.put(side, new ImGuiPlot(labels.get(side + " Hand Joint Angle")));
+
+         streamToController.put(side, new ImBoolean(false));
       }
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()));
@@ -157,10 +164,10 @@ public class RDXVRKinematicsStreamingMode
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
          InputDigitalActionData aButton = controller.getAButtonActionData();
+         if (aButton.bChanged() && aButton.bState())
+            streamToController.get(RobotSide.LEFT).set(true);
          if (aButton.bChanged() && !aButton.bState())
-         {
-            streamToController.set(!streamToController.get());
-         }
+            streamToController.get(RobotSide.LEFT).set(false);
 
          // NOTE: Implement hand open close for controller trigger button.
          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
@@ -184,10 +191,15 @@ public class RDXVRKinematicsStreamingMode
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
          InputDigitalActionData aButton = controller.getAButtonActionData();
+         if (aButton.bChanged() && aButton.bState())
+            streamToController.get(RobotSide.RIGHT).set(true);
          if (aButton.bChanged() && !aButton.bState())
-         {
-            setEnabled(!enabled.get());
-         }
+            streamToController.get(RobotSide.RIGHT).set(false);
+
+//         if (aButton.bChanged() && !aButton.bState())
+//         {
+//            setEnabled(!enabled.get());
+//         }
 
          // NOTE: Implement hand open close for controller trigger button.
          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
@@ -198,50 +210,53 @@ public class RDXVRKinematicsStreamingMode
          }
       });
 
-      for (RobotSide side : RobotSide.values)
-      {
-         vrContext.getController(side).runIfConnected(controller ->
-         {
-            float currentGripX = controller.getGripActionData().x();
-//            if (currentGripX)
-            {
-
-            }
-//            lastGripX
-         });
-      }
-
-
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
-            vrContext.getController(side).runIfConnected(controller ->
-            {  //TODO edit this part to include other robot parts (e.g., feet, elbows, chest?)
+            if(streamToController.get(side).get())
+            {
+               vrContext.getController(side).runIfConnected(controller ->
+               {  //TODO edit this part to include other robot parts (e.g., feet, elbows, chest?)
+                  KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+                  message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
+                  tempFramePose.setToZero(handDesiredControlFrames.get(side).getReferenceFrame());
+                  tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                  controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
+                  handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
+                  kinematicsRecorder.framePoseToRecord(tempFramePose);
+                  if (kinematicsRecorder.isReplaying())
+                     kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
+                  else if (sharedControlAssistant.isActive())
+                  {
+                     if(sharedControlAssistant.readyToPack())
+                        sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
+                     else
+                        sharedControlAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
+                  }
+                  message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+                  message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+                  message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
+                                                                     side.negateIfLeftSide(Math.PI / 2.0),
+                                                                     side.negateIfLeftSide(Math.PI / 2.0));
+                  toolboxInputMessage.getInputs().add().set(message);
+                  lastFramePose.put(side, new FramePose3D(tempFramePose));
+               });
+            }
+            else
+            {
+               // use previous frame or initial frame from ghost robot if none is available
+               if (lastFramePose.get(side) == null)
+                  lastFramePose.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                    syncedRobot.getFullRobotModel().getHandControlFrame(side).getTransformToWorldFrame()));
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
                message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
-               tempFramePose.setToZero(handDesiredControlFrames.get(side).getReferenceFrame());
-               tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
-               handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
-               kinematicsRecorder.framePoseToRecord(tempFramePose);
-               if (kinematicsRecorder.isReplaying())
-                  kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
-               else if (sharedControlAssistant.isActive())
-               {
-                  if(sharedControlAssistant.readyToPack())
-                     sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
-                  else
-                     sharedControlAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
-               }
-               message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
-               message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-               message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
-                                                                                 side.negateIfLeftSide(Math.PI / 2.0),
-                                                                                 side.negateIfLeftSide(Math.PI / 2.0));
+               message.getDesiredPositionInWorld().set(lastFramePose.get(side).getPosition());
+               message.getDesiredOrientationInWorld().set(lastFramePose.get(side).getOrientation());
                toolboxInputMessage.getInputs().add().set(message);
-            });
+            }
+
          }
 
 //         vrContext.getHeadset().runIfConnected(headset ->
@@ -265,7 +280,7 @@ public class RDXVRKinematicsStreamingMode
 //            toolboxInputMessage.getInputs().add().set(message);
 //         });
          if (enabled.get())
-            toolboxInputMessage.setStreamToController(streamToController.get());
+            toolboxInputMessage.setStreamToController(streamToController.get(RobotSide.LEFT).get() || streamToController.get(RobotSide.RIGHT).get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
          toolboxInputMessage.setTimestamp(System.nanoTime());
@@ -277,10 +292,13 @@ public class RDXVRKinematicsStreamingMode
    public void update(boolean ikStreamingModeEnabled)
    {
       // Safety features!
-      if (!ikStreamingModeEnabled)
-         streamToController.set(false);
-      if (!enabled.get())
-         streamToController.set(false);
+      for (RobotSide side : RobotSide.values)
+      {
+         if (!ikStreamingModeEnabled)
+            streamToController.get(side).set(false);
+         if (!enabled.get())
+            streamToController.get(side).set(false);
+      }
 
       if (status.getMessageNotification().poll())
       {
@@ -382,7 +400,10 @@ public class RDXVRKinematicsStreamingMode
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
       }
-      ImGui.checkbox(labels.get("Streaming to controller"), streamToController);
+      ImGui.text("Streaming to controller:");
+      ImGui.checkbox(labels.get("Left "), streamToController.get(RobotSide.LEFT));
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Right "), streamToController.get(RobotSide.RIGHT));
       ImGui.text("Output:");
       ImGui.sameLine();
       outputFrequencyPlot.renderImGuiWidgets();

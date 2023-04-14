@@ -49,7 +49,7 @@ public class RDXVRModeManager
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
 
-      kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), controllerHelper, kinematicsStreamingToolboxProcess);
+      kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, kinematicsStreamingToolboxProcess);
       kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
