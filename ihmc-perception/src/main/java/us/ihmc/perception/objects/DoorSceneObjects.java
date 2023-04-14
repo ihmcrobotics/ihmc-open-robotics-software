@@ -35,6 +35,8 @@ public class DoorSceneObjects
                                                                -DoorModelParameters.DOOR_PANEL_GROUND_GAP_HEIGHT);
    }
 
+   public static final double DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN = 3.0;
+
    public static ArUcoDetectableObject createPullDoorPanel()
    {
       return new ArUcoDetectableObject("PullDoor0Panel", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_PANEL_TRANSFORM_TO_MARKER);
@@ -42,7 +44,11 @@ public class DoorSceneObjects
 
    public static StaticArUcoRelativeDetectableSceneObject createPullDoorFrame()
    {
-      return new StaticArUcoRelativeDetectableSceneObject("PullDoor0Frame", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_FRAME_TRANSFORM_TO_MARKER);
+      return new StaticArUcoRelativeDetectableSceneObject("PullDoor0Frame",
+                                                          PULL_DOOR_MARKER_ID,
+                                                          DOOR_ARUCO_MARKER_WIDTH,
+                                                          PULL_DOOR_FRAME_TRANSFORM_TO_MARKER,
+                                                          DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
    }
 
    public static ArUcoDetectableObject createPushDoorPanel()
@@ -52,6 +58,10 @@ public class DoorSceneObjects
 
    public static StaticArUcoRelativeDetectableSceneObject createPushDoorFrame()
    {
-      return new StaticArUcoRelativeDetectableSceneObject("PullDoor0Frame", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER);
+      return new StaticArUcoRelativeDetectableSceneObject("PullDoor0Frame",
+                                                          PUSH_DOOR_MARKER_ID,
+                                                          DOOR_ARUCO_MARKER_WIDTH,
+                                                          PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER,
+                                                          DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
    }
 }

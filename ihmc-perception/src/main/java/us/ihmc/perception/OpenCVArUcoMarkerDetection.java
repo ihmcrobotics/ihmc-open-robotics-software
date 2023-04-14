@@ -16,15 +16,13 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_objdetect.RefineParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.perception.scene.ArUcoDetectableObject;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.tools.thread.Throttler;
@@ -195,6 +193,13 @@ public class OpenCVArUcoMarkerDetection
       markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
       markerPose.changeFrame(desiredFrame);
       markerPose.get(orientationToPack, translationToPack);
+   }
+
+   public Pose3DReadOnly getPoseInSensorFrame(int markerID, double markerSize)
+   {
+      updateMarkerPose(markerID, markerSize);
+      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
+      return markerPose;
    }
 
    public void getPose(int markerID, double markerSize, Pose3DBasics poseToPack)
