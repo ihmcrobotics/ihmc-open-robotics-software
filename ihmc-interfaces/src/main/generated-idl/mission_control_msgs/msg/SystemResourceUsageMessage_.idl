@@ -25,6 +25,10 @@ module mission_control_msgs
          */
         sequence<float> cpu_usages;
         /**
+         * [n] : temperature for nth CPU
+         */
+        sequence<float> cpu_temps;
+        /**
          * ======== Network statistics ========
          */
         long iface_count;
@@ -60,6 +64,10 @@ module mission_control_msgs
          * [n] : utilization for nth GPU
          */
         sequence<float> nvidia_gpu_utilization;
+        /**
+         * [n] : die temperature for nth GPU
+         */
+        sequence<float> nvidia_gpu_temps;
       };
     };
   };
