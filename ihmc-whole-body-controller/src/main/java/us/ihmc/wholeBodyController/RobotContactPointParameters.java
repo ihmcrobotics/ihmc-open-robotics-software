@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.LeggedJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSegment;
@@ -192,7 +193,10 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
 
    public void setGroundContactModelParameters(GroundContactModelParameters groundContactModelParameters)
    {
-      this.groundContactModelParameters = groundContactModelParameters;
+      if (this.groundContactModelParameters == null)
+         this.groundContactModelParameters = groundContactModelParameters;
+      else
+         LogTools.warn("Cannot set ground contact parameters, they have already been set elsewhere");
    }
 
    public void createGroundContactModelParameters()
