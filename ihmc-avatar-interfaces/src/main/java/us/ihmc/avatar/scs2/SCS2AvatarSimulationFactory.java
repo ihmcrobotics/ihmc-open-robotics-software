@@ -92,10 +92,10 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SCS2SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
-import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.tools.factories.FactoryFieldNotSetException;
 import us.ihmc.tools.factories.FactoryTools;
@@ -316,8 +316,8 @@ public class SCS2AvatarSimulationFactory
 
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = outputWriterFactory.get().build(robot.getControllerManager().getControllerInput(),
-                                                               robot.getControllerManager().getControllerOutput());
+      simulationOutputWriter = outputWriterFactory.get()
+                                                  .build(robot.getControllerManager().getControllerInput(), robot.getControllerManager().getControllerOutput());
    }
 
    private void setupStateEstimationThread()
