@@ -13,8 +13,7 @@ module mission_control_msgs
       {
         string service_name;
         string status;
-        long log_line_count;
-        sequence<string, 8192> log_lines;
+        sequence<octet, 25000000> log_data;
       };
     };
   };
