@@ -51,8 +51,6 @@ public class DoorSceneObjects
       EuclidCoreMissingTools.setYawPitchRollDegrees(PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation(), 90.0, 0.0, 90.0);
    }
 
-   public static final double DOOR_LEVER_HANDLE_MAXIMUM_DISTANCE_TO_LOCK_IN = 3.0;
-
    public static ArUcoDetectableObject createPullDoorPanel()
    {
       return new ArUcoDetectableObject("PullDoorPanel", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_PANEL_TRANSFORM_TO_MARKER);
@@ -81,21 +79,13 @@ public class DoorSceneObjects
                                                           DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
    }
 
-   public static StaticArUcoRelativeDetectableSceneObject createPushDoorLeverHandle()
+   public static ArUcoDetectableObject createPushDoorLeverHandle()
    {
-      return new StaticArUcoRelativeDetectableSceneObject("PushDoorLeverHandle",
-                                                          PUSH_DOOR_MARKER_ID,
-                                                          DOOR_ARUCO_MARKER_WIDTH,
-                                                          PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER,
-                                                          DOOR_LEVER_HANDLE_MAXIMUM_DISTANCE_TO_LOCK_IN);
+      return new ArUcoDetectableObject("PushDoorLeverHandle", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER);
    }
 
-   public static StaticArUcoRelativeDetectableSceneObject createPullDoorLeverHandle()
+   public static ArUcoDetectableObject createPullDoorLeverHandle()
    {
-      return new StaticArUcoRelativeDetectableSceneObject("PullDoorLeverHandle",
-                                                          PULL_DOOR_MARKER_ID,
-                                                          DOOR_ARUCO_MARKER_WIDTH,
-                                                          PULL_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER,
-                                                          DOOR_LEVER_HANDLE_MAXIMUM_DISTANCE_TO_LOCK_IN);
+      return new ArUcoDetectableObject("PullDoorLeverHandle", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER);
    }
 }

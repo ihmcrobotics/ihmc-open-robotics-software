@@ -24,6 +24,8 @@ public class PredefinedSceneObjectLibrary
 {
    private final ArUcoDetectableObject pushDoorPanel;
    private final ArUcoDetectableObject pullDoorPanel;
+   private final ArUcoDetectableObject pushDoorLeverHandle;
+   private final ArUcoDetectableObject pullDoorLeverHandle;
    private final StaticArUcoRelativeDetectableSceneObject pushDoorFrame;
    private final StaticArUcoRelativeDetectableSceneObject pullDoorFrame;
    private final ArUcoDetectableObject box;
@@ -32,8 +34,6 @@ public class PredefinedSceneObjectLibrary
    private final HashSet<ArUcoDetectableObject> arUcoDetectableObjects = new HashSet<>();
    private final HashMap<Integer, StaticArUcoRelativeDetectableSceneObject> staticArUcoRelativeDetectableObjects = new HashMap<>();
    private final TIntDoubleHashMap arUcoMarkerIDsToSizes = new TIntDoubleHashMap();
-   private final StaticArUcoRelativeDetectableSceneObject pushDoorLeverHandle;
-   private final StaticArUcoRelativeDetectableSceneObject pullDoorLeverHandle;
 
    public static PredefinedSceneObjectLibrary defaultObjects()
    {
@@ -45,20 +45,22 @@ public class PredefinedSceneObjectLibrary
       // Add door stuff
       pushDoorPanel = DoorSceneObjects.createPushDoorPanel();
       pullDoorPanel = DoorSceneObjects.createPullDoorPanel();
+      pushDoorLeverHandle = DoorSceneObjects.createPushDoorLeverHandle();
+      pullDoorLeverHandle = DoorSceneObjects.createPullDoorLeverHandle();
       arUcoDetectableObjects.add(pushDoorPanel);
       arUcoDetectableObjects.add(pullDoorPanel);
+      arUcoDetectableObjects.add(pushDoorLeverHandle);
+      arUcoDetectableObjects.add(pullDoorLeverHandle);
       arUcoMarkerIDsToSizes.put(pushDoorPanel.getMarkerID(), pushDoorPanel.getMarkerSize());
       arUcoMarkerIDsToSizes.put(pullDoorPanel.getMarkerID(), pullDoorPanel.getMarkerSize());
+      arUcoMarkerIDsToSizes.put(pushDoorLeverHandle.getMarkerID(), pushDoorLeverHandle.getMarkerSize());
+      arUcoMarkerIDsToSizes.put(pullDoorLeverHandle.getMarkerID(), pullDoorLeverHandle.getMarkerSize());
 
       // The frames stay in place after being seen
       pushDoorFrame = DoorSceneObjects.createPushDoorFrame();
       pullDoorFrame = DoorSceneObjects.createPullDoorFrame();
-      pushDoorLeverHandle = DoorSceneObjects.createPushDoorLeverHandle();
-      pullDoorLeverHandle = DoorSceneObjects.createPullDoorLeverHandle();
       staticArUcoRelativeDetectableObjects.put(pushDoorFrame.getMarkerID(), pushDoorFrame);
       staticArUcoRelativeDetectableObjects.put(pullDoorFrame.getMarkerID(), pullDoorFrame);
-      staticArUcoRelativeDetectableObjects.put(pushDoorLeverHandle.getMarkerID(), pushDoorLeverHandle);
-      staticArUcoRelativeDetectableObjects.put(pullDoorLeverHandle.getMarkerID(), pullDoorLeverHandle);
 
       box = BasicSceneObjects.createBox();
       canOfSoup = BasicSceneObjects.createCanOfSoup();
