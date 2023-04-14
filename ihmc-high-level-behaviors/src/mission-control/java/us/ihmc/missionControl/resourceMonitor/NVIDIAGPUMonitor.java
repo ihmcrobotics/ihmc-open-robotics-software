@@ -14,6 +14,7 @@ public class NVIDIAGPUMonitor extends ResourceMonitor
    private int memoryReserved;
    private int memoryUsed;
    private int memoryFree;
+   private int temperature;
 
    public NVIDIAGPUMonitor()
    {
@@ -63,6 +64,11 @@ public class NVIDIAGPUMonitor extends ResourceMonitor
    public int getMemoryFree()
    {
       return memoryFree;
+   }
+
+   public int getTemperature()
+   {
+      return temperature;
    }
 
    @Override
@@ -124,6 +130,22 @@ public class NVIDIAGPUMonitor extends ResourceMonitor
             catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored)
             {
                LogTools.info("Unable to parse nvidia-smi Utilization");
+            }
+         }
+
+         if (line.equals("Temperature"))
+         {
+            try
+            {
+               String currentTemperatureLine = lines[i + 1].trim();
+
+               int currentTemperature = Integer.parseInt(currentTemperatureLine.split("\\s+")[4]);
+
+               this.temperature = currentTemperature;
+            }
+            catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored)
+            {
+               LogTools.info("Unable to parse nvidia-smi Temperature");
             }
          }
       }
