@@ -108,10 +108,10 @@ public class MissionControlDaemon
       });
 
       MissionControlTools.findSystemdServiceNames().forEach(service ->
-      {
-         LogTools.info("Watching systemd service: " + service);
-         serviceMonitors.put(service, new SystemdServiceMonitor(instanceId, service, ros2Node));
-      });
+                                                            {
+                                                               LogTools.info("Watching systemd service: " + service);
+                                                               serviceMonitors.put(service, new SystemdServiceMonitor(instanceId, service, ros2Node));
+                                                            });
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
@@ -214,6 +214,12 @@ public class MissionControlDaemon
 
    public static void main(String[] args)
    {
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+      {
+         running = false;
+         Runtime.getRuntime().halt(0); // Set exit code to 0
+      }));
+
       if (!System.getProperty("os.name").toLowerCase().contains("linux"))
       {
          LogTools.warn("This program is only supported on Linux");
@@ -221,12 +227,6 @@ public class MissionControlDaemon
       }
 
       new MissionControlDaemon();
-
-      Runtime.getRuntime().addShutdownHook(new Thread(() ->
-      {
-         running = false;
-         Runtime.getRuntime().halt(0); // Set exit code to 0
-      }));
 
       while (running)
       {
