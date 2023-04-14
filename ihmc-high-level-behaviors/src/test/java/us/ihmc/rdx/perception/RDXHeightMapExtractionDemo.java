@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
@@ -45,6 +46,7 @@ import us.ihmc.rdx.visualizers.RDXHeightMapGraphic;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -52,6 +54,7 @@ import java.nio.FloatBuffer;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 public class RDXHeightMapExtractionDemo
 {
@@ -71,12 +74,14 @@ public class RDXHeightMapExtractionDemo
    private final ImGuiStoredPropertySetTuner heightMapFitlerParameters;
 
    private final Notification userChangedIndex = new Notification();
+
    private final ResettableExceptionHandlingExecutorService loadAndDecompressThreadExecutor = MissingThreadTools.newSingleThreadExecutor("LoadAndDecompress",
                                                                                                                                          true,
                                                                                                                                          1);
 
    private final ImInt frameIndex = new ImInt(0);
    private final ImFloat planeHeight = new ImFloat(1.5f); // 2.133f
+   private final ImBoolean autoAdvance = new ImBoolean(false);
 
    private final Pose3D previousPose = new Pose3D();
    private final Pose3D cameraPose = new Pose3D();
@@ -163,6 +168,14 @@ public class RDXHeightMapExtractionDemo
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
                }
 
+               if (autoAdvance.get())
+               {
+                  frameIndex.set(frameIndex.get() + 1);
+                  userChangedIndex.set();
+                  if (frameIndex.get() ==  (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1))
+                     autoAdvance.set(false);
+               }
+
                if (userChangedIndex.poll())
                {
                   loadAndDecompressThreadExecutor.clearQueueAndExecute(() ->
@@ -188,6 +201,10 @@ public class RDXHeightMapExtractionDemo
                                               (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1));
 
             changed |= ImGui.sliderFloat("Plane Height", planeHeight.getData(), -3.0f, 3.0f);
+            if (ImGui.button("AutoAdvance"))
+               autoAdvance.set(true);
+            if (ImGui.button("Stop Advancing"))
+               autoAdvance.set(false);
 
             if (ImGui.button("Load Previous"))
             {

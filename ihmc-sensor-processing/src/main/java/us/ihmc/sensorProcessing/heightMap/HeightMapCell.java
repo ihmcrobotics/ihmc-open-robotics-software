@@ -47,20 +47,16 @@ public class HeightMapCell
       }
       else
       {
-         double lowerBound = estimatedHeight.get() - parameters.getMahalanobisScale() * parameters.getNominalStandardDeviation();
-         double upperBound = estimatedHeight.get() + parameters.getMahalanobisScale() * parameters.getNominalStandardDeviation();
+         double error = Math.abs(heightMeasurement - estimatedHeight.get());
+         double maxErrorForReset = parameters.getMahalanobisScale() * parameters.getNominalStandardDeviation();
 
-         if (heightMeasurements.isEmpty() || heightMeasurement > upperBound)
+         if (heightMeasurements.isEmpty() || error > maxErrorForReset)
          {
             // Reset, point is above height threshold to merge
             clear();
             estimatedHeight.set(heightMeasurement);
             heightMeasurements.add(heightMeasurement);
             varianceMeasurements.add(varianceMeasurement);
-         }
-         else if (heightMeasurement < lowerBound)
-         {
-            // Ignore, point is below height threshold to consider
          }
          else if (heightMeasurements.size() >= parameters.getMaxPointsPerCell())
          {
@@ -94,11 +90,13 @@ public class HeightMapCell
          double variance = varianceMeasurements.get(oldestIndex);
          if (Double.isNaN(mapHeight.get()))
          {
+            // map height hasn't been set yet
             mapHeight.set(height);
             mapVariance.set(variance);
          }
          else
          {
+            // roll the oldest measurement into the map height
             double newHeight = (variance * mapHeight.get() + mapVariance.get() * height) / (variance + mapVariance.get());
             double newVariance = variance * mapVariance.get() / (variance + mapVariance.get());
 
