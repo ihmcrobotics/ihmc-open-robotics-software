@@ -50,7 +50,7 @@ public class MissionControlUI
 
       ImGuiPanel controlPanel = new ImGuiPanel("Control Panel", this::renderImGuiWidgets);
 
-      window.getImGuiDockSystem().getPanelManager().addPanel(controlPanel);
+      window.getImGuiDockSystem().getPanelManager().queueAddPanel(controlPanel);
 
       ThreadTools.startAThread(() -> window.run(null, () ->
       {
@@ -75,7 +75,7 @@ public class MissionControlUI
          if (!expired && !machines.containsKey(instanceId))
          {
             ImGuiMachine machine = new ImGuiMachine(instanceId, message.getHostnameAsString(), ros2Node);
-            window.getPanelManager().addPanel(machine.getPanel());
+            window.getPanelManager().queueAddPanel(machine.getPanel());
             machines.put(instanceId, machine);
          }
          else if (expired)
