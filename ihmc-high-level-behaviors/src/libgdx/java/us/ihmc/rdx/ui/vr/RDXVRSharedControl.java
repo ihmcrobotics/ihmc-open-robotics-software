@@ -7,6 +7,7 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import perception_msgs.msg.dds.DetectedObjectMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
 import us.ihmc.communication.IHMCROS2Input;
@@ -41,6 +42,7 @@ import java.util.Map;
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
    private final ROS2PublishSubscribeAPI ros2;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final IHMCROS2Input<DetectedObjectMessage> objectDetectorSubscription;
    private final ImBoolean enabledReplay;
    private final SideDependentList<ImBoolean> enabledIKStreaming;
@@ -60,16 +62,19 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
    private final ArrayList<KinematicsToolboxOutputStatus> assistanceStatusList = new ArrayList<>();
    private boolean firstPreview = true;
+   private boolean stoppedDuringFirstPreview = false;
    private int replayPreviewCounter = 0;
    private int speedSplineAdjustmentFactor = 1;
 
-   public RDXVRSharedControl(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, SideDependentList<ImBoolean> enabledIKStreaming, ImBoolean enabledReplay)
+   public RDXVRSharedControl(ROS2SyncedRobotModel syncedRobot, ROS2PublishSubscribeAPI ros2, SideDependentList<ImBoolean> enabledIKStreaming, ImBoolean enabledReplay)
    {
       this.ros2 = ros2;
+      this.syncedRobot = syncedRobot;
       this.enabledIKStreaming = enabledIKStreaming;
       this.enabledReplay = enabledReplay;
 
       // create ghost robot for assistance preview
+      DRCRobotModel robotModel = syncedRobot.getRobotModel();
       RobotDefinition ghostRobotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("#9370DB").derive(0.0, 1.0, 1.0, 0.5));
       RobotDefinition.forEachRigidBodyDefinition(ghostRobotDefinition.getRootBodyDefinition(),
@@ -85,12 +90,21 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       objectDetectorSubscription = ros2.subscribe(ArUcoObjectsPerceptionManager.DETECTED_OBJECT);
    }
 
-   public void processInput(InputDigitalActionData triggerButton)
+   public void processInput(InputDigitalActionData triggerButton, InputDigitalActionData validateButton)
    {
       // enable if trigger button has been pressed once. if button is pressed again shared control is stopped
       if (triggerButton.bChanged() && !triggerButton.bState())
-      {
          setEnabled(!enabled.get());
+
+      if(validateButton.bChanged() && !validateButton.bState() && previewSetToActive)
+      {
+         // if validate button is pressed, it means the user validated the motion
+         ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
+         splineGraphics.clear(); // stop displaying preview splines
+         stdDeviationGraphics.clear(); // stop displaying stdDeviation region
+         enabledIKStreaming.get(RobotSide.LEFT).set(true);
+         enabledIKStreaming.get(RobotSide.RIGHT).set(true);
+         previewValidated = true;
       }
    }
 
@@ -237,7 +251,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
       if (!objectName.isEmpty())
       {
-         proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame);
+         if(previewSetToActive || enabledIKStreaming.get(RobotSide.LEFT).get() || enabledIKStreaming.get(RobotSide.RIGHT).get())
+         {
+            proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectName, objectFrame);
+         }
 
          if (previewSetToActive)
          {
@@ -266,14 +283,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          ghostRobotGraphic.setActive(true); // show ghost robot of preview
          if (proMPAssistant.isCurrentTaskDone()) // if first motion preview is over and not validated yet
             firstPreview = false;
-         // if streaming to controller has been activated again, it means the user validated the motion
-         if (enabledIKStreaming.get(RobotSide.LEFT).get() || enabledIKStreaming.get(RobotSide.RIGHT).get())
-         {
-            ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
-            splineGraphics.clear(); // stop displaying preview splines
-            stdDeviationGraphics.clear(); // stop displaying stdDeviation region
-            previewValidated = true;
-         }
          if (!firstPreview) // if second replay or more, keep promp assistant in pause at beginning
             proMPAssistant.setStartTrajectories(0);
          else
@@ -286,14 +295,12 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       else // if user did not use the preview or preview has been validated
       {
          // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
-         // prevent jump by first disabling streaming to controller and then shared control
-         if (!enabledIKStreaming.get(RobotSide.LEFT).get() && !enabledIKStreaming.get(RobotSide.RIGHT).get())
-            setEnabled(false);
          if (proMPAssistant.isCurrentTaskDone())
          {
             // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
             enabledIKStreaming.get(RobotSide.LEFT).set(false);
             enabledIKStreaming.get(RobotSide.RIGHT).set(false);
+            setEnabled(false);
          }
       }
    }
@@ -320,13 +327,12 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          if (enabled)
          {
             firstPreview = true;
+            stoppedDuringFirstPreview = false;
 
             if (enabledReplay.get())
                this.enabled.set(false); // check no concurrency with replay
 
-            if (!(enabledIKStreaming.get(RobotSide.LEFT).get() || enabledIKStreaming.get(RobotSide.RIGHT).get()) && !isPreviewGraphicActive())
-               this.enabled.set(false);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
-            else if (isPreviewGraphicActive())
+            if (isPreviewGraphicActive())
             {
                // if preview is enabled we do not want to stream to the controller
                enabledIKStreaming.get(RobotSide.LEFT).set(false);
@@ -338,6 +344,12 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          }
          else // deactivated
          {
+            if(previewSetToActive && firstPreview)
+               stoppedDuringFirstPreview = true;
+            else
+               stoppedDuringFirstPreview = false;
+            enabledIKStreaming.get(RobotSide.LEFT).set(false);
+            enabledIKStreaming.get(RobotSide.RIGHT).set(false);
             // reset promp assistance
             proMPAssistant.reset();
             objectName = "";
@@ -396,5 +408,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public boolean isFirstPreview()
    {
       return firstPreview;
+   }
+
+   public boolean stoppedDuringFirstPreview()
+   {
+      return stoppedDuringFirstPreview;
    }
 }

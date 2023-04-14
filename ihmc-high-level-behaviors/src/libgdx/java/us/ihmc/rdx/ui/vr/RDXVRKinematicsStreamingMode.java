@@ -50,6 +50,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXVRKinematicsStreamingMode
 {
@@ -78,6 +79,7 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<RDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private final SideDependentList<FramePose3D> lastFramePose =  new SideDependentList<>();
+   private final SideDependentList<AtomicBoolean> firstPose =  new SideDependentList<>();
    private final SideDependentList<ImBoolean> streamToController = new SideDependentList<>();
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
@@ -147,6 +149,7 @@ public class RDXVRKinematicsStreamingMode
          wristJointAnglePlots.put(side, new ImGuiPlot(labels.get(side + " Hand Joint Angle")));
 
          streamToController.put(side, new ImBoolean(false));
+         firstPose.put(side, new AtomicBoolean(true));
       }
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()));
@@ -154,7 +157,7 @@ public class RDXVRKinematicsStreamingMode
       wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
 
       kinematicsRecorder = new KinematicsRecordReplay(ros2ControllerHelper, enabled, 2);
-      sharedControlAssistant = new RDXVRSharedControl(robotModel, ros2ControllerHelper, streamToController, kinematicsRecorder.isReplayingEnabled());
+      sharedControlAssistant = new RDXVRSharedControl(syncedRobot, ros2ControllerHelper, streamToController, kinematicsRecorder.isReplayingEnabled());
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -185,7 +188,7 @@ public class RDXVRKinematicsStreamingMode
 
          // Check if left B button is pressed in order to trigger shared control assistance
          InputDigitalActionData bButton = controller.getBButtonActionData();
-         sharedControlAssistant.processInput(bButton);
+         sharedControlAssistant.processInput(bButton, joystickButton);
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -215,7 +218,7 @@ public class RDXVRKinematicsStreamingMode
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
-            if(streamToController.get(side).get())
+            if(streamToController.get(side).get() || sharedControlAssistant.isActive())
             {
                vrContext.getController(side).runIfConnected(controller ->
                {  //TODO edit this part to include other robot parts (e.g., feet, elbows, chest?)
@@ -242,18 +245,27 @@ public class RDXVRKinematicsStreamingMode
                                                                      side.negateIfLeftSide(Math.PI / 2.0));
                   toolboxInputMessage.getInputs().add().set(message);
                   lastFramePose.put(side, new FramePose3D(tempFramePose));
+                  firstPose.get(side).set(false);
                });
             }
             else
             {
                // use previous frame or initial frame from ghost robot if none is available
-               if (lastFramePose.get(side) == null)
-                  lastFramePose.put(side, new FramePose3D(ReferenceFrame.getWorldFrame(),
+               if (lastFramePose.get(side) == null || sharedControlAssistant.stoppedDuringFirstPreview())
+               {
+                  lastFramePose.put(side,
+                                    new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                     syncedRobot.getFullRobotModel().getHandControlFrame(side).getTransformToWorldFrame()));
+                  firstPose.get(side).set(true);
+               }
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
                message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
                message.getDesiredPositionInWorld().set(lastFramePose.get(side).getPosition());
                message.getDesiredOrientationInWorld().set(lastFramePose.get(side).getOrientation());
+               if (!firstPose.get(side).get())
+                  message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
+                                                                                    side.negateIfLeftSide(Math.PI / 2.0),
+                                                                                    side.negateIfLeftSide(Math.PI / 2.0));
                toolboxInputMessage.getInputs().add().set(message);
             }
 
@@ -426,6 +438,11 @@ public class RDXVRKinematicsStreamingMode
       {
          wakeUpToolbox();
          kinematicsRecorder.setReplay(false); //check no concurrency replay and streaming
+      }
+      else
+      {
+         for (RobotSide side : RobotSide.values)
+            lastFramePose.put(side, null);
       }
    }
 
