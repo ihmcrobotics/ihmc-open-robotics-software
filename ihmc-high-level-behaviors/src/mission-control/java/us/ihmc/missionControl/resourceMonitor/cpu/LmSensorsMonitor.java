@@ -9,7 +9,7 @@ import java.util.Map;
 // Requires lm_sensors
 public class LmSensorsMonitor extends ResourceMonitor
 {
-   private Map<Integer, Integer> cpuTemps = new HashMap<>();
+   private final Map<Integer, Integer> cpuTemps = new HashMap<>();
 
    public LmSensorsMonitor()
    {
