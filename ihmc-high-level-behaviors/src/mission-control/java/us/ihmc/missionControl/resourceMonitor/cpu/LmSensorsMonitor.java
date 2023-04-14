@@ -13,7 +13,7 @@ public class LmSensorsMonitor extends ResourceMonitor
 
    public LmSensorsMonitor()
    {
-      super("sensors");
+      super(1.0, "sensors");
    }
 
    public Map<Integer, Integer> getCpuTemps()
@@ -58,13 +58,14 @@ public class LmSensorsMonitor extends ResourceMonitor
                {
                   int cpu = Integer.parseInt(lines[nextCPULine].split("\\s+")[1].replace(":", ""));
                   String tempString = lines[nextCPULine].split("\\s+")[2];
-                  int temp = (int) Float.parseFloat(tempString.replace("°C", ""));
+                  int temp = (int) Float.parseFloat(tempString.replace("\\u00B0C", "")); // \u00B0 is the degrees symbol
                   cpuTemps.put(cpu, temp);
                   nextCPULine++;
                }
                catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored)
                {
                   LogTools.info("Unable to parse lm_sensors");
+                  return; // stopgap
                }
             }
          }
