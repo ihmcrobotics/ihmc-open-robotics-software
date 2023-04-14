@@ -243,9 +243,15 @@ public class DualBlackflyCamera
                // TODO: Maybe publish a separate image for ArUco marker debugging sometime.
                // arUcoMarkerDetection.drawDetectedMarkers(blackflySourceImage.getBytedecoOpenCVMat());
                // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
+
+
+
                arUcoMarkerPublisher.update();
 
                ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneObjectLibrary);
+
+               // TODO: Publish detectable scene objects
+
             }
 
             convertColorDuration.start();

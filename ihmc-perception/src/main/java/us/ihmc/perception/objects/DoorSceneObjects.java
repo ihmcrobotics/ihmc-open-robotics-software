@@ -4,6 +4,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.scene.ArUcoDetectableObject;
+import us.ihmc.perception.scene.DetectableSceneObject;
 
 public class DoorSceneObjects
 {
@@ -39,9 +40,9 @@ public class DoorSceneObjects
       return new ArUcoDetectableObject("PullDoor0Panel", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_PANEL_TRANSFORM_TO_MARKER);
    }
 
-   public static ArUcoDetectableObject createPullDoorFrame()
+   public static StaticArUcoRelativeDetectableSceneObject createPullDoorFrame()
    {
-      return new ArUcoDetectableObject("PullDoor0Frame", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_FRAME_TRANSFORM_TO_MARKER);
+      return new StaticArUcoRelativeDetectableSceneObject("PullDoor0Frame", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_FRAME_TRANSFORM_TO_MARKER);
    }
 
    public static ArUcoDetectableObject createPushDoorPanel()
@@ -49,8 +50,8 @@ public class DoorSceneObjects
       return new ArUcoDetectableObject("PushDoor0Panel", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER);
    }
 
-   public static ArUcoDetectableObject createPushDoorFrame()
+   public static StaticArUcoRelativeDetectableSceneObject createPushDoorFrame()
    {
-      return new ArUcoDetectableObject("PullDoor0Frame", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER);
+      return new StaticArUcoRelativeDetectableSceneObject("PullDoor0Frame", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER);
    }
 }

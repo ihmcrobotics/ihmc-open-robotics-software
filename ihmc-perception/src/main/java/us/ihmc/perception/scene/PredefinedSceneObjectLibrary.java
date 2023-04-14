@@ -3,9 +3,12 @@ package us.ihmc.perception.scene;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.objects.BasicSceneObjects;
 import us.ihmc.perception.objects.DoorSceneObjects;
+import us.ihmc.perception.objects.StaticArUcoRelativeDetectableSceneObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Use to specify which scene objects a robot is looking for.
@@ -23,13 +26,14 @@ import java.util.List;
 public class PredefinedSceneObjectLibrary
 {
    private final ArUcoDetectableObject pushDoorPanel;
-   private final ArUcoDetectableObject pushDoorFrame;
    private final ArUcoDetectableObject pullDoorPanel;
-   private final ArUcoDetectableObject pullDoorFrame;
+   private final StaticArUcoRelativeDetectableSceneObject pushDoorFrame;
+   private final StaticArUcoRelativeDetectableSceneObject pullDoorFrame;
    private final ArUcoDetectableObject box;
    private final ArUcoDetectableObject canOfSoup;
 
-   private final ArrayList<ArUcoDetectableObject> arUcoDetectableObjects = new ArrayList<>();
+   private final HashSet<ArUcoDetectableObject> arUcoDetectableObjects = new HashSet<>();
+   private final HashSet<StaticArUcoRelativeDetectableSceneObject> staticArUcoRelativeDetectableObjects = new HashSet<>();
 
    public static PredefinedSceneObjectLibrary defaultObjects()
    {
@@ -40,17 +44,19 @@ public class PredefinedSceneObjectLibrary
    {
       // Add door stuff
       pushDoorPanel = DoorSceneObjects.createPushDoorPanel();
-      arUcoDetectableObjects.add(pushDoorPanel);
-      pushDoorFrame = DoorSceneObjects.createPushDoorFrame();
-      arUcoDetectableObjects.add(pushDoorFrame);
       pullDoorPanel = DoorSceneObjects.createPullDoorPanel();
+      arUcoDetectableObjects.add(pushDoorPanel);
       arUcoDetectableObjects.add(pullDoorPanel);
+
+      // The frames stay in place after being seen
+      pushDoorFrame = DoorSceneObjects.createPushDoorFrame();
       pullDoorFrame = DoorSceneObjects.createPullDoorFrame();
-      arUcoDetectableObjects.add(pullDoorFrame);
+      staticArUcoRelativeDetectableObjects.add(pushDoorFrame);
+      staticArUcoRelativeDetectableObjects.add(pullDoorFrame);
 
       box = BasicSceneObjects.createBox();
-      arUcoDetectableObjects.add(box);
       canOfSoup = BasicSceneObjects.createCanOfSoup();
+      arUcoDetectableObjects.add(box);
       arUcoDetectableObjects.add(canOfSoup);
 
       // Add non-ArUco cup -- detected by neural net
@@ -77,8 +83,13 @@ public class PredefinedSceneObjectLibrary
       return pushDoorPanel;
    }
 
-   public List<ArUcoDetectableObject> getArUcoDetectableObjects()
+   public Set<ArUcoDetectableObject> getArUcoDetectableObjects()
    {
       return arUcoDetectableObjects;
+   }
+
+   public Set<StaticArUcoRelativeDetectableSceneObject> getStaticArUcoRelativeDetectableObjects()
+   {
+      return staticArUcoRelativeDetectableObjects;
    }
 }
