@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.DetectedObjectMessage;
+import perception_msgs.msg.dds.DetectableSceneObjectMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
@@ -18,7 +18,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.perception.scene.PerceptionSceneObjectsManager;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
@@ -37,7 +36,7 @@ import java.util.Map;
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
    private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<DetectedObjectMessage> objectDetectorSubscription;
+   private final IHMCROS2Input<DetectableSceneObjectMessage> objectDetectorSubscription;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
@@ -157,10 +156,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    {
       if (objectDetectorSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
       {
-         DetectedObjectMessage detectedObjectMessage = objectDetectorSubscription.getMessageNotification().read();
-         objectName = detectedObjectMessage.getId().toString();
+         DetectableSceneObjectMessage detectableSceneObjectMessage = objectDetectorSubscription.getMessageNotification().read();
+         objectName = detectableSceneObjectMessage.getNameAsString();
 
-         MessageTools.toEuclid(detectedObjectMessage.getTransformToWorld(), objectTransformToWorld);
+         MessageTools.toEuclid(detectableSceneObjectMessage.getTransformToWorld(), objectTransformToWorld);
          objectFrame.update();
       }
 

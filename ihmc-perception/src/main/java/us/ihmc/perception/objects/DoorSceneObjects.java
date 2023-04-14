@@ -4,7 +4,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.scene.ArUcoDetectableObject;
-import us.ihmc.perception.scene.DetectableSceneObject;
 
 public class DoorSceneObjects
 {
