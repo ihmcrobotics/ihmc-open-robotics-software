@@ -366,16 +366,9 @@ public class RDXVRKinematicsStreamingMode
    public void renderImGuiWidgets()
    {
       if (controllerModel == RDXVRControllerModel.FOCUS3)
-      {
-         ImGui.text("Toggle IK tracking enabled: A button");
-         ImGui.text("Toggle stream to controller: X button");
-      }
+         ImGui.text("Stream to controller: Press and hold A, X buttons");
       else
-      {
-         ImGui.text("Toggle IK tracking enabled: Right A button");
-         ImGui.text("Toggle stream to controller: Left A button");
-      }
-
+         ImGui.text("Stream to controller: Press and hold A buttons");
       kinematicsStreamingToolboxProcess.renderImGuiWidgets();
       ghostRobotGraphic.renderImGuiWidgets();
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
@@ -400,7 +393,7 @@ public class RDXVRKinematicsStreamingMode
       // add widgets for recording/replaying motion in VR
       ImGui.text("Start/Stop recording: Press Left Joystick");
       kinematicsRecorder.renderRecordWidgets(labels);
-      ImGui.text("Start/Stop replay: Press Left Joystick (cannot stream/record if replay)");
+      ImGui.text("Start/Stop replay: Press Left Joystick"); // cannot stream/record if replay
       kinematicsRecorder.renderReplayWidgets(labels);
       // add widget for using shared control assistance in VR
       if (controllerModel == RDXVRControllerModel.FOCUS3)
