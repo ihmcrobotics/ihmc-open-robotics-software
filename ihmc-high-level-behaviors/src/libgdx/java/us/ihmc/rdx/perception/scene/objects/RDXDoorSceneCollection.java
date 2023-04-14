@@ -1,7 +1,6 @@
 package us.ihmc.rdx.perception.scene.objects;
 
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.objects.DoorSceneObjects;
 import us.ihmc.perception.scene.ROS2SceneObjectAPI;
 
 /**
@@ -11,36 +10,28 @@ public class RDXDoorSceneCollection
 {
    public static RDXSceneObject createPullDoorPanel(ROS2PublishSubscribeAPI ros2)
    {
-      RDXSceneObject sceneObject = new RDXSceneObject("environmentObjects/door/doorPanel/DoorPanel.g3dj",
-                                                      "PullDoor%dPanel",
-                                                      DoorSceneObjects.PULL_DOOR_MARKER_ID);
+      RDXSceneObject sceneObject = new RDXSceneObject("environmentObjects/door/doorPanel/DoorPanel.g3dj", "PullDoorPanel");
       sceneObject.setupForROS2Updating(ros2, ROS2SceneObjectAPI.DETECTED_PULL_DOOR_PANEL);
       return sceneObject;
    }
 
    public static RDXSceneObject createPullDoorFrame(ROS2PublishSubscribeAPI ros2)
    {
-      RDXSceneObject sceneObject = new RDXSceneObject("environmentObjects/door/doorFrame/DoorFrame.g3dj",
-                                                      "PullDoor%dFrame",
-                                                      DoorSceneObjects.PULL_DOOR_MARKER_ID);
+      RDXSceneObject sceneObject = new RDXSceneObject("environmentObjects/door/doorFrame/DoorFrame.g3dj", "PullDoorFrame");
       sceneObject.setupForROS2Updating(ros2, ROS2SceneObjectAPI.DETECTED_PULL_DOOR_FRAME);
       return sceneObject;
    }
 
    public static RDXSceneObject createPushDoorPanel(ROS2PublishSubscribeAPI ros2)
    {
-      RDXSceneObject sceneObject = new RDXSceneObject("environmentObjects/door/doorPanel/DoorPanel.g3dj",
-                                                      "PushDoor%dPanel",
-                                                      DoorSceneObjects.PUSH_DOOR_MARKER_ID);
+      RDXSceneObject sceneObject = new RDXSceneObject("environmentObjects/door/doorPanel/DoorPanel.g3dj", "PushDoorPanel");
       sceneObject.setupForROS2Updating(ros2, ROS2SceneObjectAPI.DETECTED_PUSH_DOOR_PANEL);
       return sceneObject;
    }
 
    public static RDXSceneObject createPushDoorFrame(ROS2PublishSubscribeAPI ros2)
    {
-      RDXSceneObject sceneObject = new RDXSceneObject("environmentObjects/door/doorFrame/DoorFrame.g3dj",
-                                                      "PullDoor%dFrame",
-                                                      DoorSceneObjects.PUSH_DOOR_MARKER_ID);
+      RDXSceneObject sceneObject = new RDXSceneObject("environmentObjects/door/doorFrame/DoorFrame.g3dj","PullDoorFrame");
       sceneObject.setupForROS2Updating(ros2, ROS2SceneObjectAPI.DETECTED_PUSH_DOOR_FRAME);
       return sceneObject;
    }

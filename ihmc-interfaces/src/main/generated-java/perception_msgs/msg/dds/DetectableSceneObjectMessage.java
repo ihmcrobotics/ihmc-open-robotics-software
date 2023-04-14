@@ -7,39 +7,40 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * The topic name identifies the object
+       * A detectable perception scene object
+       * The topic name identifies the object.
        */
-public class DetectedObjectMessage extends Packet<DetectedObjectMessage> implements Settable<DetectedObjectMessage>, EpsilonComparable<DetectedObjectMessage>
+public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMessage> implements Settable<DetectableSceneObjectMessage>, EpsilonComparable<DetectableSceneObjectMessage>
 {
    /**
-            * Unique ID used to identify the object
+            * The name of the scene object
             */
-   public java.lang.StringBuilder id_;
+   public java.lang.StringBuilder name_;
    /**
-            * Whether or not the object was detected this frame
+            * Whether or not the object is currently detected
             */
    public boolean detected_;
    /**
-            * Transform to world
+            * Transform of the object's frame to world frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
 
-   public DetectedObjectMessage()
+   public DetectableSceneObjectMessage()
    {
-      id_ = new java.lang.StringBuilder(255);
+      name_ = new java.lang.StringBuilder(255);
       transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
-   public DetectedObjectMessage(DetectedObjectMessage other)
+   public DetectableSceneObjectMessage(DetectableSceneObjectMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(DetectedObjectMessage other)
+   public void set(DetectableSceneObjectMessage other)
    {
-      id_.setLength(0);
-      id_.append(other.id_);
+      name_.setLength(0);
+      name_.append(other.name_);
 
       detected_ = other.detected_;
 
@@ -47,38 +48,38 @@ public class DetectedObjectMessage extends Packet<DetectedObjectMessage> impleme
    }
 
    /**
-            * Unique ID used to identify the object
+            * The name of the scene object
             */
-   public void setId(java.lang.String id)
+   public void setName(java.lang.String name)
    {
-      id_.setLength(0);
-      id_.append(id);
+      name_.setLength(0);
+      name_.append(name);
    }
 
    /**
-            * Unique ID used to identify the object
+            * The name of the scene object
             */
-   public java.lang.String getIdAsString()
+   public java.lang.String getNameAsString()
    {
-      return getId().toString();
+      return getName().toString();
    }
    /**
-            * Unique ID used to identify the object
+            * The name of the scene object
             */
-   public java.lang.StringBuilder getId()
+   public java.lang.StringBuilder getName()
    {
-      return id_;
+      return name_;
    }
 
    /**
-            * Whether or not the object was detected this frame
+            * Whether or not the object is currently detected
             */
    public void setDetected(boolean detected)
    {
       detected_ = detected;
    }
    /**
-            * Whether or not the object was detected this frame
+            * Whether or not the object is currently detected
             */
    public boolean getDetected()
    {
@@ -87,7 +88,7 @@ public class DetectedObjectMessage extends Packet<DetectedObjectMessage> impleme
 
 
    /**
-            * Transform to world
+            * Transform of the object's frame to world frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToWorld()
    {
@@ -95,24 +96,24 @@ public class DetectedObjectMessage extends Packet<DetectedObjectMessage> impleme
    }
 
 
-   public static Supplier<DetectedObjectMessagePubSubType> getPubSubType()
+   public static Supplier<DetectableSceneObjectMessagePubSubType> getPubSubType()
    {
-      return DetectedObjectMessagePubSubType::new;
+      return DetectableSceneObjectMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return DetectedObjectMessagePubSubType::new;
+      return DetectableSceneObjectMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(DetectedObjectMessage other, double epsilon)
+   public boolean epsilonEquals(DetectableSceneObjectMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.id_, other.id_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.detected_, other.detected_, epsilon)) return false;
 
@@ -126,11 +127,11 @@ public class DetectedObjectMessage extends Packet<DetectedObjectMessage> impleme
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof DetectedObjectMessage)) return false;
+      if(!(other instanceof DetectableSceneObjectMessage)) return false;
 
-      DetectedObjectMessage otherMyClass = (DetectedObjectMessage) other;
+      DetectableSceneObjectMessage otherMyClass = (DetectableSceneObjectMessage) other;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.id_, otherMyClass.id_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
       if(this.detected_ != otherMyClass.detected_) return false;
 
@@ -144,9 +145,9 @@ public class DetectedObjectMessage extends Packet<DetectedObjectMessage> impleme
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("DetectedObjectMessage {");
-      builder.append("id=");
-      builder.append(this.id_);      builder.append(", ");
+      builder.append("DetectableSceneObjectMessage {");
+      builder.append("name=");
+      builder.append(this.name_);      builder.append(", ");
       builder.append("detected=");
       builder.append(this.detected_);      builder.append(", ");
       builder.append("transform_to_world=");
