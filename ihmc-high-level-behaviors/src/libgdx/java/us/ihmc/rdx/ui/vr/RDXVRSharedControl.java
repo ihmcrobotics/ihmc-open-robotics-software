@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.perception.scene.ROS2SceneObjectAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
@@ -76,7 +77,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
-      objectDetectorSubscription = ros2.subscribe(PerceptionSceneObjectsManager.DETECTED_OBJECT);
+      objectDetectorSubscription = ros2.subscribe(ROS2SceneObjectAPI.PULL_DOOR_LEVER_HANDLE);
    }
 
    public void processInput(InputDigitalActionData triggerButton)
