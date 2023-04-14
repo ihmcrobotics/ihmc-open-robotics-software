@@ -19,7 +19,7 @@ public class StaticArUcoRelativeDetectableSceneObject extends ArUcoDetectableObj
     * We don't want to lock in the static pose until we are close enough
     * for it to matter and also to get higher accuracy.
     */
-   private double maximumDistanceToLockIn;
+   private final double maximumDistanceToLockIn;
 
    public StaticArUcoRelativeDetectableSceneObject(String name,
                                                    int markerID,
