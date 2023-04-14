@@ -170,12 +170,18 @@ public class ImGuiGlfwWindow
       }
    }
 
+   /**
+    * Launches an ImGui window with a single parent panel.
+    * Will block until a shutdown is requested.
+    *
+    * @param renderImGuiWidgets the render method for ImGui widgets
+    */
    public void runWithSinglePanel(Runnable renderImGuiWidgets)
    {
       ImGuiPanel mainPanel = new ImGuiPanel("Main Panel", renderImGuiWidgets);
       mainPanel.getIsShowing().set(true);
       imGuiWindowAndDockSystem.getPanelManager().addPanel(mainPanel);
-      ThreadTools.startAThread(() -> run(null, () -> { }, () -> System.exit(0)), glfwWindowForImGui.getWindowTitle());
+      run(null, () -> {}, () -> System.exit(0));
    }
 
    public void setIcons(String... iconPaths)
