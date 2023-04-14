@@ -8,7 +8,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class HeightMapManager
 {
@@ -251,6 +253,9 @@ public class HeightMapManager
             heightMapCells[key].addPoint(point.getZ(), verticalMeasurementVariance);
          }
       }
+
+      for (int i = 0; i < occupiedCells.size(); i++)
+         heightMapCells[occupiedCells.get(i)].updateHeightEstimate();
 
       if (debug)
          LogTools.info(occupiedCells.size() + " cells");

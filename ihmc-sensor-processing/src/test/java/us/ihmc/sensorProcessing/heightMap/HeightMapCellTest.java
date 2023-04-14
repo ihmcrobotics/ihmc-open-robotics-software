@@ -27,6 +27,7 @@ public class HeightMapCellTest
          kalmanFilterHeight = (kalmanFilterHeight * variance + height * kalmanFilterVariance) / (variance + kalmanFilterVariance);
          kalmanFilterVariance = (variance * kalmanFilterVariance) / (variance + kalmanFilterVariance);
       }
+      cell.updateHeightEstimate();
 
       assertEquals(height, cell.getEstimatedHeight(), 1e-5);
    }

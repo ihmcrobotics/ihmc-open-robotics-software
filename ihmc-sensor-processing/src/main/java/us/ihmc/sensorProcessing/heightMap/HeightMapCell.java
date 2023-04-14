@@ -19,6 +19,8 @@ public class HeightMapCell
 
    private int oldestIndex;
    private final AtomicDouble estimatedHeight = new AtomicDouble();
+   private final AtomicDouble mapHeight = new AtomicDouble();
+   private final AtomicDouble mapVariance = new AtomicDouble();
 
    /** Filtered parameters */
    private boolean isGroundCell = false;
@@ -62,18 +64,17 @@ public class HeightMapCell
          }
          else if (heightMeasurements.size() >= parameters.getMaxPointsPerCell())
          {
+            addOldestPointToMapEstimate();
             // Replace oldest point
             heightMeasurements.set(oldestIndex, heightMeasurement);
             varianceMeasurements.set(oldestIndex, varianceMeasurement);
             oldestIndex = (oldestIndex + 1) % parameters.getMaxPointsPerCell();
-            updateHeightEstimate();
          }
          else
          {
             // Merge with height estimate
             heightMeasurements.add(heightMeasurement);
             varianceMeasurements.add(varianceMeasurement);
-            updateHeightEstimate();
          }
       }
    }
@@ -84,8 +85,39 @@ public class HeightMapCell
          varianceMeasurements.set(i, varianceMeasurements.get(i) + varianceToAdd);
    }
 
+   private void addOldestPointToMapEstimate()
+   {
+      if (parameters.getEstimateHeightWithKalmanFilter())
+      {
 
-   private void updateHeightEstimate()
+         double height = heightMeasurements.get(oldestIndex);
+         double variance = varianceMeasurements.get(oldestIndex);
+         if (Double.isNaN(mapHeight.get()))
+         {
+            mapHeight.set(height);
+            mapVariance.set(variance);
+         }
+         else
+         {
+            double newHeight = (variance * mapHeight.get() + mapVariance.get() * height) / (variance + mapVariance.get());
+            double newVariance = variance * mapVariance.get() / (variance + mapVariance.get());
+
+            mapHeight.set(newHeight);
+            mapVariance.set(newVariance);
+         }
+      }
+      else if (heightMeasurements.size() > 0)
+      {
+         double height = heightMeasurements.get(oldestIndex);
+         double variance = varianceMeasurements.get(oldestIndex);
+         mapHeight.set(height);
+         mapVariance.set(variance);
+      }
+   }
+
+
+
+   public void updateHeightEstimate()
    {
       if (parameters.getEstimateHeightWithKalmanFilter())
       {
@@ -96,11 +128,28 @@ public class HeightMapCell
             heightSum += heightMeasurements.get(i) / varianceMeasurements.get(i);
             varianceSum += 1.0 / varianceMeasurements.get(i);
          }
-         estimatedHeight.set(heightSum / varianceSum);
+         double newHeight = heightSum / varianceSum;
+         // FIXME this is likely not the best way to do this
+         double newVariance = varianceMeasurements.get(0);
+         for (int i = 1; i < varianceMeasurements.size(); i++)
+         {
+            newVariance = (newVariance * varianceMeasurements.get(i)) / (newVariance + varianceMeasurements.get(i));
+         }
+
+         double heightEstimate;
+         if (heightMeasurements.size() == parameters.getMaxPointsPerCell() && !Double.isNaN(mapHeight.get()))
+            heightEstimate = (mapHeight.get() * newVariance + newHeight * mapVariance.get()) / (newVariance + mapVariance.get());
+         else
+            heightEstimate = newHeight;
+
+         estimatedHeight.set(heightEstimate);
       }
       else
       {
-         estimatedHeight.set(heightMeasurements.sum() / heightMeasurements.size());
+         if (Double.isNaN(mapHeight.get()))
+            estimatedHeight.set(heightMeasurements.sum() / heightMeasurements.size());
+         else
+            estimatedHeight.set((heightMeasurements.sum() + mapHeight.get()) / (heightMeasurements.size() + 1));
       }
    }
 
@@ -110,6 +159,8 @@ public class HeightMapCell
       varianceMeasurements.clear();
       oldestIndex = 0;
       estimatedHeight.set(Double.NaN);
+      mapHeight.set(Double.NaN);
+      mapVariance.set(Double.NaN);
    }
 
    public void resetAtHeight(double heightMeasurement, double varianceMeasurement)

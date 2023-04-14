@@ -264,7 +264,7 @@ public class HeightMapUpdater
       heightMap.setMaxHeight(gridCenter.getZ() + parameters.getMaxZ());
       heightMap.updateGridSizeXY(parameters.getGridSizeXY());
       heightMap.updateGridResolutionXY(parameters.getGridResolutionXY());
-      heightMap.update(pointCloud);
+      heightMap.update(pointCloud, verticalVarianceMeasurement);
       totalUpdateCount.incrementAndGet();
 
       if (--publishFrequencyCounter <= 0)
