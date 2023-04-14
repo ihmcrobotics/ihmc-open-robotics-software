@@ -1,7 +1,6 @@
 package us.ihmc.perception.scene;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
-import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.objects.BasicSceneObjects;
 import us.ihmc.perception.objects.DoorSceneObjects;
 import us.ihmc.perception.objects.StaticArUcoRelativeDetectableSceneObject;
@@ -33,6 +32,8 @@ public class PredefinedSceneObjectLibrary
    private final HashSet<ArUcoDetectableObject> arUcoDetectableObjects = new HashSet<>();
    private final HashMap<Integer, StaticArUcoRelativeDetectableSceneObject> staticArUcoRelativeDetectableObjects = new HashMap<>();
    private final TIntDoubleHashMap arUcoMarkerIDsToSizes = new TIntDoubleHashMap();
+   private final StaticArUcoRelativeDetectableSceneObject pushDoorLeverHandle;
+   private final StaticArUcoRelativeDetectableSceneObject pullDoorLeverHandle;
 
    public static PredefinedSceneObjectLibrary defaultObjects()
    {
@@ -52,8 +53,12 @@ public class PredefinedSceneObjectLibrary
       // The frames stay in place after being seen
       pushDoorFrame = DoorSceneObjects.createPushDoorFrame();
       pullDoorFrame = DoorSceneObjects.createPullDoorFrame();
+      pushDoorLeverHandle = DoorSceneObjects.createPushDoorLeverHandle();
+      pullDoorLeverHandle = DoorSceneObjects.createPullDoorLeverHandle();
       staticArUcoRelativeDetectableObjects.put(pushDoorFrame.getMarkerID(), pushDoorFrame);
       staticArUcoRelativeDetectableObjects.put(pullDoorFrame.getMarkerID(), pullDoorFrame);
+      staticArUcoRelativeDetectableObjects.put(pushDoorLeverHandle.getMarkerID(), pushDoorLeverHandle);
+      staticArUcoRelativeDetectableObjects.put(pullDoorLeverHandle.getMarkerID(), pullDoorLeverHandle);
 
       box = BasicSceneObjects.createBox();
       canOfSoup = BasicSceneObjects.createCanOfSoup();
@@ -64,26 +69,6 @@ public class PredefinedSceneObjectLibrary
 
       // TODO: Add non-ArUco cup -- detected by neural net
 
-   }
-
-   public ArUcoDetectableObject getPullDoorFrame()
-   {
-      return pullDoorFrame;
-   }
-
-   public ArUcoDetectableObject getPullDoorPanel()
-   {
-      return pullDoorPanel;
-   }
-
-   public ArUcoDetectableObject getPushDoorFrame()
-   {
-      return pushDoorFrame;
-   }
-
-   public ArUcoDetectableObject getPushDoorPanel()
-   {
-      return pushDoorPanel;
    }
 
    public Set<ArUcoDetectableObject> getArUcoDetectableObjects()
