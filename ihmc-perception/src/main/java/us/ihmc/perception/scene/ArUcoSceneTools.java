@@ -1,6 +1,8 @@
 package us.ihmc.perception.scene;
 
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.objects.StaticArUcoRelativeDetectableSceneObject;
 
 /**
  * This class exists to perform some operations that are like "glue" between the scene based
@@ -14,12 +16,30 @@ public class ArUcoSceneTools
       for (ArUcoDetectableObject arUcoDetectableObject : predefinedSceneObjectLibrary.getArUcoDetectableObjects())
       {
          boolean isDetected = arUcoMarkerDetection.isDetected(arUcoDetectableObject.getMarkerID());
+         arUcoDetectableObject.setCurrentlyDetected(isDetected);
          if (isDetected)
          {
             arUcoMarkerDetection.getPose(arUcoDetectableObject.getMarkerID(),
                                          arUcoDetectableObject.getMarkerSize(),
                                          arUcoDetectableObject.getReferenceFrame().getParent(),
                                          arUcoDetectableObject.getTransformToParent());
+
+            StaticArUcoRelativeDetectableSceneObject staticArUcoRelativeDetectableSceneObject
+                  = predefinedSceneObjectLibrary.getStaticArUcoRelativeDetectableObjects().get(arUcoDetectableObject.getMarkerID());
+            if (staticArUcoRelativeDetectableSceneObject != null)
+            {
+               Pose3DReadOnly poseInSensorFrame = arUcoMarkerDetection.getPoseInSensorFrame(arUcoDetectableObject.getMarkerID(),
+                                                                                            arUcoDetectableObject.getMarkerSize());
+               if (!staticArUcoRelativeDetectableSceneObject.getPoseKnown() &&
+                   poseInSensorFrame.getPosition().norm() <= staticArUcoRelativeDetectableSceneObject.getMaximumDistanceToLockIn())
+               {
+                  arUcoMarkerDetection.getPose(staticArUcoRelativeDetectableSceneObject.getMarkerID(),
+                                               staticArUcoRelativeDetectableSceneObject.getMarkerSize(),
+                                               staticArUcoRelativeDetectableSceneObject.getReferenceFrame().getParent(),
+                                               staticArUcoRelativeDetectableSceneObject.getTransformToParent());
+                  staticArUcoRelativeDetectableSceneObject.lockInPose();
+               }
+            }
          }
       }
    }

@@ -5,10 +5,7 @@ import us.ihmc.perception.objects.BasicSceneObjects;
 import us.ihmc.perception.objects.DoorSceneObjects;
 import us.ihmc.perception.objects.StaticArUcoRelativeDetectableSceneObject;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Use to specify which scene objects a robot is looking for.
@@ -33,7 +30,7 @@ public class PredefinedSceneObjectLibrary
    private final ArUcoDetectableObject canOfSoup;
 
    private final HashSet<ArUcoDetectableObject> arUcoDetectableObjects = new HashSet<>();
-   private final HashSet<StaticArUcoRelativeDetectableSceneObject> staticArUcoRelativeDetectableObjects = new HashSet<>();
+   private final HashMap<Integer, StaticArUcoRelativeDetectableSceneObject> staticArUcoRelativeDetectableObjects = new HashMap<>();
 
    public static PredefinedSceneObjectLibrary defaultObjects()
    {
@@ -51,15 +48,15 @@ public class PredefinedSceneObjectLibrary
       // The frames stay in place after being seen
       pushDoorFrame = DoorSceneObjects.createPushDoorFrame();
       pullDoorFrame = DoorSceneObjects.createPullDoorFrame();
-      staticArUcoRelativeDetectableObjects.add(pushDoorFrame);
-      staticArUcoRelativeDetectableObjects.add(pullDoorFrame);
+      staticArUcoRelativeDetectableObjects.put(pushDoorFrame.getMarkerID(), pushDoorFrame);
+      staticArUcoRelativeDetectableObjects.put(pullDoorFrame.getMarkerID(), pullDoorFrame);
 
       box = BasicSceneObjects.createBox();
       canOfSoup = BasicSceneObjects.createCanOfSoup();
       arUcoDetectableObjects.add(box);
       arUcoDetectableObjects.add(canOfSoup);
 
-      // Add non-ArUco cup -- detected by neural net
+      // TODO: Add non-ArUco cup -- detected by neural net
 
    }
 
@@ -88,7 +85,7 @@ public class PredefinedSceneObjectLibrary
       return arUcoDetectableObjects;
    }
 
-   public Set<StaticArUcoRelativeDetectableSceneObject> getStaticArUcoRelativeDetectableObjects()
+   public HashMap<Integer, StaticArUcoRelativeDetectableSceneObject> getStaticArUcoRelativeDetectableObjects()
    {
       return staticArUcoRelativeDetectableObjects;
    }

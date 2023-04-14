@@ -8,28 +8,48 @@ import us.ihmc.perception.scene.ArUcoDetectableObject;
  *
  * Once the ArUco marker is seen, the pose of this object is set as known
  * and does not move until {@link #forgetPose} is called.
+ *
+ * The whole point of this is so we don't have to put markers on everything,
+ * especially things that don't move.
  */
 public class StaticArUcoRelativeDetectableSceneObject extends ArUcoDetectableObject
 {
    private boolean poseKnown = false;
+   /**
+    * We don't want to lock in the static pose until we are close enough
+    * for it to matter and also to get higher accuracy.
+    */
+   private double maximumDistanceToLockIn;
 
-   public StaticArUcoRelativeDetectableSceneObject(String name, int markerID, double markerSize, RigidBodyTransform markerTransformToParent)
+   public StaticArUcoRelativeDetectableSceneObject(String name,
+                                                   int markerID,
+                                                   double markerSize,
+                                                   RigidBodyTransform markerTransformToParent,
+                                                   double maximumDistanceToLockIn)
    {
       super(name, markerID, markerSize, markerTransformToParent);
+      this.maximumDistanceToLockIn = maximumDistanceToLockIn;
    }
 
-   public void whate()
+   public void lockInPose()
    {
-      if (!poseKnown)
-      {
-
-         poseKnown = true;
-      }
+      poseKnown = true;
+      setCurrentlyDetected(true);
    }
 
    public void forgetPose()
    {
       setCurrentlyDetected(false);
       poseKnown = false;
+   }
+
+   public double getMaximumDistanceToLockIn()
+   {
+      return maximumDistanceToLockIn;
+   }
+
+   public boolean getPoseKnown()
+   {
+      return poseKnown;
    }
 }
