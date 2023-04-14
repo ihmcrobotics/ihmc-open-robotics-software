@@ -10,6 +10,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,26 +18,26 @@ import java.util.function.Consumer;
 
 public class SystemdServiceMonitor implements Consumer<List<String>>
 {
-   private static final int MAX_LOG_LINE_MESSAGE_LENGTH = 25;
+   private static final int MAX_LOG_LINE_MESSAGE_LENGTH = 10;
 
    private final String serviceName;
    private final ROS2Node ros2Node;
-   private final JournalCtlReader reader;
    private final IHMCROS2Publisher<SystemServiceStatusMessage> serviceStatusPublisher;
-
    private final ExceptionHandlingThreadScheduler systemServiceStatusPublisherScheduler;
+   private final JournalCtlReader reader;
 
    public SystemdServiceMonitor(UUID instanceId, String serviceName, ROS2Node ros2Node)
    {
       this.serviceName = serviceName;
       this.ros2Node = ros2Node;
-      reader = new JournalCtlReader(serviceName, this);
-      reader.start();
       serviceStatusPublisher = ROS2Tools.createPublisher(ros2Node,
                                                          ROS2Tools.getSystemServiceStatusTopic(instanceId),
                                                          ROS2Tools.getSystemServiceStatusQosProfile());
       systemServiceStatusPublisherScheduler = new ExceptionHandlingThreadScheduler("SystemServiceStatusPublisherScheduler");
       systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 1.0);
+
+      reader = new JournalCtlReader(serviceName, this);
+      reader.start();
    }
 
    public void start()
@@ -63,7 +64,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
    {
       if (logLines.size() > MAX_LOG_LINE_MESSAGE_LENGTH)
       {
-         LogTools.error("Cannot publish log lines with length greater than 25");
+         LogTools.error("Cannot publish log lines with length greater than " + MAX_LOG_LINE_MESSAGE_LENGTH);
          return;
       }
 
@@ -74,10 +75,13 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       String status = MissionControlTools.getServiceStatus(serviceName);
       message.setStatus(status);
 
-      message.setLogLineCount(logLines.size());
+      StringBuilder builder = new StringBuilder();
 
       for (String logLine : logLines)
-         message.getLogLines().add(logLine);
+         builder.append(logLine + "\n");
+
+      byte[] logBytes = builder.toString().getBytes(StandardCharsets.US_ASCII); // Use ASCII - UTF8 causes issues when publishing over DDS
+      message.getLogData().addAll(logBytes);
 
       serviceStatusPublisher.publish(message);
    }

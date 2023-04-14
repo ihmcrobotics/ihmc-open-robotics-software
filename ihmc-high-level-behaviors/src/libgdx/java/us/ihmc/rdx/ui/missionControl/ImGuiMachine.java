@@ -14,6 +14,7 @@ import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
 import us.ihmc.ros2.ROS2Node;
 
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -134,8 +135,10 @@ public class ImGuiMachine
             String gpuModel = message.getNvidiaGpuModels().getString(0);
             float totalGpuMemory = message.getNvidiaGpuMemoryTotal().get(gpuIndex);
             plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, totalGpuMemory, ImGuiCond.Always));
-            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex +  ", " + gpuModel + ") memory usage (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
-            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory total (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            plot.getPlotLines()
+                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory usage (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            plot.getPlotLines()
+                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory total (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
             vramPlots.add(plot);
             gpuIndex++;
          }
@@ -219,17 +222,12 @@ public class ImGuiMachine
 
       service.setStatus(message.getStatusAsString());
 
-      if (message.getLogLineCount() > 0)
+      if (!message.getLogData().isEmpty())
       {
-         List<String> logLines = new ArrayList<>();
-
-         for (int i = 0; i < message.getLogLineCount(); i++)
-         {
-            String logLine = message.getLogLines().getString(i);
-            logLines.add(logLine);
-         }
-
-         service.acceptLogLines(logLines);
+         byte[] logData = message.getLogData().toArray();
+         String logLinesJoined = new String(logData, StandardCharsets.US_ASCII);
+         String[] logLines = logLinesJoined.split("\n");
+         service.acceptLogLines(Arrays.stream(logLines).toList());
       }
    }
 

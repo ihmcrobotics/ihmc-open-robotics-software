@@ -10,14 +10,14 @@ public class SystemServiceStatusMessage extends Packet<SystemServiceStatusMessag
 {
    public java.lang.StringBuilder service_name_;
    public java.lang.StringBuilder status_;
-   public int log_line_count_;
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  log_lines_;
+   public us.ihmc.idl.IDLSequence.Byte  log_data_;
 
    public SystemServiceStatusMessage()
    {
       service_name_ = new java.lang.StringBuilder(255);
       status_ = new java.lang.StringBuilder(255);
-      log_lines_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (8192, "type_d");
+      log_data_ = new us.ihmc.idl.IDLSequence.Byte (25000000, "type_9");
+
    }
 
    public SystemServiceStatusMessage(SystemServiceStatusMessage other)
@@ -34,9 +34,7 @@ public class SystemServiceStatusMessage extends Packet<SystemServiceStatusMessag
       status_.setLength(0);
       status_.append(other.status_);
 
-      log_line_count_ = other.log_line_count_;
-
-      log_lines_.set(other.log_lines_);
+      log_data_.set(other.log_data_);
    }
 
    public void setServiceName(java.lang.String service_name)
@@ -69,19 +67,10 @@ public class SystemServiceStatusMessage extends Packet<SystemServiceStatusMessag
       return status_;
    }
 
-   public void setLogLineCount(int log_line_count)
-   {
-      log_line_count_ = log_line_count;
-   }
-   public int getLogLineCount()
-   {
-      return log_line_count_;
-   }
 
-
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getLogLines()
+   public us.ihmc.idl.IDLSequence.Byte  getLogData()
    {
-      return log_lines_;
+      return log_data_;
    }
 
 
@@ -106,9 +95,7 @@ public class SystemServiceStatusMessage extends Packet<SystemServiceStatusMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.status_, other.status_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.log_line_count_, other.log_line_count_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.log_lines_, other.log_lines_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.log_data_, other.log_data_, epsilon)) return false;
 
 
       return true;
@@ -127,9 +114,7 @@ public class SystemServiceStatusMessage extends Packet<SystemServiceStatusMessag
 
       if (!us.ihmc.idl.IDLTools.equals(this.status_, otherMyClass.status_)) return false;
 
-      if(this.log_line_count_ != otherMyClass.log_line_count_) return false;
-
-      if (!this.log_lines_.equals(otherMyClass.log_lines_)) return false;
+      if (!this.log_data_.equals(otherMyClass.log_data_)) return false;
 
       return true;
    }
@@ -144,10 +129,8 @@ public class SystemServiceStatusMessage extends Packet<SystemServiceStatusMessag
       builder.append(this.service_name_);      builder.append(", ");
       builder.append("status=");
       builder.append(this.status_);      builder.append(", ");
-      builder.append("log_line_count=");
-      builder.append(this.log_line_count_);      builder.append(", ");
-      builder.append("log_lines=");
-      builder.append(this.log_lines_);
+      builder.append("log_data=");
+      builder.append(this.log_data_);
       builder.append("}");
       return builder.toString();
    }
