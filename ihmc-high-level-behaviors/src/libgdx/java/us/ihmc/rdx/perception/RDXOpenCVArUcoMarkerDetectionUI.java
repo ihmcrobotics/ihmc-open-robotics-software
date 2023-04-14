@@ -146,10 +146,10 @@ public class RDXOpenCVArUcoMarkerDetectionUI
                for (int i = 0; i < markersToTrack.size(); i++)
                {
                   OpenCVArUcoMarker markerToTrack = markersToTrack.get(i);
-                  if (arUcoMarkerDetection.isDetected(markerToTrack))
+                  if (arUcoMarkerDetection.isDetected(markerToTrack.getId()))
                   {
                      markerPose.setToZero(cameraFrame);
-                     arUcoMarkerDetection.getPose(markerToTrack, markerPose);
+                     arUcoMarkerDetection.getPose(markerToTrack.getId(), markerToTrack.getSideLength(), markerPose);
                      markerPose.changeFrame(ReferenceFrame.getWorldFrame());
                      markerPoseCoordinateFrames.get(i).setPoseInWorldFrame(markerPose);
                   }
