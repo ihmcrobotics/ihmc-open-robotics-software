@@ -107,18 +107,12 @@ public class ImGuiMachineService
       ImGui.text(statusString);
 
       boolean isMissionControl3 = serviceName.contains("mission-control-3");
-      boolean allButtonsDisabled = false;
-
-      if (waitingOnStatusChange && !hasItBeenAWhileSinceTheLastActionRequest() || isMissionControl3)
-      {
-         allButtonsDisabled = true;
-      }
+      boolean allButtonsDisabled = waitingOnStatusChange && !hasItBeenAWhileSinceTheLastActionRequest() || isMissionControl3;
 
       if (allButtonsDisabled)
          ImGui.beginDisabled(true);
 
-      // Start button
-      {
+      { // Start button
          boolean disabled = statusString.startsWith("active");
          if (disabled)
             ImGui.beginDisabled(true);
@@ -132,8 +126,7 @@ public class ImGuiMachineService
             ImGui.endDisabled();
       }
       ImGui.sameLine();
-      // Stop button
-      {
+      { // Stop button
          boolean disabled = statusString.startsWith("inactive") || statusString.startsWith("failed") || isMissionControl3;
          if (disabled)
             ImGui.beginDisabled(true);
@@ -147,8 +140,7 @@ public class ImGuiMachineService
             ImGui.endDisabled();
       }
       ImGui.sameLine();
-      // Restart button
-      {
+      { // Restart button
          if (ImGui.button("Restart##" + instanceId + "-" + serviceName))
          {
             sendRestartMessage();
