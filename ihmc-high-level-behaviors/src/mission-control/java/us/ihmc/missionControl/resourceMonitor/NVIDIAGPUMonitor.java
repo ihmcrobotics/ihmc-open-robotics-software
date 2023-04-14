@@ -140,7 +140,6 @@ public class NVIDIAGPUMonitor extends ResourceMonitor
                String currentTemperatureLine = lines[i + 1].trim();
 
                int currentTemperature = Integer.parseInt(currentTemperatureLine.split("\\s+")[4]);
-               currentTemperature = 90;
 
                this.temperature = currentTemperature;
             }

@@ -240,9 +240,10 @@ public class ImGuiMachine
       String cpuWarning = "";
       // Render usage graphs
       float highestLastCPUTemp = 0f;
-      for (int i = 0; i < lastResourceUsageMessage.getCpuCount(); i++)
-         if (lastResourceUsageMessage.getCpuTemps().get(i) > highestLastCPUTemp)
-            highestLastCPUTemp = lastResourceUsageMessage.getCpuTemps().get(i);
+      // Do not assume there are the same amount of CPUs in the temps array as the CPU utilization array
+      // CPU temps only map to physical cores - CPU utilization also includes logical threads
+      for (int i = 0; i < lastResourceUsageMessage.getCpuTemps().size(); i++)
+         highestLastCPUTemp = lastResourceUsageMessage.getCpuTemps().get(i);
       if (highestLastCPUTemp > 85f)
          cpuWarning = " [high CPU temperature (" + highestLastCPUTemp + "C)]";
       ImGui.text("CPU" + cpuWarning);
