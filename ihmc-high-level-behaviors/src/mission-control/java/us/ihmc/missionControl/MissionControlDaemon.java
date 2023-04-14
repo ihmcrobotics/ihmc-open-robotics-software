@@ -114,17 +114,11 @@ public class MissionControlDaemon
 
       String action = message.getSystemdActionAsString();
 
-      if (action.equals("start"))
+      switch (action)
       {
-         serviceMonitor.start();
-      }
-      else if (action.equals("stop"))
-      {
-         serviceMonitor.stop();
-      }
-      else if (action.equals("restart"))
-      {
-         serviceMonitor.restart();
+         case "start" -> serviceMonitor.start();
+         case "stop" -> serviceMonitor.stop();
+         case "restart" -> serviceMonitor.restart();
       }
    }
 
