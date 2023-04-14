@@ -108,10 +108,10 @@ public class MissionControlDaemon
       });
 
       MissionControlTools.findSystemdServiceNames().forEach(service ->
-                                                            {
-                                                               LogTools.info("Watching systemd service: " + service);
-                                                               serviceMonitors.put(service, new SystemdServiceMonitor(instanceId, service, ros2Node));
-                                                            });
+      {
+         LogTools.info("Watching systemd service: " + service);
+         serviceMonitors.put(service, new SystemdServiceMonitor(instanceId, service, ros2Node));
+      });
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
