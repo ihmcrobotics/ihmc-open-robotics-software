@@ -902,6 +902,11 @@ public class SCS2AvatarSimulationFactory
       this.impulseBasedPhysicsEngineContactParameters.set(contactParameters);
    }
 
+   public void setGroundContactModelParameters(GroundContactModelParameters groundContactModelParameters)
+   {
+      this.groundContactModelParameters.set(groundContactModelParameters);
+   }
+
    public void setUseBulletPhysicsEngine(boolean useBulletPhysicsEngine)
    {
       this.useBulletPhysicsEngine.set(useBulletPhysicsEngine);
