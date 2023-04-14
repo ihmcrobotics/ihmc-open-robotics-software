@@ -11,7 +11,7 @@ public interface ArUcoMarkerInfoBasics extends ArUcoMarkerInfoReadOnly, StoredPr
    /**
     * ArUco marker ID in the ArUco dictionary
     */
-   default void setMarkerID(double markerID)
+   default void setMarkerID(int markerID)
    {
       set(ArUcoMarkerInfo.markerID, markerID);
    }

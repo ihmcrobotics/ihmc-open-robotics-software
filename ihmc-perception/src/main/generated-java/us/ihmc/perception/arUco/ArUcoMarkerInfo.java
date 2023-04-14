@@ -21,7 +21,7 @@ public class ArUcoMarkerInfo extends StoredPropertySet implements ArUcoMarkerInf
    /**
     * ArUco marker ID in the ArUco dictionary
     */
-   public static final DoubleStoredPropertyKey markerID = keys.addDoubleKey("Marker ID");
+   public static final IntegerStoredPropertyKey markerID = keys.addIntegerKey("Marker ID");
    /**
     * ArUco marker side length size of the black outer part
     */

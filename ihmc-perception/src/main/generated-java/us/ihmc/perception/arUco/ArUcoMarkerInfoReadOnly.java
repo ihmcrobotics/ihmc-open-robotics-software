@@ -15,7 +15,7 @@ public interface ArUcoMarkerInfoReadOnly extends StoredPropertySetReadOnly
     */
    default int getMarkerID()
    {
-      return (int) Math.round(get(markerID));
+      return get(markerID);
    }
 
    /**
