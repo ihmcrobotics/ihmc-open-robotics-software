@@ -48,6 +48,8 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
@@ -64,6 +66,8 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -94,6 +98,10 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getCpuUsages().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getCpuTemps().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -132,6 +140,10 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += (data.getNvidiaGpuUtilization().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getNvidiaGpuTemps().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -147,6 +159,10 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       if(data.getCpuUsages().size() <= 100)
       cdr.write_type_e(data.getCpuUsages());else
           throw new RuntimeException("cpu_usages field exceeds the maximum length");
+
+      if(data.getCpuTemps().size() <= 100)
+      cdr.write_type_e(data.getCpuTemps());else
+          throw new RuntimeException("cpu_temps field exceeds the maximum length");
 
       cdr.write_type_2(data.getIfaceCount());
 
@@ -180,6 +196,10 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_e(data.getNvidiaGpuUtilization());else
           throw new RuntimeException("nvidia_gpu_utilization field exceeds the maximum length");
 
+      if(data.getNvidiaGpuTemps().size() <= 100)
+      cdr.write_type_e(data.getNvidiaGpuTemps());else
+          throw new RuntimeException("nvidia_gpu_temps field exceeds the maximum length");
+
    }
 
    public static void read(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
@@ -191,6 +211,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setCpuCount(cdr.read_type_2());
       	
       cdr.read_type_e(data.getCpuUsages());	
+      cdr.read_type_e(data.getCpuTemps());	
       data.setIfaceCount(cdr.read_type_2());
       	
       cdr.read_type_e(data.getIfaceNames());	
@@ -202,6 +223,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.read_type_e(data.getNvidiaGpuMemoryUsed());	
       cdr.read_type_e(data.getNvidiaGpuMemoryTotal());	
       cdr.read_type_e(data.getNvidiaGpuUtilization());	
+      cdr.read_type_e(data.getNvidiaGpuTemps());	
 
    }
 
@@ -212,6 +234,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_5("memory_total", data.getMemoryTotal());
       ser.write_type_2("cpu_count", data.getCpuCount());
       ser.write_type_e("cpu_usages", data.getCpuUsages());
+      ser.write_type_e("cpu_temps", data.getCpuTemps());
       ser.write_type_2("iface_count", data.getIfaceCount());
       ser.write_type_e("iface_names", data.getIfaceNames());
       ser.write_type_e("iface_rx_kbps", data.getIfaceRxKbps());
@@ -221,6 +244,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_e("nvidia_gpu_memory_used", data.getNvidiaGpuMemoryUsed());
       ser.write_type_e("nvidia_gpu_memory_total", data.getNvidiaGpuMemoryTotal());
       ser.write_type_e("nvidia_gpu_utilization", data.getNvidiaGpuUtilization());
+      ser.write_type_e("nvidia_gpu_temps", data.getNvidiaGpuTemps());
    }
 
    @Override
@@ -230,6 +254,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setMemoryTotal(ser.read_type_5("memory_total"));
       data.setCpuCount(ser.read_type_2("cpu_count"));
       ser.read_type_e("cpu_usages", data.getCpuUsages());
+      ser.read_type_e("cpu_temps", data.getCpuTemps());
       data.setIfaceCount(ser.read_type_2("iface_count"));
       ser.read_type_e("iface_names", data.getIfaceNames());
       ser.read_type_e("iface_rx_kbps", data.getIfaceRxKbps());
@@ -239,6 +264,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.read_type_e("nvidia_gpu_memory_used", data.getNvidiaGpuMemoryUsed());
       ser.read_type_e("nvidia_gpu_memory_total", data.getNvidiaGpuMemoryTotal());
       ser.read_type_e("nvidia_gpu_utilization", data.getNvidiaGpuUtilization());
+      ser.read_type_e("nvidia_gpu_temps", data.getNvidiaGpuTemps());
    }
 
    public static void staticCopy(mission_control_msgs.msg.dds.SystemResourceUsageMessage src, mission_control_msgs.msg.dds.SystemResourceUsageMessage dest)

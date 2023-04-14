@@ -10,6 +10,9 @@ int32 cpu_count
 # [n] : usage for nth CPU
 float32[] cpu_usages
 
+# [n] : temperature for nth CPU
+float32[] cpu_temps
+
 # ======== Network statistics ========
 int32 iface_count
 
@@ -36,5 +39,8 @@ float32[] nvidia_gpu_memory_total
 
 # [n] : utilization for nth GPU
 float32[] nvidia_gpu_utilization
+
+# [n] : die temperature for nth GPU
+float32[] nvidia_gpu_temps
 
 
