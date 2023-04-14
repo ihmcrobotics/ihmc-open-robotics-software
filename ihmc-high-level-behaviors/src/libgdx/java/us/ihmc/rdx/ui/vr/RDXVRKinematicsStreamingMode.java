@@ -17,9 +17,11 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -211,7 +213,18 @@ public class RDXVRKinematicsStreamingMode
             HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
             sendHandCommand(RobotSide.RIGHT, handConfiguration);
          }
+
+//         FramePose3D ghostFramePose = new FramePose3D();
+//         ghostFramePose.setToZero(controller.getXForwardZUpControllerFrame());
+//         ghostFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+//         Pose3DReadOnly robotPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+//                                                    syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+//         if(ghostFramePose.epsilonEquals(robotPose, 0.1))
+//            LogTools.info("OK");
+//         LogTools.info("robotPose {}  ghost {}", robotPose, ghostFramePose);
       });
+
+
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
@@ -480,7 +493,7 @@ public class RDXVRKinematicsStreamingMode
          for (RobotSide side : RobotSide.values)
          {
             controllerFrameGraphics.get(side).getRenderables(renderables, pool);
-            handControlFrameGraphics.get(side).getRenderables(renderables, pool);
+//            handControlFrameGraphics.get(side).getRenderables(renderables, pool);
          }
       }
    }
