@@ -148,6 +148,13 @@ public class ImGuiMachineService
             lastActionRequest = System.currentTimeMillis();
          }
       }
+      ImGui.sameLine(ImGui.getContentRegionMaxX() - 60f);
+      { // Log button
+         if (ImGui.button("Open log##" + instanceId + "-" + serviceName))
+         {
+            logPanel.getIsShowing().set(true);
+         }
+      }
 
       if (allButtonsDisabled)
          ImGui.endDisabled();
