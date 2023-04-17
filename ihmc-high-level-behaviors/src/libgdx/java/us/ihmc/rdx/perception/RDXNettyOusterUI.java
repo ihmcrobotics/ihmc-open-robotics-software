@@ -119,7 +119,7 @@ public class RDXNettyOusterUI
          pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
       }
 
-      ousterFisheyeKernel.setInstrinsicParameters(ouster.getPixelShiftBuffer(), ouster.getBeamAltitudeAnglesBuffer(), ouster.getBeamAzimuthAnglesBuffer());
+      ousterFisheyeKernel.setInstrinsicParameters(ouster.getBeamAltitudeAnglesBuffer(), ouster.getBeamAzimuthAnglesBuffer());
    }
 
    public void setFisheyeImageToColorPoints(BytedecoImage fThetaFisheyeRGBA8Image,

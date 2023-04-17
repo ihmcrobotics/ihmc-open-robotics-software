@@ -5,11 +5,15 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.ros2.ROS2IOTopicPair;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -42,11 +46,11 @@ public class RDXInteractableFrameModel
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final Notification contextMenuNotification = new Notification();
    private Runnable extendedContextMenu;
+   private ROS2TunedRigidBodyTransform syncedTransformForTuning;
+   /** When interacting with the scene, sometimes the graphics will get in the way. TODO: Disable interactions too. */
+   private boolean showing = true;
 
-   public void create(ReferenceFrame parentFrame,
-                      RDX3DPanel panel3D,
-                      ModelData modelData,
-                      RDXMousePickRayCollisionCalculator collisionCalculator)
+   public void create(ReferenceFrame parentFrame, RDX3DPanel panel3D, ModelData modelData, RDXMousePickRayCollisionCalculator collisionCalculator)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transform);
@@ -71,6 +75,19 @@ public class RDXInteractableFrameModel
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
       panel3D.getScene().addRenderableProvider(this::getRenderables);
       panel3D.addImGuiOverlayAddition(this::renderTooltipsAndContextMenu);
+   }
+
+   public void addRemoteTuning(ROS2PublishSubscribeAPI ros2, ROS2IOTopicPair<RigidBodyTransformMessage> topicPair, RigidBodyTransform rigidBodyTransformToSync)
+   {
+      syncedTransformForTuning = ROS2TunedRigidBodyTransform.remoteTuner(ros2, topicPair, rigidBodyTransformToSync);
+   }
+
+   public void update()
+   {
+      boolean interactableSelected = isSelected();
+      syncedTransformForTuning.setAcceptingUpdates(!interactableSelected);
+      syncedTransformForTuning.setPublishingStatus(interactableSelected);
+      syncedTransformForTuning.update();
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
@@ -128,11 +145,11 @@ public class RDXInteractableFrameModel
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (sceneLevels.contains(RDXSceneLevel.MODEL) || sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      if (showing && (sceneLevels.contains(RDXSceneLevel.MODEL) || sceneLevels.contains(RDXSceneLevel.VIRTUAL)))
       {
          modelInstance.getRenderables(renderables, pool);
       }
-      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      if (showing && sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
          if (isMouseHovering || selectablePose3DGizmo.isSelected())
          {
@@ -161,5 +178,15 @@ public class RDXInteractableFrameModel
    public void setExtendedContextMenu(Runnable runnable)
    {
       this.extendedContextMenu = runnable;
+   }
+
+   public boolean isSelected()
+   {
+      return selectablePose3DGizmo.isSelected();
+   }
+
+   public void setShowing(boolean showing)
+   {
+      this.showing = showing;
    }
 }

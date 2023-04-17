@@ -63,6 +63,7 @@ public class PlanarRegionTestTools
       {
          ConvexPolygon2D expectedConvexPolygon = expected.getConvexPolygon(i);
          ConvexPolygon2D actualConvexPolygon = actual.getConvexPolygon(i);
+
          EuclidCoreTestTools.assertGeometricallyEquals(expectedConvexPolygon, actualConvexPolygon, epsilon);
       }
    }
