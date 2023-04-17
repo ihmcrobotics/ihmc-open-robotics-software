@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelC
 import java.util.ArrayList;
 import java.util.List;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -45,6 +46,11 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     * equal to the number of degrees of freedom of the joint it is associated with.
     */
    private final DenseMatrixArrayList desiredTorques = new DenseMatrixArrayList(initialCapacity);
+   /**
+    * The list of weights to use for each joint. The list follows the same ordering as the
+    * {@link #joints} list. A higher weight means higher priority of the joint task.
+    */
+   private final TDoubleArrayList weights = new TDoubleArrayList(initialCapacity);
 
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
@@ -68,6 +74,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
          joints.add(other.joints.get(i));
+         weights.add(other.weights.get(i));
       }
       desiredTorques.set(other.desiredTorques);
    }
@@ -81,6 +88,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
       commandId = 0;
       joints.clear();
       desiredTorques.clear();
+      weights.reset();
    }
 
    /**
@@ -151,7 +159,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
       desiredTorques.get(jointIndex).set(desiredTorque);
    }
 
-   private void checkConsistency(JointBasics joint, DMatrixRMaj desiredTorque)
+   private static void checkConsistency(JointBasics joint, DMatrixRMaj desiredTorque)
    {
       MathTools.checkEquals(joint.getDegreesOfFreedom(), desiredTorque.getNumRows());
    }
@@ -212,7 +220,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
    /**
     * {@inheritDoc}
     * 
-    * @return {@link ControllerCoreCommandType#TASKSPACE}.
+    * @return {@link ControllerCoreCommandType#JOINTSPACE}.
     */
    @Override
    public ControllerCoreCommandType getCommandType()
@@ -239,10 +247,8 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
       {
          return true;
       }
-      else if (object instanceof JointTorqueCommand)
+      else if (object instanceof JointTorqueCommand other)
       {
-         JointTorqueCommand other = (JointTorqueCommand) object;
-
          if (commandId != other.commandId)
             return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
@@ -253,6 +259,8 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
                return false;
          }
          if (!desiredTorques.equals(other.desiredTorques))
+            return false;
+         if (!weights.equals(other.weights))
             return false;
 
          return true;
