@@ -23,4 +23,15 @@ public class ServiceLogFile extends File
    {
       return Files.readAllLines(Paths.get(getAbsolutePath()));
    }
+
+   /**
+    * Check if the log file is large (larger than 100KB)
+    * @return true if the file is large, false if not
+    */
+   public boolean isLarge()
+   {
+      long fileSizeInBytes = length();
+      double fileSizeInKB = (double) fileSizeInBytes / 1024;
+      return fileSizeInKB > 100;
+   }
 }
