@@ -6,8 +6,10 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiDockspacePanel;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 
@@ -198,6 +200,7 @@ public class ImGuiMachineService
          {
             logPanel.getIsShowing().set(true);
             ImGui.setWindowFocus(logPanel.getPanelName());
+            imgui.internal.ImGui.dockBuilderDockWindow(logPanel.getPanelName(), 1);
          }
       }
 
