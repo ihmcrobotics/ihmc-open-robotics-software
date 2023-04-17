@@ -6,10 +6,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.imgui.ImGuiDockspacePanel;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 
@@ -103,7 +101,8 @@ public class ImGuiMachineService
       logLines.forEach(consoleArea::acceptLine);
       // Save log lines to file async
       if (logFile != null)
-         ThreadTools.startAThread(() -> logLines.forEach(line -> {
+         ThreadTools.startAThread(() -> logLines.forEach(line ->
+         {
             try
             {
                logFile.saveLogLine(line);
@@ -145,7 +144,8 @@ public class ImGuiMachineService
 
    public void renderImGuiWidgets()
    {
-      if (status == null) return;
+      if (status == null)
+         return;
 
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text(serviceName);
@@ -198,14 +198,19 @@ public class ImGuiMachineService
       { // Log button
          if (ImGui.button("Open log##" + instanceId + "-" + serviceName))
          {
-            logPanel.getIsShowing().set(true);
-            ImGui.setWindowFocus(logPanel.getPanelName());
-            imgui.internal.ImGui.dockBuilderDockWindow(logPanel.getPanelName(), 1);
+            openLogPanel();
          }
       }
 
       if (allButtonsDisabled)
          ImGui.endDisabled();
+   }
+
+   public void openLogPanel()
+   {
+      logPanel.getIsShowing().set(true);
+      ImGui.setWindowFocus(logPanel.getPanelName());
+      imgui.internal.ImGui.dockBuilderDockWindow(logPanel.getPanelName(), 1);
    }
 
    public void renderImGuiLogPanelWidgets()

@@ -10,6 +10,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.missionControl.resourceMonitor.FreeMemoryMonitor;
 import us.ihmc.missionControl.resourceMonitor.NVIDIAGPUMonitor;
 import us.ihmc.missionControl.resourceMonitor.SysstatNetworkMonitor;
+import us.ihmc.missionControl.resourceMonitor.UptimeMonitor;
 import us.ihmc.missionControl.resourceMonitor.cpu.CPUCoreTracker;
 import us.ihmc.missionControl.resourceMonitor.cpu.LmSensorsMonitor;
 import us.ihmc.missionControl.resourceMonitor.cpu.ProcStatCPUMonitor;
@@ -35,6 +36,7 @@ public class MissionControlDaemon
 
    private final ProcStatCPUMonitor cpuMonitor;
    private final FreeMemoryMonitor memoryMonitor;
+   private final UptimeMonitor uptimeMonitor;
    private LmSensorsMonitor sensorsMonitor; // Optional - requires lm_sensors
    private SysstatNetworkMonitor networkMonitor; // Optional - requires sysstat
    private NVIDIAGPUMonitor nvidiaGPUMonitor; // Optional - requires an NVIDIA GPU
@@ -55,6 +57,9 @@ public class MissionControlDaemon
 
       memoryMonitor = new FreeMemoryMonitor();
       memoryMonitor.start();
+
+      uptimeMonitor = new UptimeMonitor();
+      uptimeMonitor.start();
 
       if (MissionControlTools.lmSensorsAvailable())
       {
@@ -98,7 +103,7 @@ public class MissionControlDaemon
       schedulers.add(systemResourceUsagePublisherScheduler);
 
       systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.0);
-      systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.25);
+      systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.1);
 
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId), subscriber ->
       {
@@ -144,6 +149,8 @@ public class MissionControlDaemon
    private void publishResourceUsage()
    {
       SystemResourceUsageMessage message = new SystemResourceUsageMessage();
+
+      message.setUptime(uptimeMonitor.getUptime());
 
       message.setMemoryUsed(memoryMonitor.getMemoryUsedGiB());
       message.setMemoryTotal(memoryMonitor.getMemoryTotalGiB());

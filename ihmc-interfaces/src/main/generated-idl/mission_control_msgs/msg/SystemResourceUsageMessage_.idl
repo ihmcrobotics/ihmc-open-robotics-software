@@ -11,6 +11,7 @@ module mission_control_msgs
       @TypeCode(type="mission_control_msgs::msg::dds_::SystemResourceUsageMessage_")
       struct SystemResourceUsageMessage
       {
+        string uptime;
         /**
          * ======== System memory statistics ========
          */

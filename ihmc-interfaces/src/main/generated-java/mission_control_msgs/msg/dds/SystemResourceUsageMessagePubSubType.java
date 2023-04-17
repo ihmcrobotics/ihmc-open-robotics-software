@@ -40,6 +40,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -86,6 +87,8 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    public final static int getCdrSerializedSize(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getUptime().length() + 1;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -150,6 +153,10 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
    {
+      if(data.getUptime().length() <= 255)
+      cdr.write_type_d(data.getUptime());else
+          throw new RuntimeException("uptime field exceeds the maximum length");
+
       cdr.write_type_5(data.getMemoryUsed());
 
       cdr.write_type_5(data.getMemoryTotal());
@@ -204,6 +211,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.read_type_d(data.getUptime());	
       data.setMemoryUsed(cdr.read_type_5());
       	
       data.setMemoryTotal(cdr.read_type_5());
@@ -230,6 +238,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(mission_control_msgs.msg.dds.SystemResourceUsageMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_d("uptime", data.getUptime());
       ser.write_type_5("memory_used", data.getMemoryUsed());
       ser.write_type_5("memory_total", data.getMemoryTotal());
       ser.write_type_2("cpu_count", data.getCpuCount());
@@ -250,6 +259,7 @@ public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, mission_control_msgs.msg.dds.SystemResourceUsageMessage data)
    {
+      ser.read_type_d("uptime", data.getUptime());
       data.setMemoryUsed(ser.read_type_5("memory_used"));
       data.setMemoryTotal(ser.read_type_5("memory_total"));
       data.setCpuCount(ser.read_type_2("cpu_count"));
