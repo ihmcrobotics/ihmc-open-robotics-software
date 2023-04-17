@@ -156,6 +156,7 @@ public class RapidHeightMapExtractor
          openCLManager.execute2D(heightMapRegistrationKernel, cellsPerAxis, cellsPerAxis);
 
          // Read height map image into CPU memory
+         heightMapInSensor.readOpenCLImage(openCLManager);
          heightMapInWorld.readOpenCLImage(openCLManager);
 
          latestHeightMapData = convertToHeightMapData(gridCenter);
@@ -217,6 +218,11 @@ public class RapidHeightMapExtractor
    public BytedecoImage getHeightMapInWorld()
    {
       return heightMapInWorld;
+   }
+
+   public BytedecoImage getHeightMapInSensor()
+   {
+      return heightMapInSensor;
    }
 
    public int getCellsPerAxis()
