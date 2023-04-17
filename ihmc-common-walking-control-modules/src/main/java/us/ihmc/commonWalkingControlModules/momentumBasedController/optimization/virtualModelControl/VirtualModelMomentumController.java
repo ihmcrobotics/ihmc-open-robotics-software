@@ -121,7 +121,7 @@ public class VirtualModelMomentumController
    }
 
    /**
-    * Adds a {@link JointspaceAccelerationCommand} into a {@link QPInputTypeA}.
+    * Adds a {@link JointTorqueCommand} into a desired effort matrix.
     *
     * @return true if the command was successfully added.
     */
