@@ -48,7 +48,6 @@ public class ImGuiMachineService
          serviceActionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId));
       }, "Service-Action-Publisher");
 
-      // Load the content from the log file. Then, delete and recreate it.
       logFile = new ServiceLogFile(IHMCCommonPaths.MISSION_CONTROL_LOGS_DIRECTORY + "/" + serviceName + ".log");
 
       if (logFile.exists())
@@ -56,7 +55,12 @@ public class ImGuiMachineService
          try
          {
             logFile.loadLogLines().forEach(consoleArea::acceptLine);
-            logFile.delete();
+
+            // Check if the log file is larger than 100KB. If so, delete it.
+            if (logFile.isLarge())
+            {
+               logFile.delete();
+            }
          }
          catch (IOException e)
          {
@@ -66,8 +70,8 @@ public class ImGuiMachineService
 
       try
       {
-         logFile.getParentFile().mkdirs();
-         logFile.createNewFile();
+         logFile.getParentFile().mkdirs(); // Doesn't do anything if already exists
+         logFile.createNewFile(); // Doesn't do anything if already exists
       }
       catch (IOException e)
       {
