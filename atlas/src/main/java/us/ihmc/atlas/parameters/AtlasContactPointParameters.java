@@ -212,27 +212,6 @@ public class AtlasContactPointParameters extends RobotContactPointParameters<Rob
       addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint6b);
    }
 
-   @Override
-   public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
-   {
-      double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
-
-      if (useSoftGroundContactParameters)
-      {
-         linearGroundContactModel.setZStiffness(scale * 4000.0);
-         linearGroundContactModel.setZDamping(scale * 750.0);
-         linearGroundContactModel.setXYStiffness(scale * 50000.0);
-         linearGroundContactModel.setXYDamping(scale * 1000.0);
-      }
-      else
-      {
-         linearGroundContactModel.setZStiffness(scale * 2000.0);
-         linearGroundContactModel.setZDamping(scale * 1500.0);
-         linearGroundContactModel.setXYStiffness(scale * 50000.0);
-         linearGroundContactModel.setXYDamping(scale * 2000.0);
-      }
-   }
-
    public int getNumberOfContactableBodies()
    {
       return numberOfContactableBodies;

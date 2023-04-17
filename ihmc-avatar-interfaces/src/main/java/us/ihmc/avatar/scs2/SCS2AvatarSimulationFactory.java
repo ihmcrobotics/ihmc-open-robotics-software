@@ -137,6 +137,7 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
    protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>("bulletCollisionMutator");
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
+   protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>("groundContactModelParameters");
    protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
    protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
    protected final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
@@ -264,8 +265,11 @@ public class SCS2AvatarSimulationFactory
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) ->
          {
+            if (groundContactModelParameters.hasValue())
+               robotModel.getContactPointParameters().setGroundContactModelParameters(groundContactModelParameters.get());
+
             ContactPointBasedPhysicsEngine physicsEngine = new ContactPointBasedPhysicsEngine(inertialFrame, rootRegistry);
-            GroundContactModelParameters contactModelParameters = robotModel.getContactPointParameters().getContactModelParameters(simulationDT.get());
+            GroundContactModelParameters contactModelParameters = robotModel.getContactPointParameters().getGroundContactModelParameters(simulationDT.get());
             ContactPointBasedContactParameters parameters = ContactPointBasedContactParameters.defaultParameters();
             parameters.setKz(contactModelParameters.getZStiffness());
             parameters.setBz(contactModelParameters.getZDamping());
@@ -896,6 +900,11 @@ public class SCS2AvatarSimulationFactory
    public void setImpulseBasedPhysicsEngineContactParameters(ContactParametersReadOnly contactParameters)
    {
       this.impulseBasedPhysicsEngineContactParameters.set(contactParameters);
+   }
+
+   public void setGroundContactModelParameters(GroundContactModelParameters groundContactModelParameters)
+   {
+      this.groundContactModelParameters.set(groundContactModelParameters);
    }
 
    public void setUseBulletPhysicsEngine(boolean useBulletPhysicsEngine)
