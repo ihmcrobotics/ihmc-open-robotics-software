@@ -51,10 +51,9 @@ public class LmSensorsMonitor extends ResourceMonitor
          if (lines[i].contains("coretemp-isa-0000"))
          {
             int nextCPULine = i + 3;
-
-            while (lines[nextCPULine].trim().startsWith("Core"))
+            try
             {
-               try
+               while (lines[nextCPULine].trim().startsWith("Core"))
                {
                   int cpu = Integer.parseInt(lines[nextCPULine].split("\\s+")[1].replace(":", ""));
                   String tempString = lines[nextCPULine].split("\\s+")[2];
@@ -62,11 +61,11 @@ public class LmSensorsMonitor extends ResourceMonitor
                   cpuTemps.put(cpu, temp);
                   nextCPULine++;
                }
-               catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored)
-               {
-                  LogTools.info("Unable to parse lm_sensors");
-                  return; // stopgap
-               }
+            }
+            catch (ArrayIndexOutOfBoundsException | NumberFormatException ignored)
+            {
+               LogTools.info("Unable to parse lm_sensors");
+               return; // stopgap
             }
          }
       }

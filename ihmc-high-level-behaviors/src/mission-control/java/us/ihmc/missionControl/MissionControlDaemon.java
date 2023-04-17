@@ -112,8 +112,6 @@ public class MissionControlDaemon
          LogTools.info("Watching systemd service: " + service);
          serviceMonitors.put(service, new SystemdServiceMonitor(instanceId, service, ros2Node));
       });
-
-      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
 
    private void handleServiceActionMessage(SystemServiceActionMessage message)
@@ -210,27 +208,24 @@ public class MissionControlDaemon
       ros2Node.destroy();
    }
 
-   private static volatile boolean running = true;
-
    public static void main(String[] args)
    {
-      Runtime.getRuntime().addShutdownHook(new Thread(() ->
-      {
-         running = false;
-         Runtime.getRuntime().halt(0); // Set exit code to 0
-      }));
-
       if (!System.getProperty("os.name").toLowerCase().contains("linux"))
       {
          LogTools.warn("This program is only supported on Linux");
          return;
       }
 
-      new MissionControlDaemon();
+      LogTools.info("Starting Mission Control Daemon...");
 
-      while (running)
+      MissionControlDaemon daemon = new MissionControlDaemon();
+
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
-         ThreadTools.sleep(1000);
-      }
+         daemon.destroy();
+         Runtime.getRuntime().halt(0); // Set exit code to 0
+      }));
+
+      ThreadTools.sleepForever();
    }
 }

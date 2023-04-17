@@ -5,11 +5,14 @@ import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.IHMCCommonPaths;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +27,8 @@ public class ImGuiMachineService
    private final ImGuiPanel logPanel;
    private final ImGuiConsoleArea consoleArea;
    private IHMCROS2Publisher<SystemServiceActionMessage> serviceActionPublisher;
+   @Nullable
+   private ServiceLogFile logFile;
 
    // Time of the last action button press
    private long lastActionRequest = -1;
@@ -42,6 +47,33 @@ public class ImGuiMachineService
       {
          serviceActionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId));
       }, "Service-Action-Publisher");
+
+      // Load the content from the log file. Then, delete and recreate it.
+      logFile = new ServiceLogFile(IHMCCommonPaths.MISSION_CONTROL_LOGS_DIRECTORY + "/" + serviceName + ".log");
+
+      if (logFile.exists())
+      {
+         try
+         {
+            logFile.loadLogLines().forEach(consoleArea::acceptLine);
+            logFile.delete();
+         }
+         catch (IOException e)
+         {
+            LogTools.error("Unable to read log file: " + logFile.getAbsolutePath(), e);
+         }
+      }
+
+      try
+      {
+         logFile.getParentFile().mkdirs();
+         logFile.createNewFile();
+      }
+      catch (IOException e)
+      {
+         LogTools.error("Unable to create service log file: " + logFile.getAbsolutePath(), e);
+         logFile = null;
+      }
    }
 
    public String getStatus()
@@ -56,17 +88,25 @@ public class ImGuiMachineService
          status = status.substring(8); // Remove the "Active: "
          if (!status.equals(this.status))
             waitingOnStatusChange = false;
-         this.status = status;
       }
-      else
-      {
-         this.status = status;
-      }
+      this.status = status;
    }
 
    public void acceptLogLines(List<String> logLines)
    {
       logLines.forEach(consoleArea::acceptLine);
+      // Save log lines to file async
+      if (logFile != null)
+         ThreadTools.startAThread(() -> logLines.forEach(line -> {
+            try
+            {
+               logFile.saveLogLine(line);
+            }
+            catch (IOException e)
+            {
+               LogTools.error("Unable to save log line", e);
+            }
+         }), "Service-Log-Save-" + serviceName);
    }
 
    private void sendActionMessage(String systemdAction)
@@ -99,12 +139,12 @@ public class ImGuiMachineService
 
    public void renderImGuiWidgets()
    {
-      String statusString = status.toString();
+      if (status == null) return;
 
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text(serviceName);
       ImGui.popFont();
-      ImGui.text(statusString);
+      ImGui.text(status);
 
       boolean isMissionControl3 = serviceName.contains("mission-control-3");
       boolean allButtonsDisabled = waitingOnStatusChange && !hasItBeenAWhileSinceTheLastActionRequest() || isMissionControl3;
@@ -113,7 +153,7 @@ public class ImGuiMachineService
          ImGui.beginDisabled(true);
 
       { // Start button
-         boolean disabled = statusString.startsWith("active");
+         boolean disabled = status.startsWith("active");
          if (disabled)
             ImGui.beginDisabled(true);
          if (ImGui.button("Start##" + instanceId + "-" + serviceName))
@@ -127,7 +167,7 @@ public class ImGuiMachineService
       }
       ImGui.sameLine();
       { // Stop button
-         boolean disabled = statusString.startsWith("inactive") || statusString.startsWith("failed") || isMissionControl3;
+         boolean disabled = status.startsWith("inactive") || status.startsWith("failed") || isMissionControl3;
          if (disabled)
             ImGui.beginDisabled(true);
          if (ImGui.button("Stop##" + instanceId + "-" + serviceName))
@@ -148,11 +188,12 @@ public class ImGuiMachineService
             lastActionRequest = System.currentTimeMillis();
          }
       }
-      ImGui.sameLine(ImGui.getContentRegionMaxX() - 60f);
+      ImGui.sameLine();
       { // Log button
          if (ImGui.button("Open log##" + instanceId + "-" + serviceName))
          {
             logPanel.getIsShowing().set(true);
+            ImGui.setWindowFocus(logPanel.getPanelName());
          }
       }
 

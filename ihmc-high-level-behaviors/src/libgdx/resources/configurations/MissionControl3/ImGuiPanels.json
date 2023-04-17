@@ -3,14 +3,14 @@
     "Machine View" : false
   },
   "windows" : {
-    "Control Panel" : true,
-    "robotlab-ThinkPad-T460\n##35469c76-2b41-4db4-b969-d959c160ccfb" : false,
-    "d455-color-and-depth-publisher Log##35469c76-2b41-4db4-b969-d959c160ccfb" : false,
-    "dual-blackfly-and-aruco-marker-detection Log##35469c76-2b41-4db4-b969-d959c160ccfb" : false,
-    "mission-control-3 Log##35469c76-2b41-4db4-b969-d959c160ccfb" : false,
-    "ouster-lidar-depth-publisher Log##35469c76-2b41-4db4-b969-d959c160ccfb" : false,
-    "robotlab-thinkpad-rt\n##e58ca253-5806-44b1-9227-252e1fd5b6a4" : false,
-    "controller Log##e58ca253-5806-44b1-9227-252e1fd5b6a4" : false,
-    "mission-control-3 Log##e58ca253-5806-44b1-9227-252e1fd5b6a4" : false
+    "Main Panel" : true,
+    "robotlab-ThinkPad-T460\n##7d0f5046-d033-4079-9943-70cacb73aa32" : false,
+    "d455-color-and-depth-publisher Log##7d0f5046-d033-4079-9943-70cacb73aa32" : true,
+    "dual-blackfly-and-aruco-marker-detection Log##7d0f5046-d033-4079-9943-70cacb73aa32" : true,
+    "mission-control-3 Log##7d0f5046-d033-4079-9943-70cacb73aa32" : false,
+    "ouster-lidar-depth-publisher Log##7d0f5046-d033-4079-9943-70cacb73aa32" : true,
+    "robotlab-thinkpad-rt\n##583131fc-df78-402a-ae6d-f79480537563" : false,
+    "controller Log##583131fc-df78-402a-ae6d-f79480537563" : true,
+    "mission-control-3 Log##583131fc-df78-402a-ae6d-f79480537563" : false
   }
 }

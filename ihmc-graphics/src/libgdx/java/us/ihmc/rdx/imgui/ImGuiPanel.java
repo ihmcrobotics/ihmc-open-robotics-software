@@ -29,6 +29,11 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       this(panelName, null, false);
    }
 
+   public int getLastDockID()
+   {
+      return lastDockID;
+   }
+
    public ImGuiPanel(String panelName, Runnable render)
    {
       this(panelName, render, false);

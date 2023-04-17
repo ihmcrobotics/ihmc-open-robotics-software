@@ -20,6 +20,9 @@ import java.util.*;
 
 public class ImGuiMachine
 {
+   private static final int CPU_TEMP_WARN_THRESHOLD_C = 85;
+   private static final int GPU_TEMP_WARN_THRESHOLD_C = 85;
+
    private final UUID instanceId;
    private final String hostname;
 
@@ -84,6 +87,11 @@ public class ImGuiMachine
                                            ROS2Tools.getSystemServiceStatusQosProfile());
    }
 
+   public String getHostname()
+   {
+      return hostname;
+   }
+
    public ImGuiPanel getPanel()
    {
       return panel;
@@ -91,8 +99,7 @@ public class ImGuiMachine
 
    private void acceptSystemResourceUsageMessage(SystemResourceUsageMessage message)
    {
-      // Create the plot lines if they don't exist
-      {
+      { // Create the plot lines if they don't exist
          // CPU
          if (cpuPlot.getPlotLines().size() < message.getCpuCount())
          {
@@ -155,8 +162,7 @@ public class ImGuiMachine
          }
       }
 
-      // Update the plot line values
-      {
+      { // Update the plot line values
          // CPU
          for (int i = 0; i < cpuPlot.getPlotLines().size(); i++)
             ((ImPlotDoublePlotLine) cpuPlot.getPlotLines().get(i)).addValue(message.getCpuUsages().get(i));
@@ -233,10 +239,6 @@ public class ImGuiMachine
 
    public void renderImGuiWidgets()
    {
-      ImGui.pushFont(ImGuiTools.getMediumFont());
-      ImGui.text(hostname);
-      ImGui.popFont();
-
       String cpuWarning = "";
       // Render usage graphs
       float highestLastCPUTemp = 0f;
@@ -244,7 +246,7 @@ public class ImGuiMachine
       // CPU temps only map to physical cores - CPU utilization also includes logical threads
       for (int i = 0; i < lastResourceUsageMessage.getCpuTemps().size(); i++)
          highestLastCPUTemp = lastResourceUsageMessage.getCpuTemps().get(i);
-      if (highestLastCPUTemp > 85f)
+      if (highestLastCPUTemp > CPU_TEMP_WARN_THRESHOLD_C)
          cpuWarning = " [high CPU temperature (" + highestLastCPUTemp + "C)]";
       ImGui.text("CPU" + cpuWarning);
       cpuPlot.render();
@@ -253,9 +255,12 @@ public class ImGuiMachine
       if (!gpuPlots.isEmpty())
       {
          String warning = "";
-         float lastGPUTemp = lastResourceUsageMessage.getNvidiaGpuTemps().get(0);
-         if (lastGPUTemp > 85f)
-            warning = " [high GPU temperature (" + lastGPUTemp + "C)]";
+         if (!lastResourceUsageMessage.getNvidiaGpuTemps().isEmpty())
+         {
+            float lastGPUTemp = lastResourceUsageMessage.getNvidiaGpuTemps().get(0);
+            if (lastGPUTemp > GPU_TEMP_WARN_THRESHOLD_C)
+               warning = " [high GPU temperature (" + lastGPUTemp + "C)]";
+         }
          ImGui.text("GPU" + warning);
       }
 

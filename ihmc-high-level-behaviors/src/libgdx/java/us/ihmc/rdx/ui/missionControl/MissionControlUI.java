@@ -2,12 +2,10 @@ package us.ihmc.rdx.ui.missionControl;
 
 import imgui.ImGui;
 import mission_control_msgs.msg.dds.SystemAvailableMessage;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.imgui.ImGuiGlfwWindow;
-import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
@@ -15,12 +13,13 @@ import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class MissionControlUI
 {
    private final Map<UUID, SystemAvailableMessage> lastSystemAvailableMessage = new HashMap<>();
-   private final Map<UUID, ImGuiMachine> machines = new HashMap<>();
+   private final Map<UUID, ImGuiMachine> machines = new ConcurrentHashMap<>(); // Accessed by several threads
    private final ROS2Node ros2Node;
 
    private final ImGuiGlfwWindow window;
@@ -48,16 +47,13 @@ public class MissionControlUI
 
       window = new ImGuiGlfwWindow(getClass(), "Mission Control 3");
 
-      ImGuiPanel controlPanel = new ImGuiPanel("Control Panel", this::renderImGuiWidgets);
-
-      window.getImGuiDockSystem().getPanelManager().queueAddPanel(controlPanel);
-
-      ThreadTools.startAThread(() -> window.run(null, () ->
-      {
-      }, () -> System.exit(0)), getClass().getName());
+      window.setIcons("icons/mission-control-3-icon16.png", "icons/mission-control-3-icon32.png", "icons/mission-control-3-icon48.png");
 
       ExceptionHandlingThreadScheduler updateMachinesScheduler = new ExceptionHandlingThreadScheduler("UpdateMachinesScheduler");
       updateMachinesScheduler.schedule(this::updateMachines, 1.0);
+
+      // Blocking
+      window.runWithSinglePanel(this::renderImGuiWidgets);
    }
 
    private void updateMachines()
@@ -96,11 +92,20 @@ public class MissionControlUI
 
       for (Map.Entry<UUID, ImGuiMachine> entry : machines.entrySet())
       {
-         UUID instanceId = entry.getKey();
          ImGuiMachine machine = entry.getValue();
 
-         machine.renderImGuiWidgets();
-         ImGui.newLine();
+         ImGui.pushFont(ImGuiTools.getMediumFont());
+         ImGui.text(machine.getHostname());
+         ImGui.popFont();
+
+         // Add left padding
+         ImGui.setCursorPos(ImGui.getCursorPosX() + 20f, ImGui.getCursorPosY());
+         {
+            ImGui.beginGroup();
+            machine.renderImGuiWidgets();
+            ImGui.newLine();
+            ImGui.endGroup();
+         }
 
          hadMachine = true;
       }
