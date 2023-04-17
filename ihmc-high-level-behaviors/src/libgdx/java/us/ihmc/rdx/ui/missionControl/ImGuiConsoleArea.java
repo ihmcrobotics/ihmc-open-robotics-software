@@ -12,7 +12,6 @@ import java.util.HashMap;
 public class ImGuiConsoleArea
 {
    private final TextEditor textEditor = new TextEditor();
-   private TextEditorLanguageDefinition textEditorLanguageDefinition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean autoScroll = new ImBoolean(true);
 
@@ -45,7 +44,7 @@ public class ImGuiConsoleArea
       textEditor.setPalette(palette);
 
       HashMap<String, String> identifiers = new HashMap<>();
-      textEditorLanguageDefinition = new TextEditorLanguageDefinition();
+      TextEditorLanguageDefinition textEditorLanguageDefinition = new TextEditorLanguageDefinition();
       textEditorLanguageDefinition.setIdentifiers(identifiers);
       textEditor.setLanguageDefinition(textEditorLanguageDefinition);
       textEditor.setColorizerEnable(true);
