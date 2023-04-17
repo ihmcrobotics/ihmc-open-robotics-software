@@ -25,13 +25,13 @@ public class ServiceLogFile extends File
    }
 
    /**
-    * Check if the log file is large (larger than 100KB)
+    * Check if the log file is large (larger than 10MB)
     * @return true if the file is large, false if not
     */
    public boolean isLarge()
    {
       long fileSizeInBytes = length();
-      double fileSizeInKB = (double) fileSizeInBytes / 1024;
-      return fileSizeInKB > 100;
+      double fileSizeInMB = (double) fileSizeInBytes / 1024 / 1024;
+      return fileSizeInMB > 10;
    }
 }

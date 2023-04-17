@@ -56,7 +56,7 @@ public class ImGuiMachineService
          {
             logFile.loadLogLines().forEach(consoleArea::acceptLine);
 
-            // Check if the log file is larger than 100KB. If so, delete it.
+            // Check if the log file is larger than 10MB. If so, delete it.
             if (logFile.isLarge())
             {
                logFile.delete();
