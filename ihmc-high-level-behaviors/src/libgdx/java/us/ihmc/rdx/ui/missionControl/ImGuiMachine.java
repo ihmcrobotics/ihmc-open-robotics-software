@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.missionControl;
 
+import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
@@ -90,6 +91,11 @@ public class ImGuiMachine
    public String getHostname()
    {
       return hostname;
+   }
+
+   public SystemResourceUsageMessage getLastResourceUsageMessage()
+   {
+      return lastResourceUsageMessage;
    }
 
    public ImGuiPanel getPanel()
@@ -214,12 +220,20 @@ public class ImGuiMachine
    private void acceptSystemServiceStatusMessage(SystemServiceStatusMessage message)
    {
       String serviceName = message.getServiceNameAsString();
+
+      if (serviceName.contains("mission-control"))
+      {
+         // We don't care about showing mission control service
+         return;
+      }
+
       final ImGuiMachineService service;
 
       if (!services.containsKey(serviceName))
       {
          service = new ImGuiMachineService(serviceName, hostname, instanceId, panel, ros2Node);
          services.put(serviceName, service);
+         service.openLogPanel();
       }
       else
       {
@@ -237,6 +251,28 @@ public class ImGuiMachine
       }
    }
 
+   long lastWarningFlashMs = 0L;
+   boolean flashWarningFlag = false;
+
+   private void flashWarningText(String text)
+   {
+      long now = System.currentTimeMillis();
+      if (now - lastWarningFlashMs > 1000)
+      {
+         flashWarningFlag = !flashWarningFlag;
+         lastWarningFlashMs = now;
+      }
+
+      if (flashWarningFlag)
+      {
+         ImGuiTools.textColored(Color.RED, text);
+      }
+      else
+      {
+         ImGui.text(text);
+      }
+   }
+
    public void renderImGuiWidgets()
    {
       String cpuWarning = "";
@@ -248,20 +284,28 @@ public class ImGuiMachine
          highestLastCPUTemp = lastResourceUsageMessage.getCpuTemps().get(i);
       if (highestLastCPUTemp > CPU_TEMP_WARN_THRESHOLD_C)
          cpuWarning = " [high CPU temperature (" + highestLastCPUTemp + "C)]";
-      ImGui.text("CPU" + cpuWarning);
+
+      if (!cpuWarning.isEmpty())
+         flashWarningText("CPU" + cpuWarning);
+      else
+         ImGui.text("CPU");
+
       cpuPlot.render();
       ImGui.text("RAM");
       ramPlot.render();
       if (!gpuPlots.isEmpty())
       {
-         String warning = "";
+         String gpuWarning = "";
          if (!lastResourceUsageMessage.getNvidiaGpuTemps().isEmpty())
          {
             float lastGPUTemp = lastResourceUsageMessage.getNvidiaGpuTemps().get(0);
             if (lastGPUTemp > GPU_TEMP_WARN_THRESHOLD_C)
-               warning = " [high GPU temperature (" + lastGPUTemp + "C)]";
+               gpuWarning = " [high GPU temperature (" + lastGPUTemp + "C)]";
          }
-         ImGui.text("GPU" + warning);
+         if (!gpuWarning.isEmpty())
+            flashWarningText("GPU" + gpuWarning);
+         else
+            ImGui.text("GPU");
       }
 
       gpuPlots.forEach(ImPlotPlot::render);

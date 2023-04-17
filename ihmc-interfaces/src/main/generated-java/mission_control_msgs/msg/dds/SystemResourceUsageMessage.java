@@ -8,6 +8,7 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessage> implements Settable<SystemResourceUsageMessage>, EpsilonComparable<SystemResourceUsageMessage>
 {
+   public java.lang.StringBuilder uptime_;
    /**
             * ======== System memory statistics ========
             */
@@ -68,6 +69,7 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
 
    public SystemResourceUsageMessage()
    {
+      uptime_ = new java.lang.StringBuilder(255);
       cpu_usages_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
       cpu_temps_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
@@ -96,6 +98,9 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
 
    public void set(SystemResourceUsageMessage other)
    {
+      uptime_.setLength(0);
+      uptime_.append(other.uptime_);
+
       memory_used_ = other.memory_used_;
 
       memory_total_ = other.memory_total_;
@@ -116,6 +121,21 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       nvidia_gpu_memory_total_.set(other.nvidia_gpu_memory_total_);
       nvidia_gpu_utilization_.set(other.nvidia_gpu_utilization_);
       nvidia_gpu_temps_.set(other.nvidia_gpu_temps_);
+   }
+
+   public void setUptime(java.lang.String uptime)
+   {
+      uptime_.setLength(0);
+      uptime_.append(uptime);
+   }
+
+   public java.lang.String getUptimeAsString()
+   {
+      return getUptime().toString();
+   }
+   public java.lang.StringBuilder getUptime()
+   {
+      return uptime_;
    }
 
    /**
@@ -295,6 +315,8 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.uptime_, other.uptime_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.memory_used_, other.memory_used_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.memory_total_, other.memory_total_, epsilon)) return false;
@@ -338,6 +360,8 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
 
       SystemResourceUsageMessage otherMyClass = (SystemResourceUsageMessage) other;
 
+      if (!us.ihmc.idl.IDLTools.equals(this.uptime_, otherMyClass.uptime_)) return false;
+
       if(this.memory_used_ != otherMyClass.memory_used_) return false;
 
       if(this.memory_total_ != otherMyClass.memory_total_) return false;
@@ -368,6 +392,8 @@ public class SystemResourceUsageMessage extends Packet<SystemResourceUsageMessag
       StringBuilder builder = new StringBuilder();
 
       builder.append("SystemResourceUsageMessage {");
+      builder.append("uptime=");
+      builder.append(this.uptime_);      builder.append(", ");
       builder.append("memory_used=");
       builder.append(this.memory_used_);      builder.append(", ");
       builder.append("memory_total=");

@@ -98,6 +98,9 @@ public class MissionControlUI
          ImGui.text(machine.getHostname());
          ImGui.popFont();
 
+         if (machine.getLastResourceUsageMessage().getUptime() != null)
+            ImGui.text(machine.getLastResourceUsageMessage().getUptime().toString().trim());
+
          // Add left padding
          ImGui.setCursorPos(ImGui.getCursorPosX() + 20f, ImGui.getCursorPosY());
          {

@@ -1,4 +1,6 @@
 
+string uptime
+
 # ======== System memory statistics ========
 float32 memory_used
 
