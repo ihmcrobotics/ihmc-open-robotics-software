@@ -821,22 +821,34 @@ public class InverseDynamicsQPSolver
 
    public void setMinRho(double rhoMin)
    {
-      solver_lb.fillBlock(numberOfDoFs, 0, problemSize - numberOfDoFs, 1, rhoMin);
+      if (rhoSize > 0)
+      {
+         solver_lb.fillBlock(numberOfDoFs, 0, problemSize - numberOfDoFs, 1, rhoMin);
+      }
    }
 
    public void setMinRho(DMatrixRMaj rhoMin)
    {
-      solver_lb.insert(rhoMin, numberOfDoFs, 0);
+      if (rhoSize > 0)
+      {
+         solver_lb.insert(rhoMin, numberOfDoFs, 0);
+      }
    }
 
    public void setMaxRho(double rhoMax)
    {
-      solver_ub.fillBlock(numberOfDoFs, 0, problemSize - numberOfDoFs, 1, rhoMax);
+      if (rhoSize > 0)
+      {
+         solver_ub.fillBlock(numberOfDoFs, 0, problemSize - numberOfDoFs, 1, rhoMax);
+      }
    }
 
    public void setMaxRho(DMatrixRMaj rhoMax)
    {
-      solver_ub.insert(rhoMax, numberOfDoFs, 0);
+      if (rhoSize > 0)
+      {
+         solver_ub.insert(rhoMax, numberOfDoFs, 0);
+      }
    }
 
    public void setActiveDoF(int dofIndex, boolean active)
