@@ -283,7 +283,7 @@ public class ImGuiMachine
       for (int i = 0; i < lastResourceUsageMessage.getCpuTemps().size(); i++)
          highestLastCPUTemp = lastResourceUsageMessage.getCpuTemps().get(i);
       if (highestLastCPUTemp > CPU_TEMP_WARN_THRESHOLD_C)
-         cpuWarning = " [high CPU temperature (" + highestLastCPUTemp + "C)]";
+         cpuWarning = " [high temperature (" + highestLastCPUTemp + "C)]";
 
       if (!cpuWarning.isEmpty())
          flashWarningText("CPU" + cpuWarning);
@@ -300,7 +300,7 @@ public class ImGuiMachine
          {
             float lastGPUTemp = lastResourceUsageMessage.getNvidiaGpuTemps().get(0);
             if (lastGPUTemp > GPU_TEMP_WARN_THRESHOLD_C)
-               gpuWarning = " [high GPU temperature (" + lastGPUTemp + "C)]";
+               gpuWarning = " [high temperature (" + lastGPUTemp + "C)]";
          }
          if (!gpuWarning.isEmpty())
             flashWarningText("GPU" + gpuWarning);
