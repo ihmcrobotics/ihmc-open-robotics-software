@@ -24,7 +24,6 @@ import java.util.*;
 
 public class MissionControlDaemon
 {
-
    /**
     * The hostname of the system
     */
