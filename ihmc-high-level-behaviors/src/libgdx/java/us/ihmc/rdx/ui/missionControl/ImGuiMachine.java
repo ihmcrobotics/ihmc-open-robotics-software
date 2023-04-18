@@ -6,8 +6,11 @@ import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
+import mission_control_msgs.msg.dds.SystemRebootMessage;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -28,6 +31,7 @@ public class ImGuiMachine
    private final String hostname;
 
    private final ROS2Node ros2Node;
+   private IHMCROS2Publisher<SystemRebootMessage> rebootPublisher;
    private SystemResourceUsageMessage lastResourceUsageMessage = new SystemResourceUsageMessage();
 
    private final ImGuiPanel panel;
@@ -79,6 +83,10 @@ public class ImGuiMachine
       netPlot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(-3000.0, 103000.0, ImGuiCond.Always));
 
       this.ros2Node = ros2Node;
+      ThreadTools.startAsDaemon(() ->
+      {
+         rebootPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemRebootTopic(instanceId));
+      }, "Service-Action-Publisher");
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            ROS2Tools.getSystemResourceUsageTopic(instanceId),
                                            subscriber -> acceptSystemResourceUsageMessage(subscriber.takeNextData()));
@@ -101,6 +109,11 @@ public class ImGuiMachine
    public ImGuiPanel getPanel()
    {
       return panel;
+   }
+
+   public void sendRebootRequest()
+   {
+      rebootPublisher.publish(new SystemRebootMessage());
    }
 
    private void acceptSystemResourceUsageMessage(SystemResourceUsageMessage message)

@@ -10,9 +10,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -86,20 +84,55 @@ public class MissionControlUI
       }
    }
 
+   private final Map<UUID, Long> rebootConfirmations = new HashMap<>();
+   private final Set<UUID> rebootWaiting = new HashSet<>();
+
    public void renderImGuiWidgets()
    {
       boolean hadMachine = false;
 
       for (Map.Entry<UUID, ImGuiMachine> entry : machines.entrySet())
       {
+         UUID instanceId = entry.getKey();
          ImGuiMachine machine = entry.getValue();
 
          ImGui.pushFont(ImGuiTools.getMediumFont());
          ImGui.text(machine.getHostname());
          ImGui.popFont();
 
-         if (machine.getLastResourceUsageMessage().getUptime() != null)
-            ImGui.text(machine.getLastResourceUsageMessage().getUptime().toString().trim());
+         String uptime = machine.getLastResourceUsageMessage().getUptime().toString().trim();
+         ImGui.text(uptime);
+
+         if (rebootConfirmations.containsKey(instanceId))
+         {
+            // Remove from reboot confirmations after 5 seconds
+            if (System.currentTimeMillis() - rebootConfirmations.get(instanceId) > 5000)
+            {
+               rebootConfirmations.remove(instanceId);
+            }
+
+            if (ImGui.button("Reboot (confirm)"))
+            {
+               rebootConfirmations.remove(instanceId);
+               rebootWaiting.add(instanceId);
+               machine.sendRebootRequest();
+            }
+         }
+         else if (rebootWaiting.contains(instanceId))
+         {
+            ImGui.beginDisabled(true);
+            if (ImGui.button("Rebooting"))
+            {
+            }
+            ImGui.endDisabled();
+         }
+         else
+         {
+            if (ImGui.button("Reboot"))
+            {
+               rebootConfirmations.put(instanceId, System.currentTimeMillis());
+            }
+         }
 
          // Add left padding
          ImGui.setCursorPos(ImGui.getCursorPosX() + 20f, ImGui.getCursorPosY());
