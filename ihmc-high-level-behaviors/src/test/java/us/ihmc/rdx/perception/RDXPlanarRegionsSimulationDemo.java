@@ -17,7 +17,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.thread.Activator;
 
 public class RDXPlanarRegionsSimulationDemo
@@ -118,11 +117,9 @@ public class RDXPlanarRegionsSimulationDemo
                   rapidPlanarRegionsExtractor.update(bytedecoDepthImage, steppingL515Simulator.getSensorFrame(), frameRegions);
                   rapidPlanarRegionsExtractor.setProcessing(false);
 
-                  PlanarRegionsList planarRegionsList = frameRegions.getPlanarRegionsList();
-
-                  if (planarRegionsList != null && rapidPlanarRegionsExtractor.isModified())
+                  if (rapidPlanarRegionsExtractor.isModified())
                   {
-                     rapidRegionsUIPanel.render3DGraphics(planarRegionsList, steppingL515Simulator.getSensorFrame());
+                     rapidRegionsUIPanel.render3DGraphics(frameRegions);
                      rapidPlanarRegionsExtractor.setProcessing(false);
                   }
                }

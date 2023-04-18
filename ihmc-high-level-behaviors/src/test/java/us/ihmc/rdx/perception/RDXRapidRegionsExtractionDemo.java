@@ -288,7 +288,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    {
       if (rapidPlanarRegionsExtractor.isModified())
       {
-         rapidRegionsUIPanel.render3DGraphics(regionsList, cameraFrame);
+         FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList(regionsList, cameraFrame.getTransformToWorldFrame());
+         rapidRegionsUIPanel.render3DGraphics(framePlanarRegionsList);
          rapidRegionsUIPanel.render();
          rapidPlanarRegionsExtractor.setModified(false);
          rapidPlanarRegionsExtractor.setProcessing(false);
