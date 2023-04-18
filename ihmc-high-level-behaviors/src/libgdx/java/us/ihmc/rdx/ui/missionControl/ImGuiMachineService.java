@@ -25,10 +25,10 @@ public class ImGuiMachineService
    @Nullable
    private String status;
    private final ImGuiPanel logPanel;
-   private final ImGuiConsoleArea consoleArea;
    private IHMCROS2Publisher<SystemServiceActionMessage> serviceActionPublisher;
    @Nullable
    private ServiceLogFile logFile;
+   private final ImGuiConsoleArea consoleArea;
 
    // Time of the last action button press
    private long lastActionRequest = -1;
@@ -42,13 +42,14 @@ public class ImGuiMachineService
       this.instanceId = instanceId;
       logPanel = new ImGuiPanel(serviceName + " Log##" + instanceId, this::renderImGuiLogPanelWidgets);
       machinePanel.queueAddChild(logPanel);
-      consoleArea = new ImGuiConsoleArea();
+
       ThreadTools.startAsDaemon(() ->
       {
          serviceActionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId));
       }, "Service-Action-Publisher");
 
       logFile = new ServiceLogFile(IHMCCommonPaths.MISSION_CONTROL_LOGS_DIRECTORY + "/" + serviceName + ".log");
+      consoleArea = new ImGuiConsoleArea(logFile);
 
       if (logFile.exists())
       {

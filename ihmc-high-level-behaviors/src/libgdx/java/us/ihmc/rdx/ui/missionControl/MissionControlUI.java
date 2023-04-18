@@ -121,9 +121,7 @@ public class MissionControlUI
          else if (rebootWaiting.contains(instanceId))
          {
             ImGui.beginDisabled(true);
-            if (ImGui.button("Rebooting"))
-            {
-            }
+            ImGui.button("Rebooting");
             ImGui.endDisabled();
          }
          else
