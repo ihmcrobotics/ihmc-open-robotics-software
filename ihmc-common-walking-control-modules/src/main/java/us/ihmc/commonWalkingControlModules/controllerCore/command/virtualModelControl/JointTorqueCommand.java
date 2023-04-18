@@ -108,6 +108,15 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
       jointDesiredTorque.set(0, 0, desiredTorque);
    }
 
+   public void addJoint(OneDoFJointBasics joint, double desiredTorque, double weight)
+   {
+      joints.add(joint);
+      weights.add(weight);
+      DMatrixRMaj jointDesiredTorque = desiredTorques.add();
+      jointDesiredTorque.reshape(1, 1);
+      jointDesiredTorque.set(0, 0, desiredTorque);
+   }
+
    /**
     * Adds a joint to be controlled to this command.
     * <p>
@@ -162,6 +171,17 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
    private static void checkConsistency(JointBasics joint, DMatrixRMaj desiredTorque)
    {
       MathTools.checkEquals(joint.getDegreesOfFreedom(), desiredTorque.getNumRows());
+   }
+
+   /**
+    * Gets the weight associated with the {@code jointIndex}<sup>th</sup> joint of this command.
+    *
+    * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
+    * @return the weight value.
+    */
+   public double getWeight(int jointIndex)
+   {
+      return weights.get(jointIndex);
    }
 
    /**
