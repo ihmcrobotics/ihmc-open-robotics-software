@@ -105,6 +105,11 @@ public class RDXModelLoader
             FileHandle fileHandle = Gdx.files.internal(modelFileName);
             modelData = new G3dModelLoader(new UBJsonReader()).loadModelData(fileHandle);
          }
+         else if (modelFileName.endsWith(".glb"))
+         {
+            LogTools.info("Loading GLB file from: {}", modelFileName);
+            modelData = new RDXAssimpModelLoader(modelFileName).loadGLBModelData();
+         }
          else
          {
             if (shouldPrintWarnings)

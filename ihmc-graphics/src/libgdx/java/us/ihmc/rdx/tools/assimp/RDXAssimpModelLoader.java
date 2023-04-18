@@ -23,6 +23,12 @@ public class RDXAssimpModelLoader
 
    public RDXAssimpModelLoader(String modelFilePath)
    {
+      int major = Assimp.aiGetVersionMajor();
+      int minor = Assimp.aiGetVersionMinor();
+      int revision = Assimp.aiGetVersionRevision();
+      String version = major + "." + minor + "." + revision;
+      LogTools.info("Assimp version: " + version);
+
       this.modelFilePath = modelFilePath;
 
       FileHandle fileHandle = Gdx.files.internal(modelFilePath);
@@ -62,6 +68,72 @@ public class RDXAssimpModelLoader
 
       AIScene assimpScene = assimpResourceImporter.importScene(modelFilePath, postProcessingSteps, assimpPropertyStore);
 
+      ModelData modelData = new ModelData();
+      modelData.id = "";
+
+      // meshes
+      int numberOfMeshes = assimpScene.mNumMeshes();
+      LogTools.debug("Number of meshes: {}", numberOfMeshes);
+      PointerBuffer meshesPointerBuffer = assimpScene.mMeshes();
+      modelData.meshes.ensureCapacity(numberOfMeshes);
+      ArrayList<RDXAssimpMeshLoader> rdxAssimpMeshLoaders = new ArrayList<>();
+      for (int i = 0; i < numberOfMeshes; i++)
+      {
+         AIMesh assimpMesh = new AIMesh(MemoryUtil.memByteBuffer(meshesPointerBuffer.get(i), AIMesh.SIZEOF));
+         RDXAssimpMeshLoader rdxAssimpMeshLoader = new RDXAssimpMeshLoader(assimpMesh);
+         ModelMesh modelMesh = rdxAssimpMeshLoader.load();
+         rdxAssimpMeshLoaders.add(rdxAssimpMeshLoader);
+         modelData.meshes.add(modelMesh);
+      }
+
+      // materials
+      int numberOfMaterials = assimpScene.mNumMaterials();
+      LogTools.debug("Number of materials: {}", numberOfMaterials);
+      ArrayList<RDXAssimpMaterialLoader> RDXAssimpMaterialLoaders = new ArrayList<>();
+      if (numberOfMaterials > 0)
+      {
+         modelData.materials.ensureCapacity(numberOfMaterials);
+         PointerBuffer materialsPointerBuffer = assimpScene.mMaterials();
+         for (int i = 0; i < numberOfMaterials; i++)
+         {
+            AIMaterial assimpMaterial = new AIMaterial(MemoryUtil.memByteBuffer(materialsPointerBuffer.get(i), AIMaterial.SIZEOF));
+            RDXAssimpMaterialLoader RDXAssimpMaterialLoader = new RDXAssimpMaterialLoader(assimpMaterial, basePath);
+            RDXAssimpMaterialLoaders.add(RDXAssimpMaterialLoader);
+            ModelMaterial modelMaterial = RDXAssimpMaterialLoader.load();
+            modelData.materials.add(modelMaterial);
+         }
+      }
+
+      // nodes
+      AINode assimpRootNode = assimpScene.mRootNode();
+      modelData.nodes.ensureCapacity(1);
+      modelData.nodes.add(new RDXAssimpNodeLoader(rdxAssimpMeshLoaders, RDXAssimpMaterialLoaders).load(assimpRootNode));
+
+      return modelData;
+   }
+
+   public ModelData loadGLBModelData(String modelFilePath)
+   {
+      AIScene aiScene = Assimp.aiImportFile(modelFilePath,
+                                            Assimp.aiProcess_JoinIdenticalVertices |
+                                            Assimp.aiProcess_Triangulate |
+                                            Assimp.aiProcess_GenNormals |
+                                            Assimp.aiProcess_FixInfacingNormals);
+
+      if (aiScene == null)
+      {
+         LogTools.error(Assimp.aiGetErrorString());
+         return null;
+      }
+
+      // Access loaded scene data here
+      System.out.println("Loaded scene with " + aiScene.mNumMeshes() + " meshes");
+
+      return convertAssimpSceneToModelData(aiScene);
+   }
+
+   public ModelData convertAssimpSceneToModelData(AIScene assimpScene)
+   {
       ModelData modelData = new ModelData();
       modelData.id = "";
 
