@@ -137,6 +137,11 @@ public class ImGuiMachineService
       sendActionMessage("restart");
    }
 
+   public void sendKillMessage()
+   {
+      sendActionMessage("kill");
+   }
+
    private boolean hasItBeenAWhileSinceTheLastActionRequest()
    {
       return (System.currentTimeMillis() - lastActionRequest) > TimeUnit.SECONDS.toMillis(5);
@@ -190,6 +195,15 @@ public class ImGuiMachineService
          if (ImGui.button("Restart##" + instanceId + "-" + serviceName))
          {
             sendRestartMessage();
+            waitingOnStatusChange = true;
+            lastActionRequest = System.currentTimeMillis();
+         }
+      }
+      ImGui.sameLine();
+      { // Kill button
+         if (ImGui.button("Kill##" + instanceId + "-" + serviceName))
+         {
+            sendKillMessage();
             waitingOnStatusChange = true;
             lastActionRequest = System.currentTimeMillis();
          }
