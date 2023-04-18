@@ -14,8 +14,7 @@ import java.util.HashMap;
 
 public class ImGuiConsoleArea
 {
-   private ServiceLogFile logFile;
-
+   private final ServiceLogFile logFile;
    private final TextEditor textEditor = new TextEditor();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean autoScroll = new ImBoolean(true);
