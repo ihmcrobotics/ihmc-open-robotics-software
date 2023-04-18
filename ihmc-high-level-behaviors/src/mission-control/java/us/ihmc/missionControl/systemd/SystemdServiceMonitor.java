@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 
 public class SystemdServiceMonitor implements Consumer<List<String>>
 {
-   private static final int MAX_LOG_LINE_MESSAGE_LENGTH = 10;
+   private static final int MAX_LOG_LINE_MESSAGE_LENGTH = 5;
 
    private final String serviceName;
    private final ROS2Node ros2Node;
@@ -34,7 +34,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
                                                          ROS2Tools.getSystemServiceStatusTopic(instanceId),
                                                          ROS2Tools.getSystemServiceStatusQosProfile());
       systemServiceStatusPublisherScheduler = new ExceptionHandlingThreadScheduler("SystemServiceStatusPublisherScheduler");
-      systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 1.0);
+      systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 2.0);
 
       reader = new JournalCtlReader(serviceName, this);
       reader.start();
