@@ -41,7 +41,7 @@ public class ImGuiMachineService
       this.hostname = hostname;
       this.instanceId = instanceId;
       logPanel = new ImGuiPanel(serviceName + " Log##" + instanceId, this::renderImGuiLogPanelWidgets);
-      machinePanel.addChild(logPanel);
+      machinePanel.queueAddChild(logPanel);
       consoleArea = new ImGuiConsoleArea();
       ThreadTools.startAsDaemon(() ->
       {
