@@ -206,7 +206,8 @@ public class MissionControlDaemon
 
    private void destroy()
    {
-      networkMonitor.stop();
+      if (networkMonitor != null)
+         networkMonitor.stop();
       systemAvailablePublisher.destroy();
       systemResourceUsagePublisher.destroy();
       schedulers.forEach(ExceptionHandlingThreadScheduler::shutdown);

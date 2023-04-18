@@ -89,7 +89,16 @@ public final class MissionControlTools
 
    public static String getServiceStatus(String serviceName)
    {
-      String statusOutput = ProcessTools.execSimpleCommandSafe("systemctl status " + serviceName);
+      String statusOutput;
+      try
+      {
+         statusOutput = ProcessTools.execSimpleCommand("systemctl status " + serviceName);
+      }
+      catch (IOException | InterruptedException ignored)
+      {
+         LogTools.error("Could not get status for: " + serviceName);
+         return "unknown status";
+      }
       String[] lines = statusOutput.split("\\R");
       if (lines.length < 3)
       {
