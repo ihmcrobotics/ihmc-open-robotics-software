@@ -1,28 +1,11 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.QPObjectiveCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -35,11 +18,6 @@ import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithIn
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
@@ -54,6 +32,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
@@ -394,8 +377,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public void setupTorqueMinimizationCommand()
    {
-      qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getTorqueMinimizationAccelerationJacobian(),
-                                              dynamicsMatrixCalculator.getTorqueMinimizationRhoJacobian(),
+      qpSolver.addTorqueMinimizationObjective(dynamicsMatrixCalculator.getBodyMassMatrix(),
+                                              dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
                                               dynamicsMatrixCalculator.getTorqueMinimizationObjective());
    }
 
@@ -452,9 +435,25 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       }
    }
 
-   public void submitJointTorqueCommand(JointTorqueCommand jointTorqueCommand)
+   public void submitJointTorqueCommand(JointTorqueCommand command)
    {
+      dynamicsMatrixCalculator.compute();
 
+      boolean success = motionQPInputCalculator.convertJointTorqueCommand(command,
+                                                                          motionQPInput,
+                                                                          rhoQPInput,
+                                                                          dynamicsMatrixCalculator.getBodyMassMatrix(),
+                                                                          dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
+                                                                          dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix());
+      if (success)
+      {
+         qpSolver.addMotionInput(motionQPInput);
+
+         if (rhoSize > 0)
+         {
+            qpSolver.addRhoInput(rhoQPInput);
+         }
+      }
    }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
