@@ -1,21 +1,22 @@
 package us.ihmc.rdx.perception;
 
+import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.*;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.tools.thread.Activator;
 
-public class RDXGPUPlanarRegionExtractionL515HardwareDemo
+public class RDXRapidPlanarRegionsHardwareDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private Activator nativesLoadedActivator;
@@ -23,11 +24,14 @@ public class RDXGPUPlanarRegionExtractionL515HardwareDemo
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense l515;
    private Mat depthU16C1Image;
-   private BytedecoImage depth32FC1Image;
+   private BytedecoImage bytedecoDepthImage;
    private RDXPose3DGizmo l515PoseGizmo = new RDXPose3DGizmo();
-   private RDXGPUPlanarRegionExtractionUI gpuPlanarRegionExtraction;
+   private RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
+   private RapidPlanarRegionsExtractor rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
+   private OpenCLManager openCLManager;
+   private _cl_program openCLProgram;
 
-   public RDXGPUPlanarRegionExtractionL515HardwareDemo()
+   public RDXRapidPlanarRegionsHardwareDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -59,8 +63,10 @@ public class RDXGPUPlanarRegionExtractionL515HardwareDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
+                  openCLManager = new OpenCLManager();
+                  openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
+
                   realSenseHardwareManager = new RealSenseHardwareManager();
-//                  l515 = realSenseHardwareManager.createFullFeaturedL515("F1120418");
                   l515 = realSenseHardwareManager.createFullFeaturedL515("F1121365");
                   l515.initialize();
                }
@@ -69,31 +75,45 @@ public class RDXGPUPlanarRegionExtractionL515HardwareDemo
                {
                   l515.updateDataBytePointers();
 
-                  if (gpuPlanarRegionExtraction == null)
+                  if (rapidRegionsUIPanel == null)
                   {
                      MutableBytePointer depthFrameData = l515.getDepthFrameData();
                      depthU16C1Image = new Mat(l515.getDepthHeight(), l515.getDepthWidth(), opencv_core.CV_16UC1, depthFrameData);
 
-                     depth32FC1Image = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_32FC1);
+                     bytedecoDepthImage = new BytedecoImage(l515.getDepthWidth(), l515.getDepthHeight(), opencv_core.CV_16UC1);
 
-                     gpuPlanarRegionExtraction = new RDXGPUPlanarRegionExtractionUI();
-                     gpuPlanarRegionExtraction.create(l515.getDepthWidth(),
-                                                      l515.getDepthHeight(),
-                                                      depth32FC1Image.getBackingDirectByteBuffer(),
-                                                      l515.getDepthIntrinsicParameters().fx(),
-                                                      l515.getDepthIntrinsicParameters().fy(),
-                                                      l515.getDepthIntrinsicParameters().ppx(),
-                                                      l515.getDepthIntrinsicParameters().ppy(),
-                                                      l515PoseGizmo.getGizmoFrame());
-                     gpuPlanarRegionExtraction.getEnabled().set(true);
-                     baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
-                     baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+
+                     rapidRegionsExtractor.create(openCLManager,
+                                                  openCLProgram,
+                                                  l515.getDepthWidth(),
+                                                  l515.getDepthHeight(),
+                                                  l515.getDepthIntrinsicParameters().fx(),
+                                                  l515.getDepthIntrinsicParameters().fy(),
+                                                  l515.getDepthIntrinsicParameters().ppx(),
+                                                  l515.getDepthIntrinsicParameters().ppy());
+
+                     rapidRegionsUIPanel.getEnabled().set(true);
+                     baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
+                     baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUIPanel::getRenderables, RDXSceneLevel.VIRTUAL);
 
                      baseUI.getLayoutManager().reloadLayout();
                   }
 
-                  depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthDiscretization(), 0.0);
-                  gpuPlanarRegionExtraction.extractPlanarRegions();
+                  if (rapidRegionsUIPanel.getEnabled().get())
+                  {
+                     depthU16C1Image.convertTo(bytedecoDepthImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
+
+                     // Get the planar regions from the planar region extractor
+                     FramePlanarRegionsList frameRegions = new FramePlanarRegionsList();
+                     rapidRegionsExtractor.update(bytedecoDepthImage, l515PoseGizmo.getGizmoFrame(), frameRegions);
+                     rapidRegionsExtractor.setProcessing(false);
+
+                     if (rapidRegionsExtractor.isModified())
+                     {
+                        rapidRegionsUIPanel.render3DGraphics(frameRegions);
+                        rapidRegionsExtractor.setProcessing(false);
+                     }
+                  }
                }
             }
 
@@ -111,6 +131,6 @@ public class RDXGPUPlanarRegionExtractionL515HardwareDemo
 
    public static void main(String[] args)
    {
-      new RDXGPUPlanarRegionExtractionL515HardwareDemo();
+      new RDXRapidPlanarRegionsHardwareDemo();
    }
 }
