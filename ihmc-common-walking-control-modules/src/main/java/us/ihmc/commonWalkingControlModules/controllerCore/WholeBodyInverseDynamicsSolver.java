@@ -206,17 +206,16 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
    public void compute()
    {
       setupTimer.startMeasurement();
-      if (USE_DYNAMIC_MATRIX_CALCULATOR)
+
+      if (!optimizationControlModule.hasUpdatedDynamicMatrixCalculator() && (USE_DYNAMIC_MATRIX_CALCULATOR || minimizeJointTorques.getValue()))
       {
          dynamicsMatrixCalculator.compute();
-         if (minimizeJointTorques.getValue())
-            optimizationControlModule.setupTorqueMinimizationCommand();
       }
-      else if (minimizeJointTorques.getValue())
+      if (minimizeJointTorques.getValue())
       {
-         dynamicsMatrixCalculator.compute();
          optimizationControlModule.setupTorqueMinimizationCommand();
       }
+
       setupTimer.stopMeasurement();
 
       if (!optimizationControlModule.compute())
@@ -312,6 +311,8 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       planeContactWrenchProcessor.compute(externalWrenchSolution);
       if (wrenchVisualizer != null)
          wrenchVisualizer.visualize(externalWrenchSolution);
+      optimizationControlModule.resetHasUpdatedDynamicMatrixCalculator();
+
       outputTimer.stopMeasurement();
    }
 
@@ -377,8 +378,8 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
             case JOINTSPACE:
                if (command instanceof JointspaceAccelerationCommand accelerationCommand)
                   optimizationControlModule.submitJointspaceAccelerationCommand(accelerationCommand);
-               if (command instanceof JointTorqueCommand torqueCommand)
-                  optimizationControlModule.submitJointTorqueCommand(torqueCommand);
+               if (command instanceof JointTorqueCommand jointTorqueCommand)
+                  optimizationControlModule.submitJointTorqueCommand(jointTorqueCommand);
                break;
             case MOMENTUM:
                optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
