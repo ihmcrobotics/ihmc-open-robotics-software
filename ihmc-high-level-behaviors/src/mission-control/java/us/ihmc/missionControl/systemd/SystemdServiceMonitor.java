@@ -55,6 +55,11 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       ProcessTools.execSimpleCommandSafe("sudo systemctl restart " + serviceName);
    }
 
+   public void kill()
+   {
+      ProcessTools.execSimpleCommandSafe("sudo systemctl kill " + serviceName);
+   }
+
    public void publishStatus()
    {
       publishStatus(Lists.newArrayList());

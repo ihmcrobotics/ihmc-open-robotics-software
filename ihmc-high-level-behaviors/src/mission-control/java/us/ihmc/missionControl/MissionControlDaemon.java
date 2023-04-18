@@ -138,6 +138,7 @@ public class MissionControlDaemon
          case "start" -> serviceMonitor.start();
          case "stop" -> serviceMonitor.stop();
          case "restart" -> serviceMonitor.restart();
+         case "kill" -> serviceMonitor.kill();
       }
    }
 
