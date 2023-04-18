@@ -1123,13 +1123,13 @@ public class MotionQPInputCalculator
       int rhoSize = qpRhoInputToPack.getNumberOfVariables();
 
       qpMotionInputToPack.reshape(taskSize);
-      qpMotionInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      qpMotionInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
       qpMotionInputToPack.setUseWeightScalar(false);
 
       if (hasContactPoints)
       {
          qpRhoInputToPack.reshape(taskSize);
-         qpRhoInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
+         qpRhoInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
          qpRhoInputToPack.setUseWeightScalar(false);
       }
 
