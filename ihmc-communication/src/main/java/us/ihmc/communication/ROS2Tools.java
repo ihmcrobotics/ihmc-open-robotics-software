@@ -6,10 +6,7 @@ import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import mission_control_msgs.msg.dds.SystemAvailableMessage;
-import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
-import mission_control_msgs.msg.dds.SystemServiceActionMessage;
-import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
+import mission_control_msgs.msg.dds.*;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
@@ -380,6 +377,12 @@ public class ROS2Tools
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
       return typeNamedTopic(SystemServiceActionMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   public static ROS2Topic<SystemRebootMessage> getSystemRebootTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemRebootMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
    }
 
    /**

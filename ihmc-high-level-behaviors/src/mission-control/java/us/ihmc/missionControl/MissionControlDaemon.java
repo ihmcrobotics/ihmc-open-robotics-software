@@ -111,6 +111,11 @@ public class MissionControlDaemon
          handleServiceActionMessage(message);
       });
 
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemRebootTopic(instanceId), subscriber ->
+      {
+         ProcessTools.execSimpleCommandSafe("sudo reboot");
+      });
+
       MissionControlTools.findSystemdServiceNames().forEach(service ->
       {
          LogTools.info("Watching systemd service: " + service);
