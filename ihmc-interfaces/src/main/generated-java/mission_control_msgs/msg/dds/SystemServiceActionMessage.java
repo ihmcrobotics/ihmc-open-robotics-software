@@ -9,6 +9,9 @@ import us.ihmc.pubsub.TopicDataType;
 public class SystemServiceActionMessage extends Packet<SystemServiceActionMessage> implements Settable<SystemServiceActionMessage>, EpsilonComparable<SystemServiceActionMessage>
 {
    public java.lang.StringBuilder service_name_;
+   /**
+            * systemd_action valid values: [start, stop, restart, kill]
+            */
    public java.lang.StringBuilder systemd_action_;
 
    public SystemServiceActionMessage()
@@ -48,16 +51,25 @@ public class SystemServiceActionMessage extends Packet<SystemServiceActionMessag
       return service_name_;
    }
 
+   /**
+            * systemd_action valid values: [start, stop, restart, kill]
+            */
    public void setSystemdAction(java.lang.String systemd_action)
    {
       systemd_action_.setLength(0);
       systemd_action_.append(systemd_action);
    }
 
+   /**
+            * systemd_action valid values: [start, stop, restart, kill]
+            */
    public java.lang.String getSystemdActionAsString()
    {
       return getSystemdAction().toString();
    }
+   /**
+            * systemd_action valid values: [start, stop, restart, kill]
+            */
    public java.lang.StringBuilder getSystemdAction()
    {
       return systemd_action_;

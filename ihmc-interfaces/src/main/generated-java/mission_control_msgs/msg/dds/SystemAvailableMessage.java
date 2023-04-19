@@ -20,7 +20,10 @@ public class SystemAvailableMessage extends Packet<SystemAvailableMessage> imple
             * Generated in ihmc-high-level-behaviors/src/mission-control/java/us/ihmc/missionControl/MissionControlDaemon.java
             */
    public java.lang.StringBuilder instance_id_;
-   public long epoch_time_;
+   /**
+            * Epoch time in milliseconds of the system
+            */
+   public long epoch_time_ms_;
 
    public SystemAvailableMessage()
    {
@@ -42,7 +45,7 @@ public class SystemAvailableMessage extends Packet<SystemAvailableMessage> imple
       instance_id_.setLength(0);
       instance_id_.append(other.instance_id_);
 
-      epoch_time_ = other.epoch_time_;
+      epoch_time_ms_ = other.epoch_time_ms_;
 
    }
 
@@ -106,13 +109,19 @@ public class SystemAvailableMessage extends Packet<SystemAvailableMessage> imple
       return instance_id_;
    }
 
-   public void setEpochTime(long epoch_time)
+   /**
+            * Epoch time in milliseconds of the system
+            */
+   public void setEpochTimeMs(long epoch_time_ms)
    {
-      epoch_time_ = epoch_time;
+      epoch_time_ms_ = epoch_time_ms;
    }
-   public long getEpochTime()
+   /**
+            * Epoch time in milliseconds of the system
+            */
+   public long getEpochTimeMs()
    {
-      return epoch_time_;
+      return epoch_time_ms_;
    }
 
 
@@ -137,7 +146,7 @@ public class SystemAvailableMessage extends Packet<SystemAvailableMessage> imple
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.instance_id_, other.instance_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.epoch_time_, other.epoch_time_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.epoch_time_ms_, other.epoch_time_ms_, epsilon)) return false;
 
 
       return true;
@@ -156,7 +165,7 @@ public class SystemAvailableMessage extends Packet<SystemAvailableMessage> imple
 
       if (!us.ihmc.idl.IDLTools.equals(this.instance_id_, otherMyClass.instance_id_)) return false;
 
-      if(this.epoch_time_ != otherMyClass.epoch_time_) return false;
+      if(this.epoch_time_ms_ != otherMyClass.epoch_time_ms_) return false;
 
 
       return true;
@@ -172,8 +181,8 @@ public class SystemAvailableMessage extends Packet<SystemAvailableMessage> imple
       builder.append(this.hostname_);      builder.append(", ");
       builder.append("instance_id=");
       builder.append(this.instance_id_);      builder.append(", ");
-      builder.append("epoch_time=");
-      builder.append(this.epoch_time_);
+      builder.append("epoch_time_ms=");
+      builder.append(this.epoch_time_ms_);
       builder.append("}");
       return builder.toString();
    }

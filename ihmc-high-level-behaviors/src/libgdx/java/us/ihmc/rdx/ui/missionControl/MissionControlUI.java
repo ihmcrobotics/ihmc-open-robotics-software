@@ -63,7 +63,7 @@ public class MissionControlUI
          UUID instanceId = entry.getKey();
          SystemAvailableMessage message = entry.getValue();
          // Consider expired if we haven't received a SystemAvailableMessage within the last 5 seconds
-         boolean expired = (now - message.getEpochTime()) > TimeUnit.SECONDS.toMillis(5);
+         boolean expired = (now - message.getEpochTimeMs()) > TimeUnit.SECONDS.toMillis(5);
 
          // Check for new machines
          if (!expired && !machines.containsKey(instanceId))
