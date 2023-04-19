@@ -26,6 +26,7 @@ public class ImGuiMachine
 {
    private static final int GRAPH_HISTORY_LENGTH = 30;
    private static final int GRAPH_BUFFER_SIZE = GRAPH_HISTORY_LENGTH * 5;
+   private static final long FLASH_RATE_MS = 1000;
 
    /**
     * Reasonably high value for a CPU temperature. Most CPUs throttle at 100C.
@@ -283,7 +284,7 @@ public class ImGuiMachine
    private void flashWarningText(String text)
    {
       long now = System.currentTimeMillis();
-      if (now - lastWarningFlashMs > 1000)
+      if (now - lastWarningFlashMs > FLASH_RATE_MS)
       {
          flashWarningFlag = !flashWarningFlag;
          lastWarningFlashMs = now;
