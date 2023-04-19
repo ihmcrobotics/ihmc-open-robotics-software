@@ -24,6 +24,9 @@ import java.util.*;
 
 public class ImGuiMachine
 {
+   private static final int GRAPH_HISTORY_LENGTH = 30;
+   private static final int GRAPH_BUFFER_SIZE = GRAPH_HISTORY_LENGTH * 5;
+
    /**
     * Reasonably high value for a CPU temperature. Most CPUs throttle at 100C.
     */
@@ -130,15 +133,15 @@ public class ImGuiMachine
          {
             for (int i = 0; i < message.getCpuCount(); i++)
             {
-               cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("CPU (" + i + ") utilization %", 30 * 5, 30.0, new DecimalFormat("0.0")));
+               cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("CPU (" + i + ") utilization %", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
             }
          }
 
          // RAM
          if (ramPlot.getPlotLines().isEmpty())
          {
-            ramPlot.getPlotLines().add(new ImPlotDoublePlotLine("RAM usage (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
-            ramPlot.getPlotLines().add(new ImPlotDoublePlotLine("RAM total (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            ramPlot.getPlotLines().add(new ImPlotDoublePlotLine("RAM usage (GiB)", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
+            ramPlot.getPlotLines().add(new ImPlotDoublePlotLine("RAM total (GiB)", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
          }
 
          // GPU
@@ -151,7 +154,7 @@ public class ImGuiMachine
             plot.setYFlags(plotAxisYFlags);
             String gpuModel = message.getNvidiaGpuModels().getString(0);
             plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always));
-            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") utilization %", 30 * 5, 30.0, new DecimalFormat("0.0")));
+            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") utilization %", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
             gpuPlots.add(plot);
             gpuIndex++;
          }
@@ -168,9 +171,9 @@ public class ImGuiMachine
             float totalGpuMemory = message.getNvidiaGpuMemoryTotal().get(gpuIndex);
             plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, totalGpuMemory, ImGuiCond.Always));
             plot.getPlotLines()
-                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory usage (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory usage (GiB)", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
             plot.getPlotLines()
-                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory total (GiB)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory total (GiB)", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
             vramPlots.add(plot);
             gpuIndex++;
          }
@@ -181,8 +184,8 @@ public class ImGuiMachine
             for (int i = 0; i < message.getIfaceCount(); i++)
             {
                String iface = message.getIfaceNames().getString(i);
-               netPlot.getPlotLines().add(new ImPlotDoublePlotLine(iface + " rx (Kbps)", 30 * 5, 30.0, new DecimalFormat("0.0")));
-               netPlot.getPlotLines().add(new ImPlotDoublePlotLine(iface + " tx (Kbps)", 30 * 5, 30.0, new DecimalFormat("0.0")));
+               netPlot.getPlotLines().add(new ImPlotDoublePlotLine(iface + " rx (Kbps)", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
+               netPlot.getPlotLines().add(new ImPlotDoublePlotLine(iface + " tx (Kbps)", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
             }
          }
       }
