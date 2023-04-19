@@ -16,7 +16,7 @@ public class JournalCtlReader
    private final String serviceName;
    private final Consumer<List<String>> logConsumer;
    private final ConcurrentLinkedQueue<String> logLineQueue = new ConcurrentLinkedQueue<>();
-   PausablePeriodicThread readerThread = new PausablePeriodicThread("journalctl-processor", 0.2, true, this::processOutput);
+   private final PausablePeriodicThread readerThread = new PausablePeriodicThread("journalctl-processor", 0.2, true, this::processOutput);
 
    private volatile boolean running = false;
 
