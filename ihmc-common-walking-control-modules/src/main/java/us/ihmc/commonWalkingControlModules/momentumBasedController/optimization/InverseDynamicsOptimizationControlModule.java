@@ -444,21 +444,11 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          hasUpdatedDynamicMatrixCalculator = true;
       }
 
-      boolean success = motionQPInputCalculator.convertJointTorqueCommand(command,
-                                                                          motionQPInput,
-                                                                          rhoQPInput,
-                                                                          dynamicsMatrixCalculator.getBodyMassMatrix(),
-                                                                          dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
-                                                                          dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix());
-      if (success)
-      {
-         qpSolver.addMotionInput(motionQPInput);
-
-         if (rhoSize > 0)
-         {
-            qpSolver.addRhoInput(rhoQPInput);
-         }
-      }
+      qpSolver.addJointTorqueObjective(command,
+                                       dynamicsMatrixCalculator.getBodyMassMatrix(),
+                                       dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
+                                       dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix(),
+                                       jointIndexHandler);
    }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
