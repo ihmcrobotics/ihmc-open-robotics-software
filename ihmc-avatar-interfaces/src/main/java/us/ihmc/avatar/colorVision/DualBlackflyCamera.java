@@ -11,6 +11,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
+import perception_msgs.msg.dds.DetectableSceneObjectMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -30,6 +31,7 @@ import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.scene.ArUcoSceneTools;
 import us.ihmc.perception.scene.DetectableSceneObject;
 import us.ihmc.perception.scene.PredefinedSceneObjectLibrary;
+import us.ihmc.perception.scene.ROS2DetectableSceneObjectsPublisher;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
@@ -84,6 +86,7 @@ public class DualBlackflyCamera
    private PredefinedSceneObjectLibrary predefinedSceneObjectLibrary;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
+   private final ROS2DetectableSceneObjectsPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneObjectsPublisher();
    private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
    private ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
    private ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
@@ -244,12 +247,7 @@ public class DualBlackflyCamera
                arUcoMarkerPublisher.update();
 
                ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneObjectLibrary);
-
-               // TODO: Publish detectable scene objects
-               for (DetectableSceneObject detectableSceneObject : predefinedSceneObjectLibrary.getDetectableSceneObjects())
-               {
-
-               }
+               detectableSceneObjectsPublisher.publish(predefinedSceneObjectLibrary.getDetectableSceneObjects(), ros2Helper);
             }
 
             convertColorDuration.start();

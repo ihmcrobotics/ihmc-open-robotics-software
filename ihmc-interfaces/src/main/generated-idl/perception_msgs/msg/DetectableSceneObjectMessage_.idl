@@ -23,7 +23,7 @@ module perception_msgs
         /**
          * Whether or not the object is currently detected
          */
-        boolean detected;
+        boolean currently_detected;
         /**
          * Transform of the object's frame to world frame
          */

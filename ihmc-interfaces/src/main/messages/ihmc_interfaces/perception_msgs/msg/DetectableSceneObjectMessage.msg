@@ -5,7 +5,7 @@
 string name
 
 # Whether or not the object is currently detected
-bool detected
+bool currently_detected
 
 # Transform of the object's frame to world frame
 controller_msgs/RigidBodyTransformMessage transform_to_world

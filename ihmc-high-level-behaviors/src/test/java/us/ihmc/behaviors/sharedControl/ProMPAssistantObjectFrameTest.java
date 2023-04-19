@@ -8,9 +8,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.promp.ProMPUtil;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -114,28 +114,35 @@ public class ProMPAssistantObjectFrameTest
 
    private void createObjectFrameFromAruco()
    {
-      ArUcoMarkerObjectsInfo arucosInfo = new ArUcoMarkerObjectsInfo();
-      arucosInfo.load();
-      ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
-      ArUcoMarkerObject objectWithArUco;
-      // add markers with their respective info
-      for (int id : arucosInfo.getIds())
-         markersToTrack.add(new OpenCVArUcoMarker(id, arucosInfo.getMarkerSize(id)));
-      // get a marker
-      OpenCVArUcoMarker marker = markersToTrack.get(0);
-      int objectId = marker.getId();
-      // get object with attached aruco marker
-      objectWithArUco = new ArUcoMarkerObject(arucosInfo, "ArUcoObject");
+      // TODO: Talk with Luigi about design of this. - Duncan
+
+//      ArUcoMarkerObjectsInfo arucosInfo = new ArUcoMarkerObjectsInfo();
+//      arucosInfo.load();
+//      ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
+//      ArUcoMarkerObject objectWithArUco;
+//      // add markers with their respective info
+//      for (int id : arucosInfo.getIds())
+//         markersToTrack.add(new OpenCVArUcoMarker(id, arucosInfo.getMarkerSize(id)));
+//      // get a marker
+//      OpenCVArUcoMarker marker = markersToTrack.get(0);
+//      int objectId = marker.getId();
+//      // get object with attached aruco marker
+//      objectWithArUco = new ArUcoMarkerObject(arucosInfo, "ArUcoObject");
       // get marker pose in world frame, in reality this would be detected by camera
       FramePose3DBasics markerPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      new Point3D(1.073, -0.146, 1.016),
                                                      new Quaternion(-0.002, 1.000, 0.001, 0.003));
-      RigidBodyTransform markerTransformToWorld = new RigidBodyTransform(objectWithArUco.getMarkerTransformToWorld());
-      // create from this pose, the associated transform stored in objectWithArUco
-      markerPose.get(markerTransformToWorld);
-      objectWithArUco.updateFrame(); // update frame of the object
-      objectWithArUco.updateMarkerPose(markerPose); // compute object pose from marker pose
+//      RigidBodyTransform markerTransformToWorld = new RigidBodyTransform(objectWithArUco.getMarkerTransformToWorld());
+//      // create from this pose, the associated transform stored in objectWithArUco
+//      markerPose.get(markerTransformToWorld);
+//      objectWithArUco.updateFrame(); // update frame of the object
+//      objectWithArUco.updateMarkerPose(markerPose); // compute object pose from marker pose
+//
+//      objectFrame = objectWithArUco.getObjectFrame();
 
-      objectFrame = objectWithArUco.getObjectFrame();
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      markerPose.get(transformToWorld);
+      objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                               transformToWorld);
    }
 }

@@ -1,0 +1,30 @@
+#ifndef __perception_msgs__msg__DetectableSceneObjectsMessage__idl__
+#define __perception_msgs__msg__DetectableSceneObjectsMessage__idl__
+
+#include "perception_msgs/msg/./DetectableSceneObjectMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Gives the current state of the complete collection of detectable scene objects.
+       * Publishing all scene objects in one messages can simplify synchronization and
+       * reduce the complexity of logic in figuring out when objects are currently under
+       * consideraion.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::DetectableSceneObjectsMessage_")
+      struct DetectableSceneObjectsMessage
+      {
+        /**
+         * The current state of the complete collection of detectable scene objects
+         */
+        sequence<perception_msgs::msg::dds::DetectableSceneObjectMessage, 5000> detectable_scene_objects;
+      };
+    };
+  };
+};
+
+#endif
