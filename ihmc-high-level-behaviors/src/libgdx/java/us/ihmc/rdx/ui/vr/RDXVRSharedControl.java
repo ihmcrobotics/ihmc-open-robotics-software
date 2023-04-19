@@ -5,6 +5,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
 import perception_msgs.msg.dds.DetectableSceneObjectMessage;
+import perception_msgs.msg.dds.DetectableSceneObjectsMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
@@ -18,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.perception.scene.SceneObjectAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXSplineGraphic;
@@ -36,7 +38,7 @@ import java.util.Map;
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
    private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<DetectableSceneObjectMessage> objectDetectorSubscription;
+   private final IHMCROS2Input<DetectableSceneObjectsMessage> detectableSceneObjectsSubscription;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
@@ -76,7 +78,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
-      objectDetectorSubscription = ros2.subscribe(ROS2SceneObjectAPI.PULL_DOOR_LEVER_HANDLE);
+      detectableSceneObjectsSubscription = ros2.subscribe(SceneObjectAPI.DETECTABLE_SCENE_OBJECTS);
    }
 
    public void processInput(InputDigitalActionData triggerButton)
@@ -154,12 +156,13 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      if (objectDetectorSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
+      if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
       {
-         DetectableSceneObjectMessage detectableSceneObjectMessage = objectDetectorSubscription.getMessageNotification().read();
-         objectName = detectableSceneObjectMessage.getNameAsString();
+         DetectableSceneObjectsMessage detectableSceneObjectMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
+         DetectableSceneObjectMessage selectedObject = null; // TODO: Search for desired object
+         objectName = selectedObject.getNameAsString();
 
-         MessageTools.toEuclid(detectableSceneObjectMessage.getTransformToWorld(), objectTransformToWorld);
+         MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
          objectFrame.update();
       }
 
