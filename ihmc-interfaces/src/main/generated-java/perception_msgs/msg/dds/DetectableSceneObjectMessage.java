@@ -19,7 +19,7 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
    /**
             * Whether or not the object is currently detected
             */
-   public boolean detected_;
+   public boolean currently_detected_;
    /**
             * Transform of the object's frame to world frame
             */
@@ -42,7 +42,7 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
       name_.setLength(0);
       name_.append(other.name_);
 
-      detected_ = other.detected_;
+      currently_detected_ = other.currently_detected_;
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
    }
@@ -74,16 +74,16 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
    /**
             * Whether or not the object is currently detected
             */
-   public void setDetected(boolean detected)
+   public void setCurrentlyDetected(boolean currently_detected)
    {
-      detected_ = detected;
+      currently_detected_ = currently_detected;
    }
    /**
             * Whether or not the object is currently detected
             */
-   public boolean getDetected()
+   public boolean getCurrentlyDetected()
    {
-      return detected_;
+      return currently_detected_;
    }
 
 
@@ -115,7 +115,7 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.detected_, other.detected_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.currently_detected_, other.currently_detected_, epsilon)) return false;
 
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
 
@@ -133,7 +133,7 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
 
       if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
-      if(this.detected_ != otherMyClass.detected_) return false;
+      if(this.currently_detected_ != otherMyClass.currently_detected_) return false;
 
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
 
@@ -148,8 +148,8 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
       builder.append("DetectableSceneObjectMessage {");
       builder.append("name=");
       builder.append(this.name_);      builder.append(", ");
-      builder.append("detected=");
-      builder.append(this.detected_);      builder.append(", ");
+      builder.append("currently_detected=");
+      builder.append(this.currently_detected_);      builder.append(", ");
       builder.append("transform_to_world=");
       builder.append(this.transform_to_world_);
       builder.append("}");

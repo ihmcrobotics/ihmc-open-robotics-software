@@ -75,7 +75,7 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
       cdr.write_type_d(data.getName());else
           throw new RuntimeException("name field exceeds the maximum length");
 
-      cdr.write_type_7(data.getDetected());
+      cdr.write_type_7(data.getCurrentlyDetected());
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
    }
@@ -83,7 +83,7 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
    public static void read(perception_msgs.msg.dds.DetectableSceneObjectMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getName());	
-      data.setDetected(cdr.read_type_7());
+      data.setCurrentlyDetected(cdr.read_type_7());
       	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
 
@@ -93,7 +93,7 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
    public final void serialize(perception_msgs.msg.dds.DetectableSceneObjectMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("name", data.getName());
-      ser.write_type_7("detected", data.getDetected());
+      ser.write_type_7("currently_detected", data.getCurrentlyDetected());
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
    }
@@ -102,7 +102,7 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectableSceneObjectMessage data)
    {
       ser.read_type_d("name", data.getName());
-      data.setDetected(ser.read_type_7("detected"));
+      data.setCurrentlyDetected(ser.read_type_7("currently_detected"));
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
    }

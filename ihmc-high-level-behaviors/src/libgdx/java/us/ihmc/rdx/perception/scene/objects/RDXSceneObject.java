@@ -4,10 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import perception_msgs.msg.dds.DetectableSceneObjectMessage;
-import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -16,7 +12,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
@@ -37,7 +32,6 @@ public class RDXSceneObject extends SceneObject
    private final ReferenceFrame referenceFrame;
    private boolean showing = false;
    private final RDXModelInstance modelInstance;
-   private IHMCROS2Input<DetectableSceneObjectMessage> subscription;
 
    public RDXSceneObject(String modelName, String frameName)
    {
@@ -50,26 +44,8 @@ public class RDXSceneObject extends SceneObject
       referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
    }
 
-   /**
-    * Keeps this object updated from ROS 2 DetectableSceneObjectMessages.
-    */
-   public void setupForROS2Updating(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectableSceneObjectMessage> updateTopic)
-   {
-      subscription = ros2.subscribe(updateTopic);
-   }
-
    public void update()
    {
-      if (subscription.getMessageNotification().poll())
-      {
-         DetectableSceneObjectMessage detectableSceneObjectMessage = subscription.getMessageNotification().read();
-         if (getName().equals(detectableSceneObjectMessage.getNameAsString()))
-         {
-            setShowing(detectableSceneObjectMessage.getDetected());
-            MessageTools.toEuclid(detectableSceneObjectMessage.getTransformToWorld(), getTransformToParent());
-         }
-      }
-
       referenceFrame.update();
       referenceFrameGraphic.setToReferenceFrame(referenceFrame);
       modelInstance.setTransformToWorldFrame(transformToParent);
