@@ -23,7 +23,10 @@ module mission_control_msgs
          * Generated in ihmc-high-level-behaviors/src/mission-control/java/us/ihmc/missionControl/MissionControlDaemon.java
          */
         string instance_id;
-        long long epoch_time;
+        /**
+         * Epoch time in milliseconds of the system
+         */
+        long long epoch_time_ms;
       };
     };
   };

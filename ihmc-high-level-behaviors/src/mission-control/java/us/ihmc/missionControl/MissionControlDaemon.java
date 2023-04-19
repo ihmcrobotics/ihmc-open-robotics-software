@@ -147,7 +147,7 @@ public class MissionControlDaemon
       SystemAvailableMessage message = new SystemAvailableMessage();
       message.setHostname(hostname);
       message.setInstanceId(instanceId.toString());
-      message.setEpochTime(System.currentTimeMillis());
+      message.setEpochTimeMs(System.currentTimeMillis());
       systemAvailablePublisher.publish(message);
    }
 
