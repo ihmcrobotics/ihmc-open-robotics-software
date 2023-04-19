@@ -17,5 +17,6 @@
   "Log color" : false,
   "Log depth" : false,
   "SLAM enabled" : false,
-  "SLAM reset" : false
+  "SLAM reset" : false,
+  "Active mapping" : false
 }
