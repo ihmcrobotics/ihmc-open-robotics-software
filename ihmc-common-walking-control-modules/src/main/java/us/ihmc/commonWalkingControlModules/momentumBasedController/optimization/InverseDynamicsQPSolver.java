@@ -1,11 +1,12 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
-import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.matrixlib.NativeMatrix;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -60,6 +61,7 @@ public class InverseDynamicsQPSolver
    private final NativeMatrix solverOutput_jointAccelerations;
    private final NativeMatrix solverOutput_rhos;
 
+   private final NativeMatrix tempJacobian = new NativeMatrix(0, 0);
    private final NativeMatrix tempObjective = new NativeMatrix(0, 0);
    private final NativeMatrix tempWeight = new NativeMatrix(0, 0);
 
@@ -616,6 +618,83 @@ public class InverseDynamicsQPSolver
       tempObjective.set(torqueObjective);
 
       addTorqueMinimizationObjective(tempJtW, tempObjective);
+   }
+
+   public void addJointTorqueObjective(JointTorqueCommand jointTorqueCommand,
+                                       DMatrixRMaj bodyMassMatrix,
+                                       DMatrixRMaj bodyContactForceJacobianTranspose,
+                                       DMatrixRMaj bodyGravityCoriolisMatrix,
+                                       JointIndexHandler jointIndexHandler)
+   {
+      if (jointTorqueCommand.getNumberOfJoints() == 0)
+         return;
+
+      int taskSize = 0;
+      for (int jointIndex = 0; jointIndex < jointTorqueCommand.getNumberOfJoints(); jointIndex++)
+      {
+         taskSize += jointTorqueCommand.getJoint(jointIndex).getDegreesOfFreedom();
+      }
+
+      if (jointTorqueCommand.isHardConstraint())
+      {
+         tempJacobian.reshape(taskSize, problemSize);
+         tempObjective.reshape(taskSize, 1);
+         tempJacobian.zero();
+         tempObjective.zero();
+
+         int row = 0;
+         for (int jointIndex = 0; jointIndex < jointTorqueCommand.getNumberOfJoints(); jointIndex++)
+         {
+            JointBasics joint = jointTorqueCommand.getJoints().get(jointIndex);
+            DMatrixRMaj desiredTorque = jointTorqueCommand.getDesiredTorque(jointIndex);
+            int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+
+            for (int dof = 0; dof < joint.getDegreesOfFreedom(); dof++)
+            {
+               int orderedDofIndex = jointIndices[dof];
+
+               tempJacobian.insert(bodyMassMatrix, orderedDofIndex, orderedDofIndex + 1, 0, numberOfDoFs, row, 0);
+               if (rhoSize > 0)
+                  tempJacobian.insertScaled(bodyContactForceJacobianTranspose, orderedDofIndex, orderedDofIndex + 1, 0, rhoSize, row, numberOfDoFs, -1.0);
+
+               tempObjective.set(row, 0, desiredTorque.get(dof, 0) - bodyGravityCoriolisMatrix.get(orderedDofIndex, 0));
+               row++;
+            }
+         }
+
+         addEqualityConstraintInternal(tempJacobian, tempObjective, 0);
+      }
+      else
+      {
+         tempJacobian.reshape(problemSize, problemSize);
+         tempObjective.reshape(problemSize, 1);
+         tempWeight.reshape(problemSize, problemSize);
+         tempJacobian.zero();
+         tempObjective.zero();
+         tempWeight.zero();
+
+         tempJacobian.insert(bodyMassMatrix, 0, 0);
+         if (rhoSize > 0)
+            tempJacobian.insertScaled(bodyContactForceJacobianTranspose, 0, numberOfDoFs, -1.0);
+         tempObjective.insertScaled(bodyGravityCoriolisMatrix, 0, 0, -1.0);
+
+         for (int jointIndex = 0; jointIndex < jointTorqueCommand.getNumberOfJoints(); jointIndex++)
+         {
+            JointBasics joint = jointTorqueCommand.getJoints().get(jointIndex);
+            DMatrixRMaj desiredTorque = jointTorqueCommand.getDesiredTorque(jointIndex);
+            int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+            double weight = jointTorqueCommand.getWeight(jointIndex);
+
+            for (int dof = 0; dof < joint.getDegreesOfFreedom(); dof++)
+            {
+               int orderedDofIndex = jointIndices[dof];
+               tempWeight.set(orderedDofIndex, orderedDofIndex, weight);
+               tempObjective.add(orderedDofIndex, 0, desiredTorque.get(dof, 0));
+            }
+         }
+
+         addTaskInternal(tempJacobian, tempObjective, tempWeight, 0);
+      }
    }
 
    /**
