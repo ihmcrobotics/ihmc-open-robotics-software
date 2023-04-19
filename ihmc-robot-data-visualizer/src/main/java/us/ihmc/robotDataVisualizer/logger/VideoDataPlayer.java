@@ -18,7 +18,6 @@ import javafx.scene.image.WritableImage;
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.robotDataVisualizer.logger.converters.VideoConverter;
 import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
@@ -27,6 +26,7 @@ import static java.lang.Long.parseLong;
 
 public class VideoDataPlayer
 {
+   private static final boolean VIDEO_STATISTICS = true;
    private final String name;
    private final boolean hasTimebase;
    private final boolean interlaced;
@@ -333,20 +333,24 @@ public class VideoDataPlayer
          this.height = height;
 
          panel.setLayout(springLayout);
-         panel.add(table);
+
+         if (VIDEO_STATISTICS)
+         {
+            panel.add(table);
+
+            table.setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
+            table.setRowHeight(20);
+            table.getColumnModel().getColumn(0).setPreferredWidth(42);
+            table.setDefaultRenderer(Object.class, new BoldCellRenderer());
+            table.setPreferredSize(new Dimension(280, data.length * 20 + 2));
+
+            springLayout.putConstraint(SpringLayout.SOUTH, label,0, SpringLayout.SOUTH, panel);
+            springLayout.putConstraint(SpringLayout.WEST, label,0, SpringLayout.WEST, panel);
+            springLayout.putConstraint(SpringLayout.SOUTH, table,0, SpringLayout.SOUTH, panel);
+            springLayout.putConstraint(SpringLayout.WEST, table,0, SpringLayout.WEST, panel);
+         }
+
          panel.add(label);
-
-         table.setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
-         table.setRowHeight(20);
-         table.getColumnModel().getColumn(0).setPreferredWidth(42);
-         table.setDefaultRenderer(Object.class, new BoldCellRenderer());
-         table.setPreferredSize(new Dimension(280, data.length * 20 + 2));
-
-         springLayout.putConstraint(SpringLayout.SOUTH, label,0, SpringLayout.SOUTH, panel);
-         springLayout.putConstraint(SpringLayout.WEST, label,0, SpringLayout.WEST, panel);
-         springLayout.putConstraint(SpringLayout.SOUTH, table,0, SpringLayout.SOUTH, panel);
-         springLayout.putConstraint(SpringLayout.WEST, table,0, SpringLayout.WEST, panel);
-
          pack();
       }
 
@@ -439,10 +443,6 @@ public class VideoDataPlayer
          if (playRealtime)
          {
             while (System.nanoTime() < nextNanos);
-         }
-         else
-         {
-            ThreadTools.sleepSeconds(2);
          }
 
          previousNanos = System.nanoTime();
