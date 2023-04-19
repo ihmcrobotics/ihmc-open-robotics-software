@@ -3,14 +3,6 @@
     "Machine View" : false
   },
   "windows" : {
-    "Main Panel" : true,
-    "robotlab-ThinkPad-T460\n##7d0f5046-d033-4079-9943-70cacb73aa32" : false,
-    "d455-color-and-depth-publisher Log##7d0f5046-d033-4079-9943-70cacb73aa32" : true,
-    "dual-blackfly-and-aruco-marker-detection Log##7d0f5046-d033-4079-9943-70cacb73aa32" : true,
-    "mission-control-3 Log##7d0f5046-d033-4079-9943-70cacb73aa32" : false,
-    "ouster-lidar-depth-publisher Log##7d0f5046-d033-4079-9943-70cacb73aa32" : true,
-    "robotlab-thinkpad-rt\n##583131fc-df78-402a-ae6d-f79480537563" : false,
-    "controller Log##583131fc-df78-402a-ae6d-f79480537563" : true,
-    "mission-control-3 Log##583131fc-df78-402a-ae6d-f79480537563" : false
+    "Main Panel" : true
   }
 }
