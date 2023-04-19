@@ -28,6 +28,7 @@ import us.ihmc.perception.*;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.scene.ArUcoSceneTools;
+import us.ihmc.perception.scene.DetectableSceneObject;
 import us.ihmc.perception.scene.PredefinedSceneObjectLibrary;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
@@ -245,7 +246,10 @@ public class DualBlackflyCamera
                ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneObjectLibrary);
 
                // TODO: Publish detectable scene objects
+               for (DetectableSceneObject detectableSceneObject : predefinedSceneObjectLibrary.getDetectableSceneObjects())
+               {
 
+               }
             }
 
             convertColorDuration.start();
