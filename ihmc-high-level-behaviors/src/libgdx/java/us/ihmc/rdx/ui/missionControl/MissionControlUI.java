@@ -22,6 +22,10 @@ public class MissionControlUI
 
    private final ImGuiGlfwWindow window;
 
+   // Render loop helpers
+   private final Map<UUID, Long> rebootConfirmations = new HashMap<>();
+   private final Set<UUID> rebootWaiting = new HashSet<>();
+
    public MissionControlUI()
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_ui");
@@ -83,9 +87,6 @@ public class MissionControlUI
          }
       }
    }
-
-   private final Map<UUID, Long> rebootConfirmations = new HashMap<>();
-   private final Set<UUID> rebootWaiting = new HashSet<>();
 
    public void renderImGuiWidgets()
    {
