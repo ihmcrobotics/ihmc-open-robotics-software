@@ -1,5 +1,7 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -11,6 +13,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -28,8 +31,11 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
+import us.ihmc.rdx.visualizers.RDXLineMeshModel;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -66,14 +72,20 @@ public class RDXRapidHeightMapExtractionDemo
    private final ImInt frameIndex = new ImInt(0);
    private final ImFloat planeHeight = new ImFloat(1.5f); // 2.133f
    private final ImFloat sensorpitch = new ImFloat(30.0f);
+   private final ImBoolean renderInSensorFrame = new ImBoolean(false);
 
    private final Pose3D cameraPose = new Pose3D();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
+
+   private final FramePose3D framePose = new FramePose3D();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final RDXLineMeshModel sensorPositionGraphic = new RDXLineMeshModel(0.02f, Color.RED);
 
    private final Notification heightMapUpdateNotification = new Notification();
 
    private Activator nativesLoadedActivator;
 
+   private ModelInstance sensorFrameGraphic;
    private BytedecoImage loadedDepthImage;
    private final BytePointer depthBytePointer = new BytePointer(1000000);
 
@@ -131,6 +143,8 @@ public class RDXRapidHeightMapExtractionDemo
             heightMapRenderer.create(rapidHeightMapUpdater.getCellsPerAxis() * rapidHeightMapUpdater.getCellsPerAxis());
 
             totalDepthCount = (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1);
+
+            sensorFrameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.3);
          }
 
          @Override
@@ -140,6 +154,13 @@ public class RDXRapidHeightMapExtractionDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
+
+                  baseUI.getPrimaryScene().addRenderableProvider(sensorPositionGraphic, RDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(sensorFrameGraphic, RDXSceneLevel.VIRTUAL);
+
+                  sensorPositionGraphic.generateMeshes(sensorPositionBuffer, 5);
+                  sensorPositionGraphic.update();
+
                   baseUI.getLayoutManager().reloadLayout();
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
                }
@@ -170,6 +191,8 @@ public class RDXRapidHeightMapExtractionDemo
 
             changed |= ImGui.sliderFloat("Plane Height", planeHeight.getData(), -3.0f, 3.0f);
             changed |= ImGui.sliderFloat("Sensor Pitch", sensorpitch.getData(), -30.0f, 30.0f);
+
+            changed |= ImGui.checkbox("Render in Sensor Frame", renderInSensorFrame);
 
             if (ImGui.button("Load Previous"))
             {
@@ -239,8 +262,14 @@ public class RDXRapidHeightMapExtractionDemo
 
          if(fastRendererEnabled.get())
          {
+            LogTools.info("Grid Center: {}", gridCenter);
+
             heightMapRenderer.setActive(true);
-            heightMapRenderer.update(rapidHeightMapUpdater.getHeightMapInWorld().getPointerForAccessSpeed(),
+
+            if (renderInSensorFrame.get())
+               gridCenter.setToZero();
+
+            heightMapRenderer.update(rapidHeightMapUpdater.getHeightMap(renderInSensorFrame.get()).getPointerForAccessSpeed(),
                                      gridCenter,
                                      rapidHeightMapUpdater.getCenterIndex(),
                                      rapidHeightMapUpdater.getCellSizeXYInMeters());
@@ -265,9 +294,16 @@ public class RDXRapidHeightMapExtractionDemo
          rapidHeightMapUpdater.setProcessing(false);
 
          PerceptionDebugTools.displayHeightMap("Output Height Map",
-                                               rapidHeightMapUpdater.getHeightMapInWorld().getBytedecoOpenCVMat(),
+                                               rapidHeightMapUpdater.getHeightMap(renderInSensorFrame.get()).getBytedecoOpenCVMat(),
                                                1,
                                               1 / (0.3f + 0.20f * rapidHeightMapUpdater.getCellSizeXYInMeters()));
+
+         if (!renderInSensorFrame.get())
+         {
+            framePose.setToZero(cameraFrame);
+            framePose.changeFrame(ReferenceFrame.getWorldFrame());
+            LibGDXTools.toLibGDX(framePose, tempTransform, sensorFrameGraphic.transform);
+         }
       }
    }
 

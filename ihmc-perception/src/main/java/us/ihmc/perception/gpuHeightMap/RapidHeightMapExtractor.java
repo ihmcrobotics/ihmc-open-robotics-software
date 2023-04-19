@@ -135,6 +135,8 @@ public class RapidHeightMapExtractor
                                                                                        (float) (planeHeight - sensorToWorldTransform.getTranslationZ())});
          groundPlaneBuffer.writeOpenCLBufferObject(openCLManager);
 
+         LogTools.info("[Execute Kernel] Center of grid: " + gridCenter);
+
          // Set kernel arguments for the height map kernel
          openCLManager.setKernelArgument(heightMapUpdateKernel, 0, inputDepthImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(heightMapUpdateKernel, 1, heightMapInSensor.getOpenCLImageObject());
@@ -218,6 +220,14 @@ public class RapidHeightMapExtractor
    public BytedecoImage getHeightMapInWorld()
    {
       return heightMapInWorld;
+   }
+
+   public BytedecoImage getHeightMap(boolean sensorFrame)
+   {
+      if (sensorFrame)
+         return heightMapInSensor;
+      else
+         return heightMapInWorld;
    }
 
    public BytedecoImage getHeightMapInSensor()

@@ -92,7 +92,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
-            int heightIndex = xIndex * cellsPerAxis + yIndex;
+            int heightIndex = yIndex * cellsPerAxis + xIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
             float cellHeight = (float) (heightMapPointer.getShort(heightIndex * 2L)) / 10000.0f;
             cellHeight = (float) MathTools.clamp(cellHeight, minHeight, maxHeight);
