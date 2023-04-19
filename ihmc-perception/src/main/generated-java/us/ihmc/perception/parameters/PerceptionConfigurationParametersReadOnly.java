@@ -59,4 +59,9 @@ public interface PerceptionConfigurationParametersReadOnly extends StoredPropert
    {
       return get(slamReset);
    }
+
+   default boolean getActiveMapping()
+   {
+      return get(activeMapping);
+   }
 }

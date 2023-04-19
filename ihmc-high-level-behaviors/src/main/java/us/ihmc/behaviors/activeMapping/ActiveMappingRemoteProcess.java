@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
@@ -16,7 +15,6 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -32,7 +30,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ActiveMappingManagerROS2
+public class ActiveMappingRemoteProcess
 {
    private final static long STATISTICS_COLLECTION_PERIOD_MS = 100;
 
@@ -63,7 +61,7 @@ public class ActiveMappingManagerROS2
 
    private final PerceptionConfigurationParameters configurationParameters = new PerceptionConfigurationParameters();
 
-   public ActiveMappingManagerROS2(String simpleRobotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames , ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic, ROS2Node ros2Node)
+   public ActiveMappingRemoteProcess(String simpleRobotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames , ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic, ROS2Node ros2Node)
    {
       this.referenceFrames = referenceFrames;
       this.terrainRegionsTopic = terrainRegionsTopic;
@@ -147,7 +145,10 @@ public class ActiveMappingManagerROS2
 
    public void updateActiveMappingPlan()
    {
-      activeMappingModule.updateFootstepPlan();
+      if (configurationParameters.getActiveMapping())
+      {
+         activeMappingModule.updateFootstepPlan();
+      }
    }
 
    public void sendActiveMappingPlanToController()

@@ -57,4 +57,9 @@ public interface PerceptionConfigurationParametersBasics extends PerceptionConfi
    {
       set(PerceptionConfigurationParameters.slamReset, slamReset);
    }
+
+   default void setActiveMapping(boolean activeMapping)
+   {
+      set(PerceptionConfigurationParameters.activeMapping, activeMapping);
+   }
 }
