@@ -78,6 +78,7 @@ public class RDXRapidHeightMapExtractionDemo
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
 
    private final FramePose3D framePose = new FramePose3D();
+   private final FramePose3D yawedFramePose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RDXLineMeshModel sensorPositionGraphic = new RDXLineMeshModel(0.02f, Color.RED);
 
@@ -86,6 +87,7 @@ public class RDXRapidHeightMapExtractionDemo
    private Activator nativesLoadedActivator;
 
    private ModelInstance sensorFrameGraphic;
+   private ModelInstance yawedFrameGraphic;
    private BytedecoImage loadedDepthImage;
    private final BytePointer depthBytePointer = new BytePointer(1000000);
 
@@ -145,6 +147,7 @@ public class RDXRapidHeightMapExtractionDemo
             totalDepthCount = (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1);
 
             sensorFrameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.3);
+            yawedFrameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.3);
          }
 
          @Override
@@ -157,6 +160,7 @@ public class RDXRapidHeightMapExtractionDemo
 
                   baseUI.getPrimaryScene().addRenderableProvider(sensorPositionGraphic, RDXSceneLevel.VIRTUAL);
                   baseUI.getPrimaryScene().addRenderableProvider(sensorFrameGraphic, RDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(yawedFrameGraphic, RDXSceneLevel.VIRTUAL);
 
                   sensorPositionGraphic.generateMeshes(sensorPositionBuffer, 5);
                   sensorPositionGraphic.update();
@@ -303,6 +307,11 @@ public class RDXRapidHeightMapExtractionDemo
             framePose.setToZero(cameraFrame);
             framePose.changeFrame(ReferenceFrame.getWorldFrame());
             LibGDXTools.toLibGDX(framePose, tempTransform, sensorFrameGraphic.transform);
+
+            yawedFramePose.setToZero(ReferenceFrame.getWorldFrame());
+            yawedFramePose.setRotationYawAndZeroTranslation(framePose.getYaw());
+            yawedFramePose.prependTranslation(framePose.getPosition().getX(), framePose.getPosition().getY(), 0);
+            LibGDXTools.toLibGDX(yawedFramePose, tempTransform, yawedFrameGraphic.transform);
          }
       }
    }
