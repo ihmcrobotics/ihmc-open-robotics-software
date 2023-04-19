@@ -15,6 +15,8 @@ import java.util.Set;
 
 /**
  * Updates and renders perception scene objects.
+ *
+ * TODO: Create ROS2PerceptionSceneSubscription
  */
 public class RDXPerceptionSceneUI
 {
