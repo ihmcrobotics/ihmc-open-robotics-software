@@ -6,9 +6,9 @@ import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
-import mission_control_msgs.msg.dds.SystemRebootMessage;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -37,7 +37,7 @@ public class ImGuiMachine
    private final String hostname;
 
    private final ROS2Node ros2Node;
-   private IHMCROS2Publisher<SystemRebootMessage> rebootPublisher;
+   private IHMCROS2Publisher<Empty> rebootPublisher;
    private SystemResourceUsageMessage lastResourceUsageMessage = new SystemResourceUsageMessage();
 
    private final ImGuiPanel panel;
@@ -119,7 +119,7 @@ public class ImGuiMachine
 
    public void sendRebootRequest()
    {
-      rebootPublisher.publish(new SystemRebootMessage());
+      rebootPublisher.publish(new Empty());
    }
 
    private void acceptSystemResourceUsageMessage(SystemResourceUsageMessage message)

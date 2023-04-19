@@ -379,10 +379,10 @@ public class ROS2Tools
       return typeNamedTopic(SystemServiceActionMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
    }
 
-   public static ROS2Topic<SystemRebootMessage> getSystemRebootTopic(UUID instanceId)
+   public static ROS2Topic<Empty> getSystemRebootTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return typeNamedTopic(SystemRebootMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+      return typeNamedTopic(Empty.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
    }
 
    /**
