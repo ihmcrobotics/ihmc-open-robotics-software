@@ -24,7 +24,13 @@ import java.util.*;
 
 public class ImGuiMachine
 {
+   /**
+    * Reasonably high value for a CPU temperature. Most CPUs throttle at 100C.
+    */
    private static final int CPU_TEMP_WARN_THRESHOLD_C = 85;
+   /**
+    * Reasonably high value for a GPU temperature.
+    */
    private static final int GPU_TEMP_WARN_THRESHOLD_C = 85;
 
    private final UUID instanceId;
@@ -267,6 +273,10 @@ public class ImGuiMachine
    long lastWarningFlashMs = 0L;
    boolean flashWarningFlag = false;
 
+   /**
+    * Makes the test flash red every second
+    * @param text the text to flash
+    */
    private void flashWarningText(String text)
    {
       long now = System.currentTimeMillis();

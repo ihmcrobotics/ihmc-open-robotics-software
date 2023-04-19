@@ -30,9 +30,15 @@ public class ImGuiMachineService
    private ServiceLogFile logFile;
    private final ImGuiConsoleArea consoleArea;
 
-   // Time of the last action button press
-   private long lastActionRequest = -1;
-   // If we've clicked an action button, i.e. "Start" and we're expecting a change sometime in the near future
+   /**
+    * Time of the last action button press in milliseconds
+    */
+   private long lastActionRequestTimeMs = -1;
+   /**
+    * If we've clicked an action button, i.e. "Start" and we're expecting a change sometime in the near future.
+    * This disables the "start" "stop", "kill", etc. buttons for a few seconds after you've pressed them,
+    * so you know something happened and so you can't spam them
+    */
    private boolean waitingOnStatusChange = false;
 
    public ImGuiMachineService(String serviceName, String hostname, UUID instanceId, ImGuiPanel machinePanel, ROS2Node ros2Node)
@@ -145,7 +151,7 @@ public class ImGuiMachineService
 
    private boolean hasItBeenAWhileSinceTheLastActionRequest()
    {
-      return (System.currentTimeMillis() - lastActionRequest) > TimeUnit.SECONDS.toMillis(5);
+      return (System.currentTimeMillis() - lastActionRequestTimeMs) > TimeUnit.SECONDS.toMillis(5);
    }
 
    public void renderImGuiWidgets()
@@ -172,7 +178,7 @@ public class ImGuiMachineService
          {
             sendStartMessage();
             waitingOnStatusChange = true;
-            lastActionRequest = System.currentTimeMillis();
+            lastActionRequestTimeMs = System.currentTimeMillis();
          }
          if (disabled)
             ImGui.endDisabled();
@@ -186,7 +192,7 @@ public class ImGuiMachineService
          {
             sendStopMessage();
             waitingOnStatusChange = true;
-            lastActionRequest = System.currentTimeMillis();
+            lastActionRequestTimeMs = System.currentTimeMillis();
          }
          if (disabled)
             ImGui.endDisabled();
@@ -197,7 +203,7 @@ public class ImGuiMachineService
          {
             sendRestartMessage();
             waitingOnStatusChange = true;
-            lastActionRequest = System.currentTimeMillis();
+            lastActionRequestTimeMs = System.currentTimeMillis();
          }
       }
       ImGui.sameLine();
@@ -206,7 +212,7 @@ public class ImGuiMachineService
          {
             sendKillMessage();
             waitingOnStatusChange = true;
-            lastActionRequest = System.currentTimeMillis();
+            lastActionRequestTimeMs = System.currentTimeMillis();
          }
       }
       ImGui.sameLine();
