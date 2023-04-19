@@ -1,6 +1,7 @@
 package us.ihmc.robotics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
@@ -11,6 +12,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -510,4 +512,58 @@ public class EuclidCoreMissingToolsTest
       return minValue + random.nextDouble() * (maxValue - minValue);
    }
 
+   @Test
+   public void testNextPositiveDefiniteMatrix3D() throws Exception
+   {
+      Random random = new Random(23452);
+
+      for (int i = 0; i < iters; i++) { // Test nextPositiveDefiniteMatrix3D(Random random)
+         Matrix3D matrix3D = EuclidCoreMissingTools.nextPositiveDefiniteMatrix3D(random);
+
+         for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+               assertTrue(matrix3D.getElement(row, column) <= 1.0);
+               assertTrue(matrix3D.getElement(row, column) >= -1.0);
+               assertTrue(Double.isFinite(matrix3D.getElement(row, column)));
+            }
+         }
+
+         // Using Sylvester's criterion of all the leading principal minors having positive determinant to verify that matrix is positive definite
+         double firstPrincipalMinorDeterminant = matrix3D.getM00();
+         double secondPrincipalMinorDeterminant = matrix3D.getM00() * matrix3D.getM11() - matrix3D.getM01() * matrix3D.getM10();
+         double thirdPrincipalMinorDeterminant = matrix3D.determinant();
+         assertTrue(firstPrincipalMinorDeterminant > 0.0);
+         assertTrue(secondPrincipalMinorDeterminant > 0.0);
+         assertTrue(thirdPrincipalMinorDeterminant > 0.0);
+      }
+
+      for (int i = 0; i < iters; i++) { // Test nextPositiveDefiniteMatrix3D(Random random, double minMaxValue)
+         double minMaxValue = EuclidCoreRandomTools.nextDouble(random, 0.0, 100.0);
+         Matrix3D matrix3D = EuclidCoreMissingTools.nextPositiveDefiniteMatrix3D(random, minMaxValue);
+
+         for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+               assertTrue(matrix3D.getElement(row, column) <= minMaxValue);
+               assertTrue(matrix3D.getElement(row, column) >= -minMaxValue);
+               assertTrue(Double.isFinite(matrix3D.getElement(row, column)));
+            }
+         }
+
+         // Using Sylvester's criterion of all the leading principal minors having positive determinant to verify that matrix is positive definite
+         double firstPrincipalMinorDeterminant = matrix3D.getM00();
+         double secondPrincipalMinorDeterminant = matrix3D.getM00() * matrix3D.getM11() - matrix3D.getM01() * matrix3D.getM10();
+         double thirdPrincipalMinorDeterminant = matrix3D.determinant();
+         assertTrue(firstPrincipalMinorDeterminant > 0.0);
+         assertTrue(secondPrincipalMinorDeterminant > 0.0);
+         assertTrue(thirdPrincipalMinorDeterminant > 0.0);
+      }
+
+      // Test exceptions:
+      try {
+         EuclidCoreMissingTools.nextPositiveDefiniteMatrix3D(random, -0.1);
+         fail("Should have thrown an exception.");
+      } catch (RuntimeException e) {
+         // Good
+      }
+   }
 }
