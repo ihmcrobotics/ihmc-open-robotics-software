@@ -26,7 +26,7 @@ import static java.lang.Long.parseLong;
 
 public class VideoDataPlayer
 {
-   private static final boolean VIDEO_STATISTICS = true;
+   private static final boolean VIDEO_STATISTICS = false;
    private final String name;
    private final boolean hasTimebase;
    private final boolean interlaced;
