@@ -321,21 +321,21 @@ public class InverseDynamicsQPSolver
          case OBJECTIVE:
             if (input.useWeightScalar())
             {
-               addRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getWeightScalar());
+               addMotionAndRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getWeightScalar());
             }
             else
             {
-               addRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getTaskWeightMatrix());
+               addMotionAndRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getTaskWeightMatrix());
             }
             break;
          case EQUALITY:
-            addRhoEqualityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+            addMotionAndRhoEqualityConstraint(input.getTaskJacobian(), input.getTaskObjective());
             break;
          case LEQ_INEQUALITY:
-            addRhoLesserOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+            addMotionAndRhoLesserOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
             break;
          case GEQ_INEQUALITY:
-            addRhoGreaterOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+            addMotionAndRhoGreaterOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
             break;
          default:
             throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
@@ -366,7 +366,7 @@ public class InverseDynamicsQPSolver
       {
          throw new RuntimeException("Rho task needs to have size macthing the number of rhos of the robot.");
       }
-      addTaskInternal(taskJacobian, taskObjective, taskWeight, numberOfDoFs + rhoSize);
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, 0);
    }
 
    /**
@@ -450,6 +450,26 @@ public class InverseDynamicsQPSolver
       tempObjective.set(taskObjective);
       tempWeight.set(taskWeight);
       addTaskInternal(tempObjective, tempWeight, numberOfDoFs, rhoSize);
+   }
+
+   /**
+    * Sets up an objective for both motion (qdd) and contact forces (rhos).
+    * <p>
+    * min (J x - b)^T * W * (J x - b)
+    * </p>
+    *
+    * @param taskJacobian jacobian to map [qddot rho] to the objective space. J in the above equation.
+    * @param taskObjective matrix of the desired objective for the task. b in the above equation.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be
+    *       diagonal.
+    */
+   public void addMotionAndRhoTask(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight)
+   {
+      if (taskJacobian.getNumCols() != numberOfDoFs + rhoSize)
+      {
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
+      }
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, 0);
    }
 
    public void addTaskInternal(NativeMatrix taskObjective, NativeMatrix taskWeight, int offset, int variables)
@@ -555,7 +575,7 @@ public class InverseDynamicsQPSolver
    {
       if (taskJacobian.getNumCols() != numberOfDoFs)
       {
-         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
       }
       addEqualityConstraintInternal(taskJacobian, taskObjective, 0);
    }
@@ -564,9 +584,18 @@ public class InverseDynamicsQPSolver
    {
       if (taskJacobian.getNumCols() != rhoSize)
       {
-         throw new RuntimeException("Rho task needs to have size macthing the number of rhos of the robot.");
+         throw new RuntimeException("Rho task needs to have size matching the number of rhos of the robot.");
       }
       addEqualityConstraintInternal(taskJacobian, taskObjective, numberOfDoFs);
+   }
+
+   public void addMotionAndRhoEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective)
+   {
+      if (taskJacobian.getNumCols() != numberOfDoFs + rhoSize)
+      {
+         throw new RuntimeException("Motion and rho task needs to have size matching the combined DoF's and number of rhos of the robot.");
+      }
+      addEqualityConstraintInternal(taskJacobian, taskObjective, 0);
    }
 
    private void addEqualityConstraintInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, int offset)
@@ -607,6 +636,16 @@ public class InverseDynamicsQPSolver
       addRhoInequalityConstraintInternal(taskJacobian, taskObjective, -1.0);
    }
 
+   private void addMotionAndRhoLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective)
+   {
+      addMotionAndRhoInequalityConstraintInternal(taskJacobian, taskObjective, 1.0);
+   }
+
+   private void addMotionAndRhoGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective)
+   {
+      addMotionAndRhoInequalityConstraintInternal(taskJacobian, taskObjective, -1.0);
+   }
+
    private void addMotionInequalityConstraintInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, double sign)
    {
       addInequalityConstraintInternal(taskJacobian, taskObjective, sign, 0);
@@ -615,6 +654,11 @@ public class InverseDynamicsQPSolver
    private void addRhoInequalityConstraintInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, double sign)
    {
       addInequalityConstraintInternal(taskJacobian, taskObjective, sign, numberOfDoFs);
+   }
+
+   private void addMotionAndRhoInequalityConstraintInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, double sign)
+   {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, sign, 0);
    }
 
    private void addInequalityConstraintInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, double sign, int offset)
@@ -655,83 +699,6 @@ public class InverseDynamicsQPSolver
       tempObjective.set(torqueObjective);
 
       addTorqueMinimizationObjective(tempJtW, tempObjective);
-   }
-
-   public void addJointTorqueObjective(JointTorqueCommand jointTorqueCommand,
-                                       DMatrixRMaj bodyMassMatrix,
-                                       DMatrixRMaj bodyContactForceJacobianTranspose,
-                                       DMatrixRMaj bodyGravityCoriolisMatrix,
-                                       JointIndexHandler jointIndexHandler)
-   {
-      if (jointTorqueCommand.getNumberOfJoints() == 0)
-         return;
-
-      int taskSize = 0;
-      for (int jointIndex = 0; jointIndex < jointTorqueCommand.getNumberOfJoints(); jointIndex++)
-      {
-         taskSize += jointTorqueCommand.getJoint(jointIndex).getDegreesOfFreedom();
-      }
-
-      if (jointTorqueCommand.isHardConstraint())
-      {
-         tempJacobian.reshape(taskSize, problemSize);
-         tempObjective.reshape(taskSize, 1);
-         tempJacobian.zero();
-         tempObjective.zero();
-
-         int row = 0;
-         for (int jointIndex = 0; jointIndex < jointTorqueCommand.getNumberOfJoints(); jointIndex++)
-         {
-            JointBasics joint = jointTorqueCommand.getJoints().get(jointIndex);
-            DMatrixRMaj desiredTorque = jointTorqueCommand.getDesiredTorque(jointIndex);
-            int[] jointIndices = jointIndexHandler.getJointIndices(joint);
-
-            for (int dof = 0; dof < joint.getDegreesOfFreedom(); dof++)
-            {
-               int orderedDofIndex = jointIndices[dof];
-
-               tempJacobian.insert(bodyMassMatrix, orderedDofIndex, orderedDofIndex + 1, 0, numberOfDoFs, row, 0);
-               if (rhoSize > 0)
-                  tempJacobian.insertScaled(bodyContactForceJacobianTranspose, orderedDofIndex, orderedDofIndex + 1, 0, rhoSize, row, numberOfDoFs, -1.0);
-
-               tempObjective.set(row, 0, desiredTorque.get(dof, 0) - bodyGravityCoriolisMatrix.get(orderedDofIndex, 0));
-               row++;
-            }
-         }
-
-         addEqualityConstraintInternal(tempJacobian, tempObjective, 0);
-      }
-      else
-      {
-         tempJacobian.reshape(problemSize, problemSize);
-         tempObjective.reshape(problemSize, 1);
-         tempWeight.reshape(problemSize, problemSize);
-         tempJacobian.zero();
-         tempObjective.zero();
-         tempWeight.zero();
-
-         tempJacobian.insert(bodyMassMatrix, 0, 0);
-         if (rhoSize > 0)
-            tempJacobian.insertScaled(bodyContactForceJacobianTranspose, 0, numberOfDoFs, -1.0);
-         tempObjective.insertScaled(bodyGravityCoriolisMatrix, 0, 0, -1.0);
-
-         for (int jointIndex = 0; jointIndex < jointTorqueCommand.getNumberOfJoints(); jointIndex++)
-         {
-            JointBasics joint = jointTorqueCommand.getJoints().get(jointIndex);
-            DMatrixRMaj desiredTorque = jointTorqueCommand.getDesiredTorque(jointIndex);
-            int[] jointIndices = jointIndexHandler.getJointIndices(joint);
-            double weight = jointTorqueCommand.getWeight(jointIndex);
-
-            for (int dof = 0; dof < joint.getDegreesOfFreedom(); dof++)
-            {
-               int orderedDofIndex = jointIndices[dof];
-               tempWeight.set(orderedDofIndex, orderedDofIndex, weight);
-               tempObjective.add(orderedDofIndex, 0, desiredTorque.get(dof, 0));
-            }
-         }
-
-         addTaskInternal(tempJacobian, tempObjective, tempWeight, 0);
-      }
    }
 
    /**

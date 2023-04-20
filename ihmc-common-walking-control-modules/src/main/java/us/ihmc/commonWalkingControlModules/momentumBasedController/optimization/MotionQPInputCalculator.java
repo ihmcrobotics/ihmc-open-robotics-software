@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.matrixlib.NativeNullspaceProjector;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
@@ -1096,14 +1095,47 @@ public class MotionQPInputCalculator
       return true;
    }
 
-   public boolean convertJointTorqueCommand(JointTorqueCommand jointTorqueCommand, NativeQPInputTypeA qpInputTypeAToPack)
+   public boolean convertJointTorqueCommand(JointTorqueCommand jointTorqueCommand,
+                                            NativeQPInputTypeA qpInputToPack,
+                                            DMatrixRMaj bodyMassMatrix,
+                                            DMatrixRMaj bodyContactForceJacobianTranspose,
+                                            DMatrixRMaj bodyGravityCoriolisMatrix)
    {
       int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(jointTorqueCommand.getJoints());
 
       if (taskSize == 0)
          return false;
 
-      // TODO
+      qpInputToPack.reshape(taskSize);
+      qpInputToPack.setUseWeightScalar(false);
+      qpInputToPack.setConstraintType(jointTorqueCommand.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
+      qpInputToPack.taskJacobian.zero();
+      qpInputToPack.taskObjective.zero();
+      qpInputToPack.taskWeightMatrix.zero();
+
+      int row = 0;
+      for (int jointIndex = 0; jointIndex < jointTorqueCommand.getNumberOfJoints(); jointIndex++)
+      {
+         JointBasics joint = jointTorqueCommand.getJoints().get(jointIndex);
+         DMatrixRMaj desiredTorque = jointTorqueCommand.getDesiredTorque(jointIndex);
+         int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+
+         for (int dof = 0; dof < joint.getDegreesOfFreedom(); dof++)
+         {
+            int orderedDofIndex = jointIndices[dof];
+            double weight = jointTorqueCommand.getWeight(jointIndex);
+
+            qpInputToPack.taskJacobian.insert(bodyMassMatrix, orderedDofIndex, orderedDofIndex + 1, 0, numberOfDoFs, row, 0);
+
+            int rhoSize = bodyContactForceJacobianTranspose.getNumCols();
+            if (rhoSize > 0)
+               qpInputToPack.taskJacobian.insertScaled(bodyContactForceJacobianTranspose, orderedDofIndex, orderedDofIndex + 1, 0, rhoSize, row, numberOfDoFs, -1.0);
+
+            qpInputToPack.taskObjective.set(row, 0, desiredTorque.get(dof, 0) - bodyGravityCoriolisMatrix.get(orderedDofIndex, 0));
+            qpInputToPack.taskWeightMatrix.set(row, row, weight);
+            row++;
+         }
+      }
 
       return true;
    }

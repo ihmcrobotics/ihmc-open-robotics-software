@@ -439,13 +439,11 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public void submitJointTorqueCommand(JointTorqueCommand command)
    {
-//      qpSolver.addJointTorqueObjective(command,
-//                                       dynamicsMatrixCalculator.getBodyMassMatrix(),
-//                                       dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
-//                                       dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix(),
-//                                       jointIndexHandler);
-
-      boolean success = motionQPInputCalculator.convertJointTorqueCommand(command, motionAndRhoQPInput);
+      boolean success = motionQPInputCalculator.convertJointTorqueCommand(command,
+                                                                          motionAndRhoQPInput,
+                                                                          dynamicsMatrixCalculator.getBodyMassMatrix(),
+                                                                          dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
+                                                                          dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix());
       if (success)
          qpSolver.addMotionAndRhoInput(motionAndRhoQPInput);
    }
