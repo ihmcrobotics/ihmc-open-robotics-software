@@ -314,6 +314,34 @@ public class InverseDynamicsQPSolver
       }
    }
 
+   public void addMotionAndRhoInput(NativeQPInputTypeA input)
+   {
+      switch (input.getConstraintType())
+      {
+         case OBJECTIVE:
+            if (input.useWeightScalar())
+            {
+               addRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getWeightScalar());
+            }
+            else
+            {
+               addRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getTaskWeightMatrix());
+            }
+            break;
+         case EQUALITY:
+            addRhoEqualityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+            break;
+         case LEQ_INEQUALITY:
+            addRhoLesserOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+            break;
+         case GEQ_INEQUALITY:
+            addRhoGreaterOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+            break;
+         default:
+            throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
+      }
+   }
+
    public void addMotionTask(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight)
    {
       if (taskJacobian.getNumCols() != numberOfDoFs)
@@ -330,6 +358,15 @@ public class InverseDynamicsQPSolver
          throw new RuntimeException("Rho task needs to have size macthing the number of rhos of the robot.");
       }
       addTaskInternal(taskJacobian, taskObjective, taskWeight, numberOfDoFs);
+   }
+
+   public void addMotionAndRhoTask(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight)
+   {
+      if (taskJacobian.getNumCols() != numberOfDoFs + rhoSize)
+      {
+         throw new RuntimeException("Rho task needs to have size macthing the number of rhos of the robot.");
+      }
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, numberOfDoFs + rhoSize);
    }
 
    /**
