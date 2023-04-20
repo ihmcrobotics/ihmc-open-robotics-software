@@ -382,12 +382,18 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
                break;
             case JOINTSPACE:
                if (command instanceof JointspaceAccelerationCommand accelerationCommand)
+               {
                   optimizationControlModule.submitJointspaceAccelerationCommand(accelerationCommand);
-               if (command instanceof JointTorqueCommand jointTorqueCommand)
+               }
+               else if (command instanceof JointTorqueCommand jointTorqueCommand)
                {
                   if (!updateDynamicMatrixCalculator.getValue())
                      throw new RuntimeException("Dynamic matrix calculator must be enabled in order to consume a JointTorqueCommand");
                   optimizationControlModule.submitJointTorqueCommand(jointTorqueCommand);
+               }
+               else
+               {
+                  throw new RuntimeException("The command type: (type=" + command.getCommandType() + ")-(class=" + command.getClass().getSimpleName() + ") is not handled.");
                }
                break;
             case MOMENTUM:
