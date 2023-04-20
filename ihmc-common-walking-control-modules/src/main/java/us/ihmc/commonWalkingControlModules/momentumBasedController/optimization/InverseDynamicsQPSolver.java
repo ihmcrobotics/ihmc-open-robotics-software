@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.InverseDynamicsConstraintDomain;
 import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.spatial.Wrench;
@@ -169,9 +168,9 @@ public class InverseDynamicsQPSolver
       parentRegistry.addChild(registry);
    }
 
-   private int getNumberOfVariables(InverseDynamicsConstraintDomain constraintDomain)
+   private int getNumberOfVariables(QPInputDomain inputDomain)
    {
-      switch (constraintDomain)
+      switch (inputDomain)
       {
          case MOTION:
             return numberOfDoFs;
@@ -180,13 +179,13 @@ public class InverseDynamicsQPSolver
          case MOTION_AND_RHO:
             return numberOfDoFs + rhoSize;
          default:
-            throw new RuntimeException("Unknown constraint domain " + constraintDomain);
+            throw new RuntimeException("Unknown constraint domain " + inputDomain);
       }
    }
 
-   private int getVariableOffset(InverseDynamicsConstraintDomain constraintDomain)
+   private int getVariableOffset(QPInputDomain inputDomain)
    {
-      switch (constraintDomain)
+      switch (inputDomain)
       {
          case MOTION:
          case MOTION_AND_RHO:
@@ -194,7 +193,7 @@ public class InverseDynamicsQPSolver
          case RHO:
             return numberOfDoFs;
          default:
-            throw new RuntimeException("Unknown constraint domain " + constraintDomain);
+            throw new RuntimeException("Unknown constraint domain " + inputDomain);
       }
    }
 
@@ -282,36 +281,36 @@ public class InverseDynamicsQPSolver
       solver_f.addBlock(solverOutput_jointAccelerations, 0, 0, 0, 0, numberOfDoFs, 1, -1.0 / factor);
    }
 
-   public void addQPInput(NativeQPInputTypeA input, InverseDynamicsConstraintDomain constraintDomain)
+   public void addQPInput(NativeQPInputTypeA input, QPInputDomain inputDomain)
    {
       switch (input.getConstraintType())
       {
          case OBJECTIVE:
             if (input.useWeightScalar())
-               addQPTask(input.taskJacobian, input.taskObjective, input.getWeightScalar(), constraintDomain);
+               addQPTask(input.taskJacobian, input.taskObjective, input.getWeightScalar(), inputDomain);
             else
-               addQPTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix, constraintDomain);
+               addQPTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix, inputDomain);
             break;
          case EQUALITY:
-            addEqualityConstraint(input.taskJacobian, input.taskObjective, constraintDomain);
+            addEqualityConstraint(input.taskJacobian, input.taskObjective, inputDomain);
             break;
          case LEQ_INEQUALITY:
-            addLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, constraintDomain);
+            addLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, inputDomain);
             break;
          case GEQ_INEQUALITY:
-            addGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, constraintDomain);
+            addGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, inputDomain);
             break;
          default:
             throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
       }
    }
 
-   public void addQPInput(NativeQPInputTypeB input, InverseDynamicsConstraintDomain constraintDomain)
+   public void addQPInput(NativeQPInputTypeB input, QPInputDomain inputDomain)
    {
       if (input.useWeightScalar())
-         addQPTask(input.taskJacobian, input.taskConvectiveTerm, input.getWeightScalar(), input.directCostHessian, input.directCostGradient, constraintDomain);
+         addQPTask(input.taskJacobian, input.taskConvectiveTerm, input.getWeightScalar(), input.directCostHessian, input.directCostGradient, inputDomain);
       else
-         addQPTask(input.taskJacobian, input.taskConvectiveTerm, input.taskWeightMatrix, input.directCostHessian, input.directCostGradient, constraintDomain);
+         addQPTask(input.taskJacobian, input.taskConvectiveTerm, input.taskWeightMatrix, input.directCostHessian, input.directCostGradient, inputDomain);
    }
 
    /**
@@ -323,15 +322,15 @@ public class InverseDynamicsQPSolver
     * @param taskJacobian jacobian to map qddot to the objective space. J in the above equation.
     * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
     * @param taskWeight weight for the desired objective. W in the above equation. Assumed to bediagonal.
-    * @param constraintDomain whether the decision variable x is accelerations, rho, or both.
+    * @param inputDomain whether the decision variable x is accelerations, rho, or both.
     */
-   public void addQPTask(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight, InverseDynamicsConstraintDomain constraintDomain)
+   public void addQPTask(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight, QPInputDomain inputDomain)
    {
-      if (taskJacobian.getNumCols() != getNumberOfVariables(constraintDomain))
+      if (taskJacobian.getNumCols() != getNumberOfVariables(inputDomain))
       {
-         throw new RuntimeException("Invalid task size. Expected " + getNumberOfVariables(constraintDomain) + " but received " + taskJacobian.getNumCols());
+         throw new RuntimeException("Invalid task size. Expected " + getNumberOfVariables(inputDomain) + " but received " + taskJacobian.getNumCols());
       }
-      addTaskInternal(taskJacobian, taskObjective, taskWeight, getVariableOffset(constraintDomain));
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, getVariableOffset(inputDomain));
    }
 
    /**
@@ -343,15 +342,15 @@ public class InverseDynamicsQPSolver
     * @param taskJacobian jacobian to map qddot to the objective space. J in the above equation.
     * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
     * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
-    * @param constraintDomain whether the decision variable x is accelerations, rho, or both.
+    * @param inputDomain whether the decision variable x is accelerations, rho, or both.
     */
-   public void addQPTask(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight, InverseDynamicsConstraintDomain constraintDomain)
+   public void addQPTask(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight, QPInputDomain inputDomain)
    {
-      if (taskJacobian.getNumCols() != getNumberOfVariables(constraintDomain))
+      if (taskJacobian.getNumCols() != getNumberOfVariables(inputDomain))
       {
-         throw new RuntimeException("Invalid task size. Expected " + getNumberOfVariables(constraintDomain) + " but received " + taskJacobian.getNumCols());
+         throw new RuntimeException("Invalid task size. Expected " + getNumberOfVariables(inputDomain) + " but received " + taskJacobian.getNumCols());
       }
-      addTaskInternal(taskJacobian, taskObjective, taskWeight, getVariableOffset(constraintDomain));
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, getVariableOffset(inputDomain));
    }
 
    public void addQPTask(NativeMatrix taskJacobian,
@@ -359,13 +358,13 @@ public class InverseDynamicsQPSolver
                          double taskWeight,
                          NativeMatrix directCostHessian,
                          NativeMatrix directCostGradient,
-                         InverseDynamicsConstraintDomain constraintDomain)
+                         QPInputDomain inputDomain)
    {
-      if (taskJacobian.getNumCols() != getNumberOfVariables(constraintDomain))
+      if (taskJacobian.getNumCols() != getNumberOfVariables(inputDomain))
       {
-         throw new RuntimeException("Invalid task size. Expected " + getNumberOfVariables(constraintDomain) + " but received " + taskJacobian.getNumCols());
+         throw new RuntimeException("Invalid task size. Expected " + getNumberOfVariables(inputDomain) + " but received " + taskJacobian.getNumCols());
       }
-      addTaskInternal(taskJacobian, taskConvectiveTerm, taskWeight,directCostHessian, directCostGradient, getVariableOffset(constraintDomain));
+      addTaskInternal(taskJacobian, taskConvectiveTerm, taskWeight,directCostHessian, directCostGradient, getVariableOffset(inputDomain));
    }
 
    public void addQPTask(NativeMatrix taskJacobian,
@@ -373,13 +372,13 @@ public class InverseDynamicsQPSolver
                          NativeMatrix taskWeight,
                          NativeMatrix directCostHessian,
                          NativeMatrix directCostGradient,
-                         InverseDynamicsConstraintDomain constraintDomain)
+                         QPInputDomain inputDomain)
    {
-      if (taskJacobian.getNumCols() != getNumberOfVariables(constraintDomain))
+      if (taskJacobian.getNumCols() != getNumberOfVariables(inputDomain))
       {
-         throw new RuntimeException("Invalid task size. Expected " + getNumberOfVariables(constraintDomain) + " but received " + taskJacobian.getNumCols());
+         throw new RuntimeException("Invalid task size. Expected " + getNumberOfVariables(inputDomain) + " but received " + taskJacobian.getNumCols());
       }
-      addTaskInternal(taskJacobian, taskConvectiveTerm, taskWeight, directCostHessian, directCostGradient, getVariableOffset(constraintDomain));
+      addTaskInternal(taskJacobian, taskConvectiveTerm, taskWeight, directCostHessian, directCostGradient, getVariableOffset(inputDomain));
    }
 
    /**
@@ -390,13 +389,13 @@ public class InverseDynamicsQPSolver
     *
     * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
     * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
-    * @param constraintDomain whether the decision variable x is accelerations, rho, or both.
+    * @param inputDomain whether the decision variable x is accelerations, rho, or both.
     */
-   public void addIdentityJacobianTask(DMatrixRMaj taskObjective, DMatrixRMaj taskWeight, InverseDynamicsConstraintDomain constraintDomain)
+   public void addIdentityJacobianTask(DMatrixRMaj taskObjective, DMatrixRMaj taskWeight, QPInputDomain inputDomain)
    {
       tempObjective.set(taskObjective);
       tempWeight.set(taskWeight);
-      addTaskInternal(tempObjective, tempWeight, getVariableOffset(constraintDomain), getNumberOfVariables(constraintDomain));
+      addTaskInternal(tempObjective, tempWeight, getVariableOffset(inputDomain), getNumberOfVariables(inputDomain));
    }
 
    public void addTaskInternal(NativeMatrix taskObjective, NativeMatrix taskWeight, int offset, int variables)
@@ -498,13 +497,13 @@ public class InverseDynamicsQPSolver
       solver_f.multAddBlock(tempJtW, taskConvectiveTerm, offset, 0);
    }
 
-   public void addEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, InverseDynamicsConstraintDomain constraintDomain)
+   public void addEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, QPInputDomain inputDomain)
    {
-      if (taskJacobian.getNumCols() != getNumberOfVariables(constraintDomain))
+      if (taskJacobian.getNumCols() != getNumberOfVariables(inputDomain))
       {
          throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
       }
-      addEqualityConstraintInternal(taskJacobian, taskObjective, getVariableOffset(constraintDomain));
+      addEqualityConstraintInternal(taskJacobian, taskObjective, getVariableOffset(inputDomain));
    }
 
    private void addEqualityConstraintInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, int offset)
@@ -525,19 +524,19 @@ public class InverseDynamicsQPSolver
       solver_beq.insert(taskObjective, previousSize, 0);
    }
 
-   public void addLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, InverseDynamicsConstraintDomain constraintDomain)
+   public void addLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, QPInputDomain inputDomain)
    {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, constraintDomain);
+      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, inputDomain);
    }
 
-   public void addGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, InverseDynamicsConstraintDomain constraintDomain)
+   public void addGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, QPInputDomain inputDomain)
    {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, constraintDomain);
+      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, inputDomain);
    }
 
-   private void addInequalityConstraintInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, double sign, InverseDynamicsConstraintDomain constraintDomain)
+   private void addInequalityConstraintInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, double sign, QPInputDomain inputDomain)
    {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, sign, getVariableOffset(constraintDomain));
+      addInequalityConstraintInternal(taskJacobian, taskObjective, sign, getVariableOffset(inputDomain));
    }
 
    private void addInequalityConstraintInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, double sign, int offset)
@@ -822,4 +821,29 @@ public class InverseDynamicsQPSolver
    {
       solverInput_activeIndices.insert(activeRhoMatrix, numberOfDoFs, 0);
    }
+
+   /**
+    * Parameterizes which variable set a task describes.
+    */
+   public enum QPInputDomain
+   {
+      /**
+       * The task is a function of the desired accelerations q_dd, such that the Jacobian J multiplies the accelerations: <br>
+       * J q_dd
+       */
+      MOTION,
+
+      /**
+       * The task is a function of the rho, the generalized contact forces. The Jacobian J multiplies the rho vector: <br>
+       * J rho
+       */
+      RHO,
+
+      /**
+       * The task is a function of the desired accelerations and rho, the generalized contact forces. The Jacobian J multiplies the combined acceleration and rho vector: <br>
+       * J [q_dd^T rho^T]^T
+       */
+      MOTION_AND_RHO
+   }
+
 }

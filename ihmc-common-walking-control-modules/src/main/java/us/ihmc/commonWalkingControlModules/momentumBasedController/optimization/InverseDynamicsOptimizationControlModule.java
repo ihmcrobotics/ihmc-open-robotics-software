@@ -5,7 +5,6 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.InverseDynamicsConstraintDomain;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -39,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.InverseDynamicsConstraintDomain.*;
+import static us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPSolver.QPInputDomain.*;
 
 public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
