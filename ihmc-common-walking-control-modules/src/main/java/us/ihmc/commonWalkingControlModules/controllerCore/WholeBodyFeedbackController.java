@@ -76,16 +76,29 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
    private void registerControllers(FeedbackControllerTemplate template)
    {
       dynamicControllerConstructionEnabled.set(template.isDynamicControllerConstructionAllowed());
-      template.getSpatialFeedbackControllerTemplate().forEach(this::registerSpatialControllers);
-      template.getPointFeedbackControllerTemplate().forEach(this::registerPointControllers);
-      template.getOrientationFeedbackControllerTemplate().forEach(this::registerOrientationControllers);
-      template.getOneDoFJointFeedbackControllerTemplate().forEach(this::registerOneDoFJointControllers);
+
+      for (RigidBodyBasics rigidBody : coreToolbox.getRootBody().subtreeIterable())
+      { // Iterating through the robot instead of the templates to guarantee consistent ordering of the yoVariables
+         registerSpatialControllers(rigidBody, template.getSpatialFeedbackControllerTemplate().get(rigidBody));
+         registerPointControllers(rigidBody, template.getPointFeedbackControllerTemplate().get(rigidBody));
+         registerOrientationControllers(rigidBody, template.getOrientationFeedbackControllerTemplate().get(rigidBody));
+      }
+
+      for (OneDoFJointBasics joint : coreToolbox.getRootBody().subtreeJointList(OneDoFJointBasics.class))
+      { // Iterating through the robot instead of the templates to guarantee consistent ordering of the yoVariables
+         if (template.getOneDoFJointFeedbackControllerTemplate().contains(joint))
+            registerOneDoFJointControllers(joint);
+      }
+
       if (template.isCenterOfMassFeedbackControllerEnabled())
          registerCenterOfMassController();
    }
 
-   private void registerSpatialControllers(RigidBodyBasics endEffector, int numberOfControllers)
+   private void registerSpatialControllers(RigidBodyBasics endEffector, Integer numberOfControllers)
    {
+      if (numberOfControllers == null)
+         return;
+
       List<SpatialFeedbackController> endEffectorControllers = new ArrayList<>();
       spatialFeedbackControllerMap.put(endEffector, endEffectorControllers);
 
@@ -97,8 +110,11 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
       }
    }
 
-   private void registerPointControllers(RigidBodyBasics endEffector, int numberOfControllers)
+   private void registerPointControllers(RigidBodyBasics endEffector, Integer numberOfControllers)
    {
+      if (numberOfControllers == null)
+         return;
+
       List<PointFeedbackController> endEffectorControllers = new ArrayList<>();
       pointFeedbackControllerMap.put(endEffector, endEffectorControllers);
 
@@ -110,8 +126,11 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
       }
    }
 
-   private void registerOrientationControllers(RigidBodyBasics endEffector, int numberOfControllers)
+   private void registerOrientationControllers(RigidBodyBasics endEffector, Integer numberOfControllers)
    {
+      if (numberOfControllers == null)
+         return;
+
       List<OrientationFeedbackController> endEffectorControllers = new ArrayList<>();
       orientationFeedbackControllerMap.put(endEffector, endEffectorControllers);
 
@@ -308,7 +327,7 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
          if (!dynamicControllerConstructionEnabled.getValue())
          {
             throw new FeedbackControllerException("Could not find a controller available for the end-effector: " + endEffector.getName()
-                  + ", number of controllers: " + endEffectorControllers.size());
+                                                  + ", number of controllers: " + endEffectorControllers.size());
          }
          else
          {
@@ -375,7 +394,7 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
          if (!dynamicControllerConstructionEnabled.getValue())
          {
             throw new FeedbackControllerException("Could not find a controller available for the end-effector: " + endEffector.getName()
-                  + ", number of controllers: " + endEffectorControllers.size());
+                                                  + ", number of controllers: " + endEffectorControllers.size());
          }
          else
          {
@@ -436,7 +455,7 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
          if (!dynamicControllerConstructionEnabled.getValue())
          {
             throw new FeedbackControllerException("Could not find a controller available for the end-effector: " + endEffector.getName()
-                  + ", number of controllers: " + endEffectorControllers.size());
+                                                  + ", number of controllers: " + endEffectorControllers.size());
          }
          else
          {
@@ -515,7 +534,7 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
       if (controller.isEnabled())
       {
          throw new FeedbackControllerException("Cannot submit more than one feedback control command to the same controller. Controller joint: "
-               + joint.getName());
+                                               + joint.getName());
       }
 
       controller.submitFeedbackControlCommand(feedbackControlCommand);
@@ -543,7 +562,7 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
    {
       if (activeControlMode != requestedControlMode)
          throw new FeedbackControllerException("Incompatible feedback control command: command requires: " + requestedControlMode + ", current mode: "
-               + activeControlMode);
+                                               + activeControlMode);
    }
 
    public InverseDynamicsCommandList getInverseDynamicsOutput()
