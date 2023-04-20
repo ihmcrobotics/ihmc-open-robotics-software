@@ -238,9 +238,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
             swingPlanningModule.setHeightMapData(heightMapMessage);
          SwingPlannerParametersReadOnly swingPlannerParameters = swingPlannerParametersReference.getAndSet(null);
          if (swingPlannerParameters != null)
+         {
             swingPlanningModule.setSwingPlannerParameters(swingPlannerParameters);
+            swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
+         }
 
-         swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
          wasPlanUpdated = false;
       }
    }
