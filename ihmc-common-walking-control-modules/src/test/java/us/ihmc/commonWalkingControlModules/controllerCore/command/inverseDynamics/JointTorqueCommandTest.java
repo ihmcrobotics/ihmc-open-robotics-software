@@ -300,5 +300,11 @@ public class JointTorqueCommandTest
       {
          return numberOfContactableBodies;
       }
+
+      @Override
+      public boolean updateDynamicMatrixCalculator()
+      {
+         return true;
+      }
    }
 }
