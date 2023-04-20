@@ -87,7 +87,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    private final ArrayList<QPObjectiveCommand> nullspaceQPObjectiveCommands = new ArrayList<>();
    private final ArrayList<RigidBodyReadOnly> rigidBodiesWithCoPCommands = new ArrayList<>();
-   private boolean hasUpdatedDynamicMatrixCalculator = false;
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -438,12 +437,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public void submitJointTorqueCommand(JointTorqueCommand command)
    {
-      if (!hasUpdatedDynamicMatrixCalculator)
-      {
-         dynamicsMatrixCalculator.compute();
-         hasUpdatedDynamicMatrixCalculator = true;
-      }
-
       qpSolver.addJointTorqueObjective(command,
                                        dynamicsMatrixCalculator.getBodyMassMatrix(),
                                        dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
@@ -505,16 +498,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    public void submitContactWrenchCommand(ContactWrenchCommand command)
    {
       wrenchMatrixCalculator.submitContactWrenchCommand(command);
-   }
-
-   public boolean hasUpdatedDynamicMatrixCalculator()
-   {
-      return hasUpdatedDynamicMatrixCalculator;
-   }
-
-   public void resetHasUpdatedDynamicMatrixCalculator()
-   {
-      hasUpdatedDynamicMatrixCalculator = false;
    }
 
    public void submitOptimizationSettingsCommand(InverseDynamicsOptimizationSettingsCommand command)

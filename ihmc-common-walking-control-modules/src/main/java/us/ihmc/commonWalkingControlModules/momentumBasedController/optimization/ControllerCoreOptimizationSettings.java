@@ -6,12 +6,14 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOp
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
+import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 
 public interface ControllerCoreOptimizationSettings
 {
@@ -422,5 +424,25 @@ public interface ControllerCoreOptimizationSettings
    default public FrictionConeRotationCalculator getFrictionConeRotation()
    {
       return new ZeroConeRotationCalculator();
+   }
+
+   /**
+    * Determines which inverse dynamics calculator is used in {@link WholeBodyInverseDynamicsSolver}.
+    * <p>
+    * If true, {@link DynamicsMatrixCalculator} is used.
+    * <p>
+    * If false, {@link InverseDynamicsCalculator} is used.
+    */
+   default boolean useDynamicMatrixCalculatorForInverseDynamics()
+   {
+      return false;
+   }
+
+   /**
+    * If true, {@link WholeBodyInverseDynamicsSolver} will update the {@link DynamicsMatrixCalculator}.
+    */
+   default boolean updateDynamicMatrixCalculator()
+   {
+      return useDynamicMatrixCalculatorForInverseDynamics() || areJointTorquesMinimized();
    }
 }
