@@ -54,6 +54,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final NativeQPInputTypeB directMotionQPInput;
    private final NativeQPInputTypeA motionQPInput;
    private final NativeQPInputTypeA rhoQPInput;
+   private final NativeQPInputTypeA motionAndRhoQPInput;
    private final NativeQPVariableSubstitution motionQPVariableSubstitution;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
@@ -128,6 +129,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       motionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       directMotionQPInput = new NativeQPInputTypeB(numberOfDoFs);
       rhoQPInput = new NativeQPInputTypeA(rhoSize);
+      motionAndRhoQPInput = new NativeQPInputTypeA(numberOfDoFs + rhoSize);
       motionQPVariableSubstitution = new NativeQPVariableSubstitution();
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
@@ -437,11 +439,15 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public void submitJointTorqueCommand(JointTorqueCommand command)
    {
-      qpSolver.addJointTorqueObjective(command,
-                                       dynamicsMatrixCalculator.getBodyMassMatrix(),
-                                       dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
-                                       dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix(),
-                                       jointIndexHandler);
+//      qpSolver.addJointTorqueObjective(command,
+//                                       dynamicsMatrixCalculator.getBodyMassMatrix(),
+//                                       dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
+//                                       dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix(),
+//                                       jointIndexHandler);
+
+      boolean success = motionQPInputCalculator.convertJointTorqueCommand(command, motionAndRhoQPInput);
+      if (success)
+         qpSolver.addMotionAndRhoInput(motionAndRhoQPInput);
    }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)

@@ -1096,6 +1096,18 @@ public class MotionQPInputCalculator
       return true;
    }
 
+   public boolean convertJointTorqueCommand(JointTorqueCommand jointTorqueCommand, NativeQPInputTypeA qpInputTypeAToPack)
+   {
+      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(jointTorqueCommand.getJoints());
+
+      if (taskSize == 0)
+         return false;
+
+      // TODO
+
+      return true;
+   }
+
    private void recordTaskJacobian(NativeMatrix taskJacobian)
    {
       int taskSize = taskJacobian.getNumRows();
