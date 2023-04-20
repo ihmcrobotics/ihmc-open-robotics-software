@@ -1095,6 +1095,18 @@ public class MotionQPInputCalculator
       return true;
    }
 
+   /**
+    * Sets up an objective for matching a desired set of joint torques. <br>
+    * Given a desired torque vector tau_d, this task is: <br>
+    *
+    * [M (-J^T beta)] [q_dd^T rho^T]^T = tau_d - (Cq_d + G)  <br>
+    *
+    * @param jointTorqueCommand desired joint torque command to convert
+    * @param qpInputToPack the result of the conversion.
+    * @param bodyMassMatrix, M in the above equation
+    * @param bodyContactForceJacobianTranspose, J^T beta in the above equation
+    * @param bodyGravityCoriolisMatrix, {Cq_d + G} in the above equation
+    */
    public boolean convertJointTorqueCommand(JointTorqueCommand jointTorqueCommand,
                                             NativeQPInputTypeA qpInputToPack,
                                             DMatrixRMaj bodyMassMatrix,
@@ -1125,12 +1137,15 @@ public class MotionQPInputCalculator
             int orderedDofIndex = jointIndices[dof];
             double weight = jointTorqueCommand.getWeight(jointIndex);
 
+            // Pack the corresponding row of body mass matrix M
             qpInputToPack.taskJacobian.insert(bodyMassMatrix, orderedDofIndex, orderedDofIndex + 1, 0, numberOfDoFs, row, 0);
 
+            // Pack the corresponding row of contact jacobian {J^T beta}
             int rhoSize = bodyContactForceJacobianTranspose.getNumCols();
             if (rhoSize > 0)
                qpInputToPack.taskJacobian.insertScaled(bodyContactForceJacobianTranspose, orderedDofIndex, orderedDofIndex + 1, 0, rhoSize, row, numberOfDoFs, -1.0);
 
+            // Pack the corresponding row of the objective, {tau_d - Cq_d - G}
             qpInputToPack.taskObjective.set(row, 0, desiredTorque.get(dof, 0) - bodyGravityCoriolisMatrix.get(orderedDofIndex, 0));
             qpInputToPack.taskWeightMatrix.set(row, row, weight);
             row++;
