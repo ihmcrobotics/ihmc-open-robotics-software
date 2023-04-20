@@ -5,6 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.InverseDynamicsConstraintDomain;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -37,6 +38,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.InverseDynamicsConstraintDomain.*;
 
 public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
@@ -332,38 +335,38 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    {
       boolean success = motionQPInputCalculator.computePrivilegedJointAccelerations(motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addQPInput(motionQPInput, MOTION);
    }
 
    private void setupRhoTasks()
    {
       DMatrixRMaj rhoPrevious = wrenchMatrixCalculator.getRhoPreviousMatrix();
       DMatrixRMaj rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
-      qpSolver.addRhoTask(rhoPrevious, rhoRateWeight);
+      qpSolver.addIdentityJacobianTask(rhoPrevious, rhoRateWeight, RHO);
 
       rhoQPInput.getTaskWeightMatrix().set(wrenchMatrixCalculator.getCoPRegularizationWeight());
       rhoQPInput.getTaskJacobian().set(wrenchMatrixCalculator.getCoPRegularizationJacobian());
       rhoQPInput.getTaskObjective().set(wrenchMatrixCalculator.getCoPRegularizationObjective());
       rhoQPInput.setUseWeightScalar(false);
-      qpSolver.addRhoInput(rhoQPInput);
+      qpSolver.addQPInput(rhoQPInput, RHO);
 
       rhoQPInput.getTaskWeightMatrix().set(wrenchMatrixCalculator.getCoPRateRegularizationWeight());
       rhoQPInput.getTaskJacobian().set(wrenchMatrixCalculator.getCoPRateRegularizationJacobian());
       rhoQPInput.getTaskObjective().set(wrenchMatrixCalculator.getCoPRateRegularizationObjective());
       rhoQPInput.setUseWeightScalar(false);
-      qpSolver.addRhoInput(rhoQPInput);
+      qpSolver.addQPInput(rhoQPInput, RHO);
 
       // The wrench matrix calculator holds on to the command until all inverse dynamics commands are received since the
       // contact state may yet change and the rho Jacobians need to be computed for these inputs.
       // see also wrenchMatrixCalculator#submitWrenchCommand()
       while (wrenchMatrixCalculator.getContactWrenchInput(rhoQPInput))
       {
-         qpSolver.addRhoInput(rhoQPInput);
+         qpSolver.addQPInput(rhoQPInput, RHO);
       }
 
       while (wrenchMatrixCalculator.getNextCenterOfPressureInput(rhoQPInput))
       {
-         qpSolver.addRhoInput(rhoQPInput);
+         qpSolver.addQPInput(rhoQPInput, RHO);
       }
    }
 
@@ -400,14 +403,14 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    {
       boolean success = motionQPInputCalculator.convertQPObjectiveCommand(command, motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addQPInput(motionQPInput, MOTION);
    }
 
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
       boolean success = motionQPInputCalculator.convertSpatialAccelerationCommand(command, motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addQPInput(motionQPInput, MOTION);
    }
 
    public void submitJointspaceAccelerationCommand(JointspaceAccelerationCommand command)
@@ -416,7 +419,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       {
          boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, motionQPInput);
          if (success)
-            qpSolver.addMotionInput(motionQPInput);
+            qpSolver.addQPInput(motionQPInput, MOTION);
       }
       else
       {
@@ -445,21 +448,21 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
                                                                           dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),
                                                                           dynamicsMatrixCalculator.getBodyGravityCoriolisMatrix());
       if (success)
-         qpSolver.addMotionAndRhoInput(motionAndRhoQPInput);
+         qpSolver.addQPInput(motionAndRhoQPInput, MOTION_AND_RHO);
    }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       boolean success = motionQPInputCalculator.convertMomentumRateCommand(command, motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addQPInput(motionQPInput, MOTION);
    }
 
    public void submitLinearMomentumRateCostCommand(LinearMomentumRateCostCommand command)
    {
       boolean success = motionQPInputCalculator.convertLinearMomentumRateCostCommand(command, directMotionQPInput);
       if (success)
-         qpSolver.addMotionInput(directMotionQPInput);
+         qpSolver.addQPInput(directMotionQPInput, MOTION);
    }
 
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
