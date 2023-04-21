@@ -18,9 +18,14 @@ public class ArUcoDetectableObject extends KnownRigidModelSceneObject
    /**
     * Give the marker info directly from code.
     */
-   public ArUcoDetectableObject(String name, int markerID, double markerSize, RigidBodyTransform markerTransformToParent, String visualModelFilePath)
+   public ArUcoDetectableObject(String name,
+                                int markerID,
+                                double markerSize,
+                                RigidBodyTransform markerTransformToParent,
+                                String visualModelFilePath,
+                                RigidBodyTransform visualModelToNodeFrameTransform)
    {
-      super(name, visualModelFilePath);
+      super(name, visualModelFilePath, visualModelToNodeFrameTransform);
 
       this.markerID = markerID;
       this.markerSize = markerSize;
@@ -30,9 +35,9 @@ public class ArUcoDetectableObject extends KnownRigidModelSceneObject
    /**
     * Loads info from StoredPropertySet with name as suffix
     */
-   public ArUcoDetectableObject(String name, String visualModelFilePath)
+   public ArUcoDetectableObject(String name, String visualModelFilePath, RigidBodyTransform visualModelToNodeFrameTransform)
    {
-      super(name, visualModelFilePath);
+      super(name, visualModelFilePath, visualModelToNodeFrameTransform);
 
       ArUcoMarkerInfo arUcoMarkerInfo = new ArUcoMarkerInfo(name);
       markerID = arUcoMarkerInfo.getMarkerID();

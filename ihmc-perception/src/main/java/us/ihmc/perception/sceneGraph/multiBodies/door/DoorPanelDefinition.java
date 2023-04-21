@@ -44,7 +44,7 @@ public class DoorPanelDefinition extends RigidBodyDefinition
       getInertiaPose().getRotation().setToZero();
 
       VisualDefinition modelVisualDefinition = new VisualDefinition();
-      ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition("environmentObjects/door/doorPanel/DoorPanel.g3dj");
+      ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition(DoorSceneObjects.DOOR_PANEL_VISUAL_MODEL_FILE_PATH);
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(modelVisualDefinition);
 
