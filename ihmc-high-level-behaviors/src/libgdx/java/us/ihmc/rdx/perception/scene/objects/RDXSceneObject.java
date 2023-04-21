@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.scene.SceneObject;
+import us.ihmc.perception.scene.KnownRigidModelSceneObject;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -24,23 +24,25 @@ import java.util.Set;
  * TODO: Add pose "override", via right click context menu, and gizmo.
  *   Possibly do this in a higher level class or class that extends this.
  */
-public class RDXSceneObject extends SceneObject
+public class RDXSceneObject
 {
    private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
+   private final KnownRigidModelSceneObject knownRigidModelSceneObject;
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
    private final ReferenceFrame referenceFrame;
    private boolean showing = false;
    private final RDXModelInstance modelInstance;
 
-   public RDXSceneObject(String modelName, String frameName)
+   public RDXSceneObject(KnownRigidModelSceneObject knownRigidModelSceneObject)
    {
-      super(frameName);
+      this.knownRigidModelSceneObject = knownRigidModelSceneObject;
 
-      modelInstance = new RDXModelInstance(RDXModelLoader.load(modelName));
+      modelInstance = new RDXModelInstance(RDXModelLoader.load(knownRigidModelSceneObject.getVisualModelFilePath()));
       modelInstance.setColor(GHOST_COLOR);
 
-      referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(frameName, ReferenceFrame.getWorldFrame(), transformToParent);
+      referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(knownRigidModelSceneObject.getName(),
+                                                                                       ReferenceFrame.getWorldFrame(), transformToParent);
       referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
    }
 
