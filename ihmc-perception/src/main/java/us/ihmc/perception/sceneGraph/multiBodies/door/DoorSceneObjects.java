@@ -52,15 +52,35 @@ public class DoorSceneObjects
       EuclidCoreMissingTools.setYawPitchRollDegrees(PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER.getRotation(), 90.0, 0.0, 90.0);
    }
 
+   // TODO: These transforms need to be verified.
+   public static final String DOOR_PANEL_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorPanel/DoorPanel.g3dj";
+   public static final RigidBodyTransform PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final String DOOR_FRAME_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorPanel/DoorFrame.g3dj";
+   public static final RigidBodyTransform PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final String DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH = "environmentObjects/door/doorPanel/DoorLeverHandle.g3dj";
+   public static final RigidBodyTransform PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+   public static final RigidBodyTransform PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
    public static ArUcoDetectableObject createPullDoorPanel()
    {
-      return new ArUcoDetectableObject("PullDoorPanel", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_PANEL_TRANSFORM_TO_MARKER,
-                                       );
+      return new ArUcoDetectableObject("PullDoorPanel",
+                                       PULL_DOOR_MARKER_ID,
+                                       DOOR_ARUCO_MARKER_WIDTH,
+                                       PULL_DOOR_PANEL_TRANSFORM_TO_MARKER,
+                                       DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
+                                       PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 
    public static ArUcoDetectableObject createPushDoorPanel()
    {
-      return new ArUcoDetectableObject("PushDoorPanel", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER);
+      return new ArUcoDetectableObject("PushDoorPanel",
+                                       PUSH_DOOR_MARKER_ID,
+                                       DOOR_ARUCO_MARKER_WIDTH,
+                                       PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER,
+                                       DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
+                                       PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 
    public static StaticArUcoRelativeDetectableSceneObject createPullDoorFrame()
@@ -69,6 +89,8 @@ public class DoorSceneObjects
                                                           PULL_DOOR_MARKER_ID,
                                                           DOOR_ARUCO_MARKER_WIDTH,
                                                           PULL_DOOR_FRAME_TRANSFORM_TO_MARKER,
+                                                          DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
+                                                          PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                           DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
    }
 
@@ -78,16 +100,28 @@ public class DoorSceneObjects
                                                           PUSH_DOOR_MARKER_ID,
                                                           DOOR_ARUCO_MARKER_WIDTH,
                                                           PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER,
+                                                          DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
+                                                          PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                           DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
    }
 
    public static ArUcoDetectableObject createPushDoorLeverHandle()
    {
-      return new ArUcoDetectableObject("PushDoorLeverHandle", PUSH_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER);
+      return new ArUcoDetectableObject("PushDoorLeverHandle",
+                                       PUSH_DOOR_MARKER_ID,
+                                       DOOR_ARUCO_MARKER_WIDTH,
+                                       PUSH_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER,
+                                       DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                       PUSH_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 
    public static ArUcoDetectableObject createPullDoorLeverHandle()
    {
-      return new ArUcoDetectableObject("PullDoorLeverHandle", PULL_DOOR_MARKER_ID, DOOR_ARUCO_MARKER_WIDTH, PULL_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER);
+      return new ArUcoDetectableObject("PullDoorLeverHandle",
+                                       PULL_DOOR_MARKER_ID,
+                                       DOOR_ARUCO_MARKER_WIDTH,
+                                       PULL_DOOR_LEVER_HANDLE_TRANSFORM_TO_MARKER,
+                                       DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                       PULL_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 }

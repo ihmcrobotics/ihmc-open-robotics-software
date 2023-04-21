@@ -19,13 +19,20 @@ public class BasicSceneObjects
          new Point3D(0.07, 0.15, 0.17)
    );
    public static final String BOX_VISUAL_MODEL_FILE_PATH = "environmentObjects/box/box.g3dj";
+   public static final RigidBodyTransform BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    // TODO: Get soup can model from Arghya
    public static final String CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH = "environmentObjects/box/box.g3dj";
+   public static final RigidBodyTransform CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    public static ArUcoDetectableObject createBox()
    {
-      return new ArUcoDetectableObject("Box", BOX_MARKER_ID, BOX_MARKER_WIDTH, BOX_TRANSFORM_TO_MARKER, BOX_VISUAL_MODEL_FILE_PATH);
+      return new ArUcoDetectableObject("Box",
+                                       BOX_MARKER_ID,
+                                       BOX_MARKER_WIDTH,
+                                       BOX_TRANSFORM_TO_MARKER,
+                                       BOX_VISUAL_MODEL_FILE_PATH,
+                                       BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 
    /**
@@ -34,6 +41,11 @@ public class BasicSceneObjects
     */
    public static ArUcoDetectableObject createCanOfSoup()
    {
-      return new ArUcoDetectableObject("CanOfSoup", 4, MARKER_WIDTH, new RigidBodyTransform(), CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH);
+      return new ArUcoDetectableObject("CanOfSoup",
+                                       4,
+                                       MARKER_WIDTH,
+                                       new RigidBodyTransform(),
+                                       CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH,
+                                       CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
    }
 }

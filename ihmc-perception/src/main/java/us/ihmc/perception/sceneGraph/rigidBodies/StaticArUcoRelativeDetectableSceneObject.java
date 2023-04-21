@@ -26,9 +26,10 @@ public class StaticArUcoRelativeDetectableSceneObject extends ArUcoDetectableObj
                                                    double markerSize,
                                                    RigidBodyTransform markerTransformToParent,
                                                    String visualModelFilePath,
+                                                   RigidBodyTransform visualModelToNodeFrameTransform,
                                                    double maximumDistanceToLockIn)
    {
-      super(name, markerID, markerSize, markerTransformToParent, visualModelFilePath);
+      super(name, markerID, markerSize, markerTransformToParent, visualModelFilePath, visualModelToNodeFrameTransform);
       this.maximumDistanceToLockIn = maximumDistanceToLockIn;
    }
 
