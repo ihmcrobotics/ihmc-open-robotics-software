@@ -8,7 +8,7 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
  * A scene object detectable via an ArUco marker.
  * Loads a stored property set for the marker information.
  */
-public class ArUcoDetectableObject extends DetectableSceneObject
+public class ArUcoDetectableObject extends KnownRigidModelSceneObject
 {
    private final int markerID;
    private final double markerSize;
@@ -17,9 +17,9 @@ public class ArUcoDetectableObject extends DetectableSceneObject
    /**
     * Give the marker info directly from code.
     */
-   public ArUcoDetectableObject(String name, int markerID, double markerSize, RigidBodyTransform markerTransformToParent)
+   public ArUcoDetectableObject(String name, int markerID, double markerSize, RigidBodyTransform markerTransformToParent, String visualModelFilePath)
    {
-      super(name);
+      super(name, visualModelFilePath);
 
       this.markerID = markerID;
       this.markerSize = markerSize;
@@ -29,9 +29,9 @@ public class ArUcoDetectableObject extends DetectableSceneObject
    /**
     * Loads info from StoredPropertySet with name as suffix
     */
-   public ArUcoDetectableObject(String name)
+   public ArUcoDetectableObject(String name, String visualModelFilePath)
    {
-      super(name);
+      super(name, visualModelFilePath);
 
       ArUcoMarkerInfo arUcoMarkerInfo = new ArUcoMarkerInfo(name);
       markerID = arUcoMarkerInfo.getMarkerID();
