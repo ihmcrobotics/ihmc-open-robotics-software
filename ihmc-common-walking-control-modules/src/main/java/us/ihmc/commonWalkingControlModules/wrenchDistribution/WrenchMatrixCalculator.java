@@ -572,4 +572,9 @@ public class WrenchMatrixCalculator
    {
       return copTaskSize;
    }
+
+   public PlaneContactStateToWrenchMatrixHelper getPlaneContactStateToWrenchMatrixHelper(RigidBodyBasics rigidBody)
+   {
+      return planeContactStateToWrenchMatrixHelpers.get(rigidBody);
+   }
 }
