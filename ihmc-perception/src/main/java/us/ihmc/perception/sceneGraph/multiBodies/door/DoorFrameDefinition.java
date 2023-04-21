@@ -1,4 +1,4 @@
-package us.ihmc.perception.multiBodies.door;
+package us.ihmc.perception.sceneGraph.multiBodies.door;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;

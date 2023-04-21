@@ -1,4 +1,4 @@
-package us.ihmc.perception.scene;
+package us.ihmc.perception.sceneGraph;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 

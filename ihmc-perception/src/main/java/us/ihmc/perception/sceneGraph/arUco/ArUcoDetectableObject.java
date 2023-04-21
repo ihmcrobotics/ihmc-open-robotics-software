@@ -1,7 +1,8 @@
-package us.ihmc.perception.scene;
+package us.ihmc.perception.sceneGraph.arUco;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.arUco.ArUcoMarkerInfo;
+import us.ihmc.perception.sceneGraph.KnownRigidModelSceneObject;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**

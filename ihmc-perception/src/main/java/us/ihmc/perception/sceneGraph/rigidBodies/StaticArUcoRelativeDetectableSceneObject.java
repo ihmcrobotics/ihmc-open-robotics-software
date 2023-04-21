@@ -1,7 +1,7 @@
-package us.ihmc.perception.objects;
+package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.scene.ArUcoDetectableObject;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableObject;
 
 /**
  * This object stays in the same spot relative to a detected ArUco marker.
@@ -25,9 +25,10 @@ public class StaticArUcoRelativeDetectableSceneObject extends ArUcoDetectableObj
                                                    int markerID,
                                                    double markerSize,
                                                    RigidBodyTransform markerTransformToParent,
+                                                   String visualModelFilePath,
                                                    double maximumDistanceToLockIn)
    {
-      super(name, markerID, markerSize, markerTransformToParent);
+      super(name, markerID, markerSize, markerTransformToParent, visualModelFilePath);
       this.maximumDistanceToLockIn = maximumDistanceToLockIn;
    }
 

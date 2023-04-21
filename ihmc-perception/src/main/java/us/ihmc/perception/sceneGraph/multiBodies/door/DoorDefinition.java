@@ -1,10 +1,9 @@
-package us.ihmc.perception.multiBodies.door;
+package us.ihmc.perception.sceneGraph.multiBodies.door;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.perception.objects.DoorModelParameters;
 import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -16,6 +15,9 @@ import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 
 /**
  * SCS 2 definition of the door we have in the lab.
+ *
+ * It is a push and pull door depending on the side you're on.
+ *
  * TODO: It's decently accurate, but still missing some features like:
  *   - Accurate hinge axis
  *   - Lever handle latch
