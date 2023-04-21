@@ -409,12 +409,17 @@ public class RDXBlackflyCalibrationSuite
                                  opencv_core.BORDER_CONSTANT,
                                  undistortionRemapBorderValue);
 
-            newCameraMatrixEstimate.copyTo(openCVArUcoMarkerDetection.getCameraMatrix());
-            openCVArUcoMarkerDetection.update(texture.getRGBA8Image());
+            synchronized (openCVArUcoMarkerDetection.getSyncObject())
+            {
+               newCameraMatrixEstimate.copyTo(openCVArUcoMarkerDetection.getCameraMatrix());
+               openCVArUcoMarkerDetection.update(texture.getRGBA8Image());
 
-            opencv_imgproc.cvtColor(texture.getRGBA8Mat(), spareRGBMatForArUcoDrawing, opencv_imgproc.COLOR_RGBA2RGB);
-            openCVArUcoMarkerDetection.drawDetectedMarkers(spareRGBMatForArUcoDrawing);
-            openCVArUcoMarkerDetection.drawRejectedPoints(spareRGBMatForArUcoDrawing);
+               opencv_imgproc.cvtColor(texture.getRGBA8Mat(), spareRGBMatForArUcoDrawing, opencv_imgproc.COLOR_RGBA2RGB);
+
+               openCVArUcoMarkerDetection.drawDetectedMarkers(spareRGBMatForArUcoDrawing);
+               openCVArUcoMarkerDetection.drawRejectedPoints(spareRGBMatForArUcoDrawing);
+            }
+
             opencv_imgproc.cvtColor(spareRGBMatForArUcoDrawing, texture.getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA);
 
             cameraMatrixForUndistortion.swap();
