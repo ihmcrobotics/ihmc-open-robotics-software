@@ -1,4 +1,4 @@
-package us.ihmc.rdx.perception.scene;
+package us.ihmc.rdx.perception.sceneGraph;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -12,7 +12,6 @@ import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.scene.objects.RDXPredefinedRigidBodySceneNode;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
 import java.util.ArrayList;
@@ -21,16 +20,16 @@ import java.util.Set;
 /**
  * Updates and renders perception scene graph nodes.
  */
-public class RDXPerceptionSceneUI
+public class RDXPerceptionSceneGraphUI
 {
    private final PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private final ROS2DetectableSceneNodesSubscription detectableSceneNodesSubscription;
-   private final ImGuiPanel panel = new ImGuiPanel("Objects Perception UI", this::renderImGuiWidgets);
+   private final ImGuiPanel panel = new ImGuiPanel("Perception Scene Graph UI", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
-   private final ArrayList<RDXPredefinedRigidBodySceneNode> sceneObjects = new ArrayList<>();
+   private final ArrayList<RDXPredefinedRigidBodySceneNode> predefinedRigidBodySceneNodes = new ArrayList<>();
 
-   public RDXPerceptionSceneUI(PredefinedSceneNodeLibrary predefinedSceneNodeLibrary, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public RDXPerceptionSceneGraphUI(PredefinedSceneNodeLibrary predefinedSceneNodeLibrary, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
 
@@ -42,7 +41,7 @@ public class RDXPerceptionSceneUI
          if (detectableSceneNode instanceof PredefinedRigidBodySceneNode predefinedRigidBodySceneNode)
          {
             RDXPredefinedRigidBodySceneNode rdxPredefinedRigidBodySceneNode = new RDXPredefinedRigidBodySceneNode(predefinedRigidBodySceneNode);
-            sceneObjects.add(rdxPredefinedRigidBodySceneNode);
+            predefinedRigidBodySceneNodes.add(rdxPredefinedRigidBodySceneNode);
          }
       }
    }
@@ -51,7 +50,7 @@ public class RDXPerceptionSceneUI
    {
       detectableSceneNodesSubscription.update();
 
-      for (RDXPredefinedRigidBodySceneNode sceneObject : sceneObjects)
+      for (RDXPredefinedRigidBodySceneNode sceneObject : predefinedRigidBodySceneNodes)
       {
          sceneObject.update();
       }
@@ -66,7 +65,7 @@ public class RDXPerceptionSceneUI
    {
       if (showGraphics.get())
       {
-         for (RDXPredefinedRigidBodySceneNode sceneObject : sceneObjects)
+         for (RDXPredefinedRigidBodySceneNode sceneObject : predefinedRigidBodySceneNodes)
          {
             sceneObject.getRenderables(renderables, pool, sceneLevels);
          }

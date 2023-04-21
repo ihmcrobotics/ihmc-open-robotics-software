@@ -1,4 +1,4 @@
-package us.ihmc.rdx.perception.scene.objects;
+package us.ihmc.rdx.perception.sceneGraph;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
