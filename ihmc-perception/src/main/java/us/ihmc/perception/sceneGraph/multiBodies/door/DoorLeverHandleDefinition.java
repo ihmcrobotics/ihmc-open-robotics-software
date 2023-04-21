@@ -39,12 +39,13 @@ public class DoorLeverHandleDefinition extends RigidBodyDefinition
       getInertiaPose().getRotation().setToZero();
 
       VisualDefinition modelVisualDefinition = new VisualDefinition();
-      ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition("environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj");
+      ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH);
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(modelVisualDefinition);
 
       VisualDefinition modelVisualDefinitionOtherSide = new VisualDefinition();
-      ModelFileGeometryDefinition geometryDefinitionOtherSide = new ModelFileGeometryDefinition("environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj");
+      ModelFileGeometryDefinition geometryDefinitionOtherSide
+            = new ModelFileGeometryDefinition(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH);
       modelVisualDefinitionOtherSide.setGeometryDefinition(geometryDefinitionOtherSide);
       modelVisualDefinitionOtherSide.getOriginPose().prependPitchRotation(Math.PI);
       modelVisualDefinitionOtherSide.getOriginPose().getTranslation().setX(0.0508);

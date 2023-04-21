@@ -34,7 +34,7 @@ public class DoorFrameDefinition extends RigidBodyDefinition
       getInertiaPose().getRotation().setToZero();
 
       VisualDefinition frameModelVisualDefinition = new VisualDefinition();
-      ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition("environmentObjects/door/doorFrame/DoorFrame.g3dj");
+      ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition(DoorSceneNodeDefinitions.DOOR_FRAME_VISUAL_MODEL_FILE_PATH);
       frameModelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(frameModelVisualDefinition);
 
