@@ -437,8 +437,8 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
          if (!setCommand)
          {
             centerOfPressureCommand.setContactingRigidBody(null);
-//            centerOfPressureCommand.setDesiredCoP(desiredCoP);
-            centerOfPressureCommand.setWeight(midFootZUpFrame, 0.0, 0.0);//centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
+            centerOfPressureCommand.setDesiredCoP(desiredCoP);
+            centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
          }
       }
       else
