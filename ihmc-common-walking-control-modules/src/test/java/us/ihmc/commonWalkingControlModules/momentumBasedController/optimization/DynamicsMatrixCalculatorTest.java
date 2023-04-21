@@ -429,7 +429,7 @@ public class DynamicsMatrixCalculatorTest
       Assert.assertTrue(!MatrixTools.isEmptyMatrix(matrixSolution));
    }
 
-   private class GeneralMomentumOptimizationSettings implements ControllerCoreOptimizationSettings
+   public static class GeneralMomentumOptimizationSettings implements ControllerCoreOptimizationSettings
    {
 
       // defaults for unscaled model:
