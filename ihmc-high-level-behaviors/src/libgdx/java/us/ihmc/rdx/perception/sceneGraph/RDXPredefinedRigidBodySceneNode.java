@@ -50,7 +50,7 @@ public class RDXPredefinedRigidBodySceneNode
 
       referenceFrameGraphic.setToReferenceFrame(predefinedRigidBodySceneNode.getReferenceFrame());
 
-      nodePose.setIncludingFrame(predefinedRigidBodySceneNode.getReferenceFrame(), predefinedRigidBodySceneNode.getTransformToParent());
+      nodePose.setToZero(predefinedRigidBodySceneNode.getReferenceFrame());
       nodePose.changeFrame(ReferenceFrame.getWorldFrame());
       nodePose.get(nodeToWorldTransform);
       modelInstance.setTransformToWorldFrame(nodeToWorldTransform);
