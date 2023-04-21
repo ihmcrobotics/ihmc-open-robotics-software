@@ -23,6 +23,11 @@ public class ReferenceFrameLibrary
       referenceFrames.add(referenceFrame);
    }
 
+   public void addAll(List<ReferenceFrame> referenceFrames)
+   {
+      referenceFrames.addAll(referenceFrames);
+   }
+
    public void build()
    {
       referenceFrameNames = new String[referenceFrames.size()];

@@ -24,6 +24,7 @@ public class ArUcoSceneTools
                                          arUcoDetectableNode.getMarkerSize(),
                                          arUcoDetectableNode.getReferenceFrame().getParent(),
                                          arUcoDetectableNode.getTransformToParent());
+            arUcoDetectableNode.getReferenceFrame().update();
 
             StaticArUcoRelativeDetectableSceneNode staticArUcoRelativeDetectableSceneNode
                   = predefinedSceneNodeLibrary.getStaticArUcoRelativeDetectableNodes().get(arUcoDetectableNode.getMarkerID());
@@ -38,6 +39,7 @@ public class ArUcoSceneTools
                                                staticArUcoRelativeDetectableSceneNode.getMarkerSize(),
                                                staticArUcoRelativeDetectableSceneNode.getReferenceFrame().getParent(),
                                                staticArUcoRelativeDetectableSceneNode.getTransformToParent());
+                  staticArUcoRelativeDetectableSceneNode.getReferenceFrame().update();
                   staticArUcoRelativeDetectableSceneNode.lockInPose();
                }
             }

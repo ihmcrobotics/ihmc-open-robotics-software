@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
@@ -32,10 +33,11 @@ public class PredefinedSceneNodeLibrary
    private final ArUcoDetectableNode box;
    private final ArUcoDetectableNode canOfSoup;
 
-   private final HashSet<DetectableSceneNode> detectableSceneNodes = new HashSet<>();
-   private final HashSet<ArUcoDetectableNode> arUcoDetectableNodes = new HashSet<>();
+   private final ArrayList<DetectableSceneNode> detectableSceneNodes = new ArrayList<>();
+   private final ArrayList<ArUcoDetectableNode> arUcoDetectableNodes = new ArrayList<>();
    private final HashMap<Integer, StaticArUcoRelativeDetectableSceneNode> staticArUcoRelativeDetectableNodes = new HashMap<>();
    private final TIntDoubleHashMap arUcoMarkerIDsToSizes = new TIntDoubleHashMap();
+   private final List<ReferenceFrame> referenceFrames = new ArrayList<>();
 
    public static PredefinedSceneNodeLibrary defaultObjects()
    {
@@ -71,23 +73,29 @@ public class PredefinedSceneNodeLibrary
 
    public void registerArUcoDetectableSceneNode(ArUcoDetectableNode arUcoDetectableNode)
    {
-      detectableSceneNodes.add(arUcoDetectableNode);
+      registerDetectableSceneNode(arUcoDetectableNode);
       arUcoDetectableNodes.add(arUcoDetectableNode);
       arUcoMarkerIDsToSizes.put(arUcoDetectableNode.getMarkerID(), arUcoDetectableNode.getMarkerSize());
    }
 
    public void registerStaticArUcoRelativeDetectableSceneNode(StaticArUcoRelativeDetectableSceneNode staticArUcoRelativeDetectableSceneNode)
    {
-      detectableSceneNodes.add(staticArUcoRelativeDetectableSceneNode);
+      registerDetectableSceneNode(staticArUcoRelativeDetectableSceneNode);
       staticArUcoRelativeDetectableNodes.put(staticArUcoRelativeDetectableSceneNode.getMarkerID(), staticArUcoRelativeDetectableSceneNode);
    }
 
-   public HashSet<DetectableSceneNode> getDetectableSceneNodes()
+   public void registerDetectableSceneNode(DetectableSceneNode detectableSceneNode)
+   {
+      detectableSceneNodes.add(detectableSceneNode);
+      referenceFrames.add(detectableSceneNode.getReferenceFrame());
+   }
+
+   public List<DetectableSceneNode> getDetectableSceneNodes()
    {
       return detectableSceneNodes;
    }
 
-   public Set<ArUcoDetectableNode> getArUcoDetectableNodes()
+   public List<ArUcoDetectableNode> getArUcoDetectableNodes()
    {
       return arUcoDetectableNodes;
    }
@@ -100,5 +108,10 @@ public class PredefinedSceneNodeLibrary
    public TIntDoubleHashMap getArUcoMarkerIDsToSizes()
    {
       return arUcoMarkerIDsToSizes;
+   }
+
+   public List<ReferenceFrame> getReferenceFrames()
+   {
+      return referenceFrames;
    }
 }

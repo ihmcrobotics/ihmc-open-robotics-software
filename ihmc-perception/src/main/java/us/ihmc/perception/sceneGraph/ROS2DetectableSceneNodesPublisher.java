@@ -14,7 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
  * reduce the complexity of logic in figuring out when objects are currently under
  * consideraion.
  */
-public class ROS2DetectableSceneObjectsPublisher
+public class ROS2DetectableSceneNodesPublisher
 {
    private final DetectableSceneNodesMessage detectableSceneObjectsMessage = new DetectableSceneNodesMessage();
    private final FramePose3D sceneObjectPose = new FramePose3D();
@@ -33,6 +33,6 @@ public class ROS2DetectableSceneObjectsPublisher
          sceneObjectPose.get(sceneObjectToWorldTransform);
          MessageTools.toMessage(sceneObjectToWorldTransform, detectableSceneNodeMessage.getTransformToWorld());
       }
-      ros2PublishSubscribeAPI.publish(SceneObjectAPI.DETECTABLE_SCENE_OBJECTS, detectableSceneObjectsMessage);
+      ros2PublishSubscribeAPI.publish(SceneGraphAPI.DETECTABLE_SCENE_NODES, detectableSceneObjectsMessage);
    }
 }

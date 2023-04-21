@@ -29,7 +29,7 @@ import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
-import us.ihmc.perception.sceneGraph.ROS2DetectableSceneObjectsPublisher;
+import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesPublisher;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
@@ -84,7 +84,7 @@ public class DualBlackflyCamera
    private PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
-   private final ROS2DetectableSceneObjectsPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneObjectsPublisher();
+   private final ROS2DetectableSceneNodesPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneNodesPublisher();
    private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
    private ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
    private ROS2TunedRigidBodyTransform remoteTunableCameraTransform;
