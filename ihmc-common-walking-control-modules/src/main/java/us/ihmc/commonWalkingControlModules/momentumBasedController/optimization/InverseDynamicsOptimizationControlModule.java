@@ -66,6 +66,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final List<KinematicLoopFunction> kinematicLoopFunctions;
    private final int numberOfDoFs;
    private final int rhoSize;
+   private final boolean hasFloatingBase;
 
    private final OneDoFJointBasics[] oneDoFJoints;
    private final DMatrixRMaj qDDotMinMatrix, qDDotMaxMatrix;
@@ -158,7 +159,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
       momentumModuleSolution = new MomentumModuleSolution();
 
-      boolean hasFloatingBase = toolbox.getRootJoint() != null;
+      hasFloatingBase = toolbox.getRootJoint() != null;
       NativeActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
       double dt = toolbox.getControlDT();
       qpSolver = new InverseDynamicsQPSolver(activeSetQPSolver, numberOfDoFs, rhoSize, hasFloatingBase, dt, registry);
@@ -442,6 +443,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    public void submitJointTorqueCommand(JointTorqueCommand command)
    {
       boolean success = motionQPInputCalculator.convertJointTorqueCommand(command,
+                                                                          hasFloatingBase,
                                                                           motionAndRhoQPInput,
                                                                           dynamicsMatrixCalculator.getBodyMassMatrix(),
                                                                           dynamicsMatrixCalculator.getBodyContactForceJacobianTranspose(),

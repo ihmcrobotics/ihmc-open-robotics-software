@@ -1102,12 +1102,14 @@ public class MotionQPInputCalculator
     * [M (-J^T beta)] [q_dd^T rho^T]^T = tau_d - (Cq_d + G)  <br>
     *
     * @param jointTorqueCommand desired joint torque command to convert
+    * @param hasFloatingBase whether the robot has a floating base, used for indexing the mass matrix
     * @param qpInputToPack the result of the conversion.
     * @param bodyMassMatrix, M in the above equation
     * @param bodyContactForceJacobianTranspose, J^T beta in the above equation
     * @param bodyGravityCoriolisMatrix, {Cq_d + G} in the above equation
     */
    public boolean convertJointTorqueCommand(JointTorqueCommand jointTorqueCommand,
+                                            boolean hasFloatingBase,
                                             NativeQPInputTypeA qpInputToPack,
                                             DMatrixRMaj bodyMassMatrix,
                                             DMatrixRMaj bodyContactForceJacobianTranspose,
@@ -1134,19 +1136,19 @@ public class MotionQPInputCalculator
 
          for (int dof = 0; dof < joint.getDegreesOfFreedom(); dof++)
          {
-            int orderedDofIndex = jointIndices[dof];
+            int bodyDofIndex = jointIndices[dof] - (hasFloatingBase ? 6 : 0);
             double weight = jointTorqueCommand.getWeight(jointIndex);
 
             // Pack the corresponding row of body mass matrix M
-            qpInputToPack.taskJacobian.insert(bodyMassMatrix, orderedDofIndex, orderedDofIndex + 1, 0, numberOfDoFs, row, 0);
+            qpInputToPack.taskJacobian.insert(bodyMassMatrix, bodyDofIndex, bodyDofIndex + 1, 0, numberOfDoFs, row, 0);
 
             // Pack the corresponding row of contact jacobian {J^T beta}
             int rhoSize = bodyContactForceJacobianTranspose.getNumCols();
             if (rhoSize > 0)
-               qpInputToPack.taskJacobian.insertScaled(bodyContactForceJacobianTranspose, orderedDofIndex, orderedDofIndex + 1, 0, rhoSize, row, numberOfDoFs, -1.0);
+               qpInputToPack.taskJacobian.insert(bodyContactForceJacobianTranspose, bodyDofIndex, bodyDofIndex + 1, 0, rhoSize, row, numberOfDoFs);
 
             // Pack the corresponding row of the objective, {tau_d - Cq_d - G}
-            qpInputToPack.taskObjective.set(row, 0, desiredTorque.get(dof, 0) - bodyGravityCoriolisMatrix.get(orderedDofIndex, 0));
+            qpInputToPack.taskObjective.set(row, 0, desiredTorque.get(dof, 0) - bodyGravityCoriolisMatrix.get(bodyDofIndex, 0));
             qpInputToPack.taskWeightMatrix.set(row, row, weight);
             row++;
          }
