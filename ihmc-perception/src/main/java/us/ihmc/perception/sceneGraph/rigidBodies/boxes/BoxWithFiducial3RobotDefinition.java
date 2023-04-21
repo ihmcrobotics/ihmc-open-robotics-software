@@ -1,9 +1,10 @@
-package us.ihmc.rdx.simulation.environment.object.objects;
+package us.ihmc.perception.sceneGraph.rigidBodies.boxes;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
+import us.ihmc.perception.sceneGraph.rigidBodies.BasicSceneObjects;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
@@ -27,7 +28,7 @@ public class BoxWithFiducial3RobotDefinition extends RobotDefinition
       double size = 0.35;
       RigidBodyDefinition box = new RigidBodyDefinition("Box");
       VisualDefinition modelVisualDefinition = new VisualDefinition();
-      ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition("environmentObjects/box/box.g3dj");
+      ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition(BasicSceneObjects.BOX_VISUAL_MODEL_FILE_PATH);
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       box.addVisualDefinition(modelVisualDefinition);
 

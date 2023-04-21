@@ -1,8 +1,9 @@
-package us.ihmc.perception.scene;
+package us.ihmc.perception.sceneGraph.arUco;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
-import us.ihmc.perception.objects.StaticArUcoRelativeDetectableSceneObject;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneObject;
+import us.ihmc.perception.sceneGraph.PredefinedSceneObjectLibrary;
 
 /**
  * This class exists to perform some operations that are like "glue" between the scene based

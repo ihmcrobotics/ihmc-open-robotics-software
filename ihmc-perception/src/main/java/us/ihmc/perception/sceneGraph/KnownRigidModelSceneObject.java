@@ -1,4 +1,4 @@
-package us.ihmc.perception.scene;
+package us.ihmc.perception.sceneGraph;
 
 /**
  * A scene object that is a rigid body whose shape and appearance is

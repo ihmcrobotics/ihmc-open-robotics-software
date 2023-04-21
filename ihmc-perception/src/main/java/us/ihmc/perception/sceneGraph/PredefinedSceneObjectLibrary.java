@@ -1,9 +1,10 @@
-package us.ihmc.perception.scene;
+package us.ihmc.perception.sceneGraph;
 
 import gnu.trove.map.hash.TIntDoubleHashMap;
-import us.ihmc.perception.objects.BasicSceneObjects;
-import us.ihmc.perception.objects.DoorSceneObjects;
-import us.ihmc.perception.objects.StaticArUcoRelativeDetectableSceneObject;
+import us.ihmc.perception.sceneGraph.rigidBodies.BasicSceneObjects;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneObjects;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneObject;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableObject;
 
 import java.util.*;
 

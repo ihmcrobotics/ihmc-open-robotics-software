@@ -1,4 +1,4 @@
-package us.ihmc.perception.scene;
+package us.ihmc.perception.sceneGraph;
 
 import perception_msgs.msg.dds.DetectableSceneObjectsMessage;
 import us.ihmc.communication.ROS2Tools;
