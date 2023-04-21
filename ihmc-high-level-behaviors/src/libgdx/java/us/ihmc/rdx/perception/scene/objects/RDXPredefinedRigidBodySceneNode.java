@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -24,33 +24,36 @@ import java.util.Set;
  * TODO: Add pose "override", via right click context menu, and gizmo.
  *   Possibly do this in a higher level class or class that extends this.
  */
-public class RDXSceneObject
+public class RDXPredefinedRigidBodySceneNode
 {
    private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
-   private final PredefinedRigidBodySceneNode knownRigidModelSceneObject;
+   private final PredefinedRigidBodySceneNode predefinedRigidBodySceneNode;
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
-   private final RigidBodyTransform transformToParent = new RigidBodyTransform();
-   private final ReferenceFrame referenceFrame;
    private boolean showing = false;
    private final RDXModelInstance modelInstance;
+   private final FramePose3D nodePose = new FramePose3D();
+   private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
 
-   public RDXSceneObject(PredefinedRigidBodySceneNode knownRigidModelSceneObject)
+   public RDXPredefinedRigidBodySceneNode(PredefinedRigidBodySceneNode predefinedRigidBodySceneNode)
    {
-      this.knownRigidModelSceneObject = knownRigidModelSceneObject;
+      this.predefinedRigidBodySceneNode = predefinedRigidBodySceneNode;
 
-      modelInstance = new RDXModelInstance(RDXModelLoader.load(knownRigidModelSceneObject.getVisualModelFilePath()));
+      modelInstance = new RDXModelInstance(RDXModelLoader.load(predefinedRigidBodySceneNode.getVisualModelFilePath()));
       modelInstance.setColor(GHOST_COLOR);
 
-      referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(knownRigidModelSceneObject.getName(),
-                                                                                       ReferenceFrame.getWorldFrame(), transformToParent);
       referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
    }
 
    public void update()
    {
-      referenceFrame.update();
-      referenceFrameGraphic.setToReferenceFrame(referenceFrame);
-      modelInstance.setTransformToWorldFrame(transformToParent);
+      showing = predefinedRigidBodySceneNode.getCurrentlyDetected();
+
+      referenceFrameGraphic.setToReferenceFrame(predefinedRigidBodySceneNode.getReferenceFrame());
+
+      nodePose.setIncludingFrame(predefinedRigidBodySceneNode.getReferenceFrame(), predefinedRigidBodySceneNode.getTransformToParent());
+      nodePose.changeFrame(ReferenceFrame.getWorldFrame());
+      nodePose.get(nodeToWorldTransform);
+      modelInstance.setTransformToWorldFrame(nodeToWorldTransform);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
@@ -72,16 +75,17 @@ public class RDXSceneObject
 
    public RigidBodyTransform getTransformToParent()
    {
-      return transformToParent;
+      return predefinedRigidBodySceneNode.getTransformToParent();
    }
 
    public void setTransformToParent(RigidBodyTransform transform)
    {
-      transformToParent.set(transform);
+      predefinedRigidBodySceneNode.getTransformToParent().set(transform);
+      predefinedRigidBodySceneNode.getReferenceFrame().update();
    }
 
    public ReferenceFrame getReferenceFrame()
    {
-      return referenceFrame;
+      return predefinedRigidBodySceneNode.getReferenceFrame();
    }
 }

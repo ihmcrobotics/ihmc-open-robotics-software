@@ -16,7 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.SceneObjectAPI;
+import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -51,7 +51,7 @@ public class KinematicsRecordReplay
       for (int n = 0; n < numberOfParts; n++)
          framesToRecordHistory.add(new ArrayList<>());
 
-      detectableSceneObjectsSubscription = ros2.subscribe(SceneObjectAPI.DETECTABLE_SCENE_OBJECTS);
+      detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)

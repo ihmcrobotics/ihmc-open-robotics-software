@@ -35,6 +35,11 @@ public abstract class SceneNode
       return referenceFrame.getReferenceFrame();
    }
 
+   /**
+    * Used to get and set the transform to the parent frame.
+    * If you modify this transform, you must then call {@link ReferenceFrame#update()} on {@link #getReferenceFrame()}.
+    * @return the transform to the parent frame
+    */
    public RigidBodyTransform getTransformToParent()
    {
       return referenceFrame.getTransformToParent();
