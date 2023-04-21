@@ -20,8 +20,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointFeedbackController implements FeedbackControllerInterface
 {
-   public static final String shortName = "PDController";
-
    private final JointspaceAccelerationCommand inverseDynamicsOutput = new JointspaceAccelerationCommand();
    private final JointspaceVelocityCommand inverseKinematicsOutput = new JointspaceVelocityCommand();
    private final JointTorqueCommand virtualModelControlOutput = new JointTorqueCommand();
