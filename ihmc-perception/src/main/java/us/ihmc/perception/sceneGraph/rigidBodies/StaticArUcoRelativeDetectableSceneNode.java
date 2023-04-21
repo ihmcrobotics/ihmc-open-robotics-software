@@ -1,18 +1,18 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableObject;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 
 /**
- * This object stays in the same spot relative to a detected ArUco marker.
+ * This node stays in the same spot relative to a detected ArUco marker.
  *
- * Once the ArUco marker is seen, the pose of this object is set as known
+ * Once the ArUco marker is seen, the pose of this node is set as known
  * and does not move until {@link #forgetPose} is called.
  *
  * The whole point of this is so we don't have to put markers on everything,
  * especially things that don't move.
  */
-public class StaticArUcoRelativeDetectableSceneObject extends ArUcoDetectableObject
+public class StaticArUcoRelativeDetectableSceneNode extends ArUcoDetectableNode
 {
    private boolean poseKnown = false;
    /**
@@ -21,13 +21,13 @@ public class StaticArUcoRelativeDetectableSceneObject extends ArUcoDetectableObj
     */
    private final double maximumDistanceToLockIn;
 
-   public StaticArUcoRelativeDetectableSceneObject(String name,
-                                                   int markerID,
-                                                   double markerSize,
-                                                   RigidBodyTransform markerTransformToParent,
-                                                   String visualModelFilePath,
-                                                   RigidBodyTransform visualModelToNodeFrameTransform,
-                                                   double maximumDistanceToLockIn)
+   public StaticArUcoRelativeDetectableSceneNode(String name,
+                                                 int markerID,
+                                                 double markerSize,
+                                                 RigidBodyTransform markerTransformToParent,
+                                                 String visualModelFilePath,
+                                                 RigidBodyTransform visualModelToNodeFrameTransform,
+                                                 double maximumDistanceToLockIn)
    {
       super(name, markerID, markerSize, markerTransformToParent, visualModelFilePath, visualModelToNodeFrameTransform);
       this.maximumDistanceToLockIn = maximumDistanceToLockIn;

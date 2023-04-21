@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.sceneGraph.KnownRigidModelSceneObject;
+import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -27,14 +27,14 @@ import java.util.Set;
 public class RDXSceneObject
 {
    private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
-   private final KnownRigidModelSceneObject knownRigidModelSceneObject;
+   private final PredefinedRigidBodySceneNode knownRigidModelSceneObject;
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
    private final ReferenceFrame referenceFrame;
    private boolean showing = false;
    private final RDXModelInstance modelInstance;
 
-   public RDXSceneObject(KnownRigidModelSceneObject knownRigidModelSceneObject)
+   public RDXSceneObject(PredefinedRigidBodySceneNode knownRigidModelSceneObject)
    {
       this.knownRigidModelSceneObject = knownRigidModelSceneObject;
 

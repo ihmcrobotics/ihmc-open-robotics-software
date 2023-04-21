@@ -1,7 +1,7 @@
 package us.ihmc.perception.sceneGraph;
 
-import perception_msgs.msg.dds.DetectableSceneObjectMessage;
-import perception_msgs.msg.dds.DetectableSceneObjectsMessage;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -16,22 +16,22 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
  */
 public class ROS2DetectableSceneObjectsPublisher
 {
-   private final DetectableSceneObjectsMessage detectableSceneObjectsMessage = new DetectableSceneObjectsMessage();
+   private final DetectableSceneNodesMessage detectableSceneObjectsMessage = new DetectableSceneNodesMessage();
    private final FramePose3D sceneObjectPose = new FramePose3D();
    private final RigidBodyTransform sceneObjectToWorldTransform = new RigidBodyTransform();
 
-   public void publish(Iterable<DetectableSceneObject> detectableSceneObjects, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public void publish(Iterable<DetectableSceneNode> detectableSceneObjects, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
-      detectableSceneObjectsMessage.getDetectableSceneObjects().clear();
-      for (DetectableSceneObject detectableSceneObject : detectableSceneObjects)
+      detectableSceneObjectsMessage.getDetectableSceneNodes().clear();
+      for (DetectableSceneNode detectableSceneObject : detectableSceneObjects)
       {
-         DetectableSceneObjectMessage detectableSceneObjectMessage = detectableSceneObjectsMessage.getDetectableSceneObjects().add();
-         detectableSceneObjectMessage.setName(detectableSceneObject.getName());
-         detectableSceneObjectMessage.setCurrentlyDetected(detectableSceneObject.getCurrentlyDetected());
+         DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneObjectsMessage.getDetectableSceneNodes().add();
+         detectableSceneNodeMessage.setName(detectableSceneObject.getName());
+         detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneObject.getCurrentlyDetected());
          sceneObjectPose.setIncludingFrame(detectableSceneObject.getReferenceFrame(), detectableSceneObject.getTransformToParent());
          sceneObjectPose.changeFrame(ReferenceFrame.getWorldFrame());
          sceneObjectPose.get(sceneObjectToWorldTransform);
-         MessageTools.toMessage(sceneObjectToWorldTransform, detectableSceneObjectMessage.getTransformToWorld());
+         MessageTools.toMessage(sceneObjectToWorldTransform, detectableSceneNodeMessage.getTransformToWorld());
       }
       ros2PublishSubscribeAPI.publish(SceneObjectAPI.DETECTABLE_SCENE_OBJECTS, detectableSceneObjectsMessage);
    }

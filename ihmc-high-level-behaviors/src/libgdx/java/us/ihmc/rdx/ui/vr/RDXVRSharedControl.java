@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.DetectableSceneObjectMessage;
-import perception_msgs.msg.dds.DetectableSceneObjectsMessage;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
@@ -38,7 +38,7 @@ import java.util.Map;
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
    private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<DetectableSceneObjectsMessage> detectableSceneObjectsSubscription;
+   private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
@@ -158,8 +158,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    {
       if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
       {
-         DetectableSceneObjectsMessage detectableSceneObjectMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
-         DetectableSceneObjectMessage selectedObject = null; // TODO: Search for desired object
+         DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
+         DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
          objectName = selectedObject.getNameAsString();
 
          MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);

@@ -7,37 +7,37 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * A detectable perception scene object
-       * The topic name identifies the object.
+       * A detectable perception scene node
+       * The topic name identifies the node.
        */
-public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMessage> implements Settable<DetectableSceneObjectMessage>, EpsilonComparable<DetectableSceneObjectMessage>
+public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessage> implements Settable<DetectableSceneNodeMessage>, EpsilonComparable<DetectableSceneNodeMessage>
 {
    /**
-            * The name of the scene object
+            * The name of the scene node
             */
    public java.lang.StringBuilder name_;
    /**
-            * Whether or not the object is currently detected
+            * Whether or not the node is currently detected
             */
    public boolean currently_detected_;
    /**
-            * Transform of the object's frame to world frame
+            * Transform of the node's frame to world frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
 
-   public DetectableSceneObjectMessage()
+   public DetectableSceneNodeMessage()
    {
       name_ = new java.lang.StringBuilder(255);
       transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
-   public DetectableSceneObjectMessage(DetectableSceneObjectMessage other)
+   public DetectableSceneNodeMessage(DetectableSceneNodeMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(DetectableSceneObjectMessage other)
+   public void set(DetectableSceneNodeMessage other)
    {
       name_.setLength(0);
       name_.append(other.name_);
@@ -48,7 +48,7 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
    }
 
    /**
-            * The name of the scene object
+            * The name of the scene node
             */
    public void setName(java.lang.String name)
    {
@@ -57,14 +57,14 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
    }
 
    /**
-            * The name of the scene object
+            * The name of the scene node
             */
    public java.lang.String getNameAsString()
    {
       return getName().toString();
    }
    /**
-            * The name of the scene object
+            * The name of the scene node
             */
    public java.lang.StringBuilder getName()
    {
@@ -72,14 +72,14 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
    }
 
    /**
-            * Whether or not the object is currently detected
+            * Whether or not the node is currently detected
             */
    public void setCurrentlyDetected(boolean currently_detected)
    {
       currently_detected_ = currently_detected;
    }
    /**
-            * Whether or not the object is currently detected
+            * Whether or not the node is currently detected
             */
    public boolean getCurrentlyDetected()
    {
@@ -88,7 +88,7 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
 
 
    /**
-            * Transform of the object's frame to world frame
+            * Transform of the node's frame to world frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToWorld()
    {
@@ -96,19 +96,19 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
    }
 
 
-   public static Supplier<DetectableSceneObjectMessagePubSubType> getPubSubType()
+   public static Supplier<DetectableSceneNodeMessagePubSubType> getPubSubType()
    {
-      return DetectableSceneObjectMessagePubSubType::new;
+      return DetectableSceneNodeMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return DetectableSceneObjectMessagePubSubType::new;
+      return DetectableSceneNodeMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(DetectableSceneObjectMessage other, double epsilon)
+   public boolean epsilonEquals(DetectableSceneNodeMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -127,9 +127,9 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof DetectableSceneObjectMessage)) return false;
+      if(!(other instanceof DetectableSceneNodeMessage)) return false;
 
-      DetectableSceneObjectMessage otherMyClass = (DetectableSceneObjectMessage) other;
+      DetectableSceneNodeMessage otherMyClass = (DetectableSceneNodeMessage) other;
 
       if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
@@ -145,7 +145,7 @@ public class DetectableSceneObjectMessage extends Packet<DetectableSceneObjectMe
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("DetectableSceneObjectMessage {");
+      builder.append("DetectableSceneNodeMessage {");
       builder.append("name=");
       builder.append(this.name_);      builder.append(", ");
       builder.append("currently_detected=");
