@@ -4,8 +4,8 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.DetectableSceneObjectMessage;
-import perception_msgs.msg.dds.DetectableSceneObjectsMessage;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -38,7 +38,7 @@ public class KinematicsRecordReplay
    private final List<List<Pose3DReadOnly>> framesToRecordHistory = new ArrayList<>();
    private int partId = 0; // identifier of current frame, used to now what body part among numberOfParts we are currently handling
    private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<DetectableSceneObjectsMessage> detectableSceneObjectsSubscription;
+   private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
    private boolean objectLocked = false;
    private ReferenceFrame objectFrame;
 
@@ -62,8 +62,8 @@ public class KinematicsRecordReplay
          isRecording = !isRecording;
          if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !objectLocked)
          {
-            DetectableSceneObjectsMessage detectableSceneObjectMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
-            DetectableSceneObjectMessage selectedObject = null; // TODO: Search for desired object
+            DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
+            DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
             RigidBodyTransform objectTransformToWorld = new RigidBodyTransform();
             MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
             ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),

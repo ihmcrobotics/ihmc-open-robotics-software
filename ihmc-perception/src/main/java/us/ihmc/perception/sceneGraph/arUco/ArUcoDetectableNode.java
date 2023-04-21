@@ -2,14 +2,14 @@ package us.ihmc.perception.sceneGraph.arUco;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.arUco.ArUcoMarkerInfo;
-import us.ihmc.perception.sceneGraph.KnownRigidModelSceneObject;
+import us.ihmc.perception.sceneGraph.PredefinedRigidBodySceneNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
  * A scene object detectable via an ArUco marker.
  * Loads a stored property set for the marker information.
  */
-public class ArUcoDetectableObject extends KnownRigidModelSceneObject
+public class ArUcoDetectableNode extends PredefinedRigidBodySceneNode
 {
    private final int markerID;
    private final double markerSize;
@@ -18,12 +18,12 @@ public class ArUcoDetectableObject extends KnownRigidModelSceneObject
    /**
     * Give the marker info directly from code.
     */
-   public ArUcoDetectableObject(String name,
-                                int markerID,
-                                double markerSize,
-                                RigidBodyTransform markerTransformToParent,
-                                String visualModelFilePath,
-                                RigidBodyTransform visualModelToNodeFrameTransform)
+   public ArUcoDetectableNode(String name,
+                              int markerID,
+                              double markerSize,
+                              RigidBodyTransform markerTransformToParent,
+                              String visualModelFilePath,
+                              RigidBodyTransform visualModelToNodeFrameTransform)
    {
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
 
@@ -35,7 +35,7 @@ public class ArUcoDetectableObject extends KnownRigidModelSceneObject
    /**
     * Loads info from StoredPropertySet with name as suffix
     */
-   public ArUcoDetectableObject(String name, String visualModelFilePath, RigidBodyTransform visualModelToNodeFrameTransform)
+   public ArUcoDetectableNode(String name, String visualModelFilePath, RigidBodyTransform visualModelToNodeFrameTransform)
    {
       super(name, visualModelFilePath, visualModelToNodeFrameTransform);
 

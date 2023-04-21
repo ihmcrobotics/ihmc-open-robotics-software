@@ -2,21 +2,21 @@ package perception_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "DetectableSceneObjectMessage" defined in "DetectableSceneObjectMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "DetectableSceneNodeMessage" defined in "DetectableSceneNodeMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from DetectableSceneObjectMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit DetectableSceneObjectMessage_.idl instead.
+* This file was automatically generated from DetectableSceneNodeMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit DetectableSceneNodeMessage_.idl instead.
 *
 */
-public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.DetectableSceneObjectMessage>
+public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.DetectableSceneNodeMessage>
 {
-   public static final java.lang.String name = "perception_msgs::msg::dds_::DetectableSceneObjectMessage_";
+   public static final java.lang.String name = "perception_msgs::msg::dds_::DetectableSceneNodeMessage_";
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(perception_msgs.msg.dds.DetectableSceneObjectMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +24,7 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.DetectableSceneObjectMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.DetectableSceneNodeMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -49,12 +49,12 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.DetectableSceneObjectMessage data)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.DetectableSceneNodeMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.DetectableSceneObjectMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.DetectableSceneNodeMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -69,7 +69,7 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
       return current_alignment - initial_alignment;
    }
 
-   public static void write(perception_msgs.msg.dds.DetectableSceneObjectMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       if(data.getName().length() <= 255)
       cdr.write_type_d(data.getName());else
@@ -80,7 +80,7 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
    }
 
-   public static void read(perception_msgs.msg.dds.DetectableSceneObjectMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getName());	
       data.setCurrentlyDetected(cdr.read_type_7());
@@ -90,7 +90,7 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
    }
 
    @Override
-   public final void serialize(perception_msgs.msg.dds.DetectableSceneObjectMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("name", data.getName());
       ser.write_type_7("currently_detected", data.getCurrentlyDetected());
@@ -99,7 +99,7 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectableSceneObjectMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectableSceneNodeMessage data)
    {
       ser.read_type_d("name", data.getName());
       data.setCurrentlyDetected(ser.read_type_7("currently_detected"));
@@ -107,15 +107,15 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
 
    }
 
-   public static void staticCopy(perception_msgs.msg.dds.DetectableSceneObjectMessage src, perception_msgs.msg.dds.DetectableSceneObjectMessage dest)
+   public static void staticCopy(perception_msgs.msg.dds.DetectableSceneNodeMessage src, perception_msgs.msg.dds.DetectableSceneNodeMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public perception_msgs.msg.dds.DetectableSceneObjectMessage createData()
+   public perception_msgs.msg.dds.DetectableSceneNodeMessage createData()
    {
-      return new perception_msgs.msg.dds.DetectableSceneObjectMessage();
+      return new perception_msgs.msg.dds.DetectableSceneNodeMessage();
    }
    @Override
    public int getTypeSize()
@@ -129,24 +129,24 @@ public class DetectableSceneObjectMessagePubSubType implements us.ihmc.pubsub.To
       return name;
    }
    
-   public void serialize(perception_msgs.msg.dds.DetectableSceneObjectMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(perception_msgs.msg.dds.DetectableSceneObjectMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(perception_msgs.msg.dds.DetectableSceneObjectMessage src, perception_msgs.msg.dds.DetectableSceneObjectMessage dest)
+   public void copy(perception_msgs.msg.dds.DetectableSceneNodeMessage src, perception_msgs.msg.dds.DetectableSceneNodeMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public DetectableSceneObjectMessagePubSubType newInstance()
+   public DetectableSceneNodeMessagePubSubType newInstance()
    {
-      return new DetectableSceneObjectMessagePubSubType();
+      return new DetectableSceneNodeMessagePubSubType();
    }
 }

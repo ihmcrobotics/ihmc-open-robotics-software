@@ -5,23 +5,21 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 /**
- * Represents an object node on the Scene Knowledge Graph (to be defined).
+ * Represents a node on the Scene Knowledge Graph (to be defined).
  *
- * We give each object a name, unique identifier, and a reference frame.
- *
- * Object as in a door, chair, can of soup, etc.
+ * We give each node a name and a reference frame.
  */
-public abstract class SceneObject
+public abstract class SceneNode
 {
    private final String name;
    private final ModifiableReferenceFrame referenceFrame;
 
-   public SceneObject(String name)
+   public SceneNode(String name)
    {
       this(name, ReferenceFrame.getWorldFrame());
    }
 
-   public SceneObject(String name, ReferenceFrame parentFrame)
+   public SceneNode(String name, ReferenceFrame parentFrame)
    {
       this.name = name;
       this.referenceFrame = new ModifiableReferenceFrame(parentFrame);

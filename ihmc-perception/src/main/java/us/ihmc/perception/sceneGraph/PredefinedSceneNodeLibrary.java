@@ -1,0 +1,104 @@
+package us.ihmc.perception.sceneGraph;
+
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import us.ihmc.perception.sceneGraph.rigidBodies.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBodies.StaticArUcoRelativeDetectableSceneNode;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+
+import java.util.*;
+
+/**
+ * Use to specify which scene nodes a robot is looking for.
+ *
+ * We can put more specific stuff in here for now, like door specific
+ * and even dynamic nodes.
+ *
+ * This is a super high level class, it includes ROS 2 topics,
+ * heuristic stuff for certain nodes, stuff like that.
+ *
+ * This class exists so we can support multiple robots detecting the same
+ * nodes, but also to serve the need we have to define things
+ * by hand and construct custom heuristics.
+ */
+public class PredefinedSceneNodeLibrary
+{
+   private final ArUcoDetectableNode pushDoorPanel;
+   private final ArUcoDetectableNode pullDoorPanel;
+   private final ArUcoDetectableNode pushDoorLeverHandle;
+   private final ArUcoDetectableNode pullDoorLeverHandle;
+   private final StaticArUcoRelativeDetectableSceneNode pushDoorFrame;
+   private final StaticArUcoRelativeDetectableSceneNode pullDoorFrame;
+   private final ArUcoDetectableNode box;
+   private final ArUcoDetectableNode canOfSoup;
+
+   private final HashSet<DetectableSceneNode> detectableSceneNodes = new HashSet<>();
+   private final HashSet<ArUcoDetectableNode> arUcoDetectableNodes = new HashSet<>();
+   private final HashMap<Integer, StaticArUcoRelativeDetectableSceneNode> staticArUcoRelativeDetectableNodes = new HashMap<>();
+   private final TIntDoubleHashMap arUcoMarkerIDsToSizes = new TIntDoubleHashMap();
+
+   public static PredefinedSceneNodeLibrary defaultObjects()
+   {
+      return new PredefinedSceneNodeLibrary();
+   }
+
+   private PredefinedSceneNodeLibrary()
+   {
+      // Add door stuff
+      pushDoorPanel = DoorSceneNodeDefinitions.createPushDoorPanel();
+      pullDoorPanel = DoorSceneNodeDefinitions.createPullDoorPanel();
+      pushDoorLeverHandle = DoorSceneNodeDefinitions.createPushDoorLeverHandle();
+      pullDoorLeverHandle = DoorSceneNodeDefinitions.createPullDoorLeverHandle();
+      registerArUcoDetectableSceneNode(pushDoorPanel);
+      registerArUcoDetectableSceneNode(pullDoorPanel);
+      registerArUcoDetectableSceneNode(pushDoorLeverHandle);
+      registerArUcoDetectableSceneNode(pullDoorLeverHandle);
+
+      // The frames stay in place after being seen
+      pushDoorFrame = DoorSceneNodeDefinitions.createPushDoorFrame();
+      pullDoorFrame = DoorSceneNodeDefinitions.createPullDoorFrame();
+      registerStaticArUcoRelativeDetectableSceneNode(pushDoorFrame);
+      registerStaticArUcoRelativeDetectableSceneNode(pullDoorFrame);
+
+      box = RigidBodySceneObjectDefinitions.createBox();
+      canOfSoup = RigidBodySceneObjectDefinitions.createCanOfSoup();
+      registerArUcoDetectableSceneNode(box);
+      registerArUcoDetectableSceneNode(canOfSoup);
+
+      // TODO: Add non-ArUco cup -- detected by neural net
+
+   }
+
+   public void registerArUcoDetectableSceneNode(ArUcoDetectableNode arUcoDetectableNode)
+   {
+      detectableSceneNodes.add(arUcoDetectableNode);
+      arUcoDetectableNodes.add(arUcoDetectableNode);
+      arUcoMarkerIDsToSizes.put(arUcoDetectableNode.getMarkerID(), arUcoDetectableNode.getMarkerSize());
+   }
+
+   public void registerStaticArUcoRelativeDetectableSceneNode(StaticArUcoRelativeDetectableSceneNode staticArUcoRelativeDetectableSceneNode)
+   {
+      detectableSceneNodes.add(staticArUcoRelativeDetectableSceneNode);
+      staticArUcoRelativeDetectableNodes.put(staticArUcoRelativeDetectableSceneNode.getMarkerID(), staticArUcoRelativeDetectableSceneNode);
+   }
+
+   public HashSet<DetectableSceneNode> getDetectableSceneNodes()
+   {
+      return detectableSceneNodes;
+   }
+
+   public Set<ArUcoDetectableNode> getArUcoDetectableNodes()
+   {
+      return arUcoDetectableNodes;
+   }
+
+   public HashMap<Integer, StaticArUcoRelativeDetectableSceneNode> getStaticArUcoRelativeDetectableNodes()
+   {
+      return staticArUcoRelativeDetectableNodes;
+   }
+
+   public TIntDoubleHashMap getArUcoMarkerIDsToSizes()
+   {
+      return arUcoMarkerIDsToSizes;
+   }
+}

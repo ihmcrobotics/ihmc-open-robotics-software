@@ -28,7 +28,7 @@ import us.ihmc.perception.*;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
-import us.ihmc.perception.sceneGraph.PredefinedSceneObjectLibrary;
+import us.ihmc.perception.sceneGraph.PredefinedSceneNodeLibrary;
 import us.ihmc.perception.sceneGraph.ROS2DetectableSceneObjectsPublisher;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
@@ -81,7 +81,7 @@ public class DualBlackflyCamera
    private final Stopwatch encodingDuration = new Stopwatch();
    private final Stopwatch copyDuration = new Stopwatch();
    private long sequenceNumber = 0;
-   private PredefinedSceneObjectLibrary predefinedSceneObjectLibrary;
+   private PredefinedSceneNodeLibrary predefinedSceneNodeLibrary;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private final ROS2DetectableSceneObjectsPublisher detectableSceneObjectsPublisher = new ROS2DetectableSceneObjectsPublisher();
@@ -100,14 +100,14 @@ public class DualBlackflyCamera
                       RobotSide side,
                       ROS2Helper ros2Helper,
                       RealtimeROS2Node realtimeROS2Node,
-                      PredefinedSceneObjectLibrary predefinedSceneObjectLibrary,
+                      PredefinedSceneNodeLibrary predefinedSceneNodeLibrary,
                       IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics)
    {
       this.blackfly = blackfly;
       this.side = side;
       this.ros2Helper = ros2Helper;
       this.realtimeROS2Node = realtimeROS2Node;
-      this.predefinedSceneObjectLibrary = predefinedSceneObjectLibrary;
+      this.predefinedSceneNodeLibrary = predefinedSceneNodeLibrary;
       this.ousterFisheyeColoringIntrinsics = ousterFisheyeColoringIntrinsics;
 
       blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
@@ -212,7 +212,7 @@ public class DualBlackflyCamera
                   newCameraMatrixEstimate.copyTo(arUcoMarkerDetection.getCameraMatrix());
                   arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
                                                                             ros2Helper,
-                                                                            predefinedSceneObjectLibrary.getArUcoMarkerIDsToSizes());
+                                                                            predefinedSceneNodeLibrary.getArUcoMarkerIDsToSizes());
 
                   remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
                                                                                        ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
@@ -244,8 +244,8 @@ public class DualBlackflyCamera
                // arUcoMarkerDetection.drawRejectedPoints(blackflySourceImage.getBytedecoOpenCVMat());
                arUcoMarkerPublisher.update();
 
-               ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneObjectLibrary);
-               detectableSceneObjectsPublisher.publish(predefinedSceneObjectLibrary.getDetectableSceneObjects(), ros2Helper);
+               ArUcoSceneTools.updateLibraryPosesFromDetectionResults(arUcoMarkerDetection, predefinedSceneNodeLibrary);
+               detectableSceneObjectsPublisher.publish(predefinedSceneNodeLibrary.getDetectableSceneNodes(), ros2Helper);
             }
 
             convertColorDuration.start();
