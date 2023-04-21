@@ -13,6 +13,9 @@ import us.ihmc.log.LogTools;
 
 import java.util.List;
 
+/**
+ * Subscribes to, synchronizing, a list of detectable nodes in the robot's perception scene graph.
+ */
 public class ROS2DetectableSceneNodesSubscription
 {
    private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneNodesSubscription;
