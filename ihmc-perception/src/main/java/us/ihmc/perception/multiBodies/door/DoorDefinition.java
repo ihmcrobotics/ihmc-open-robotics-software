@@ -1,4 +1,4 @@
-package us.ihmc.rdx.simulation.environment.object.objects.door;
+package us.ihmc.perception.multiBodies.door;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
