@@ -9,6 +9,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -20,6 +21,7 @@ public class RDXPerceptionSceneGraphDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
+   private RDXEnvironmentBuilder environmentBuilder;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXHighLevelDepthSensorSimulator simulatedCamera;
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
@@ -38,6 +40,11 @@ public class RDXPerceptionSceneGraphDemo
 
             ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
+
+            environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
+            environmentBuilder.create();
+            baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
+            environmentBuilder.loadEnvironment("DoorsForArUcoTesting.json");
 
             sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
@@ -65,6 +72,7 @@ public class RDXPerceptionSceneGraphDemo
          @Override
          public void render()
          {
+            environmentBuilder.update();
             simulatedCamera.render(baseUI.getPrimaryScene());
             arUcoMarkerDetection.update();
 
@@ -83,6 +91,7 @@ public class RDXPerceptionSceneGraphDemo
             arUcoMarkerDetection.destroy();
             simulatedCamera.dispose();
             baseUI.dispose();
+            environmentBuilder.destroy();
          }
       });
    }
