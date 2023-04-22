@@ -23,5 +23,7 @@ public class RDXArUcoBoxObject extends RDXEnvironmentObject
       setMass(0.3f);
       Box3D collisionBox = new Box3D(size, size, size);
       setCollisionGeometryObject(collisionBox);
+
+      getRealisticModelOffset().getTranslation().add(-size / 2.0, -size / 2.0, -size / 2.0);
    }
 }
