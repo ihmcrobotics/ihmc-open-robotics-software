@@ -16,6 +16,7 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
@@ -172,13 +173,13 @@ public class RDXTeleoperationManager extends ImGuiPanel
       footstepPlanning = new RDXFootstepPlanning(robotModel, teleoperationParameters, syncedRobot);
 
       // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(ROS2Tools.SLAM_OUTPUT_RAPID_REGIONS, frameRegions ->
+      ros2Helper.subscribeViaCallback(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS, frameRegions ->
       {
          PlanarRegionsList regions = PlanarRegionMessageConverter.convertToPlanarRegionsList(frameRegions);
          footstepPlanning.setPlanarRegionsList(regions);
          interactableFootstepPlan.setPlanarRegionsList(regions);
       });
-      ros2Helper.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, heightMap ->
+      ros2Helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMap ->
       {
          footstepPlanning.setHeightMapData(heightMap);
          interactableFootstepPlan.setHeightMapMessage(heightMap);

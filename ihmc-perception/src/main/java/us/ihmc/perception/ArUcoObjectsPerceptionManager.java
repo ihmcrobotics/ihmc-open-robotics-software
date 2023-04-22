@@ -3,6 +3,7 @@ package us.ihmc.perception;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import perception_msgs.msg.dds.DetectedObjectMessage;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -35,7 +36,7 @@ public class ArUcoObjectsPerceptionManager
    public ArUcoObjectsPerceptionManager(ROS2PublishSubscribeAPI ros2, ArUcoMarkerObjectsInfo objectsInfo)
    {
       this.ros2 = ros2;
-      arUcoMarkerPosesSubscription = ros2.subscribe(ROS2Tools.ARUCO_MARKER_POSES);
+      arUcoMarkerPosesSubscription = ros2.subscribe(PerceptionAPI.ARUCO_MARKER_POSES);
 
       ArrayList<Integer> IDs = objectsInfo.getIds();
       objectNames = objectsInfo.getObjectNames();

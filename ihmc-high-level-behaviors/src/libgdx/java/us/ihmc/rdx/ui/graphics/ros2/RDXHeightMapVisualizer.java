@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.HeightMapMessage;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -41,8 +42,8 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
    public void setupForNetworking(ROS2PublishSubscribeAPI ros2)
    {
-      ros2.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
-      activeHeartbeat = new ROS2Heartbeat(ros2, ROS2Tools.PUBLISH_HEIGHT_MAP);
+      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
+      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.PUBLISH_HEIGHT_MAP);
    }
 
    @Override

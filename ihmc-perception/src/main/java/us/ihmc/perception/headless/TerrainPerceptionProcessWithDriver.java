@@ -9,6 +9,7 @@ import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -355,10 +356,10 @@ public class TerrainPerceptionProcessWithDriver
       String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365"); // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563
       new TerrainPerceptionProcessWithDriver(l515SerialNumber,
                                              RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
-                                             ROS2Tools.L515_DEPTH_IMAGE,
-                                             ROS2Tools.L515_COLOR_IMAGE,
-                                             ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
-                                             ROS2Tools.PERSPECTIVE_RAPID_REGIONS,
+                                             PerceptionAPI.L515_DEPTH_IMAGE,
+                                             PerceptionAPI.L515_COLOR_IMAGE,
+                                             PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
+                                             PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                              ReferenceFrame::getWorldFrame);
    }
 }

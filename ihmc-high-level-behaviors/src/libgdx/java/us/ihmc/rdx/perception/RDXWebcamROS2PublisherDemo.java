@@ -8,6 +8,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -61,7 +62,7 @@ public class RDXWebcamROS2PublisherDemo
 
             realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
 
-            ROS2Topic<BigVideoPacket> bigVideoTestTopic = ROS2Tools.BIG_VIDEO_TEST;
+            ROS2Topic<BigVideoPacket> bigVideoTestTopic = PerceptionAPI.BIG_VIDEO_TEST;
             try
             {
                publisher = realtimeROS2Node.createPublisher(BigVideoPacket.getPubSubType().get(), bigVideoTestTopic.getName(), ROS2QosProfile.BEST_EFFORT());
