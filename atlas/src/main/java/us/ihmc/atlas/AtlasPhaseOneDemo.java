@@ -10,6 +10,7 @@ import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.avatar.simulationStarter.DRCSimulationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.BehaviorRegistry;
@@ -123,7 +124,7 @@ public class AtlasPhaseOneDemo
       PlanarRegionsList environmentWithoutDebrisRegions = environment.getEnvironmentRegions();
       PlanarRegionsList environmentWithDebrisRegions = environment.getEnvironmentWithDebrisRegions();
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME);
 
       PlanarRegionSLAMMapper realsensePlanarRegionSLAM = new PlanarRegionSLAMMapper();
 
@@ -133,12 +134,12 @@ public class AtlasPhaseOneDemo
 
       // might be a weird delay with threads at 0.5 hz depending on each other
       double period = 3.0;
-      new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, period, () ->
+      new PeriodicPlanarRegionPublisher(ros2Node, PerceptionAPI.LIDAR_REA_REGIONS, period, () ->
       {
          multisense.setMap(ignoreDebris.get() ? environmentWithoutDebrisRegions : environmentWithDebrisRegions);
          return multisense.computeRegions();
       }).start();
-      new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, period, () ->
+      new PeriodicPlanarRegionPublisher(ros2Node, PerceptionAPI.REALSENSE_SLAM_REGIONS, period, () ->
       {
          boolean ignoreDebrisLocal = ignoreDebris.get();
          if (ignoreDebrisLocal != lastIgnoreDebrisValueUsedByRealsense)

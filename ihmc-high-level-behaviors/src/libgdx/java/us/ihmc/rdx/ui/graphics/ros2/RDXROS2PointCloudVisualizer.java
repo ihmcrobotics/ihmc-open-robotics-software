@@ -15,6 +15,7 @@ import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
@@ -85,7 +86,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
 
       if (topic.getType().equals(LidarScanMessage.class))
       {
-         lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.PUBLISH_LIDAR_SCAN);
+         lidarActiveHeartbeat = new ROS2Heartbeat(ros2Node, PerceptionAPI.PUBLISH_LIDAR_SCAN);
       }
    }
 

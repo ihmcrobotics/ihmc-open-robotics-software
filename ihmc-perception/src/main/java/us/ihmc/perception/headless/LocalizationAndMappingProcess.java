@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -76,7 +77,7 @@ public class LocalizationAndMappingProcess
       this.ros2Helper = new ROS2Helper(ros2Node);
 
       controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
-      slamOutputRegionsPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SLAM_OUTPUT_RAPID_REGIONS);
+      slamOutputRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
@@ -160,7 +161,7 @@ public class LocalizationAndMappingProcess
    public static void main(String[] args)
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "slam_node");
-      new LocalizationAndMappingProcess("Nadia", ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
-                                        ROS2Tools.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Node, true);
+      new LocalizationAndMappingProcess("Nadia", PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
+                                        PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Node, true);
    }
 }

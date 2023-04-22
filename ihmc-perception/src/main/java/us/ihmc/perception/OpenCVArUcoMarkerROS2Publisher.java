@@ -2,6 +2,7 @@ package us.ihmc.perception;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -62,7 +63,7 @@ public class OpenCVArUcoMarkerROS2Publisher
                   arUcoMarkerPoses.getPosition().add().set(framePoseOfMarker.getX(), framePoseOfMarker.getY(), framePoseOfMarker.getZ());
                }
             }
-            ros2.publish(ROS2Tools.ARUCO_MARKER_POSES, arUcoMarkerPoses);
+            ros2.publish(PerceptionAPI.ARUCO_MARKER_POSES, arUcoMarkerPoses);
          }
       }
    }

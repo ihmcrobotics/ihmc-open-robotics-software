@@ -47,7 +47,7 @@ public class AtlasRealsenseSLAMRemoteLauncher
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
 
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, PerceptionAPI.REA_NODE_NAME);
 
 //      slamMessager = KryoMessager.createServer(SLAMModuleAPI.API, NetworkPorts.SLAM_MODULE_UI_PORT.getPort(), "SLAMModule", 5);
 //      ThreadTools.startAThread(() -> ExceptionTools.handle(slamMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");
