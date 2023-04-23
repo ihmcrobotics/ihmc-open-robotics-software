@@ -33,7 +33,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ActiveMappingRemoteProcess
 {
-   private final static long STATISTICS_COLLECTION_PERIOD_MS = 100;
+   public enum ActiveMappingMode
+   {
+      EXECUTE_AND_PAUSE, CONTINUOUS_MAPPING_STRAIGHT, CONTINUOUS_MAPPING_COVERAGE, CONTINUOUS_MAPPING_SEARCH
+   }
+
+   public ActiveMappingMode activeMappingMode = ActiveMappingMode.EXECUTE_AND_PAUSE;
+
+   private final static long STATISTICS_COLLECTION_PERIOD_MS = 500;
 
    private final AtomicReference<FramePlanarRegionsListMessage> planarRegionsListMessage = new AtomicReference<>(null);
    private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>();
@@ -84,19 +91,19 @@ public class ActiveMappingRemoteProcess
       });
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS, activeMappingModule.getPlanarRegionMap().getParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, configurationParameters);
 
       ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS_WITH_POSE, this::onPlanarRegionsReceived);
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), walkingStatusMessage::set);
 
       executorService.scheduleAtFixedRate(this::updateActiveMappingPlan, 0, 500, TimeUnit.MILLISECONDS);
-      executorService.scheduleAtFixedRate(this::statisticsCollectionThread, 0, STATISTICS_COLLECTION_PERIOD_MS, TimeUnit.MILLISECONDS);
+      executorService.scheduleAtFixedRate(this::generalUpdate, 0, STATISTICS_COLLECTION_PERIOD_MS, TimeUnit.MILLISECONDS);
    }
 
-   private void statisticsCollectionThread()
+   private void generalUpdate()
    {
-      activeMappingModule.getPlanarRegionMap().printStatistics(true);
+      ros2PropertySetGroup.update();
+      //activeMappingModule.getPlanarRegionMap().printStatistics(true);
    }
 
    public void onPlanarRegionsReceived(FramePlanarRegionsListMessage message)
@@ -119,7 +126,6 @@ public class ActiveMappingRemoteProcess
 
       if (enableLiveMode)
       {
-         LogTools.info("Registering Regions: {}", framePlanarRegionsList.getPlanarRegionsList().getNumberOfPlanarRegions());
          updateMapWithNewRegions(framePlanarRegionsList);
       }
 
@@ -127,7 +133,6 @@ public class ActiveMappingRemoteProcess
       if (regionsToPublish != null)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionsToPublish);
-         //controllerRegionsPublisher.publish(planarRegionsListMessage);
          slamOutputRegionsPublisher.publish(planarRegionsListMessage);
       }
 
@@ -146,9 +151,12 @@ public class ActiveMappingRemoteProcess
 
    public void updateActiveMappingPlan()
    {
+      LogTools.info("Updating Active Mapping Plan: " + configurationParameters.getActiveMapping());
       if (configurationParameters.getActiveMapping())
       {
          activeMappingModule.updateFootstepPlan();
+         sendActiveMappingPlanToController();
+         configurationParameters.setActiveMapping(false);
       }
    }
 
@@ -167,10 +175,5 @@ public class ActiveMappingRemoteProcess
    public void setEnableLiveMode(boolean enableLiveMode)
    {
       this.enableLiveMode = enableLiveMode;
-   }
-
-   public ActiveMappingModule getActiveMappingModule()
-   {
-      return activeMappingModule;
    }
 }

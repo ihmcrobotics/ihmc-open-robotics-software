@@ -8,6 +8,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.activeMapping.ActiveMappingModule;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -18,11 +19,6 @@ import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
 public class RDXActiveMappingUIPanel implements RenderableProvider
 {
-   public enum Mode
-   {
-      REMOTE, LOCAL
-   }
-
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
@@ -30,20 +26,17 @@ public class RDXActiveMappingUIPanel implements RenderableProvider
    private ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
    private ActiveMappingModule activeMappingModule;
    private ImGuiPanel imGuiPanel;
-   private Mode mode = Mode.LOCAL;
 
    private final ImBoolean renderEnabled = new ImBoolean(true);
 
    public RDXActiveMappingUIPanel(String name, ActiveMappingModule mappingManager)
    {
-      mode = Mode.LOCAL;
       this.activeMappingModule = mappingManager;
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
    }
 
    public RDXActiveMappingUIPanel(String name, ROS2Helper ros2Helper)
    {
-      mode = Mode.REMOTE;
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
       perceptionConfigurationParameters = new PerceptionConfigurationParameters();
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
@@ -54,7 +47,7 @@ public class RDXActiveMappingUIPanel implements RenderableProvider
    {
       ImGui.checkbox(labels.get("Render Enabled"), renderEnabled);
 
-      if (mode == Mode.REMOTE)
+      if (remotePropertySets != null)
       {
          remotePropertySets.renderImGuiWidgets();
       }
@@ -62,6 +55,8 @@ public class RDXActiveMappingUIPanel implements RenderableProvider
       {
          if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
          {
+            LogTools.info("Triggered footstep plan calculation");
+
             activeMappingModule.updateFootstepPlan();
             activeMappingModule.setWalkingEnabled(true);
          }
@@ -70,11 +65,11 @@ public class RDXActiveMappingUIPanel implements RenderableProvider
 
    public void render3DGraphics()
    {
-      if (mode == Mode.REMOTE)
+      if (remotePropertySets != null)
       {
 
       }
-      else if (mode == Mode.LOCAL)
+      else
       {
          synchronized (mapPlanarRegionsGraphic)
          {
