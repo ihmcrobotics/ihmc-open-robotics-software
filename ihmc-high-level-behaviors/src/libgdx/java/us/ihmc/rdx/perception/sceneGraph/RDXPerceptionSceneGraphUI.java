@@ -58,6 +58,7 @@ public class RDXPerceptionSceneGraphUI
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("Detectable scene nodes received: " + detectableSceneNodesSubscription.getNumberOfMessagesReceived());
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
    }
 
