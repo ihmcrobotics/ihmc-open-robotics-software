@@ -22,6 +22,7 @@ public class ROS2DetectableSceneNodesSubscription
    private final List<DetectableSceneNode> detectableSceneNodes;
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private final FramePose3D nodePose = new FramePose3D();
+   private long numberOfMessagesReceived = 0;
 
    public ROS2DetectableSceneNodesSubscription(List<DetectableSceneNode> detectableSceneNodes, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
@@ -30,10 +31,16 @@ public class ROS2DetectableSceneNodesSubscription
       detectableSceneNodesSubscription = ros2PublishSubscribeAPI.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
    }
 
-   public void update()
+   /**
+    * Check for a new ROS 2 message and update the scene nodes with it.
+    * @return if a new message was used to update the scene nodes on this call
+    */
+   public boolean update()
    {
-      if (detectableSceneNodesSubscription.getMessageNotification().poll())
+      boolean newMessageAvailable = detectableSceneNodesSubscription.getMessageNotification().poll();
+      if (newMessageAvailable)
       {
+         ++numberOfMessagesReceived;
          DetectableSceneNodesMessage detectableSceneNodesMessage = detectableSceneNodesSubscription.getMessageNotification().read();
          IDLSequence.Object<DetectableSceneNodeMessage> detectableSceneNodeMessages = detectableSceneNodesMessage.getDetectableSceneNodes();
 
@@ -61,5 +68,11 @@ public class ROS2DetectableSceneNodesSubscription
             }
          }
       }
+      return newMessageAvailable;
+   }
+
+   public long getNumberOfMessagesReceived()
+   {
+      return numberOfMessagesReceived;
    }
 }
