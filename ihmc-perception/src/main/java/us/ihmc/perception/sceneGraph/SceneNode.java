@@ -12,7 +12,7 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 public abstract class SceneNode
 {
    private final String name;
-   private final ModifiableReferenceFrame referenceFrame;
+   private final ModifiableReferenceFrame nodeFrame;
 
    public SceneNode(String name)
    {
@@ -22,7 +22,7 @@ public abstract class SceneNode
    public SceneNode(String name, ReferenceFrame parentFrame)
    {
       this.name = name;
-      this.referenceFrame = new ModifiableReferenceFrame(parentFrame);
+      this.nodeFrame = new ModifiableReferenceFrame(parentFrame);
    }
 
    public String getName()
@@ -30,18 +30,23 @@ public abstract class SceneNode
       return name;
    }
 
-   public ReferenceFrame getReferenceFrame()
+   public ReferenceFrame getNodeFrame()
    {
-      return referenceFrame.getReferenceFrame();
+      return nodeFrame.getReferenceFrame();
    }
 
    /**
     * Used to get and set the transform to the parent frame.
-    * If you modify this transform, you must then call {@link ReferenceFrame#update()} on {@link #getReferenceFrame()}.
+    * If you modify this transform, you must then call {@link ReferenceFrame#update()} on {@link #getNodeFrame()}.
     * @return the transform to the parent frame
     */
-   public RigidBodyTransform getTransformToParent()
+   public RigidBodyTransform getNodeToParentFrameTransform()
    {
-      return referenceFrame.getTransformToParent();
+      return nodeFrame.getTransformToParent();
+   }
+
+   protected void changeParentFrame(ReferenceFrame newParentFrame)
+   {
+      nodeFrame.changeParentFrame(newParentFrame);
    }
 }

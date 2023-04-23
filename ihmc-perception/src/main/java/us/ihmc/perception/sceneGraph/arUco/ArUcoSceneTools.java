@@ -24,9 +24,9 @@ public class ArUcoSceneTools
             {
                arUcoMarkerDetection.getPose(arUcoDetectableNode.getMarkerID(),
                                             arUcoDetectableNode.getMarkerSize(),
-                                            arUcoDetectableNode.getReferenceFrame().getParent(),
-                                            arUcoDetectableNode.getTransformToParent());
-               arUcoDetectableNode.getReferenceFrame().update();
+                                            arUcoDetectableNode.getMarkerFrame().getParent(),
+                                            arUcoDetectableNode.getMarkerToWorldFrameTransform());
+               arUcoDetectableNode.getMarkerFrame().update();
 
                StaticArUcoRelativeDetectableSceneNode staticArUcoRelativeDetectableSceneNode = predefinedSceneNodeLibrary.getStaticArUcoRelativeDetectableNodes()
                                                                                                                          .get(arUcoDetectableNode.getMarkerID());
@@ -38,9 +38,9 @@ public class ArUcoSceneTools
                   {
                      arUcoMarkerDetection.getPose(staticArUcoRelativeDetectableSceneNode.getMarkerID(),
                                                   staticArUcoRelativeDetectableSceneNode.getMarkerSize(),
-                                                  staticArUcoRelativeDetectableSceneNode.getReferenceFrame().getParent(),
-                                                  staticArUcoRelativeDetectableSceneNode.getTransformToParent());
-                     staticArUcoRelativeDetectableSceneNode.getReferenceFrame().update();
+                                                  staticArUcoRelativeDetectableSceneNode.getMarkerFrame().getParent(),
+                                                  staticArUcoRelativeDetectableSceneNode.getMarkerToWorldFrameTransform());
+                     staticArUcoRelativeDetectableSceneNode.getMarkerFrame().update();
                      staticArUcoRelativeDetectableSceneNode.lockInPose();
                   }
                }

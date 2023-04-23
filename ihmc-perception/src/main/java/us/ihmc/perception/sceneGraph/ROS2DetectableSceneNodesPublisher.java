@@ -28,7 +28,7 @@ public class ROS2DetectableSceneNodesPublisher
          DetectableSceneNodeMessage detectableSceneNodeMessage = detectableSceneObjectsMessage.getDetectableSceneNodes().add();
          detectableSceneNodeMessage.setName(detectableSceneObject.getName());
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneObject.getCurrentlyDetected());
-         sceneObjectPose.setToZero(detectableSceneObject.getReferenceFrame());
+         sceneObjectPose.setToZero(detectableSceneObject.getNodeFrame());
          sceneObjectPose.changeFrame(ReferenceFrame.getWorldFrame());
          sceneObjectPose.get(sceneObjectToWorldTransform);
          MessageTools.toMessage(sceneObjectToWorldTransform, detectableSceneNodeMessage.getTransformToWorld());
