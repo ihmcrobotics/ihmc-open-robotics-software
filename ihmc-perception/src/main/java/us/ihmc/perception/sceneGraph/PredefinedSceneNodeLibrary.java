@@ -87,7 +87,7 @@ public class PredefinedSceneNodeLibrary
    public void registerDetectableSceneNode(DetectableSceneNode detectableSceneNode)
    {
       detectableSceneNodes.add(detectableSceneNode);
-      referenceFrames.add(detectableSceneNode.getReferenceFrame());
+      referenceFrames.add(detectableSceneNode.getNodeFrame());
    }
 
    public List<DetectableSceneNode> getDetectableSceneNodes()

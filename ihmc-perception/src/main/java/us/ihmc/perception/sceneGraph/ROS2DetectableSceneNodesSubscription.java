@@ -57,9 +57,9 @@ public class ROS2DetectableSceneNodesSubscription
 
                MessageTools.toEuclid(detectableSceneNodeMessage.getTransformToWorld(), nodeToWorldTransform);
                nodePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), nodeToWorldTransform);
-               nodePose.changeFrame(detectableSceneNode.getReferenceFrame().getParent());
-               nodePose.get(detectableSceneNode.getTransformToParent());
-               detectableSceneNode.getReferenceFrame().update();
+               nodePose.changeFrame(detectableSceneNode.getNodeFrame().getParent());
+               nodePose.get(detectableSceneNode.getNodeToParentFrameTransform());
+               detectableSceneNode.getNodeFrame().update();
             }
             else
             {

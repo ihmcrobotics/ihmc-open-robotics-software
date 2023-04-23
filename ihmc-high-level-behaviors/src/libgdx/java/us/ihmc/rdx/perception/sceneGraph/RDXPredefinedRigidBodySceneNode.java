@@ -48,9 +48,9 @@ public class RDXPredefinedRigidBodySceneNode
    {
       showing = predefinedRigidBodySceneNode.getCurrentlyDetected();
 
-      referenceFrameGraphic.setToReferenceFrame(predefinedRigidBodySceneNode.getReferenceFrame());
+      referenceFrameGraphic.setToReferenceFrame(predefinedRigidBodySceneNode.getNodeFrame());
 
-      nodePose.setToZero(predefinedRigidBodySceneNode.getReferenceFrame());
+      nodePose.setToZero(predefinedRigidBodySceneNode.getNodeFrame());
       nodePose.changeFrame(ReferenceFrame.getWorldFrame());
       nodePose.get(nodeToWorldTransform);
       modelInstance.setTransformToWorldFrame(nodeToWorldTransform);
@@ -75,17 +75,17 @@ public class RDXPredefinedRigidBodySceneNode
 
    public RigidBodyTransform getTransformToParent()
    {
-      return predefinedRigidBodySceneNode.getTransformToParent();
+      return predefinedRigidBodySceneNode.getNodeToParentFrameTransform();
    }
 
    public void setTransformToParent(RigidBodyTransform transform)
    {
-      predefinedRigidBodySceneNode.getTransformToParent().set(transform);
-      predefinedRigidBodySceneNode.getReferenceFrame().update();
+      predefinedRigidBodySceneNode.getNodeToParentFrameTransform().set(transform);
+      predefinedRigidBodySceneNode.getNodeFrame().update();
    }
 
    public ReferenceFrame getReferenceFrame()
    {
-      return predefinedRigidBodySceneNode.getReferenceFrame();
+      return predefinedRigidBodySceneNode.getNodeFrame();
    }
 }

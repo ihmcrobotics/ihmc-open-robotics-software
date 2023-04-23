@@ -13,6 +13,7 @@ import us.ihmc.perception.sceneGraph.ROS2DetectableSceneNodesSubscription;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -28,6 +29,7 @@ public class RDXPerceptionSceneGraphUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ArrayList<RDXPredefinedRigidBodySceneNode> predefinedRigidBodySceneNodes = new ArrayList<>();
+   private final ArrayList<ImPlotDoublePlot> detectableNodeCurrentlyDetectedPlots = new ArrayList<>();
 
    public RDXPerceptionSceneGraphUI(PredefinedSceneNodeLibrary predefinedSceneNodeLibrary, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
@@ -43,6 +45,9 @@ public class RDXPerceptionSceneGraphUI
             RDXPredefinedRigidBodySceneNode rdxPredefinedRigidBodySceneNode = new RDXPredefinedRigidBodySceneNode(predefinedRigidBodySceneNode);
             predefinedRigidBodySceneNodes.add(rdxPredefinedRigidBodySceneNode);
          }
+
+         int plotHeightInPixels = 35;
+         detectableNodeCurrentlyDetectedPlots.add(new ImPlotDoublePlot(detectableSceneNode.getName(), plotHeightInPixels));
       }
    }
 
@@ -50,9 +55,9 @@ public class RDXPerceptionSceneGraphUI
    {
       detectableSceneNodesSubscription.update();
 
-      for (RDXPredefinedRigidBodySceneNode sceneObject : predefinedRigidBodySceneNodes)
+      for (RDXPredefinedRigidBodySceneNode predefinedRigidBodySceneNode : predefinedRigidBodySceneNodes)
       {
-         sceneObject.update();
+         predefinedRigidBodySceneNode.update();
       }
    }
 
@@ -60,15 +65,22 @@ public class RDXPerceptionSceneGraphUI
    {
       ImGui.text("Detectable scene nodes received: " + detectableSceneNodesSubscription.getNumberOfMessagesReceived());
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
+      ImGui.text("Detections:");
+      for (int i = 0; i < detectableNodeCurrentlyDetectedPlots.size(); i++)
+      {
+         ImPlotDoublePlot detectableNodeCurrentlyDetectedPlot = detectableNodeCurrentlyDetectedPlots.get(i);
+         detectableNodeCurrentlyDetectedPlot.addValue(predefinedSceneNodeLibrary.getDetectableSceneNodes().get(i).getCurrentlyDetected() ? 1.0 : 0.0);
+         detectableNodeCurrentlyDetectedPlot.renderImGuiWidgets();
+      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (showGraphics.get())
       {
-         for (RDXPredefinedRigidBodySceneNode sceneObject : predefinedRigidBodySceneNodes)
+         for (RDXPredefinedRigidBodySceneNode predefinedRigidBodySceneNode : predefinedRigidBodySceneNodes)
          {
-            sceneObject.getRenderables(renderables, pool, sceneLevels);
+            predefinedRigidBodySceneNode.getRenderables(renderables, pool, sceneLevels);
          }
       }
    }
