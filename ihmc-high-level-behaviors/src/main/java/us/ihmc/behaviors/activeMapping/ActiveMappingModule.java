@@ -4,10 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
@@ -63,13 +60,15 @@ public class ActiveMappingModule
          request.setTimeout(0.25);
          request.setStartFootPoses(leftSolePose, rightSolePose);
          request.setPlanarRegionsList(planarRegionMap.getMapRegions());
-         //request.setAssumeFlatGround(true);
+//         request.setAssumeFlatGround(true);
          request.setPlanBodyPath(false);
          request.setGoalFootPoses(0.22, goalFeetPose);
          request.setSnapGoalSteps(true);
          request.setPerformAStarSearch(true);
 
          plannerOutput = footstepPlanner.handleRequest(request);
+
+         FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
 
          LogTools.info(String.format("Planar Regions: %d\t, First Area: %.2f\t Plan Length: %d\n",
                                      planarRegionMap.getMapRegions().getNumberOfPlanarRegions(),
