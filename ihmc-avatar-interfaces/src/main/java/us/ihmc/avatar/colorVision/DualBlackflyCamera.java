@@ -217,12 +217,6 @@ public class DualBlackflyCamera
                   remoteTunableCameraTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
                                                                                        ROS2Tools.OBJECT_DETECTION_CAMERA_TO_PARENT_TUNING,
                                                                                        cameraTransformToParent);
-
-                  // TODO: Instantiate door heuristic manager
-//                  predefinedSceneObjectLibrary.
-
-
-                  // TODO: Set up detectable scene object manager and publisher
                }
 
                remoteTunableCameraTransform.update();
