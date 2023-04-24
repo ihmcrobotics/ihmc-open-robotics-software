@@ -54,7 +54,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 {
-   private static final boolean MORE_YOVARIABLES = true;
+   private static final boolean MORE_YOVARIABLES = false;
 
    private static final double minForceZInPercentThresholdToFilterFoot = 0.0;
    private static final double maxForceZInPercentThresholdToFilterFoot = 0.45;
@@ -372,6 +372,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                throw new RuntimeException("Should not get there");
          }
       }
+
+      if (imuBasedLinearStateCalculator.isEstimationEnabled())
+         imuBasedLinearStateCalculator.updateLinearAccelerationMeasurement();
 
       if (numberOfEndEffectorsTrusted.getIntegerValue() == 0)
       {
