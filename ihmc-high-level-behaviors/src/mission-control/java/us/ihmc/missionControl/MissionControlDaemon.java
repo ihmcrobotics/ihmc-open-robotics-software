@@ -237,7 +237,7 @@ public class MissionControlDaemon
       {
          daemon.destroy();
          Runtime.getRuntime().halt(0); // Set exit code to 0
-      }));
+      }, MissionControlDaemon.class.getName() + "-Shutdown"));
 
       ThreadTools.sleepForever();
    }
