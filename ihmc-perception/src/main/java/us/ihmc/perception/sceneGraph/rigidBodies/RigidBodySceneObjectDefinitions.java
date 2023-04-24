@@ -1,9 +1,8 @@
 package us.ihmc.perception.sceneGraph.rigidBodies;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
  * Static methods to create boxes, cylinders, etc.
@@ -14,10 +13,16 @@ public class RigidBodySceneObjectDefinitions
 
    public static final int BOX_MARKER_ID = 2;
    public static final double BOX_MARKER_WIDTH = 0.210101;
-   public static final RigidBodyTransform BOX_TRANSFORM_TO_MARKER = new RigidBodyTransform(
-         new YawPitchRoll(Math.toRadians(180.0), Math.toRadians(0.0), Math.toRadians(-90.0)),
-         new Point3D(0.07, 0.15, 0.17)
-   );
+   // The box is a cube
+   public static final double BOX_SIZE = 0.35;
+   public static final double BOX_MARKER_FROM_BOTTOM_Z = 0.047298;
+   public static final double BOX_MARKER_FROM_RIGHT_Y = 0.047298;
+   public static final RigidBodyTransform BOX_TRANSFORM_TO_MARKER = new RigidBodyTransform();
+   static
+   {
+      EuclidCoreMissingTools.setYawPitchRollDegrees(BOX_TRANSFORM_TO_MARKER.getRotation(), 180.0, 0.0, 0.0);
+      BOX_TRANSFORM_TO_MARKER.getTranslation().set(0.0, BOX_MARKER_FROM_RIGHT_Y, BOX_MARKER_FROM_BOTTOM_Z);
+   }
    public static final String BOX_VISUAL_MODEL_FILE_PATH = "environmentObjects/box/box.g3dj";
    public static final RigidBodyTransform BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
