@@ -395,4 +395,10 @@ public class TouchDownState extends AbstractFootControlState
    {
       return null;
    }
+
+   @Override
+   public boolean isLoadBearing()
+   {
+      return true;
+   }
 }
