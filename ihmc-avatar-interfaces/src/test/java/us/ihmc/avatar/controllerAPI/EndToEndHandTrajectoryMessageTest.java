@@ -152,7 +152,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
 
          OneDoFJointBasics[] armOriginal = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
-         OneDoFJointBasics[] armClone = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(chest, hand);
+         OneDoFJointBasics[] armClone = MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(armOriginal, robotSide.getLowerCaseName()), OneDoFJointBasics.class);
+
          for (int jointIndex = 0; jointIndex < armOriginal.length; jointIndex++)
          {
             OneDoFJointBasics original = armOriginal[jointIndex];
