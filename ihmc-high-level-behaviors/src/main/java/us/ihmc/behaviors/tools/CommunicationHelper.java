@@ -65,15 +65,8 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    public CommunicationHelper(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
-      this(robotModel, ros2Node, true);
-   }
-
-   public CommunicationHelper(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, boolean commsEnabledToStart)
-   {
       this.robotModel = robotModel;
       this.ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
-
-      ros2Helper.setCommunicationCallbacksEnabled(commsEnabledToStart);
    }
 
    // Construction-only methods:
@@ -285,13 +278,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public Notification subscribeToWalkingCompletedViaNotification()
    {
       return ros2Helper.subscribeToWalkingCompletedViaNotification();
-   }
-
-   // Let behaviors manage or manage for them?
-   // Split into finer granularity -- publishers and subscribers?
-   public void setCommunicationCallbacksEnabled(boolean enabled)
-   {
-      ros2Helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    public void destroy()
