@@ -17,7 +17,6 @@ public abstract class ResourceMonitor
 {
    private static final double DEFAULT_READ_PERIOD_SECONDS = 0.25;
 
-   private final double parsePeriodSeconds;
    private final String[] command;
    private final PausablePeriodicThread thread;
    private volatile boolean running;
@@ -29,7 +28,6 @@ public abstract class ResourceMonitor
 
    public ResourceMonitor(double parsePeriodSeconds, String... command)
    {
-      this.parsePeriodSeconds = parsePeriodSeconds;
       this.command = command;
       thread = new PausablePeriodicThread(getClass().getName() + "-Reader-Parser", parsePeriodSeconds, true, () ->
       {
