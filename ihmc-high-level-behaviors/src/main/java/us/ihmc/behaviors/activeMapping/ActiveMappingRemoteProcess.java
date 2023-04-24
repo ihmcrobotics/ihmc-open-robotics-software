@@ -103,6 +103,7 @@ public class ActiveMappingRemoteProcess
    private void generalUpdate()
    {
       ros2PropertySetGroup.update();
+      activeMappingModule.setActive(configurationParameters.getSLAMEnabled());
       //activeMappingModule.getPlanarRegionMap().printStatistics(true);
    }
 
@@ -155,7 +156,13 @@ public class ActiveMappingRemoteProcess
       if (configurationParameters.getActiveMapping())
       {
          activeMappingModule.updateFootstepPlan();
-         sendActiveMappingPlanToController();
+
+         if (activeMappingModule.isPlanAvailable())
+         {
+            sendActiveMappingPlanToController();
+            activeMappingModule.setPlanAvailable(false);
+         }
+
          configurationParameters.setActiveMapping(false);
       }
    }

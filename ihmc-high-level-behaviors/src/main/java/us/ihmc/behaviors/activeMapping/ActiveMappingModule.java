@@ -2,9 +2,7 @@ package us.ihmc.behaviors.activeMapping;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -16,9 +14,6 @@ import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
 public class ActiveMappingModule
 {
    private final FootstepPlanningModule footstepPlanner;
@@ -29,8 +24,8 @@ public class ActiveMappingModule
    private FootstepPlannerRequest request;
    private FootstepPlannerOutput plannerOutput;
 
-   private boolean walkingEnabled = false;
-   private boolean active = true;
+   private boolean planAvailable = false;
+   private boolean active = false;
 
    public ActiveMappingModule(DRCRobotModel robotModel, HumanoidReferenceFrames humanoidReferenceFrames)
    {
@@ -39,40 +34,50 @@ public class ActiveMappingModule
       this.robotModel = robotModel;
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
+
+      active = true;
    }
 
    public void updateMap(FramePlanarRegionsList regions)
    {
-      planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
+      if(active)
+      {
+         planarRegionMap.registerRegions(regions.getPlanarRegionsList(), regions.getSensorToWorldFrameTransform());
+      }
    }
 
    public void updateFootstepPlan()
    {
-      Pose3D leftSolePose = new Pose3D(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-      Pose3D rightSolePose = new Pose3D(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+      if(active)
+      {
+         Pose3D leftSolePose = new Pose3D(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+         Pose3D rightSolePose = new Pose3D(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+         Pose3D midFootPose = new Pose3D(referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame());
 
-      Pose3D leftGoalPose = new Pose3D(leftSolePose);
-      leftGoalPose.appendTranslation(1.0, 0.0, 0.0);
+         Pose3D goalFeetPose = new Pose3D(midFootPose);
+         goalFeetPose.appendTranslation(1.0, 0.0, 0.0);
 
-      Pose3D rightGoalPose = new Pose3D(rightSolePose);
-      rightGoalPose.appendTranslation(1.0, 0.0, 0.0);
+         LogTools.info("Start Pose: {}, Goal Pose: {}", leftSolePose, goalFeetPose);
 
-      LogTools.info("Start Pose: {}, Goal Pose: {}", leftSolePose, leftGoalPose);
+         request = new FootstepPlannerRequest();
+         request.setTimeout(0.25);
+         request.setStartFootPoses(leftSolePose, rightSolePose);
+         request.setPlanarRegionsList(planarRegionMap.getMapRegions());
+         //request.setAssumeFlatGround(true);
+         request.setPlanBodyPath(false);
+         request.setGoalFootPoses(0.22, goalFeetPose);
+         request.setSnapGoalSteps(true);
+         request.setPerformAStarSearch(true);
 
-      request = new FootstepPlannerRequest();
-      request.setTimeout(0.25);
-      request.setStartFootPoses(leftSolePose, rightSolePose);
-      request.setPlanarRegionsList(planarRegionMap.getMapRegions());
-      request.setPlanBodyPath(false);
-      request.setGoalFootPoses(leftGoalPose, rightGoalPose);
-      request.setPerformAStarSearch(true);
+         plannerOutput = footstepPlanner.handleRequest(request);
 
-      plannerOutput = footstepPlanner.handleRequest(request);
+         LogTools.info(String.format("Planar Regions: %d\t, First Area: %.2f\t Plan Length: %d\n",
+                                     planarRegionMap.getMapRegions().getNumberOfPlanarRegions(),
+                                     planarRegionMap.getMapRegions().getPlanarRegion(0).getArea(),
+                                     footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps()));
 
-
-      LogTools.info(String.format("Planar Regions: %d\t Plan Length: %d\n",
-                                  planarRegionMap.getMapRegions().getNumberOfPlanarRegions(),
-                                  footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps()));
+         planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
+      }
    }
 
    public PlanarRegionMap getPlanarRegionMap()
@@ -91,18 +96,23 @@ public class ActiveMappingModule
       planarRegionMap.setModified(true);
    }
 
-   public void setWalkingEnabled(boolean walkingEnabled)
+   public void setPlanAvailable(boolean planAvailable)
    {
-      this.walkingEnabled = walkingEnabled;
+      this.planAvailable = planAvailable;
    }
 
-   public boolean isWalkingEnabled()
+   public boolean isPlanAvailable()
    {
-      return walkingEnabled;
+      return planAvailable;
    }
 
    public boolean isActive()
    {
       return active;
+   }
+
+   public void setActive(boolean active)
+   {
+      this.active = active;
    }
 }
