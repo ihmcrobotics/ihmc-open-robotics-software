@@ -16,7 +16,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
-import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;

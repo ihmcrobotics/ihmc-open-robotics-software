@@ -327,4 +327,10 @@ public class OnToesState extends AbstractFootControlState
    {
       return null;
    }
+
+   @Override
+   public boolean isLoadBearing()
+   {
+      return true;
+   }
 }

@@ -830,4 +830,14 @@ public abstract class WalkingControllerParameters
    {
       return Double.POSITIVE_INFINITY;
    }
+
+   /**
+    *  When there's less than this fraction of swing remaining, the robot joints in swing should switch to
+    *  "load bearing". Essentially, for hydraulic robots, this switches them from velocity to position controlled.
+    *  This can be used to help alleviate heavy impacts at touchdown.
+    */
+   public double getFractionOfSwingToSwitchToLoaded()
+   {
+      return Double.NaN;
+   }
 }
