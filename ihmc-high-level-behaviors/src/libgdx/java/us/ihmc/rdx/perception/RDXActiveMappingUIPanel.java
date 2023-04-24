@@ -58,7 +58,7 @@ public class RDXActiveMappingUIPanel implements RenderableProvider
             LogTools.info("Triggered footstep plan calculation");
 
             activeMappingModule.updateFootstepPlan();
-            activeMappingModule.setWalkingEnabled(true);
+            activeMappingModule.setPlanAvailable(true);
          }
       }
    }
