@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.missionControl;
 
+import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import us.ihmc.commons.thread.ThreadTools;
@@ -162,7 +163,18 @@ public class ImGuiMachineService
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text(serviceName);
       ImGui.popFont();
-      ImGui.text(status);
+      if (status.startsWith("failed"))
+      {
+         ImGuiTools.textColored(Color.SCARLET, status);
+      }
+      else if (status.startsWith("active"))
+      {
+         ImGuiTools.textColored(Color.LIME, status);
+      }
+      else
+      {
+         ImGui.text(status);
+      }
 
       boolean isMissionControl3 = serviceName.contains("mission-control-3");
       boolean allButtonsDisabled = waitingOnStatusChange && !hasItBeenAWhileSinceTheLastActionRequest() || isMissionControl3;
