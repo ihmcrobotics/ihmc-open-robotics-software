@@ -14,7 +14,7 @@ public class SysstatNetworkMonitor extends ResourceMonitor
 
    public SysstatNetworkMonitor()
    {
-      super(2.0, "sar", "-n", "DEV", "1");
+      super(2.0, "timeout", "2.1s", "sar", "-n", "DEV", "1");
    }
 
    public Map<String, Float> getIfaceRxKbps()

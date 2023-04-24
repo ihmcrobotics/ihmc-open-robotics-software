@@ -1,6 +1,5 @@
 package us.ihmc.missionControl.resourceMonitor;
 
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.io.BufferedReader;
@@ -63,16 +62,6 @@ public abstract class ResourceMonitor
       ProcessBuilder processBuilder = new ProcessBuilder(command);
       processBuilder.redirectErrorStream(true);
       Process process = processBuilder.start();
-
-      // Destroy the process after the parse period has expired
-      new Thread(() ->
-      {
-         ThreadTools.sleep((long) (parsePeriodSeconds * 1000));
-         if (process.isAlive())
-         {
-            process.destroy();
-         }
-      }).start();
 
       List<String> lines = new ArrayList<>();
 
