@@ -6,14 +6,14 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
  * and run the main in super to regenerate.
  */
-public interface ArUcoMarkerInfoBasics extends ArUcoMarkerInfoReadOnly, StoredPropertySetBasics
+public interface ArUcoMarkerBasics extends ArUcoMarkerReadOnly, StoredPropertySetBasics
 {
    /**
     * ArUco marker ID in the ArUco dictionary
     */
    default void setMarkerID(int markerID)
    {
-      set(ArUcoMarkerInfo.markerID, markerID);
+      set(ArUcoMarker.markerID, markerID);
    }
 
    /**
@@ -21,7 +21,7 @@ public interface ArUcoMarkerInfoBasics extends ArUcoMarkerInfoReadOnly, StoredPr
     */
    default void setMarkerSize(double markerSize)
    {
-      set(ArUcoMarkerInfo.markerSize, markerSize);
+      set(ArUcoMarker.markerSize, markerSize);
    }
 
    /**
@@ -29,7 +29,7 @@ public interface ArUcoMarkerInfoBasics extends ArUcoMarkerInfoReadOnly, StoredPr
     */
    default void setMarkerXTranslationToParent(double markerXTranslationToParent)
    {
-      set(ArUcoMarkerInfo.markerXTranslationToParent, markerXTranslationToParent);
+      set(ArUcoMarker.markerXTranslationToParent, markerXTranslationToParent);
    }
 
    /**
@@ -37,7 +37,7 @@ public interface ArUcoMarkerInfoBasics extends ArUcoMarkerInfoReadOnly, StoredPr
     */
    default void setMarkerYTranslationToParent(double markerYTranslationToParent)
    {
-      set(ArUcoMarkerInfo.markerYTranslationToParent, markerYTranslationToParent);
+      set(ArUcoMarker.markerYTranslationToParent, markerYTranslationToParent);
    }
 
    /**
@@ -45,7 +45,7 @@ public interface ArUcoMarkerInfoBasics extends ArUcoMarkerInfoReadOnly, StoredPr
     */
    default void setMarkerZTranslationToParent(double markerZTranslationToParent)
    {
-      set(ArUcoMarkerInfo.markerZTranslationToParent, markerZTranslationToParent);
+      set(ArUcoMarker.markerZTranslationToParent, markerZTranslationToParent);
    }
 
    /**
@@ -53,7 +53,7 @@ public interface ArUcoMarkerInfoBasics extends ArUcoMarkerInfoReadOnly, StoredPr
     */
    default void setMarkerYawRotationToParentDegrees(double markerYawRotationToParentDegrees)
    {
-      set(ArUcoMarkerInfo.markerYawRotationToParentDegrees, markerYawRotationToParentDegrees);
+      set(ArUcoMarker.markerYawRotationToParentDegrees, markerYawRotationToParentDegrees);
    }
 
    /**
@@ -61,7 +61,7 @@ public interface ArUcoMarkerInfoBasics extends ArUcoMarkerInfoReadOnly, StoredPr
     */
    default void setMarkerPitchRotationToParentDegrees(double markerPitchRotationToParentDegrees)
    {
-      set(ArUcoMarkerInfo.markerPitchRotationToParentDegrees, markerPitchRotationToParentDegrees);
+      set(ArUcoMarker.markerPitchRotationToParentDegrees, markerPitchRotationToParentDegrees);
    }
 
    /**
@@ -69,6 +69,6 @@ public interface ArUcoMarkerInfoBasics extends ArUcoMarkerInfoReadOnly, StoredPr
     */
    default void setMarkerRollRotationToParentDegrees(double markerRollRotationToParentDegrees)
    {
-      set(ArUcoMarkerInfo.markerRollRotationToParentDegrees, markerRollRotationToParentDegrees);
+      set(ArUcoMarker.markerRollRotationToParentDegrees, markerRollRotationToParentDegrees);
    }
 }

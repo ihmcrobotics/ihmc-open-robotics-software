@@ -2,13 +2,13 @@ package us.ihmc.perception.arUco;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.perception.arUco.ArUcoMarkerInfo.*;
+import static us.ihmc.perception.arUco.ArUcoMarker.*;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
  * and run the main in super to regenerate.
  */
-public interface ArUcoMarkerInfoReadOnly extends StoredPropertySetReadOnly
+public interface ArUcoMarkerReadOnly extends StoredPropertySetReadOnly
 {
    /**
     * ArUco marker ID in the ArUco dictionary
