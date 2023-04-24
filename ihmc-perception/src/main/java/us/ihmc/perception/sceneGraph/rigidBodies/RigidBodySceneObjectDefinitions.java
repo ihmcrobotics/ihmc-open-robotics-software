@@ -27,6 +27,7 @@ public class RigidBodySceneObjectDefinitions
    public static final RigidBodyTransform BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
    // TODO: Get soup can model from Arghya
+   public static final int CAN_OF_SOUP_MARKER_ID = 3;
    public static final String CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH = "environmentObjects/box/box.g3dj";
    public static final RigidBodyTransform CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
 
