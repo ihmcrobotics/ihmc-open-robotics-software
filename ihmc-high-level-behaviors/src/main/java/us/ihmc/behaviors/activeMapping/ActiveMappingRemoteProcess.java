@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
@@ -48,6 +49,7 @@ public class ActiveMappingRemoteProcess
    private final ROS2PublisherMap publisherMap;
    private final ROS2Helper ros2Helper;
    private final HumanoidReferenceFrames referenceFrames;
+   private final ROS2SyncedRobotModel syncedRobotModel;
 
    private ActiveMappingModule activeMappingModule;
    private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
@@ -69,9 +71,10 @@ public class ActiveMappingRemoteProcess
 
    private final PerceptionConfigurationParameters configurationParameters = new PerceptionConfigurationParameters();
 
-   public ActiveMappingRemoteProcess(String simpleRobotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames , ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic, ROS2Node ros2Node)
+   public ActiveMappingRemoteProcess(String simpleRobotName, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel, ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic, ROS2Node ros2Node)
    {
-      this.referenceFrames = referenceFrames;
+      this.syncedRobotModel = syncedRobotModel;
+      this.referenceFrames = syncedRobotModel.getReferenceFrames();
       this.terrainRegionsTopic = terrainRegionsTopic;
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
 
@@ -103,6 +106,8 @@ public class ActiveMappingRemoteProcess
    private void generalUpdate()
    {
       ros2PropertySetGroup.update();
+      syncedRobotModel.update();
+      referenceFrames.updateFrames();
       activeMappingModule.setActive(configurationParameters.getSLAMEnabled());
       //activeMappingModule.getPlanarRegionMap().printStatistics(true);
    }

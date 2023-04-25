@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.*;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 
@@ -1465,5 +1467,17 @@ public class PlanarRegionTools
    {
       Point3D closestPoint = closestPointOnPlanarRegion(point, region);
       return closestPoint.epsilonEquals(point, epsilon);
+   }
+
+   public static PlanarRegion createSquarePlanarRegion(float length, Point3D translation, Quaternion orientation)
+   {
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(-length / 2.0f, length / 2.0f);
+      convexPolygon.addVertex(length / 2.0f, length / 2.0f);
+      convexPolygon.addVertex(length / 2.0f, -length / 2.0f);
+      convexPolygon.addVertex(-length / 2.0f, -length / 2.0f);
+      convexPolygon.update();
+
+      return new PlanarRegion(new RigidBodyTransform(orientation, translation), convexPolygon);
    }
 }

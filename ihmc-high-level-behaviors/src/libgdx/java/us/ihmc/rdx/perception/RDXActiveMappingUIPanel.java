@@ -50,13 +50,21 @@ public class RDXActiveMappingUIPanel implements RenderableProvider
       if (remotePropertySets != null)
       {
          remotePropertySets.renderImGuiWidgets();
+
+         if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+         {
+            LogTools.info("Enabled Remove Active Mapping");
+            if (perceptionConfigurationParameters != null)
+            {
+               perceptionConfigurationParameters.setActiveMapping(true);
+            }
+         }
       }
       else
       {
          if (ImGui.button("Calculate Footstep Plan") || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
          {
             LogTools.info("Triggered footstep plan calculation");
-
             activeMappingModule.updateFootstepPlan();
             activeMappingModule.setPlanAvailable(true);
          }
