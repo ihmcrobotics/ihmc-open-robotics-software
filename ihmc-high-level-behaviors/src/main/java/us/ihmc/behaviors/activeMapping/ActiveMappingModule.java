@@ -4,18 +4,29 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
+import us.ihmc.perception.tools.ActiveMappingTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
+
 public class ActiveMappingModule
 {
+   public enum ActiveMappingMode
+   {
+      EXECUTE_AND_PAUSE, CONTINUOUS_MAPPING_STRAIGHT, CONTINUOUS_MAPPING_COVERAGE, CONTINUOUS_MAPPING_SEARCH
+   }
+
+   public ActiveMappingMode activeMappingMode = ActiveMappingMode.CONTINUOUS_MAPPING_STRAIGHT;
+
    private final FootstepPlanningModule footstepPlanner;
    private final DRCRobotModel robotModel;
    private final HumanoidReferenceFrames referenceFrames;
@@ -23,6 +34,13 @@ public class ActiveMappingModule
 
    private FootstepPlannerRequest request;
    private FootstepPlannerOutput plannerOutput;
+
+   private Pose3D leftGoalPose = new Pose3D();
+   private Pose3D rightGoalPose = new Pose3D();
+   private Pose3D leftSolePose = new Pose3D();
+   private Pose3D rightSolePose = new Pose3D();
+
+   private ArrayList<Point2D> frontierPoints = new ArrayList<>();
 
    private boolean planAvailable = false;
    private boolean active = false;
@@ -50,19 +68,12 @@ public class ActiveMappingModule
    {
       if(active)
       {
-         Pose3D leftSolePose = new Pose3D(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-         Pose3D rightSolePose = new Pose3D(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+         leftSolePose.set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+         rightSolePose.set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+         leftGoalPose.setToZero();
+         rightGoalPose.setToZero();
 
-         leftSolePose.setZ(0);
-         rightSolePose.setZ(0);
-
-         Pose3D leftGoalPose = new Pose3D(leftSolePose);
-         leftGoalPose.appendTranslation(0.6, 0.0, 0.0);
-
-         Pose3D rightGoalPose = new Pose3D(leftGoalPose);
-         rightGoalPose.appendTranslation(0.0, -0.22, 0.0);
-
-         LogTools.info("Start Pose: {}, Goal Pose: {}", leftSolePose, leftGoalPose);
+         ActiveMappingTools.setStraightGoalFootPoses(leftSolePose, rightSolePose, leftGoalPose, rightGoalPose, 0.6f);
 
          request = new FootstepPlannerRequest();
          request.setTimeout(0.25);
@@ -86,6 +97,8 @@ public class ActiveMappingModule
          planAvailable = footstepPlanner.getOutput().getFootstepPlan().getNumberOfSteps() > 0;
       }
    }
+
+
 
    public PlanarRegionMap getPlanarRegionMap()
    {
