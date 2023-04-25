@@ -6,6 +6,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
@@ -673,6 +674,13 @@ public class PlanarRegionMap
       {
          if (region.getArea() > parameters.getMinimumPlanarRegionArea())
             regions.addPlanarRegion(region);
+      }
+
+      if (!initialized)
+      {
+         PlanarRegion initialSupportSquareRegion = PlanarRegionTools.createSquarePlanarRegion(1.0f, new Point3D(), new Quaternion());
+         initialSupportSquareRegion.setRegionId(uniqueIDtracker++);
+         finalMap.addPlanarRegion(initialSupportSquareRegion);
       }
 
       PlanarLandmarkList landmarks = new PlanarLandmarkList(regions);

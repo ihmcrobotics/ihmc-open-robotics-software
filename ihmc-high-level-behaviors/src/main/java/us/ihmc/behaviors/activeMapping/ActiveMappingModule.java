@@ -4,11 +4,14 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ActiveMappingModule
@@ -49,26 +52,31 @@ public class ActiveMappingModule
       {
          Pose3D leftSolePose = new Pose3D(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
          Pose3D rightSolePose = new Pose3D(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
-         Pose3D midFootPose = new Pose3D(referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame());
 
-         Pose3D goalFeetPose = new Pose3D(midFootPose);
-         goalFeetPose.appendTranslation(1.0, 0.0, 0.0);
+         leftSolePose.setZ(0);
+         rightSolePose.setZ(0);
 
-         LogTools.info("Start Pose: {}, Goal Pose: {}", leftSolePose, goalFeetPose);
+         Pose3D leftGoalPose = new Pose3D(leftSolePose);
+         leftGoalPose.appendTranslation(0.6, 0.0, 0.0);
+
+         Pose3D rightGoalPose = new Pose3D(leftGoalPose);
+         rightGoalPose.appendTranslation(0.0, -0.22, 0.0);
+
+         LogTools.info("Start Pose: {}, Goal Pose: {}", leftSolePose, leftGoalPose);
 
          request = new FootstepPlannerRequest();
          request.setTimeout(0.25);
          request.setStartFootPoses(leftSolePose, rightSolePose);
          request.setPlanarRegionsList(planarRegionMap.getMapRegions());
-//         request.setAssumeFlatGround(true);
          request.setPlanBodyPath(false);
-         request.setGoalFootPoses(0.22, goalFeetPose);
-         request.setSnapGoalSteps(true);
+         request.setGoalFootPoses(leftGoalPose, rightGoalPose);
          request.setPerformAStarSearch(true);
 
          plannerOutput = footstepPlanner.handleRequest(request);
 
          FootstepPlanningResult footstepPlanningResult = plannerOutput.getFootstepPlanningResult();
+
+         LogTools.info("Footstep Planning Result: {}", footstepPlanningResult);
 
          LogTools.info(String.format("Planar Regions: %d\t, First Area: %.2f\t Plan Length: %d\n",
                                      planarRegionMap.getMapRegions().getNumberOfPlanarRegions(),
