@@ -42,7 +42,7 @@ public class ActiveMappingTools
 
                if (PlanarRegionTools.isPointInWorldInsidePlanarRegion(region, projectedPoint))
                {
-                  frontierPoints.add(new Point2D(point.getX(), point.getY());
+                  frontierPoints.add(new Point2D(point.getX(), point.getY()));
                }
             }
          }

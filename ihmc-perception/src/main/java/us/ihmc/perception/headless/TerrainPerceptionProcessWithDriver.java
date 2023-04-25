@@ -128,6 +128,8 @@ public class TerrainPerceptionProcessWithDriver
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
 
       realSenseHardwareManager = new RealSenseHardwareManager();
+
+      LogTools.info("Creating Bytedeco Realsense Using: {}", serialNumber);
       sensor = realSenseHardwareManager.createBytedecoRealsenseDevice(serialNumber, realsenseConfiguration);
       if (sensor.getDevice() == null)
       {
