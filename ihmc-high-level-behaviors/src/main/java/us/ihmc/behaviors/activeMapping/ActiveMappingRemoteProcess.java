@@ -34,13 +34,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ActiveMappingRemoteProcess
 {
-   public enum ActiveMappingMode
-   {
-      EXECUTE_AND_PAUSE, CONTINUOUS_MAPPING_STRAIGHT, CONTINUOUS_MAPPING_COVERAGE, CONTINUOUS_MAPPING_SEARCH
-   }
-
-   public ActiveMappingMode activeMappingMode = ActiveMappingMode.EXECUTE_AND_PAUSE;
-
    private final static long STATISTICS_COLLECTION_PERIOD_MS = 500;
 
    private final AtomicReference<FramePlanarRegionsListMessage> planarRegionsListMessage = new AtomicReference<>(null);
