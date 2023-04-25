@@ -13,12 +13,6 @@ public abstract class SceneNode
 {
    private final String name;
    private final ModifiableReferenceFrame nodeFrame;
-   /**
-    * Sometimes, the operator will want to override the pose of a scene node.
-    * This can be for test cases, to make up for detection errors, or
-    * to place objects for which no detection mechnism exists yet.
-    */
-   private boolean poseOverriddenByOperator = false;
 
    public SceneNode(String name)
    {
@@ -54,15 +48,5 @@ public abstract class SceneNode
    protected void changeParentFrame(ReferenceFrame newParentFrame)
    {
       nodeFrame.changeParentFrame(newParentFrame);
-   }
-
-   public void setPoseOverriddenByOperator(boolean poseOverriddenByOperator)
-   {
-      this.poseOverriddenByOperator = poseOverriddenByOperator;
-   }
-
-   public boolean getPoseOverriddenByOperator()
-   {
-      return poseOverriddenByOperator;
    }
 }

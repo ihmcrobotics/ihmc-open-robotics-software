@@ -22,16 +22,6 @@ public abstract class ImGuiFancyWidget
    private float prefixTextWidth;
    private boolean textWidthCalculated = false;
 
-   protected ImGuiFancyWidget(String label)
-   {
-      this.prefixLabel = label;
-      this.label = labels.getHidden(label);
-      this.format = "";
-   }
-
-   /**
-    * @param format included just for convenience, use as protected field; not used in this class
-    */
    protected ImGuiFancyWidget(String label, String format)
    {
       this.prefixLabel = label;
