@@ -4,9 +4,8 @@ import imgui.internal.ImGui;
 
 import java.util.Arrays;
 
-public class ImGuiEnumPlot
+public class ImGuiEnumPlot extends ImGuiFancyWidget
 {
-   private final String label;
    private final int bufferSize;
    private final float[] values;
    private final int width;
@@ -25,7 +24,7 @@ public class ImGuiEnumPlot
 
    public ImGuiEnumPlot(String label, int bufferSize, int width, int height)
    {
-      this.label = label;
+      super(label);
       this.bufferSize = bufferSize;
       values = new float[bufferSize];
       this.width = width;
@@ -35,12 +34,14 @@ public class ImGuiEnumPlot
 
    public void render(int ordinal, String overlayText)
    {
+      beforeWidgetRender();
+
       if (ordinal < 0)
          values[index] = Float.NaN;
       else
          values[index] = ordinal;
 
-      ImGui.plotLines(label, values, bufferSize, 0, overlayText, Float.MAX_VALUE, Float.MAX_VALUE, width, height);
+      ImGui.plotLines(label, values, bufferSize, 0, overlayText, Float.MAX_VALUE, Float.MAX_VALUE, 0, height);
 
       ++index;
       if (index >= bufferSize - 1)
@@ -48,5 +49,7 @@ public class ImGuiEnumPlot
          index = 0;
       }
       values[index] = Float.NaN;
+
+      afterWidgetRender();
    }
 }
