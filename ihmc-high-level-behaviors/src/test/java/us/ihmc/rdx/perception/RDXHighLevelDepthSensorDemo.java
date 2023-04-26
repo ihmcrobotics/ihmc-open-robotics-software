@@ -13,7 +13,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.visualizers.RDXFrustumVisualizer;
+import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.perception.BytedecoImage;
 
 import java.nio.ByteBuffer;
@@ -28,7 +28,7 @@ public class RDXHighLevelDepthSensorDemo
    private ModelInstance mousePickSphere;
    private int mousePosX;
    private int mousePosY;
-   private RDXFrustumVisualizer frustumVisualizer;
+   private RDXFrustumGraphic frustumVisualizer;
    private RDXBytedecoImagePanel mainViewDepthPanel;
    private BytedecoImage image;
 
@@ -106,7 +106,7 @@ public class RDXHighLevelDepthSensorDemo
             RDX3DPanel panel3D = new RDX3DPanel("3D View 2", true);
             baseUI.add3DPanel(panel3D);
 
-            frustumVisualizer = new RDXFrustumVisualizer();
+            frustumVisualizer = new RDXFrustumGraphic();
             baseUI.getPrimaryScene().addRenderableProvider(frustumVisualizer::getRenderables, RDXSceneLevel.VIRTUAL);
          }
 

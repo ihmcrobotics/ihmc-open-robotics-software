@@ -3,7 +3,7 @@
   "logging" : false,
   "numberBasisFunctions": 20,
   "numberObservations": 10,
-  "conditionOnlyLastObservation": false,
+  "conditionOnlyLastObservation": true,
   "numberOfInferredSpeeds": 0,
   "allowedIncreaseDecreaseSpeedFactor": 2,
   "tasks":[
