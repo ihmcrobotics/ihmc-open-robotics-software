@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -25,10 +26,9 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.JSONTools;
-
-import java.util.List;
 
 public class RDXHandPoseAction implements RDXBehaviorAction
 {
@@ -52,7 +52,7 @@ public class RDXHandPoseAction implements RDXBehaviorAction
                       ROS2SyncedRobotModel syncedRobot,
                       FullHumanoidRobotModel fullRobotModel,
                       ROS2ControllerHelper ros2ControllerHelper,
-                      List<ReferenceFrame> referenceFrameLibrary)
+                      ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.fullRobotModel = fullRobotModel;
@@ -115,7 +115,7 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    @Override
    public void renderImGuiWidgets()
    {
-      if (referenceFrameLibraryCombo.combo())
+      if (referenceFrameLibraryCombo.render())
       {
          FramePose3D poseToKeep = new FramePose3D();
          poseToKeep.setToZero(poseGizmo.getGizmoFrame());

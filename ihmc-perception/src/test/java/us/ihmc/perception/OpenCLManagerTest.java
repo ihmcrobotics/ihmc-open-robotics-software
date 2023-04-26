@@ -18,7 +18,7 @@ import static org.bytedeco.opencl.global.OpenCL.*;
 
 public class OpenCLManagerTest
 {
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testLoadingAndPrintingParameters()
    {
@@ -26,7 +26,7 @@ public class OpenCLManagerTest
       openCLManager.destroy();
    }
 
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testOpenCLContext()
    {
@@ -53,7 +53,7 @@ public class OpenCLManagerTest
       openCLManager.destroy();
    }
 
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testOpenCLImageManipulation()
    {
@@ -96,7 +96,7 @@ public class OpenCLManagerTest
       openCLManager.destroy();
    }
 
-   @Tag("gui")
+   @Tag("opencl")
    @Test
    public void testOpenCLImageManipulation2()
    {
