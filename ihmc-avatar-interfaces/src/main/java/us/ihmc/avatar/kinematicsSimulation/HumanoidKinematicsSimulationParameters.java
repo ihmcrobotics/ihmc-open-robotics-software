@@ -1,6 +1,7 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.UnitConversions;
 
 public class HumanoidKinematicsSimulationParameters
@@ -16,6 +17,8 @@ public class HumanoidKinematicsSimulationParameters
    private double dt = UnitConversions.hertzToSeconds(70);
    private boolean runNoFasterThanMaxRealtimeRate = true;
    private double maxRealtimeRate = 2.0;
+   
+   private SimulationConstructionSet scs;
 
    public double getInitialGroundHeight()
    {
@@ -116,9 +119,26 @@ public class HumanoidKinematicsSimulationParameters
    {
       return runNoFasterThanMaxRealtimeRate;
    }
+   
+   public void setMaxRealtimeRate(double maxRealtimeRate)
+   {
+      this.maxRealtimeRate = maxRealtimeRate;
+   }
 
    public double getMaxRealtimeRate()
    {
       return maxRealtimeRate;
    }
+   
+   public void useSCS1ToManageThreadAndPreview(SimulationConstructionSet scs)
+   {
+      this.scs = scs;
+   }
+
+   public SimulationConstructionSet getScs()
+   {
+      return scs;
+   }
+
+   
 }
