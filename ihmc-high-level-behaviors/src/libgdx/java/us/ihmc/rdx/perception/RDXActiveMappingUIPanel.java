@@ -15,12 +15,15 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
 public class RDXActiveMappingUIPanel implements RenderableProvider
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
+
+   private final RDXFootstepPlanGraphic footstepPlanGraphic = new RDXFootstepPlanGraphic();
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
    private ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
