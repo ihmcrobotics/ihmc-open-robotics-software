@@ -68,7 +68,7 @@ tasks.create("generateMessages") {
       var foundDependency = false
 
       copy {
-         for (file in configurations.default.get().files)
+         for (file in configurations.runtimeClasspath.get().files)
          {
             if (file.name.contains("ros2-common-interfaces"))
             {
@@ -81,7 +81,7 @@ tasks.create("generateMessages") {
 
       if (!foundDependency)
       {
-         throw GradleException("Could not find ros2-common-interfaces in configurations.default!")
+         throw GradleException("Could not find ros2-common-interfaces in configurations.runtimeClasspath!")
       }
 
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces").toPath())
