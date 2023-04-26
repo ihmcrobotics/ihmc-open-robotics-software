@@ -76,7 +76,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
 
    public void setEnabled(boolean enabled)
    {
-      helper.setCommunicationCallbacksEnabled(enabled);
       mainThread.setRunning(enabled);
    }
 

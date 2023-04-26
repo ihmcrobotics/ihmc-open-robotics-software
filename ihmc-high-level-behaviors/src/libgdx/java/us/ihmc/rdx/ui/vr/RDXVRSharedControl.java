@@ -4,7 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import perception_msgs.msg.dds.DetectedObjectMessage;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.DetectableSceneNodesMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
@@ -19,7 +20,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.perception.ArUcoObjectsPerceptionManager;
+import us.ihmc.perception.sceneGraph.SceneGraphAPI;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXEdgeDefinedShapeGraphic;
@@ -39,7 +40,7 @@ import java.util.Map;
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
    private final ROS2PublishSubscribeAPI ros2;
-   private final IHMCROS2Input<DetectedObjectMessage> objectDetectorSubscription;
+   private final IHMCROS2Input<DetectableSceneNodesMessage> detectableSceneObjectsSubscription;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
@@ -80,7 +81,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
-      objectDetectorSubscription = ros2.subscribe(ArUcoObjectsPerceptionManager.DETECTED_OBJECT);
+      detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
    }
 
    public void processInput(InputDigitalActionData triggerButton)
@@ -219,12 +220,13 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      if (objectDetectorSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
+      if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
       {
-         DetectedObjectMessage detectedObjectMessage = objectDetectorSubscription.getMessageNotification().read();
-         objectName = detectedObjectMessage.getId().toString();
+         DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
+         DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
+         objectName = selectedObject.getNameAsString();
 
-         MessageTools.toEuclid(detectedObjectMessage.getTransformToWorld(), objectTransformToWorld);
+         MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
          objectFrame.update();
       }
 

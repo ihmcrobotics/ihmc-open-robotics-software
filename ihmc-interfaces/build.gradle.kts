@@ -53,7 +53,7 @@ generatorDependencies {
 }
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()
-val msg_packages = listOf("ihmc_common_msgs", "controller_msgs", "toolbox_msgs", "quadruped_msgs", "perception_msgs", "exoskeleton_msgs", "atlas_msgs")
+val msg_packages = listOf("ihmc_common_msgs", "mission_control_msgs", "controller_msgs", "toolbox_msgs", "quadruped_msgs", "perception_msgs", "exoskeleton_msgs", "atlas_msgs")
 
 tasks.create("generateMessages") {
    doFirst {

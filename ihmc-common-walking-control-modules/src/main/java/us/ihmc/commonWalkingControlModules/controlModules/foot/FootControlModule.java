@@ -304,6 +304,11 @@ public class FootControlModule implements SCS2YoGraphicHolder
       return stateMachine.getCurrentStateKey();
    }
 
+   public AbstractFootControlState getCurrentControlState()
+   {
+      return stateMachine.getCurrentState();
+   }
+
    public void initialize()
    {
       stateMachine.resetToInitialState();

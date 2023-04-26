@@ -41,6 +41,7 @@ public class ImGuiTools
 
    private static ImFont consoleFont;
    private static ImFont smallFont;
+   private static ImFont smallBoldFont;
    private static ImFont mediumFont;
    private static ImFont bigFont;
    private static ImFont nodeFont;
@@ -262,6 +263,7 @@ public class ImGuiTools
    public static ImFont setupFonts(ImGuiIO io, int fontSizeLevel)
    {
       final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
+      final ImFontConfig boldFontConfig = new ImFontConfig();
       final ImFontConfig consoleFontConfig = new ImFontConfig();
       final ImFontConfig mediumFontConfig = new ImFontConfig();
       final ImFontConfig bigFontConfig = new ImFontConfig();
@@ -281,6 +283,7 @@ public class ImGuiTools
 //      fontConfig.setRasterizerMultiply(2.0f);
 //      fontConfig.setPixelSnapH(true);
       fontConfig.setFontBuilderFlags(fontsFlags);
+      boldFontConfig.setFontBuilderFlags(fontsFlags + ImGuiFreeTypeBuilderFlags.Bold);
       consoleFontConfig.setFontBuilderFlags(fontsFlags);
       mediumFontConfig.setFontBuilderFlags(fontsFlags);
       bigFontConfig.setFontBuilderFlags(fontsFlags);
@@ -300,6 +303,7 @@ public class ImGuiTools
       {
          fontConfig.setName("segoeui.ttf, 16px");
          smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, fontConfig);
+         smallBoldFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, boldFontConfig);
 
          fontConfig.setName("segoeui.ttf, 20px");
          mediumFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 20.0f, mediumFontConfig);
@@ -314,6 +318,7 @@ public class ImGuiTools
       {
          fontConfig.setName("DejaVuSans.ttf, 13px");
          smallFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
+         smallBoldFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, boldFontConfig);
 
          fontConfig.setName("DejaVuSans.ttf, 17px");
          mediumFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 17.0f, mediumFontConfig);
@@ -382,6 +387,11 @@ public class ImGuiTools
    public static ImFont getSmallFont()
    {
       return smallFont;
+   }
+
+   public static ImFont getSmallBoldFont()
+   {
+      return smallBoldFont;
    }
 
    public static ImFont getNodeFont() {
