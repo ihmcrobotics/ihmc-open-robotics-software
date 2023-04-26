@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -59,10 +60,14 @@ public class AvatarFlatGroundDetector
    private final ConcurrentMessageInputBuffer messageListener;
 
    private PlanarRegionsList planarRegions;
+
    private final FootstepStatusMessage latestFootstepStatusMessage = new FootstepStatusMessage();
-   private final FootstepStatusMessage leftFootstepStatusMessage = new FootstepStatusMessage();
-   private final FootstepStatusMessage rightFootstepStatusMessage = new FootstepStatusMessage();
+//   private final FootstepStatusMessage leftFootstepStatusMessage = new FootstepStatusMessage();
+//   private final FootstepStatusMessage rightFootstepStatusMessage = new FootstepStatusMessage();
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
+
+   private final YoEnum<FootstepStatus> leftFootstepStatus = new YoEnum<>("leftFootstepStatus", registry, FootstepStatus.class, false);
+   private final YoEnum<FootstepStatus> rightFootstepStatus = new YoEnum<>("rightFootstepStatus", registry, FootstepStatus.class, false);
 
    protected PlanarRegionsHistory planarRegionsHistory = new PlanarRegionsHistory();
    private final List<PlanarRegionsList> planarRegionsForPlanning = new ArrayList<>();
@@ -104,8 +109,8 @@ public class AvatarFlatGroundDetector
    {
       //consumeMessages();
 
-//      if(planarRegions == null)
-//         return;
+      if(planarRegions == null)
+         return;
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -162,11 +167,11 @@ public class AvatarFlatGroundDetector
          else if (isFootOnGround(RobotSide.LEFT) || isFootOnGround(RobotSide.RIGHT))
          {
             if (capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() > capturabilityBasedStatus.getRightFootSupportPolygon3d().size()
-                && FootstepStatus.fromByte(leftFootstepStatusMessage.getRobotSide()) == FootstepStatus.COMPLETED)
+                && leftFootstepStatus.getEnumValue() == FootstepStatus.COMPLETED)
                stanceSide = RobotSide.LEFT;
 
             else if (capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() < capturabilityBasedStatus.getRightFootSupportPolygon3d().size()
-                     && FootstepStatus.fromByte(rightFootstepStatusMessage.getRobotSide()) == FootstepStatus.COMPLETED)
+                     && rightFootstepStatus.getEnumValue() == FootstepStatus.COMPLETED)
                stanceSide = RobotSide.RIGHT;
 
             Point3DReadOnly stanceFootPosition = footPoses.get(stanceSide).getPosition();
@@ -329,10 +334,10 @@ public class AvatarFlatGroundDetector
       {
          latestFootstepStatusMessage.set(messageListener.pollNewestMessage(FootstepStatusMessage.class));
 
-         if (RobotSide.fromByte(leftFootstepStatusMessage.getRobotSide()) == RobotSide.LEFT)
-            leftFootstepStatusMessage.set(latestFootstepStatusMessage);
+         if (RobotSide.fromByte(latestFootstepStatusMessage.getRobotSide()) == RobotSide.LEFT)
+            leftFootstepStatus.set(FootstepStatus.fromByte(latestFootstepStatusMessage.getFootstepStatus()));
          else
-            rightFootstepStatusMessage.set(latestFootstepStatusMessage);
+            rightFootstepStatus.set(FootstepStatus.fromByte(latestFootstepStatusMessage.getFootstepStatus()));
 
          messageListener.clearMessages(FootstepStatusMessage.class);
       }
@@ -410,19 +415,22 @@ public class AvatarFlatGroundDetector
 
    public boolean isFootOnGround(RobotSide robotSide)
    {
-      if (robotSide == RobotSide.LEFT)
-      {
-         double number = capturabilityBasedStatus.getLeftFootSupportPolygon3d().getCurrentCapacity();
-         double number2 = capturabilityBasedStatus.getLeftFootSupportPolygon3d().size();
-         boolean test =  number2>number;
-         return test;
-      }
-      else
+      if (robotSide == RobotSide.RIGHT)
       {
          double number = capturabilityBasedStatus.getRightFootSupportPolygon3d().getCurrentCapacity();
          double number2 = capturabilityBasedStatus.getRightFootSupportPolygon3d().size();
-         return capturabilityBasedStatus.getRightFootSupportPolygon3d().size() > 0.5 * capturabilityBasedStatus.getRightFootSupportPolygon3d().getCurrentCapacity();
+         boolean test =  number2  >= 0.4* number;
+         return test;
       }
+      else if (robotSide == RobotSide.LEFT)
+      {
+         double number = capturabilityBasedStatus.getLeftFootSupportPolygon3d().getCurrentCapacity();
+         double number2 = capturabilityBasedStatus.getLeftFootSupportPolygon3d().size();
+         boolean test =  number2 >= 0.4* number;
+         return test;
+      }
+      else
+         return false;
    }
 
    public boolean areFeetCoplanar()

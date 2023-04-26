@@ -165,7 +165,7 @@ public class StepGeneratorCommandInputManager implements Updatable
       commandInputManager.clearCommands(PlanarRegionsListCommand.class);
 
       // if the robot is standing, or we just finished a step, we should submit the newest regions
-      if (latestWalkingStatus.get() == WalkingStatus.COMPLETED || latestFootstepStatusReceived.get() == FootstepStatus.COMPLETED)
+      if (latestWalkingStatus.get() == WalkingStatus.COMPLETED || latestWalkingStatus.get() == WalkingStatus.PAUSED || latestFootstepStatusReceived.get() == FootstepStatus.COMPLETED)
          shouldSubmitNewRegions.set(true);
 
       // if the contact state just changed, we should submit the newest regions
