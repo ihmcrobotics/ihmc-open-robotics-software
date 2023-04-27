@@ -41,6 +41,9 @@ public class HeightMapUpdater
    private static final boolean printQueueSize = false;
    private static final int maxQueueLength = 5;
 
+   private static final long sleepTimeMillis = 20;
+   private static final long maxIdleTimeMillis = 1000;
+
    public static final boolean USE_OUSTER_FRAME = true;
    public static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
    static
@@ -169,8 +172,7 @@ public class HeightMapUpdater
    public boolean runUpdateThread()
    {
       int updatesWithoutDataCounter = 0;
-      long sleepTimeMillis = 20;
-      long maxIdleTimeMillis = 1000;
+
 
       while (updatesWithoutDataCounter < maxIdleTimeMillis / sleepTimeMillis)
       {
