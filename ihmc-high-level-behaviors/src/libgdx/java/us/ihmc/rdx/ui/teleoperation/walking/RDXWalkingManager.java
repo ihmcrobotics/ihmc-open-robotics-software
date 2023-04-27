@@ -17,6 +17,8 @@ import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -52,6 +54,12 @@ public class RDXWalkingManager
     private final ImBoolean showGraphics = new ImBoolean(true);
     private boolean isPlacingFootstep = false;
 
+    private final RDXWalkingLowLevelMessenger walkingLowLevelMessenger;
+    private boolean robotIsWalking = false;
+    private boolean spaceBarPressed = false;
+    private boolean robotWalkingIsPaused = false;
+
+
     public RDXWalkingManager(DRCRobotModel robotModel,
                              CommunicationHelper communicationHelper,
                              ROS2SyncedRobotModel syncedRobot,
@@ -62,6 +70,8 @@ public class RDXWalkingManager
         this.robotModel = robotModel;
         this.syncedRobot = syncedRobot;
         this.teleoperationParameters = teleoperationParameters;
+
+        walkingLowLevelMessenger = new RDXWalkingLowLevelMessenger(communicationHelper, teleoperationParameters);
 
         footstepPlanning = new RDXFootstepPlanning(robotModel, teleoperationParameters, syncedRobot);
 
@@ -170,6 +180,7 @@ public class RDXWalkingManager
 
         if (interactableFootstepPlan.getNumberOfFootsteps() > 0)
         {
+            robotIsWalking = false;
             footstepPlanning.setReadyToWalk(false);
             footstepsSentToControllerGraphic.clear();
         }
@@ -184,6 +195,10 @@ public class RDXWalkingManager
     public void renderImGuiWidgets()
     {
         ImGui.separator();
+
+        ImGui.text("Options during walking: ");
+        ImGui.sameLine();
+        walkingLowLevelMessenger.renderImGuiWidgets();
 
         ImGui.text("Leg control mode: " + legControlMode.name());
         if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
@@ -218,6 +233,38 @@ public class RDXWalkingManager
         ImGui.separator();
         ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
         ImGui.separator();
+
+        if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+        {
+            if (!spaceBarPressed)
+            {
+                spaceBarPressed = true;
+
+                if (!robotIsWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
+                {
+                    LogTools.info("Walking started");
+                    interactableFootstepPlan.walkFromSteps();
+                    robotIsWalking = true;
+                    robotWalkingIsPaused = false;
+                }
+                else if (!robotWalkingIsPaused)
+                {
+                    LogTools.info("Pause Walking");
+                    walkingLowLevelMessenger.sendPauseWalkingRequest();
+                    robotWalkingIsPaused = true;
+                }
+                else
+                {
+                    LogTools.info("Continue Walking");
+                    walkingLowLevelMessenger.sendContinueWalkingRequest();
+                    robotWalkingIsPaused = false;
+                }
+            }
+        }
+        else
+        {
+            spaceBarPressed = false;
+        }
     }
 
     public void updateWalkPathControlRing()
