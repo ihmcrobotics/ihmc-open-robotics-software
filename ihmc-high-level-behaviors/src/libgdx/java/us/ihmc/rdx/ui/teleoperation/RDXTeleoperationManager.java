@@ -87,6 +87,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private RDXRobotCollisionModel selfCollisionModel;
    private RDXRobotCollisionModel environmentCollisionModel;
    private RDXArmManager armManager;
+   private final RDXWalkingManager walkingManager;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
@@ -100,8 +101,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ImString tempImGuiText = new ImString(1000);
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
-
-   private final RDXWalkingManager walkingManager;
 
    public RDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -438,7 +437,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
          ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
          ImGui.sameLine();
          interactablePelvis.renderImGuiWidgets();
-
 
          boolean handInteractablesAreDeleted = true;
          for (RobotSide side : interactableHands.sides())
