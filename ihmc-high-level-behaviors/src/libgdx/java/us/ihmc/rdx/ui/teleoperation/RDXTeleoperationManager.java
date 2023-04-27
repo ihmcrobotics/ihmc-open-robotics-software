@@ -369,7 +369,13 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
             interactablePelvis.process3DViewInput(input);
 
-            walkingManager.interactableFeetProcessLegControlMode(input);
+            for (RobotSide side : interactableFeet.sides())
+            {
+               if (interactableFeet.get(side).process3DViewInput(input))
+               {
+                  walkingManager.setLegControlModeToSingleSupportFootPosing();
+               }
+            }
 
             for (RobotSide side : interactableHands.sides())
             {
@@ -408,7 +414,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
             walkingManager.deleteAll();
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-               robotPartInteractable.delete();footstepsSentToControllerGraphic.clear();
+               robotPartInteractable.delete();
+
+            footstepsSentToControllerGraphic.clear();
          }
       }
 
@@ -452,7 +460,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
             //    desiredRobot.setLegShowing(side, !footInteractables.get(side).isDeleted());
          }
 
-         walkingManager.renderFeetSingleSupportPosing();
+         for (RobotSide side : interactableFeet.sides())
+         {
+            ImGui.text(side.getPascalCaseName() + " foot:");
+            ImGui.sameLine();
+            if (interactableFeet.get(side).renderImGuiWidgets())
+            {
+               walkingManager.setLegControlModeToSingleSupportFootPosing();
+            }
+         }
 
          ImGui.separator();
 
