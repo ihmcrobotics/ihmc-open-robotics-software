@@ -158,11 +158,18 @@ public class HeightMapManager
       occupiedCells.clear();
    }
 
+   /**
+    * This method consums the {@param pointCloud} add adds it to the existing height map. It then updates the height map estimates in each of the cells.
+    */
    public void update(Point3D[] pointCloud)
    {
       update(pointCloud, 1.0);
    }
 
+   /**
+    * This method consums the {@param pointCloud} add adds it to the existing height map. It then updates the height map estimates in each of the cells.
+    * It does this using a constant variance for all points, defined by {@param verticalMeasurementVariance}.
+    */
    public void update(Point3D[] pointCloud, double verticalMeasurementVariance)
    {
 //      List<Point3D> pointList = new ArrayList<>();

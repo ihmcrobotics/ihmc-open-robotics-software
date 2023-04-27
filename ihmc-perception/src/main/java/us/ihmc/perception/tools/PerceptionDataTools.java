@@ -6,7 +6,7 @@ import java.nio.FloatBuffer;
 
 public class PerceptionDataTools
 {
-   public static FloatBuffer convertPolarDepthImageToPointCloudInSensorFrame(BytedecoImage imageToConvert, double verticalFOV, double horizontalFOV)
+   public static FloatBuffer convertSphericalDepthImageToPointCloudInSensorFrame(BytedecoImage imageToConvert, double verticalFOV, double horizontalFOV)
    {
       int numberOfPoints = imageToConvert.getImageHeight() * imageToConvert.getImageWidth();
       FloatBuffer depthData = NativeMemoryTools.allocate(3 * Float.BYTES * numberOfPoints).asFloatBuffer();
