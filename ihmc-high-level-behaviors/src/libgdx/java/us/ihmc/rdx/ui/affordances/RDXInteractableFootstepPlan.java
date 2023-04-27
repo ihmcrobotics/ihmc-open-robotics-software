@@ -160,7 +160,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       if (footsteps.size() > 0)
       {
          // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
-         if (ImGui.button(labels.get("Walk")) || ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+         if (ImGui.button(labels.get("Walk")))
          {
             walkFromSteps();
          }
