@@ -31,29 +31,26 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXWalkingManager
 {
-    RDXBaseUI baseUI;
-    private final CommunicationHelper communicationHelper;
-    private final ROS2SyncedRobotModel syncedRobot;
-    private final RDXTeleoperationParameters teleoperationParameters;
-    private final RDXFootstepPlanning footstepPlanning;
+    private RDXBaseUI baseUI;
     private final DRCRobotModel robotModel;
-    private final ROS2ControllerHelper ros2Helper;
+    private final ROS2SyncedRobotModel syncedRobot;
+    private final CommunicationHelper communicationHelper;
+    private final RDXTeleoperationParameters teleoperationParameters;
 
     private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
-
     private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
 
     private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
-
-    private boolean isPlacingFootstep = false;
-
-    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
+    private final RDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowPosePlacement();
+    private final RDXInteractableFootstepPlan interactableFootstepPlan = new RDXInteractableFootstepPlan();
+    private final RDXFootstepPlanning footstepPlanning;
     private final RDXManualFootstepPlacement manualFootstepPlacement = new RDXManualFootstepPlacement();
     private final RDXWalkPathControlRing walkPathControlRing = new RDXWalkPathControlRing();
-    private final RDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowPosePlacement();
+    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
+
+    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
     private final ImBoolean showGraphics = new ImBoolean(true);
-    private final RDXInteractableFootstepPlan interactableFootstepPlan = new RDXInteractableFootstepPlan();
+    private boolean isPlacingFootstep = false;
 
     public RDXWalkingManager(DRCRobotModel robotModel,
                              CommunicationHelper communicationHelper,
@@ -65,7 +62,6 @@ public class RDXWalkingManager
         this.robotModel = robotModel;
         this.syncedRobot = syncedRobot;
         this.teleoperationParameters = teleoperationParameters;
-        this.ros2Helper = ros2Helper;
 
         footstepPlanning = new RDXFootstepPlanning(robotModel, teleoperationParameters, syncedRobot);
 
@@ -83,10 +79,7 @@ public class RDXWalkingManager
 
         footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
         communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
-        {
-            footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
-        });
-
+            footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy")));
     }
 
 
@@ -106,14 +99,10 @@ public class RDXWalkingManager
         baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
         walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters);
-
-
-
     }
 
     public void update()
     {
-        syncedRobot.update();
         footstepsSentToControllerGraphic.update();
 
         if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
@@ -231,22 +220,6 @@ public class RDXWalkingManager
         ImGui.separator();
     }
 
-    public void setFootstepPlannerParameters(FootstepPlannerParametersBasics footstepPlannerParameters)
-    {
-        footstepPlanning.setFootstepPlannerParameters(footstepPlannerParameters);
-    }
-
-    public void setBodyPathPlannerParameters(AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters)
-    {
-        footstepPlanning.setBodyPathPlannerParameters(bodyPathPlannerParameters);
-    }
-
-    public void setSwingParameters(SwingPlannerParametersBasics swingParameters)
-    {
-        interactableFootstepPlan.setSwingPlannerParameters(swingParameters);
-        footstepPlanning.setSwingFootPlannerParameters(swingParameters);
-    }
-
     public void updateWalkPathControlRing()
     {
         walkPathControlRing.update(interactableFootstepPlan);
@@ -264,55 +237,12 @@ public class RDXWalkingManager
             walkPathControlRing.process3DViewInput(input);
     }
 
-    public void renderFeetSingleSupportPosing()
-    {
-        for (RobotSide side : interactableFeet.sides())
-        {
-            ImGui.text(side.getPascalCaseName() + " foot:");
-            ImGui.sameLine();
-            if (interactableFeet.get(side).renderImGuiWidgets())
-            {
-                legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
-            }
-        }
-    }
-
-    public void interactableFeetProcessLegControlMode(ImGui3DViewInput input)
-    {
-        for (RobotSide side : interactableFeet.sides())
-        {
-            if (interactableFeet.get(side).process3DViewInput(input))
-            {
-                legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
-            }
-        }
-    }
-
-    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-    {
-        footstepsSentToControllerGraphic.getRenderables(renderables, pool);
-        ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
-        manualFootstepPlacement.getRenderables(renderables, pool);
-        interactableFootstepPlan.getRenderables(renderables, pool);
-        bodyPathPlanGraphic.getRenderables(renderables, pool);
-    }
-
-    public void getWalkPathControlRingVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-    {
-        walkPathControlRing.getVirtualRenderables(renderables, pool);
-    }
-
     public void destroy()
     {
         walkPathControlRing.destroy();
         footstepsSentToControllerGraphic.destroy();
         bodyPathPlanGraphic.destroy();
         interactableFootstepPlan.destroy();
-    }
-
-    public RDXManualFootstepPlacement getManualFootstepPlacement()
-    {
-        return manualFootstepPlacement;
     }
 
     public void deleteAll()
@@ -325,5 +255,45 @@ public class RDXWalkingManager
         walkPathControlRing.delete();
 
         legControlMode = RDXLegControlMode.DISABLED;
+    }
+
+    public void setFootstepPlannerParameters(FootstepPlannerParametersBasics footstepPlannerParameters)
+    {
+        footstepPlanning.setFootstepPlannerParameters(footstepPlannerParameters);
+    }
+
+    public void setBodyPathPlannerParameters(AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters)
+    {
+        footstepPlanning.setBodyPathPlannerParameters(bodyPathPlannerParameters);
+    }
+
+    public void setSwingParameters(SwingPlannerParametersBasics swingParameters)
+    {
+        interactableFootstepPlan.setSwingPlannerParameters(swingParameters);
+        footstepPlanning.setSwingFootPlannerParameters(swingParameters);
+    }
+
+    public void setLegControlModeToSingleSupportFootPosing()
+    {
+        legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+    }
+
+    public RDXManualFootstepPlacement getManualFootstepPlacement()
+    {
+        return manualFootstepPlacement;
+    }
+
+    public void getWalkPathControlRingVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+    {
+        walkPathControlRing.getVirtualRenderables(renderables, pool);
+    }
+
+    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+    {
+        footstepsSentToControllerGraphic.getRenderables(renderables, pool);
+        ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
+        manualFootstepPlacement.getRenderables(renderables, pool);
+        interactableFootstepPlan.getRenderables(renderables, pool);
+        bodyPathPlanGraphic.getRenderables(renderables, pool);
     }
 }
