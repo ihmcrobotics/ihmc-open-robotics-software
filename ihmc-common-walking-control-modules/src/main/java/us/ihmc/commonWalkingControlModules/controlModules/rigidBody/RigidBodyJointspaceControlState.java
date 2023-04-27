@@ -11,8 +11,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -99,12 +101,32 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
          {
             JointDesiredOutput lowLevelJointData = jointDesiredOutputList.getJointDesiredOutput(i);
+            PIDGainsReadOnly lowLevelJointGain = jointControlHelper.getLowLevelJointGain(i);
+            OneDoFJointReadOnly joint = jointDesiredOutputList.getOneDoFJoint(i);
+
+            // Clamp desired position based on maximum feedback
+            double desiredPosition = getJointDesiredPosition(i);
+            double maximumFeedback = lowLevelJointGain.getMaximumFeedback();
+            if (!Double.isNaN(maximumFeedback) && Double.isFinite(maximumFeedback) && lowLevelJointGain.getKp() > 1.0e-3)
+            {
+               double maxPositionError = maximumFeedback / lowLevelJointGain.getKp();
+               desiredPosition = EuclidCoreTools.clamp(desiredPosition, joint.getQ() - maxPositionError, joint.getQ() + maxPositionError);
+            }
+
+            // Clamp desired velocity based on maximum feedback rate
+            double desiredVelocity = getJointDesiredVelocity(i);
+            double maximumFeedbackRate = lowLevelJointGain.getMaximumFeedbackRate();
+            if (!Double.isNaN(maximumFeedbackRate) && Double.isFinite(maximumFeedbackRate) && lowLevelJointGain.getKd() > 1.0e-3)
+            {
+               double maxVelocityError = maximumFeedbackRate / lowLevelJointGain.getKd();
+               desiredVelocity = EuclidCoreTools.clamp(desiredVelocity, joint.getQd() - maxVelocityError, joint.getQd() + maxVelocityError);
+            }
 
             lowLevelJointData.setControlMode(JointDesiredControlMode.POSITION);
-            lowLevelJointData.setDesiredPosition(getJointDesiredPosition(i));
-            lowLevelJointData.setDesiredVelocity(getJointDesiredVelocity(i));
-            lowLevelJointData.setStiffness(jointControlHelper.getLowLevelJointGain(i).getKp());
-            lowLevelJointData.setDamping(jointControlHelper.getLowLevelJointGain(i).getKd());
+            lowLevelJointData.setDesiredPosition(desiredPosition);
+            lowLevelJointData.setDesiredVelocity(desiredVelocity);
+            lowLevelJointData.setStiffness(lowLevelJointGain.getKp());
+            lowLevelJointData.setDamping(lowLevelJointGain.getKd());
          }
 
          return jointDesiredOutputList;
