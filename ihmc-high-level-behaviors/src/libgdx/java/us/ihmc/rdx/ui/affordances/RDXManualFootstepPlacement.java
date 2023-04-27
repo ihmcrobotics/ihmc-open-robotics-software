@@ -11,11 +11,13 @@ import imgui.internal.ImGui;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -154,12 +156,36 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    private void placeFootstep()
    {
+      System.out.println(footstepBeingPlaced.getFootPose().getPosition());
+
+      if (footstepBeingPlaced.getFootPose().getPosition().getZ() > 0.5 || footstepBeingPlaced.getFootPose().getPosition().getX() > 0.6)
+      {
+         System.out.println(footstepBeingPlaced.getFootPose().getPosition());
+         LogTools.info("Footstep Rejected, not reachable... not placing footstep");
+         return;
+      }
+
+      if (footstepPlan.getNumberOfFootsteps() > 0)
+      {
+         FramePoint3DReadOnly testing = footstepPlan.getLastFootstep().getFootPose().getPosition();
+         System.out.println("The last footstep placed: " + testing);
+         System.out.println(footstepBeingPlaced.getFootPose().getPosition().distance(testing));
+         if (footstepBeingPlaced.getFootPose().getPosition().distance(testing) > 0.6)
+         {
+            LogTools.info("Footstep Rejected, not reachable... not placing footstep");
+            return;
+         }
+      }
+
       footstepIndex++;
       RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
       addedStep.copyFrom(baseUI, footstepBeingPlaced);
+
       // Switch sides
       currentFootStepSide = currentFootStepSide.getOppositeSide();
       createNewFootStep(currentFootStepSide);
+
+
    }
 
    public void renderImGuiWidgets()
