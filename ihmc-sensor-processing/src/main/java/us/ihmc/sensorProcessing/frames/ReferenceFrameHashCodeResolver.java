@@ -108,7 +108,7 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
     * @param referenceFrame the reference frame to register.
     * @param frameHashCode the custom hash-code to associate with the given frame.
     * @throws IllegalArgumentException if a distinct reference frame was already registered under the
-    *            same hash-code as {@code referenceFrame.hashCode()}.
+    *            same hash-code as {@code referenceFrame.getFrameNameHashCode()}.
     */
    public void put(ReferenceFrame referenceFrame, long frameHashCode)
    {
@@ -274,7 +274,7 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
     * Gets the reference frame associated to the given {@code frameHashCode}.
     * 
     * @param frameHashCode the hash-code used to retrieve the reference frame, it is usually generated
-    *           from {@code referenceFrame.hashCode()}.
+    *           from {@code referenceFrame.getFrameNameHashCode()}.
     * @return the corresponding reference frame.
     * @throws RuntimeException if no reference frame is associated to the given hash-code.
     */
