@@ -11,9 +11,13 @@ module mission_control_msgs
       @TypeCode(type="mission_control_msgs::msg::dds_::SystemServiceActionMessage_")
       struct SystemServiceActionMessage
       {
+        /**
+         * The name of the systemd service
+         */
         string service_name;
         /**
-         * systemd_action valid values: [start, stop, restart, kill]
+         * The action to perform in the systemctl command
+         * Valid values: [start, stop, restart, kill]
          */
         string systemd_action;
       };
