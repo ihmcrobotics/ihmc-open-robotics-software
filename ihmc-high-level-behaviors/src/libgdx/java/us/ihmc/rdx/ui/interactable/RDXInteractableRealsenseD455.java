@@ -32,8 +32,8 @@ public class RDXInteractableRealsenseD455
 
    private void create(RDX3DPanel panel3D, ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify)
    {
-      ModelData l515SensorModel = RDXModelLoader.loadModelData("environmentObjects/d455Sensor/D455.g3dj");
-      interactableFrameModel.create(referenceFrameToRepresent, transformToParentToModify, panel3D, l515SensorModel, this::calculateClosestCollision);
+      ModelData d455SensorModel = RDXModelLoader.loadModelData("environmentObjects/d455Sensor/D455.g3dj");
+      interactableFrameModel.create(referenceFrameToRepresent, transformToParentToModify, panel3D, d455SensorModel, this::calculateClosestCollision);
    }
 
    private double calculateClosestCollision(Line3DReadOnly mousePickRay)
