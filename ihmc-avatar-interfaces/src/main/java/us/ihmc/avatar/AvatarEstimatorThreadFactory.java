@@ -179,7 +179,7 @@ public class AvatarEstimatorThreadFactory
    public void configureWithDRCRobotModel(DRCRobotModel robotModel, RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       configureWithWholeBodyControllerParameters(robotModel);
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel("estimator");
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       if (robotInitialSetup != null)
       {
          robotInitialSetup.initializeFullRobotModel(fullRobotModel);

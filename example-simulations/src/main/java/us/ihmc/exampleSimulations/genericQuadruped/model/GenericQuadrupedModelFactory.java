@@ -44,9 +44,9 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
    }
 
    @Override
-   public FullQuadrupedRobotModel createFullRobotModel(String namePrefix, boolean enforceUniqueReferenceFrames)
+   public FullQuadrupedRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames)
    {
-      return new FullQuadrupedRobotModelWrapper(namePrefix, robotDefinition, jointMapAndContactInfo, enforceUniqueReferenceFrames);
+      return new FullQuadrupedRobotModelWrapper(robotDefinition, jointMapAndContactInfo, enforceUniqueReferenceFrames);
    }
 
    @Override

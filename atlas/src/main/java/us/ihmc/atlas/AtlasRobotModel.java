@@ -395,14 +395,13 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public FullHumanoidRobotModel createFullRobotModel()
    {
-      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap());
-      return doArmJointRestriction(fullRobotModel);
+      return createFullRobotModel(true);
    }
 
    @Override
-   public FullHumanoidRobotModel createFullRobotModel(String namePrefix, boolean enforceUniqueReferenceFrames)
+   public FullHumanoidRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames)
    {
-      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelWrapper(namePrefix, getRobotDefinition(), getJointMap(), enforceUniqueReferenceFrames);
+      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap(), enforceUniqueReferenceFrames);
       return doArmJointRestriction(fullRobotModel);
    }
 
