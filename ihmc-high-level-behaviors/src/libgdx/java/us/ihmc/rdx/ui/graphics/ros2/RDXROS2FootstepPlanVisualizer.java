@@ -83,7 +83,9 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (isActive() && sceneLevelCheck(sceneLevels))
-         pointCloudRenderer.getRenderables(renderables, pool);
+      {
+
+      }
    }
 
    @Override
@@ -95,11 +97,11 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
 
    public void setSubscribed(boolean subscribed)
    {
-      if (subscribed && realtimeROS2Node == null)
+      if (subscribed && ros2Node == null)
       {
          subscribe();
       }
-      else if (!subscribed && realtimeROS2Node != null)
+      else if (!subscribed && ros2Node != null)
       {
          unsubscribe();
       }
@@ -108,10 +110,10 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    private void unsubscribe()
    {
       subscribed.set(false);
-      if (realtimeROS2Node != null)
+      if (ros2Node != null)
       {
-         realtimeROS2Node.destroy();
-         realtimeROS2Node = null;
+         ros2Node.destroy();
+         ros2Node = null;
       }
    }
 
