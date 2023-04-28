@@ -158,7 +158,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       System.out.println(footstepBeingPlaced.getFootPose().getPosition());
 
-      if (footstepBeingPlaced.getFootPose().getPosition().getZ() > 0.5 || footstepBeingPlaced.getFootPose().getPosition().getX() > 0.6)
+      if (footstepBeingPlaced.getFootPose().getPosition().getZ() > 0.8 || footstepBeingPlaced.getFootPose().getPosition().getX() > 0.6)
       {
          System.out.println(footstepBeingPlaced.getFootPose().getPosition());
          LogTools.info("Footstep Rejected, not reachable... not placing footstep");

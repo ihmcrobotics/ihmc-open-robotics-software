@@ -279,6 +279,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       messageList.setOffsetFootstepsHeightWithExecutionError(true);
       messageList.setDefaultSwingDuration(teleoperationParameters.getSwingTime());
       messageList.setDefaultTransferDuration(teleoperationParameters.getTransferTime());
+      messageList.setAreFootstepsAdjustable(teleoperationParameters.getAreFootstepsAdjustable());
 
       communicationHelper.publishToController(messageList);
 

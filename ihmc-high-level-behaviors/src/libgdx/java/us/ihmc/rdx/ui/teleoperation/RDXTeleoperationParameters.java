@@ -33,6 +33,7 @@ public class RDXTeleoperationParameters extends StoredPropertySet
    public static final BooleanStoredPropertyKey planWidthBodyPath = keys.addBooleanKey("Plan with body path");
    public static final BooleanStoredPropertyKey replanSwingTrajectoriesOnChange = keys.addBooleanKey("Replan swing trajectories on change");
    public static final BooleanStoredPropertyKey isPSIAdjustable = keys.addBooleanKey("Is PSI adjustable");
+   public static final BooleanStoredPropertyKey areFootstepsAdjustable = keys.addBooleanKey("Are footsteps adjustable");
 
    public RDXTeleoperationParameters(String robotName)
    {
@@ -152,5 +153,10 @@ public class RDXTeleoperationParameters extends StoredPropertySet
    public boolean getPSIAdjustable()
    {
       return get(isPSIAdjustable);
+   }
+
+   public boolean getAreFootstepsAdjustable()
+   {
+      return get(areFootstepsAdjustable);
    }
 }

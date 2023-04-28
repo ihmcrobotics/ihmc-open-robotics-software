@@ -23,10 +23,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
-import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.ui.*;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
@@ -67,6 +64,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
    private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
+   private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustable;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
@@ -183,6 +181,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false, () -> walkingManager.setSwingParameters(swingFootPlannerParameters));
 
       teleoperationParametersTuner.create(teleoperationParameters);
+      areFootstepsAdjustable = teleoperationParametersTuner.createBooleanSlider(RDXTeleoperationParameters.areFootstepsAdjustable);
       swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.swingTime, 0.3, 2.5);
       transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.transferTime, 0.3, 2.5);
       turnAggressivenessSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.turnAggressiveness, 0.0, 10.0);
@@ -393,6 +392,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       chestYawSlider.renderImGuiWidgets();
 
       swingTimeSlider.render();
+      areFootstepsAdjustable.render();
       transferTimeSlider.render();
       turnAggressivenessSlider.render();
       trajectoryTimeSlider.render();
@@ -408,7 +408,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          ImGui.checkbox("Interactables enabled", interactablesEnabled);
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Delete all")))
+         if (ImGui.button(labels.get("Delete all")) || ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
          {
             walkingManager.deleteAll();
 
