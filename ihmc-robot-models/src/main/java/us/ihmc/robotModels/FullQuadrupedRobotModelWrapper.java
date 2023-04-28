@@ -36,8 +36,6 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 public class FullQuadrupedRobotModelWrapper extends FullRobotModelWrapper implements FullQuadrupedRobotModel
 {
-   private static final AtomicInteger modelCounter = new AtomicInteger();
-
    private BiMap<QuadrupedJointName, OneDoFJointBasics> jointNameOneDoFJointBiMap;
    @Deprecated
    private Map<QuadrupedJointName, JointLimit> jointLimits;
@@ -63,45 +61,26 @@ public class FullQuadrupedRobotModelWrapper extends FullRobotModelWrapper implem
 
    public FullQuadrupedRobotModelWrapper(RobotDefinition robotDefinition, QuadrupedJointNameMap jointNameMap)
    {
-      this("model" + modelCounter.incrementAndGet(), robotDefinition, jointNameMap);
+      this(robotDefinition, jointNameMap, true);
    }
 
-   public FullQuadrupedRobotModelWrapper(String namePrefix, RobotDefinition robotDefinition, QuadrupedJointNameMap jointNameMap)
+   public FullQuadrupedRobotModelWrapper(RobotDefinition robotDefinition, QuadrupedJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
    {
-      this(namePrefix, robotDefinition, jointNameMap, true);
-   }
-
-   public FullQuadrupedRobotModelWrapper(String namePrefix, RobotDefinition robotDefinition, QuadrupedJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
-   {
-      super(robotDefinition.newInstance(generateUniqueStationaryFrame(namePrefix, enforceUniqueReferenceFrames)));
+      super(robotDefinition.newInstance(ReferenceFrame.getWorldFrame()), enforceUniqueReferenceFrames);
       setupQuadrupedJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
 
    public FullQuadrupedRobotModelWrapper(RobotDescription robotDescription, QuadrupedJointNameMap jointNameMap)
    {
-      this("model" + modelCounter.incrementAndGet(), robotDescription, jointNameMap);
+      this(robotDescription, jointNameMap, true);
    }
 
-   public FullQuadrupedRobotModelWrapper(String namePrefix, RobotDescription robotDescription, QuadrupedJointNameMap jointNameMap)
+   public FullQuadrupedRobotModelWrapper(RobotDescription robotDescription, QuadrupedJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
    {
-      this(namePrefix, robotDescription, jointNameMap, true);
-   }
-
-   public FullQuadrupedRobotModelWrapper(String namePrefix, RobotDescription robotDescription, QuadrupedJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
-   {
-      super(instantiateRobot(robotDescription, generateUniqueStationaryFrame(namePrefix, enforceUniqueReferenceFrames)));
+      super(instantiateRobot(robotDescription, ReferenceFrame.getWorldFrame()), enforceUniqueReferenceFrames);
       setupQuadrupedJointNameMap(jointNameMap);
       setupRobotDescription(robotDescription);
-   }
-
-   private static ReferenceFrame generateUniqueStationaryFrame(String namePrefix, boolean enforceUniqueReferenceFrames)
-   {
-      ReferenceFrame staticFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent(namePrefix + "StationaryFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-      if (enforceUniqueReferenceFrames)
-         staticFrame.setNameRestrictionLevel(FrameNameRestrictionLevel.FRAME_NAME);
-
-      return staticFrame;
    }
 
    protected void setupQuadrupedJointNameMap(QuadrupedJointNameMap jointNameMap)

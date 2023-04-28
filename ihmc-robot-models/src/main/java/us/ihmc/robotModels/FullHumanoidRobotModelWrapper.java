@@ -1,34 +1,24 @@
 package us.ihmc.robotModels;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import us.ihmc.euclid.referenceFrame.FrameNameRestrictionLevel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 
+import java.util.Arrays;
+import java.util.EnumMap;
+
 public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper implements FullHumanoidRobotModel
 {
-   private static final AtomicInteger modelCounter = new AtomicInteger();
-
    private HumanoidJointNameMap jointNameMap;
    private RigidBodyBasics chest;
    private SideDependentList<RigidBodyBasics> feet;
@@ -48,56 +38,38 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
    public FullHumanoidRobotModelWrapper(RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
    {
-      this("model" + modelCounter.incrementAndGet(), robotDefinition, jointNameMap, true);
+      this(robotDefinition, jointNameMap, true);
    }
 
-   public FullHumanoidRobotModelWrapper(String namePrefix, RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
+   public FullHumanoidRobotModelWrapper(RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
    {
-      this(namePrefix, robotDefinition, jointNameMap, true);
-   }
-
-   public FullHumanoidRobotModelWrapper(String namePrefix, RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
-   {
-      this(robotDefinition.newInstance(generateUniqueStationaryFrame(namePrefix, enforceUniqueReferenceFrames)));
+      this(robotDefinition.newInstance(ReferenceFrame.getWorldFrame()), enforceUniqueReferenceFrames);
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
 
    public FullHumanoidRobotModelWrapper(RobotDescription robotDescription, HumanoidJointNameMap jointNameMap)
    {
-      this("model" + modelCounter.incrementAndGet(), robotDescription, jointNameMap);
+      this(robotDescription, jointNameMap, true);
    }
 
-   public FullHumanoidRobotModelWrapper(String namePrefix, RobotDescription robotDescription, HumanoidJointNameMap jointNameMap)
+   public FullHumanoidRobotModelWrapper(RobotDescription robotDescription, HumanoidJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
    {
-      this(namePrefix, robotDescription, jointNameMap, true);
-   }
-
-   public FullHumanoidRobotModelWrapper(String namePrefix, RobotDescription robotDescription, HumanoidJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
-   {
-      this(instantiateRobot(robotDescription, generateUniqueStationaryFrame(namePrefix, enforceUniqueReferenceFrames)));
+      this(instantiateRobot(robotDescription, ReferenceFrame.getWorldFrame()), enforceUniqueReferenceFrames);
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDescription(robotDescription);
    }
 
-   public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator, RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
+   public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator, RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap, boolean enforceUniqueReferenceFrames)
    {
-      this(elevator);
+      this(elevator, enforceUniqueReferenceFrames);
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
 
-   public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator)
+   public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator, boolean enforceUniqueReferenceFrames)
    {
-      super(elevator);
-   }
-
-   private static ReferenceFrame generateUniqueStationaryFrame(String namePrefix, boolean enforceUniqueReferenceFrames)
-   {
-      ReferenceFrame stationaryFrame = new FixedMovingReferenceFrame(namePrefix + "StationaryFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-      if (enforceUniqueReferenceFrames)
-         stationaryFrame.setNameRestrictionLevel(FrameNameRestrictionLevel.FRAME_NAME);
-      return stationaryFrame;
+      super(elevator, enforceUniqueReferenceFrames);
    }
 
    protected void setupHumanoidJointNameMap(HumanoidJointNameMap jointNameMap)

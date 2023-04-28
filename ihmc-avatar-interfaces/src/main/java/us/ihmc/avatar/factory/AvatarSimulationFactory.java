@@ -357,7 +357,7 @@ public class AvatarSimulationFactory
    private void createMasterContext()
    {
       // Create intermediate data buffer for threading.
-      masterFullRobotModel = robotModel.get().createFullRobotModel("master");
+      masterFullRobotModel = robotModel.get().createFullRobotModel();
       robotInitialSetup.get().initializeFullRobotModel(masterFullRobotModel);
       masterContext = new HumanoidRobotContextData(masterFullRobotModel);
    }

@@ -320,7 +320,7 @@ public abstract class HumanoidControllerWarmup
    @SuppressWarnings("unchecked")
    public void setupController()
    {
-      fullRobotModel = robotModel.createFullRobotModel("warmup");
+      fullRobotModel = robotModel.createFullRobotModel();
       centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
       oneDoFJoints = fullRobotModel.getOneDoFJoints();

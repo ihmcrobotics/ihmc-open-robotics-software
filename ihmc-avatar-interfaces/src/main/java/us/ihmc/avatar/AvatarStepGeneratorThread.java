@@ -60,7 +60,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints,
                                     RealtimeROS2Node ros2Node)
    {
-      this.fullRobotModel = drcRobotModel.createFullRobotModel("stepGenerator");
+      this.fullRobotModel = drcRobotModel.createFullRobotModel();
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
