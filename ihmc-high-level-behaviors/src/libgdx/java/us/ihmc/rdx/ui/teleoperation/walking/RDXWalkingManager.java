@@ -147,18 +147,12 @@ public class RDXWalkingManager
             walkPathControlRing.delete();
         }
 
-        if (legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
-        {
-            interactableFootstepPlan.clear();
-            bodyPathPlanGraphic.clear();
-        }
-
         if (legControlMode != RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT)
         {
             manualFootstepPlacement.exitPlacement();
         }
 
-        if (legControlMode == RDXLegControlMode.DISABLED)
+        if (legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING || legControlMode == RDXLegControlMode.DISABLED)
         {
             interactableFootstepPlan.clear();
             bodyPathPlanGraphic.clear();
@@ -175,6 +169,7 @@ public class RDXWalkingManager
         }
 
         footstepsSentToControllerGraphic.update();
+
         boolean isCurrentlyPlacingFootstep = getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal();
         if (isPlacingFootstep != isCurrentlyPlacingFootstep)
             baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
