@@ -279,7 +279,7 @@ public class ImGuiMachine
          byte[] logData = message.getLogData().toArray();
          String logLinesJoined = new String(logData, StandardCharsets.US_ASCII);
          String[] logLines = logLinesJoined.split("\n");
-         service.acceptLogLines(Arrays.stream(logLines).toList());
+         service.acceptLogLines(Arrays.stream(logLines).toList(), message.getRefresh());
       }
    }
 

@@ -7,13 +7,17 @@ import imgui.type.ImBoolean;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ImGuiConsoleArea
 {
    private final TextEditor textEditor = new TextEditor();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean autoScroll = new ImBoolean(true);
+   private final List<String> buffer = new ArrayList<>();
+   private long lastFlush = 0L;
 
    public ImGuiConsoleArea()
    {
@@ -61,8 +65,12 @@ public class ImGuiConsoleArea
       if (ImGui.button("Refresh log"))
       {
          textEditor.setText("");
+      }
 
-
+      if (System.currentTimeMillis() - lastFlush > 2000)
+      {
+         flushBuffer();
+         lastFlush = System.currentTimeMillis();
       }
 
       if (autoScroll.get())
@@ -77,18 +85,42 @@ public class ImGuiConsoleArea
       ImGui.popFont();
    }
 
-   public void acceptLine(String newText)
+   public void flushBuffer()
    {
-      int previousCursorLine = textEditor.getCursorPositionLine();
-      int previousCursorColumn = textEditor.getCursorPositionColumn();
-      int lastLineIndex = textEditor.getTotalLines() - 1;
-      int endOfLastLineColumn = textEditor.getTextLines()[lastLineIndex].length();
-      boolean isAutoScroll = previousCursorLine == lastLineIndex && previousCursorColumn == endOfLastLineColumn;
-      textEditor.setCursorPosition(lastLineIndex, endOfLastLineColumn);
-      textEditor.setReadOnly(false);
-      textEditor.insertText(newText + "\n");
-      textEditor.setReadOnly(true);
-      if (!isAutoScroll)
-         textEditor.setCursorPosition(previousCursorLine, previousCursorColumn);
+      if (buffer.isEmpty())
+         return;
+
+      String[] previousLines = textEditor.getTextLines();
+      String[] newLines = buffer.toArray(new String[0]);
+      String[] lines = new String[previousLines.length + buffer.size()];
+
+      System.arraycopy(previousLines, 0, lines, 0, previousLines.length);
+      System.arraycopy(newLines, 0, lines, previousLines.length, newLines.length);
+
+      textEditor.setTextLines(lines);
+
+      buffer.clear();
+   }
+
+   public void acceptLine(String newText, boolean buffer)
+   {
+      if (buffer)
+      {
+         this.buffer.add(newText);
+      }
+      else
+      {
+         int previousCursorLine = textEditor.getCursorPositionLine();
+         int previousCursorColumn = textEditor.getCursorPositionColumn();
+         int lastLineIndex = textEditor.getTotalLines() - 1;
+         int endOfLastLineColumn = textEditor.getTextLines()[lastLineIndex].length();
+         boolean isAutoScroll = previousCursorLine == lastLineIndex && previousCursorColumn == endOfLastLineColumn;
+         textEditor.setCursorPosition(lastLineIndex, endOfLastLineColumn);
+         textEditor.setReadOnly(false);
+         textEditor.insertText(newText + "\n");
+         textEditor.setReadOnly(true);
+         if (!isAutoScroll)
+            textEditor.setCursorPosition(previousCursorLine, previousCursorColumn);
+      }
    }
 }

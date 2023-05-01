@@ -15,7 +15,6 @@ import us.ihmc.missionControl.resourceMonitor.UptimeMonitor;
 import us.ihmc.missionControl.resourceMonitor.cpu.CPUCoreTracker;
 import us.ihmc.missionControl.resourceMonitor.cpu.LmSensorsMonitor;
 import us.ihmc.missionControl.resourceMonitor.cpu.ProcStatCPUMonitor;
-import us.ihmc.missionControl.systemd.JournalCtlReader;
 import us.ihmc.missionControl.systemd.SystemdServiceMonitor;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
