@@ -31,7 +31,7 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
     * The idea is to have a quick way to switch to a safer and more conservative operation mode meant
     * for a random random person to try out the IK streaming.
     */
-   public static final boolean DEMO_MODE = true;
+   public static final boolean DEMO_MODE = false;
 
    public ValkyrieKinematicsStreamingToolboxModule(DRCRobotModel robotModel,
                                                    KinematicsStreamingToolboxParameters parameters,
