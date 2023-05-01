@@ -8,6 +8,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -303,15 +304,15 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       computeWrenchJacobianInFrame(centerOfMassFrame, wrenchJacobianInCoMFrame);
       computeWrenchJacobianInFrame(planeFrame, wrenchJacobianInPlaneFrame);
-      computeCopObjectiveJacobian(copRegularizationJacobian, copRegularizationObjective, desiredCoP);
+      double weightScalar = computeCopObjectiveJacobian(copRegularizationJacobian, copRegularizationObjective, desiredCoP);
       computeCopObjectiveJacobian(copRateRegularizationJacobian, copRateRegularizationObjective, previousCoP);
 
       if (yoPlaneContactState.inContact() && !resetRequested.getBooleanValue() && canHandleCoPCommand())
       {
-         copRegularizationWeightMatrix.set(0, 0, copRegularizationWeight.getX());
-         copRegularizationWeightMatrix.set(1, 1, copRegularizationWeight.getY());
-         copRateRegularizationWeightMatrix.set(0, 0, copRateRegularizationWeight.getX());
-         copRateRegularizationWeightMatrix.set(1, 1, copRateRegularizationWeight.getY());
+         copRegularizationWeightMatrix.set(0, 0, weightScalar * copRegularizationWeight.getX());
+         copRegularizationWeightMatrix.set(1, 1, weightScalar * copRegularizationWeight.getY());
+         copRateRegularizationWeightMatrix.set(0, 0, weightScalar * copRateRegularizationWeight.getX());
+         copRateRegularizationWeightMatrix.set(1, 1, weightScalar * copRateRegularizationWeight.getY());
       }
       else
       {
@@ -329,37 +330,37 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final FrameVector3D forceFromRho = new FrameVector3D();
 
-   public void computeCopObjectiveJacobian(DMatrixRMaj jacobianToPack, DMatrixRMaj objectiveToPack, FramePoint2DReadOnly desiredCoP)
+   public double computeCopObjectiveJacobian(DMatrixRMaj jacobianToPack, DMatrixRMaj objectiveToPack, FramePoint2DReadOnly desiredCoP)
    {
       if (desiredCoP.containsNaN())
       {
          jacobianToPack.reshape(2, rhoSize);
          jacobianToPack.zero();
          objectiveToPack.zero();
-         return;
+         return 0.0;
+      }
+
+      if (wrenchFromRho.getLinearPart().normSquared() < 1.0e-1)
+      {
+         jacobianToPack.reshape(2, rhoSize);
+         jacobianToPack.zero();
+         objectiveToPack.zero();
+         return 0.0;
+      }
+
+      forceFromRho.setIncludingFrame(wrenchFromRho.getLinearPart());
+      forceFromRho.changeFrame(planeFrame);
+
+      if (forceFromRho.getZ() < 1.0e-1)
+      {
+         jacobianToPack.reshape(2, rhoSize);
+         jacobianToPack.zero();
+         objectiveToPack.zero();
+         return 0.0;
       }
 
       if (useOldCoPObjectiveFormulation)
       {
-         if (wrenchFromRho.getLinearPart().normSquared() < 1.0e-1)
-         {
-            jacobianToPack.reshape(2, rhoSize);
-            jacobianToPack.zero();
-            objectiveToPack.zero();
-            return;
-         }
-
-         forceFromRho.setIncludingFrame(wrenchFromRho.getLinearPart());
-         forceFromRho.changeFrame(planeFrame);
-
-         if (forceFromRho.getZ() < 1.0e-1)
-         {
-            jacobianToPack.reshape(2, rhoSize);
-            jacobianToPack.zero();
-            objectiveToPack.zero();
-            return;
-         }
-
          double fzInverse = 1.0 / forceFromRho.getZ();
 
          // [ -J_ty / F_z_previous ] * rho == x_cop
@@ -371,7 +372,9 @@ public class PlaneContactStateToWrenchMatrixHelper
          MatrixTools.setMatrixBlock(jacobianToPack, 1, 0, wrenchJacobianInPlaneFrame, tauXIndex, 0, 1, rhoSize, fzInverse);
 
          // Get the objective value
-         desiredCoP.get(copRegularizationObjective);
+         desiredCoP.get(objectiveToPack);
+
+         return 1.0;
       }
       else
       {
@@ -382,7 +385,10 @@ public class PlaneContactStateToWrenchMatrixHelper
                                             rhoSize,
                                             jacobianToPack,
                                             objectiveToPack);
+
+         return 1.0 / MathTools.square(forceFromRho.getZ());
       }
+
    }
 
    private void clear(int rhoIndex)

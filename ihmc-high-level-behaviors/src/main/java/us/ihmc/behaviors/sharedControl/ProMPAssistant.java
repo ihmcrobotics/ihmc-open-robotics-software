@@ -2,10 +2,12 @@ package us.ihmc.behaviors.sharedControl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -34,6 +36,8 @@ public class ProMPAssistant
    private boolean firstObservedBodyPart = true;
    private String currentTask = ""; // detected task
    private int numberObservations = 0; // number of observations used to update the prediction
+   private final HashMap<String, Point3D[]> initialStdDeviations = new HashMap<>(); // std deviations of position used for visualization
+   private final HashMap<String, Point3D[]> initialMeans = new HashMap<>(); // mean trajectories of position used for visualization
    private String bodyPartInference = "";
    private String bodyPartGoal = "";
    private final HashMap<String, String> taskBodyPartInferenceMap = new HashMap<>();
@@ -342,7 +346,17 @@ public class ProMPAssistant
                (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet().forEach(part -> bodyPartObservedTrajectoryMap.put(part, new ArrayList<>()));
             }
             if (!currentTask.isEmpty())
+            {
                LogTools.info("Found task! {}", currentTask);
+               for (Map.Entry<String, String> entryPart : proMPManagers.get(currentTask).getBodyPartsGeometry().entrySet())
+               {
+                  // store stdDeviation trajectories for informing user through graphics
+                  initialStdDeviations.put(entryPart.getKey(),
+                                           proMPManagers.get(currentTask).generateStdDeviationTrajectory(entryPart.getKey()));
+                  initialMeans.put(entryPart.getKey(),
+                                   proMPManagers.get(currentTask).generateMeanTrajectory(entryPart.getKey(), objectFrame));
+               }
+            }
          }
          else // no tasks in this context
          {
@@ -470,6 +484,8 @@ public class ProMPAssistant
       bodyPartObservedTrajectoryMap.clear();
       bodyPartGeneratedTrajectoryMap.clear();
       bodyPartTrajectorySampleCounter.clear();
+      initialStdDeviations.clear();
+      initialMeans.clear();
       observationRecognition.clear();
       doneInitialProcessingTask = false;
       isLastViaPoint.set(false);
@@ -496,6 +512,16 @@ public class ProMPAssistant
    public ProMPManager getProMPManager(String task)
    {
       return proMPManagers.get(task);
+   }
+
+   public Point3D[] getInitialStdDeviation(String bodyPart)
+   {
+      return initialStdDeviations.get(bodyPart);
+   }
+
+   public Point3D[] getInitialMean(String bodyPart)
+   {
+      return initialMeans.get(bodyPart);
    }
 
    public Set<String> getTaskNames()

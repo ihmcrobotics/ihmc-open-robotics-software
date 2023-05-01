@@ -11,12 +11,14 @@ import javafx.stage.Stage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
+import us.ihmc.ihmcPerception.heightMap.HeightMapInputData;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.messager.javafx.JavaFXMessager;
@@ -89,8 +91,13 @@ public abstract class HeightMapUI extends ApplicationNoModule
             PointCloudData pointCloudData = new PointCloudData(data);
             Point3D gridCenter = new Point3D(data.getLidarPosition().getX(), data.getLidarPosition().getY(), groundHeight);
             FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
+            HeightMapInputData inputData = new HeightMapInputData();
+            inputData.pointCloud = pointCloudData;
+            inputData.sensorPose = sensorPose;
+            inputData.gridCenter = gridCenter;
+            inputData.verticalMeasurementVariance = MathTools.square(parameters.getNominalStandardDeviation());
 
-            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Triple.of(pointCloudData, sensorPose, gridCenter));
+            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, inputData);
          }
       } );
       /*
