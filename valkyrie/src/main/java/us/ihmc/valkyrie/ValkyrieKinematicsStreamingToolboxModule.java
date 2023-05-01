@@ -79,6 +79,12 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRosControlController.VERSION);
       ValkyrieJointMap jointMap = robotModel.getJointMap();
+      if (DEMO_MODE)
+      {
+         ValkyrieKinematicsCollisionModel kinematicsCollisionModel = new ValkyrieKinematicsCollisionModel(jointMap);
+         kinematicsCollisionModel.setEnableConservativeCollisions(true);
+         robotModel.setHumanoidRobotKinematicsCollisionModel(kinematicsCollisionModel);
+      }
       boolean startYoVariableServer = true;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
 

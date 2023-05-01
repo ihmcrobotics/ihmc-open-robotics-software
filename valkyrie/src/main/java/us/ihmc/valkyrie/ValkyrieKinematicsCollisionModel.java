@@ -24,9 +24,22 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
 {
    private final HumanoidJointNameMap jointMap;
 
+   /**
+    * When {@code true}, the collisions are tweaked to be more conservative. These collision shapes
+    * were used during IHMC Open House 2023, where kids were able to take control of the robot with the
+    * VR and IK streaming. The collision shapes may be too conservative for an experienced user trying
+    * to achieve a task with the robot.
+    */
+   private boolean enableConservativeCollisions = false;
+
    public ValkyrieKinematicsCollisionModel(HumanoidJointNameMap jointMap)
    {
       this.jointMap = jointMap;
+   }
+
+   public void setEnableConservativeCollisions(boolean enableConservativeCollisions)
+   {
+      this.enableConservativeCollisions = enableConservativeCollisions;
    }
 
    @Override
@@ -59,26 +72,45 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
          RigidBodyBasics torso = multiBodySystem.findRigidBody(jointMap.getChestName());
          MovingReferenceFrame torsoFrame = torso.getParentJoint().getFrameAfterJoint();
          FrameCapsule3D torsoShapeTop = new FrameCapsule3D(torsoFrame, 0.08, 0.15);
-         torsoShapeTop.getPosition().set(0.04, 0.0, 0.253);
+         if (enableConservativeCollisions)
+            torsoShapeTop.getPosition().set(0.04, 0.0, 0.253);
+         else
+            torsoShapeTop.getPosition().set(0.004, 0.0, 0.253);
          torsoShapeTop.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeTop));
 
-         FrameCapsule3D torsoShapeBottom = new FrameCapsule3D(torsoFrame, 0.1, 0.14);
-         torsoShapeBottom.getPosition().set(0.0, 0.0, 0.103);
+         FrameCapsule3D torsoShapeBottom = new FrameCapsule3D(torsoFrame, 0.1, 0.12);
+         torsoShapeBottom.getPosition().set(-0.006, 0.0, 0.103);
+         if (enableConservativeCollisions)
+         {
+            torsoShapeBottom.setRadius(0.14);
+            torsoShapeBottom.getPosition().set(0.0, 0.0, 0.103);
+         }
          torsoShapeBottom.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottom));
 
-         FrameSphere3D torsoShapeBack = new FrameSphere3D(torsoFrame, -0.175, 0, 0.22, 0.25);
-         collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBack));
+         if (enableConservativeCollisions)
+         {
+            FrameSphere3D torsoShapeBack = new FrameSphere3D(torsoFrame, -0.175, 0, 0.22, 0.25);
+            collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBack));
+         }
 
          RigidBodyBasics pelvis = multiBodySystem.findRigidBody(jointMap.getPelvisName());
          MovingReferenceFrame pelvisFrame = pelvis.getParentJoint().getFrameAfterJoint();
-         FrameCapsule3D pelvisShapeTop = new FrameCapsule3D(pelvisFrame, 0.22, 0.14);
+         FrameCapsule3D pelvisShapeTop = new FrameCapsule3D(pelvisFrame, 0.15, 0.1);
+         if (enableConservativeCollisions)
+            pelvisShapeTop.setSize(0.22, 0.14);
          pelvisShapeTop.getAxis().set(Axis3D.Y);
          pelvisShapeTop.getPosition().set(0.0, 0.0, -0.08);
          collidables.add(new Collidable(pelvis, collisionMask, collisionGroup, pelvisShapeTop));
-         FrameCapsule3D pelvisShapeBottom = new FrameCapsule3D(pelvisFrame, 0.125, 0.15);
-         pelvisShapeBottom.getPosition().set(0.01, 0.0, -0.155);
+         FrameCapsule3D pelvisShapeBottom = new FrameCapsule3D(pelvisFrame, 0.125, 0.14);
+         pelvisShapeBottom.getPosition().set(0.0, 0.0, -0.155);
+         if (enableConservativeCollisions)
+         {
+            pelvisShapeBottom.setSize(0.125, 0.15);
+            pelvisShapeBottom.getPosition().set(0.01, 0.0, -0.155);
+         }
+
          collidables.add(new Collidable(pelvis, collisionMask, collisionGroup, pelvisShapeBottom));
 
          for (RobotSide robotSide : RobotSide.values)
@@ -125,7 +157,9 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
          { // Assuming this val with arm mass sim
             RigidBodyBasics massSim = multiBodySystem.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).getSuccessor();
             MovingReferenceFrame massSimFrame = massSim.getParentJoint().getFrameAfterJoint();
-            FrameCapsule3D massSimShape = new FrameCapsule3D(massSimFrame, 0.36, 0.09);
+            FrameCapsule3D massSimShape = new FrameCapsule3D(massSimFrame, 0.36, 0.065);
+            if (enableConservativeCollisions)
+               massSimShape.setRadius(0.09);
             massSimShape.getPosition().set(-0.025, robotSide.negateIfRightSide(0.17), 0.0);
             massSimShape.getAxis().set(Axis3D.Y);
             collidables.add(new Collidable(massSim, collisionMask, collisionGroup, massSimShape));
@@ -139,7 +173,9 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
 
          RigidBodyBasics upperLeg = multiBodySystem.findJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).getSuccessor();
          MovingReferenceFrame upperLegFrame = upperLeg.getParentJoint().getFrameAfterJoint();
-         FrameCapsule3D upperLegShapeTop = new FrameCapsule3D(upperLegFrame, 0.25, 0.13);
+         FrameCapsule3D upperLegShapeTop = new FrameCapsule3D(upperLegFrame, 0.25, 0.1);
+         if (enableConservativeCollisions)
+            upperLegShapeTop.setRadius(0.13);
          upperLegShapeTop.getPosition().set(0.032, robotSide.negateIfRightSide(0.091), -0.108);
          upperLegShapeTop.getAxis().set(new Vector3D(-0.139, robotSide.negateIfLeftSide(0.1), 0.99));
          collidables.add(new Collidable(upperLeg, collisionMask, collisionGroup, upperLegShapeTop));
