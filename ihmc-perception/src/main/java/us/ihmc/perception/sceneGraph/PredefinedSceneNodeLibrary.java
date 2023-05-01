@@ -28,8 +28,6 @@ public class PredefinedSceneNodeLibrary
    private final ArUcoDetectableNode pullDoorPanel;
    private final ArUcoDetectableNode pushDoorLeverHandle;
    private final ArUcoDetectableNode pullDoorLeverHandle;
-   private final StaticArUcoRelativeDetectableSceneNode pushDoorFrame;
-   private final StaticArUcoRelativeDetectableSceneNode pullDoorFrame;
    private final ArUcoDetectableNode box;
    private final ArUcoDetectableNode canOfSoup;
 
@@ -56,18 +54,12 @@ public class PredefinedSceneNodeLibrary
       registerArUcoDetectableSceneNode(pushDoorLeverHandle);
       registerArUcoDetectableSceneNode(pullDoorLeverHandle);
 
-      // The frames stay in place after being seen
-      pushDoorFrame = DoorSceneNodeDefinitions.createPushDoorFrame();
-      pullDoorFrame = DoorSceneNodeDefinitions.createPullDoorFrame();
-      registerStaticArUcoRelativeDetectableSceneNode(pushDoorFrame);
-      registerStaticArUcoRelativeDetectableSceneNode(pullDoorFrame);
-
       box = RigidBodySceneObjectDefinitions.createBox();
       canOfSoup = RigidBodySceneObjectDefinitions.createCanOfSoup();
       registerArUcoDetectableSceneNode(box);
       registerArUcoDetectableSceneNode(canOfSoup);
 
-      // TODO: Add non-ArUco cup -- detected by neural net
+      // TODO: Remove aruco detectables and use non-ArUco objects -- detected by neural net
 
    }
 

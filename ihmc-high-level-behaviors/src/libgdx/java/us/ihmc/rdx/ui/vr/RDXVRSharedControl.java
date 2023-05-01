@@ -21,6 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.sceneGraph.SceneGraphAPI;
+import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectableNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.visualizers.RDXEdgeDefinedShapeGraphic;
@@ -37,6 +38,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class to pack a teleoperated referenceFrame and modify it by using some assistance from the robot.
+ * This class also generates a visualization of the assistance through:
+ * 1. ghost robot motion
+ * 2. spline trajectories for end-effectors
+ * 3. std deviation colored region of the autonomy used for assistance
+ */
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
    private final ROS2PublishSubscribeAPI ros2;
@@ -84,6 +92,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       detectableSceneObjectsSubscription = ros2.subscribe(SceneGraphAPI.DETECTABLE_SCENE_NODES);
    }
 
+   /**
+    * Process the VR input to activate/deactivate shared control
+    */
    public void processInput(InputDigitalActionData triggerButton)
    {
       // enable if trigger button has been pressed once. if button is pressed again shared control is stopped
@@ -93,6 +104,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       }
    }
 
+   /**
+    * 1. ghost robot graphics
+    */
    public void updatePreviewModel(KinematicsToolboxOutputStatus status)
    {
       ghostRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition());
@@ -104,6 +118,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostRobotModel.getElevator().updateFramesRecursively();
    }
 
+   /**
+    * 1. ghost robot graphics
+    */
    public void replayPreviewModel()
    {
       KinematicsToolboxOutputStatus status = getPreviewStatus();
@@ -121,6 +138,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          replayPreviewCounter = 0;
    }
 
+   /**
+    * 2. spline trajectories for end-effectors
+    */
    private void replaySplinesPreview()
    {
       // draw spline for the computed trajectories from assistance
@@ -155,6 +175,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       }
    }
 
+   /**
+    * 3. std deviation colored region of the autonomy used for assistance
+    */
    private void enableStdDeviationVisualization(String bodyPart)
    {
       if (stdDeviationGraphics.get(bodyPart) == null)
@@ -182,6 +205,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       }
    }
 
+   /**
+    * 3. std deviation colored region of the autonomy used for assistance
+    */
    private Point3D[][] createStdDeviationEdges(Point3D[] mean, Point3D[] stdDeviation)
    {
       Point3D[][] edges = new Point3D[8][mean.length];
@@ -223,11 +249,16 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       if (detectableSceneObjectsSubscription.getMessageNotification().poll() && !proMPAssistant.startedProcessing())
       {
          DetectableSceneNodesMessage detectableSceneNodeMessage = detectableSceneObjectsSubscription.getMessageNotification().read();
-         DetectableSceneNodeMessage selectedObject = null; // TODO: Search for desired object
-         objectName = selectedObject.getNameAsString();
-
-         MessageTools.toEuclid(selectedObject.getTransformToWorld(), objectTransformToWorld);
-         objectFrame.update();
+         for (var sceneNodeMessage : detectableSceneNodeMessage.getDetectableSceneNodes())
+         {
+            // TODO. update this once Panel and LeverHandle are unified into single detectable "Door"
+            if (sceneNodeMessage.currently_detected_ && !sceneNodeMessage.name_.toString().contains("Panel"))
+            {
+               objectName = sceneNodeMessage.getNameAsString();
+               MessageTools.toEuclid(sceneNodeMessage.getTransformToWorld(), objectTransformToWorld);
+               objectFrame.update();
+            }
+         }
       }
 
       if (proMPAssistant.startedProcessing())

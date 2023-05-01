@@ -34,8 +34,8 @@
     "z" : 0.0,
     "qx" : 0.0,
     "qy" : 0.0,
-    "qz" : 0.0,
-    "qs" : 1.0
+    "qz" : 1.0,
+    "qs" : 0.0
   }, {
     "type" : "RDXDoorLeverHandleObject",
     "x" : 1.055655594017242,
