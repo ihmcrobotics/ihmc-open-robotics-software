@@ -3,7 +3,6 @@ buildscript {
       maven { url = uri("https://plugins.gradle.org/m2/") }
       mavenCentral()
       mavenLocal()
-      jcenter()
    }
    dependencies {
       classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.22.2")
