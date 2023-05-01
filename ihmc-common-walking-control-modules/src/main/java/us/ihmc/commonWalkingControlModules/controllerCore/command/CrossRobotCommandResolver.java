@@ -74,6 +74,8 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType.JOINTSPACE;
+
 /**
  * The objective of this class is to help the passing commands between two instances of the same
  * robot.
@@ -329,7 +331,12 @@ public class CrossRobotCommandResolver
                resolveJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) commandToResolve, out.addJointLimitEnforcementMethodCommand());
                break;
             case JOINTSPACE:
-               resolveJointspaceAccelerationCommand((JointspaceAccelerationCommand) commandToResolve, out.addJointspaceAccelerationCommand());
+               if (commandToResolve instanceof JointspaceAccelerationCommand jointspaceAccelerationCommand)
+                  resolveJointspaceAccelerationCommand(jointspaceAccelerationCommand, out.addJointspaceAccelerationCommand());
+               else if (commandToResolve instanceof JointTorqueCommand jointTorqueCommand)
+                  resolveJointTorqueCommand(jointTorqueCommand, out.addJointTorqueCommand());
+               else
+                  throw new RuntimeException("Unknown " + JOINTSPACE +  " command " + commandToResolve.getClass().getSimpleName());
                break;
             case MOMENTUM:
                resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
@@ -771,8 +778,10 @@ public class CrossRobotCommandResolver
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
-         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredTorque(jointIndex));
+         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredTorque(jointIndex), in.getWeight(jointIndex));
       }
+
+      out.setConstraintType(in.getConstraintType());
    }
 
    public void resolveVirtualForceCommand(VirtualForceCommand in, VirtualForceCommand out)

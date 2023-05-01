@@ -22,7 +22,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
-import us.ihmc.rdx.visualizers.RDXFrustumVisualizer;
+import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class RDXInteractableBlackflyFujinon
@@ -34,7 +34,7 @@ public class RDXInteractableBlackflyFujinon
    private final ImBoolean renderARImage = new ImBoolean(false);
    private final double frustimNear = 0.05;
    private final ImFloat frustumFar = new ImFloat(5.0f);
-   private RDXFrustumVisualizer frustumVisualizer;
+   private RDXFrustumGraphic frustumVisualizer;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Matrix4 tempMatrix4 = new Matrix4();
    private PerspectiveCamera camera;
@@ -68,7 +68,7 @@ public class RDXInteractableBlackflyFujinon
       camera.position.setZero();
       camera.up.set(0.0f, 0.0f, 1.0f);
       camera.direction.set(1.0f, 0.0f, 0.0f);
-      frustumVisualizer = new RDXFrustumVisualizer();
+      frustumVisualizer = new RDXFrustumGraphic();
 
       panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
    }

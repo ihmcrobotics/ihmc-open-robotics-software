@@ -30,7 +30,7 @@ public class JournalCtlReader
    {
       ThreadTools.startAsDaemon(() ->
       {
-         ProcessBuilder processBuilder = new ProcessBuilder("journalctl", "--since", "1 hour ago", "-ef", "-u", serviceName);
+         ProcessBuilder processBuilder = new ProcessBuilder("sudo", "journalctl", "--since", "1 hour ago", "-ef", "-u", serviceName);
 
          try
          {
