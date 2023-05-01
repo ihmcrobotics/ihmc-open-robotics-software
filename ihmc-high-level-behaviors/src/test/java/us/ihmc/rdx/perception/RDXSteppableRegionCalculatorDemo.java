@@ -50,7 +50,7 @@ public class RDXSteppableRegionCalculatorDemo
       ROS2Node ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "simulation_ui_realtime");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      heightMap = new RemoteHeightMapUpdater(ReferenceFrame::getWorldFrame, realtimeRos2Node);
+      heightMap = new RemoteHeightMapUpdater("", ReferenceFrame::getWorldFrame, realtimeRos2Node);
       heightMap.getParameters().setMaxZ(1.5);
 
       heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
