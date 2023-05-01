@@ -16,7 +16,8 @@ import java.util.concurrent.TimeUnit;
 
 public class MissionControlUI
 {
-   private final Map<UUID, Long> lastSystemAvailableMessage = new HashMap<>();
+   private final Map<UUID, Long> lastSystemAvailableMessageTimes = new HashMap<>();
+   private final Map<UUID, SystemAvailableMessage> lastSystemAvailableMessage = new HashMap<>();
    private final Map<UUID, ImGuiMachine> machines = new ConcurrentHashMap<>(); // Accessed by several threads
    private final ROS2Node ros2Node;
 
@@ -44,7 +45,8 @@ public class MissionControlUI
             LogTools.error("Unable to create instanceId from " + instanceIdString);
             return;
          }
-         lastSystemAvailableMessage.put(instanceId, System.currentTimeMillis());
+         lastSystemAvailableMessageTimes.put(instanceId, System.currentTimeMillis());
+         lastSystemAvailableMessage.put(instanceId, message);
       });
 
       window = new ImGuiGlfwWindow(getClass(), "Mission Control 3");
@@ -62,17 +64,18 @@ public class MissionControlUI
    {
       long now = System.currentTimeMillis();
 
-      for (Map.Entry<UUID, Long> entry : lastSystemAvailableMessage.entrySet())
+      for (Map.Entry<UUID, SystemAvailableMessage> entry : lastSystemAvailableMessage.entrySet())
       {
          UUID instanceId = entry.getKey();
-         long time = entry.getValue();
+         SystemAvailableMessage message = entry.getValue();
+         long time = lastSystemAvailableMessageTimes.get(instanceId);
          // Consider expired if we haven't received a SystemAvailableMessage within the last 5 seconds
          boolean expired = (now - time) > TimeUnit.SECONDS.toMillis(5);
 
          // Check for new machines
          if (!expired && !machines.containsKey(instanceId))
          {
-            ImGuiMachine machine = new ImGuiMachine(instanceId, "?", ros2Node);
+            ImGuiMachine machine = new ImGuiMachine(instanceId, message.getHostnameAsString(), ros2Node);
             window.getPanelManager().queueAddPanel(machine.getPanel());
             machines.put(instanceId, machine);
          }
