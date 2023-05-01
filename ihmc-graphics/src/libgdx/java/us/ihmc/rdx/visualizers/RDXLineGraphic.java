@@ -137,4 +137,9 @@ public class RDXLineGraphic implements RenderableProvider
    {
       executorService.destroy();
    }
+
+   public ModelInstance getModelInstance()
+   {
+      return modelInstance;
+   }
 }
