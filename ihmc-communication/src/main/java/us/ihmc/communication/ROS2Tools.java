@@ -385,6 +385,12 @@ public class ROS2Tools
       return typeNamedTopic(Empty.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
    }
 
+   public static ROS2Topic<SystemServiceLogRefreshMessage> getSystemServiceLogRefreshTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemServiceLogRefreshMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
    /**
     * Get the system service status QOS profile for Mission Control
     * @return the ROS2QosProfile with history
@@ -392,7 +398,7 @@ public class ROS2Tools
    public static ROS2QosProfile getSystemServiceStatusQosProfile()
    {
       ROS2QosProfile profile = new ROS2QosProfile();
-      profile.setReliability(ReliabilityQosKindType.BEST_EFFORT);
+      profile.setReliability(ReliabilityQosKindType.RELIABLE);
       return profile;
    }
 
