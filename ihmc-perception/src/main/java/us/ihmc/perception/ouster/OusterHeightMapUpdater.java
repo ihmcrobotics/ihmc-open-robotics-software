@@ -16,7 +16,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
-import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
@@ -74,16 +73,21 @@ public class OusterHeightMapUpdater
       heightMapUpdater.attachHeightMapConsumer(heightMapConsumer);
    }
 
-   public void updateWithDataBuffer(ReferenceFrame sensorFrame, ReferenceFrame groundFrame, FloatBuffer pointCloudInSensorFrame, int numberOfPoints, Instant instant)
+   public void updateWithDataBuffer(ReferenceFrame groundFrame,
+                                    ReferenceFrame sensorFrame,
+                                    FloatBuffer pointCloudInWorldFrame,
+                                    int numberOfPoints,
+                                    Instant instant)
    {
       double groundHeight = groundFrame.getTransformToRoot().getTranslationZ();
 
       FramePose3D sensorPose = new FramePose3D(sensorFrame);
       sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
       Point3D gridCenter = new Point3D(sensorPose.getX(), sensorPose.getY(), groundHeight);
-      PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInSensorFrame);
+      PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInWorldFrame);
 
-      heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, sensorPose, gridCenter));
+      // submitting the world frame for the sensor pose, as that's the frame the data is in.
+      heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, new FramePose3D(ReferenceFrame.getWorldFrame()), gridCenter));
    }
 
    public void consumeStateRequestMessage(HeightMapStateRequestMessage message)

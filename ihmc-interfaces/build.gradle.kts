@@ -14,7 +14,7 @@ buildscript {
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.7"
-   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.ihmc-cd") version "1.24"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -53,7 +53,7 @@ generatorDependencies {
 }
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()
-val msg_packages = listOf("ihmc_common_msgs", "controller_msgs", "toolbox_msgs", "quadruped_msgs", "perception_msgs", "exoskeleton_msgs", "atlas_msgs")
+val msg_packages = listOf("ihmc_common_msgs", "mission_control_msgs", "controller_msgs", "toolbox_msgs", "quadruped_msgs", "perception_msgs", "exoskeleton_msgs", "atlas_msgs")
 
 tasks.create("generateMessages") {
    doFirst {
@@ -68,7 +68,7 @@ tasks.create("generateMessages") {
       var foundDependency = false
 
       copy {
-         for (file in configurations.default.get().files)
+         for (file in configurations.runtimeClasspath.get().files)
          {
             if (file.name.contains("ros2-common-interfaces"))
             {
@@ -81,7 +81,7 @@ tasks.create("generateMessages") {
 
       if (!foundDependency)
       {
-         throw GradleException("Could not find ros2-common-interfaces in configurations.default!")
+         throw GradleException("Could not find ros2-common-interfaces in configurations.runtimeClasspath!")
       }
 
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces").toPath())

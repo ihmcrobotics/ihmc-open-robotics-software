@@ -26,6 +26,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
+import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -34,11 +35,11 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
 
-import java.util.List;
 import java.util.UUID;
 
 public class RDXWalkAction implements RDXBehaviorAction
@@ -65,7 +66,7 @@ public class RDXWalkAction implements RDXBehaviorAction
                       FootstepPlanningModule footstepPlanner,
                       ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper ros2ControllerHelper,
-                      List<ReferenceFrame> referenceFrameLibrary)
+                      ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.footstepPlanner = footstepPlanner;
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
@@ -157,7 +158,7 @@ public class RDXWalkAction implements RDXBehaviorAction
    @Override
    public void renderImGuiWidgets()
    {
-      if (referenceFrameLibraryCombo.combo())
+      if (referenceFrameLibraryCombo.render())
       {
          FramePose3D poseToKeep = new FramePose3D();
          poseToKeep.setToZero(footstepPlannerGoalGizmo.getGizmoFrame());

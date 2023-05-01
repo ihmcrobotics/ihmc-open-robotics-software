@@ -60,8 +60,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   protected final YoRegistry registry;
-
    protected final YoBoolean isEnabled;
 
    protected final FBPose3D yoDesiredPose;
@@ -191,7 +189,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       rigidBodyAccelerationProvider = ccToolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
-      registry = new YoRegistry(appendIndex(endEffectorName, controllerIndex) + "SpatialFBController");
       dt = ccToolbox.getControlDT();
       gains = fbToolbox.getOrCreateSE3PIDGains(endEffector, controllerIndex, computeIntegralTerm, true);
       positionGains = gains.getPositionGains();
@@ -201,7 +198,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       controlFrame = fbToolbox.getOrCreateControlFrame(endEffector, controllerIndex, true);
 
-      isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerEnabled", registry);
+      isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isSpatialFBControllerEnabled", fbToolbox.getRegistry());
       isEnabled.set(false);
 
       yoDesiredPose = fbToolbox.getOrCreatePoseData(endEffector, controllerIndex, DESIRED, isEnabled, true);
@@ -257,9 +254,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             yoFeedForwardAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, ACCELERATION, isEnabled, false);
             yoProportionalFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, P_FEEDBACK, ACCELERATION, isEnabled, false);
             yoDerivativeFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, D_FEEDBACK, ACCELERATION, isEnabled, false);
-            yoIntegralFeedbackAcceleration = computeIntegralTerm
-                  ? fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, I_FEEDBACK, ACCELERATION, isEnabled, false)
-                  : null;
+            yoIntegralFeedbackAcceleration = computeIntegralTerm ? fbToolbox.getOrCreateVectorData6D(endEffector,
+                                                                                                     controllerIndex,
+                                                                                                     I_FEEDBACK,
+                                                                                                     ACCELERATION,
+                                                                                                     isEnabled,
+                                                                                                     false)
+                                                                 : null;
             yoFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, ACCELERATION, isEnabled, false);
             rateLimitedFeedbackAcceleration = fbToolbox.getOrCreateRateLimitedVectorData6D(endEffector,
                                                                                            controllerIndex,
@@ -348,8 +349,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoFeedForwardVelocity = null;
          rateLimitedFeedbackVelocity = null;
       }
-
-      parentRegistry.addChild(registry);
    }
 
    public void submitFeedbackControlCommand(SpatialFeedbackControlCommand command)
@@ -471,13 +470,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredLinearAcceleration.add(linearDerivativeFeedback);
       if (computeIntegralTerm)
          desiredLinearAcceleration.add(linearIntegralFeedback);
-      desiredLinearAcceleration.clipToMaxLength(positionGains.getMaximumFeedback());
+      desiredLinearAcceleration.clipToMaxNorm(positionGains.getMaximumFeedback());
 
       desiredAngularAcceleration.setIncludingFrame(angularProportionalFeedback);
       desiredAngularAcceleration.add(angularDerivativeFeedback);
       if (computeIntegralTerm)
          desiredAngularAcceleration.add(angularIntegralFeedback);
-      desiredAngularAcceleration.clipToMaxLength(orientationGains.getMaximumFeedback());
+      desiredAngularAcceleration.clipToMaxNorm(orientationGains.getMaximumFeedback());
 
       yoProportionalFeedbackAcceleration.setIncludingFrame(angularProportionalFeedback, linearProportionalFeedback);
       yoProportionalFeedbackAcceleration.setCommandId(currentCommandId);
@@ -531,11 +530,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       desiredLinearVelocity.setIncludingFrame(linearProportionalFeedback);
       desiredLinearVelocity.add(linearIntegralFeedback);
-      desiredLinearVelocity.clipToMaxLength(positionGains.getMaximumFeedback());
+      desiredLinearVelocity.clipToMaxNorm(positionGains.getMaximumFeedback());
 
       desiredAngularVelocity.setIncludingFrame(angularProportionalFeedback);
       desiredAngularVelocity.add(angularIntegralFeedback);
-      desiredAngularVelocity.clipToMaxLength(orientationGains.getMaximumFeedback());
+      desiredAngularVelocity.clipToMaxNorm(orientationGains.getMaximumFeedback());
 
       yoFeedbackVelocity.setIncludingFrame(desiredAngularVelocity, desiredLinearVelocity);
       yoFeedbackVelocity.changeFrame(trajectoryFrame);
@@ -596,12 +595,12 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredLinearForce.setIncludingFrame(linearProportionalFeedback);
       desiredLinearForce.add(linearDerivativeFeedback);
       desiredLinearForce.add(linearIntegralFeedback);
-      desiredLinearForce.clipToMaxLength(positionGains.getMaximumFeedback());
+      desiredLinearForce.clipToMaxNorm(positionGains.getMaximumFeedback());
 
       desiredAngularTorque.setIncludingFrame(angularProportionalFeedback);
       desiredAngularTorque.add(angularDerivativeFeedback);
       desiredAngularTorque.add(angularIntegralFeedback);
-      desiredAngularTorque.clipToMaxLength(orientationGains.getMaximumFeedback());
+      desiredAngularTorque.clipToMaxNorm(orientationGains.getMaximumFeedback());
 
       yoFeedbackWrench.setIncludingFrame(desiredAngularTorque, desiredLinearForce);
       yoFeedbackWrench.changeFrame(trajectoryFrame);
@@ -677,8 +676,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
       selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
 
-      linearFeedbackTermToPack.clipToMaxLength(positionGains.getMaximumProportionalError());
-      angularFeedbackTermToPack.clipToMaxLength(orientationGains.getMaximumProportionalError());
+      linearFeedbackTermToPack.clipToMaxNorm(positionGains.getMaximumProportionalError());
+      angularFeedbackTermToPack.clipToMaxNorm(orientationGains.getMaximumProportionalError());
 
       yoErrorVector.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
       yoErrorVector.changeFrame(trajectoryFrame);
@@ -743,8 +742,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
       selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
 
-      linearFeedbackTermToPack.clipToMaxLength(positionGains.getMaximumDerivativeError());
-      angularFeedbackTermToPack.clipToMaxLength(orientationGains.getMaximumDerivativeError());
+      linearFeedbackTermToPack.clipToMaxNorm(positionGains.getMaximumDerivativeError());
+      angularFeedbackTermToPack.clipToMaxNorm(orientationGains.getMaximumDerivativeError());
 
       if (yoFilteredErrorVelocity != null)
       {
@@ -841,7 +840,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          linearFeedbackTermToPack.add(yoErrorPositionIntegrated);
          linearFeedbackTermToPack.changeFrame(controlFrame);
          selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);
-         linearFeedbackTermToPack.clipToMaxLength(maximumLinearIntegralError);
+         linearFeedbackTermToPack.clipToMaxNorm(maximumLinearIntegralError);
          yoErrorPositionIntegrated.setIncludingFrame(linearFeedbackTermToPack);
          yoErrorPositionIntegrated.changeFrame(trajectoryFrame);
          yoErrorPositionIntegrated.setCommandId(currentCommandId);
@@ -886,7 +885,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          angularFeedbackTermToPack.scale(dt);
          angularFeedbackTermToPack.changeFrame(controlFrame);
          selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
-         angularFeedbackTermToPack.clipToMaxLength(maximumAngularIntegralError);
+         angularFeedbackTermToPack.clipToMaxNorm(maximumAngularIntegralError);
          yoErrorRotationVectorIntegrated.setIncludingFrame(angularFeedbackTermToPack);
          yoErrorRotationVectorIntegrated.changeFrame(trajectoryFrame);
          yoErrorRotationVectorIntegrated.setCommandId(currentCommandId);

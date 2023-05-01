@@ -1,9 +1,12 @@
 package us.ihmc.communication;
 
+import com.eprosima.xmlschemas.fastrtps_profiles.HistoryQosKindType;
+import com.eprosima.xmlschemas.fastrtps_profiles.ReliabilityQosKindType;
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import mission_control_msgs.msg.dds.*;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
@@ -21,6 +24,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -246,6 +250,8 @@ public class ROS2Tools
    public static final ROS2Topic<Empty> PUBLISH_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("publish_lidar_scan").withType(Empty.class);
    public static final ROS2Topic<Empty> PUBLISH_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("publish_height_map").withType(Empty.class);
 
+   public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withModule("mission_control").withType(SystemAvailableMessage.class);
+
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
@@ -343,6 +349,51 @@ public class ROS2Tools
    public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()
    {
       return typeNamedTopic(DoorParameterPacket.class, ROS2Tools.IHMC_ROOT);
+   }
+
+   /**
+    * Get system resource usage topic for Mission Control
+    * @param instanceId of the Mission Control Daemon
+    * @return the ROS2Topic the daemon will use for system resource usage messages
+    */
+   public static ROS2Topic<SystemResourceUsageMessage> getSystemResourceUsageTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemResourceUsageMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   /**
+    * Get system service status topic for Mission Control
+    * @param instanceId of the Mission Control Daemon
+    * @return the ROS2Topic the daemon will use for system service status messages
+    */
+   public static ROS2Topic<SystemServiceStatusMessage> getSystemServiceStatusTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemServiceStatusMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   public static ROS2Topic<SystemServiceActionMessage> getSystemServiceActionTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(SystemServiceActionMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   public static ROS2Topic<Empty> getSystemRebootTopic(UUID instanceId)
+   {
+      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
+      return typeNamedTopic(Empty.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+   }
+
+   /**
+    * Get the system service status QOS profile for Mission Control
+    * @return the ROS2QosProfile with history
+    */
+   public static ROS2QosProfile getSystemServiceStatusQosProfile()
+   {
+      ROS2QosProfile profile = new ROS2QosProfile();
+      profile.setReliability(ReliabilityQosKindType.BEST_EFFORT);
+      return profile;
    }
 
    public final static ExceptionHandler RUNTIME_EXCEPTION = e ->

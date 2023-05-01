@@ -20,7 +20,7 @@ public class RDXRobotLowLevelMessenger
    {
       this.communicationHelper = communicationHelper;
       this.teleoperationParameters = teleoperationParameters;
-      robotLowLevelMessenger = communicationHelper.newRobotLowLevelMessenger();
+      robotLowLevelMessenger = communicationHelper.getOrCreateRobotLowLevelMessenger();
 
       if (robotLowLevelMessenger == null)
       {

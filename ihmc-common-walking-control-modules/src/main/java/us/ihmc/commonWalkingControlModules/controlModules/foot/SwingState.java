@@ -127,6 +127,9 @@ public class SwingState extends AbstractFootControlState
    private final YoBoolean yoSetDesiredVelocityToZero;
    private final YoBoolean scaleSecondaryJointWeights;
    private final YoDouble secondaryJointWeightScale;
+
+   private final YoDouble fractionOfSwingToSwitchToLoaded;
+
    private Vector3DReadOnly nominalAngularWeight;
    private Vector3DReadOnly nominalLinearWeight;
    private final ReferenceFrame ankleFrame;
@@ -171,6 +174,9 @@ public class SwingState extends AbstractFootControlState
       scaleSecondaryJointWeights = new YoBoolean(namePrefix + "ScaleSecondaryJointWeights", registry);
       secondaryJointWeightScale = new YoDouble(namePrefix + "SecondaryJointWeightScale", registry);
       secondaryJointWeightScale.set(1.0);
+
+      fractionOfSwingToSwitchToLoaded = new YoDouble(namePrefix + "FractionOfSwingToSwitchToLoaded", registry);
+      fractionOfSwingToSwitchToLoaded.set(footControlHelper.getWalkingControllerParameters().getFractionOfSwingToSwitchToLoaded());
 
       touchdownDesiredLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredTouchdownAcceleration", worldFrame, registry);
 
@@ -838,5 +844,15 @@ public class SwingState extends AbstractFootControlState
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       return null;
+   }
+
+   @Override
+   public boolean isLoadBearing()
+   {
+      if (fractionOfSwingToSwitchToLoaded.isNaN())
+         return false;
+
+      double timeToSwitchToLoadBearing = swingDuration.getValue() * (1.0 - fractionOfSwingToSwitchToLoaded.getValue());
+      return currentTimeWithSwingSpeedUp.getDoubleValue() > timeToSwitchToLoadBearing;
    }
 }
