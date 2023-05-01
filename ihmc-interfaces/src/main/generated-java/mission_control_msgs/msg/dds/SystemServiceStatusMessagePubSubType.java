@@ -42,6 +42,8 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (25000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -61,6 +63,9 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getStatus().length() + 1;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getLogData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -79,6 +84,8 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_d(data.getStatus());else
           throw new RuntimeException("status field exceeds the maximum length");
 
+      cdr.write_type_7(data.getRefresh());
+
       if(data.getLogData().size() <= 25000000)
       cdr.write_type_e(data.getLogData());else
           throw new RuntimeException("log_data field exceeds the maximum length");
@@ -89,6 +96,8 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       cdr.read_type_d(data.getServiceName());	
       cdr.read_type_d(data.getStatus());	
+      data.setRefresh(cdr.read_type_7());
+      	
       cdr.read_type_e(data.getLogData());	
 
    }
@@ -98,6 +107,7 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_d("service_name", data.getServiceName());
       ser.write_type_d("status", data.getStatus());
+      ser.write_type_7("refresh", data.getRefresh());
       ser.write_type_e("log_data", data.getLogData());
    }
 
@@ -106,6 +116,7 @@ public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.read_type_d("service_name", data.getServiceName());
       ser.read_type_d("status", data.getStatus());
+      data.setRefresh(ser.read_type_7("refresh"));
       ser.read_type_e("log_data", data.getLogData());
    }
 

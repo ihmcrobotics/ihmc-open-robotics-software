@@ -4,25 +4,19 @@ import imgui.ImGui;
 import imgui.extension.texteditor.TextEditor;
 import imgui.extension.texteditor.TextEditorLanguageDefinition;
 import imgui.type.ImBoolean;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.tools.processManagement.ProcessTools;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 public class ImGuiConsoleArea
 {
-   private final ServiceLogFile logFile;
    private final TextEditor textEditor = new TextEditor();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean autoScroll = new ImBoolean(true);
 
-   public ImGuiConsoleArea(ServiceLogFile logFile)
+   public ImGuiConsoleArea()
    {
-      this.logFile = logFile;
-
       int[] palette = new int[] {0xffffffff,   // Default
                                  0xffd69c56,   // Keyword
                                  0xff00ff00,   // Number
@@ -64,44 +58,11 @@ public class ImGuiConsoleArea
 
       ImGui.sameLine();
 
-      if (ImGui.button("Clear log"))
+      if (ImGui.button("Refresh log"))
       {
-         if (logFile.exists())
-         {
-            textEditor.setText("");
-            try
-            {
-               logFile.delete();
-               logFile.createNewFile();
-            }
-            catch (IOException e)
-            {
-               LogTools.warn("Unable to delete service log file", e);
-            }
-         }
-      }
+         textEditor.setText("");
 
-      ImGui.sameLine();
 
-      if (ImGui.button("Open log directory"))
-      {
-         String os = System.getProperty("os.name").toLowerCase();
-
-         new Thread(() ->
-         {
-            if (os.contains("linux"))
-            {
-               ProcessTools.execSimpleCommandSafe("xdg-open " + logFile.getParentFile().getAbsolutePath());
-            }
-            else if (os.contains("windows"))
-            {
-               ProcessTools.execSimpleCommandSafe("explorer.exe " + logFile.getParentFile().getAbsolutePath());
-            }
-            else if (os.contains("mac"))
-            {
-               // TODO:
-            }
-         }).start();
       }
 
       if (autoScroll.get())
