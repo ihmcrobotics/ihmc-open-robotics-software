@@ -24,6 +24,8 @@ public class ActiveMappingModule
       EXECUTE_AND_PAUSE, CONTINUOUS_MAPPING_STRAIGHT, CONTINUOUS_MAPPING_COVERAGE, CONTINUOUS_MAPPING_SEARCH
    }
 
+   private DecisionLayer decisionLayer;
+
    public ActiveMappingMode activeMappingMode = ActiveMappingMode.CONTINUOUS_MAPPING_STRAIGHT;
 
    private final FootstepPlanningModule footstepPlanner;
