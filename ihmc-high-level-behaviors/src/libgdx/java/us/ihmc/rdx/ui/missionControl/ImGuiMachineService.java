@@ -39,11 +39,6 @@ public class ImGuiMachineService
     */
    private boolean waitingOnStatusChange = false;
 
-   /**
-    * If we are waiting on a full log refresh from the Daemon
-    */
-   private boolean waitingOnRefresh = false;
-
    public ImGuiMachineService(String serviceName, String hostname, UUID instanceId, ImGuiPanel machinePanel, ROS2Node ros2Node)
    {
       this.serviceName = serviceName;
@@ -91,9 +86,9 @@ public class ImGuiMachineService
       this.status = status;
    }
 
-   public void acceptLogLines(List<String> logLines)
+   public void acceptLogLines(List<String> logLines, boolean buffer)
    {
-      logLines.forEach(consoleArea::acceptLine);
+      logLines.forEach(line -> consoleArea.acceptLine(line, buffer));
    }
 
    private void sendActionMessage(String systemdAction)

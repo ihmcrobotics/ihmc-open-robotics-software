@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 public class SystemdServiceMonitor implements Consumer<List<String>>
 {
-   public static final int MAX_LOG_LINE_MESSAGE_LENGTH = 5;
+   public static final int MAX_LOG_LINE_MESSAGE_LENGTH = 10;
 
    private final String serviceName;
    private final ROS2Node ros2Node;
@@ -80,6 +80,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       SystemServiceStatusMessage message = new SystemServiceStatusMessage();
 
       message.setServiceName(serviceName);
+      message.setRefresh(isARefresh);
 
       String status = MissionControlTools.getServiceStatus(serviceName);
       message.setStatus(status);
