@@ -29,6 +29,10 @@ import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+/**
+ *  This class provides easy access to everything that involves mobility for the robot. Everything with walking and moving the legs are contained in this class
+ *  This allows the features to all be grouped together in the UI making the robot easier to operate.
+ */
 public class RDXMobilityManager
 {
    private RDXBaseUI baseUI;
