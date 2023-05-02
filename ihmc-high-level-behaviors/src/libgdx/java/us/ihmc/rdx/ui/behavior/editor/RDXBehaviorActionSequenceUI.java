@@ -8,12 +8,12 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.BehaviorActionSequence;
-import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
@@ -43,7 +43,7 @@ public class RDXBehaviorActionSequenceUI
    private ROS2Node ros2Node;
    private ROS2SyncedRobotModel syncedRobot;
    private ReferenceFrameLibrary referenceFrameLibrary;
-   private final ImString newSequenceName = new ImString("", 100);
+   private final ImString newSequenceName = new ImString(256);
    private final TreeSet<RDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(RDXBehaviorActionSequenceEditor::getName));
 
    public void create(WorkspaceResourceDirectory behaviorSequenceStorageDirectory,

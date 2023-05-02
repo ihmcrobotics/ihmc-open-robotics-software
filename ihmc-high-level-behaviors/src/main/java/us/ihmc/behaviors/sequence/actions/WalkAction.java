@@ -1,11 +1,9 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
-import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -18,6 +16,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

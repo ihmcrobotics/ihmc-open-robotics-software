@@ -62,18 +62,17 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    private RemoteEnvironmentMapInterface environmentMap;
    private VisibilityGraphPathPlanner bodyPathPlanner;
    private FootstepPlanningModule footstepPlanner;
+   private RobotLowLevelMessenger lowLevelMessenger;
 
    public CommunicationHelper(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
-      this(robotModel, ros2Node, true);
-   }
-
-   public CommunicationHelper(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, boolean commsEnabledToStart)
-   {
       this.robotModel = robotModel;
       this.ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
+   }
 
-      ros2Helper.setCommunicationCallbacksEnabled(commsEnabledToStart);
+   public ROS2ControllerHelper getControllerHelper()
+   {
+      return ros2Helper;
    }
 
    // Construction-only methods:
@@ -127,9 +126,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
       return new VisibilityGraphPathPlanner(visibilityGraphsParameters, new ObstacleAvoidanceProcessor(visibilityGraphsParameters));
    }
 
-   public RobotLowLevelMessenger newRobotLowLevelMessenger()
+   public RobotLowLevelMessenger getOrCreateRobotLowLevelMessenger()
    {
-      return robotModel.newRobotLowLevelMessenger(ros2Helper.getROS2NodeInterface());
+      if (lowLevelMessenger == null)
+         lowLevelMessenger = robotModel.newRobotLowLevelMessenger(ros2Helper.getROS2NodeInterface());
+
+      return lowLevelMessenger;
    }
 
    public FootstepPlanningModule getOrCreateFootstepPlanner()
@@ -285,13 +287,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public Notification subscribeToWalkingCompletedViaNotification()
    {
       return ros2Helper.subscribeToWalkingCompletedViaNotification();
-   }
-
-   // Let behaviors manage or manage for them?
-   // Split into finer granularity -- publishers and subscribers?
-   public void setCommunicationCallbacksEnabled(boolean enabled)
-   {
-      ros2Helper.setCommunicationCallbacksEnabled(enabled);
    }
 
    public void destroy()

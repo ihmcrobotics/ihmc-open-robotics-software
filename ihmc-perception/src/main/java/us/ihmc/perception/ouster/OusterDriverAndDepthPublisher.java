@@ -134,7 +134,6 @@ public class OusterDriverAndDepthPublisher
       depthPublisher.extractCompressAndPublish(ousterSensorFrame.getReferenceFrame(),
                                                depthExtractionKernel,
                                                ouster.getAquisitionInstant(),
-                                               ouster.getPixelShiftBuffer(),
                                                ouster.getBeamAltitudeAnglesBuffer(),
                                                ouster.getBeamAzimuthAnglesBuffer());
    }

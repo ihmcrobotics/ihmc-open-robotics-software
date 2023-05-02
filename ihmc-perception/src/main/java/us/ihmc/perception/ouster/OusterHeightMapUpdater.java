@@ -1,6 +1,7 @@
 package us.ihmc.perception.ouster;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
@@ -13,12 +14,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
+import us.ihmc.ihmcPerception.heightMap.HeightMapInputData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
-import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.nio.FloatBuffer;
@@ -26,6 +29,7 @@ import java.time.Instant;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class OusterHeightMapUpdater
@@ -36,6 +40,7 @@ public class OusterHeightMapUpdater
    private final RealtimeROS2Node realtimeROS2Node;
    private final IHMCRealtimeROS2Publisher<HeightMapMessage> heightMapPublisher;
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
+   private final AtomicReference<WalkingStatus> currentWalkingStatus = new AtomicReference<>();
    private final HeightMapUpdater heightMapUpdater;
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
@@ -50,6 +55,7 @@ public class OusterHeightMapUpdater
       heightMapPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
       ros2.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_STATE_REQUEST, this::consumeStateRequestMessage);
       ros2.subscribeToControllerViaCallback(HighLevelStateChangeStatusMessage.class, this::consumeStateChangedMessage);
+      ros2.subscribeToControllerViaCallback(WalkingStatusMessage.class, this::consumeWalkingStatusMessage);
 
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
@@ -86,9 +92,22 @@ public class OusterHeightMapUpdater
       sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
       Point3D gridCenter = new Point3D(sensorPose.getX(), sensorPose.getY(), groundHeight);
       PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInWorldFrame);
-
+      HeightMapInputData inputData = new HeightMapInputData();
+      inputData.pointCloud = pointCloudData;
+      inputData.gridCenter = gridCenter;
       // submitting the world frame for the sensor pose, as that's the frame the data is in.
-      heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, new FramePose3D(ReferenceFrame.getWorldFrame()), gridCenter));
+      inputData.sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+      // TODO add variance
+      if (currentWalkingStatus.get() == WalkingStatus.STARTED)
+      {
+         inputData.verticalMeasurementVariance = heightMapUpdater.getHeightMapParameters().getSensorVarianceWhenMoving();
+      }
+      else
+      {
+         inputData.verticalMeasurementVariance = heightMapUpdater.getHeightMapParameters().getSensorVarianceWhenStanding();
+      }
+
+      heightMapUpdater.addPointCloudToQueue(inputData);
    }
 
    public void consumeStateRequestMessage(HeightMapStateRequestMessage message)
@@ -107,9 +126,20 @@ public class OusterHeightMapUpdater
       HighLevelControllerName fromState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
       HighLevelControllerName toState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
       if (fromState == HighLevelControllerName.WALKING && toState != HighLevelControllerName.CUSTOM1)
+      {
          heightMapUpdater.requestClear();
+         currentWalkingStatus.set(WalkingStatus.COMPLETED);
+      }
       else if (fromState != HighLevelControllerName.CUSTOM1 && toState == HighLevelControllerName.WALKING)
+      {
          heightMapUpdater.requestClear();
+         currentWalkingStatus.set(WalkingStatus.COMPLETED);
+      }
+   }
+
+   public void consumeWalkingStatusMessage(WalkingStatusMessage message)
+   {
+      currentWalkingStatus.set(WalkingStatus.fromByte(message.getWalkingStatus()));
    }
 
    public void update()

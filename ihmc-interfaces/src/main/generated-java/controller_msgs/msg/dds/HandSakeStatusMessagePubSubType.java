@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class HandSakeStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandSakeStatusMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HandSakeStatusMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "6bb08caea12d1db576d1dda27378858cef10e4d0115ec27ed33012d7e1fd2bc6";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

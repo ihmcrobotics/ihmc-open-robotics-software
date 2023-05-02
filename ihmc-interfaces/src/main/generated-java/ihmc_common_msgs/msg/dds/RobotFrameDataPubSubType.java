@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class RobotFrameDataPubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.RobotFrameData>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::RobotFrameData_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "f8687a6bdf55a343feeae8c83a08f2182249a27a2f4b84e6c0d33229533e0f4e";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -4,12 +4,12 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
-import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import java.util.UUID;
 

@@ -1081,8 +1081,10 @@ public class CrossRobotCommandRandomTools
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
-         next.addJoint(joint, RandomMatrices_DDRM.rectangle(joint.getDegreesOfFreedom(), 1, random));
+         next.addJoint(joint, RandomMatrices_DDRM.rectangle(joint.getDegreesOfFreedom(), 1, random), random.nextDouble());
       }
+
+      next.setConstraintType(nextElementIn(random, ConstraintType.values()));
 
       return next;
    }

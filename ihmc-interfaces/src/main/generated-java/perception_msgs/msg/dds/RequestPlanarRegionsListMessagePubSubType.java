@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class RequestPlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.RequestPlanarRegionsListMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::RequestPlanarRegionsListMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "7fd1566eb3b630fbeefff0dabf686d7f82f8e5e1acb9e54b388b1e058962c261";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class Ellipsoid3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.Ellipsoid3DMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::Ellipsoid3DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "4e010183cc223c7d26e01fa0fdff2ae71ceb4be23391c7e206ed7b022138ee16";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
