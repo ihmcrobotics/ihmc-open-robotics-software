@@ -2,6 +2,7 @@ package us.ihmc.rdx.imgui;
 
 import imgui.ImGui;
 import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
 
 /**
  * This class removes per-tick hash map lookup for the label, doing it once in constructor.
@@ -21,6 +22,8 @@ public abstract class ImGuiFancyWidget
    private final String prefixLabel;
    private float prefixTextWidth;
    private boolean textWidthCalculated = false;
+   private boolean widgetTextColoring = false;
+   private int widgetTextColor = 0;
 
    protected ImGuiFancyWidget(String label, String format)
    {
@@ -42,10 +45,38 @@ public abstract class ImGuiFancyWidget
       ImGui.text(prefixLabel);
       ImGui.sameLine();
       ImGui.pushItemWidth(ImGuiTools.getUsableWindowWidth() - prefixTextWidth);
+
+      if (widgetTextColoring)
+         ImGui.pushStyleColor(ImGuiCol.Text, widgetTextColor);
    }
 
    protected void afterWidgetRender()
    {
       ImGui.popItemWidth();
+
+      if (widgetTextColoring)
+         ImGui.popStyleColor();
+   }
+
+   /**
+    * Colors any text rendered in the widget, but not the label.
+    * Call anytime. No need to call every tick. It will persist for this widget
+    * until another color is set or the color is cleared using {@link #clearWidgetTextColor}.
+    * Use ImGuiTools contants for colors. i.e. ImGuiTools.RED
+    * @param intColor
+    */
+   public void setWidgetTextColor(int intColor)
+   {
+      widgetTextColoring = true;
+      widgetTextColor = intColor;
+   }
+
+   /**
+    * Go back to using the default style text color for the widget.
+    * No need to call every tick. It will persist for this widget until another color is set.
+    */
+   public void clearWidgetTextColor()
+   {
+      widgetTextColoring = false;
    }
 }
