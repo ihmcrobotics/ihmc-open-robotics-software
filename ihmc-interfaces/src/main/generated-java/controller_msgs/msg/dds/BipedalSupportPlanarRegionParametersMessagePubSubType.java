@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class BipedalSupportPlanarRegionParametersMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::BipedalSupportPlanarRegionParametersMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "c54e8346144f4a2aaadae56765f1dd72ce6ce346524b4abdd6661803b8e094b1";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

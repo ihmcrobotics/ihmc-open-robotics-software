@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.WalkingControllerFailureStatusMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::WalkingControllerFailureStatusMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "2f558dacfd97ba1c9dd9e8237e77f52934a08803248d10b96ad59448d035bbcb";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

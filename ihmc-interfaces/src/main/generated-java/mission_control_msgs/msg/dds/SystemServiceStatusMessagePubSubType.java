@@ -11,6 +11,18 @@ package mission_control_msgs.msg.dds;
 public class SystemServiceStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<mission_control_msgs.msg.dds.SystemServiceStatusMessage>
 {
    public static final java.lang.String name = "mission_control_msgs::msg::dds_::SystemServiceStatusMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8858b12874e0b37682535fbc8a03bd9530373d35169a3b991bbb66ac3494820b";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

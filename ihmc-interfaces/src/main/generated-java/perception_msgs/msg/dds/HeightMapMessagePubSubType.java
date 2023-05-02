@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.HeightMapMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::HeightMapMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "e024b8ac4761e9faffd92f3ea3ee79e5b2d84a194c76de1cb6e7ed89e1fdafb4";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

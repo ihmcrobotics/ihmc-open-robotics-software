@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class StoredPropertySetMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.StoredPropertySetMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::StoredPropertySetMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "df1e117510bfbc9a3b5e5f09fe846d21aee1aa9168aac2625a0cc9f6d6ef0436";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

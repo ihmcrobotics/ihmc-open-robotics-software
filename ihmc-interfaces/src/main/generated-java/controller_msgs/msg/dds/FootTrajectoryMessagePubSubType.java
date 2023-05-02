@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class FootTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.FootTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::FootTrajectoryMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "4c5e9d02495e72db233735997392cae562942cb0ae4f685f2c37fc1b0ecb1ecb";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -11,6 +11,18 @@ package mission_control_msgs.msg.dds;
 public class SystemAvailableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<mission_control_msgs.msg.dds.SystemAvailableMessage>
 {
    public static final java.lang.String name = "mission_control_msgs::msg::dds_::SystemAvailableMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "525e41fd8a9e08cc6e69249e8f354ae678209397367f8a2ae6c33de2c13cf06f";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
