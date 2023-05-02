@@ -32,7 +32,7 @@ import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.interactable.RDXChestOrientationSlider;
 import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
-import us.ihmc.rdx.ui.teleoperation.mobility.RDXMobilityManager;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -87,7 +87,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private RDXRobotCollisionModel selfCollisionModel;
    private RDXRobotCollisionModel environmentCollisionModel;
    private RDXArmManager armManager;
-   private final RDXMobilityManager walkingManager;
+   private final RDXLocomotionManager walkingManager;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
@@ -156,7 +156,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
 
-      walkingManager = new RDXMobilityManager(robotModel, communicationHelper, syncedRobot, teleoperationParameters, ros2Helper);
+      walkingManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, teleoperationParameters, ros2Helper);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)

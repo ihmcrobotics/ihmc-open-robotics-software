@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.teleoperation.mobility;
+package us.ihmc.rdx.ui.teleoperation.locomotion;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -33,7 +33,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  *  This class provides easy access to everything that involves mobility for the robot. Everything with walking and moving the legs are contained in this class
  *  This allows the features to all be grouped together in the UI making the robot easier to operate.
  */
-public class RDXMobilityManager
+public class RDXLocomotionManager
 {
    private RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
@@ -56,11 +56,11 @@ public class RDXMobilityManager
    private final ImBoolean showGraphics = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
 
-   public RDXMobilityManager(DRCRobotModel robotModel,
-                             CommunicationHelper communicationHelper,
-                             ROS2SyncedRobotModel syncedRobot,
-                             RDXTeleoperationParameters teleoperationParameters,
-                             ROS2ControllerHelper ros2Helper)
+   public RDXLocomotionManager(DRCRobotModel robotModel,
+                               CommunicationHelper communicationHelper,
+                               ROS2SyncedRobotModel syncedRobot,
+                               RDXTeleoperationParameters teleoperationParameters,
+                               ROS2ControllerHelper ros2Helper)
    {
       this.communicationHelper = communicationHelper;
       this.robotModel = robotModel;
