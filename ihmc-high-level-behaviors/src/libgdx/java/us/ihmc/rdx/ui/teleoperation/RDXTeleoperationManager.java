@@ -33,6 +33,7 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.interactable.RDXChestOrientationSlider;
 import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -67,9 +68,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
    private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
-   private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
-   private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
-   private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -156,7 +154,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
 
-      walkingManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, teleoperationParameters, ros2Helper);
+      walkingManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -183,9 +181,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false, () -> walkingManager.setSwingParameters(swingFootPlannerParameters));
 
       teleoperationParametersTuner.create(teleoperationParameters);
-      swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.swingTime, 0.3, 2.5);
-      transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.transferTime, 0.3, 2.5);
-      turnAggressivenessSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.turnAggressiveness, 0.0, 10.0);
 
       trajectoryTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
 
@@ -392,9 +387,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
 
-      swingTimeSlider.render();
-      transferTimeSlider.render();
-      turnAggressivenessSlider.render();
       trajectoryTimeSlider.render();
 
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
@@ -419,7 +411,13 @@ public class RDXTeleoperationManager extends ImGuiPanel
          }
       }
 
+      ImGui.separator();
+      ImGui.newLine();
+
       walkingManager.renderImGuiWidgets();
+
+      ImGui.separator();
+      ImGui.newLine();
 
       handManager.renderImGuiWidgets();
 
@@ -600,8 +598,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       return handManager;
    }
 
-   public RDXTeleoperationParameters getTeleoperationParameters()
+   public RDXLocomotionParameters getLocomotionParamters()
    {
-      return teleoperationParameters;
+      return walkingManager.getLocomotionParameters();
    }
 }
