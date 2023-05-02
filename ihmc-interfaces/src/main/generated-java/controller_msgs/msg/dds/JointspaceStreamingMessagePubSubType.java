@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class JointspaceStreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.JointspaceStreamingMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::JointspaceStreamingMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "724591a02693b74e1391f73c68287eeb1391513c2602ed146f24959d88a8cbfa";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

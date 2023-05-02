@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class NeckDesiredAccelerationsMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.NeckDesiredAccelerationsMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::NeckDesiredAccelerationsMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "f50efecc776a0e173d2da55aad7f3410170dafb37700db71c3b4805ea6cb039f";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

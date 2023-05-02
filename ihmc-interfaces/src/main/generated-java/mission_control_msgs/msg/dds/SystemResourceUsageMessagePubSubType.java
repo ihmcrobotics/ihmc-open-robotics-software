@@ -11,6 +11,18 @@ package mission_control_msgs.msg.dds;
 public class SystemResourceUsageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<mission_control_msgs.msg.dds.SystemResourceUsageMessage>
 {
    public static final java.lang.String name = "mission_control_msgs::msg::dds_::SystemResourceUsageMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "5e938f2337b8e65cd417d64f4155d3921400c6a7248d8331fdda31a35b4a83d6";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
