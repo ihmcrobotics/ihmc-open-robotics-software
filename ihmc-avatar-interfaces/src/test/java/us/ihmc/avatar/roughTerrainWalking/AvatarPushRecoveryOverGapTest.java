@@ -62,7 +62,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       double gapWidth = 0.10;
       double sideGapWidth = 0.04;
 
-      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, 0.55, gapWidth, sideGapWidth);
+      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, 0.75, gapWidth, sideGapWidth);
 
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
@@ -137,7 +137,6 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    public void testForwardPush()
    {
       setupTest();
-      simulationTestHelper.setKeepSCSUp(true);
 
       simulationTestHelper.simulateNow(1.0);
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
@@ -149,7 +148,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
-      double simulationTime = (swingTime + transferTime) * 4 + 4.0;
+      double simulationTime = (swingTime + transferTime) * 4 + 10.0;
       simulationTestHelper.simulateNow(simulationTime);
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
@@ -162,6 +161,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    public void testSidePush()
    {
       setupTest();
+      simulationTestHelper.setKeepSCSUp(true);
 
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
@@ -228,18 +228,19 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    {
       public GapPlanarRegionEnvironment(double platform1Length, double platform2Length, double platformWidth, double forwardGapSize, double sideGapSize)
       {
-         generator.translate(0.0, 0.0, -0.01);
-         generator.addCubeReferencedAtBottomMiddle(platform1Length, platformWidth, 0.01); // ground
+         double height = 0.05;
+         generator.translate(0.0, 0.0, -height);
+         generator.addCubeReferencedAtBottomMiddle(platform1Length, platformWidth, height); // ground
 
          double platform2Center = 0.5 * (platform1Length + platform2Length) + forwardGapSize;
          generator.translate(0.5 * (platform1Length + platform2Length) + forwardGapSize, 0.0, 0.0);
-         generator.addCubeReferencedAtBottomMiddle(platform2Length, platformWidth, 0.01); // ground
+         generator.addCubeReferencedAtBottomMiddle(platform2Length, platformWidth, height); // ground
 
          double sideWidth = 0.18;
          double sideLength = platform1Length + platform2Length + forwardGapSize;
          double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
          generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth + sideGapSize + 0.5 * sideWidth, 0.0);
-         generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, 0.01); // ground
+         generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, height); // ground
          addPlanarRegionsToTerrain(YoAppearance.Grey());
       }
    }

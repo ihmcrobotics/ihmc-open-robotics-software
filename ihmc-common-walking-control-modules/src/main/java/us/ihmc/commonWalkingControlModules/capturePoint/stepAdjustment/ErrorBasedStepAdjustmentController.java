@@ -664,6 +664,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(reachabilityConstraintHandler.getSCS2YoGraphics());
       group.addChild(environmentConstraintProvider.getSCS2YoGraphics());
+      group.addChild(multiStepCaptureRegionCalculator.getSCS2YoGraphics());
       group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint2D(yoNamePrefix + "FootstepSolution",
                                                                     footstepSolution.getPosition(),
                                                                     0.01,
