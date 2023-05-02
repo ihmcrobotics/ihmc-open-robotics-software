@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.teleoperation.walking;
+package us.ihmc.rdx.ui.teleoperation.mobility;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -29,7 +29,7 @@ import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class RDXWalkingManager
+public class RDXMobilityManager
 {
    private RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
@@ -52,11 +52,11 @@ public class RDXWalkingManager
    private final ImBoolean showGraphics = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
 
-   public RDXWalkingManager(DRCRobotModel robotModel,
-                            CommunicationHelper communicationHelper,
-                            ROS2SyncedRobotModel syncedRobot,
-                            RDXTeleoperationParameters teleoperationParameters,
-                            ROS2ControllerHelper ros2Helper)
+   public RDXMobilityManager(DRCRobotModel robotModel,
+                             CommunicationHelper communicationHelper,
+                             ROS2SyncedRobotModel syncedRobot,
+                             RDXTeleoperationParameters teleoperationParameters,
+                             ROS2ControllerHelper ros2Helper)
    {
       this.communicationHelper = communicationHelper;
       this.robotModel = robotModel;
@@ -79,9 +79,9 @@ public class RDXWalkingManager
 
       footstepsSentToControllerGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class,
-         footsteps ->
-               footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps,
-                                                                                                                   "Teleoperation Panel Controller Spy")));
+                                                           footsteps ->
+                                                                 footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps,
+                                                                                                                                                                     "Teleoperation Panel Controller Spy")));
    }
 
    public void create(RDXBaseUI baseUI)
