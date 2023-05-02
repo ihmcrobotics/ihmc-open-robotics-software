@@ -1,9 +1,11 @@
 package us.ihmc.ihmcPerception.heightMap;
 
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -12,6 +14,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -25,6 +28,7 @@ import us.ihmc.tools.thread.ExecutorServiceTools;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -40,16 +44,18 @@ public class RemoteHeightMapUpdater
    private final HeightMapUpdater heightMapUpdater;
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private final AtomicReference<WalkingStatus> currentWalkingStatus = new AtomicReference<>();
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
                                                                                                                   ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-   public RemoteHeightMapUpdater(Supplier<ReferenceFrame> groundFrameProvider, RealtimeROS2Node ros2Node)
+   public RemoteHeightMapUpdater(String robotName, Supplier<ReferenceFrame> groundFrameProvider, RealtimeROS2Node ros2Node)
    {
       this.ros2Node = ros2Node;
 
       IHMCRealtimeROS2Publisher<HeightMapMessage> heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.HEIGHT_MAP_STATE_REQUEST, m -> consumeStateRequestMessage(m.readNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotName), m -> consumeWalkingStatusMessage(m.readNextData()));
 
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
@@ -68,7 +74,20 @@ public class RemoteHeightMapUpdater
             PointCloudData pointCloudData = new PointCloudData(data);
             FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
 
-            heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, sensorPose, gridCenter));
+            HeightMapInputData inputData = new HeightMapInputData();
+            inputData.pointCloud = pointCloudData;
+            inputData.sensorPose = sensorPose;
+            inputData.gridCenter = gridCenter;
+            if (currentWalkingStatus.get() == WalkingStatus.STARTED)
+            {
+               inputData.verticalMeasurementVariance = heightMapUpdater.getHeightMapParameters().getSensorVarianceWhenMoving();
+            }
+            else
+            {
+               inputData.verticalMeasurementVariance = heightMapUpdater.getHeightMapParameters().getSensorVarianceWhenStanding();
+            }
+
+            heightMapUpdater.addPointCloudToQueue(inputData);
          }
       });
 
@@ -97,6 +116,11 @@ public class RemoteHeightMapUpdater
 
       heightMapUpdater.setPublishFrequency(initialPublishFrequency);
       heightMapUpdater.setEnableUpdates(true);
+   }
+
+   private void consumeWalkingStatusMessage(WalkingStatusMessage message)
+   {
+      currentWalkingStatus.set(WalkingStatus.fromByte(message.getWalkingStatus()));
    }
 
    public void start()

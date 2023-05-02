@@ -1,0 +1,23 @@
+#ifndef __mission_control_msgs__msg__SystemServiceLogRefreshMessage__idl__
+#define __mission_control_msgs__msg__SystemServiceLogRefreshMessage__idl__
+
+module mission_control_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="mission_control_msgs::msg::dds_::SystemServiceLogRefreshMessage_")
+      struct SystemServiceLogRefreshMessage
+      {
+        /**
+         * The name of the systemd service
+         */
+        string service_name;
+      };
+    };
+  };
+};
+
+#endif

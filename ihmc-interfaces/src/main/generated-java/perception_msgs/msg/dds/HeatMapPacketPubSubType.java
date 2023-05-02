@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.HeatMapPacket>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::HeatMapPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "aae496385281ab6b21d2efb8c4c1831cbf31627b42244e6163879dff2dfb4e17";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

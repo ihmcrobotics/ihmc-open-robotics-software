@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollDatagramChannel;
+import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
-import io.netty.channel.socket.nio.NioDatagramChannel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -130,9 +131,19 @@ public class NettyOuster
 
    public NettyOuster()
    {
-      group = new NioEventLoopGroup();
+      /*
+       * We require Epoll to be available to avoid high CPU in ROS2Node instances.
+       * This service will only work on Linux.
+       * https://netty.io/wiki/native-transports.html
+       */
+      if (!Epoll.isAvailable())
+      {
+         throw new RuntimeException("Netty native transport (Epoll) is not available. Epoll is required to avoid high CPU in certain situations.");
+      }
+
+      group = new EpollEventLoopGroup();
       bootstrap = new Bootstrap();
-      bootstrap.group(group).channel(NioDatagramChannel.class).handler(new SimpleChannelInboundHandler<DatagramPacket>()
+      bootstrap.group(group).channel(EpollDatagramChannel.class).handler(new SimpleChannelInboundHandler<DatagramPacket>()
       {
          @Override
          protected void channelRead0(ChannelHandlerContext context, DatagramPacket packet)

@@ -303,6 +303,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
             highLevelStateChangeStatusMessage.setInitialHighLevelControllerName(fromByte);
             highLevelStateChangeStatusMessage.setEndHighLevelControllerName(toByte);
             statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
+            controllerToolbox.reportControllerStateChangeToListeners(from, to);
          }
       });
 

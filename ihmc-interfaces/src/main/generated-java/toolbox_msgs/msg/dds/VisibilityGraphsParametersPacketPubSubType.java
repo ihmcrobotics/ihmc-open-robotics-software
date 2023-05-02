@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class VisibilityGraphsParametersPacketPubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::VisibilityGraphsParametersPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "b5e2023355be0f63352233fcdb5ec9772f5016b3e641f7ffe4c92655b5947ad9";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

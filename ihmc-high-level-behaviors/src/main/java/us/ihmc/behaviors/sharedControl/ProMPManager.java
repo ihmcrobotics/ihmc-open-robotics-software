@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.promp.*;
 import us.ihmc.tools.io.JSONFileTools;
@@ -541,14 +543,26 @@ public class ProMPManager
     */
    public List<FramePose3D> generateTaskTrajectory(String bodyPart, ReferenceFrame frame)
    {
-      EigenMatrixXd meanTrajectoryConditioned = learnedProMPs.get(bodyPart).generate_trajectory();
-      return toFrameList(meanTrajectoryConditioned, bodyPart, frame);
+      EigenMatrixXd meanTrajectory = learnedProMPs.get(bodyPart).generate_trajectory();
+      return toFramePoseList(meanTrajectory, bodyPart, frame);
+   }
+
+   public Point3D[] generateMeanTrajectory(String bodyPart, ReferenceFrame frame)
+   {
+      EigenMatrixXd meanTrajectory = learnedProMPs.get(bodyPart).generate_trajectory();
+      return toFramePointList(meanTrajectory, bodyPart, frame);
+   }
+
+   public Point3D[] generateStdDeviationTrajectory(String bodyPart)
+   {
+      EigenMatrixXd stdDeviationTrajectory = learnedProMPs.get(bodyPart).gen_traj_std_dev();
+      return toFramePointList(stdDeviationTrajectory, bodyPart);
    }
 
    /**
-    * Transform trajectory from list of frame poses to EigenMatrixXd
+    * Transform trajectory from EigenMatrixXd to list of frame poses
     */
-   private List<FramePose3D> toFrameList(EigenMatrixXd matrix, String bodyPart, ReferenceFrame frame)
+   private List<FramePose3D> toFramePoseList(EigenMatrixXd matrix, String bodyPart, ReferenceFrame frame)
    {
       List<FramePose3D> frameList = new ArrayList<>();
       for (int i = 0; i < matrix.rows(); i++)
@@ -569,9 +583,50 @@ public class ProMPManager
       return frameList;
    }
 
+   private Point3D[] toFramePointList(EigenMatrixXd matrix, String bodyPart, ReferenceFrame frame)
+   {
+      Point3D[] pointArray = new Point3D[(int) matrix.rows()];
+      for (int i = 0; i < matrix.rows(); i++)
+      {
+         FramePoint3D setPoint = new FramePoint3D(frame);
+         switch (bodyPartsGeometry.get(bodyPart))
+         {
+            case "Position" -> setPoint.set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2));
+            case "Orientation" -> LogTools.error("Cannot convert matrix to FramePoint3D List. Matrix contains only orientations");
+            case "Pose" -> setPoint.set(matrix.coeff(i, 4), matrix.coeff(i, 5), matrix.coeff(i, 6));
+         }
+         if(frame != ReferenceFrame.getWorldFrame())
+            setPoint.changeFrame(ReferenceFrame.getWorldFrame());
+         pointArray[i] = new Point3D(setPoint.getX(), setPoint.getY(), setPoint.getZ());
+      }
+      return pointArray;
+   }
+
+   private Point3D[] toFramePointList(EigenMatrixXd matrix, String bodyPart)
+   {
+      Point3D[] pointArray = new Point3D[(int) matrix.rows()];
+      for (int i = 0; i < matrix.rows(); i++)
+      {
+         Point3D setPoint = new Point3D();
+         switch (bodyPartsGeometry.get(bodyPart))
+         {
+            case "Position" -> setPoint.set(matrix.coeff(i, 0), matrix.coeff(i, 1), matrix.coeff(i, 2));
+            case "Orientation" -> LogTools.error("Cannot convert matrix to FramePoint3D List. Matrix contains only orientations");
+            case "Pose" -> setPoint.set(matrix.coeff(i, 4), matrix.coeff(i, 5), matrix.coeff(i, 6));
+         }
+         pointArray[i] = setPoint;
+      }
+      return pointArray;
+   }
+
    public HashMap<String, String> getBodyPartsGeometry()
    {
       return bodyPartsGeometry;
+   }
+
+   public HashMap<String,ProMP> getLearnedProMPs()
+   {
+      return learnedProMPs;
    }
 
    public double getMeanEndValueQS()

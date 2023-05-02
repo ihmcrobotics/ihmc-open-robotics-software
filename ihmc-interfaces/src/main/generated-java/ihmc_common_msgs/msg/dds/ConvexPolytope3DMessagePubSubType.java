@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class ConvexPolytope3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.ConvexPolytope3DMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::ConvexPolytope3DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8a78292af56cbefa0b7f32a44cfc873a8aaccf4157866c7b83735f244a77bf41";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

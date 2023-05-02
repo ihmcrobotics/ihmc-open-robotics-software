@@ -58,7 +58,6 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private final Vector3D translationToWorld = new Vector3D();
    private float depthDiscretization;
    private CameraModel cameraModel;
-   private final ByteBuffer ousterPixelShiftsBuffer = NativeMemoryTools.allocate(Integer.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
    private final ByteBuffer ousterBeamAltitudeAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
    private final ByteBuffer ousterBeamAzimuthAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * NettyOuster.MAX_POINTS_PER_COLUMN);
 
@@ -132,7 +131,6 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
          delayPlot.addValue(MessageTools.calculateDelay(imageMessage));
 
          cameraModel = CameraModel.getCameraModel(imageMessage);
-         MessageTools.extractIDLSequenceCastingBytesToInts(imageMessage.getOusterPixelShifts(), ousterPixelShiftsBuffer);
          MessageTools.extractIDLSequence(imageMessage.getOusterBeamAltitudeAngles(), ousterBeamAltitudeAnglesBuffer);
          MessageTools.extractIDLSequence(imageMessage.getOusterBeamAzimuthAngles(), ousterBeamAzimuthAnglesBuffer);
       }
@@ -243,11 +241,6 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    public CameraModel getCameraModel()
    {
       return cameraModel;
-   }
-
-   public ByteBuffer getOusterPixelShiftsBuffer()
-   {
-      return ousterPixelShiftsBuffer;
    }
 
    public ByteBuffer getOusterBeamAltitudeAnglesBuffer()

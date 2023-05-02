@@ -11,6 +11,18 @@ package quadruped_msgs.msg.dds;
 public class PawStepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.TopicDataType<quadruped_msgs.msg.dds.PawStepPlanningRequestPacket>
 {
    public static final java.lang.String name = "quadruped_msgs::msg::dds_::PawStepPlanningRequestPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "d5a261a0f8296480bd57b7f6cd9c4006e7b5180e6a19b6110d2f6a912c02a77c";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

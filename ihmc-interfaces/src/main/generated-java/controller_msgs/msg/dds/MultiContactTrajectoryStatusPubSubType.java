@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class MultiContactTrajectoryStatusPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.MultiContactTrajectoryStatus>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::MultiContactTrajectoryStatus_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "a899a31cf65f617255afa2e2c41758e1d3167c35d7952e6e34995f07af478e01";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

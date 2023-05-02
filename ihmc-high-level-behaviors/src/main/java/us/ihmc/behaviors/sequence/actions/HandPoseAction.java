@@ -5,10 +5,10 @@ import ihmc_common_msgs.msg.dds.FrameInformation;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.BehaviorAction;
-import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class HandPoseAction extends HandPoseActionData implements BehaviorAction
 {

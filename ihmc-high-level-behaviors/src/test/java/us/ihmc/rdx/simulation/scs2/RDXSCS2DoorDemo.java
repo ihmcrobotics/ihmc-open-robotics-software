@@ -5,7 +5,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.object.objects.FlatGroundDefinition;
-import us.ihmc.rdx.simulation.environment.object.objects.door.DoorDefinition;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
