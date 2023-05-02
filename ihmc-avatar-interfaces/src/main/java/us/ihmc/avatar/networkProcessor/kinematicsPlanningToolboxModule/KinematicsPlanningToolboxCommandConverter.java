@@ -15,6 +15,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class KinematicsPlanningToolboxCommandConverter implements CommandConversionInterface
@@ -22,9 +23,9 @@ public class KinematicsPlanningToolboxCommandConverter implements CommandConvers
    private final Map<Integer, RigidBodyBasics> rigidBodyHashMap = new HashMap<>();
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
 
-   public KinematicsPlanningToolboxCommandConverter(FullHumanoidRobotModel fullRobotModel)
+   public KinematicsPlanningToolboxCommandConverter(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
-      referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
+      referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
 
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(fullRobotModel.getElevator());
       for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
