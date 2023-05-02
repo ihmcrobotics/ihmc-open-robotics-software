@@ -57,7 +57,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
 
    public void kill()
    {
-      ProcessTools.execSimpleCommandSafe("sudo systemctl kill " + serviceName);
+      ProcessTools.execSimpleCommandSafe("sudo systemctl kill -s SIGKILL " + serviceName);
    }
 
    public void publishStatus()
