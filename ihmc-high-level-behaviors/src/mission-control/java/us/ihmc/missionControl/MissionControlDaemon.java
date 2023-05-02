@@ -3,6 +3,7 @@ package us.ihmc.missionControl;
 import mission_control_msgs.msg.dds.SystemAvailableMessage;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceActionMessage;
+import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -104,13 +105,16 @@ public class MissionControlDaemon
       systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.0);
       systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.1);
 
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceLogRefreshTopic(instanceId), subscriber ->
+      {
+         handleServiceLogRefreshMessage(subscriber.takeNextData());
+      });
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId), subscriber ->
       {
          SystemServiceActionMessage message = subscriber.takeNextData();
          LogTools.info("Received service action message " + message);
          handleServiceActionMessage(message);
       });
-
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemRebootTopic(instanceId), subscriber ->
       {
          ProcessTools.execSimpleCommandSafe("sudo reboot");
@@ -121,6 +125,20 @@ public class MissionControlDaemon
          LogTools.info("Watching systemd service: " + service);
          serviceMonitors.put(service, new SystemdServiceMonitor(instanceId, service, ros2Node));
       });
+   }
+
+   private void handleServiceLogRefreshMessage(SystemServiceLogRefreshMessage message)
+   {
+      String serviceName = message.getServiceNameAsString();
+      SystemdServiceMonitor serviceMonitor = serviceMonitors.get(serviceName);
+
+      if (serviceMonitor == null)
+         return;
+
+      List<String> logHistoryComplete = new ArrayList<>(serviceMonitor.getReader().getLogHistory());
+
+      for (List<String> logHistorySplit : MissionControlTools.splitLogLines(logHistoryComplete, SystemdServiceMonitor.MAX_LOG_LINE_MESSAGE_LENGTH))
+         serviceMonitor.publishStatus(logHistorySplit, true);
    }
 
    private void handleServiceActionMessage(SystemServiceActionMessage message)
@@ -147,7 +165,6 @@ public class MissionControlDaemon
       SystemAvailableMessage message = new SystemAvailableMessage();
       message.setHostname(hostname);
       message.setInstanceId(instanceId.toString());
-      message.setEpochTimeMs(System.currentTimeMillis());
       systemAvailablePublisher.publish(message);
    }
 
