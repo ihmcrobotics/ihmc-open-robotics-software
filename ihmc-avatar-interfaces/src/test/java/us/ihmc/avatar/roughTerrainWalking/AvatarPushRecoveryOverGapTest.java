@@ -149,19 +149,20 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
       double simulationTime = (swingTime + transferTime) * 4 + 10.0;
-      simulationTestHelper.simulateNow(simulationTime);
+      boolean success = simulationTestHelper.simulateNow(simulationTime);
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.4, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      assertTrue(success);
    }
 
    @Test
    public void testSidePush()
    {
       setupTest();
-      simulationTestHelper.setKeepSCSUp(true);
 
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
@@ -228,19 +229,21 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    {
       public GapPlanarRegionEnvironment(double platform1Length, double platform2Length, double platformWidth, double forwardGapSize, double sideGapSize)
       {
-         double height = 0.05;
-         generator.translate(0.0, 0.0, -height);
-         generator.addCubeReferencedAtBottomMiddle(platform1Length, platformWidth, height); // ground
+         generator.translate(0.0, 0.0, -0.0);
+         generator.addRectangle(platform1Length, platformWidth);
+         //         generator.addCubeReferencedAtBottomMiddle(platform1Length, platformWidth, 0.01); // ground
 
          double platform2Center = 0.5 * (platform1Length + platform2Length) + forwardGapSize;
          generator.translate(0.5 * (platform1Length + platform2Length) + forwardGapSize, 0.0, 0.0);
-         generator.addCubeReferencedAtBottomMiddle(platform2Length, platformWidth, height); // ground
+         generator.addRectangle(platform2Length, platformWidth);
+         //         generator.addCubeReferencedAtBottomMiddle(platform2Length, platformWidth, 0.01); // ground
 
          double sideWidth = 0.18;
          double sideLength = platform1Length + platform2Length + forwardGapSize;
          double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
          generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth + sideGapSize + 0.5 * sideWidth, 0.0);
-         generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, height); // ground
+         generator.addRectangle(sideLength, sideWidth);
+         //         generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, 0.01); // ground
          addPlanarRegionsToTerrain(YoAppearance.Grey());
       }
    }
