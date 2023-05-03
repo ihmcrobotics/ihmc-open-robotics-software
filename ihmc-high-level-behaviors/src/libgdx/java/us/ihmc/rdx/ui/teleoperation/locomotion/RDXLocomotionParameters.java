@@ -10,6 +10,7 @@ public class RDXLocomotionParameters extends StoredPropertySet
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
+   public static final BooleanStoredPropertyKey areFootstepsAdjustable = keys.addBooleanKey("Are footsteps adjustable");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
    public static final DoubleStoredPropertyKey turnAggressiveness = keys.addDoubleKey("Turn aggressiveness");
@@ -27,6 +28,11 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public RDXLocomotionParameters(String robotName)
    {
       super(keys, RDXLocomotionParameters.class, StringUtils.capitalize(robotName));
+   }
+
+   public boolean getAreFootstepsAdjustable()
+   {
+      return get(areFootstepsAdjustable);
    }
 
    public double getSwingTime()

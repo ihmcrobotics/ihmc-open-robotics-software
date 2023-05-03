@@ -164,6 +164,11 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, key, min, max, onParametersUpdatedCallback);
    }
 
+   public ImGuiStoredPropertySetBooleanWidget createBooleanSlider(BooleanStoredPropertyKey key)
+   {
+      return new ImGuiStoredPropertySetBooleanWidget(storedPropertySet, key, onParametersUpdatedCallback);
+   }
+
    private void onParametersUpdatedCallbackAndMore()
    {
       anyParameterChanged = true;
