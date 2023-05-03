@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ComPositionPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ComPositionPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ComPositionPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "fe2c3845346bc7a0f75dcac73c2cc11f871a594bf7cb39b83bdf0f9fa975f5d7";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

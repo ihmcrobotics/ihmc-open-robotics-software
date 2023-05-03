@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class ExoStepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.ExoStepDataMessage>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::ExoStepDataMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "df2aa8733d7bd99e783e70fe1847ee42456a77ce4c1fdb445dc2f9500a0d0615";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

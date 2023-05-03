@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class QuixStairsStepTypeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.QuixStairsStepTypeMessage>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::QuixStairsStepTypeMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "251955d4cf732b6ca52627691558acd0207c01903fcfb014535f213ce5332497";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

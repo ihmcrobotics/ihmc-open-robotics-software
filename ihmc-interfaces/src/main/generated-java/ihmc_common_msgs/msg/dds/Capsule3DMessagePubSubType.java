@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class Capsule3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.Capsule3DMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::Capsule3DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "57cb066363fbd1b15b561793a1809920cb3f869c775c5b83285b2c5e2a66b6bf";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

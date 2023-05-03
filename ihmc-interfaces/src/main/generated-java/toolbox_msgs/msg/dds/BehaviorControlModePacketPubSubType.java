@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class BehaviorControlModePacketPubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.BehaviorControlModePacket>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::BehaviorControlModePacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ffc9f2cbabaddcff5c7a2aa48f984a263666db96741783fcfa172f915d057e13";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -993,7 +993,7 @@ public class CrossRobotCommandResolver
       if (in == null)
          return null;
       else
-         return referenceFrameHashCodeResolver.getReferenceFrame(in.hashCode());
+         return referenceFrameHashCodeResolver.getReferenceFrame(in.getFrameNameHashCode());
    }
 
    private <B extends RigidBodyReadOnly> B resolveRigidBody(B in)

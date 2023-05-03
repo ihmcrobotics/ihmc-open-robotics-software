@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class ReachingManifoldMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.ReachingManifoldMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::ReachingManifoldMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "f2780a689fc11f03c9ffb162b522146098b2ed299a295ba5c5751e3a26bdb20b";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

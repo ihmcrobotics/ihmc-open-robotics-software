@@ -3,17 +3,15 @@ package us.ihmc.rdx.ui.missionControl;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import mission_control_msgs.msg.dds.SystemServiceActionMessage;
+import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.IHMCCommonPaths;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -26,9 +24,8 @@ public class ImGuiMachineService
    @Nullable
    private String status;
    private final ImGuiPanel logPanel;
+   private IHMCROS2Publisher<SystemServiceLogRefreshMessage> logRefreshPublisher;
    private IHMCROS2Publisher<SystemServiceActionMessage> serviceActionPublisher;
-   @Nullable
-   private ServiceLogFile logFile;
    private final ImGuiConsoleArea consoleArea;
 
    /**
@@ -52,40 +49,25 @@ public class ImGuiMachineService
 
       ThreadTools.startAsDaemon(() ->
       {
+         logRefreshPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceLogRefreshTopic(instanceId));
+      }, "Log-Refresh-Publisher-Thread");
+      ThreadTools.startAsDaemon(() ->
+      {
          serviceActionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId));
-      }, "Service-Action-Publisher");
+      }, "Service-Action-Publisher-Thread");
 
-      logFile = new ServiceLogFile(IHMCCommonPaths.MISSION_CONTROL_LOGS_DIRECTORY + "/" + serviceName + ".log");
-      consoleArea = new ImGuiConsoleArea(logFile);
+      // Request a refresh after 1 second
+      ThreadTools.scheduleSingleExecution("Refresh", this::requestRefresh, 1, TimeUnit.SECONDS);
 
-      if (logFile.exists())
-      {
-         try
-         {
-            logFile.loadLogLines().forEach(consoleArea::acceptLine);
+      consoleArea = new ImGuiConsoleArea();
+   }
 
-            // Check if the log file is larger than 10MB. If so, delete it.
-            if (logFile.isLarge())
-            {
-               logFile.delete();
-            }
-         }
-         catch (IOException e)
-         {
-            LogTools.error("Unable to read log file: " + logFile.getAbsolutePath(), e);
-         }
-      }
-
-      try
-      {
-         logFile.getParentFile().mkdirs(); // Doesn't do anything if already exists
-         logFile.createNewFile(); // Doesn't do anything if already exists
-      }
-      catch (IOException e)
-      {
-         LogTools.error("Unable to create service log file: " + logFile.getAbsolutePath(), e);
-         logFile = null;
-      }
+   public void requestRefresh()
+   {
+      // Request full log data
+      SystemServiceLogRefreshMessage logRefreshMessage = new SystemServiceLogRefreshMessage();
+      logRefreshMessage.setServiceName(serviceName);
+      logRefreshPublisher.publish(logRefreshMessage);
    }
 
    public String getStatus()
@@ -104,22 +86,9 @@ public class ImGuiMachineService
       this.status = status;
    }
 
-   public void acceptLogLines(List<String> logLines)
+   public void acceptLogLines(List<String> logLines, boolean buffer)
    {
-      logLines.forEach(consoleArea::acceptLine);
-      // Save log lines to file async
-      if (logFile != null)
-         ThreadTools.startAThread(() -> logLines.forEach(line ->
-         {
-            try
-            {
-               logFile.saveLogLine(line);
-            }
-            catch (IOException e)
-            {
-               LogTools.error("Unable to save log line", e);
-            }
-         }), "Service-Log-Save-" + serviceName);
+      logLines.forEach(line -> consoleArea.acceptLine(line, buffer));
    }
 
    private void sendActionMessage(String systemdAction)
