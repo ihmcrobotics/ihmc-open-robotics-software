@@ -1,4 +1,4 @@
-package us.ihmc.atlas.ObstacleCourseTests;
+package us.ihmc.atlas.obstacleCourseTests;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
