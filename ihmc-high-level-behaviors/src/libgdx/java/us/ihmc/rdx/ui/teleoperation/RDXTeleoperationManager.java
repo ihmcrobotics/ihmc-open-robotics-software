@@ -412,12 +412,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       }
 
       ImGui.separator();
-      ImGui.newLine();
-
       walkingManager.renderImGuiWidgets();
-
       ImGui.separator();
-      ImGui.newLine();
 
       handManager.renderImGuiWidgets();
 
@@ -598,7 +594,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       return handManager;
    }
 
-   public RDXLocomotionParameters getLocomotionParamters()
+   public RDXLocomotionParameters getLocomotionParameters()
    {
       return walkingManager.getLocomotionParameters();
    }
