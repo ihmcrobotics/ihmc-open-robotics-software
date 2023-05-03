@@ -38,6 +38,13 @@ import java.util.function.Supplier;
 import static us.ihmc.behaviors.BehaviorModule.API.BehaviorTreeStatus;
 import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
 
+/**
+ * This is the UI for interacting with a remotely running behavior tree.
+ * TODO:
+ *   - Remove Kryo to simplify connection management -- use exclusively ROS 2
+ *   - Somehow rework the ImNodes area, it takes a lot of space. Perhaps showing the
+ *     nodes as normal panels as an option would be good.
+ */
 public class RDXBehaviorUIManager
 {
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
