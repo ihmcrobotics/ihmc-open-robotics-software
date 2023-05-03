@@ -337,10 +337,9 @@ float3 computeNormal3DFromThreePoint3Ds(float3 firstPointOnPlane, float3 secondP
    return normalize(normal);
 }
 
-float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector)
+void solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector, float* coefficients)
 {
     float* inverse_covariance_matrix = invert3x3Matrix(covariance_matrix);
-    float coefficients[3] = {0.0f, 0.0f, 0.0f};
     for (int row = 0; row < 3; row++)
     {
         for (int col = 0; col < 3; col++)
@@ -348,6 +347,4 @@ float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vec
             coefficients[row] += inverse_covariance_matrix[col + row * 3] * z_variance_vector[col];
         }
     }
-
-    return coefficients;
 }

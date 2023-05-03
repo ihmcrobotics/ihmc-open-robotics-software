@@ -73,7 +73,7 @@ float4 back_project_perspective(int2 pos, float Z, global float* params)
    return point;
 }
 
-float3 estimate_perspective_normal(read_write image2d_t in, int rIndex, int cIndex, global float* params)
+float3 estimate_perspective_normal(read_only image2d_t in, int rIndex, int cIndex, global float* params)
 {
    float residual = 0;
    float radius = 0;
@@ -119,7 +119,7 @@ float3 estimate_perspective_normal(read_write image2d_t in, int rIndex, int cInd
    return normalize((1 / (float) (count)) * normal.xyz);
 }
 
-float3 estimate_spherical_normal(read_write image2d_t in, int rIndex, int cIndex, global float* params)
+float3 estimate_spherical_normal(read_only image2d_t in, int rIndex, int cIndex, global float* params)
 {
    float residual = 0;
    float radius = 0;
@@ -165,7 +165,7 @@ float3 estimate_spherical_normal(read_write image2d_t in, int rIndex, int cIndex
    return normalize((1 / (float) (count)) * normal.xyz);
 }
 
-float3 estimate_perspective_centroid(read_write image2d_t in, int y, int x, global float* params)
+float3 estimate_perspective_centroid(read_only image2d_t in, int y, int x, global float* params)
 {
    float Z = 0;
    int count = 0;
@@ -192,7 +192,7 @@ float3 estimate_perspective_centroid(read_write image2d_t in, int y, int x, glob
    return (1 / (float) (count)) * centroid;
 }
 
-float3 estimate_spherical_centroid(read_write image2d_t in, int rIndex, int cIndex, global float* params)
+float3 estimate_spherical_centroid(read_only image2d_t in, int rIndex, int cIndex, global float* params)
 {
    float radius = 0;
    int count = 0;
@@ -258,7 +258,7 @@ bool isConnected(float3 ag, float3 an, float3 bg, float3 bn, global float* param
  * Replace non-reading (0s) pixels with an approximate nearby value, so they don't
  * upset the rest of the algorithm.
  */
-void fillDeadPixels(read_write image2d_t inputImage, int x, int y, write_only image2d_t out0, global float* params)
+void fillDeadPixels(read_only image2d_t inputImage, int x, int y, write_only image2d_t out0, global float* params)
 {
    uint Z = 0;
    int count = 0;
@@ -352,7 +352,7 @@ void fillDeadPixels(read_write image2d_t inputImage, int x, int y, write_only im
    }
 }
 
-void smooth_non_boundary(read_write image2d_t in, int x, int y, write_only image2d_t out0, global float* params)
+void smooth_non_boundary(read_only image2d_t in, int x, int y, write_only image2d_t out0, global float* params)
 {
    uint Z = 0;
    int m = 5;
@@ -402,7 +402,7 @@ float3 calculateNormal(float3 p1, float3 p2, float3 p3)
  * Filters all pixels within a patch on depth map. Removes outliers, flying points, dead pixels and measurement
  * noise.
  */
-void kernel filterKernel(read_write image2d_t inputImage, write_only image2d_t filteredImage, write_only image2d_t nxImage, global float* parameters)
+void kernel filterKernel(read_only image2d_t inputImage, write_only image2d_t filteredImage, write_only image2d_t nxImage, global float* parameters)
 {
    int y = get_global_id(0);
    int x = get_global_id(1);
@@ -421,7 +421,7 @@ void kernel filterKernel(read_write image2d_t inputImage, write_only image2d_t f
  * patches on a sub-sampled grid of the depth map. The following intrinsic parameters are used to convert to Point Cloud.
  * K: [459.97265625, 0.0, 341.83984375, 0.0, 459.8046875, 249.173828125, 0.0, 0.0, 1.0]
  * */
-void kernel packKernel(read_write image2d_t in,
+void kernel packKernel(read_only image2d_t in,
                        write_only image2d_t out0,
                        write_only image2d_t out1,
                        write_only image2d_t out2, /* float3 maps for normal*/
@@ -478,7 +478,7 @@ void kernel packKernel(read_write image2d_t in,
 /* Merge Kernel: Creates the graph-based structure by adding connections between the neighboring
  * patches based on similarity.
  */
-void kernel mergeKernel(read_write image2d_t in,
+void kernel mergeKernel(read_only image2d_t in,
                         read_only image2d_t out0,
                         read_only image2d_t out1,
                         read_only image2d_t out2, /* float3 maps for normal*/
@@ -544,7 +544,7 @@ void kernel mergeKernel(read_write image2d_t in,
 /*
  * Perspective Back-Projection Kernel for Structured Light And Perspective Time-of-Flight Sensors
  * */
-void kernel perspectiveBackProjectionKernel(read_write image2d_t in, global float* cloud, global float* params)
+void kernel perspectiveBackProjectionKernel(read_only image2d_t in, global float* cloud, global float* params)
 {
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
@@ -584,7 +584,7 @@ void kernel perspectiveBackProjectionKernel(read_write image2d_t in, global floa
 /*
  * Spherical Back-Projection Kernel for Rotating LIDARs.
  * */
-void kernel sphericalBackProjectionKernel(read_write image2d_t in, global float* cloud, global float* params)
+void kernel sphericalBackProjectionKernel(read_only image2d_t in, global float* cloud, global float* params)
 {
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
@@ -768,20 +768,20 @@ void kernel correspondenceKernel(read_only image2d_t one0,
 /*
  * Centroid Calculation Kernel for Iterative Closest Point
  * */
-void kernel centroidReduceKernel(read_write image2d_t one0,
-                                 read_write image2d_t one1,
-                                 read_write image2d_t one2,
-                                 read_write image2d_t one3,
-                                 read_write image2d_t one4,
-                                 read_write image2d_t one5,
-                                 read_write image2d_t two0,
-                                 read_write image2d_t two1,
-                                 read_write image2d_t two2,
-                                 read_write image2d_t two3,
-                                 read_write image2d_t two4,
-                                 read_write image2d_t two5,
-                                 read_write image2d_t matchRowImage,
-                                 read_write image2d_t matchColumnImage,
+void kernel centroidReduceKernel(read_only image2d_t one0,
+                                 read_only image2d_t one1,
+                                 read_only image2d_t one2,
+                                 read_only image2d_t one3,
+                                 read_only image2d_t one4,
+                                 read_only image2d_t one5,
+                                 read_only image2d_t two0,
+                                 read_only image2d_t two1,
+                                 read_only image2d_t two2,
+                                 read_only image2d_t two3,
+                                 read_only image2d_t two4,
+                                 read_only image2d_t two5,
+                                 read_only image2d_t matchRowImage,
+                                 read_only image2d_t matchColumnImage,
                                  global float* mean,
                                  global float* params)
 {
@@ -846,20 +846,20 @@ void kernel centroidReduceKernel(read_write image2d_t one0,
 /*
  * ICP Kernel for Iterative Closest Point
  * */
-void kernel correlReduceKernel(read_write image2d_t one0,
-                               read_write image2d_t one1,
-                               read_write image2d_t one2,
-                               read_write image2d_t one3,
-                               read_write image2d_t one4,
-                               read_write image2d_t one5,
-                               read_write image2d_t two0,
-                               read_write image2d_t two1,
-                               read_write image2d_t two2,
-                               read_write image2d_t two3,
-                               read_write image2d_t two4,
-                               read_write image2d_t two5,
-                               read_write image2d_t matchRowImage,
-                               read_write image2d_t matchColumnImage,
+void kernel correlReduceKernel(read_only image2d_t one0,
+                               read_only image2d_t one1,
+                               read_only image2d_t one2,
+                               read_only image2d_t one3,
+                               read_only image2d_t one4,
+                               read_only image2d_t one5,
+                               read_only image2d_t two0,
+                               read_only image2d_t two1,
+                               read_only image2d_t two2,
+                               read_only image2d_t two3,
+                               read_only image2d_t two4,
+                               read_only image2d_t two5,
+                               read_only image2d_t matchRowImage,
+                               read_only image2d_t matchColumnImage,
                                global float* correlation,
                                global float* params)
 {
