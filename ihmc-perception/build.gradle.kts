@@ -39,8 +39,8 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.19.1")
-   api("us.ihmc:simulation-construction-set:0.23.2")
+   api("us.ihmc:euclid:0.20.0")
+   api("us.ihmc:simulation-construction-set:0.23.3")
    api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
@@ -60,7 +60,7 @@ openpnpDependencies {
 val javaCPPVersion = "1.5.9"
 
 bytedecoDependencies {
-   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:euclid:0.20.0")
    api("us.ihmc:ihmc-commons:0.31.0")
    apiCommonBytedecoNatives()
 }
@@ -121,7 +121,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:simulation-construction-set:0.23.2")
+   api("us.ihmc:simulation-construction-set:0.23.3")
 
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

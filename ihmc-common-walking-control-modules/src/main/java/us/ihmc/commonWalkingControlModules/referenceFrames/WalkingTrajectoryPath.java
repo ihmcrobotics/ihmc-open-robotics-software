@@ -73,7 +73,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final String WALKING_TRAJECTORY_PATH_FRAME_NAME = "walkingTrajectoryPathFrame";
    public static final String WALKING_TRAJECTORY_FRAME_NAMEID = worldFrame.getNameId() + ReferenceFrame.SEPARATOR + WALKING_TRAJECTORY_PATH_FRAME_NAME;
-   public static final int WALKING_TRAJECTORY_FRAME_ID = WALKING_TRAJECTORY_FRAME_NAMEID.hashCode();
+   public static final int WALKING_TRAJECTORY_FRAME_ID = WALKING_TRAJECTORY_PATH_FRAME_NAME.hashCode();
 
    private static final int MAX_NUMBER_OF_FOOTSTEPS = 2;
 
