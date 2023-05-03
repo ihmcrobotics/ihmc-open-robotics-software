@@ -37,7 +37,7 @@ public class BulletKinematicRobotLink
       originPose.getTranslation().set(originPosition);
 
    }
-   
+
    public void setOriginPosition(double x, double y, double z)
    {
       originPose.getTranslation().set(x, y, z);
