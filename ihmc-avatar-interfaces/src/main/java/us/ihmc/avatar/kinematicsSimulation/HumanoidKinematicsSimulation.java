@@ -39,6 +39,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -100,6 +101,7 @@ public class HumanoidKinematicsSimulation
    private final PausablePeriodicThread controlThread;
    private final ROS2Node ros2Node;
    private final RealtimeROS2Node realtimeROS2Node;
+   private final ROS2Heartbeat heartbeat;
    private final RobotConfigurationDataPublisher robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -150,6 +152,7 @@ public class HumanoidKinematicsSimulation
 
       // instantiate some existing controller ROS2 API?
       ros2Node = ROS2Tools.createROS2Node(kinematicsSimulationParameters.getPubSubImplementation(), ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
+      heartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.KINEMATICS_SIMULATION_HEARTBEAT);
 
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
@@ -402,10 +405,12 @@ public class HumanoidKinematicsSimulation
       {
          initialize();
          controlThread.start();
+         heartbeat.setAlive(true);
       }
       else if (!running && controlThread.isRunning())
       {
          controlThread.stop();
+         heartbeat.setAlive(false);
       }
    }
 
