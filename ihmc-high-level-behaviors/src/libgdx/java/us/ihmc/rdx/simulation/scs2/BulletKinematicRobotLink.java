@@ -7,8 +7,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletTerrainObject;
 
@@ -26,7 +24,6 @@ public class BulletKinematicRobotLink
    private final BulletPhysicsEngine bulletPhysicsEngine;
 
    private final TerrainObjectDefinition terrainObjectDefinition = new TerrainObjectDefinition();
-   private final MaterialDefinition materialDefinition = new MaterialDefinition(ColorDefinitions.RosyBrown());
    private final RigidBodyTransform originPose = new RigidBodyTransform();
 
    public BulletKinematicRobotLink(ReferenceFrame frameAfterJoint, BulletPhysicsEngine bulletPhysicsEngine)
@@ -52,8 +49,6 @@ public class BulletKinematicRobotLink
 
    public void addCollidableShape(GeometryDefinition geometryDefinition)
    {
-      // Adding a visual is not necessary
-      // terrainObjectDefinition.addVisualDefinition(new VisualDefinition(originPose, geometryDefinition, materialDefinition));
       terrainObjectDefinition.addCollisionShapeDefinition(new CollisionShapeDefinition(originPose, geometryDefinition));
    }
 
