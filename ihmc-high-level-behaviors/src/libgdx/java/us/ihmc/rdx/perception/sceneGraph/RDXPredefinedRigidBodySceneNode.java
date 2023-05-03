@@ -50,9 +50,8 @@ public class RDXPredefinedRigidBodySceneNode
       referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
 
       int bufferSize = 1000;
-      int widthPixels = 250;
       int heightPixels = 20;
-      currentlyDetectedPlot = new ImGuiEnumPlot(predefinedRigidBodySceneNode.getName(), bufferSize, widthPixels, heightPixels);
+      currentlyDetectedPlot = new ImGuiEnumPlot(predefinedRigidBodySceneNode.getName(), bufferSize, heightPixels);
    }
 
    public void update()

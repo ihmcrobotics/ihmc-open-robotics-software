@@ -18,12 +18,20 @@ public abstract class ImGuiFancyWidget
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    protected final String label;
+   /** Used by a lot of widgets that extend this class. Just here for brevity for those.*/
    protected final String format;
    private final String prefixLabel;
    private float prefixTextWidth;
    private boolean textWidthCalculated = false;
    private boolean widgetTextColoring = false;
    private int widgetTextColor = 0;
+
+   protected ImGuiFancyWidget(String label)
+   {
+      this.prefixLabel = label;
+      this.label = labels.getHidden(label);
+      this.format = null;
+   }
 
    protected ImGuiFancyWidget(String label, String format)
    {
