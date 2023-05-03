@@ -18,7 +18,6 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
-import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
