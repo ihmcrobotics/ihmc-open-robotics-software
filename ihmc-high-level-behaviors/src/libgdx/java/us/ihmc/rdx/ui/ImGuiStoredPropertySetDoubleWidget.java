@@ -172,7 +172,7 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
    {
       if (ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, min, max))
       {
-//         clamp(imDouble); // TODO: In what case is this necessary?
+         //         clamp(imDouble); // TODO: In what case is this necessary?
          onParametersUpdatedCallback.run();
       }
    }

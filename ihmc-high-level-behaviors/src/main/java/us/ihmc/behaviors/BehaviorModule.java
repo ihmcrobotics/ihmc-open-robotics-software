@@ -78,7 +78,7 @@ public class BehaviorModule
       return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS, false);
    }
 
-   public BehaviorModule(BehaviorRegistry behaviorRegistry, 
+   public BehaviorModule(BehaviorRegistry behaviorRegistry,
                          DRCRobotModel robotModel,
                          CommunicationMode ros2CommunicationMode,
                          CommunicationMode messagerCommunicationMode,
