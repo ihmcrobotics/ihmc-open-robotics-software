@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class ControllerCrashNotificationPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ControllerCrashNotificationPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ControllerCrashNotificationPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "bdda2de356da1c64a8888ce22dfe56dd53cb592edb83b29b64b21b124e82fed3";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

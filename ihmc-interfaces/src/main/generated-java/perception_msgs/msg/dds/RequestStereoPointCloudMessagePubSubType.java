@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class RequestStereoPointCloudMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.RequestStereoPointCloudMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::RequestStereoPointCloudMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "7751d5cc52c7e8f0ad7bd2de21ceaa455a52d2119955f671b6835bf36533e764";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

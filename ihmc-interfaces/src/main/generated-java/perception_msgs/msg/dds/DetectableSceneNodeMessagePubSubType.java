@@ -11,6 +11,18 @@ package perception_msgs.msg.dds;
 public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.DetectableSceneNodeMessage>
 {
    public static final java.lang.String name = "perception_msgs::msg::dds_::DetectableSceneNodeMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "0812da413b8d0ba150aa2e4a0ff99e479efe261b078b378618d4f54c266676ef";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

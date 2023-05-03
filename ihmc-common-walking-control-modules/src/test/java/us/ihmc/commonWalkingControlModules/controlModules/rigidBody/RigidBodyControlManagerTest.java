@@ -133,8 +133,8 @@ public class RigidBodyControlManagerTest
       Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-      message.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
-      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+      message.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
+      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
       message.getTaskspaceTrajectoryPoints().add()
              .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
 
@@ -273,7 +273,7 @@ public class RigidBodyControlManagerTest
          Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
          SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-         message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+         message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
          message.getTaskspaceTrajectoryPoints().add()
                 .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
 
@@ -384,8 +384,8 @@ public class RigidBodyControlManagerTest
       Quaternion controlFrameOrientation = new Quaternion();
 
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-      message.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
-      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+      message.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
+      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getFrameNameHashCode());
       message.getControlFramePose().getPosition().set(controlFramePosition);
       message.getControlFramePose().getOrientation().set(controlFrameOrientation);
       message.setUseCustomControlFrame(true);

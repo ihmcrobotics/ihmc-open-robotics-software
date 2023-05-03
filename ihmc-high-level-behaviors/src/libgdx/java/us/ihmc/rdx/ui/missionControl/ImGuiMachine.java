@@ -7,6 +7,7 @@ import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
+import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
@@ -93,17 +94,20 @@ public class ImGuiMachine
       netPlot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(-3000.0, 103000.0, ImGuiCond.Always));
 
       this.ros2Node = ros2Node;
+
       ThreadTools.startAsDaemon(() ->
       {
          rebootPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemRebootTopic(instanceId));
-      }, "Service-Action-Publisher");
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.getSystemResourceUsageTopic(instanceId),
-                                           subscriber -> acceptSystemResourceUsageMessage(subscriber.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.getSystemServiceStatusTopic(instanceId),
-                                           subscriber -> acceptSystemServiceStatusMessage(subscriber.takeNextData()),
-                                           ROS2Tools.getSystemServiceStatusQosProfile());
+      }, "Reboot-Publisher-Thread");
+
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemResourceUsageTopic(instanceId), subscriber ->
+      {
+         acceptSystemResourceUsageMessage(subscriber.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceStatusTopic(instanceId), subscriber ->
+      {
+         acceptSystemServiceStatusMessage(subscriber.takeNextData());
+      }, ROS2Tools.getSystemServiceStatusQosProfile());
    }
 
    public String getHostname()
@@ -134,7 +138,8 @@ public class ImGuiMachine
          {
             for (int i = 0; i < message.getCpuCount(); i++)
             {
-               cpuPlot.getPlotLines().add(new ImPlotDoublePlotLine("CPU (" + i + ") utilization %", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
+               cpuPlot.getPlotLines()
+                      .add(new ImPlotDoublePlotLine("CPU (" + i + ") utilization %", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
             }
          }
 
@@ -155,7 +160,11 @@ public class ImGuiMachine
             plot.setYFlags(plotAxisYFlags);
             String gpuModel = message.getNvidiaGpuModels().getString(0);
             plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, 103.0, ImGuiCond.Always));
-            plot.getPlotLines().add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") utilization %", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
+            plot.getPlotLines()
+                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") utilization %",
+                                              GRAPH_BUFFER_SIZE,
+                                              GRAPH_HISTORY_LENGTH,
+                                              new DecimalFormat("0.0")));
             gpuPlots.add(plot);
             gpuIndex++;
          }
@@ -172,9 +181,15 @@ public class ImGuiMachine
             float totalGpuMemory = message.getNvidiaGpuMemoryTotal().get(gpuIndex);
             plot.setCustomBeforePlotLogic(() -> ImPlot.setNextPlotLimitsY(0.0, totalGpuMemory, ImGuiCond.Always));
             plot.getPlotLines()
-                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory usage (GiB)", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
+                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory usage (GiB)",
+                                              GRAPH_BUFFER_SIZE,
+                                              GRAPH_HISTORY_LENGTH,
+                                              new DecimalFormat("0.0")));
             plot.getPlotLines()
-                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory total (GiB)", GRAPH_BUFFER_SIZE, GRAPH_HISTORY_LENGTH, new DecimalFormat("0.0")));
+                .add(new ImPlotDoublePlotLine("GPU (" + gpuIndex + ", " + gpuModel + ") memory total (GiB)",
+                                              GRAPH_BUFFER_SIZE,
+                                              GRAPH_HISTORY_LENGTH,
+                                              new DecimalFormat("0.0")));
             vramPlots.add(plot);
             gpuIndex++;
          }
@@ -244,12 +259,6 @@ public class ImGuiMachine
    {
       String serviceName = message.getServiceNameAsString();
 
-      if (serviceName.contains("mission-control"))
-      {
-         // We don't care about showing mission control service
-         return;
-      }
-
       final ImGuiMachineService service;
 
       if (!services.containsKey(serviceName))
@@ -270,7 +279,7 @@ public class ImGuiMachine
          byte[] logData = message.getLogData().toArray();
          String logLinesJoined = new String(logData, StandardCharsets.US_ASCII);
          String[] logLines = logLinesJoined.split("\n");
-         service.acceptLogLines(Arrays.stream(logLines).toList());
+         service.acceptLogLines(Arrays.stream(logLines).toList(), message.getRefresh());
       }
    }
 
@@ -279,6 +288,7 @@ public class ImGuiMachine
 
    /**
     * Makes the test flash red every second
+    *
     * @param text the text to flash
     */
    private void flashWarningText(String text)

@@ -395,7 +395,18 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public FullHumanoidRobotModel createFullRobotModel()
    {
-      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap());
+      return createFullRobotModel(true);
+   }
+
+   @Override
+   public FullHumanoidRobotModel createFullRobotModel(boolean enforceUniqueReferenceFrames)
+   {
+      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap(), enforceUniqueReferenceFrames);
+      return doArmJointRestriction(fullRobotModel);
+   }
+
+   private FullHumanoidRobotModel doArmJointRestriction(FullHumanoidRobotModel fullRobotModel)
+   {
       for (RobotSide robotSide : RobotSide.values())
       {
          ArmJointName[] armJointNames = new ArmJointName[] {ArmJointName.FIRST_WRIST_PITCH, ArmJointName.WRIST_ROLL, ArmJointName.SECOND_WRIST_PITCH};

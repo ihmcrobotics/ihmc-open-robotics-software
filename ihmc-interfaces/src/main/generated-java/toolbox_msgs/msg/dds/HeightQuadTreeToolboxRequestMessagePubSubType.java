@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class HeightQuadTreeToolboxRequestMessagePubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::HeightQuadTreeToolboxRequestMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "4b5c2c3b448b5b00e83014bfbaa25ee4792cf1a730300ba6beab4498caa79652";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

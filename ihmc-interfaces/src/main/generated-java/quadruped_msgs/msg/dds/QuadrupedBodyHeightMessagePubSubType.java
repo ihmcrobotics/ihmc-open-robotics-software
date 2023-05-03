@@ -11,6 +11,18 @@ package quadruped_msgs.msg.dds;
 public class QuadrupedBodyHeightMessagePubSubType implements us.ihmc.pubsub.TopicDataType<quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage>
 {
    public static final java.lang.String name = "quadruped_msgs::msg::dds_::QuadrupedBodyHeightMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "ee2445bf4fd0cdfd057738d5f919cdda0e320b9e078dc41cd896a68a0f2a0edd";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

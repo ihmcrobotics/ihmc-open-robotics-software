@@ -11,6 +11,18 @@ package exoskeleton_msgs.msg.dds;
 public class MetabolicMessagePubSubType implements us.ihmc.pubsub.TopicDataType<exoskeleton_msgs.msg.dds.MetabolicMessage>
 {
    public static final java.lang.String name = "exoskeleton_msgs::msg::dds_::MetabolicMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "b2b37bf1a7dfd193bc300daa466c93015108318e1648e2e3706da58f1f3bceab";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class PlanarVelocityPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PlanarVelocityPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PlanarVelocityPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "60be9474a084f9aa07d53a0266f0c307807a524ec4feac182a8108dd594be5a0";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

@@ -11,6 +11,18 @@ package toolbox_msgs.msg.dds;
 public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicDataType<toolbox_msgs.msg.dds.WalkToGoalBehaviorPacket>
 {
    public static final java.lang.String name = "toolbox_msgs::msg::dds_::WalkToGoalBehaviorPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "4d5c693f4030f9f0e323c55acc820d75f4773fef6248048cdd54c9d898aa8f2e";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
