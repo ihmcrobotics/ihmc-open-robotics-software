@@ -333,7 +333,8 @@ void kernel computeSurfaceNormalsWithLeastSquares(
    {
       float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
       float z_variance_vector[3] = {-xz, -yz, -z};
-      float* coefficients = solveForPlaneCoefficients(covariance_matrix, z_variance_vector);
+      float coefficients[3] = {0, 0, 0};
+      solveForPlaneCoefficients(covariance_matrix, z_variance_vector, coefficients);
 
       float x_solution = x / n;
       float y_solution = y / n;
