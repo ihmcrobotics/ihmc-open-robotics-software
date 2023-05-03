@@ -14,7 +14,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -163,8 +162,24 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       swingPlannerRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper,
                                                                            helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"),
                                                                            SWING_PLANNER_PARAMETERS);
-      stopForImpassibilities = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(), LookAndStepBehaviorParameters.stopForImpassibilities);
-      referenceAlpha = new ImDoubleWrapper(footstepPlannerRemotePropertySet.getStoredPropertySet(), FootstepPlannerParameterKeys.referencePlanAlpha);
+      stopForImpassibilities = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(),
+                                                    LookAndStepBehaviorParameters.stopForImpassibilities,
+                                                    stopForImpassibilities ->
+                                                    {
+                                                       if (ImGui.checkbox(labels.get("Stop for impassibilities"), stopForImpassibilities))
+                                                       {
+                                                          lookAndStepRemotePropertySet.setPropertyChanged();
+                                                       }
+                                                    });
+      referenceAlpha = new ImDoubleWrapper(footstepPlannerRemotePropertySet.getStoredPropertySet(),
+                                           FootstepPlannerParameterKeys.referencePlanAlpha,
+                                           alpha ->
+                                           {
+                                              if (ImGuiTools.volatileInputDouble("Reference alpha", alpha))
+                                              {
+                                                 footstepPlannerRemotePropertySet.setPropertyChanged();
+                                              }
+                                           });
    }
 
    @Override
@@ -262,26 +277,13 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       footstepPlanningDurationPlot.renderImGuiWidgets();
       ImGui.text("Footstep planning regions recieved:");
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
-      stopForImpassibilities.accessImBoolean(stopForImpassibilities ->
-      {
-         if (ImGui.checkbox(labels.get("Stop for impassibilities"), stopForImpassibilities))
-         {
-            lookAndStepRemotePropertySet.setPropertyChanged();
-         }
-      });
+      stopForImpassibilities.renderImGuiWidget();
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
 
       ImGui.text(ReferenceBasedIdealStepCalculator.statusMessage);
 
-      referenceAlpha.accessImDouble(alpha ->
-      {
-         if (ImGuiTools.volatileInputDouble("Reference alpha", alpha))
-         {
-            footstepPlannerRemotePropertySet.getStoredPropertySet().set(FootstepPlannerParameterKeys.referencePlanAlpha, alpha.get());
-            footstepPlannerRemotePropertySet.setPropertyChanged();
-         }
-      });
+      referenceAlpha.renderImGuiWidget();
 
 //      footholdVolumePlot.render();
 
