@@ -3,7 +3,6 @@ package us.ihmc.perception.sceneGraph.multiBodies.door;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
-import us.ihmc.perception.objects.DoorModelParameters;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Cylinder3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
