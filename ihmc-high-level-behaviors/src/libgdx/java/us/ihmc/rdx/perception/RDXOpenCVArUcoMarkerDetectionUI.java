@@ -16,8 +16,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.rdx.ui.yo.ImPlotPlot;
@@ -28,6 +28,12 @@ import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * This class provides tuners and performance analysis for a locally running instance
+ * of {@link OpenCVArUcoMarkerDetection}.
+ *
+ * TODO: Create a remote version.
+ */
 public class RDXOpenCVArUcoMarkerDetectionUI
 {
    private final String namePostfix;
@@ -78,11 +84,9 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       mainPanel = new ImGuiPanel("ArUco Marker Detection" + namePostfix, this::renderImGuiWidgets);
    }
 
-   public void create(OpenCVArUcoMarkerDetection arUcoMarkerDetection, ArrayList<OpenCVArUcoMarker> markersToTrack, ReferenceFrame cameraFrame)
+   public void create(OpenCVArUcoMarkerDetection arUcoMarkerDetection)
    {
       this.arUcoMarkerDetection = arUcoMarkerDetection;
-      this.markersToTrack = markersToTrack;
-      this.cameraFrame = cameraFrame;
 
       imageForDrawing = new BytedecoImage(100, 100, opencv_core.CV_8UC3);
       boolean flipY = false;
@@ -109,14 +113,26 @@ public class RDXOpenCVArUcoMarkerDetectionUI
 
       idColor = new Scalar(0, 0, 255, 0);
 
+      detectionDurationPlot.getPlotLines().add(detectionDurationPlotLine);
+      detectionDurationPlot.getPlotLines().add(restOfStuffPlotLine);
+   }
+
+   /**
+    * Rendering the 3D poses of the ArUco markers requires knowing the sizes of them,
+    * which we don't always know, so we make this a separate method so it can be added
+    * if needed. We might not have the camera frame either, and it's also required,
+    * so we pass that in here too.
+    */
+   public void setupForRenderingDetectedPosesIn3D(ArrayList<OpenCVArUcoMarker> markersToTrack, ReferenceFrame cameraFrame)
+   {
+      this.cameraFrame = cameraFrame;
+      this.markersToTrack = markersToTrack;
+
       for (OpenCVArUcoMarker markerToTrack : markersToTrack)
       {
          RDXModelInstance coordinateFrame = new RDXModelInstance(RDXModelBuilder.createCoordinateFrame(0.4));
          markerPoseCoordinateFrames.add(coordinateFrame);
       }
-
-      detectionDurationPlot.getPlotLines().add(detectionDurationPlotLine);
-      detectionDurationPlot.getPlotLines().add(restOfStuffPlotLine);
    }
 
    public void update()
@@ -141,7 +157,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
                markerImagePanel.display();
             }
 
-            if (showGraphics.get())
+            if (markersToTrack != null && showGraphics.get())
             {
                for (int i = 0; i < markersToTrack.size(); i++)
                {
@@ -165,7 +181,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       if (ImGui.checkbox(labels.get("Detection enabled"), detectionEnabled))
          arUcoMarkerDetection.setEnabled(detectionEnabled.get());
       ImGui.sameLine();
-      ImGui.checkbox(labels.get("Show graphics"), showGraphics);
+      ImGui.checkbox(labels.get("Show 3D graphics"), showGraphics);
       ImGui.text("Image width: " + imageForDrawing.getImageWidth() + " height: " + imageForDrawing.getImageHeight());
       detectionDurationPlot.render();
       ImGui.text("Detected ArUco Markers:");
@@ -173,17 +189,21 @@ public class RDXOpenCVArUcoMarkerDetectionUI
       {
          trackedMarker.setCurrentlyDetected(false);
       }
-      arUcoMarkerDetection.forEachDetectedID(id ->
+      synchronized (arUcoMarkerDetection.getSyncObject())
       {
-         RDXOpenCVArUcoTrackedMarker trackedMarker = idToTrackedMarkerMap.get(id);
-         if (trackedMarker == null)
+         for (int i = 0; i < arUcoMarkerDetection.getDetectedIDs().size(); i++)
          {
-            trackedMarker = new RDXOpenCVArUcoTrackedMarker(id);
-            idToTrackedMarkerMap.put(id, trackedMarker);
-            trackedMarkers.add(trackedMarker);
+            int id = arUcoMarkerDetection.getDetectedIDs().get(i);
+            RDXOpenCVArUcoTrackedMarker trackedMarker = idToTrackedMarkerMap.get(id);
+            if (trackedMarker == null)
+            {
+               trackedMarker = new RDXOpenCVArUcoTrackedMarker(id);
+               idToTrackedMarkerMap.put(id, trackedMarker);
+               trackedMarkers.add(trackedMarker);
+            }
+            trackedMarker.setCurrentlyDetected(true);
          }
-         trackedMarker.setCurrentlyDetected(true);
-      });
+      }
       for (RDXOpenCVArUcoTrackedMarker trackedMarker : trackedMarkers)
       {
          ImGui.text("ID: " + trackedMarker.getId());

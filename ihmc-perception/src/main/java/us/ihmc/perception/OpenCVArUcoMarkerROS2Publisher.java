@@ -40,7 +40,7 @@ public class OpenCVArUcoMarkerROS2Publisher
       {
          synchronized (arUcoMarkerDetection.getSyncObject())
          {
-            Mat ids = arUcoMarkerDetection.getIds();
+            Mat ids = arUcoMarkerDetection.getIDsMat();
             arUcoMarkerPoses.getMarkerId().clear();
             arUcoMarkerPoses.getOrientation().clear();
             arUcoMarkerPoses.getPosition().clear();
