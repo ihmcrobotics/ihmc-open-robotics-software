@@ -33,6 +33,7 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.interactable.RDXChestOrientationSlider;
 import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -67,9 +68,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
    private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
-   private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
-   private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
-   private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -87,7 +85,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private RDXRobotCollisionModel selfCollisionModel;
    private RDXRobotCollisionModel environmentCollisionModel;
    private RDXArmManager armManager;
-   private final RDXLocomotionManager walkingManager;
+   private final RDXLocomotionManager locomotionManager;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
@@ -156,7 +154,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
 
-      walkingManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, teleoperationParameters, ros2Helper);
+      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -176,16 +174,13 @@ public class RDXTeleoperationManager extends ImGuiPanel
       this.baseUI = baseUI;
       desiredRobot.create();
 
-      walkingManager.create(baseUI);
+      locomotionManager.create(baseUI);
 
-      footstepPlanningParametersTuner.create(footstepPlannerParameters, false, () -> walkingManager.setFootstepPlannerParameters(footstepPlannerParameters));
-      bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false, () -> walkingManager.setBodyPathPlannerParameters(bodyPathPlannerParameters));
-      swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false, () -> walkingManager.setSwingParameters(swingFootPlannerParameters));
+      footstepPlanningParametersTuner.create(footstepPlannerParameters, false, () -> locomotionManager.setFootstepPlannerParameters(footstepPlannerParameters));
+      bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false, () -> locomotionManager.setBodyPathPlannerParameters(bodyPathPlannerParameters));
+      swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false, () -> locomotionManager.setSwingParameters(swingFootPlannerParameters));
 
       teleoperationParametersTuner.create(teleoperationParameters);
-      swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.swingTime, 0.3, 2.5);
-      transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.transferTime, 0.3, 2.5);
-      turnAggressivenessSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.turnAggressiveness, 0.0, 10.0);
 
       trajectoryTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
 
@@ -286,11 +281,11 @@ public class RDXTeleoperationManager extends ImGuiPanel
       syncedRobot.update();
       desiredRobot.update();
 
-      walkingManager.update();
+      locomotionManager.update();
 
       if (interactablesEnabled.get())
       {
-         walkingManager.updateWalkPathControlRing();
+         locomotionManager.updateWalkPathControlRing();
 
          if (interactablesAvailable)
          {
@@ -342,7 +337,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesEnabled.get())
       {
-         walkingManager.caculateWalkPathControlRing3DViewPick(input);
+         locomotionManager.caculateWalkPathControlRing3DViewPick(input);
 
          if (interactablesAvailable)
          {
@@ -360,7 +355,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesEnabled.get())
       {
-         walkingManager.processWalkPathControlRing3dViewInput(input);
+         locomotionManager.processWalkPathControlRing3dViewInput(input);
 
          if (interactablesAvailable)
          {
@@ -372,7 +367,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
             {
                if (interactableFeet.get(side).process3DViewInput(input))
                {
-                  walkingManager.setLegControlModeToSingleSupportFootPosing();
+                  locomotionManager.setLegControlModeToSingleSupportFootPosing();
                }
             }
 
@@ -392,9 +387,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
 
-      swingTimeSlider.render();
-      transferTimeSlider.render();
-      turnAggressivenessSlider.render();
       trajectoryTimeSlider.render();
 
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
@@ -410,7 +402,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          ImGui.sameLine();
          if (ImGui.button(labels.get("Delete all")))
          {
-            walkingManager.deleteAll();
+            locomotionManager.deleteAll();
 
             for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.delete();
@@ -419,7 +411,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
          }
       }
 
-      walkingManager.renderImGuiWidgets();
+      ImGui.separator();
+      locomotionManager.renderImGuiWidgets();
+      ImGui.separator();
 
       handManager.renderImGuiWidgets();
 
@@ -464,7 +458,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
             ImGui.sameLine();
             if (interactableFeet.get(side).renderImGuiWidgets())
             {
-               walkingManager.setLegControlModeToSingleSupportFootPosing();
+               locomotionManager.setLegControlModeToSingleSupportFootPosing();
             }
          }
 
@@ -549,7 +543,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
          if (showGraphics.get())
          {
-            walkingManager.getRenderables(renderables, pool);
+            locomotionManager.getRenderables(renderables, pool);
          }
 
          if (interactablesEnabled.get())
@@ -565,7 +559,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                   robotPartInteractable.getVirtualRenderables(renderables, pool);
             }
 
-            walkingManager.getWalkPathControlRingVirtualRenderables(renderables, pool);
+            locomotionManager.getWalkPathControlRingVirtualRenderables(renderables, pool);
          }
       }
    }
@@ -573,7 +567,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    public void destroy()
    {
       desiredRobot.destroy();
-      walkingManager.destroy();
+      locomotionManager.destroy();
    }
 
    public List<RDXVisualizer> getVisualizers()
@@ -600,8 +594,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       return handManager;
    }
 
-   public RDXTeleoperationParameters getTeleoperationParameters()
+   public RDXLocomotionParameters getLocomotionParameters()
    {
-      return teleoperationParameters;
+      return locomotionManager.getLocomotionParameters();
    }
 }

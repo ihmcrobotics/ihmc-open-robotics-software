@@ -39,6 +39,16 @@ public class ReferenceFrameMissingTools
                                                                              transformToParent);
    }
 
+   /**
+    * To be used externally. Remember {@link #getCallingClassName()}
+    * depends on the stacktrace, so don't try and call this from the
+    * constructor to reduce code duplication.
+    */
+   public static String computeFrameName()
+   {
+      return computeFrameName(getCallingClassName());
+   }
+
    private static String computeFrameName(String callingClassName)
    {
       HashMap<String, MutableInt> threadLocalHashMap = INDEX.get();
@@ -47,6 +57,9 @@ public class ReferenceFrameMissingTools
       return callingClassName + frameID;
    }
 
+   /**
+    * Gets the calling class name by creating a Throwable.
+    */
    private static String getCallingClassName()
    {
       StackTraceElement callerStackElement = new Throwable().getStackTrace()[2];

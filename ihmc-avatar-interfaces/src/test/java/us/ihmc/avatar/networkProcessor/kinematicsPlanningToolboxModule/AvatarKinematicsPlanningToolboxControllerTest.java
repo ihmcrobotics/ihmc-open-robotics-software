@@ -100,7 +100,6 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel();
       commandInputManager = new CommandInputManager(KinematicsPlanningToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(desiredFullRobotModel));
 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsPlanningToolboxModule.supportedStatus());
 
@@ -110,6 +109,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
                                                                   statusOutputManager,
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);
+      commandInputManager.registerConversionHelper(new KinematicsPlanningToolboxCommandConverter(desiredFullRobotModel, toolboxController.getDesiredReferenceFrames()));
 
       RobotDefinition robotDefinition = robotModel.getRobotDefinition();
       robotDefinition.ignoreAllJoints();
