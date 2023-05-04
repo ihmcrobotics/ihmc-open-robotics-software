@@ -86,7 +86,7 @@ public class DoorDefinition extends RobotDefinition
       setRootBodyDefinition(rootBodyDefinition);
    }
 
-   public void applyPDController(Robot robot)
+   public static void applyPDController(Robot robot)
    {
       SimRevoluteJoint doorLeverJoint = (SimRevoluteJoint) robot.getJoint("doorLeverJoint");
       robot.getControllerManager().addController(() ->
