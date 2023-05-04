@@ -33,6 +33,14 @@ import java.util.stream.Collectors;
 public class RDXVisualTools
 {
    public static final double NO_SCALING = 1.0;
+   /**
+    * Make the desired ghost robot a little larger, so it shows up more cleanly.
+    * This is because a desired ghost will generally be showing up partially colliding
+    * or overlapping with an opaque estimate of the robot's current state.
+    * It's possible that 10% is too much, if you feel it is, it probably is, and
+    * change it.
+    */
+   public static final double DESIRED_ROBOT_SCALING = 1.1;
    private static final Color DEFAULT_COLOR = Color.BLUE;
 
    public static List<RDXVisualModelInstance> collectNodes(List<VisualDefinition> visualDefinitions)
