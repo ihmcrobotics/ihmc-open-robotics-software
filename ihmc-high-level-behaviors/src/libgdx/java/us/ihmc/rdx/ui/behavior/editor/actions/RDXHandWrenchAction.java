@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -17,6 +17,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXHandWrenchAction implements RDXBehaviorAction
