@@ -30,6 +30,7 @@ import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.input.ImGuiMouseDragData;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class RDXPathControlRingGizmo implements RenderableProvider
@@ -71,7 +72,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    /**
     * The main, source, true, base transform that this thing represents.
     */
-   private final RigidBodyTransform transformToParent;
+   private RigidBodyTransform transformToParent;
    private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
    private final RigidBodyTransform controlRingTransformToWorld = new RigidBodyTransform();
@@ -80,7 +81,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private RDXFocusBasedCamera camera3D;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform transformFromKeyboardTransformationToWorld = new RigidBodyTransform();
-   private ReferenceFrame keyboardTransformationFrame;
+   private ModifiableReferenceFrame keyboardTransformationFrame;
    private final Point3D cameraPosition = new Point3D();
    private double distanceToCamera;
    private double lastDistanceToCamera = -1.0;
@@ -103,11 +104,29 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public RDXPathControlRingGizmo(ReferenceFrame parentReferenceFrame)
    {
-      this.parentReferenceFrame = parentReferenceFrame;
-      transformToParent = new RigidBodyTransform();
-      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
-      keyboardTransformationFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                           transformFromKeyboardTransformationToWorld);
+      RigidBodyTransform transformToParent = new RigidBodyTransform();
+      ReferenceFrame gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      initialize(gizmoFrame, transformToParent);
+   }
+
+   public RDXPathControlRingGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
+   {
+      initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
+   }
+
+   public RDXPathControlRingGizmo(RigidBodyTransform gizmoTransformToParentFrameToModify, ReferenceFrame parentReferenceFrame)
+   {
+      ReferenceFrame gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame,
+                                                                                                         gizmoTransformToParentFrameToModify);
+      initialize(gizmoFrame, gizmoTransformToParentFrameToModify);
+   }
+
+   private void initialize(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
+   {
+      this.parentReferenceFrame = gizmoFrame.getParent();
+      this.transformToParent = gizmoTransformToParentFrameToModify;
+      this.gizmoFrame = gizmoFrame;
+      keyboardTransformationFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    }
 
    public void setParentFrame(ReferenceFrame parentReferenceFrame)
@@ -299,8 +318,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
             {
                transformFromKeyboardTransformationToWorld.setToZero();
                transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
-               keyboardTransformationFrame.update();
-               tempFramePose3D.setToZero(keyboardTransformationFrame);
+               keyboardTransformationFrame.getReferenceFrame().update();
+               tempFramePose3D.setToZero(keyboardTransformationFrame.getReferenceFrame());
 
                double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
                if (upArrowHeld && !ctrlHeld) // x +

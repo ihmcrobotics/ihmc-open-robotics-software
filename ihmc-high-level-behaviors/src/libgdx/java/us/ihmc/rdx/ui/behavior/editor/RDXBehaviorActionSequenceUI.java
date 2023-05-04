@@ -7,6 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -20,6 +21,18 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 import java.util.Comparator;
 import java.util.TreeSet;
 
+/**
+ * This panel renders a list of available action sequences found as JSON on disk,
+ * allows you to create new ones, and select one as active, which will show its
+ * panel and allow you to interact with it.
+ *
+ * For example, this will show a list of:
+ * - Push door (simulation)
+ * - Pull door (simulation)
+ * - Push door (real robot)
+ * - Pick up box marker ID 3
+ * - etc...
+ */
 public class RDXBehaviorActionSequenceUI
 {
    private final ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
@@ -46,35 +59,34 @@ public class RDXBehaviorActionSequenceUI
       this.ros2Node = ros2Node;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
+
+      BehaviorActionSequence.addCommonFrames(referenceFrameLibrary, syncedRobot);
+      referenceFrameLibrary.build();
+
       reindexSequences();
    }
 
    public void update()
    {
-      for (RDXBehaviorActionSequenceEditor editor : editors)
-      {
-         editor.update();
-      }
+      for (var editor : editors)
+         if (editor.getPanel().getIsShowing().get())
+            editor.update();
    }
 
    private void renderImGuiWidgets()
    {
       boolean reindexClicked = ImGui.button(labels.get("Reindex sequence files"));
       if (reindexClicked)
-      {
          reindexSequences();
-      }
 
-      for (RDXBehaviorActionSequenceEditor editor : editors)
-      {
+      for (var editor : editors)
          ImGui.checkbox(labels.get(editor.getName()), editor.getPanel().getIsShowing());
-      }
 
       ImGuiTools.inputText(labels.getHidden("newSequenceName"), newSequenceName);
       ImGui.sameLine();
       if (ImGui.button("Create new sequence"))
       {
-         RDXBehaviorActionSequenceEditor editor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
+         var editor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
          editor.saveToFile();
          addEditor(editor);
       }
@@ -85,12 +97,12 @@ public class RDXBehaviorActionSequenceUI
       for (WorkspaceResourceFile queryContainedFile : behaviorSequenceStorageDirectory.queryContainedFiles())
       {
          boolean alreadyLoaded = false;
-         for (RDXBehaviorActionSequenceEditor editor : editors)
+         for (var editor : editors)
             alreadyLoaded |= editor.getWorkspaceFile().getFileName().equals(queryContainedFile.getFileName());
 
          if (!alreadyLoaded)
          {
-            RDXBehaviorActionSequenceEditor editor = new RDXBehaviorActionSequenceEditor(queryContainedFile);
+            var editor = new RDXBehaviorActionSequenceEditor(queryContainedFile);
             addEditor(editor);
             editor.loadActionsFromFile();
          }
@@ -106,26 +118,20 @@ public class RDXBehaviorActionSequenceUI
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      for (RDXBehaviorActionSequenceEditor editor : editors)
-      {
+      for (var editor : editors)
          editor.calculate3DViewPick(input);
-      }
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      for (RDXBehaviorActionSequenceEditor editor : editors)
-      {
+      for (var editor : editors)
          editor.process3DViewInput(input);
-      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXBehaviorActionSequenceEditor editor : editors)
-      {
+      for (var editor : editors)
          editor.getRenderables(renderables, pool);
-      }
    }
 
    public ImGuiPanel getManagerPanel()
