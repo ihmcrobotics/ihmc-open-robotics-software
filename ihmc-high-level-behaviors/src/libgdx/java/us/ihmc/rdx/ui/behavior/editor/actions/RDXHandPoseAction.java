@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -24,6 +24,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;

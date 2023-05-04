@@ -1,29 +1,39 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
+import us.ihmc.rdx.ui.tools.ImGuiRobotSideCombo;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 
-public class RDXPelvisHeightAction implements RDXBehaviorAction
+public class RDXArmJointAnglesAction implements RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ROS2ControllerHelper ros2ControllerHelper;
    private final ImBoolean selected = new ImBoolean();
-   private final ImDouble heightInWorld = new ImDouble();
+   private ImGuiRobotSideCombo side = new ImGuiRobotSideCombo();
+   private ROS2ControllerHelper ros2ControllerHelper;
+   private int numberOfJoints = 7;
+   private ImDouble[] jointAngles = new ImDouble[numberOfJoints];
    private final ImDouble trajectoryTime = new ImDouble(4.0);
+
+   public RDXArmJointAnglesAction()
+   {
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         jointAngles[i] = new ImDouble();
+      }
+   }
 
    public void create(ROS2ControllerHelper ros2ControllerHelper)
    {
@@ -51,46 +61,56 @@ public class RDXPelvisHeightAction implements RDXBehaviorAction
    @Override
    public void renderImGuiWidgets()
    {
+      ImGui.pushItemWidth(100.0f);
+      side.combo(labels.get("Side"));
+      ImGui.popItemWidth();
       ImGui.pushItemWidth(80.0f);
-      ImGui.inputDouble(labels.get("Height in world"), heightInWorld);
       ImGui.inputDouble(labels.get("Trajectory time"), trajectoryTime);
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         ImGui.inputDouble(labels.get("j" + i), jointAngles[i]);
+      }
       ImGui.popItemWidth();
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+
    }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
+      jsonNode.put("side", side.getSide().getLowerCaseName());
       jsonNode.put("trajectoryTime", trajectoryTime.get());
-      jsonNode.put("heightInWorld", heightInWorld.get());
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         jsonNode.put("j" + i, jointAngles[i].get());
+      }
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
+      side.setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       trajectoryTime.set(jsonNode.get("trajectoryTime").asDouble());
-      heightInWorld.set(jsonNode.get("heightInWorld").asDouble());
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         jointAngles[i].set(jsonNode.get("j" + i).asDouble());
+      }
    }
 
    @Override
    public void performAction()
    {
-      PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
-      message.getEuclideanTrajectory()
-             .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime.get(),
-                                                                        new Point3D(0.0, 0.0, heightInWorld.get()),
-                                                                        ReferenceFrame.getWorldFrame()));
-      long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-      message.getEuclideanTrajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-      message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
-      message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
-      message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
-
-      ros2ControllerHelper.publishToController(message);
+      double[] jointAngleArray = new double[numberOfJoints];
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         jointAngleArray[i] = jointAngles[i].get();
+      }
+      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side.getSide(), trajectoryTime.get(), jointAngleArray);
+      ros2ControllerHelper.publishToController(armTrajectoryMessage);
    }
 
    @Override
@@ -108,6 +128,6 @@ public class RDXPelvisHeightAction implements RDXBehaviorAction
    @Override
    public String getNameForDisplay()
    {
-      return "Pelvis Height";
+      return "Arm Joint Angles";
    }
 }
