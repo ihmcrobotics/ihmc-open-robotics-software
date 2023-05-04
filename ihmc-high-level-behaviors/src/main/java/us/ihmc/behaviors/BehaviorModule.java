@@ -13,6 +13,7 @@ import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
+import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -34,6 +35,10 @@ import java.time.temporal.ChronoUnit;
 import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT;
 import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT;
 
+/**
+ * Manages a behavior tree based process on the real robot and syncs it
+ * with an operator UI with shared autonomy.
+ */
 public class BehaviorModule
 {
    private static SharedMemoryMessager sharedMemoryMessager;
@@ -56,6 +61,7 @@ public class BehaviorModule
    private final boolean enableROS1;
    private BehaviorDefinition highestLevelBehaviorDefinition;
    private BehaviorHelper helper;
+   private ROS2Heartbeat heartbeat;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
@@ -72,7 +78,7 @@ public class BehaviorModule
       return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS, false);
    }
 
-   public BehaviorModule(BehaviorRegistry behaviorRegistry, 
+   public BehaviorModule(BehaviorRegistry behaviorRegistry,
                          DRCRobotModel robotModel,
                          CommunicationMode ros2CommunicationMode,
                          CommunicationMode messagerCommunicationMode,
@@ -114,6 +120,7 @@ public class BehaviorModule
 
       LogTools.info("Starting behavior module in ROS 2: {}, Messager: {} modes", ros2CommunicationMode.name(), messagerCommunicationMode.name());
       ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "behavior_module");
+      heartbeat = new ROS2Heartbeat(ros2Node, API.HEARTBEAT);
       helper = new BehaviorHelper(highestLevelNodeDefinition.getName(), robotModel, ros2Node, enableROS1);
       highestLevelNode = highestLevelNodeDefinition.getBehaviorSupplier().build(helper);
       if (highestLevelNode.getYoRegistry() != null)
@@ -192,6 +199,7 @@ public class BehaviorModule
             setupHighLevelBehavior(candidateHighestLevelNodeDefinition);
          }
       });
+      heartbeat.setAlive(true);
    }
 
    public Messager getMessager()
@@ -218,7 +226,8 @@ public class BehaviorModule
    // API created here from build
    public static class API
    {
-      public static final ROS2Topic<Empty> SHUTDOWN = ROS2Tools.BEHAVIOR_MODULE.withOutput().withType(Empty.class).withSuffix("shutdown");
+      public static final ROS2Topic<Empty> HEARTBEAT = ROS2Tools.BEHAVIOR_MODULE.withOutput().withType(Empty.class).withSuffix("heartbeat");
+      public static final ROS2Topic<Empty> SHUTDOWN = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class).withSuffix("shutdown");
       public static final ROS2Topic<std_msgs.msg.dds.String> SET_HIGHEST_LEVEL_BEHAVIOR
             = ROS2Tools.BEHAVIOR_MODULE.withType(std_msgs.msg.dds.String.class).withSuffix("set_highest_level_behavior");
 
