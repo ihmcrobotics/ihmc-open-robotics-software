@@ -17,6 +17,8 @@ import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
@@ -62,6 +64,11 @@ public class RDXLocomotionManager
    private final ImBoolean showGraphics = new ImBoolean(true);
    private boolean isPlacingFootstep = false;
 
+   private final RDXWalkingLowLevelMessenger walkingLowLevelMessenger;
+   private boolean robotIsWalking = false;
+   private boolean spaceBarPressed = false;
+   private boolean robotWalkingIsPaused = false;
+
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
                                ROS2SyncedRobotModel syncedRobot,
@@ -73,6 +80,9 @@ public class RDXLocomotionManager
 
       walkingParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       walkingParameters.load();
+
+      walkingLowLevelMessenger = new RDXWalkingLowLevelMessenger(communicationHelper);
+
 
       footstepPlanning = new RDXFootstepPlanning(robotModel, walkingParameters, syncedRobot);
 
@@ -194,6 +204,11 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
+
+
+      ImGui.text("Options during walking: ");
+      ImGui.sameLine();
+      walkingLowLevelMessenger.renderImGuiWidgets();
       swingTimeSlider.render();
       transferTimeSlider.render();
       turnAggressivenessSlider.render();
@@ -229,6 +244,39 @@ public class RDXLocomotionManager
 
       interactableFootstepPlan.renderImGuiWidgets();
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
+
+
+      if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+      {
+         if (!spaceBarPressed)
+         {
+            spaceBarPressed = true;
+
+            if (!robotIsWalking && interactableFootstepPlan.getNumberOfFootsteps() > 0)
+            {
+               LogTools.info("Walking started");
+               interactableFootstepPlan.walkFromSteps();
+               robotIsWalking = true;
+               robotWalkingIsPaused = false;
+            }
+            else if (!robotWalkingIsPaused)
+            {
+               LogTools.info("Pause Walking");
+               walkingLowLevelMessenger.sendPauseWalkingRequest();
+               robotWalkingIsPaused = true;
+            }
+            else
+            {
+               LogTools.info("Continue Walking");
+               walkingLowLevelMessenger.sendContinueWalkingRequest();
+               robotWalkingIsPaused = false;
+            }
+         }
+      }
+      else
+      {
+         spaceBarPressed = false;
+      }
    }
 
    public void updateWalkPathControlRing()
