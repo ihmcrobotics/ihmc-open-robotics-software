@@ -2,8 +2,8 @@ package us.ihmc.perception;
 
 public class OpenCVArUcoMarker
 {
-   private int id;
-   private double sideLength;
+   private final int id;
+   private final double sideLength;
 
    public OpenCVArUcoMarker(int id, double sideLength)
    {
