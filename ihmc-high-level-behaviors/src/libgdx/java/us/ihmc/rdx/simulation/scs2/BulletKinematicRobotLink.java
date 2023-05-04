@@ -56,7 +56,10 @@ public class BulletKinematicRobotLink
    public void build()
    {
       bulletTerrainObject = bulletPhysicsEngine.addAndGetTerrainObject(terrainObjectDefinition);
-      bulletTerrainObject.getBtRigidBody().setMassProps(1.0, new btVector3(0.5, 0.5, 0.5));
+      // TODO: Introduce these as parameters
+      double mass = 1.0;
+      double momentOfInertia = 0.5;
+      bulletTerrainObject.getBtRigidBody().setMassProps(mass, new btVector3(momentOfInertia, momentOfInertia, momentOfInertia));
    }
 
    public void beforePhysics(double time)
