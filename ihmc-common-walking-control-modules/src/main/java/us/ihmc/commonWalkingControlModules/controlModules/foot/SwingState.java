@@ -74,6 +74,10 @@ public class SwingState extends AbstractFootControlState
    private final C1ContinuousTrajectorySmoother swingTrajectorySmoother;
    private double swingTrajectoryBlendDuration = 0.0;
 
+   private final PoseReferenceFrame footstepFrame;
+   private final PoseReferenceFrame adjustedFootstepFrame;
+   private final FramePose3D adjustedWaypoint = new FramePose3D();
+
    private final List<FixedFramePoint3DBasics> swingWaypointsForViz = new ArrayList<>();
 
    private final ReferenceFrame soleFrame;
@@ -181,7 +185,7 @@ public class SwingState extends AbstractFootControlState
       touchdownDesiredLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredTouchdownAcceleration", worldFrame, registry);
 
       ankleFrame = contactableFoot.getFrameAfterParentJoint();
-      controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
+      controlFrame = new PoseReferenceFrame(namePrefix + "controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
 
       spatialFeedbackControlCommand.set(rootBody, foot);
       spatialFeedbackControlCommand.setPrimaryBase(pelvis);
@@ -258,6 +262,9 @@ public class SwingState extends AbstractFootControlState
       yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       yoDesiredSoleAngularVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
+
+      footstepFrame = new PoseReferenceFrame(namePrefix + "FootstepFrame", worldFrame);
+      adjustedFootstepFrame = new PoseReferenceFrame(namePrefix + "AdjustedFootstepFrame", worldFrame);
 
       setupViz(yoGraphicsListRegistry, registry);
    }
@@ -629,10 +636,6 @@ public class SwingState extends AbstractFootControlState
 
       fillAndInitializeBlendedTrajectories();
    }
-
-   private final PoseReferenceFrame footstepFrame = new PoseReferenceFrame("FootstepFrame", worldFrame);
-   private final PoseReferenceFrame adjustedFootstepFrame = new PoseReferenceFrame("AdjustedFootstepFrame", worldFrame);
-   private final FramePose3D adjustedWaypoint = new FramePose3D();
 
    private void fillAndInitializeBlendedTrajectories()
    {

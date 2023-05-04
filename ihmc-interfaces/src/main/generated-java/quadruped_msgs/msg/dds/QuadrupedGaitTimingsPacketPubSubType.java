@@ -11,6 +11,18 @@ package quadruped_msgs.msg.dds;
 public class QuadrupedGaitTimingsPacketPubSubType implements us.ihmc.pubsub.TopicDataType<quadruped_msgs.msg.dds.QuadrupedGaitTimingsPacket>
 {
    public static final java.lang.String name = "quadruped_msgs::msg::dds_::QuadrupedGaitTimingsPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "5b2cf3670f71288cfbab7f8f9a7745ba2eb5dacc55d9a7d9b1423f12b9fc3b56";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

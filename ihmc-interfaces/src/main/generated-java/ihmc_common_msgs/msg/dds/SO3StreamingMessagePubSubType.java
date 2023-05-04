@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class SO3StreamingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.SO3StreamingMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::SO3StreamingMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "95d981ba46fe0cfe0041e134464907d1688c48945a7213a9109fbe7b858c2b95";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

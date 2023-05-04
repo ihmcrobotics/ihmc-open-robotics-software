@@ -23,7 +23,7 @@ import java.util.List;
  *  This is the class that is updated based on the desired values of the robot. If poses get sent to the robot, it should be these poses.
  *
  *  TODO make this robot color differently.
-  */
+ */
 public class RDXDesiredRobot extends RDXMultiBodyGraphic
 {
    private final ROS2SyncedRobotModel syncedRobotModel;
@@ -68,9 +68,9 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
       ColorDefinition ghostColor = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
       MaterialDefinition material = new MaterialDefinition(ghostColor);
       SCS2DefinitionMissingTools.forEachRigidBodyDefinitionIncludingFourBars(robotDefinition.getRootBodyDefinition(),
-                                                 body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
-      boolean createReferenceFrameGraphics = true;
-      loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), RDXVisualTools.NO_SCALING, createReferenceFrameGraphics);
+                                                                             body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
+      boolean createReferenceFrameGraphics = false;
+      loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), RDXVisualTools.DESIRED_ROBOT_SCALING, createReferenceFrameGraphics);
    }
 
    @Override

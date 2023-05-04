@@ -15,7 +15,7 @@ import us.ihmc.perception.PlanarRegionMappingHandler;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.rdx.visualizers.RDXLineMeshModel;
+import us.ihmc.rdx.visualizers.RDXLineGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class RDXPlanarRegionMappingUIPanel implements RenderableProvider
    private final ImBoolean renderBoundingBoxEnabled = new ImBoolean(false);
    private boolean captured = false;
 
-   private RDXLineMeshModel lineMeshModel = new RDXLineMeshModel(0.02f, Color.WHITE);
+   private RDXLineGraphic lineMeshModel = new RDXLineGraphic(0.02f, Color.WHITE);
    private RDXPlanarRegionsGraphic previousRegionsGraphic = new RDXPlanarRegionsGraphic();
    private RDXPlanarRegionsGraphic currentRegionsGraphic = new RDXPlanarRegionsGraphic();
 

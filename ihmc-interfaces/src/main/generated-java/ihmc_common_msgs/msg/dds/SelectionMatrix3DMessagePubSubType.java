@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class SelectionMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::SelectionMatrix3DMessage_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "36bf816d7fed910df388841dff66fb6d0db3751b1fa7ccfac1eb1a67b0cddc7d";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

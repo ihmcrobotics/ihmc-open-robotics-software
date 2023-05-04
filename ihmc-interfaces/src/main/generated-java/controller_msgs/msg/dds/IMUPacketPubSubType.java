@@ -11,6 +11,18 @@ package controller_msgs.msg.dds;
 public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.IMUPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::IMUPacket_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "193178e9e1c07fa3cf0fa684743ded4ff9feccf12d4e636a259936cc674c16d8";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();

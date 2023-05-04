@@ -11,6 +11,18 @@ package ihmc_common_msgs.msg.dds;
 public class FrameInformationPubSubType implements us.ihmc.pubsub.TopicDataType<ihmc_common_msgs.msg.dds.FrameInformation>
 {
    public static final java.lang.String name = "ihmc_common_msgs::msg::dds_::FrameInformation_";
+   
+   @Override
+   public final java.lang.String getDefinitionChecksum()
+   {
+   		return "8993d15a4993416d6f466d7a53d44e56afe4bed0b87b311345fa7ad64c3a2105";
+   }
+   
+   @Override
+   public final java.lang.String getDefinitionVersion()
+   {
+   		return "local";
+   }
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
