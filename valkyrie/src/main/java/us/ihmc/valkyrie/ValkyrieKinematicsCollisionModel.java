@@ -64,10 +64,13 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
          long collisionMask = helper.getCollisionMask(bodyName);
          long collisionGroup = helper.createCollisionGroup(armNames.get(RobotSide.LEFT), armNames.get(RobotSide.RIGHT));
 
-         RigidBodyBasics head = multiBodySystem.findRigidBody(jointMap.getHeadName());
-         MovingReferenceFrame headFrame = head.getParentJoint().getFrameAfterJoint();
-         FrameSphere3D headShape = new FrameSphere3D(headFrame, 0.09, 0, 0, 0.18);
-         collidables.add(new Collidable(head, collisionMask, collisionGroup, headShape));
+         if (enableConservativeCollisions)
+         { // 
+            RigidBodyBasics head = multiBodySystem.findRigidBody(jointMap.getHeadName());
+            MovingReferenceFrame headFrame = head.getParentJoint().getFrameAfterJoint();
+            FrameSphere3D headShape = new FrameSphere3D(headFrame, 0.09, 0, 0, 0.18);
+            collidables.add(new Collidable(head, collisionMask, collisionGroup, headShape));
+         }
 
          RigidBodyBasics torso = multiBodySystem.findRigidBody(jointMap.getChestName());
          MovingReferenceFrame torsoFrame = torso.getParentJoint().getFrameAfterJoint();
